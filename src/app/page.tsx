@@ -34,7 +34,7 @@ function BackgroundDecor() {
 
 function IndianFlag() {
   return (
-    <div className="relative mb-4 flex items-center justify-center">
+    <div className="relative mb-0 flex items-center justify-center">
       <div className="absolute inset-0 w-12 h-12 md:w-16 md:h-16 rounded-full border-2 border-accent/20 animate-ping opacity-10"></div>
       <div className="relative w-12 h-12 md:w-16 md:h-16 rounded-full overflow-hidden shadow-xl border-2 border-white/50 animate-float bg-white">
         <div className="h-1/3 bg-[#FF9933]"></div>
@@ -80,7 +80,7 @@ export default function Home() {
             
             <IndianFlag />
 
-            <div className="flex flex-col items-center gap-0 w-full">
+            <div className="flex flex-col items-center gap-0 w-full -mt-2 md:-mt-4">
               <div className="flex flex-col items-center group mb-0">
                 <div className="relative w-28 h-36 md:w-36 md:h-48 transition-transform hover:scale-105 duration-500">
                   <Image 
@@ -93,11 +93,11 @@ export default function Home() {
                 <div className="flex flex-col items-center -mt-6 md:-mt-10 text-white drop-shadow-md space-y-0.5">
                    <p className="text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] leading-tight">Niti Aayog registered</p>
                    <p className="text-[9px] md:text-[11px] font-bold uppercase tracking-[0.15em] leading-tight opacity-90">National Informatics Centre</p>
-                   <p className="text-[18px] md:text-2xl font-bold uppercase tracking-[0.2em] leading-tight">Government of India</p>
+                   <p className="text-xl md:text-3xl font-bold uppercase tracking-[0.2em] leading-tight">Government of India</p>
                 </div>
               </div>
               
-              <div className="font-headline font-bold text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl tracking-tight leading-tight min-h-[1.5em] flex justify-center items-center overflow-visible">
+              <div className="font-headline font-bold text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl tracking-tight leading-tight min-h-[1.5em] flex justify-center items-center overflow-visible mt-4 md:mt-6">
                 <span className="bg-gradient-to-r from-[#FF9933] via-white to-[#138808] bg-clip-text text-transparent italic block drop-shadow-sm px-4 pb-4">
                   <Typewriter 
                     text="Human Rights Affairs Trust" 
