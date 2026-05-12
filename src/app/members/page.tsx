@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useMemo } from 'react'
@@ -122,8 +123,8 @@ const members: Member[] = [
     id: "M004",
     name: "Vikram Malhotra",
     designation: "State Chairman",
-    jurisdiction: "Delhi NCR",
-    stateName: "Delhi NCR",
+    jurisdiction: "West Bengal",
+    stateName: "West Bengal",
     level: "State",
     imageId: "leader-3"
   },
@@ -131,8 +132,8 @@ const members: Member[] = [
     id: "M005",
     name: "Sonia Gandhi",
     designation: "Vice Chairperson",
-    jurisdiction: "Delhi NCR",
-    stateName: "Delhi NCR",
+    jurisdiction: "West Bengal",
+    stateName: "West Bengal",
     level: "State",
     imageId: "leader-4"
   },
@@ -158,9 +159,9 @@ const members: Member[] = [
     id: "M008",
     name: "Anil Kapoor",
     designation: "District Chairman",
-    jurisdiction: "New Delhi Central",
-    stateName: "Delhi NCR",
-    districtName: "New Delhi Central",
+    jurisdiction: "Kolkata",
+    stateName: "West Bengal",
+    districtName: "Kolkata",
     level: "District",
     imageId: "leader-3"
   },

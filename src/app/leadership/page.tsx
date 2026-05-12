@@ -20,7 +20,7 @@ const centralTeam: Leader[] = [
 
 const stateTeams = [
   {
-    state: "Delhi NCR",
+    state: "West Bengal",
     leaders: [
       { name: "Vikram Malhotra", title: "State Chairman", imageId: "leader-3" },
       { name: "Sonia Gandhi", title: "Vice Chairperson", imageId: "leader-4" }
@@ -37,7 +37,7 @@ const stateTeams = [
 
 const districtTeams = [
   {
-    district: "New Delhi Central",
+    district: "Kolkata",
     leaders: [{ name: "Anil Kapoor", title: "District Chairman", imageId: "leader-3" }]
   },
   {
