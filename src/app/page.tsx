@@ -75,7 +75,7 @@ function BackgroundDecor() {
 
 function IndianFlag() {
   return (
-    <div className="relative mb-12 self-start ml-4 md:ml-12 h-12 md:h-24">
+    <div className="relative mb-8 self-start ml-4 md:ml-12 h-12 md:h-24">
       {/* Ornate Flagpole - STATIONARY */}
       <div className="absolute -left-2 -top-4 bottom-[-20px] w-2 bg-gradient-to-r from-slate-400 via-slate-100 to-slate-400 rounded-full shadow-2xl z-20">
         <div className="absolute -top-3 -left-1 w-4 h-4 rounded-full bg-gradient-to-tr from-yellow-600 via-yellow-200 to-yellow-600 shadow-lg"></div>
@@ -126,7 +126,7 @@ export default function Home() {
       <BackgroundDecor />
       <Navbar />
       
-      <section className="relative min-h-screen flex flex-col justify-center overflow-hidden pt-32 pb-24">
+      <section className="relative min-h-screen flex flex-col items-center overflow-hidden pt-40 pb-24">
         <div className="absolute inset-0 z-0">
           <Image 
             src={heroImg?.imageUrl || ''} 
@@ -140,23 +140,23 @@ export default function Home() {
         </div>
 
         <div className="container mx-auto px-4 relative z-10 text-white text-center">
-          <div className="max-w-full space-y-10 animate-fade-in-up flex flex-col items-center">
+          <div className="max-w-full space-y-8 animate-fade-in-up flex flex-col items-center">
             
             <IndianFlag />
 
-            <div className="flex flex-col items-center gap-6 w-full -mt-6">
+            <div className="flex flex-col items-center gap-6 w-full">
               {logoImg && (
-                <div className="relative w-16 h-16 md:w-24 md:h-24 mb-2 mix-blend-plus-lighter opacity-90">
+                <div className="relative w-20 h-20 md:w-32 md:h-32 mb-2 transition-transform hover:scale-105">
                   <Image 
                     src={logoImg.imageUrl} 
-                    alt="Niti Aayog Emblem" 
+                    alt="Official Emblem" 
                     fill 
                     className="object-contain"
                   />
                 </div>
               )}
               
-              <div className="font-headline font-bold text-[5.5vw] sm:text-[4.5vw] md:text-[5vw] lg:text-[5.5vw] xl:text-[6vw] tracking-tighter leading-none whitespace-nowrap overflow-visible drop-shadow-[0_10px_10px_rgba(0,0,0,0.5)] mx-auto">
+              <div className="font-headline font-bold text-[5.5vw] sm:text-[4.5vw] md:text-[5vw] lg:text-[5.5vw] xl:text-[6vw] tracking-tighter leading-none whitespace-nowrap drop-shadow-[0_10px_10px_rgba(0,0,0,0.5)]">
                 <Typewriter 
                   text="Human Rights Affairs Trust" 
                   speed={80} 
@@ -165,17 +165,17 @@ export default function Home() {
                 />
               </div>
               
-              <div className="inline-flex items-center gap-2 bg-accent/30 text-accent px-5 py-2 md:px-6 md:py-2.5 rounded-full text-sm md:text-lg font-bold border border-accent/40 backdrop-blur-md mx-auto">
+              <div className="inline-flex items-center gap-2 bg-accent/30 text-accent px-5 py-2 md:px-6 md:py-2.5 rounded-full text-sm md:text-lg font-bold border border-accent/40 backdrop-blur-md">
                 <Shield className="w-4 h-4 md:w-6 md:h-6" />
                 <span>India's Trusted Human Rights Shield</span>
               </div>
             </div>
             
-            <h1 className="text-6xl md:text-8xl lg:text-9xl font-headline font-bold leading-tight max-w-5xl mx-auto bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-cyan-400 bg-[length:200%_auto] bg-clip-text text-transparent animate-gradient-x py-4">
+            <h1 className="text-5xl sm:text-6xl md:text-8xl lg:text-9xl font-headline font-bold leading-tight max-w-6xl mx-auto bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-cyan-400 bg-[length:200%_auto] bg-clip-text text-transparent animate-gradient-x py-6">
               Upholding Justice. Empowering Citizens.
             </h1>
             
-            <p className="text-base md:text-xl text-slate-200 font-body max-w-2xl leading-relaxed mx-auto">
+            <p className="text-base md:text-xl text-slate-200 font-body max-w-2xl leading-relaxed mx-auto px-4">
               Providing a robust shield against injustice through expert legal guidance, community support, and radical constitutional transparency.
             </p>
             
@@ -190,18 +190,18 @@ export default function Home() {
               </Button>
             </div>
 
-            <div className="w-full pt-12 max-w-6xl mx-auto">
-              <div className="glass-dark rounded-[2rem] md:rounded-[3.5rem] p-6 md:p-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-12 border-white/10 overflow-hidden">
+            <div className="w-full pt-16 max-w-6xl mx-auto">
+              <div className="glass-dark rounded-[2.5rem] md:rounded-[4rem] p-8 md:p-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-10 border-white/10">
                 {[
-                  { icon: <Gavel className="w-6 h-6 md:w-10 md:h-10 text-accent" />, count: "25k+", label: "Legal Cases Resolved" },
-                  { icon: <Users className="w-6 h-6 md:w-10 md:h-10 text-emerald-400" />, count: "500+", label: "Expert Advocates" },
-                  { icon: <Shield className="w-6 h-6 md:w-10 md:h-10 text-indigo-400" />, count: "100%", label: "Secure Data Handling" },
-                  { icon: <HeartHandshake className="w-6 h-6 md:w-10 md:h-10 text-pink-400" />, count: "50+", label: "National Centers" }
+                  { icon: <Gavel className="w-8 h-8 md:w-10 md:h-10 text-accent" />, count: "25k+", label: "Legal Cases Resolved" },
+                  { icon: <Users className="w-8 h-8 md:w-10 md:h-10 text-emerald-400" />, count: "500+", label: "Expert Advocates" },
+                  { icon: <Shield className="w-8 h-8 md:w-10 md:h-10 text-indigo-400" />, count: "100%", label: "Secure Data Handling" },
+                  { icon: <HeartHandshake className="w-8 h-8 md:w-10 md:h-10 text-pink-400" />, count: "50+", label: "National Centers" }
                 ].map((stat, i) => (
-                  <div key={i} className="flex items-center gap-4 md:gap-6 text-white hover:scale-105 transition-transform cursor-default justify-start sm:justify-center">
-                    <div className="p-3 md:p-5 bg-white/10 rounded-xl md:rounded-3xl shrink-0">{stat.icon}</div>
+                  <div key={i} className="flex items-center gap-5 text-white hover:scale-105 transition-transform cursor-default justify-start sm:justify-center">
+                    <div className="p-4 md:p-5 bg-white/10 rounded-2xl md:rounded-3xl shrink-0">{stat.icon}</div>
                     <div className="space-y-1 text-left">
-                      <p className="text-2xl md:text-3xl font-bold font-headline">{stat.count}</p>
+                      <p className="text-3xl md:text-4xl font-bold font-headline">{stat.count}</p>
                       <p className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-slate-300 leading-tight">
                         {stat.label}
                       </p>
