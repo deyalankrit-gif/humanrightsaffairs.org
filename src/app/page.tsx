@@ -10,7 +10,7 @@ import { DocSearch } from '@/components/doc-search'
 import { Footer } from '@/components/footer'
 import { Button } from '@/components/ui/button'
 import { PlaceHolderImages } from '@/lib/placeholder-images'
-import { Shield, Scale, Users, HeartHandshake, ArrowRight, Gavel, CircleCheck, FileText, Heart } from 'lucide-react'
+import { Shield, Scale, Users, HeartHandshake, ArrowRight, Gavel, CircleCheck, FileText, Heart, Globe } from 'lucide-react'
 import { DonationDialog } from '@/components/donation-dialog'
 import { Typewriter } from '@/components/typewriter'
 
@@ -19,9 +19,9 @@ function BackgroundDecor() {
   const heroImg = PlaceHolderImages.find(img => img.id === 'hero-human-rights')
 
   return (
-    <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden select-none opacity-30">
-      {/* Floating Faint Images */}
-      <div className="absolute top-[10%] right-[15%] w-32 h-32 md:w-64 md:h-64 rounded-full overflow-hidden opacity-[0.05] blur-[2px] animate-float">
+    <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden select-none opacity-40">
+      {/* Floating Faint Images - Humanitarian & Legal Themes */}
+      <div className="absolute top-[5%] right-[10%] w-48 h-48 md:w-80 md:h-80 rounded-full overflow-hidden opacity-[0.04] blur-[2px] animate-float">
         <Image 
           src={libraryImg?.imageUrl || ''} 
           alt="Legal Heritage" 
@@ -29,43 +29,54 @@ function BackgroundDecor() {
           className="object-cover grayscale"
         />
       </div>
-      <div className="absolute bottom-[15%] right-[25%] w-40 h-40 md:w-80 md:h-80 rounded-[3rem] overflow-hidden opacity-[0.04] blur-[1px] animate-float animate-delay-500">
+      <div className="absolute bottom-[10%] left-[5%] w-56 h-56 md:w-96 md:h-96 rounded-[4rem] overflow-hidden opacity-[0.03] blur-[1px] animate-float animate-delay-500">
         <Image 
           src={heroImg?.imageUrl || ''} 
-          alt="Unity" 
+          alt="Humanitarian Unity" 
           fill 
           className="object-cover sepia"
         />
       </div>
 
-      {/* Animated Scale of Justice */}
-      <div className="absolute top-[15%] left-[5%] animate-float opacity-[0.08]">
-        <Scale className="w-24 h-24 md:w-48 md:h-48 text-primary" />
+      {/* Justice Scales & Legal Symbols */}
+      <div className="absolute top-[12%] left-[8%] animate-float opacity-[0.07]">
+        <Scale className="w-20 h-20 md:w-40 md:h-40 text-primary" />
       </div>
-      {/* Animated Shield */}
-      <div className="absolute top-[40%] right-[8%] animate-float animate-delay-200 opacity-[0.06]">
-        <Shield className="w-32 h-32 md:w-64 md:h-64 text-accent" />
-      </div>
-      {/* Animated Handshake */}
-      <div className="absolute bottom-[20%] left-[10%] animate-float animate-delay-500 opacity-[0.08]">
-        <HeartHandshake className="w-28 h-28 md:w-56 md:h-56 text-emerald-500" />
-      </div>
-      {/* Animated Document/Law */}
-      <div className="absolute top-[70%] right-[15%] animate-float animate-delay-300 opacity-[0.05]">
-        <FileText className="w-20 h-20 md:w-40 md:h-40 text-primary" />
-      </div>
-      {/* Subtle Heart */}
-      <div className="absolute top-[10%] right-[25%] animate-pulse opacity-[0.06]">
-        <Heart className="w-12 h-12 md:w-24 md:h-24 text-accent" />
-      </div>
-      {/* Another Gavel */}
-      <div className="absolute bottom-[5%] right-[5%] animate-float animate-delay-100 opacity-[0.07]">
+      <div className="absolute bottom-[8%] right-[12%] animate-float animate-delay-100 opacity-[0.06]">
         <Gavel className="w-16 h-16 md:w-32 md:h-32 text-primary" />
       </div>
+
+      {/* Protective Shields & Awareness Icons */}
+      <div className="absolute top-[35%] right-[5%] animate-float animate-delay-200 opacity-[0.05]">
+        <Shield className="w-24 h-24 md:w-56 md:h-56 text-accent" />
+      </div>
+
+      {/* Diverse Community Silhouettes (represented by Users icon) */}
+      <div className="absolute top-[60%] left-[15%] animate-float animate-delay-300 opacity-[0.06]">
+        <Users className="w-28 h-28 md:w-64 md:h-64 text-emerald-500" />
+      </div>
+
+      {/* Humanitarian Themes (HeartHandshake, Heart) */}
+      <div className="absolute bottom-[25%] left-[10%] animate-float animate-delay-500 opacity-[0.07]">
+        <HeartHandshake className="w-24 h-24 md:w-48 md:h-48 text-emerald-500" />
+      </div>
+      <div className="absolute top-[10%] right-[25%] animate-pulse opacity-[0.05]">
+        <Heart className="w-10 h-10 md:w-20 md:h-20 text-accent" />
+      </div>
+
+      {/* Global Human Rights (Globe) */}
+      <div className="absolute top-[50%] right-[20%] animate-float animate-delay-200 opacity-[0.04]">
+        <Globe className="w-20 h-20 md:w-40 md:h-40 text-indigo-400" />
+      </div>
+
+      {/* Legal Awareness Icons */}
+      <div className="absolute bottom-[15%] right-[25%] animate-float animate-delay-300 opacity-[0.05]">
+        <FileText className="w-16 h-16 md:w-32 md:h-32 text-primary" />
+      </div>
       
-      {/* Soft Glows */}
-      <div className="absolute top-1/4 left-1/3 w-[300px] h-[300px] md:w-[500px] md:h-[500px] bg-accent/5 rounded-full blur-[120px] animate-glow"></div>
-      <div className="absolute bottom-1/4 right-1/3 w-[250px] h-[250px] md:w-[400px] md:h-[400px] bg-primary/5 rounded-full blur-[100px] animate-glow animate-delay-500"></div>
+      {/* Soft Ethereal Glows */}
+      <div className="absolute top-1/3 left-1/4 w-[400px] h-[400px] md:w-[600px] md:h-[600px] bg-accent/5 rounded-full blur-[150px] animate-glow"></div>
+      <div className="absolute bottom-1/3 right-1/4 w-[350px] h-[350px] md:w-[500px] md:h-[500px] bg-primary/5 rounded-full blur-[120px] animate-glow animate-delay-500"></div>
     </div>
   )
 }
@@ -135,7 +146,7 @@ export default function Home() {
             </div>
             
             <h1 className="text-xl md:text-4xl lg:text-5xl font-headline font-bold leading-tight max-w-4xl">
-              Upholding <span className="text-accent italic">Justice</span> Empowering <span className="text-emerald-400">Citizens</span>.
+              Upholding Justice Empowering Citizens.
             </h1>
             
             <p className="text-base md:text-2xl text-slate-200 font-body max-w-3xl leading-relaxed">
@@ -155,7 +166,7 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Floating Stats - Responsive behavior */}
+        {/* Floating Stats */}
         <div className="absolute bottom-6 md:bottom-12 left-1/2 -translate-x-1/2 w-full container px-4 hidden lg:block animate-fade-in-up animate-delay-500">
            <div className="glass-dark rounded-[2rem] md:rounded-[3rem] p-6 md:p-10 grid grid-cols-4 gap-6 md:gap-10">
              {[
