@@ -27,9 +27,9 @@ const stateTeams = [
     ]
   },
   {
-    state: "Maharashtra",
+    state: "Howrah Dist. Chapter",
     leaders: [
-      { name: "Rajesh Patil", title: "State Chairman", imageId: "leader-1" },
+      { name: "Rajesh Patil", title: "Chapter Chairman", imageId: "leader-1" },
       { name: "Amruta Fadnavis", title: "Legal Head", imageId: "leader-2" }
     ]
   }
@@ -41,11 +41,11 @@ const districtTeams = [
     leaders: [{ name: "Anil Kapoor", title: "District Chairman", imageId: "leader-3" }]
   },
   {
-    district: "Mumbai Suburban",
+    district: "Howrah Sadar",
     leaders: [{ name: "Sunil Shetty", title: "District Chairman", imageId: "leader-4" }]
   },
   {
-    district: "Pune City",
+    district: "Uluberia",
     leaders: [{ name: "Prakash Jha", title: "District Chairman", imageId: "leader-1" }]
   }
 ]
@@ -130,14 +130,14 @@ export default function LeadershipPage() {
           <div className="space-y-24">
             <div className="flex items-center justify-center gap-2 text-primary font-bold uppercase tracking-[0.3em] mb-12">
               <Shield className="w-6 h-6 text-emerald-500" />
-              <span>State Jurisdictions</span>
+              <span>Regional Chapters</span>
             </div>
             
             <div className="grid md:grid-cols-2 gap-12 max-w-6xl mx-auto">
               {stateTeams.map((team, i) => (
                 <div key={i} className="bg-white p-12 rounded-[3rem] shadow-sm border border-slate-100 flex flex-col items-center">
                   <div className="bg-emerald-50 text-emerald-600 px-6 py-2 rounded-full font-bold text-sm mb-12">
-                    {team.state} Chapter
+                    {team.state}
                   </div>
                   <div className="flex flex-wrap justify-center gap-8">
                     {team.leaders.map((leader, j) => (

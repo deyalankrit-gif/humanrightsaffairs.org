@@ -29,16 +29,24 @@ type Member = {
   imageId: string
 }
 
-const indianStates = [
-  "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", 
+const chapters = [
+  "West Bengal", "Howrah Dist. Chapter", "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", 
   "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jharkhand", 
-  "Karnataka", "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur", 
+  "Karnataka", "Kerala", "Madhya Pradesh", "Manipur", 
   "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Punjab", 
   "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura", 
-  "Uttar Pradesh", "Uttarakhand", "West Bengal", "Delhi NCR"
+  "Uttar Pradesh", "Uttarakhand"
 ]
 
-const stateToDistricts: Record<string, string[]> = {
+const chapterToDistricts: Record<string, string[]> = {
+  "West Bengal": [
+    "Alipurduar", "Bankura", "Birbhum", "Cooch Behar", "Dakshin Dinajpur",
+    "Darjeeling", "Hooghly", "Howrah", "Jalpaiguri", "Jhargram",
+    "Kalimpong", "Kolkata", "Malda", "Murshidabad", "Nadia",
+    "North 24 Parganas", "Paschim Bardhaman", "Paschim Medinipur",
+    "Purba Bardhaman", "Purba Medinipur", "Purulia", "South 24 Parganas", "Uttar Dinajpur"
+  ],
+  "Howrah Dist. Chapter": ["Howrah Sadar", "Uluberia", "Bally", "Domjur", "Amta"],
   "Andhra Pradesh": ["Visakhapatnam", "Vijayawada", "Guntur", "Nellore", "Kurnool", "Anantapur", "Kakinada"],
   "Arunachal Pradesh": ["Itanagar", "Tawang", "Ziro", "Pasighat", "Along", "Tezu"],
   "Assam": ["Guwahati", "Dibrugarh", "Jorhat", "Silchar", "Nagaon", "Tinsukia", "Tezpur"],
@@ -52,7 +60,6 @@ const stateToDistricts: Record<string, string[]> = {
   "Karnataka": ["Bangalore", "Mysore", "Hubli", "Mangalore", "Belgaum", "Gulbarga", "Davangere"],
   "Kerala": ["Thiruvananthapuram", "Kochi", "Kozhikode", "Thrissur", "Kollam", "Alappuzha", "Palakkad"],
   "Madhya Pradesh": ["Indore", "Bhopal", "Jabalpur", "Gwalior", "Ujjain", "Sagar", "Dewas"],
-  "Maharashtra": ["Mumbai Suburban", "Mumbai City", "Pune City", "Nagpur", "Nashik", "Thane", "Aurangabad", "Solapur"],
   "Manipur": ["Imphal", "Churachandpur", "Thoubal", "Bishnupur", "Senapati"],
   "Meghalaya": ["Shillong", "Tura", "Jowai", "Nongpoh", "Williamnagar"],
   "Mizoram": ["Aizawl", "Lunglei", "Champhai", "Serchhip", "Kolasib"],
@@ -65,33 +72,7 @@ const stateToDistricts: Record<string, string[]> = {
   "Telangana": ["Hyderabad", "Warangal", "Nizamabad", "Karimnagar", "Khammam", "Ramagundam"],
   "Tripura": ["Agartala", "Udaipur", "Dharmanagar", "Kailasahar", "Ambassa"],
   "Uttar Pradesh": ["Lucknow", "Kanpur", "Ghaziabad", "Agra", "Varanasi", "Meerut", "Prayagraj", "Bareilly"],
-  "Uttarakhand": ["Dehradun", "Haridwar", "Haldwani", "Roorkee", "Rudrapur", "Kashipur"],
-  "West Bengal": [
-    "Alipurduar",
-    "Bankura",
-    "Birbhum",
-    "Cooch Behar",
-    "Dakshin Dinajpur",
-    "Darjeeling",
-    "Hooghly",
-    "Howrah",
-    "Jalpaiguri",
-    "Jhargram",
-    "Kalimpong",
-    "Kolkata",
-    "Malda",
-    "Murshidabad",
-    "Nadia",
-    "North 24 Parganas",
-    "Paschim Bardhaman",
-    "Paschim Medinipur",
-    "Purba Bardhaman",
-    "Purba Medinipur",
-    "Purulia",
-    "South 24 Parganas",
-    "Uttar Dinajpur"
-  ],
-  "Delhi NCR": ["New Delhi Central", "North Delhi", "South Delhi", "West Delhi", "East Delhi", "Northeast Delhi", "Southwest Delhi"]
+  "Uttarakhand": ["Dehradun", "Haridwar", "Haldwani", "Roorkee", "Rudrapur", "Kashipur"]
 }
 
 const members: Member[] = [
@@ -140,9 +121,9 @@ const members: Member[] = [
   {
     id: "M006",
     name: "Rajesh Patil",
-    designation: "State Chairman",
-    jurisdiction: "Maharashtra",
-    stateName: "Maharashtra",
+    designation: "Chapter Chairman",
+    jurisdiction: "Howrah Dist. Chapter",
+    stateName: "Howrah Dist. Chapter",
     level: "State",
     imageId: "leader-1"
   },
@@ -150,8 +131,8 @@ const members: Member[] = [
     id: "M007",
     name: "Amruta Fadnavis",
     designation: "Legal Head",
-    jurisdiction: "Maharashtra",
-    stateName: "Maharashtra",
+    jurisdiction: "Howrah Dist. Chapter",
+    stateName: "Howrah Dist. Chapter",
     level: "State",
     imageId: "leader-2"
   },
@@ -169,9 +150,9 @@ const members: Member[] = [
     id: "M009",
     name: "Sunil Shetty",
     designation: "District Chairman",
-    jurisdiction: "Mumbai Suburban",
-    stateName: "Maharashtra",
-    districtName: "Mumbai Suburban",
+    jurisdiction: "Howrah Sadar",
+    stateName: "Howrah Dist. Chapter",
+    districtName: "Howrah Sadar",
     level: "District",
     imageId: "leader-4"
   },
@@ -179,9 +160,9 @@ const members: Member[] = [
     id: "M010",
     name: "Prakash Jha",
     designation: "District Chairman",
-    jurisdiction: "Pune City",
-    stateName: "Maharashtra",
-    districtName: "Pune City",
+    jurisdiction: "Uluberia",
+    stateName: "Howrah Dist. Chapter",
+    districtName: "Uluberia",
     level: "District",
     imageId: "leader-1"
   }
@@ -195,7 +176,7 @@ export default function MembersPage() {
 
   const availableDistricts = useMemo(() => {
     if (!selectedState) return []
-    return stateToDistricts[selectedState] || []
+    return chapterToDistricts[selectedState] || []
   }, [selectedState])
 
   const handleLevelClick = (level: string) => {
@@ -282,16 +263,16 @@ export default function MembersPage() {
                     variant={levelFilter === "State" ? "default" : "outline"}
                     className={`rounded-full px-6 font-bold flex items-center gap-2 ${levelFilter === "State" ? 'bg-primary text-white' : 'hover:border-accent hover:text-accent'}`}
                   >
-                    {selectedState || "State"} <ChevronDown className="w-4 h-4 opacity-50" />
+                    {selectedState || "State/Chapter"} <ChevronDown className="w-4 h-4 opacity-50" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="max-h-80 overflow-y-auto w-56">
                   <DropdownMenuItem onClick={() => handleLevelClick("State")}>
-                    All States
+                    All States/Chapters
                   </DropdownMenuItem>
-                  {indianStates.map((state) => (
-                    <DropdownMenuItem key={state} onClick={() => handleStateSelect(state)}>
-                      {state}
+                  {chapters.map((chapter) => (
+                    <DropdownMenuItem key={chapter} onClick={() => handleStateSelect(chapter)}>
+                      {chapter}
                     </DropdownMenuItem>
                   ))}
                 </DropdownMenuContent>
@@ -308,7 +289,7 @@ export default function MembersPage() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="max-h-80 overflow-y-auto w-56">
                   {!selectedState ? (
-                    <div className="p-4 text-xs text-slate-400 italic">Select a State first</div>
+                    <div className="p-4 text-xs text-slate-400 italic">Select a State/Chapter first</div>
                   ) : (
                     <>
                       <DropdownMenuItem onClick={() => handleLevelClick("District")}>
@@ -321,7 +302,7 @@ export default function MembersPage() {
                           </DropdownMenuItem>
                         ))
                       ) : (
-                        <div className="p-4 text-xs text-slate-400 italic">No districts listed for this state</div>
+                        <div className="p-4 text-xs text-slate-400 italic">No districts listed for this region</div>
                       )}
                     </>
                   )}
