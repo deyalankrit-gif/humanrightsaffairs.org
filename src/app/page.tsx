@@ -1,5 +1,4 @@
 
-
 import Image from 'next/image'
 import { Navbar } from '@/components/navbar'
 import { ChairmanMessage } from '@/components/chairman-message'
@@ -98,7 +97,7 @@ export default function Home() {
                 </div>
               </div>
               
-              <div className="font-headline font-bold text-4xl sm:text-6xl md:text-7xl lg:text-8xl tracking-tight leading-tight min-h-[1.5em] flex justify-center items-center overflow-visible mt-4 md:mt-8">
+              <div className="font-headline font-bold text-3xl sm:text-5xl md:text-6xl md:text-7xl tracking-tight leading-tight min-h-[1.5em] flex justify-center items-center overflow-visible mt-4 md:mt-8">
                 <span className="bg-gradient-to-r from-[#FF9933] via-white to-[#138808] bg-clip-text text-transparent italic block drop-shadow-sm px-4 pb-4">
                   <Typewriter 
                     text="Human Rights Affairs Trust" 
