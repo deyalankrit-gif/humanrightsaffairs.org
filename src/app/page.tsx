@@ -75,24 +75,24 @@ function BackgroundDecor() {
 
 function IndianFlag() {
   return (
-    <div className="relative mb-6 md:mb-10 self-start ml-4 md:ml-12 h-8 md:h-16">
+    <div className="relative mb-6 md:mb-10 self-start ml-4 md:ml-12 h-6 md:h-12">
       {/* Static Flagpole */}
       <div className="absolute -left-1.5 -top-3 bottom-[-10px] md:bottom-[-15px] w-1 md:w-1.5 bg-gradient-to-r from-slate-400 via-slate-100 to-slate-400 rounded-full shadow-2xl z-20">
         <div className="absolute -top-1.5 -left-0.5 w-2 h-2 md:w-3 md:h-3 rounded-full bg-gradient-to-tr from-yellow-600 via-yellow-200 to-yellow-600 shadow-lg"></div>
       </div>
 
-      {/* Fluttering Cloth Flag - Smaller Dimensions */}
-      <div className="animate-flag-wave origin-left flex flex-col w-14 h-9 md:w-28 md:h-18 rounded-sm shadow-[0_15px_40px_rgba(0,0,0,0.4)] shrink-0 overflow-hidden relative border-l border-white/20 z-10">
+      {/* Fluttering Cloth Flag - Smaller Dimensions as requested */}
+      <div className="animate-flag-wave origin-left flex flex-col w-12 h-8 md:w-20 md:h-13 rounded-sm shadow-[0_10px_30px_rgba(0,0,0,0.4)] shrink-0 overflow-hidden relative border-l border-white/20 z-10">
         <div className="h-1/3 bg-[#FF9933] relative"></div>
         <div className="h-1/3 bg-white flex items-center justify-center relative">
           <div className="absolute inset-0 flex items-center justify-center">
-             <div className="w-2 h-2 md:w-5 md:h-5 rounded-full border-[0.3px] border-[#000080]/60 flex items-center justify-center">
+             <div className="w-1.5 h-1.5 md:w-3 md:h-3 rounded-full border-[0.3px] border-[#000080]/60 flex items-center justify-center">
                <div className="w-0.5 h-0.5 bg-[#000080] rounded-full"></div>
                <div className="absolute inset-0 flex items-center justify-center">
                   {[...Array(24)].map((_, i) => (
                     <div 
                       key={i} 
-                      className="absolute w-[0.1px] md:w-[0.3px] h-1 md:h-2.5 bg-[#000080]/70" 
+                      className="absolute w-[0.1px] md:w-[0.3px] h-0.8 md:h-1.5 bg-[#000080]/70" 
                       style={{ transform: `rotate(${i * 15}deg)` }}
                     />
                   ))}
@@ -151,7 +151,7 @@ export default function Home() {
                 />
               </div>
               
-              {/* Human Rights Affairs Trust - Beautifully displayed typewriter text */}
+              {/* Human Rights Affairs Trust - Big Typewriter text */}
               <div className="font-headline font-bold text-4xl sm:text-6xl md:text-8xl lg:text-9xl tracking-tight leading-tight drop-shadow-xl min-h-[1.2em] flex justify-center items-center">
                 <span className="bg-gradient-to-r from-[#FF9933] via-white to-[#138808] bg-clip-text text-transparent italic block">
                   <Typewriter 
@@ -168,8 +168,8 @@ export default function Home() {
               </div>
             </div>
             
-            {/* Tagline - Large, Cyan-Magenta Animated Gradient */}
-            <h1 className="text-4xl sm:text-6xl md:text-8xl lg:text-9xl font-headline font-bold leading-tight max-w-7xl mx-auto bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-cyan-400 bg-[length:200%_auto] bg-clip-text text-transparent animate-gradient-x py-6 md:py-12">
+            {/* Tagline - Now small as requested, but still cyan-magenta animated gradient */}
+            <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-headline font-bold leading-tight max-w-4xl mx-auto bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-cyan-400 bg-[length:200%_auto] bg-clip-text text-transparent animate-gradient-x py-4 md:py-8">
               Upholding Justice. Empowering Citizens.
             </h1>
             
