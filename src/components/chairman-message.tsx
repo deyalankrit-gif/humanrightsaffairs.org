@@ -22,7 +22,7 @@ export function ChairmanMessage() {
               />
             </div>
             <div className="absolute bottom-6 left-6 right-6 bg-white/90 backdrop-blur-md p-6 rounded-xl shadow-lg">
-              <h3 className="font-headline text-2xl font-bold text-primary">Dr. Rajendra Kumar Sharma</h3>
+              <h3 className="font-headline text-2xl font-bold text-primary">Dhritimaan Dey</h3>
               <p className="text-accent font-semibold text-sm tracking-widest uppercase">Chairman, Human Rights Affairs Trust</p>
             </div>
           </div>
@@ -45,10 +45,10 @@ export function ChairmanMessage() {
             </div>
             <div className="flex items-center gap-4 pt-4 border-t border-slate-200">
                <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center text-secondary font-bold text-xl">
-                 RS
+                 DD
                </div>
                <div>
-                 <p className="font-bold text-lg text-primary">Dr. Rajendra Kumar Sharma</p>
+                 <p className="font-bold text-lg text-primary">Dhritimaan Dey</p>
                  <p className="text-slate-500">National Chairman & Founder</p>
                </div>
             </div>

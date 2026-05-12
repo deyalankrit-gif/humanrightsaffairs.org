@@ -13,7 +13,7 @@ type Leader = {
 }
 
 const centralTeam: Leader[] = [
-  { name: "Dr. Rajendra Kumar Sharma", title: "Central Chairman & Founder", imageId: "chairman-photo" },
+  { name: "Dhritimaan Dey", title: "Central Chairman & Founder", imageId: "chairman-photo" },
   { name: "Adv. Meera Deshmukh", title: "National Legal Advisor", imageId: "leader-1" },
   { name: "Dr. Arvind Swamy", title: "General Secretary", imageId: "leader-2" },
 ]
