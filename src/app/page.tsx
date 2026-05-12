@@ -75,7 +75,7 @@ function BackgroundDecor() {
 
 function IndianFlag() {
   return (
-    <div className="relative mb-6 flex items-center justify-center">
+    <div className="relative mb-4 flex items-center justify-center">
       {/* Animated Glow Ring */}
       <div className="absolute inset-0 w-12 h-12 md:w-16 md:h-16 rounded-full border-2 border-accent/30 animate-ping opacity-20"></div>
       
@@ -123,22 +123,22 @@ export default function Home() {
         </div>
 
         <div className="container mx-auto px-4 relative z-10 text-white text-center">
-          <div className="max-w-full space-y-8 md:space-y-10 flex flex-col items-center">
+          <div className="max-w-full space-y-6 md:space-y-8 flex flex-col items-center">
             
             <IndianFlag />
 
-            <div className="flex flex-col items-center gap-6 md:gap-8 w-full">
-              {/* Centered Niti Aayog Emblem - Large Size */}
-              <div className="relative w-32 h-32 md:w-60 md:h-60 transition-transform hover:scale-105">
+            <div className="flex flex-col items-center gap-4 md:gap-6 w-full">
+              {/* Niti Aayog Registered Satyamev Jayate Image */}
+              <div className="relative w-40 h-52 md:w-72 md:h-96 transition-transform hover:scale-105">
                 <Image 
-                  src="/Niti.png" 
-                  alt="Official Niti Aayog Emblem" 
+                  src="/nity3.png" 
+                  alt="Niti Aayog Registered Emblem" 
                   fill 
                   className="object-contain"
                 />
               </div>
               
-              {/* Organization Title with Typewriter effect - Slightly Smaller */}
+              {/* Organization Title with Typewriter effect */}
               <div className="font-headline font-bold text-xl sm:text-2xl md:text-3xl lg:text-4xl tracking-tight leading-tight drop-shadow-xl min-h-[1.2em] flex justify-center items-center">
                 <span className="bg-gradient-to-r from-[#FF9933] via-white to-[#138808] bg-clip-text text-transparent italic block">
                   <Typewriter 
@@ -187,7 +187,7 @@ export default function Home() {
                   <div key={i} className="flex flex-col sm:flex-row items-center gap-2 md:gap-4 text-white hover:scale-105 transition-transform cursor-default justify-center">
                     <div className="p-2 md:p-4 bg-white/10 rounded-lg md:rounded-2xl shrink-0">{stat.icon}</div>
                     <div className="space-y-0 text-center sm:text-left">
-                      <p className="text-lg md:text-2xl font-bold font-headline">{stat.count}</p>
+                      <p className="text-sm md:text-base font-bold font-headline">{stat.count}</p>
                       <p className="text-[7px] md:text-[9px] font-bold uppercase tracking-[0.1em] text-slate-400 leading-tight">
                         {stat.label}
                       </p>
