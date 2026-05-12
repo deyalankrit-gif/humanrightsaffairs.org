@@ -34,7 +34,7 @@ function BackgroundDecor() {
 
 function IndianFlag() {
   return (
-    <div className="relative mb-6 flex items-center justify-center">
+    <div className="relative mb-4 flex items-center justify-center">
       <div className="absolute inset-0 w-12 h-12 md:w-16 md:h-16 rounded-full border-2 border-accent/20 animate-ping opacity-10"></div>
       <div className="relative w-12 h-12 md:w-16 md:h-16 rounded-full overflow-hidden shadow-xl border-2 border-white/50 animate-float bg-white">
         <div className="h-1/3 bg-[#FF9933]"></div>
@@ -81,7 +81,7 @@ export default function Home() {
             <IndianFlag />
 
             <div className="flex flex-col items-center gap-0 w-full">
-              <div className="flex flex-col items-center group mb-2">
+              <div className="flex flex-col items-center group mb-0">
                 <div className="relative w-28 h-36 md:w-36 md:h-48 transition-transform hover:scale-105 duration-500">
                   <Image 
                     src="/Niti3.png" 
@@ -90,14 +90,14 @@ export default function Home() {
                     className="object-contain"
                   />
                 </div>
-                <div className="flex flex-col items-center -mt-2 md:-mt-4 text-white drop-shadow-md space-y-0.5">
+                <div className="flex flex-col items-center -mt-6 md:-mt-10 text-white drop-shadow-md space-y-0.5">
                    <p className="text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] leading-tight">Niti Aayog registered</p>
                    <p className="text-[9px] md:text-[11px] font-bold uppercase tracking-[0.15em] leading-tight opacity-90">National Informatics Centre</p>
                    <p className="text-[18px] md:text-2xl font-bold uppercase tracking-[0.2em] leading-tight">Government of India</p>
                 </div>
               </div>
               
-              <div className="font-headline font-bold text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl tracking-tight leading-tight min-h-[1.5em] flex justify-center items-center overflow-visible">
+              <div className="font-headline font-bold text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl tracking-tight leading-tight min-h-[1.5em] flex justify-center items-center overflow-visible">
                 <span className="bg-gradient-to-r from-[#FF9933] via-white to-[#138808] bg-clip-text text-transparent italic block drop-shadow-sm px-4 pb-4">
                   <Typewriter 
                     text="Human Rights Affairs Trust" 
@@ -108,11 +108,11 @@ export default function Home() {
               </div>
             </div>
             
-            <h1 className="text-xl sm:text-2xl md:text-4xl lg:text-5xl xl:text-6xl font-headline font-bold leading-tight md:whitespace-nowrap bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-cyan-400 bg-[length:200%_auto] bg-clip-text text-transparent animate-gradient-x py-4 w-full drop-shadow-md">
+            <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-headline font-bold leading-tight md:whitespace-nowrap bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-cyan-400 bg-[length:200%_auto] bg-clip-text text-transparent animate-gradient-x py-2 w-full drop-shadow-md">
               Upholding Justice. Empowering Citizens.
             </h1>
             
-            <p className="text-sm sm:text-base md:text-xl text-slate-300 font-body max-w-3xl leading-relaxed mx-auto px-4 opacity-90">
+            <p className="text-sm sm:text-base md:text-lg text-slate-300 font-body max-w-2xl leading-relaxed mx-auto px-4 opacity-90">
               Providing a robust shield against injustice through expert legal guidance, community support, and constitutional transparency.
             </p>
             
