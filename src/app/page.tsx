@@ -63,7 +63,7 @@ export default function Home() {
       <BackgroundDecor />
       <Navbar />
       
-      <section className="relative min-h-screen flex flex-col items-center pt-24 md:pt-32 pb-20">
+      <section className="relative min-h-screen flex flex-col items-center pt-16 md:pt-24 pb-20">
         <div className="absolute inset-0 z-0">
           <Image 
             src="/Human R2.jpeg" 
@@ -80,7 +80,7 @@ export default function Home() {
             
             <IndianFlag />
 
-            <div className="flex flex-col items-center gap-0 w-full -mt-4 md:-mt-6">
+            <div className="flex flex-col items-center gap-0 w-full -mt-2 md:-mt-4">
               <div className="flex flex-col items-center group mb-0">
                 <div className="relative w-28 h-36 md:w-36 md:h-48 transition-transform hover:scale-105 duration-500">
                   <Image 
@@ -97,7 +97,7 @@ export default function Home() {
                 </div>
               </div>
               
-              <div className="font-headline font-bold text-4xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-[7rem] tracking-tight leading-tight min-h-[1.5em] flex justify-center items-center overflow-visible mt-8 md:mt-12">
+              <div className="font-headline font-bold text-3xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-[6.5rem] tracking-tight leading-tight min-h-[1.5em] flex justify-center items-center overflow-visible mt-6 md:mt-10">
                 <span className="bg-gradient-to-r from-[#FF9933] via-white to-[#138808] bg-clip-text text-transparent italic block drop-shadow-sm px-4 pb-4">
                   <Typewriter 
                     text="Human Rights Affairs Trust" 
