@@ -151,8 +151,8 @@ export default function Home() {
                 />
               </div>
               
-              {/* Human Rights Affairs Trust - Typewriter text */}
-              <div className="font-headline font-bold text-4xl sm:text-6xl md:text-8xl lg:text-9xl tracking-tight leading-tight drop-shadow-xl min-h-[1.2em] flex justify-center items-center">
+              {/* Human Rights Affairs Trust - Typewriter text - Slightly Smaller Size */}
+              <div className="font-headline font-bold text-3xl sm:text-5xl md:text-7xl lg:text-8xl tracking-tight leading-tight drop-shadow-xl min-h-[1.2em] flex justify-center items-center">
                 <span className="bg-gradient-to-r from-[#FF9933] via-white to-[#138808] bg-clip-text text-transparent italic block">
                   <Typewriter 
                     text="Human Rights Affairs Trust" 
@@ -168,7 +168,7 @@ export default function Home() {
               </div>
             </div>
             
-            {/* Tagline - Cyan/Magenta Animated Gradient */}
+            {/* Tagline - Cyan/Magenta Animated Gradient - One Line */}
             <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-headline font-bold leading-tight md:whitespace-nowrap bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-cyan-400 bg-[length:200%_auto] bg-clip-text text-transparent animate-gradient-x py-4 md:py-6 w-full">
               Upholding Justice. Empowering Citizens.
             </h1>
@@ -188,7 +188,7 @@ export default function Home() {
               </Button>
             </div>
 
-            {/* Statistics Dashboard - Updated with Small Text size */}
+            {/* Statistics Dashboard - Small Text size */}
             <div className="w-full pt-16 md:pt-20 max-w-6xl mx-auto">
               <div className="glass-dark rounded-[2rem] md:rounded-[4rem] p-6 md:p-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-10 border-white/10">
                 {[
