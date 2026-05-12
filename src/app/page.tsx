@@ -1,3 +1,4 @@
+
 import Image from 'next/image'
 import { Navbar } from '@/components/navbar'
 import { ChairmanMessage } from '@/components/chairman-message'
@@ -76,7 +77,7 @@ function IndianFlag() {
   return (
     <div className="animate-flag-wave origin-left relative">
       <div className="flex flex-col w-12 h-7 md:w-20 md:h-12 rounded-sm shadow-2xl border border-white/20 shrink-0 overflow-hidden relative">
-        {/* Colors */}
+        {/* Flag Bands */}
         <div className="h-1/3 bg-[#FF9933]"></div>
         <div className="h-1/3 bg-white flex items-center justify-center relative">
           <div className="absolute inset-0 flex items-center justify-center">
@@ -96,12 +97,12 @@ function IndianFlag() {
         </div>
         <div className="h-1/3 bg-[#138808]"></div>
         
-        {/* Real Ripple Shading Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/5 via-white/20 to-black/5 bg-[length:400%_100%] animate-flag-ripple pointer-events-none mix-blend-overlay"></div>
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-black/10 to-transparent bg-[length:200%_100%] animate-flag-ripple pointer-events-none mix-blend-multiply opacity-30"></div>
+        {/* Realistic Silk Ripple Overlays */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black/10 via-white/30 to-black/10 bg-[length:200%_100%] animate-flag-ripple pointer-events-none mix-blend-overlay"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-black/15 to-transparent bg-[length:150%_100%] animate-flag-ripple pointer-events-none mix-blend-multiply opacity-40"></div>
       </div>
-      {/* Flag Pole (Subtle) */}
-      <div className="absolute -left-1 top-0 bottom-0 w-1 bg-gradient-to-r from-slate-400 to-slate-200 rounded-full shadow-lg"></div>
+      {/* Flag Pole (Realistic Shadowing) */}
+      <div className="absolute -left-1 top-0 bottom-0 w-1 bg-gradient-to-r from-slate-500 via-slate-300 to-slate-400 rounded-full shadow-lg"></div>
     </div>
   )
 }
