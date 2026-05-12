@@ -96,8 +96,8 @@ export default function Home() {
                 </div>
               </div>
               
-              {/* Organization Title with Typewriter effect */}
-              <div className="font-headline font-bold text-2xl sm:text-4xl md:text-5xl lg:text-6xl tracking-tight leading-tight min-h-[1.5em] flex justify-center items-center">
+              {/* Organization Title with Typewriter effect - Increased Size */}
+              <div className="font-headline font-bold text-4xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl tracking-tight leading-tight min-h-[1.5em] flex justify-center items-center">
                 <span className="bg-gradient-to-r from-[#FF9933] via-white to-[#138808] bg-clip-text text-transparent italic block drop-shadow-sm">
                   <Typewriter 
                     text="Human Rights Affairs Trust" 
