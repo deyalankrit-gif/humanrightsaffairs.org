@@ -1,7 +1,7 @@
 
 "use client"
 
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import Image from 'next/image'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
@@ -25,6 +25,7 @@ type Member = {
   jurisdiction: string
   level: "National" | "State" | "District"
   stateName?: string
+  districtName?: string
   imageId: string
 }
 
@@ -36,6 +37,14 @@ const indianStates = [
   "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura", 
   "Uttar Pradesh", "Uttarakhand", "West Bengal", "Delhi NCR"
 ]
+
+// Mock mapping of districts for the demo states
+const stateToDistricts: Record<string, string[]> = {
+  "Delhi NCR": ["New Delhi Central", "North Delhi", "South Delhi", "West Delhi", "East Delhi"],
+  "Maharashtra": ["Mumbai Suburban", "Pune City", "Nagpur", "Nashik", "Thane"],
+  "West Bengal": ["Kolkata", "Howrah", "Darjeeling", "Hooghly"],
+  "Uttar Pradesh": ["Lucknow", "Kanpur", "Varanasi", "Agra"]
+}
 
 const members: Member[] = [
   {
@@ -103,6 +112,8 @@ const members: Member[] = [
     name: "Anil Kapoor",
     designation: "District Chairman",
     jurisdiction: "New Delhi Central",
+    stateName: "Delhi NCR",
+    districtName: "New Delhi Central",
     level: "District",
     imageId: "leader-3"
   },
@@ -111,8 +122,20 @@ const members: Member[] = [
     name: "Sunil Shetty",
     designation: "District Chairman",
     jurisdiction: "Mumbai Suburban",
+    stateName: "Maharashtra",
+    districtName: "Mumbai Suburban",
     level: "District",
     imageId: "leader-4"
+  },
+  {
+    id: "M010",
+    name: "Prakash Jha",
+    designation: "District Chairman",
+    jurisdiction: "Pune City",
+    stateName: "Maharashtra",
+    districtName: "Pune City",
+    level: "District",
+    imageId: "leader-1"
   }
 ]
 
@@ -120,15 +143,28 @@ export default function MembersPage() {
   const [search, setSearch] = useState("")
   const [levelFilter, setLevelFilter] = useState<string>("All")
   const [selectedState, setSelectedState] = useState<string | null>(null)
+  const [selectedDistrict, setSelectedDistrict] = useState<string | null>(null)
+
+  const availableDistricts = useMemo(() => {
+    if (!selectedState) return []
+    return stateToDistricts[selectedState] || []
+  }, [selectedState])
 
   const handleLevelClick = (level: string) => {
     setLevelFilter(level)
     setSelectedState(null)
+    setSelectedDistrict(null)
   }
 
   const handleStateSelect = (state: string) => {
     setLevelFilter("State")
     setSelectedState(state)
+    setSelectedDistrict(null) // Reset district when state changes
+  }
+
+  const handleDistrictSelect = (district: string) => {
+    setLevelFilter("District")
+    setSelectedDistrict(district)
   }
 
   const filteredMembers = members.filter(m => {
@@ -136,11 +172,22 @@ export default function MembersPage() {
                           m.jurisdiction.toLowerCase().includes(search.toLowerCase()) ||
                           m.designation.toLowerCase().includes(search.toLowerCase());
     
-    const matchesLevel = levelFilter === "All" || m.level === levelFilter;
+    let matchesLevel = levelFilter === "All" || m.level === levelFilter;
     
-    // If filtering by State level and a specific state is chosen
+    // If filtering by State level specifically
     if (levelFilter === "State" && selectedState) {
-      return matchesSearch && m.level === "State" && m.stateName === selectedState;
+      matchesLevel = m.level === "State" && m.stateName === selectedState;
+    }
+
+    // If filtering by District level specifically
+    if (levelFilter === "District") {
+      if (selectedState && selectedDistrict) {
+        matchesLevel = m.level === "District" && m.stateName === selectedState && m.districtName === selectedDistrict;
+      } else if (selectedState) {
+        matchesLevel = m.level === "District" && m.stateName === selectedState;
+      } else {
+        matchesLevel = m.level === "District";
+      }
     }
 
     return matchesSearch && matchesLevel;
@@ -206,13 +253,36 @@ export default function MembersPage() {
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              <Button
-                variant={levelFilter === "District" ? "default" : "outline"}
-                onClick={() => handleLevelClick("District")}
-                className={`rounded-full px-6 font-bold ${levelFilter === "District" ? 'bg-primary text-white' : 'hover:border-accent hover:text-accent'}`}
-              >
-                District
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant={levelFilter === "District" ? "default" : "outline"}
+                    className={`rounded-full px-6 font-bold flex items-center gap-2 ${levelFilter === "District" ? 'bg-primary text-white' : 'hover:border-accent hover:text-accent'}`}
+                  >
+                    {selectedDistrict || "District"} <ChevronDown className="w-4 h-4 opacity-50" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="max-h-80 overflow-y-auto w-56">
+                  {!selectedState ? (
+                    <div className="p-4 text-xs text-slate-400 italic">Select a State first</div>
+                  ) : (
+                    <>
+                      <DropdownMenuItem onClick={() => handleLevelClick("District")}>
+                        All Districts in {selectedState}
+                      </DropdownMenuItem>
+                      {availableDistricts.length > 0 ? (
+                        availableDistricts.map((district) => (
+                          <DropdownMenuItem key={district} onClick={() => handleDistrictSelect(district)}>
+                            {district}
+                          </DropdownMenuItem>
+                        ))
+                      ) : (
+                        <div className="p-4 text-xs text-slate-400 italic">No districts listed for this state</div>
+                      )}
+                    </>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
             <div className="relative w-full md:w-96">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
