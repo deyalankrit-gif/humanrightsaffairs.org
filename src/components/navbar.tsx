@@ -1,4 +1,3 @@
-
 "use client"
 
 import React from 'react'
@@ -25,12 +24,15 @@ export function Navbar() {
   }, [])
 
   return (
-    <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${isScrolled ? 'bg-white/80 backdrop-blur-md shadow-sm py-3' : 'bg-transparent py-5'}`}>
+    <nav className={`fixed top-0 w-full z-50 transition-all duration-500 ${isScrolled ? 'bg-white/70 backdrop-blur-md shadow-lg py-3' : 'bg-transparent py-5'}`}>
       <div className="container mx-auto px-4 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2">
-          <Shield className="w-8 h-8 text-primary fill-accent" />
+        <Link href="/" className="flex items-center gap-2 group">
+          <div className="relative">
+            <Shield className={`w-10 h-10 transition-colors duration-500 ${isScrolled ? 'text-primary' : 'text-white'} fill-accent`} />
+            <div className="absolute inset-0 bg-accent/20 blur-lg rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          </div>
           <div className="flex flex-col">
-            <span className="font-headline font-bold text-lg leading-none text-primary">HRAT</span>
+            <span className={`font-headline font-bold text-xl leading-none transition-colors duration-500 ${isScrolled ? 'text-primary' : 'text-white'}`}>HRAT</span>
             <span className="text-[10px] font-bold tracking-widest text-accent uppercase">JusticeShield</span>
           </div>
         </Link>
@@ -38,11 +40,19 @@ export function Navbar() {
         {/* Desktop Nav */}
         <div className="hidden md:flex items-center gap-8">
           {navLinks.map((link) => (
-            <Link key={link.name} href={link.href} className="text-sm font-medium hover:text-accent transition-colors">
+            <Link 
+              key={link.name} 
+              href={link.href} 
+              className={`text-sm font-bold tracking-wide transition-all duration-500 hover:text-accent relative group ${isScrolled ? 'text-primary' : 'text-white'}`}
+            >
               {link.name}
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-accent transition-all duration-300 group-hover:w-full"></span>
             </Link>
           ))}
-          <Button variant="default" className="bg-primary text-white rounded-full px-6">
+          <Button 
+            variant="default" 
+            className="bg-accent text-primary hover:bg-accent/90 rounded-full px-8 font-bold shadow-lg shadow-accent/20 transition-transform active:scale-95"
+          >
             Donate
           </Button>
         </div>
@@ -51,18 +61,22 @@ export function Navbar() {
         <div className="md:hidden">
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <Menu className="w-6 h-6" />
+              <Button variant="ghost" size="icon" className={isScrolled ? 'text-primary' : 'text-white'}>
+                <Menu className="w-8 h-8" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="right">
+            <SheetContent side="right" className="glass">
               <div className="flex flex-col gap-6 mt-12">
                 {navLinks.map((link) => (
-                  <Link key={link.name} href={link.href} className="text-xl font-headline font-semibold">
+                  <Link 
+                    key={link.name} 
+                    href={link.href} 
+                    className="text-2xl font-headline font-bold text-primary hover:text-accent transition-colors"
+                  >
                     {link.name}
                   </Link>
                 ))}
-                <Button className="w-full bg-primary text-white mt-4">
+                <Button className="w-full bg-primary text-white py-6 text-lg mt-4 shadow-xl">
                   Donate Now
                 </Button>
               </div>
