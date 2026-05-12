@@ -3,12 +3,30 @@
 
 import React from 'react'
 import Image from 'next/image'
-import { Shield, QrCode, CheckCircle2, BadgeCheck } from 'lucide-react'
+import { Shield, QrCode, CheckCircle2, BadgeCheck, Info } from 'lucide-react'
 import { PlaceHolderImages } from '@/lib/placeholder-images'
 import { Button } from '@/components/ui/button'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 export function IDCardShowcase() {
   const idImg = PlaceHolderImages.find(img => img.id === 'id-card-sample')
+
+  const eligibilityCriteria = [
+    { title: "Citizenship", detail: "Must be a citizen of India (for Indian Chapters) or have valid residency." },
+    { title: "Age Requirement", detail: "Minimum 18 years of age to register as a formal advocate/member." },
+    { title: "Background", detail: "No prior criminal record related to human rights violations." },
+    { title: "Commitment", detail: "Willingness to undergo basic constitutional literacy training." },
+    { title: "Documentation", detail: "Possession of valid Aadhaar and PAN cards for verification." }
+  ]
 
   return (
     <section id="membership" className="py-24 bg-primary text-white overflow-hidden relative">
@@ -45,12 +63,44 @@ export function IDCardShowcase() {
             </ul>
 
             <div className="flex flex-wrap gap-4 pt-4">
-              <Button className="bg-accent text-primary font-bold hover:bg-accent/90 px-8 py-6 rounded-xl text-lg">
+              <Button className="bg-accent text-primary font-bold hover:bg-accent/90 px-8 py-6 rounded-xl text-lg shadow-lg shadow-accent/20">
                 Register as Member
               </Button>
-              <Button variant="outline" className="border-white/30 text-white hover:bg-white/10 px-8 py-6 rounded-xl text-lg">
-                View Eligibility
-              </Button>
+              
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/10 px-8 py-6 rounded-xl text-lg backdrop-blur-sm">
+                    View Eligibility
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent className="bg-white text-primary rounded-[2rem] border-none shadow-2xl max-w-lg">
+                  <AlertDialogHeader>
+                    <div className="w-12 h-12 bg-accent/10 rounded-2xl flex items-center justify-center mb-4">
+                      <Info className="w-6 h-6 text-accent" />
+                    </div>
+                    <AlertDialogTitle className="text-2xl font-headline font-bold">Membership Eligibility</AlertDialogTitle>
+                    <AlertDialogDescription className="text-slate-600 text-base">
+                      To maintain the integrity of our human rights network, all members must meet the following criteria:
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <div className="py-4 space-y-4">
+                    {eligibilityCriteria.map((c, i) => (
+                      <div key={i} className="flex gap-3">
+                        <div className="mt-1"><CheckCircle2 className="w-4 h-4 text-emerald-500" /></div>
+                        <div>
+                          <p className="font-bold text-sm">{c.title}</p>
+                          <p className="text-xs text-slate-500">{c.detail}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <AlertDialogFooter>
+                    <AlertDialogAction className="bg-primary text-white rounded-xl px-8 font-bold">
+                      Understood
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
           </div>
 
