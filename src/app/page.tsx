@@ -1,3 +1,4 @@
+
 import Image from 'next/image'
 import { Navbar } from '@/components/navbar'
 import { ChairmanMessage } from '@/components/chairman-message'
@@ -9,15 +10,47 @@ import { DocSearch } from '@/components/doc-search'
 import { Footer } from '@/components/footer'
 import { Button } from '@/components/ui/button'
 import { PlaceHolderImages } from '@/lib/placeholder-images'
-import { Shield, Scale, Users, HeartHandshake, ArrowRight, Gavel, CheckCircle2 } from 'lucide-react'
+import { Shield, Scale, Users, HeartHandshake, ArrowRight, Gavel, CheckCircle2, FileText, Heart } from 'lucide-react'
 import { DonationDialog } from '@/components/donation-dialog'
 import { Typewriter } from '@/components/typewriter'
+
+function BackgroundDecor() {
+  return (
+    <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden opacity-20">
+      {/* Animated Scale */}
+      <div className="absolute top-[15%] left-[5%] animate-float opacity-30">
+        <Scale className="w-32 h-32 text-primary/20" />
+      </div>
+      {/* Animated Shield */}
+      <div className="absolute top-[40%] right-[8%] animate-float animate-delay-200 opacity-20">
+        <Shield className="w-48 h-48 text-accent/10" />
+      </div>
+      {/* Animated Handshake */}
+      <div className="absolute bottom-[20%] left-[10%] animate-float animate-delay-500 opacity-20">
+        <HeartHandshake className="w-40 h-40 text-emerald-500/10" />
+      </div>
+      {/* Animated Document */}
+      <div className="absolute top-[70%] right-[15%] animate-float animate-delay-300 opacity-10">
+        <FileText className="w-24 h-24 text-primary/20" />
+      </div>
+      {/* Subtle Heart */}
+      <div className="absolute top-[10%] right-[25%] animate-pulse opacity-10">
+        <Heart className="w-16 h-16 text-accent/20" />
+      </div>
+      {/* Another Gavel */}
+      <div className="absolute bottom-[5%] right-[5%] animate-float animate-delay-100 opacity-10">
+        <Gavel className="w-20 h-20 text-primary/30" />
+      </div>
+    </div>
+  )
+}
 
 export default function Home() {
   const heroImg = PlaceHolderImages.find(img => img.id === 'hero-human-rights')
 
   return (
-    <main className="min-h-screen">
+    <main className="min-h-screen relative">
+      <BackgroundDecor />
       <Navbar />
       
       {/* Hero Section */}
@@ -119,7 +152,7 @@ export default function Home() {
       </section>
 
       {/* AI Search Section */}
-      <section className="py-24 bg-white relative overflow-hidden">
+      <section className="py-24 bg-white/50 backdrop-blur-sm relative overflow-hidden">
         <div className="absolute top-0 right-0 w-64 h-64 bg-accent/5 rounded-full blur-[100px]"></div>
         <div className="container mx-auto px-4 relative z-10">
           <div className="text-center mb-16 animate-fade-in-up">
@@ -139,7 +172,7 @@ export default function Home() {
       <IDCardShowcase />
 
       {/* Final CTA / Donation */}
-      <section className="py-24 bg-slate-50 relative overflow-hidden">
+      <section className="py-24 bg-slate-50/50 backdrop-blur-sm relative overflow-hidden">
         <div className="absolute -top-24 -left-24 w-96 h-96 bg-accent/10 rounded-full blur-3xl animate-pulse"></div>
         <div className="container mx-auto px-4 relative z-10">
           <div className="bg-primary rounded-[3rem] p-12 md:p-24 flex flex-col items-center text-center text-white shadow-2xl relative overflow-hidden group">
