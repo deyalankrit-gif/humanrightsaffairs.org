@@ -16,7 +16,6 @@ import { Typewriter } from '@/components/typewriter'
 function BackgroundDecor() {
   return (
     <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden select-none opacity-30">
-      {/* Subtle floating elements to add depth without clutter */}
       <div className="absolute top-[12%] left-[8%] animate-float opacity-[0.05]">
         <Scale className="w-20 h-20 md:w-32 md:h-32 text-primary" />
       </div>
@@ -27,7 +26,6 @@ function BackgroundDecor() {
         <Shield className="w-24 h-24 md:w-40 md:h-40 text-accent" />
       </div>
       
-      {/* Soft color glows */}
       <div className="absolute top-1/4 left-1/4 w-[400px] h-[400px] md:w-[600px] md:h-[600px] bg-accent/5 rounded-full blur-[150px] animate-glow"></div>
       <div className="absolute bottom-1/4 right-1/4 w-[350px] h-[350px] md:w-[500px] md:h-[500px] bg-primary/5 rounded-full blur-[120px] animate-delay-500"></div>
     </div>
@@ -83,7 +81,6 @@ export default function Home() {
             <IndianFlag />
 
             <div className="flex flex-col items-center gap-2 w-full">
-              {/* Official Emblem & Registration Info */}
               <div className="flex flex-col items-center group mb-4">
                 <div className="relative w-28 h-36 md:w-36 md:h-48 transition-transform hover:scale-105 duration-500">
                   <Image 
@@ -100,8 +97,7 @@ export default function Home() {
                 </div>
               </div>
               
-              {/* Organization Title with Typewriter effect */}
-              <div className="font-headline font-bold text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl tracking-tight leading-tight min-h-[1.5em] flex justify-center items-center overflow-visible">
+              <div className="font-headline font-bold text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl tracking-tight leading-tight min-h-[1.5em] flex justify-center items-center overflow-visible">
                 <span className="bg-gradient-to-r from-[#FF9933] via-white to-[#138808] bg-clip-text text-transparent italic block drop-shadow-sm px-4 pb-4">
                   <Typewriter 
                     text="Human Rights Affairs Trust" 
@@ -112,7 +108,6 @@ export default function Home() {
               </div>
             </div>
             
-            {/* Tagline - Large, One Line, Animated Gradient */}
             <h1 className="text-xl sm:text-2xl md:text-4xl lg:text-5xl xl:text-6xl font-headline font-bold leading-tight md:whitespace-nowrap bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-cyan-400 bg-[length:200%_auto] bg-clip-text text-transparent animate-gradient-x py-4 w-full drop-shadow-md">
               Upholding Justice. Empowering Citizens.
             </h1>
@@ -132,7 +127,6 @@ export default function Home() {
               </Button>
             </div>
 
-            {/* Statistics Dashboard */}
             <div className="w-full pt-12 md:pt-20 max-w-4xl mx-auto">
               <div className="glass-dark rounded-[1.5rem] md:rounded-[2.5rem] p-4 md:p-6 grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 border-white/5">
                 {[
@@ -157,7 +151,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Search Section */}
       <section id="search" className="py-20 md:py-32 bg-white/50 backdrop-blur-sm relative overflow-hidden">
         <div className="absolute top-0 right-0 w-80 h-80 bg-accent/5 rounded-full blur-[120px]"></div>
         <div className="container mx-auto px-4 relative z-10">
@@ -177,7 +170,6 @@ export default function Home() {
 
       <IDCardShowcase />
 
-      {/* Support Section */}
       <section className="py-16 md:py-32 bg-slate-50/50 backdrop-blur-sm relative overflow-hidden">
         <div className="absolute -top-24 -left-24 w-96 h-96 bg-accent/10 rounded-full blur-3xl animate-pulse"></div>
         <div className="container mx-auto px-4 relative z-10">
