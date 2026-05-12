@@ -10,7 +10,7 @@ import { DocSearch } from '@/components/doc-search'
 import { Footer } from '@/components/footer'
 import { Button } from '@/components/ui/button'
 import { PlaceHolderImages } from '@/lib/placeholder-images'
-import { Shield, Scale, Users, HeartHandshake, ArrowRight, Gavel, CircleCheck, FileText, Heart, Globe } from 'lucide-react'
+import { Shield, Scale, Users, HeartHandshake, ArrowRight, Gavel, CheckCircle2, FileText, Heart, Globe } from 'lucide-react'
 import { DonationDialog } from '@/components/donation-dialog'
 import { Typewriter } from '@/components/typewriter'
 
@@ -20,7 +20,6 @@ function BackgroundDecor() {
 
   return (
     <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden select-none opacity-40">
-      {/* Floating Faint Images - Humanitarian & Legal Themes */}
       <div className="absolute top-[5%] right-[10%] w-48 h-48 md:w-80 md:h-80 rounded-full overflow-hidden opacity-[0.04] blur-[2px] animate-float">
         <Image 
           src={libraryImg?.imageUrl || ''} 
@@ -38,7 +37,6 @@ function BackgroundDecor() {
         />
       </div>
 
-      {/* Justice Scales & Legal Symbols */}
       <div className="absolute top-[12%] left-[8%] animate-float opacity-[0.07]">
         <Scale className="w-20 h-20 md:w-40 md:h-40 text-primary" />
       </div>
@@ -46,17 +44,14 @@ function BackgroundDecor() {
         <Gavel className="w-16 h-16 md:w-32 md:h-32 text-primary" />
       </div>
 
-      {/* Protective Shields & Awareness Icons */}
       <div className="absolute top-[35%] right-[5%] animate-float animate-delay-200 opacity-[0.05]">
         <Shield className="w-24 h-24 md:w-56 md:h-56 text-accent" />
       </div>
 
-      {/* Diverse Community Silhouettes (represented by Users icon) */}
       <div className="absolute top-[60%] left-[15%] animate-float animate-delay-300 opacity-[0.06]">
         <Users className="w-28 h-28 md:w-64 md:h-64 text-emerald-500" />
       </div>
 
-      {/* Humanitarian Themes (HeartHandshake, Heart) */}
       <div className="absolute bottom-[25%] left-[10%] animate-float animate-delay-500 opacity-[0.07]">
         <HeartHandshake className="w-24 h-24 md:w-48 md:h-48 text-emerald-500" />
       </div>
@@ -64,17 +59,14 @@ function BackgroundDecor() {
         <Heart className="w-10 h-10 md:w-20 md:h-20 text-accent" />
       </div>
 
-      {/* Global Human Rights (Globe) */}
       <div className="absolute top-[50%] right-[20%] animate-float animate-delay-200 opacity-[0.04]">
         <Globe className="w-20 h-20 md:w-40 md:h-40 text-indigo-400" />
       </div>
 
-      {/* Legal Awareness Icons */}
       <div className="absolute bottom-[15%] right-[25%] animate-float animate-delay-300 opacity-[0.05]">
         <FileText className="w-16 h-16 md:w-32 md:h-32 text-primary" />
       </div>
       
-      {/* Soft Ethereal Glows */}
       <div className="absolute top-1/3 left-1/4 w-[400px] h-[400px] md:w-[600px] md:h-[600px] bg-accent/5 rounded-full blur-[150px] animate-glow"></div>
       <div className="absolute bottom-1/3 right-1/4 w-[350px] h-[350px] md:w-[500px] md:h-[500px] bg-primary/5 rounded-full blur-[120px] animate-glow animate-delay-500"></div>
     </div>
@@ -89,7 +81,6 @@ export default function Home() {
       <BackgroundDecor />
       <Navbar />
       
-      {/* Hero Section */}
       <section className="relative min-h-screen flex items-center overflow-hidden pt-32 pb-24 md:pb-32">
         <div className="absolute inset-0 z-0">
           <Image 
@@ -107,7 +98,6 @@ export default function Home() {
           <div className="max-w-full space-y-8 md:space-y-12 animate-fade-in-up">
             <div className="space-y-4 md:space-y-6">
               <div className="flex flex-col items-start gap-4 md:gap-6">
-                {/* Indian Tricolor Flag */}
                 <div className="flex flex-col w-12 h-7 md:w-20 md:h-12 rounded shadow-2xl border border-white/30 shrink-0 overflow-hidden">
                   <div className="h-1/3 bg-[#FF9933]"></div>
                   <div className="h-1/3 bg-white flex items-center justify-center relative">
@@ -166,7 +156,6 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Floating Stats */}
         <div className="absolute bottom-6 md:bottom-12 left-1/2 -translate-x-1/2 w-full container px-4 hidden lg:block animate-fade-in-up animate-delay-500">
            <div className="glass-dark rounded-[2rem] md:rounded-[3rem] p-6 md:p-10 grid grid-cols-4 gap-6 md:gap-10">
              {[
@@ -187,7 +176,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* AI Search Section */}
       <section id="search" className="py-16 md:py-24 bg-white/50 backdrop-blur-sm relative overflow-hidden">
         <div className="absolute top-0 right-0 w-64 h-64 bg-accent/5 rounded-full blur-[100px]"></div>
         <div className="container mx-auto px-4 relative z-10">
@@ -207,7 +195,6 @@ export default function Home() {
 
       <IDCardShowcase />
 
-      {/* Final CTA / Donation */}
       <section className="py-16 md:py-24 bg-slate-50/50 backdrop-blur-sm relative overflow-hidden">
         <div className="absolute -top-24 -left-24 w-96 h-96 bg-accent/10 rounded-full blur-3xl animate-pulse"></div>
         <div className="container mx-auto px-4 relative z-10">
@@ -231,10 +218,10 @@ export default function Home() {
                 </DonationDialog>
                 <div className="flex flex-col items-center md:items-start justify-center text-left space-y-2">
                   <p className="font-bold flex items-center gap-2 text-emerald-400 text-sm md:text-base">
-                    <CircleCheck className="w-4 h-4 md:w-5 md:h-5" /> Instant Receipt Generation
+                    <CheckCircle2 className="w-4 h-4 md:w-5 md:h-5" /> Instant Receipt Generation
                   </p>
                   <p className="font-bold flex items-center gap-2 text-emerald-400 text-sm md:text-base">
-                    <CircleCheck className="w-4 h-4 md:w-5 md:h-5" /> Transparent Fund Tracking
+                    <CheckCircle2 className="w-4 h-4 md:w-5 md:h-5" /> Transparent Fund Tracking
                   </p>
                 </div>
               </div>
