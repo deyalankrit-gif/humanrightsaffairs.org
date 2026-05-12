@@ -23,6 +23,30 @@
       "description": "Books and gavel symbolizing legal knowledge",
       "imageUrl": "https://picsum.photos/seed/legal/800/600",
       "imageHint": "legal books gavel"
+    },
+    {
+      "id": "leader-1",
+      "description": "Leadership team member 1",
+      "imageUrl": "https://picsum.photos/seed/leader1/400/500",
+      "imageHint": "professional man portrait"
+    },
+    {
+      "id": "leader-2",
+      "description": "Leadership team member 2",
+      "imageUrl": "https://picsum.photos/seed/leader2/400/500",
+      "imageHint": "professional woman portrait"
+    },
+    {
+      "id": "leader-3",
+      "description": "Leadership team member 3",
+      "imageUrl": "https://picsum.photos/seed/leader3/400/500",
+      "imageHint": "professional man suit"
+    },
+    {
+      "id": "leader-4",
+      "description": "Leadership team member 4",
+      "imageUrl": "https://picsum.photos/seed/leader4/400/500",
+      "imageHint": "professional woman business"
     }
   ]
 }
