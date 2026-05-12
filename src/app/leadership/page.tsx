@@ -40,7 +40,7 @@ const districtTeams = [
     leaders: [{ name: "Anil Kapoor", title: "District Chairman", imageId: "leader-3" }]
   },
   {
-    district: "Agartala",
+    district: "Howrah",
     leaders: [{ name: "Sunil Shetty", title: "District Chairman", imageId: "leader-4" }]
   },
   {

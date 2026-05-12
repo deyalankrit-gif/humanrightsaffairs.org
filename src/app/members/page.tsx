@@ -46,7 +46,7 @@ const chapterToDistricts: Record<string, string[]> = {
     "Purba Bardhaman", "Purba Medinipur", "Purulia", "South 24 Parganas", "Uttar Dinajpur"
   ],
   "Tripura Chapter": [
-    "Agartala", "Udaipur", "Dharmanagar", "Kailasahar", "Ambassa", "Khowai", "Belonia", "Bishalgarh"
+    "Howrah", "Udaipur", "Dharmanagar", "Kailasahar", "Ambassa", "Khowai", "Belonia", "Bishalgarh"
   ],
   "Andhra Pradesh": ["Visakhapatnam", "Vijayawada", "Guntur", "Nellore", "Kurnool", "Anantapur", "Kakinada"],
   "Arunachal Pradesh": ["Itanagar", "Tawang", "Ziro", "Pasighat", "Along", "Tezu"],
@@ -71,7 +71,7 @@ const chapterToDistricts: Record<string, string[]> = {
   "Sikkim": ["Gangtok", "Namchi", "Mangan", "Gyalshing", "Pakyong"],
   "Tamil Nadu": ["Chennai", "Coimbatore", "Madurai", "Trichy", "Salem", "Tirunelveli", "Erode"],
   "Telangana": ["Hyderabad", "Warangal", "Nizamabad", "Karimnagar", "Khammam", "Ramagundam"],
-  "Tripura": ["Agartala", "Udaipur", "Dharmanagar", "Kailasahar", "Ambassa"],
+  "Tripura": ["Howrah", "Udaipur", "Dharmanagar", "Kailasahar", "Ambassa"],
   "Uttar Pradesh": ["Lucknow", "Kanpur", "Ghaziabad", "Agra", "Varanasi", "Meerut", "Prayagraj", "Bareilly"],
   "Uttarakhand": ["Dehradun", "Haridwar", "Haldwani", "Roorkee", "Rudrapur", "Kashipur"]
 }
@@ -151,9 +151,9 @@ const members: Member[] = [
     id: "M009",
     name: "Sunil Shetty",
     designation: "District Chairman",
-    jurisdiction: "Agartala",
+    jurisdiction: "Howrah",
     stateName: "Tripura Chapter",
-    districtName: "Agartala",
+    districtName: "Howrah",
     level: "District",
     imageId: "leader-4"
   },
