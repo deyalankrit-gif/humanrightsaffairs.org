@@ -1,4 +1,3 @@
-
 import Image from 'next/image'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
@@ -22,7 +21,7 @@ const stateTeams = [
   {
     state: "West Bengal",
     leaders: [
-      { name: "Vikram Malhotra", title: "State Chairman", imageId: "leader-3" },
+      { name: "Moumita Saha", title: "State Chairman", imageId: "leader-2" },
       { name: "Sonia Gandhi", title: "Vice Chairperson", imageId: "leader-4" }
     ]
   },
@@ -176,4 +175,3 @@ export default function LeadershipPage() {
       <Footer />
     </main>
   )
-}

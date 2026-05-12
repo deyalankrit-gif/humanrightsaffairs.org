@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useMemo } from 'react'
@@ -102,12 +101,12 @@ const members: Member[] = [
   },
   {
     id: "M004",
-    name: "Vikram Malhotra",
+    name: "Moumita Saha",
     designation: "State Chairman",
     jurisdiction: "West Bengal",
     stateName: "West Bengal",
     level: "State",
-    imageId: "leader-3"
+    imageId: "leader-2"
   },
   {
     id: "M005",
@@ -423,4 +422,3 @@ export default function MembersPage() {
       <Footer />
     </main>
   )
-}
