@@ -71,7 +71,7 @@ export default function Home() {
         </div>
 
         <div className="container mx-auto px-4 relative z-10 text-white">
-          <div className="max-w-4xl space-y-8 animate-fade-in-up">
+          <div className="max-w-6xl space-y-8 animate-fade-in-up">
             <div className="space-y-6">
               <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
                 {/* Indian Tricolor Flag */}
@@ -96,7 +96,7 @@ export default function Home() {
                   <div className="h-1/3 bg-[#138808]"></div>
                 </div>
                 
-                <div className="font-headline font-bold text-6xl md:text-8xl tracking-tight leading-tight">
+                <div className="font-headline font-bold text-5xl md:text-7xl lg:text-8xl tracking-tight leading-tight whitespace-nowrap">
                   <Typewriter 
                     text="Human Rights Affairs Trust" 
                     speed={100} 
@@ -112,11 +112,11 @@ export default function Home() {
               </div>
             </div>
             
-            <h1 className="text-4xl md:text-5xl font-headline font-bold leading-tight">
+            <h1 className="text-3xl md:text-5xl font-headline font-bold leading-tight">
               Upholding <span className="text-accent italic">Justice</span> Empowering <span className="text-emerald-400">Citizens</span>.
             </h1>
             
-            <p className="text-xl md:text-2xl text-slate-200 font-body max-w-2xl leading-relaxed">
+            <p className="text-lg md:text-2xl text-slate-200 font-body max-w-2xl leading-relaxed">
               We provide a robust shield against injustice through expert legal guidance, community-led support, and radical constitutional transparency.
             </p>
             
