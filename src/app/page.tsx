@@ -75,9 +75,14 @@ function BackgroundDecor() {
 
 function IndianFlag() {
   return (
-    <div className="animate-flag-wave origin-left relative mb-12 self-start ml-4 md:ml-12">
-      {/* Flag Container */}
-      <div className="flex flex-col w-20 h-12 md:w-36 md:h-24 rounded-sm shadow-[0_20px_50px_rgba(0,0,0,0.3)] shrink-0 overflow-hidden relative border-l border-white/20">
+    <div className="relative mb-12 self-start ml-4 md:ml-12 h-12 md:h-24">
+      {/* Ornate Flagpole - STATIONARY */}
+      <div className="absolute -left-2 -top-4 bottom-[-20px] w-2 bg-gradient-to-r from-slate-400 via-slate-100 to-slate-400 rounded-full shadow-2xl z-20">
+        <div className="absolute -top-3 -left-1 w-4 h-4 rounded-full bg-gradient-to-tr from-yellow-600 via-yellow-200 to-yellow-600 shadow-lg"></div>
+      </div>
+
+      {/* Flag Fabric - ANIMATED */}
+      <div className="animate-flag-wave origin-left flex flex-col w-20 h-12 md:w-36 md:h-24 rounded-sm shadow-[0_20px_50px_rgba(0,0,0,0.3)] shrink-0 overflow-hidden relative border-l border-white/20 z-10">
         {/* Colors */}
         <div className="h-1/3 bg-[#FF9933] relative"></div>
         <div className="h-1/3 bg-white flex items-center justify-center relative">
@@ -108,17 +113,13 @@ function IndianFlag() {
         {/* Highlight Layer */}
         <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent opacity-40 pointer-events-none"></div>
       </div>
-      
-      {/* Ornate Flagpole */}
-      <div className="absolute -left-2 -top-4 bottom-[-20px] w-2 bg-gradient-to-r from-slate-400 via-slate-100 to-slate-400 rounded-full shadow-2xl">
-        <div className="absolute -top-3 -left-1 w-4 h-4 rounded-full bg-gradient-to-tr from-yellow-600 via-yellow-200 to-yellow-600 shadow-lg"></div>
-      </div>
     </div>
   )
 }
 
 export default function Home() {
   const heroImg = PlaceHolderImages.find(img => img.id === 'hero-human-rights')
+  const logoImg = PlaceHolderImages.find(img => img.id === 'niti-logo')
 
   return (
     <main className="min-h-screen relative">
@@ -131,7 +132,7 @@ export default function Home() {
             src={heroImg?.imageUrl || ''} 
             alt="Human Rights Unity" 
             fill 
-            className="object-cover brightness-[0.25] scale-105 grayscale"
+            className="object-cover brightness-[0.2] scale-105 grayscale"
             priority
             data-ai-hint={heroImg?.imageHint}
           />
@@ -140,8 +141,20 @@ export default function Home() {
 
         <div className="container mx-auto px-4 relative z-10 text-white text-center">
           <div className="max-w-full space-y-10 animate-fade-in-up flex flex-col items-center">
-            <div className="flex flex-col items-center gap-6 w-full">
-              <IndianFlag />
+            
+            <IndianFlag />
+
+            <div className="flex flex-col items-center gap-6 w-full -mt-6">
+              {logoImg && (
+                <div className="relative w-16 h-16 md:w-24 md:h-24 mb-2 mix-blend-plus-lighter opacity-90">
+                  <Image 
+                    src={logoImg.imageUrl} 
+                    alt="Niti Aayog Emblem" 
+                    fill 
+                    className="object-contain"
+                  />
+                </div>
+              )}
               
               <div className="font-headline font-bold text-[5.5vw] sm:text-[4.5vw] md:text-[5vw] lg:text-[5.5vw] xl:text-[6vw] tracking-tighter leading-none whitespace-nowrap overflow-visible drop-shadow-[0_10px_10px_rgba(0,0,0,0.5)] mx-auto">
                 <Typewriter 
@@ -158,7 +171,7 @@ export default function Home() {
               </div>
             </div>
             
-            <h1 className="text-5xl md:text-7xl lg:text-8xl font-headline font-bold leading-tight max-w-5xl mx-auto bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-cyan-400 bg-[length:200%_auto] bg-clip-text text-transparent animate-gradient-x py-4">
+            <h1 className="text-6xl md:text-8xl lg:text-9xl font-headline font-bold leading-tight max-w-5xl mx-auto bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-cyan-400 bg-[length:200%_auto] bg-clip-text text-transparent animate-gradient-x py-4">
               Upholding Justice. Empowering Citizens.
             </h1>
             
