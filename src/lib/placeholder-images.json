@@ -47,6 +47,30 @@
       "description": "Leadership team member 4",
       "imageUrl": "https://picsum.photos/seed/leader4/400/500",
       "imageHint": "professional woman business"
+    },
+    {
+      "id": "event-legal-aid",
+      "description": "Free legal aid camp in rural India",
+      "imageUrl": "https://picsum.photos/seed/legalaid/800/600",
+      "imageHint": "community legal aid"
+    },
+    {
+      "id": "event-rally",
+      "description": "Human rights awareness rally",
+      "imageUrl": "https://picsum.photos/seed/rally/800/600",
+      "imageHint": "public awareness rally"
+    },
+    {
+      "id": "event-convention",
+      "description": "National Human Rights Convention",
+      "imageUrl": "https://picsum.photos/seed/convention/800/600",
+      "imageHint": "conference hall meeting"
+    },
+    {
+      "id": "event-workshop",
+      "description": "Constitutional rights workshop for students",
+      "imageUrl": "https://picsum.photos/seed/workshop/800/600",
+      "imageHint": "educational workshop classroom"
     }
   ]
 }
