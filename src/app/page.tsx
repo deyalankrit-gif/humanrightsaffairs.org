@@ -36,11 +36,24 @@ export default function Home() {
 
         <div className="container mx-auto px-4 relative z-10 text-white">
           <div className="max-w-4xl space-y-6 animate-fade-in-up">
-            <div className="space-y-2">
-              <p className="text-accent font-headline font-bold text-2xl md:text-3xl tracking-wide italic">
-                <Typewriter text="Human Rights Affairs Trust" speed={80} delay={500} />
-              </p>
-              <div className="inline-flex items-center gap-2 bg-accent/20 text-accent px-4 py-1.5 rounded-full text-sm font-bold border border-accent/30 backdrop-blur-md">
+            <div className="space-y-4">
+              <div className="flex items-center gap-4">
+                {/* Indian Tricolor Flag */}
+                <div className="flex flex-col w-12 h-8 rounded-sm overflow-hidden shadow-lg border border-white/10 shrink-0">
+                  <div className="h-1/3 bg-[#FF9933]"></div>
+                  <div className="h-1/3 bg-white flex items-center justify-center">
+                    <div className="w-1.5 h-1.5 rounded-full border border-[#000080] flex items-center justify-center relative">
+                      <div className="w-0.5 h-0.5 bg-[#000080] rounded-full"></div>
+                    </div>
+                  </div>
+                  <div className="h-1/3 bg-[#138808]"></div>
+                </div>
+                <p className="text-accent font-headline font-bold text-3xl md:text-5xl tracking-wide italic leading-tight">
+                  <Typewriter text="Human Rights Affairs Trust" speed={80} delay={500} />
+                </p>
+              </div>
+              
+              <div className="inline-flex items-center gap-2 bg-accent/20 text-accent px-4 py-1.5 rounded-full text-sm font-bold border border-accent/30 backdrop-blur-md animate-pulse">
                 <Shield className="w-4 h-4" />
                 <span>India's Trusted Human Rights Shield</span>
               </div>
