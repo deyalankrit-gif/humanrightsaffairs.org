@@ -97,7 +97,7 @@ export default function Home() {
                 </div>
               </div>
               
-              <div className="font-headline font-bold text-2xl sm:text-4xl md:text-5xl lg:text-6xl tracking-tight leading-tight min-h-[1.5em] flex justify-center items-center overflow-visible mt-4 md:mt-8">
+              <div className="font-headline font-bold text-3xl sm:text-5xl md:text-6xl lg:text-7xl tracking-tight leading-tight min-h-[1.5em] flex justify-center items-center overflow-visible mt-4 md:mt-8">
                 <span className="bg-gradient-to-r from-[#FF9933] via-white to-[#138808] bg-clip-text text-transparent italic block drop-shadow-sm px-4 pb-4">
                   <Typewriter 
                     text="Human Rights Affairs Trust" 
