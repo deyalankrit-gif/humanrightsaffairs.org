@@ -63,7 +63,7 @@ export default function Home() {
       <BackgroundDecor />
       <Navbar />
       
-      <section className="relative min-h-screen flex flex-col items-center pt-16 md:pt-24 pb-20">
+      <section className="relative min-h-screen flex flex-col items-center pt-12 md:pt-16 pb-20">
         <div className="absolute inset-0 z-0">
           <Image 
             src="/Human R2.jpeg" 
@@ -93,11 +93,11 @@ export default function Home() {
                 <div className="flex flex-col items-center mt-2 md:mt-3 text-white drop-shadow-md space-y-1 relative z-20">
                    <p className="text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] leading-tight">Niti Aayog registered</p>
                    <p className="text-[9px] md:text-[11px] font-bold uppercase tracking-[0.15em] leading-tight opacity-90">National Informatics Centre</p>
-                   <p className="text-xl md:text-4xl font-bold uppercase tracking-[0.2em] leading-tight">Government of India</p>
+                   <p className="text-sm md:text-lg font-bold uppercase tracking-[0.2em] leading-tight">Government of India</p>
                 </div>
               </div>
               
-              <div className="font-headline font-bold text-3xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-[6.5rem] tracking-tight leading-tight min-h-[1.5em] flex justify-center items-center overflow-visible mt-6 md:mt-10">
+              <div className="font-headline font-bold text-3xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-[5.5rem] tracking-tight leading-tight min-h-[1.5em] flex justify-center items-center overflow-visible mt-4 md:mt-8">
                 <span className="bg-gradient-to-r from-[#FF9933] via-white to-[#138808] bg-clip-text text-transparent italic block drop-shadow-sm px-4 pb-4">
                   <Typewriter 
                     text="Human Rights Affairs Trust" 
