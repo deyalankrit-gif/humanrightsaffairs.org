@@ -22,10 +22,12 @@ const navLinks = [
 export function Navbar() {
   const [isScrolled, setIsScrolled] = React.useState(false)
   const [activeHash, setActiveHash] = React.useState('')
+  const [mounted, setMounted] = React.useState(false)
   const pathname = usePathname()
   const isHome = pathname === '/'
 
   React.useEffect(() => {
+    setMounted(true)
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20)
       
@@ -108,14 +110,16 @@ export function Navbar() {
               </Link>
             )
           })}
-          <DonationDialog>
-            <Button 
-              variant="default" 
-              className="bg-accent text-primary hover:bg-accent/90 rounded-full px-8 font-bold shadow-lg shadow-accent/20 transition-transform active:scale-95"
-            >
-              Donate
-            </Button>
-          </DonationDialog>
+          {mounted && (
+            <DonationDialog>
+              <Button 
+                variant="default" 
+                className="bg-accent text-primary hover:bg-accent/90 rounded-full px-8 font-bold shadow-lg shadow-accent/20 transition-transform active:scale-95"
+              >
+                Donate
+              </Button>
+            </DonationDialog>
+          )}
         </div>
 
         {/* Mobile Nav */}
@@ -151,11 +155,13 @@ export function Navbar() {
                     </Link>
                   )
                 })}
-                <DonationDialog>
-                  <Button className="w-full bg-primary text-white py-8 text-xl mt-8 shadow-xl rounded-2xl">
-                    Donate Now
-                  </Button>
-                </DonationDialog>
+                {mounted && (
+                  <DonationDialog>
+                    <Button className="w-full bg-primary text-white py-8 text-xl mt-8 shadow-xl rounded-2xl">
+                      Donate Now
+                    </Button>
+                  </DonationDialog>
+                )}
               </div>
             </SheetContent>
           </Sheet>
