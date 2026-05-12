@@ -67,7 +67,7 @@ function BackgroundDecor() {
       </div>
       
       <div className="absolute top-1/3 left-1/4 w-[400px] h-[400px] md:w-[600px] md:h-[600px] bg-accent/5 rounded-full blur-[150px] animate-glow"></div>
-      <div className="absolute bottom-1/3 right-1/4 w-[350px] h-[350px] md:w-[500px] md:h-[500px] bg-primary/5 rounded-full blur-[120px] animate-glow animate-delay-500"></div>
+      <div className="absolute bottom-1/3 right-1/4 w-[350px] h-[350px] md:w-[500px] md:h-[500px] bg-primary/5 rounded-full blur-[120px] animate-delay-500"></div>
     </div>
   )
 }
@@ -150,9 +150,9 @@ export default function Home() {
                 />
               </div>
               
-              {/* Human Rights Affairs Trust - Small static text */}
-              <div className="font-headline font-bold text-xl sm:text-2xl md:text-3xl tracking-tight leading-tight drop-shadow-lg">
-                <span className="bg-gradient-to-r from-[#FF9933] via-white to-[#138808] bg-clip-text text-transparent italic block md:inline">
+              {/* Human Rights Affairs Trust - Large static text */}
+              <div className="font-headline font-bold text-4xl sm:text-6xl md:text-8xl tracking-tight leading-tight drop-shadow-xl">
+                <span className="bg-gradient-to-r from-[#FF9933] via-white to-[#138808] bg-clip-text text-transparent italic block">
                   Human Rights Affairs Trust
                 </span>
               </div>
