@@ -75,18 +75,18 @@ function BackgroundDecor() {
 
 function IndianFlag() {
   return (
-    <div className="animate-flag-wave origin-center relative mb-8 self-start">
-      <div className="flex flex-col w-16 h-10 md:w-24 md:h-14 rounded-sm shadow-2xl border border-white/20 shrink-0 overflow-hidden relative">
+    <div className="animate-flag-wave origin-left relative mb-8 self-start ml-4 md:ml-8">
+      <div className="flex flex-col w-16 h-10 md:w-28 md:h-16 rounded-sm shadow-2xl shrink-0 overflow-hidden relative">
         <div className="h-1/3 bg-[#FF9933]"></div>
         <div className="h-1/3 bg-white flex items-center justify-center relative">
           <div className="absolute inset-0 flex items-center justify-center">
-             <div className="w-2 h-2 md:w-4 md:h-4 rounded-full border border-[#000080] flex items-center justify-center">
+             <div className="w-3 h-3 md:w-5 md:h-5 rounded-full border-[0.5px] border-[#000080] flex items-center justify-center">
                <div className="w-0.5 h-0.5 bg-[#000080] rounded-full"></div>
                <div className="absolute inset-0 flex items-center justify-center">
                   {[...Array(24)].map((_, i) => (
                     <div 
                       key={i} 
-                      className="absolute w-px h-1 md:h-1.5 bg-[#000080]/60" 
+                      className="absolute w-[0.5px] h-1.5 md:h-2 bg-[#000080]/80" 
                       style={{ transform: `rotate(${i * 15}deg)` }}
                     />
                   ))}
@@ -96,10 +96,12 @@ function IndianFlag() {
         </div>
         <div className="h-1/3 bg-[#138808]"></div>
         
-        <div className="absolute inset-0 bg-gradient-to-r from-black/10 via-white/30 to-black/10 bg-[length:200%_100%] animate-flag-ripple pointer-events-none mix-blend-overlay"></div>
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-black/15 to-transparent bg-[length:150%_100%] animate-flag-ripple pointer-events-none mix-blend-multiply opacity-40"></div>
+        {/* Cloth ripples and shadows */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black/20 via-white/20 to-black/20 bg-[length:200%_100%] animate-flag-ripple pointer-events-none mix-blend-overlay"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-black/10 to-transparent bg-[length:150%_100%] animate-flag-ripple-alt pointer-events-none mix-blend-multiply opacity-30"></div>
       </div>
-      <div className="absolute -left-1 top-0 bottom-0 w-1 bg-gradient-to-r from-slate-500 via-slate-300 to-slate-400 rounded-full shadow-lg"></div>
+      {/* Flagpole */}
+      <div className="absolute -left-1.5 -top-2 bottom-[-10px] w-1.5 bg-gradient-to-r from-slate-600 via-slate-300 to-slate-500 rounded-full shadow-lg"></div>
     </div>
   )
 }
@@ -134,7 +136,7 @@ export default function Home() {
               {nitiLogo && (
                 <div className="relative w-32 h-32 md:w-56 md:h-56 transition-transform hover:scale-105 duration-700 mx-auto">
                   <Image 
-                    src={nitiLogo.imageUrl} 
+                    src="/Niti.png" 
                     alt="Niti Aayog Registered Emblem" 
                     fill 
                     className="object-contain mix-blend-screen opacity-90"
@@ -157,7 +159,7 @@ export default function Home() {
               </div>
             </div>
             
-            <h1 className="text-3xl md:text-5xl lg:text-6xl font-headline font-bold leading-tight max-w-5xl mx-auto bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-cyan-400 bg-[length:200%_auto] bg-clip-text text-transparent animate-gradient-x py-2">
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-headline font-bold leading-tight max-w-5xl mx-auto bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-cyan-400 bg-[length:200%_auto] bg-clip-text text-transparent animate-gradient-x py-2">
               Upholding Justice. Empowering Citizens.
             </h1>
             
@@ -176,19 +178,19 @@ export default function Home() {
               </Button>
             </div>
 
-            <div className="w-full pt-12">
-              <div className="glass-dark rounded-[2rem] md:rounded-[3.5rem] p-6 md:p-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12 border-white/10">
+            <div className="w-full pt-12 max-w-6xl mx-auto">
+              <div className="glass-dark rounded-[2rem] md:rounded-[3.5rem] p-6 md:p-10 grid grid-cols-2 lg:grid-cols-4 gap-6 md:gap-12 border-white/10 overflow-hidden">
                 {[
                   { icon: <Gavel className="w-6 h-6 md:w-10 md:h-10 text-accent" />, count: "25k+", label: "Legal Cases Resolved" },
                   { icon: <Users className="w-6 h-6 md:w-10 md:h-10 text-emerald-400" />, count: "500+", label: "Expert Advocates" },
                   { icon: <Shield className="w-6 h-6 md:w-10 md:h-10 text-indigo-400" />, count: "100%", label: "Secure Data Handling" },
                   { icon: <HeartHandshake className="w-6 h-6 md:w-10 md:h-10 text-pink-400" />, count: "50+", label: "National Centers" }
                 ].map((stat, i) => (
-                  <div key={i} className="flex items-center gap-6 text-white hover:scale-105 transition-transform cursor-default justify-center sm:justify-start">
-                    <div className="p-4 md:p-5 bg-white/10 rounded-xl md:rounded-3xl shrink-0">{stat.icon}</div>
-                    <div className="space-y-1 text-left">
-                      <p className="text-2xl md:text-3xl font-bold font-headline">{stat.count}</p>
-                      <p className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-slate-300 leading-tight">
+                  <div key={i} className="flex flex-col md:flex-row items-center gap-4 md:gap-6 text-white hover:scale-105 transition-transform cursor-default justify-center">
+                    <div className="p-3 md:p-5 bg-white/10 rounded-xl md:rounded-3xl shrink-0">{stat.icon}</div>
+                    <div className="space-y-1 text-center md:text-left">
+                      <p className="text-xl md:text-3xl font-bold font-headline">{stat.count}</p>
+                      <p className="text-[9px] md:text-xs font-bold uppercase tracking-widest text-slate-300 leading-tight">
                         {stat.label}
                       </p>
                     </div>
