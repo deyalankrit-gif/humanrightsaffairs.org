@@ -80,7 +80,7 @@ export default function Home() {
             
             <IndianFlag />
 
-            <div className="flex flex-col items-center gap-0 w-full -mt-2 md:-mt-4">
+            <div className="flex flex-col items-center gap-0 w-full -mt-4 md:-mt-8">
               <div className="flex flex-col items-center group mb-0">
                 <div className="relative w-28 h-36 md:w-36 md:h-48 transition-transform hover:scale-105 duration-500">
                   <Image 
@@ -90,14 +90,14 @@ export default function Home() {
                     className="object-contain"
                   />
                 </div>
-                <div className="flex flex-col items-center -mt-6 md:-mt-10 text-white drop-shadow-md space-y-0.5">
+                <div className="flex flex-col items-center -mt-8 md:-mt-14 text-white drop-shadow-md space-y-0.5">
                    <p className="text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] leading-tight">Niti Aayog registered</p>
                    <p className="text-[9px] md:text-[11px] font-bold uppercase tracking-[0.15em] leading-tight opacity-90">National Informatics Centre</p>
                    <p className="text-xl md:text-3xl font-bold uppercase tracking-[0.2em] leading-tight">Government of India</p>
                 </div>
               </div>
               
-              <div className="font-headline font-bold text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl tracking-tight leading-tight min-h-[1.5em] flex justify-center items-center overflow-visible mt-4 md:mt-6">
+              <div className="font-headline font-bold text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl tracking-tight leading-tight min-h-[1.5em] flex justify-center items-center overflow-visible mt-4 md:mt-6">
                 <span className="bg-gradient-to-r from-[#FF9933] via-white to-[#138808] bg-clip-text text-transparent italic block drop-shadow-sm px-4 pb-4">
                   <Typewriter 
                     text="Human Rights Affairs Trust" 
