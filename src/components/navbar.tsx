@@ -5,7 +5,7 @@ import React from 'react'
 import Link from 'next/link'
 import { Shield, Menu, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger } from '@/components/ui/sheet'
 import { usePathname } from 'next/navigation'
 import { DonationDialog } from './donation-dialog'
 import { cn } from '@/lib/utils'
@@ -131,11 +131,16 @@ export function Navbar() {
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="bg-white/95 backdrop-blur-xl border-l-primary/10">
-              <div className="flex flex-col gap-6 mt-12">
-                <div className="flex items-center gap-2 mb-8">
+              <SheetHeader className="text-left mb-8">
+                <SheetTitle className="flex items-center gap-2">
                    <Shield className="w-8 h-8 text-primary fill-accent" />
                    <span className="font-headline font-bold text-2xl text-primary">JusticeShield</span>
-                </div>
+                </SheetTitle>
+                <SheetDescription className="text-[10px] font-bold tracking-widest text-accent uppercase">
+                  Central Government Registered Human Rights Organization
+                </SheetDescription>
+              </SheetHeader>
+              <div className="flex flex-col gap-6">
                 {navLinks.map((link) => {
                   const isPageActive = pathname === link.href
                   const isHashActive = isHome && activeHash && link.href === `/${activeHash}`
