@@ -9,7 +9,6 @@ import { AIChat } from '@/components/ai-chat'
 import { DocSearch } from '@/components/doc-search'
 import { Footer } from '@/components/footer'
 import { Button } from '@/components/ui/button'
-import { PlaceHolderImages } from '@/lib/placeholder-images'
 import { Shield, Scale, Users, HeartHandshake, ArrowRight, Gavel, CheckCircle2, FileText, Heart, Globe } from 'lucide-react'
 import { DonationDialog } from '@/components/donation-dialog'
 import { Typewriter } from '@/components/typewriter'
@@ -96,7 +95,7 @@ export default function Home() {
                 </div>
               </div>
               
-              {/* Organization Title with Typewriter effect - Increased Size */}
+              {/* Organization Title with Typewriter effect - Enlarged Size */}
               <div className="font-headline font-bold text-4xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl tracking-tight leading-tight min-h-[1.5em] flex justify-center items-center">
                 <span className="bg-gradient-to-r from-[#FF9933] via-white to-[#138808] bg-clip-text text-transparent italic block drop-shadow-sm">
                   <Typewriter 
@@ -128,7 +127,7 @@ export default function Home() {
               </Button>
             </div>
 
-            {/* Statistics Dashboard - Small Text labels */}
+            {/* Statistics Dashboard - Refined Small Labels */}
             <div className="w-full pt-12 md:pt-20 max-w-4xl mx-auto">
               <div className="glass-dark rounded-[1.5rem] md:rounded-[2.5rem] p-4 md:p-6 grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 border-white/5">
                 {[
