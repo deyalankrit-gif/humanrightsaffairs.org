@@ -38,14 +38,36 @@ const indianStates = [
   "Uttar Pradesh", "Uttarakhand", "West Bengal", "Delhi NCR"
 ]
 
-// Mock mapping of districts for the demo states
 const stateToDistricts: Record<string, string[]> = {
-  "Delhi NCR": ["New Delhi Central", "North Delhi", "South Delhi", "West Delhi", "East Delhi"],
-  "Maharashtra": ["Mumbai Suburban", "Pune City", "Nagpur", "Nashik", "Thane"],
-  "West Bengal": ["Kolkata", "Howrah", "Darjeeling", "Hooghly"],
-  "Uttar Pradesh": ["Lucknow", "Kanpur", "Varanasi", "Agra"],
-  "Bihar": ["Patna", "Gaya", "Bhagalpur", "Muzaffarpur"],
-  "Tamil Nadu": ["Chennai", "Coimbatore", "Madurai", "Salem"]
+  "Andhra Pradesh": ["Visakhapatnam", "Vijayawada", "Guntur", "Nellore", "Kurnool", "Anantapur", "Kakinada"],
+  "Arunachal Pradesh": ["Itanagar", "Tawang", "Ziro", "Pasighat", "Along", "Tezu"],
+  "Assam": ["Guwahati", "Dibrugarh", "Jorhat", "Silchar", "Nagaon", "Tinsukia", "Tezpur"],
+  "Bihar": ["Patna", "Gaya", "Bhagalpur", "Muzaffarpur", "Purnia", "Darbhanga", "Arrah"],
+  "Chhattisgarh": ["Raipur", "Bhilai", "Bilaspur", "Korba", "Rajnandgaon", "Jagdalpur"],
+  "Goa": ["North Goa", "South Goa", "Panaji", "Margao", "Vasco da Gama"],
+  "Gujarat": ["Ahmedabad", "Surat", "Vadodara", "Rajkot", "Bhavnagar", "Jamnagar", "Gandhinagar"],
+  "Haryana": ["Gurgaon", "Faridabad", "Panipat", "Ambala", "Rohtak", "Hisar", "Karnal"],
+  "Himachal Pradesh": ["Shimla", "Dharamshala", "Solan", "Mandi", "Kullu", "Hamirpur"],
+  "Jharkhand": ["Ranchi", "Jamshedpur", "Dhanbad", "Bokaro", "Deoghar", "Hazaribagh"],
+  "Karnataka": ["Bangalore", "Mysore", "Hubli", "Mangalore", "Belgaum", "Gulbarga", "Davangere"],
+  "Kerala": ["Thiruvananthapuram", "Kochi", "Kozhikode", "Thrissur", "Kollam", "Alappuzha", "Palakkad"],
+  "Madhya Pradesh": ["Indore", "Bhopal", "Jabalpur", "Gwalior", "Ujjain", "Sagar", "Dewas"],
+  "Maharashtra": ["Mumbai Suburban", "Mumbai City", "Pune City", "Nagpur", "Nashik", "Thane", "Aurangabad", "Solapur"],
+  "Manipur": ["Imphal", "Churachandpur", "Thoubal", "Bishnupur", "Senapati"],
+  "Meghalaya": ["Shillong", "Tura", "Jowai", "Nongpoh", "Williamnagar"],
+  "Mizoram": ["Aizawl", "Lunglei", "Champhai", "Serchhip", "Kolasib"],
+  "Nagaland": ["Kohima", "Dimapur", "Mokokchung", "Tuensang", "Wokha"],
+  "Odisha": ["Bhubaneswar", "Cuttack", "Rourkela", "Sambalpur", "Puri", "Berhampur", "Balasore"],
+  "Punjab": ["Ludhiana", "Amritsar", "Jalandhar", "Patiala", "Bathinda", "Hoshiarpur", "Mohali"],
+  "Rajasthan": ["Jaipur", "Jodhpur", "Udaipur", "Kota", "Ajmer", "Bikaner", "Alwar", "Sikar"],
+  "Sikkim": ["Gangtok", "Namchi", "Mangan", "Gyalshing", "Pakyong"],
+  "Tamil Nadu": ["Chennai", "Coimbatore", "Madurai", "Trichy", "Salem", "Tirunelveli", "Erode"],
+  "Telangana": ["Hyderabad", "Warangal", "Nizamabad", "Karimnagar", "Khammam", "Ramagundam"],
+  "Tripura": ["Agartala", "Udaipur", "Dharmanagar", "Kailasahar", "Ambassa"],
+  "Uttar Pradesh": ["Lucknow", "Kanpur", "Ghaziabad", "Agra", "Varanasi", "Meerut", "Prayagraj", "Bareilly"],
+  "Uttarakhand": ["Dehradun", "Haridwar", "Haldwani", "Roorkee", "Rudrapur", "Kashipur"],
+  "West Bengal": ["Kolkata", "Howrah", "Durgapur", "Siliguri", "Asansol", "Darjeeling", "Hooghly"],
+  "Delhi NCR": ["New Delhi Central", "North Delhi", "South Delhi", "West Delhi", "East Delhi", "Northeast Delhi", "Southwest Delhi"]
 }
 
 const members: Member[] = [
@@ -161,7 +183,7 @@ export default function MembersPage() {
   const handleStateSelect = (state: string) => {
     setLevelFilter("State")
     setSelectedState(state)
-    setSelectedDistrict(null) // Reset district when state changes
+    setSelectedDistrict(null) 
   }
 
   const handleDistrictSelect = (district: string) => {
@@ -176,12 +198,10 @@ export default function MembersPage() {
     
     let matchesLevel = levelFilter === "All" || m.level === levelFilter;
     
-    // If filtering by State level specifically
     if (levelFilter === "State" && selectedState) {
       matchesLevel = m.level === "State" && m.stateName === selectedState;
     }
 
-    // If filtering by District level specifically
     if (levelFilter === "District") {
       if (selectedState && selectedDistrict) {
         matchesLevel = m.level === "District" && m.stateName === selectedState && m.districtName === selectedDistrict;
@@ -199,7 +219,6 @@ export default function MembersPage() {
     <main className="min-h-screen bg-slate-50">
       <Navbar />
 
-      {/* Header Section */}
       <section className="pt-40 pb-20 bg-primary text-white relative overflow-hidden">
         <div className="absolute top-0 right-0 w-1/2 h-full bg-accent/5 -skew-x-12"></div>
         <div className="container mx-auto px-4 relative z-10 text-center">
@@ -214,7 +233,6 @@ export default function MembersPage() {
         </div>
       </section>
 
-      {/* Filter & Search */}
       <section className="py-12 bg-white border-b border-slate-200 sticky top-[72px] md:top-[84px] z-30">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row gap-6 items-center justify-between">
@@ -299,7 +317,6 @@ export default function MembersPage() {
         </div>
       </section>
 
-      {/* Members Grid */}
       <section className="py-20">
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
