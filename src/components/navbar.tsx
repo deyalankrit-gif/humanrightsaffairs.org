@@ -29,28 +29,32 @@ export function Navbar() {
       setIsScrolled(window.scrollY > 20)
       
       if (isHome) {
-        // Simple hash detection for home sections
+        // Detection for home sections
         const sections = ['knowledge', 'helpline', 'membership']
+        let currentSection = ''
         for (const section of sections) {
           const el = document.getElementById(section)
           if (el) {
             const rect = el.getBoundingClientRect()
+            // If the section is near the top of the viewport
             if (rect.top <= 150 && rect.bottom >= 150) {
-              setActiveHash(`#${section}`)
-              return
+              currentSection = `#${section}`
+              break
             }
           }
         }
-        if (window.scrollY < 300) setActiveHash('')
+        setActiveHash(currentSection)
       }
     }
     
     window.addEventListener('scroll', handleScroll)
+    // Initial check
+    handleScroll()
     return () => window.removeEventListener('scroll', handleScroll)
   }, [isHome])
 
   const navColorClass = (isScrolled || !isHome) ? 'text-primary' : 'text-white'
-  const bgColorClass = (isScrolled || !isHome) ? 'bg-white/70 backdrop-blur-md shadow-lg py-3' : 'bg-transparent py-5'
+  const bgColorClass = (isScrolled || !isHome) ? 'bg-white/90 backdrop-blur-md shadow-lg py-3' : 'bg-transparent py-5'
 
   return (
     <nav className={cn(
@@ -78,23 +82,27 @@ export function Navbar() {
         {/* Desktop Nav */}
         <div className="hidden md:flex items-center gap-8">
           {navLinks.map((link) => {
-            const isActive = pathname === link.href || (isHome && activeHash && link.href === `/${activeHash}`)
-            const isHomeActive = link.href === '/' && isHome && !activeHash
+            // Determine if the link is active
+            const isPageActive = pathname === link.href
+            const isHashActive = isHome && activeHash && link.href === `/${activeHash}`
+            const isHomeRootActive = link.href === '/' && isHome && !activeHash
+            
+            const isActive = isPageActive || isHashActive || isHomeRootActive
 
             return (
               <Link 
                 key={link.name} 
                 href={link.href} 
                 className={cn(
-                  "text-sm font-bold tracking-wide transition-all duration-500 relative group",
+                  "text-sm font-bold tracking-wide transition-all duration-500 relative group py-2",
                   navColorClass,
-                  (isActive || isHomeActive) ? "text-accent" : "hover:text-accent"
+                  isActive ? "text-accent" : "hover:text-accent/80"
                 )}
               >
                 {link.name}
                 <span className={cn(
-                  "absolute -bottom-1 left-0 h-0.5 bg-accent transition-all duration-300",
-                  (isActive || isHomeActive) ? "w-full" : "w-0 group-hover:w-full"
+                  "absolute bottom-0 left-0 h-0.5 bg-accent transition-all duration-300",
+                  isActive ? "w-full" : "w-0 group-hover:w-full"
                 )}></span>
               </Link>
             )
@@ -117,19 +125,25 @@ export function Navbar() {
                 <Menu className="w-8 h-8" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="glass">
+            <SheetContent side="right" className="bg-white/95 backdrop-blur-xl border-l-primary/10">
               <div className="flex flex-col gap-6 mt-12">
+                <div className="flex items-center gap-2 mb-8">
+                   <Shield className="w-8 h-8 text-primary fill-accent" />
+                   <span className="font-headline font-bold text-2xl text-primary">JusticeShield</span>
+                </div>
                 {navLinks.map((link) => {
-                  const isActive = pathname === link.href || (isHome && activeHash && link.href === `/${activeHash}`)
-                  const isHomeActive = link.href === '/' && isHome && !activeHash
+                  const isPageActive = pathname === link.href
+                  const isHashActive = isHome && activeHash && link.href === `/${activeHash}`
+                  const isHomeRootActive = link.href === '/' && isHome && !activeHash
+                  const isActive = isPageActive || isHashActive || isHomeRootActive
                   
                   return (
                     <Link 
                       key={link.name} 
                       href={link.href} 
                       className={cn(
-                        "text-2xl font-headline font-bold transition-colors",
-                        (isActive || isHomeActive) ? "text-accent" : "text-primary hover:text-accent"
+                        "text-2xl font-headline font-bold transition-colors border-l-4 pl-4",
+                        isActive ? "text-accent border-accent" : "text-primary border-transparent hover:text-accent"
                       )}
                     >
                       {link.name}
@@ -137,7 +151,7 @@ export function Navbar() {
                   )
                 })}
                 <DonationDialog>
-                  <Button className="w-full bg-primary text-white py-6 text-lg mt-4 shadow-xl">
+                  <Button className="w-full bg-primary text-white py-8 text-xl mt-8 shadow-xl rounded-2xl">
                     Donate Now
                   </Button>
                 </DonationDialog>
