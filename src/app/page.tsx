@@ -106,7 +106,6 @@ function IndianFlag() {
 
 export default function Home() {
   const heroImg = PlaceHolderImages.find(img => img.id === 'hero-human-rights')
-  const nityDarpanImg = PlaceHolderImages.find(img => img.id === 'nity-darpan-logo')
 
   return (
     <main className="min-h-screen relative">
@@ -132,18 +131,6 @@ export default function Home() {
               <div className="flex flex-col items-start gap-4 md:gap-6">
                 <IndianFlag />
                 
-                {/* Emblem Image with blend mode and opacity for seamless background integration */}
-                {nityDarpanImg && (
-                  <div className="relative w-48 h-20 md:w-80 md:h-32 -mb-2 md:-mb-4">
-                    <Image
-                      src={nityDarpanImg.imageUrl}
-                      alt={nityDarpanImg.description}
-                      fill
-                      className="object-contain mix-blend-plus-lighter opacity-90 transition-opacity hover:opacity-100"
-                    />
-                  </div>
-                )}
-
                 <div className="font-headline font-bold text-[8vw] sm:text-[7vw] md:text-[6.5vw] lg:text-[7vw] xl:text-[7.5vw] tracking-tighter leading-none whitespace-nowrap overflow-visible drop-shadow-2xl">
                   <Typewriter 
                     text="Human Rights Affairs Trust" 
