@@ -1,3 +1,4 @@
+
 import type {Config} from 'tailwindcss';
 
 export default {
@@ -96,6 +97,10 @@ export default {
         'flag-ripple': {
           '0%': { backgroundPosition: '-200% 0' },
           '100%': { backgroundPosition: '200% 0' },
+        },
+        'gradient-x': {
+          '0%, 100%': { 'background-position': 'left center' },
+          '50%': { 'background-position': 'right center' },
         }
       },
       animation: {
@@ -108,6 +113,7 @@ export default {
         'blink': 'blink 1s step-end infinite',
         'flag-wave': 'flag-wave 3s ease-in-out infinite',
         'flag-ripple': 'flag-ripple 3s linear infinite',
+        'gradient-x': 'gradient-x 5s ease infinite',
       },
     },
   },

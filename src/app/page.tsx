@@ -157,7 +157,7 @@ export default function Home() {
               </div>
             </div>
             
-            <h1 className="text-xl md:text-3xl lg:text-4xl font-headline font-bold leading-tight max-w-5xl mx-auto">
+            <h1 className="text-2xl md:text-4xl lg:text-5xl font-headline font-bold leading-tight max-w-5xl mx-auto bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-cyan-400 bg-[length:200%_auto] bg-clip-text text-transparent animate-gradient-x py-2">
               Upholding Justice. Empowering Citizens.
             </h1>
             
