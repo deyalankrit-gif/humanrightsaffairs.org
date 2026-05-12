@@ -75,14 +75,14 @@ function BackgroundDecor() {
 
 function IndianFlag() {
   return (
-    <div className="relative mb-8 self-start ml-4 md:ml-12 h-12 md:h-24">
+    <div className="relative mb-12 self-start ml-4 md:ml-12 h-12 md:h-24">
       {/* Ornate Flagpole - STATIONARY */}
       <div className="absolute -left-2 -top-4 bottom-[-20px] w-2 bg-gradient-to-r from-slate-400 via-slate-100 to-slate-400 rounded-full shadow-2xl z-20">
         <div className="absolute -top-3 -left-1 w-4 h-4 rounded-full bg-gradient-to-tr from-yellow-600 via-yellow-200 to-yellow-600 shadow-lg"></div>
       </div>
 
       {/* Flag Fabric - ANIMATED */}
-      <div className="animate-flag-wave origin-left flex flex-col w-20 h-12 md:w-36 md:h-24 rounded-sm shadow-[0_20px_50px_rgba(0,0,0,0.3)] shrink-0 overflow-hidden relative border-l border-white/20 z-10">
+      <div className="animate-flag-wave origin-left flex flex-col w-24 h-14 md:w-44 md:h-28 rounded-sm shadow-[0_20px_50px_rgba(0,0,0,0.4)] shrink-0 overflow-hidden relative border-l border-white/20 z-10">
         {/* Colors */}
         <div className="h-1/3 bg-[#FF9933] relative"></div>
         <div className="h-1/3 bg-white flex items-center justify-center relative">
@@ -132,7 +132,7 @@ export default function Home() {
             src={heroImg?.imageUrl || ''} 
             alt="Human Rights Unity" 
             fill 
-            className="object-cover brightness-[0.2] scale-105 grayscale"
+            className="object-cover brightness-[0.25] scale-105 grayscale"
             priority
             data-ai-hint={heroImg?.imageHint}
           />
@@ -140,13 +140,13 @@ export default function Home() {
         </div>
 
         <div className="container mx-auto px-4 relative z-10 text-white text-center">
-          <div className="max-w-full space-y-8 animate-fade-in-up flex flex-col items-center">
+          <div className="max-w-full space-y-12 animate-fade-in-up flex flex-col items-center">
             
             <IndianFlag />
 
-            <div className="flex flex-col items-center gap-6 w-full">
+            <div className="flex flex-col items-center gap-8 w-full">
               {logoImg && (
-                <div className="relative w-20 h-20 md:w-32 md:h-32 mb-2 transition-transform hover:scale-105">
+                <div className="relative w-28 h-28 md:w-48 md:h-48 mb-4 transition-transform hover:scale-105">
                   <Image 
                     src={logoImg.imageUrl} 
                     alt="Official Emblem" 
@@ -156,7 +156,7 @@ export default function Home() {
                 </div>
               )}
               
-              <div className="font-headline font-bold text-[5.5vw] sm:text-[4.5vw] md:text-[5vw] lg:text-[5.5vw] xl:text-[6vw] tracking-tighter leading-none whitespace-nowrap drop-shadow-[0_10px_10px_rgba(0,0,0,0.5)]">
+              <div className="font-headline font-bold text-[7vw] sm:text-[6vw] md:text-[6.5vw] lg:text-[7vw] xl:text-[7.5vw] tracking-tighter leading-none whitespace-nowrap drop-shadow-[0_15px_15px_rgba(0,0,0,0.6)]">
                 <Typewriter 
                   text="Human Rights Affairs Trust" 
                   speed={80} 
@@ -165,44 +165,44 @@ export default function Home() {
                 />
               </div>
               
-              <div className="inline-flex items-center gap-2 bg-accent/30 text-accent px-5 py-2 md:px-6 md:py-2.5 rounded-full text-sm md:text-lg font-bold border border-accent/40 backdrop-blur-md">
-                <Shield className="w-4 h-4 md:w-6 md:h-6" />
+              <div className="inline-flex items-center gap-3 bg-accent/30 text-accent px-6 py-2.5 md:px-8 md:py-3.5 rounded-full text-sm md:text-xl font-bold border border-accent/40 backdrop-blur-md">
+                <Shield className="w-5 h-5 md:w-7 md:h-7" />
                 <span>India's Trusted Human Rights Shield</span>
               </div>
             </div>
             
-            <h1 className="text-5xl sm:text-6xl md:text-8xl lg:text-9xl font-headline font-bold leading-tight max-w-6xl mx-auto bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-cyan-400 bg-[length:200%_auto] bg-clip-text text-transparent animate-gradient-x py-6">
+            <h1 className="text-5xl sm:text-6xl md:text-8xl lg:text-9xl font-headline font-bold leading-tight max-w-6xl mx-auto bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-cyan-400 bg-[length:200%_auto] bg-clip-text text-transparent animate-gradient-x py-8">
               Upholding Justice. Empowering Citizens.
             </h1>
             
-            <p className="text-base md:text-xl text-slate-200 font-body max-w-2xl leading-relaxed mx-auto px-4">
+            <p className="text-lg md:text-2xl text-slate-200 font-body max-w-3xl leading-relaxed mx-auto px-4">
               Providing a robust shield against injustice through expert legal guidance, community support, and radical constitutional transparency.
             </p>
             
-            <div className="flex flex-wrap gap-4 md:gap-6 pt-6 justify-center">
+            <div className="flex flex-wrap gap-4 md:gap-8 pt-8 justify-center">
               <DonationDialog>
-                <Button size="lg" className="bg-accent text-primary font-bold hover:bg-accent/90 px-8 py-7 md:px-12 md:py-9 rounded-xl md:rounded-2xl text-lg md:text-2xl shadow-2xl shadow-accent/20 transition-all hover:-translate-y-1">
-                  Get Free Legal Aid <ArrowRight className="ml-2 w-5 h-5 md:w-7 md:h-7" />
+                <Button size="lg" className="bg-accent text-primary font-bold hover:bg-accent/90 px-10 py-8 md:px-14 md:py-10 rounded-xl md:rounded-2xl text-xl md:text-3xl shadow-2xl shadow-accent/30 transition-all hover:-translate-y-2">
+                  Get Free Legal Aid <ArrowRight className="ml-3 w-6 h-6 md:w-8 md:h-8" />
                 </Button>
               </DonationDialog>
-              <Button size="lg" variant="outline" className="border-white/60 text-white bg-white/10 hover:bg-white/20 px-8 py-7 md:px-12 md:py-9 rounded-xl md:rounded-2xl text-lg md:text-2xl backdrop-blur-lg transition-all border-2 font-bold">
+              <Button size="lg" variant="outline" className="border-white/60 text-white bg-white/10 hover:bg-white/20 px-10 py-8 md:px-14 md:py-10 rounded-xl md:rounded-2xl text-xl md:text-3xl backdrop-blur-lg transition-all border-2 font-bold">
                 Explore Rights Library
               </Button>
             </div>
 
-            <div className="w-full pt-16 max-w-6xl mx-auto">
-              <div className="glass-dark rounded-[2.5rem] md:rounded-[4rem] p-8 md:p-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-10 border-white/10">
+            <div className="w-full pt-20 max-w-7xl mx-auto">
+              <div className="glass-dark rounded-[3rem] md:rounded-[5rem] p-10 md:p-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 md:gap-14 border-white/10">
                 {[
-                  { icon: <Gavel className="w-8 h-8 md:w-10 md:h-10 text-accent" />, count: "25k+", label: "Legal Cases Resolved" },
-                  { icon: <Users className="w-8 h-8 md:w-10 md:h-10 text-emerald-400" />, count: "500+", label: "Expert Advocates" },
-                  { icon: <Shield className="w-8 h-8 md:w-10 md:h-10 text-indigo-400" />, count: "100%", label: "Secure Data Handling" },
-                  { icon: <HeartHandshake className="w-8 h-8 md:w-10 md:h-10 text-pink-400" />, count: "50+", label: "National Centers" }
+                  { icon: <Gavel className="w-10 h-10 md:w-14 md:h-14 text-accent" />, count: "25k+", label: "Legal Cases Resolved" },
+                  { icon: <Users className="w-10 h-10 md:w-14 md:h-14 text-emerald-400" />, count: "500+", label: "Expert Advocates" },
+                  { icon: <Shield className="w-10 h-10 md:w-14 md:h-14 text-indigo-400" />, count: "100%", label: "Secure Data Handling" },
+                  { icon: <HeartHandshake className="w-10 h-10 md:w-14 md:h-14 text-pink-400" />, count: "50+", label: "National Centers" }
                 ].map((stat, i) => (
-                  <div key={i} className="flex items-center gap-5 text-white hover:scale-105 transition-transform cursor-default justify-start sm:justify-center">
-                    <div className="p-4 md:p-5 bg-white/10 rounded-2xl md:rounded-3xl shrink-0">{stat.icon}</div>
-                    <div className="space-y-1 text-left">
-                      <p className="text-3xl md:text-4xl font-bold font-headline">{stat.count}</p>
-                      <p className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-slate-300 leading-tight">
+                  <div key={i} className="flex items-center gap-6 text-white hover:scale-110 transition-transform cursor-default justify-start sm:justify-center">
+                    <div className="p-5 md:p-7 bg-white/10 rounded-2xl md:rounded-[2.5rem] shrink-0">{stat.icon}</div>
+                    <div className="space-y-2 text-left">
+                      <p className="text-4xl md:text-6xl font-bold font-headline">{stat.count}</p>
+                      <p className="text-xs md:text-sm font-bold uppercase tracking-[0.2em] text-slate-300 leading-tight">
                         {stat.label}
                       </p>
                     </div>
@@ -214,12 +214,12 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="search" className="py-16 md:py-24 bg-white/50 backdrop-blur-sm relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-accent/5 rounded-full blur-[100px]"></div>
+      <section id="search" className="py-20 md:py-32 bg-white/50 backdrop-blur-sm relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-80 h-80 bg-accent/5 rounded-full blur-[120px]"></div>
         <div className="container mx-auto px-4 relative z-10">
-          <div className="text-center mb-12 md:mb-16 animate-fade-in-up">
-            <h2 className="text-3xl md:text-5xl font-headline font-bold text-primary mb-4">AI-Enhanced <span className="text-accent">Rights</span> Explorer</h2>
-            <p className="text-slate-500 max-w-2xl mx-auto text-base md:text-lg">Instantly navigate complex legal frameworks. Our AI highlights exactly what you need to know about your constitutional protections.</p>
+          <div className="text-center mb-16 md:mb-24 animate-fade-in-up">
+            <h2 className="text-4xl md:text-7xl font-headline font-bold text-primary mb-6">AI-Enhanced <span className="text-accent">Rights</span> Explorer</h2>
+            <p className="text-slate-500 max-w-3xl mx-auto text-lg md:text-2xl">Instantly navigate complex legal frameworks. Our AI highlights exactly what you need to know about your constitutional protections.</p>
           </div>
           <DocSearch />
         </div>
@@ -233,33 +233,33 @@ export default function Home() {
 
       <IDCardShowcase />
 
-      <section className="py-16 md:py-24 bg-slate-50/50 backdrop-blur-sm relative overflow-hidden">
+      <section className="py-20 md:py-32 bg-slate-50/50 backdrop-blur-sm relative overflow-hidden">
         <div className="absolute -top-24 -left-24 w-96 h-96 bg-accent/10 rounded-full blur-3xl animate-pulse"></div>
         <div className="container mx-auto px-4 relative z-10">
-          <div className="bg-primary rounded-[2rem] md:rounded-[3rem] p-8 md:p-24 flex flex-col items-center text-center text-white shadow-2xl relative overflow-hidden group">
+          <div className="bg-primary rounded-[3rem] md:rounded-[5rem] p-10 md:p-32 flex flex-col items-center text-center text-white shadow-2xl relative overflow-hidden group">
             <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10"></div>
             <div className="absolute inset-0 bg-gradient-to-r from-accent/10 via-transparent to-accent/10 opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
             
-            <div className="max-w-3xl space-y-6 md:space-y-8 relative z-10">
+            <div className="max-w-4xl space-y-8 md:space-y-12 relative z-10">
               <div className="animate-float">
-                <Scale className="w-12 h-12 md:w-20 md:h-20 text-accent mx-auto" />
+                <Scale className="w-16 h-16 md:w-28 md:h-28 text-accent mx-auto" />
               </div>
-              <h2 className="text-3xl md:text-6xl font-headline font-bold">Support the Cause of <span className="text-accent italic">Justice</span></h2>
-              <p className="text-base md:text-xl text-indigo-100 leading-relaxed">
+              <h2 className="text-4xl md:text-8xl font-headline font-bold">Support the Cause of <span className="text-accent italic">Justice</span></h2>
+              <p className="text-lg md:text-2xl text-indigo-100 leading-relaxed">
                 Your contributions help us provide free legal aid to the marginalized and run awareness campaigns across rural India. All donations are tax-exempt under 80G.
               </p>
-              <div className="pt-4 flex flex-col md:flex-row gap-4 md:gap-6 justify-center">
+              <div className="pt-8 flex flex-col md:flex-row gap-6 md:gap-10 justify-center">
                 <DonationDialog>
-                  <Button className="bg-accent text-primary font-bold hover:bg-accent/90 hover:scale-105 active:scale-95 transition-all px-8 py-6 md:px-12 md:py-8 rounded-xl md:rounded-2xl text-lg md:text-xl shadow-xl shadow-accent/20">
+                  <Button className="bg-accent text-primary font-bold hover:bg-accent/90 hover:scale-110 active:scale-95 transition-all px-12 py-8 md:px-16 md:py-10 rounded-xl md:rounded-[2rem] text-xl md:text-3xl shadow-2xl shadow-accent/30">
                     Donate Securely Now
                   </Button>
                 </DonationDialog>
-                <div className="flex flex-col items-center md:items-start justify-center text-left space-y-2">
-                  <p className="font-bold flex items-center gap-2 text-emerald-400 text-sm md:text-base">
-                    <CheckCircle2 className="w-4 h-4 md:w-5 md:h-5" /> Instant Receipt Generation
+                <div className="flex flex-col items-center md:items-start justify-center text-left space-y-3">
+                  <p className="font-bold flex items-center gap-3 text-emerald-400 text-base md:text-xl">
+                    <CheckCircle2 className="w-5 h-5 md:w-7 md:h-7" /> Instant Receipt Generation
                   </p>
-                  <p className="font-bold flex items-center gap-2 text-emerald-400 text-sm md:text-base">
-                    <CheckCircle2 className="w-4 h-4 md:w-5 md:h-5" /> Transparent Fund Tracking
+                  <p className="font-bold flex items-center gap-3 text-emerald-400 text-base md:text-xl">
+                    <CheckCircle2 className="w-5 h-5 md:w-7 md:h-7" /> Transparent Fund Tracking
                   </p>
                 </div>
               </div>
