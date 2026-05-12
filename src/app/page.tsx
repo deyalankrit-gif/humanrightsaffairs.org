@@ -10,37 +10,40 @@ import { DocSearch } from '@/components/doc-search'
 import { Footer } from '@/components/footer'
 import { Button } from '@/components/ui/button'
 import { PlaceHolderImages } from '@/lib/placeholder-images'
-import { Shield, Scale, Users, HeartHandshake, ArrowRight, Gavel, CheckCircle2, FileText, Heart } from 'lucide-react'
+import { Shield, Scale, Users, HeartHandshake, ArrowRight, Gavel, CircleCheck, FileText, Heart } from 'lucide-react'
 import { DonationDialog } from '@/components/donation-dialog'
 import { Typewriter } from '@/components/typewriter'
 
 function BackgroundDecor() {
   return (
-    <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden opacity-20">
-      {/* Animated Scale */}
-      <div className="absolute top-[15%] left-[5%] animate-float opacity-30">
-        <Scale className="w-32 h-32 text-primary/20" />
+    <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden select-none opacity-40">
+      {/* Animated Scale of Justice */}
+      <div className="absolute top-[15%] left-[5%] animate-float opacity-[0.08]">
+        <Scale className="w-48 h-48 text-primary" />
       </div>
       {/* Animated Shield */}
-      <div className="absolute top-[40%] right-[8%] animate-float animate-delay-200 opacity-20">
-        <Shield className="w-48 h-48 text-accent/10" />
+      <div className="absolute top-[40%] right-[8%] animate-float animate-delay-200 opacity-[0.06]">
+        <Shield className="w-64 h-64 text-accent" />
       </div>
       {/* Animated Handshake */}
-      <div className="absolute bottom-[20%] left-[10%] animate-float animate-delay-500 opacity-20">
-        <HeartHandshake className="w-40 h-40 text-emerald-500/10" />
+      <div className="absolute bottom-[20%] left-[10%] animate-float animate-delay-500 opacity-[0.08]">
+        <HeartHandshake className="w-56 h-56 text-emerald-500" />
       </div>
-      {/* Animated Document */}
-      <div className="absolute top-[70%] right-[15%] animate-float animate-delay-300 opacity-10">
-        <FileText className="w-24 h-24 text-primary/20" />
+      {/* Animated Document/Law */}
+      <div className="absolute top-[70%] right-[15%] animate-float animate-delay-300 opacity-[0.05]">
+        <FileText className="w-40 h-40 text-primary" />
       </div>
       {/* Subtle Heart */}
-      <div className="absolute top-[10%] right-[25%] animate-pulse opacity-10">
-        <Heart className="w-16 h-16 text-accent/20" />
+      <div className="absolute top-[10%] right-[25%] animate-pulse opacity-[0.06]">
+        <Heart className="w-24 h-24 text-accent" />
       </div>
       {/* Another Gavel */}
-      <div className="absolute bottom-[5%] right-[5%] animate-float animate-delay-100 opacity-10">
-        <Gavel className="w-20 h-20 text-primary/30" />
+      <div className="absolute bottom-[5%] right-[5%] animate-float animate-delay-100 opacity-[0.07]">
+        <Gavel className="w-32 h-32 text-primary" />
       </div>
+      {/* Soft Glows */}
+      <div className="absolute top-1/4 left-1/3 w-[500px] h-[500px] bg-accent/5 rounded-full blur-[120px] animate-glow"></div>
+      <div className="absolute bottom-1/4 right-1/3 w-[400px] h-[400px] bg-primary/5 rounded-full blur-[100px] animate-glow animate-delay-500"></div>
     </div>
   )
 }
@@ -68,10 +71,10 @@ export default function Home() {
         </div>
 
         <div className="container mx-auto px-4 relative z-10 text-white">
-          <div className="max-w-5xl space-y-8 animate-fade-in-up">
+          <div className="max-w-4xl space-y-8 animate-fade-in-up">
             <div className="space-y-6">
               <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
-                {/* Indian Tricolor Flag - High Quality Rendering */}
+                {/* Indian Tricolor Flag */}
                 <div className="flex flex-col w-20 h-12 rounded-md overflow-hidden shadow-2xl border border-white/20 shrink-0">
                   <div className="h-1/3 bg-[#FF9933]"></div>
                   <div className="h-1/3 bg-white flex items-center justify-center relative">
@@ -93,24 +96,24 @@ export default function Home() {
                   <div className="h-1/3 bg-[#138808]"></div>
                 </div>
                 
-                <div className="font-headline font-bold text-4xl md:text-7xl tracking-tight italic leading-tight">
+                <div className="font-headline font-bold text-6xl md:text-8xl tracking-tight leading-tight">
                   <Typewriter 
                     text="Human Rights Affairs Trust" 
                     speed={100} 
                     delay={500} 
-                    className="bg-gradient-to-r from-[#FF9933] via-white to-[#138808] bg-clip-text text-transparent drop-shadow-sm" 
+                    className="bg-gradient-to-r from-[#FF9933] via-white to-[#138808] bg-clip-text text-transparent drop-shadow-sm italic" 
                   />
                 </div>
               </div>
               
-              <div className="inline-flex items-center gap-2 bg-accent/20 text-accent px-5 py-2 rounded-full text-base font-bold border border-accent/30 backdrop-blur-md animate-pulse">
-                <Shield className="w-5 h-5" />
+              <div className="inline-flex items-center gap-2 bg-accent/20 text-accent px-4 py-1.5 rounded-full text-sm font-bold border border-accent/30 backdrop-blur-md animate-pulse">
+                <Shield className="w-4 h-4" />
                 <span>India's Trusted Human Rights Shield</span>
               </div>
             </div>
             
             <h1 className="text-4xl md:text-5xl font-headline font-bold leading-tight">
-              Upholding <span className="text-accent italic">Justice</span> & Empowering <span className="text-emerald-400">Citizens</span>.
+              Upholding <span className="text-accent italic">Justice</span> Empowering <span className="text-emerald-400">Citizens</span>.
             </h1>
             
             <p className="text-xl md:text-2xl text-slate-200 font-body max-w-2xl leading-relaxed">
@@ -195,10 +198,10 @@ export default function Home() {
                 </DonationDialog>
                 <div className="flex flex-col items-center md:items-start justify-center text-left space-y-2">
                   <p className="font-bold flex items-center gap-2 text-emerald-400">
-                    <CheckCircle2 className="w-5 h-5" /> Instant Receipt Generation
+                    <CircleCheck className="w-5 h-5" /> Instant Receipt Generation
                   </p>
                   <p className="font-bold flex items-center gap-2 text-emerald-400">
-                    <CheckCircle2 className="w-5 h-5" /> Transparent Fund Tracking
+                    <CircleCheck className="w-5 h-5" /> Transparent Fund Tracking
                   </p>
                 </div>
               </div>
