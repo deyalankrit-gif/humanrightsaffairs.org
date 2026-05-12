@@ -63,7 +63,7 @@ export default function Home() {
       <BackgroundDecor />
       <Navbar />
       
-      <section className="relative min-h-screen flex flex-col items-center pt-24 pb-20">
+      <section className="relative min-h-screen flex flex-col items-center pt-36 md:pt-48 pb-20">
         <div className="absolute inset-0 z-0">
           <Image 
             src="/Human R2.jpeg" 
@@ -76,11 +76,11 @@ export default function Home() {
         </div>
 
         <div className="container mx-auto px-4 relative z-10 text-white text-center">
-          <div className="max-w-full space-y-4 md:space-y-6 flex flex-col items-center pt-4 md:pt-8">
+          <div className="max-w-full space-y-4 md:space-y-6 flex flex-col items-center">
             
             <IndianFlag />
 
-            <div className="flex flex-col items-center gap-0 w-full -mt-10 md:-mt-14">
+            <div className="flex flex-col items-center gap-0 w-full -mt-8 md:-mt-12">
               <div className="flex flex-col items-center group mb-0">
                 <div className="relative w-28 h-36 md:w-36 md:h-48 transition-transform hover:scale-105 duration-500">
                   <Image 
@@ -90,14 +90,14 @@ export default function Home() {
                     className="object-contain"
                   />
                 </div>
-                <div className="flex flex-col items-center mt-2 md:mt-3 text-white drop-shadow-md space-y-0.5 relative z-20">
+                <div className="flex flex-col items-center mt-4 md:mt-6 text-white drop-shadow-md space-y-1 relative z-20">
                    <p className="text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] leading-tight">Niti Aayog registered</p>
                    <p className="text-[9px] md:text-[11px] font-bold uppercase tracking-[0.15em] leading-tight opacity-90">National Informatics Centre</p>
-                   <p className="text-xl md:text-3xl font-bold uppercase tracking-[0.2em] leading-tight">Government of India</p>
+                   <p className="text-xl md:text-4xl font-bold uppercase tracking-[0.2em] leading-tight">Government of India</p>
                 </div>
               </div>
               
-              <div className="font-headline font-bold text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-[7.5rem] tracking-tight leading-tight min-h-[1.5em] flex justify-center items-center overflow-visible mt-6 md:mt-10">
+              <div className="font-headline font-bold text-5xl sm:text-7xl md:text-8xl lg:text-9xl xl:text-[8.5rem] tracking-tight leading-tight min-h-[1.5em] flex justify-center items-center overflow-visible mt-10 md:mt-16">
                 <span className="bg-gradient-to-r from-[#FF9933] via-white to-[#138808] bg-clip-text text-transparent italic block drop-shadow-sm px-4 pb-4">
                   <Typewriter 
                     text="Human Rights Affairs Trust" 
