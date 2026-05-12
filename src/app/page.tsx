@@ -127,22 +127,22 @@ export default function Home() {
         </div>
 
         <div className="container mx-auto px-4 relative z-10 text-white">
-          <div className="max-w-full space-y-6 md:space-y-10 animate-fade-in-up">
+          <div className="max-w-full space-y-4 md:space-y-8 animate-fade-in-up">
             <div className="space-y-4 md:space-y-6">
               <div className="flex flex-col items-start gap-4 md:gap-6">
                 <IndianFlag />
                 
-                {/* Image positioned above the text */}
-                <div className="relative w-40 h-16 md:w-64 md:h-24">
+                {/* Emblem Image positioned directly above the organization name */}
+                <div className="relative w-48 h-20 md:w-80 md:h-32 -mb-2 md:-mb-4">
                   <Image
                     src={nityDarpanImg?.imageUrl || ''}
-                    alt="Emblem"
+                    alt="NITI DARPAN Emblem"
                     fill
                     className="object-contain"
                   />
                 </div>
 
-                <div className="font-headline font-bold text-4xl sm:text-6xl md:text-8xl lg:text-9xl xl:text-[10rem] tracking-tighter leading-none whitespace-nowrap overflow-visible drop-shadow-2xl">
+                <div className="font-headline font-bold text-[8vw] sm:text-[7vw] md:text-[6.5vw] lg:text-[7vw] xl:text-[7.5vw] tracking-tighter leading-none whitespace-nowrap overflow-visible drop-shadow-2xl">
                   <Typewriter 
                     text="Human Rights Affairs Trust" 
                     speed={80} 
@@ -172,7 +172,7 @@ export default function Home() {
                   Get Free Legal Aid <ArrowRight className="ml-2 w-5 h-5 md:w-8 md:h-8" />
                 </Button>
               </DonationDialog>
-              <Button size="lg" variant="outline" className="border-white/60 text-white bg-white/10 hover:bg-white/20 px-6 py-6 md:px-10 md:py-8 rounded-xl md:rounded-2xl text-base md:text-2xl backdrop-blur-lg transition-all border-2 font-bold">
+              <Button size="lg" variant="outline" className="border-white/60 text-white bg-white/10 hover:bg-white/20 px-6 py-6 md:px-10 md:py-8 rounded-xl md:rounded-2xl text-base md:text-2xl backdrop-blur-lg transition-all border-2 font-bold shadow-lg">
                 Explore Rights Library
               </Button>
             </div>
