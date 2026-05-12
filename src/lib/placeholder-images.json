@@ -71,6 +71,12 @@
       "description": "Constitutional rights workshop for students",
       "imageUrl": "https://picsum.photos/seed/workshop/800/600",
       "imageHint": "educational workshop classroom"
+    },
+    {
+      "id": "nity-darpan-logo",
+      "description": "Emblem positioned above the organization name",
+      "imageUrl": "https://picsum.photos/seed/nitydarpan/500/200",
+      "imageHint": "emblem logo"
     }
   ]
 }

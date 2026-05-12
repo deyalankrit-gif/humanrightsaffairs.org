@@ -77,7 +77,6 @@ function IndianFlag() {
   return (
     <div className="animate-flag-wave origin-left relative">
       <div className="flex flex-col w-12 h-7 md:w-20 md:h-12 rounded-sm shadow-2xl border border-white/20 shrink-0 overflow-hidden relative">
-        {/* Flag Bands */}
         <div className="h-1/3 bg-[#FF9933]"></div>
         <div className="h-1/3 bg-white flex items-center justify-center relative">
           <div className="absolute inset-0 flex items-center justify-center">
@@ -97,11 +96,9 @@ function IndianFlag() {
         </div>
         <div className="h-1/3 bg-[#138808]"></div>
         
-        {/* Realistic Silk Ripple Overlays */}
         <div className="absolute inset-0 bg-gradient-to-r from-black/10 via-white/30 to-black/10 bg-[length:200%_100%] animate-flag-ripple pointer-events-none mix-blend-overlay"></div>
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-black/15 to-transparent bg-[length:150%_100%] animate-flag-ripple pointer-events-none mix-blend-multiply opacity-40"></div>
       </div>
-      {/* Flag Pole (Realistic Shadowing) */}
       <div className="absolute -left-1 top-0 bottom-0 w-1 bg-gradient-to-r from-slate-500 via-slate-300 to-slate-400 rounded-full shadow-lg"></div>
     </div>
   )
@@ -109,6 +106,7 @@ function IndianFlag() {
 
 export default function Home() {
   const heroImg = PlaceHolderImages.find(img => img.id === 'hero-human-rights')
+  const nityDarpanImg = PlaceHolderImages.find(img => img.id === 'nity-darpan-logo')
 
   return (
     <main className="min-h-screen relative">
@@ -129,11 +127,22 @@ export default function Home() {
         </div>
 
         <div className="container mx-auto px-4 relative z-10 text-white">
-          <div className="max-w-full space-y-8 md:space-y-12 animate-fade-in-up">
-            <div className="space-y-6 md:space-y-8">
-              <div className="flex flex-col items-start gap-6 md:gap-8">
+          <div className="max-w-full space-y-6 md:space-y-10 animate-fade-in-up">
+            <div className="space-y-4 md:space-y-6">
+              <div className="flex flex-col items-start gap-4 md:gap-6">
                 <IndianFlag />
                 
+                {/* Image positioned above the text */}
+                <div className="relative w-40 h-16 md:w-64 md:h-24">
+                  <Image
+                    src={nityDarpanImg?.imageUrl || ''}
+                    alt="Emblem"
+                    fill
+                    className="object-contain"
+                    data-ai-hint={nityDarpanImg?.imageHint}
+                  />
+                </div>
+
                 <div className="font-headline font-bold text-3xl sm:text-5xl md:text-7xl lg:text-8xl xl:text-9xl tracking-tighter leading-none whitespace-nowrap overflow-visible drop-shadow-2xl">
                   <Typewriter 
                     text="Human Rights Affairs Trust" 
