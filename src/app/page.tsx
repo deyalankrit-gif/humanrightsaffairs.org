@@ -79,13 +79,13 @@ export default function Home() {
       <Navbar />
       
       {/* Hero Section */}
-      <section className="relative min-h-[90vh] flex items-center overflow-hidden pt-24 pb-32">
+      <section className="relative min-h-[95vh] flex items-center overflow-hidden pt-24 pb-32">
         <div className="absolute inset-0 z-0">
           <Image 
             src={heroImg?.imageUrl || ''} 
             alt="Human Rights Unity" 
             fill 
-            className="object-cover brightness-[0.25] scale-105"
+            className="object-cover brightness-[0.2] scale-105"
             priority
             data-ai-hint={heroImg?.imageHint}
           />
@@ -93,21 +93,21 @@ export default function Home() {
         </div>
 
         <div className="container mx-auto px-4 relative z-10 text-white">
-          <div className="max-w-6xl space-y-10 animate-fade-in-up">
+          <div className="max-w-7xl space-y-12 animate-fade-in-up">
             <div className="space-y-6">
               <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
                 {/* Indian Tricolor Flag */}
-                <div className="flex flex-col w-16 h-10 rounded shadow-2xl border border-white/20 shrink-0">
+                <div className="flex flex-col w-20 h-12 rounded shadow-2xl border border-white/30 shrink-0 overflow-hidden">
                   <div className="h-1/3 bg-[#FF9933]"></div>
                   <div className="h-1/3 bg-white flex items-center justify-center relative">
                     <div className="absolute inset-0 flex items-center justify-center">
-                       <div className="w-2.5 h-2.5 rounded-full border border-[#000080] flex items-center justify-center">
+                       <div className="w-3 h-3 rounded-full border border-[#000080] flex items-center justify-center">
                          <div className="w-0.5 h-0.5 bg-[#000080] rounded-full"></div>
                          <div className="absolute inset-0 flex items-center justify-center">
                             {[...Array(24)].map((_, i) => (
                               <div 
                                 key={i} 
-                                className="absolute w-px h-1 bg-[#000080]/30" 
+                                className="absolute w-px h-1 bg-[#000080]/40" 
                                 style={{ transform: `rotate(${i * 15}deg)` }}
                               />
                             ))}
@@ -118,37 +118,37 @@ export default function Home() {
                   <div className="h-1/3 bg-[#138808]"></div>
                 </div>
                 
-                <div className="font-headline font-bold text-3xl md:text-5xl lg:text-6xl tracking-tight leading-none whitespace-nowrap overflow-visible">
+                <div className="font-headline font-bold text-3xl sm:text-5xl md:text-7xl lg:text-8xl xl:text-9xl tracking-tighter leading-none whitespace-nowrap overflow-visible drop-shadow-2xl">
                   <Typewriter 
                     text="Human Rights Affairs Trust" 
                     speed={80} 
                     delay={400} 
-                    className="bg-gradient-to-r from-[#FF9933] via-white to-[#138808] bg-clip-text text-transparent drop-shadow-lg italic" 
+                    className="bg-gradient-to-r from-[#FF9933] via-white to-[#138808] bg-clip-text text-transparent italic" 
                   />
                 </div>
               </div>
               
-              <div className="inline-flex items-center gap-2 bg-accent/20 text-accent px-4 py-1.5 rounded-full text-sm font-bold border border-accent/30 backdrop-blur-md animate-pulse">
-                <Shield className="w-4 h-4" />
+              <div className="inline-flex items-center gap-2 bg-accent/30 text-accent px-5 py-2 rounded-full text-base font-bold border border-accent/40 backdrop-blur-md animate-pulse">
+                <Shield className="w-5 h-5" />
                 <span>India's Trusted Human Rights Shield</span>
               </div>
             </div>
             
-            <h1 className="text-3xl md:text-5xl font-headline font-bold leading-tight">
+            <h1 className="text-2xl md:text-4xl lg:text-5xl font-headline font-bold leading-tight">
               Upholding <span className="text-accent italic">Justice</span> Empowering <span className="text-emerald-400">Citizens</span>.
             </h1>
             
-            <p className="text-lg md:text-xl text-slate-200 font-body max-w-2xl leading-relaxed">
+            <p className="text-lg md:text-2xl text-slate-200 font-body max-w-3xl leading-relaxed">
               We provide a robust shield against injustice through expert legal guidance, community-led support, and radical constitutional transparency.
             </p>
             
-            <div className="flex flex-wrap gap-5 pt-4">
+            <div className="flex flex-wrap gap-6 pt-6">
               <DonationDialog>
-                <Button size="lg" className="bg-accent text-primary font-bold hover:bg-accent/90 px-8 py-7 rounded-2xl text-xl shadow-xl shadow-accent/20 transition-all hover:-translate-y-1">
-                  Get Free Legal Aid <ArrowRight className="ml-2 w-6 h-6" />
+                <Button size="lg" className="bg-accent text-primary font-bold hover:bg-accent/90 px-10 py-8 rounded-2xl text-2xl shadow-2xl shadow-accent/20 transition-all hover:-translate-y-1">
+                  Get Free Legal Aid <ArrowRight className="ml-2 w-8 h-8" />
                 </Button>
               </DonationDialog>
-              <Button size="lg" variant="outline" className="border-white/50 text-white bg-white/5 hover:bg-white/10 px-8 py-7 rounded-2xl text-xl backdrop-blur-md transition-all border-2">
+              <Button size="lg" variant="outline" className="border-white/60 text-white bg-white/10 hover:bg-white/20 px-10 py-8 rounded-2xl text-2xl backdrop-blur-lg transition-all border-2 font-bold">
                 Explore Rights Library
               </Button>
             </div>
@@ -156,18 +156,18 @@ export default function Home() {
         </div>
 
         {/* Floating Stats */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 w-full container px-4 hidden lg:block animate-fade-in-up animate-delay-500">
-           <div className="glass-dark rounded-[2.5rem] p-8 grid grid-cols-4 gap-8">
+        <div className="absolute bottom-12 left-1/2 -translate-x-1/2 w-full container px-4 hidden lg:block animate-fade-in-up animate-delay-500">
+           <div className="glass-dark rounded-[3rem] p-10 grid grid-cols-4 gap-10">
              {[
-               { icon: <Gavel className="w-6 h-6 text-accent" />, count: "25k+", label: "Legal Cases Resolved" },
-               { icon: <Users className="w-6 h-6 text-emerald-400" />, count: "500+", label: "Expert Advocates" },
-               { icon: <Shield className="w-6 h-6 text-indigo-400" />, count: "100%", label: "Secure Data" },
-               { icon: <HeartHandshake className="w-6 h-6 text-pink-400" />, count: "50+", label: "National Centers" }
+               { icon: <Gavel className="w-8 h-8 text-accent" />, count: "25k+", label: "Legal Cases Resolved" },
+               { icon: <Users className="w-8 h-8 text-emerald-400" />, count: "500+", label: "Expert Advocates" },
+               { icon: <Shield className="w-8 h-8 text-indigo-400" />, count: "100%", label: "Secure Data" },
+               { icon: <HeartHandshake className="w-8 h-8 text-pink-400" />, count: "50+", label: "National Centers" }
              ].map((stat, i) => (
-               <div key={i} className="flex items-center gap-4 text-white hover:scale-105 transition-transform cursor-default">
-                 <div className="p-3 bg-white/10 rounded-2xl">{stat.icon}</div>
+               <div key={i} className="flex items-center gap-5 text-white hover:scale-105 transition-transform cursor-default">
+                 <div className="p-4 bg-white/10 rounded-2xl">{stat.icon}</div>
                  <div>
-                   <p className="text-2xl font-bold font-headline">{stat.count}</p>
+                   <p className="text-3xl font-bold font-headline">{stat.count}</p>
                    <p className="text-xs font-bold uppercase tracking-widest text-slate-300">{stat.label}</p>
                  </div>
                </div>
