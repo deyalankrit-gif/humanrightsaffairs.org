@@ -84,7 +84,7 @@ export default function Home() {
             <IndianFlag />
 
             <div className="flex flex-col items-center gap-2 w-full">
-              {/* Niti Aayog Registered Satyamev Jayate Image Stack */}
+              {/* Niti Aayog Registered Emblem Section */}
               <div className="flex flex-col items-center group mb-4">
                 <div className="relative w-32 h-40 md:w-48 md:h-60 transition-transform hover:scale-105 duration-500">
                   <Image 
@@ -94,14 +94,12 @@ export default function Home() {
                     className="object-contain"
                   />
                 </div>
-                <div className="flex flex-col items-center mt-2 space-y-0.5">
+                <div className="flex flex-col items-center mt-2">
                   <p className="text-white/95 text-sm md:text-lg font-body tracking-tight font-semibold">Niti Aayog Registrated</p>
-                  <p className="text-white/60 text-[8px] md:text-[10px] font-medium opacity-80 uppercase tracking-wider">National Informatics Centre (NIC)</p>
-                  <p className="text-white/60 text-[8px] md:text-[10px] font-medium opacity-80 uppercase tracking-wider">Government of India</p>
                 </div>
               </div>
               
-              {/* Organization Title with Typewriter effect - Slightly smaller and refined */}
+              {/* Organization Title with Typewriter effect */}
               <div className="font-headline font-bold text-lg sm:text-2xl md:text-3xl lg:text-4xl tracking-tight leading-tight min-h-[1.5em] flex justify-center items-center">
                 <span className="bg-gradient-to-r from-[#FF9933] via-white to-[#138808] bg-clip-text text-transparent italic block drop-shadow-sm">
                   <Typewriter 
