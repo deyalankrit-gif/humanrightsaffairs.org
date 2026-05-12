@@ -81,7 +81,7 @@ function IndianFlag() {
         <div className="absolute -top-1 -left-0.5 w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-gradient-to-tr from-yellow-600 via-yellow-200 to-yellow-600 shadow-lg"></div>
       </div>
 
-      {/* Fluttering Cloth Flag - Smaller Dimensions */}
+      {/* Fluttering Cloth Flag */}
       <div className="animate-flag-wave origin-left flex flex-col w-10 h-6 md:w-16 md:h-10 rounded-sm shadow-[0_5px_15px_rgba(0,0,0,0.4)] shrink-0 overflow-hidden relative border-l border-white/20 z-10">
         <div className="h-1/3 bg-[#FF9933] relative"></div>
         <div className="h-1/3 bg-white flex items-center justify-center relative">
@@ -168,8 +168,8 @@ export default function Home() {
               </div>
             </div>
             
-            {/* Tagline - Slightly larger font with animated cyan/magenta gradient */}
-            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-headline font-bold leading-tight max-w-4xl mx-auto bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-cyan-400 bg-[length:200%_auto] bg-clip-text text-transparent animate-gradient-x py-4 md:py-8">
+            {/* Tagline - Slightly larger, on one line, with animated cyan/magenta gradient */}
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-headline font-bold leading-tight md:whitespace-nowrap bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-cyan-400 bg-[length:200%_auto] bg-clip-text text-transparent animate-gradient-x py-4 md:py-8 w-full">
               Upholding Justice. Empowering Citizens.
             </h1>
             
