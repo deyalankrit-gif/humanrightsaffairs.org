@@ -101,7 +101,7 @@ export default function Home() {
               </div>
               
               {/* Organization Title with Typewriter effect */}
-              <div className="font-headline font-bold text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl tracking-tight leading-tight min-h-[1.5em] flex justify-center items-center overflow-visible">
+              <div className="font-headline font-bold text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl tracking-tight leading-tight min-h-[1.5em] flex justify-center items-center overflow-visible">
                 <span className="bg-gradient-to-r from-[#FF9933] via-white to-[#138808] bg-clip-text text-transparent italic block drop-shadow-sm px-4 pb-4">
                   <Typewriter 
                     text="Human Rights Affairs Trust" 
@@ -144,7 +144,7 @@ export default function Home() {
                   <div key={i} className="flex flex-col sm:flex-row items-center gap-2 md:gap-3 text-white hover:opacity-80 transition-opacity cursor-default justify-center">
                     <div className="p-2 md:p-3 bg-white/5 rounded-lg md:rounded-xl shrink-0">{stat.icon}</div>
                     <div className="space-y-0 text-center sm:text-left">
-                      <p className="text-sm md:text-base font-bold font-headline leading-none">{stat.count}</p>
+                      <p className="text-xs md:text-sm font-bold font-headline leading-none">{stat.count}</p>
                       <p className="text-[7px] md:text-[8px] font-bold uppercase tracking-[0.1em] text-slate-400 leading-tight">
                         {stat.label}
                       </p>
