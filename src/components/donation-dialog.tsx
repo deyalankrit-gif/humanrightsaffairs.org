@@ -34,7 +34,6 @@ import {
   SelectValue 
 } from '@/components/ui/select'
 import { 
-  ShieldCheck, 
   CreditCard, 
   Download, 
   Printer, 
@@ -170,11 +169,13 @@ export function DonationDialog({ children }: { children: React.ReactNode }) {
       </DialogTrigger>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-3xl font-headline font-bold text-primary flex items-center gap-2">
+          <DialogTitle className="text-3xl font-headline font-bold text-primary flex items-center gap-3">
             {step === 'details' && "Donor Information"}
             {step === 'payment' && "Secure Payment Gateway"}
             {step === 'success' && "Donation Successful"}
-            <ShieldCheck className="text-accent w-8 h-8" />
+            <div className="relative w-10 h-10">
+              <Image src="/HRAT Logo.jpeg" alt="HRAT Logo" fill className="object-contain" />
+            </div>
           </DialogTitle>
           <DialogDescription>
             {step === 'details' && "Please provide your details for tax-exemption receipts (80G)."}
@@ -322,8 +323,10 @@ export function DonationDialog({ children }: { children: React.ReactNode }) {
 
             <div ref={invoiceRef} className="border-2 border-slate-100 rounded-[2rem] p-8 bg-white shadow-lg space-y-6">
               <div className="header flex items-center justify-between border-b-2 pb-6">
-                <div className="flex items-center gap-2">
-                  <ShieldCheck className="w-8 h-8 text-primary fill-accent" />
+                <div className="flex items-center gap-3">
+                  <div className="relative w-12 h-12">
+                    <Image src="/HRAT Logo.jpeg" alt="HRAT Logo" fill className="object-contain" />
+                  </div>
                   <div>
                     <h4 className="font-headline font-bold text-xl leading-none">HRAT</h4>
                     <p className="text-[10px] tracking-widest font-bold text-accent uppercase">JusticeShield</p>

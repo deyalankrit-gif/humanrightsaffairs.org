@@ -3,7 +3,8 @@
 
 import React from 'react'
 import Link from 'next/link'
-import { Shield, Menu, X } from 'lucide-react'
+import Image from 'next/image'
+import { Menu, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger } from '@/components/ui/sheet'
 import { usePathname } from 'next/navigation'
@@ -68,10 +69,15 @@ export function Navbar() {
       <div className="container mx-auto px-4 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2 group">
           <div className="relative">
-            <Shield className={cn(
-              "w-10 h-10 transition-colors duration-500 fill-accent",
-              navColorClass
-            )} />
+            <div className="relative w-12 h-12 transition-transform duration-500 group-hover:scale-110">
+              <Image 
+                src="/HRAT Logo.jpeg" 
+                alt="HRAT Official Logo" 
+                fill 
+                className="object-contain"
+                priority
+              />
+            </div>
             <div className="absolute inset-0 bg-accent/20 blur-lg rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
           </div>
           <div className="flex flex-col">
@@ -134,7 +140,14 @@ export function Navbar() {
             <SheetContent side="right" className="bg-white/95 backdrop-blur-xl border-l-primary/10">
               <SheetHeader className="text-left mb-8">
                 <SheetTitle className="flex items-center gap-2">
-                   <Shield className="w-8 h-8 text-primary fill-accent" />
+                   <div className="relative w-10 h-10">
+                    <Image 
+                      src="/HRAT Logo.jpeg" 
+                      alt="HRAT Official Logo" 
+                      fill 
+                      className="object-contain"
+                    />
+                   </div>
                    <span className="font-headline font-bold text-2xl text-primary">JusticeShield</span>
                 </SheetTitle>
                 <SheetDescription className="text-[10px] font-bold tracking-widest text-accent uppercase">

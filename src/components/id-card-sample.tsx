@@ -3,7 +3,7 @@
 
 import React from 'react'
 import Image from 'next/image'
-import { Shield, QrCode, CheckCircle2, BadgeCheck, Info } from 'lucide-react'
+import { QrCode, CheckCircle2, BadgeCheck, Info } from 'lucide-react'
 import { PlaceHolderImages } from '@/lib/placeholder-images'
 import { Button } from '@/components/ui/button'
 import {
@@ -112,7 +112,14 @@ export function IDCardShowcase() {
                 <div className="absolute top-0 right-0 w-32 h-32 bg-slate-50 rounded-bl-full -mr-10 -mt-10"></div>
                 <div className="flex items-start justify-between mb-8">
                   <div className="flex items-center gap-3">
-                    <Shield className="w-10 h-10 text-primary fill-accent" />
+                    <div className="relative w-12 h-12">
+                      <Image 
+                        src="/HRAT Logo.jpeg" 
+                        alt="HRAT Logo" 
+                        fill 
+                        className="object-contain"
+                      />
+                    </div>
                     <div>
                       <h4 className="font-headline font-bold text-xl leading-none">HRAT</h4>
                       <p className="text-[10px] tracking-widest font-bold text-accent uppercase">JusticeShield</p>

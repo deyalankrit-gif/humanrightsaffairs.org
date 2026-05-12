@@ -1,5 +1,6 @@
 
-import { Shield, Mail, Phone, MapPin, Facebook, Twitter, Instagram, Youtube } from 'lucide-react'
+import Image from 'next/image'
+import { Mail, Phone, MapPin, Facebook, Twitter, Instagram, Youtube } from 'lucide-react'
 import Link from 'next/link'
 import { DonationDialog } from './donation-dialog'
 
@@ -9,8 +10,15 @@ export function Footer() {
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
           <div className="space-y-6">
-            <Link href="/" className="flex items-center gap-2">
-              <Shield className="w-8 h-8 text-white fill-accent" />
+            <Link href="/" className="flex items-center gap-2 group">
+              <div className="relative w-10 h-10">
+                <Image 
+                  src="/HRAT Logo.jpeg" 
+                  alt="HRAT Logo" 
+                  fill 
+                  className="object-contain brightness-0 invert"
+                />
+              </div>
               <div className="flex flex-col">
                 <span className="font-headline font-bold text-xl leading-none">HRAT</span>
                 <span className="text-[10px] font-bold tracking-widest text-accent uppercase">JusticeShield</span>
@@ -40,7 +48,7 @@ export function Footer() {
             <ul className="space-y-4 text-indigo-100">
               <li><Link href="/#leadership" className="hover:text-white transition-colors">Chairman's Message</Link></li>
               <li><Link href="/#knowledge" className="hover:text-white transition-colors">Rights Center</Link></li>
-              <li><Link href="/#membership" className="hover:text-white transition-colors">Become a Member</Link></li>
+              <li><Link href="/#membership" className="hover:text-white transition-colors">Be A Member</Link></li>
               <li><Link href="/#helpline" className="hover:text-white transition-colors">Emergency Contacts</Link></li>
               <li>
                 <DonationDialog>
