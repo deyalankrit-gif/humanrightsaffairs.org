@@ -125,7 +125,7 @@ export default function Home() {
               {/* Niti Aayog Registered Satyamev Jayate Image */}
               <div className="relative w-40 h-52 md:w-72 md:h-96 transition-transform hover:scale-105">
                 <Image 
-                  src="/Nity3.png" 
+                  src="/Niti3.png" 
                   alt="Niti Aayog Registered Emblem" 
                   fill 
                   className="object-contain"
