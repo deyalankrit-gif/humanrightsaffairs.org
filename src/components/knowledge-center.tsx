@@ -46,45 +46,45 @@ const guides = [
 
 export function KnowledgeCenter() {
   return (
-    <section id="knowledge" className="py-24 bg-slate-50">
+    <section id="knowledge" className="py-16 md:py-24 bg-slate-50">
       <div className="container mx-auto px-4">
-        <div className="flex flex-col md:flex-row items-end justify-between mb-16 gap-4">
+        <div className="flex flex-col md:flex-row items-start md:items-end justify-between mb-12 md:mb-16 gap-6">
           <div className="max-w-xl">
-            <div className="inline-flex items-center gap-2 text-secondary font-bold mb-4">
-              <Globe className="w-5 h-5" />
+            <div className="inline-flex items-center gap-2 text-secondary font-bold mb-4 text-sm">
+              <Globe className="w-4 h-4 md:w-5 md:h-5" />
               <span>Multilingual Knowledge Hub</span>
             </div>
-            <h2 className="text-4xl font-headline font-bold text-primary mb-4">Digital Library of Human Rights</h2>
-            <p className="text-slate-600">Access legal manuals, rights guides, and educational materials in English, Hindi, and Bengali. Knowledge is your first line of defense.</p>
+            <h2 className="text-3xl md:text-4xl font-headline font-bold text-primary mb-4">Digital Library of Human Rights</h2>
+            <p className="text-slate-600 text-sm md:text-base">Access legal manuals, rights guides, and educational materials in English, Hindi, and Bengali. Knowledge is your first line of defense.</p>
           </div>
-          <Button variant="outline" className="border-primary text-primary hover:bg-primary hover:text-white">
+          <Button variant="outline" className="border-primary text-primary hover:bg-primary hover:text-white w-full md:w-auto">
             View All Documentation
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-[250px]">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 auto-rows-auto md:auto-rows-[250px]">
           {guides.map((guide, idx) => (
             <Card 
               key={idx} 
-              className={`p-8 border-none flex flex-col justify-between group overflow-hidden relative shadow-sm hover:shadow-xl transition-all duration-500 ${guide.color} ${guide.size === 'lg' ? 'md:col-span-2' : ''}`}
+              className={`p-6 md:p-8 border-none flex flex-col justify-between group overflow-hidden relative shadow-sm hover:shadow-xl transition-all duration-500 ${guide.color} ${guide.size === 'lg' ? 'md:col-span-2' : ''}`}
             >
-              <div className="absolute -right-4 -bottom-4 opacity-5 group-hover:scale-125 transition-transform duration-700">
-                {React.cloneElement(guide.icon as React.ReactElement, { className: "w-48 h-48" })}
+              <div className="absolute -right-4 -bottom-4 opacity-5 group-hover:scale-125 transition-transform duration-700 hidden md:block">
+                {React.cloneElement(guide.icon as React.ReactElement, { className: "w-32 h-32 md:w-48 md:h-48" })}
               </div>
               <div className="relative z-10">
-                <div className="p-3 bg-white rounded-xl w-fit shadow-sm mb-6">
+                <div className="p-2 md:p-3 bg-white rounded-xl w-fit shadow-sm mb-4 md:mb-6">
                   {guide.icon}
                 </div>
-                <h3 className="text-2xl font-headline font-bold text-primary mb-2">{guide.title}</h3>
-                <p className="text-slate-600 text-sm max-w-xs">{guide.desc}</p>
+                <h3 className="text-xl md:text-2xl font-headline font-bold text-primary mb-2">{guide.title}</h3>
+                <p className="text-slate-600 text-xs md:text-sm max-w-xs">{guide.desc}</p>
               </div>
-              <div className="relative z-10 flex gap-2">
-                <Button variant="ghost" className="text-primary hover:text-accent font-bold px-0 flex items-center gap-1">
-                  Read More <ExternalLink className="w-4 h-4" />
+              <div className="relative z-10 flex flex-wrap gap-2 mt-4 md:mt-0">
+                <Button variant="ghost" className="text-primary hover:text-accent font-bold px-0 flex items-center gap-1 text-xs md:text-sm">
+                  Read More <ExternalLink className="w-3 h-3 md:w-4 md:h-4" />
                 </Button>
                 {guide.title.includes('Manuals') && (
-                  <Button size="sm" className="bg-primary text-white ml-auto">
-                    <Download className="w-4 h-4 mr-2" /> Download
+                  <Button size="sm" className="bg-primary text-white ml-auto text-xs h-8 md:h-9">
+                    <Download className="w-3 h-3 md:w-4 md:h-4 mr-2" /> Download
                   </Button>
                 )}
               </div>
