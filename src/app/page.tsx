@@ -12,7 +12,6 @@ import { Button } from '@/components/ui/button'
 import { PlaceHolderImages } from '@/lib/placeholder-images'
 import { Shield, Scale, Users, HeartHandshake, ArrowRight, Gavel, CheckCircle2, FileText, Heart, Globe } from 'lucide-react'
 import { DonationDialog } from '@/components/donation-dialog'
-import { Typewriter } from '@/components/typewriter'
 
 function BackgroundDecor() {
   const libraryImg = PlaceHolderImages.find(img => img.id === 'legal-library')
@@ -75,7 +74,7 @@ function BackgroundDecor() {
 
 function IndianFlag() {
   return (
-    <div className="relative mb-12 self-start ml-4 md:ml-12 h-12 md:h-24">
+    <div className="relative mb-8 md:mb-12 self-start ml-4 md:ml-12 h-12 md:h-24">
       {/* Ornate Flagpole - STATIONARY */}
       <div className="absolute -left-2 -top-4 bottom-[-20px] w-2 bg-gradient-to-r from-slate-400 via-slate-100 to-slate-400 rounded-full shadow-2xl z-20">
         <div className="absolute -top-3 -left-1 w-4 h-4 rounded-full bg-gradient-to-tr from-yellow-600 via-yellow-200 to-yellow-600 shadow-lg"></div>
@@ -119,14 +118,13 @@ function IndianFlag() {
 
 export default function Home() {
   const heroImg = PlaceHolderImages.find(img => img.id === 'hero-human-rights')
-  const logoImg = PlaceHolderImages.find(img => img.id === 'niti-logo')
 
   return (
     <main className="min-h-screen relative">
       <BackgroundDecor />
       <Navbar />
       
-      <section className="relative min-h-screen flex flex-col items-center overflow-hidden pt-40 pb-24">
+      <section className="relative min-h-screen flex flex-col items-center overflow-hidden pt-32 pb-24">
         <div className="absolute inset-0 z-0">
           <Image 
             src={heroImg?.imageUrl || ''} 
@@ -140,29 +138,24 @@ export default function Home() {
         </div>
 
         <div className="container mx-auto px-4 relative z-10 text-white text-center">
-          <div className="max-w-full space-y-12 animate-fade-in-up flex flex-col items-center">
+          <div className="max-w-full space-y-8 md:space-y-12 animate-fade-in-up flex flex-col items-center">
             
             <IndianFlag />
 
             <div className="flex flex-col items-center gap-8 w-full">
-              {logoImg && (
-                <div className="relative w-28 h-28 md:w-48 md:h-48 mb-4 transition-transform hover:scale-105">
-                  <Image 
-                    src={logoImg.imageUrl} 
-                    alt="Official Emblem" 
-                    fill 
-                    className="object-contain"
-                  />
-                </div>
-              )}
-              
-              <div className="font-headline font-bold text-[7vw] sm:text-[6vw] md:text-[6.5vw] lg:text-[7vw] xl:text-[7.5vw] tracking-tighter leading-none whitespace-nowrap drop-shadow-[0_15px_15px_rgba(0,0,0,0.6)]">
-                <Typewriter 
-                  text="Human Rights Affairs Trust" 
-                  speed={80} 
-                  delay={400} 
-                  className="bg-gradient-to-r from-[#FF9933] via-white to-[#138808] bg-clip-text text-transparent italic" 
+              <div className="relative w-40 h-40 md:w-80 md:h-80 transition-transform hover:scale-105">
+                <Image 
+                  src="/Niti.png" 
+                  alt="Official Niti Aayog Emblem" 
+                  fill 
+                  className="object-contain"
                 />
+              </div>
+              
+              <div className="font-headline font-bold text-[9vw] sm:text-[8vw] md:text-[9.5vw] lg:text-[10.5vw] xl:text-[11vw] tracking-tighter leading-none whitespace-nowrap drop-shadow-[0_20px_20px_rgba(0,0,0,0.8)]">
+                <span className="bg-gradient-to-r from-[#FF9933] via-white to-[#138808] bg-clip-text text-transparent italic">
+                  Human Rights Affairs Trust
+                </span>
               </div>
               
               <div className="inline-flex items-center gap-3 bg-accent/30 text-accent px-6 py-2.5 md:px-8 md:py-3.5 rounded-full text-sm md:text-xl font-bold border border-accent/40 backdrop-blur-md">
@@ -171,38 +164,38 @@ export default function Home() {
               </div>
             </div>
             
-            <h1 className="text-5xl sm:text-6xl md:text-8xl lg:text-9xl font-headline font-bold leading-tight max-w-6xl mx-auto bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-cyan-400 bg-[length:200%_auto] bg-clip-text text-transparent animate-gradient-x py-8">
+            <h1 className="text-6xl sm:text-7xl md:text-8xl lg:text-[9rem] font-headline font-bold leading-tight max-w-7xl mx-auto bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-cyan-400 bg-[length:200%_auto] bg-clip-text text-transparent animate-gradient-x py-12">
               Upholding Justice. Empowering Citizens.
             </h1>
             
-            <p className="text-lg md:text-2xl text-slate-200 font-body max-w-3xl leading-relaxed mx-auto px-4">
+            <p className="text-xl md:text-3xl text-slate-200 font-body max-w-4xl leading-relaxed mx-auto px-4">
               Providing a robust shield against injustice through expert legal guidance, community support, and radical constitutional transparency.
             </p>
             
-            <div className="flex flex-wrap gap-4 md:gap-8 pt-8 justify-center">
+            <div className="flex flex-wrap gap-4 md:gap-8 pt-12 justify-center">
               <DonationDialog>
-                <Button size="lg" className="bg-accent text-primary font-bold hover:bg-accent/90 px-10 py-8 md:px-14 md:py-10 rounded-xl md:rounded-2xl text-xl md:text-3xl shadow-2xl shadow-accent/30 transition-all hover:-translate-y-2">
-                  Get Free Legal Aid <ArrowRight className="ml-3 w-6 h-6 md:w-8 md:h-8" />
+                <Button size="lg" className="bg-accent text-primary font-bold hover:bg-accent/90 px-12 py-10 md:px-16 md:py-12 rounded-xl md:rounded-2xl text-2xl md:text-4xl shadow-2xl shadow-accent/30 transition-all hover:-translate-y-2">
+                  Get Free Legal Aid <ArrowRight className="ml-4 w-7 h-7 md:w-10 md:h-10" />
                 </Button>
               </DonationDialog>
-              <Button size="lg" variant="outline" className="border-white/60 text-white bg-white/10 hover:bg-white/20 px-10 py-8 md:px-14 md:py-10 rounded-xl md:rounded-2xl text-xl md:text-3xl backdrop-blur-lg transition-all border-2 font-bold">
+              <Button size="lg" variant="outline" className="border-white/60 text-white bg-white/10 hover:bg-white/20 px-12 py-10 md:px-16 md:py-12 rounded-xl md:rounded-2xl text-2xl md:text-4xl backdrop-blur-lg transition-all border-2 font-bold">
                 Explore Rights Library
               </Button>
             </div>
 
-            <div className="w-full pt-20 max-w-7xl mx-auto">
-              <div className="glass-dark rounded-[3rem] md:rounded-[5rem] p-10 md:p-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 md:gap-14 border-white/10">
+            <div className="w-full pt-24 max-w-7xl mx-auto">
+              <div className="glass-dark rounded-[3rem] md:rounded-[5rem] p-12 md:p-20 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 md:gap-16 border-white/10">
                 {[
-                  { icon: <Gavel className="w-10 h-10 md:w-14 md:h-14 text-accent" />, count: "25k+", label: "Legal Cases Resolved" },
-                  { icon: <Users className="w-10 h-10 md:w-14 md:h-14 text-emerald-400" />, count: "500+", label: "Expert Advocates" },
-                  { icon: <Shield className="w-10 h-10 md:w-14 md:h-14 text-indigo-400" />, count: "100%", label: "Secure Data Handling" },
-                  { icon: <HeartHandshake className="w-10 h-10 md:w-14 md:h-14 text-pink-400" />, count: "50+", label: "National Centers" }
+                  { icon: <Gavel className="w-12 h-12 md:w-16 md:h-16 text-accent" />, count: "25k+", label: "Legal Cases Resolved" },
+                  { icon: <Users className="w-12 h-12 md:w-16 md:h-16 text-emerald-400" />, count: "500+", label: "Expert Advocates" },
+                  { icon: <Shield className="w-12 h-12 md:w-16 md:h-16 text-indigo-400" />, count: "100%", label: "Secure Data Handling" },
+                  { icon: <HeartHandshake className="w-12 h-12 md:w-16 md:h-16 text-pink-400" />, count: "50+", label: "National Centers" }
                 ].map((stat, i) => (
-                  <div key={i} className="flex items-center gap-6 text-white hover:scale-110 transition-transform cursor-default justify-start sm:justify-center">
-                    <div className="p-5 md:p-7 bg-white/10 rounded-2xl md:rounded-[2.5rem] shrink-0">{stat.icon}</div>
-                    <div className="space-y-2 text-left">
-                      <p className="text-4xl md:text-6xl font-bold font-headline">{stat.count}</p>
-                      <p className="text-xs md:text-sm font-bold uppercase tracking-[0.2em] text-slate-300 leading-tight">
+                  <div key={i} className="flex items-center gap-8 text-white hover:scale-110 transition-transform cursor-default justify-start sm:justify-center">
+                    <div className="p-6 md:p-8 bg-white/10 rounded-2xl md:rounded-[3rem] shrink-0">{stat.icon}</div>
+                    <div className="space-y-3 text-left">
+                      <p className="text-5xl md:text-7xl font-bold font-headline">{stat.count}</p>
+                      <p className="text-sm md:text-base font-bold uppercase tracking-[0.2em] text-slate-300 leading-tight">
                         {stat.label}
                       </p>
                     </div>
