@@ -75,9 +75,9 @@ function BackgroundDecor() {
 
 function IndianFlag() {
   return (
-    <div className="relative mb-4 flex items-center justify-center">
-      <div className="absolute inset-0 w-12 h-12 md:w-16 md:h-16 rounded-full border-2 border-accent/30 animate-ping opacity-20"></div>
-      <div className="relative w-12 h-12 md:w-16 md:h-16 rounded-full overflow-hidden shadow-2xl border-2 border-white/40 animate-float">
+    <div className="relative mb-2 flex items-center justify-center">
+      <div className="absolute inset-0 w-10 h-10 md:w-14 md:h-14 rounded-full border-2 border-accent/30 animate-ping opacity-20"></div>
+      <div className="relative w-10 h-10 md:w-14 md:h-14 rounded-full overflow-hidden shadow-2xl border-2 border-white/40 animate-float">
         <div className="h-1/3 bg-[#FF9933]"></div>
         <div className="h-1/3 bg-white flex items-center justify-center relative">
           <div className="w-3 h-3 md:w-4 md:h-4 rounded-full border-[0.5px] border-[#000080] flex items-center justify-center relative animate-[spin_10s_linear_infinite]">
@@ -104,36 +104,43 @@ export default function Home() {
       <BackgroundDecor />
       <Navbar />
       
-      <section className="relative min-h-screen flex flex-col items-center pt-32 pb-24">
+      <section className="relative min-h-screen flex flex-col items-center pt-24 pb-20">
         <div className="absolute inset-0 z-0">
           <Image 
             src="/Human R2.jpeg" 
             alt="Human Rights Heritage" 
             fill 
-            className="object-cover brightness-[0.25] scale-105 grayscale"
+            className="object-cover brightness-[0.2] scale-105 grayscale"
             priority
           />
           <div className="absolute inset-0 bg-gradient-to-tr from-primary via-primary/80 to-transparent"></div>
         </div>
 
         <div className="container mx-auto px-4 relative z-10 text-white text-center">
-          <div className="max-w-full space-y-6 md:space-y-8 flex flex-col items-center">
+          <div className="max-w-full space-y-4 md:space-y-6 flex flex-col items-center">
             
             <IndianFlag />
 
-            <div className="flex flex-col items-center gap-4 md:gap-6 w-full">
-              {/* Niti Aayog Registered Satyamev Jayate Image */}
-              <div className="relative w-40 h-52 md:w-72 md:h-96 transition-transform hover:scale-105">
-                <Image 
-                  src="/Niti3.png" 
-                  alt="Niti Aayog Registered Emblem" 
-                  fill 
-                  className="object-contain"
-                />
+            <div className="flex flex-col items-center gap-4 w-full">
+              {/* Niti Aayog Registered Satyamev Jayate Image Stack */}
+              <div className="flex flex-col items-center group transition-transform hover:scale-[1.02] duration-500">
+                <div className="relative w-40 h-52 md:w-64 md:h-80">
+                  <Image 
+                    src="/Niti3.png" 
+                    alt="Niti Aayog Registered Emblem" 
+                    fill 
+                    className="object-contain"
+                  />
+                </div>
+                <div className="flex flex-col items-center -mt-8 md:-mt-12 space-y-0.5 md:space-y-1">
+                  <p className="text-white/90 text-sm md:text-xl font-body tracking-tight font-medium">Niti Aayog Registrated</p>
+                  <p className="text-white/60 text-[9px] md:text-xs font-normal opacity-80">National Informatics Centre(NIC)</p>
+                  <p className="text-white/60 text-[9px] md:text-xs font-normal opacity-80">Government of India</p>
+                </div>
               </div>
               
               {/* Organization Title with Typewriter effect */}
-              <div className="font-headline font-bold text-xl sm:text-2xl md:text-3xl lg:text-4xl tracking-tight leading-tight drop-shadow-xl min-h-[1.2em] flex justify-center items-center">
+              <div className="font-headline font-bold text-lg sm:text-2xl md:text-3xl lg:text-4xl tracking-tight leading-tight drop-shadow-2xl min-h-[1.2em] flex justify-center items-center mt-4">
                 <span className="bg-gradient-to-r from-[#FF9933] via-white to-[#138808] bg-clip-text text-transparent italic block">
                   <Typewriter 
                     text="Human Rights Affairs Trust" 
@@ -142,19 +149,14 @@ export default function Home() {
                   />
                 </span>
               </div>
-              
-              <div className="inline-flex items-center gap-2 md:gap-3 bg-accent/30 text-accent px-4 py-2 md:px-6 md:py-2.5 rounded-full text-[10px] md:text-sm font-bold border border-accent/40 backdrop-blur-md uppercase tracking-widest">
-                <Shield className="w-3 h-3 md:w-4 md:h-4" />
-                <span>India's Trusted Human Rights Shield</span>
-              </div>
             </div>
             
             {/* Tagline - Large, One Line, Animated Gradient */}
-            <h1 className="text-xl sm:text-2xl md:text-4xl lg:text-5xl font-headline font-bold leading-tight md:whitespace-nowrap bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-cyan-400 bg-[length:200%_auto] bg-clip-text text-transparent animate-gradient-x py-2 md:py-4 w-full">
+            <h1 className="text-xl sm:text-2xl md:text-4xl lg:text-6xl font-headline font-bold leading-tight md:whitespace-nowrap bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-cyan-400 bg-[length:200%_auto] bg-clip-text text-transparent animate-gradient-x py-2 md:py-4 w-full">
               Upholding Justice. Empowering Citizens.
             </h1>
             
-            <p className="text-sm sm:text-lg md:text-xl text-slate-300 font-body max-w-4xl leading-relaxed mx-auto px-4">
+            <p className="text-sm sm:text-lg md:text-xl text-slate-300 font-body max-w-4xl leading-relaxed mx-auto px-4 opacity-90">
               Providing a robust shield against injustice through expert legal guidance, community support, and radical constitutional transparency.
             </p>
             
