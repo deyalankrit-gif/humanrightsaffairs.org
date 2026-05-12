@@ -6,7 +6,7 @@ import Image from 'next/image'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 import { PlaceHolderImages } from '@/lib/placeholder-images'
-import { Search, MapPin, BadgeCheck, User, Users, Shield, Briefcase } from 'lucide-react'
+import { Search, MapPin, BadgeCheck, User, Users, Shield, Briefcase, Hash } from 'lucide-react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -164,34 +164,64 @@ export default function MembersPage() {
             {filteredMembers.length > 0 ? (
               filteredMembers.map((member) => {
                 const img = PlaceHolderImages.find(i => i.id === member.imageId)
+                const isDistrict = member.level === "District"
+
                 return (
-                  <Card key={member.id} className="group border-none shadow-sm hover:shadow-2xl transition-all duration-500 rounded-[2.5rem] overflow-hidden bg-white border border-slate-100">
-                    <CardHeader className="p-0">
-                      <div className="relative aspect-[4/5] overflow-hidden">
-                        <Image 
-                          src={img?.imageUrl || ''} 
-                          alt={member.name} 
-                          fill 
-                          className="object-cover group-hover:scale-110 transition-transform duration-700"
-                          data-ai-hint={img?.imageHint}
-                        />
-                        <div className="absolute top-6 right-6">
-                          <Badge className="bg-white/90 backdrop-blur-md text-primary font-bold shadow-lg border-none px-4 py-1">
+                  <Card key={member.id} className="group border-none shadow-sm hover:shadow-2xl transition-all duration-500 rounded-[2.5rem] overflow-hidden bg-white border border-slate-100 flex flex-col h-full">
+                    {!isDistrict ? (
+                      <CardHeader className="p-0">
+                        <div className="relative aspect-[4/5] overflow-hidden">
+                          <Image 
+                            src={img?.imageUrl || ''} 
+                            alt={member.name} 
+                            fill 
+                            className="object-cover group-hover:scale-110 transition-transform duration-700"
+                            data-ai-hint={img?.imageHint}
+                          />
+                          <div className="absolute top-6 right-6">
+                            <Badge className="bg-white/90 backdrop-blur-md text-primary font-bold shadow-lg border-none px-4 py-1">
+                              {member.level}
+                            </Badge>
+                          </div>
+                          <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-primary/90 via-primary/40 to-transparent">
+                             <div className="flex items-center gap-2 text-accent mb-2">
+                               <BadgeCheck className="w-5 h-5 fill-accent text-primary" />
+                               <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white">Verified ID: {member.id}</span>
+                             </div>
+                             <h3 className="text-2xl font-headline font-bold text-white group-hover:text-accent transition-colors">
+                              {member.name}
+                            </h3>
+                          </div>
+                        </div>
+                      </CardHeader>
+                    ) : (
+                      <CardHeader className="p-8 pb-0 flex flex-col items-center text-center">
+                        <div className="mb-6">
+                           <Badge className="bg-primary text-white font-bold px-4 py-1">
                             {member.level}
                           </Badge>
                         </div>
-                        <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-primary/90 via-primary/40 to-transparent">
-                           <div className="flex items-center gap-2 text-accent mb-2">
-                             <BadgeCheck className="w-5 h-5 fill-accent text-primary" />
-                             <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white">Verified ID: {member.id}</span>
-                           </div>
-                           <h3 className="text-2xl font-headline font-bold text-white group-hover:text-accent transition-colors">
-                            {member.name}
-                          </h3>
+                        <div className="w-20 h-20 rounded-full bg-slate-50 flex items-center justify-center mb-4 group-hover:bg-accent/10 transition-colors">
+                          <User className="w-10 h-10 text-slate-300 group-hover:text-accent transition-colors" />
                         </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="p-8 space-y-4">
+                        <h3 className="text-2xl font-headline font-bold text-primary group-hover:text-accent transition-colors">
+                          {member.name}
+                        </h3>
+                      </CardHeader>
+                    )}
+                    <CardContent className="p-8 space-y-4 flex-1">
+                      {isDistrict && (
+                        <div className="flex items-start gap-4 mb-2">
+                          <div className="p-2 bg-slate-50 rounded-xl group-hover:bg-accent/10 transition-colors">
+                            <Hash className="w-5 h-5 text-slate-400 group-hover:text-accent" />
+                          </div>
+                          <div>
+                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">ID Card Number</p>
+                            <p className="font-bold text-accent font-mono">{member.id}</p>
+                          </div>
+                        </div>
+                      )}
+
                       <div className="flex items-start gap-4">
                         <div className="p-2 bg-slate-50 rounded-xl group-hover:bg-accent/10 transition-colors">
                           <Briefcase className="w-5 h-5 text-slate-400 group-hover:text-accent" />
