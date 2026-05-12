@@ -75,18 +75,20 @@ function BackgroundDecor() {
 
 function IndianFlag() {
   return (
-    <div className="animate-flag-wave origin-left relative mb-8 self-start ml-4 md:ml-8">
-      <div className="flex flex-col w-16 h-10 md:w-28 md:h-16 rounded-sm shadow-2xl shrink-0 overflow-hidden relative">
-        <div className="h-1/3 bg-[#FF9933]"></div>
+    <div className="animate-flag-wave origin-left relative mb-12 self-start ml-4 md:ml-12">
+      {/* Flag Container */}
+      <div className="flex flex-col w-20 h-12 md:w-36 md:h-24 rounded-sm shadow-[0_20px_50px_rgba(0,0,0,0.3)] shrink-0 overflow-hidden relative border-l border-white/20">
+        {/* Colors */}
+        <div className="h-1/3 bg-[#FF9933] relative"></div>
         <div className="h-1/3 bg-white flex items-center justify-center relative">
           <div className="absolute inset-0 flex items-center justify-center">
-             <div className="w-3 h-3 md:w-5 md:h-5 rounded-full border-[0.5px] border-[#000080] flex items-center justify-center">
+             <div className="w-4 h-4 md:w-8 md:h-8 rounded-full border-[0.5px] border-[#000080]/60 flex items-center justify-center">
                <div className="w-0.5 h-0.5 bg-[#000080] rounded-full"></div>
                <div className="absolute inset-0 flex items-center justify-center">
                   {[...Array(24)].map((_, i) => (
                     <div 
                       key={i} 
-                      className="absolute w-[0.5px] h-1.5 md:h-2 bg-[#000080]/80" 
+                      className="absolute w-[0.5px] h-2 md:h-4 bg-[#000080]/70" 
                       style={{ transform: `rotate(${i * 15}deg)` }}
                     />
                   ))}
@@ -96,19 +98,27 @@ function IndianFlag() {
         </div>
         <div className="h-1/3 bg-[#138808]"></div>
         
-        {/* Cloth ripples and shadows */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/20 via-white/20 to-black/20 bg-[length:200%_100%] animate-flag-ripple pointer-events-none mix-blend-overlay"></div>
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-black/10 to-transparent bg-[length:150%_100%] animate-flag-ripple-alt pointer-events-none mix-blend-multiply opacity-30"></div>
+        {/* Real Cloth Texturing */}
+        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/natural-paper.png')] opacity-30 pointer-events-none"></div>
+        
+        {/* Complex Light & Shadow Layers */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black/30 via-transparent to-black/30 bg-[length:150%_100%] animate-flag-ripple pointer-events-none mix-blend-multiply"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-white/10 via-white/40 to-white/10 bg-[length:200%_100%] animate-flag-ripple-alt pointer-events-none mix-blend-overlay"></div>
+        
+        {/* Highlight Layer */}
+        <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent opacity-40 pointer-events-none"></div>
       </div>
-      {/* Flagpole */}
-      <div className="absolute -left-1.5 -top-2 bottom-[-10px] w-1.5 bg-gradient-to-r from-slate-600 via-slate-300 to-slate-500 rounded-full shadow-lg"></div>
+      
+      {/* Ornate Flagpole */}
+      <div className="absolute -left-2 -top-4 bottom-[-20px] w-2 bg-gradient-to-r from-slate-400 via-slate-100 to-slate-400 rounded-full shadow-2xl">
+        <div className="absolute -top-3 -left-1 w-4 h-4 rounded-full bg-gradient-to-tr from-yellow-600 via-yellow-200 to-yellow-600 shadow-lg"></div>
+      </div>
     </div>
   )
 }
 
 export default function Home() {
   const heroImg = PlaceHolderImages.find(img => img.id === 'hero-human-rights')
-  const nitiLogo = PlaceHolderImages.find(img => img.id === 'niti-logo')
 
   return (
     <main className="min-h-screen relative">
@@ -133,17 +143,6 @@ export default function Home() {
             <div className="flex flex-col items-center gap-6 w-full">
               <IndianFlag />
               
-              {nitiLogo && (
-                <div className="relative w-32 h-32 md:w-56 md:h-56 transition-transform hover:scale-105 duration-700 mx-auto">
-                  <Image 
-                    src="/Niti.png" 
-                    alt="Niti Aayog Registered Emblem" 
-                    fill 
-                    className="object-contain mix-blend-screen opacity-90"
-                  />
-                </div>
-              )}
-              
               <div className="font-headline font-bold text-[5.5vw] sm:text-[4.5vw] md:text-[5vw] lg:text-[5.5vw] xl:text-[6vw] tracking-tighter leading-none whitespace-nowrap overflow-visible drop-shadow-[0_10px_10px_rgba(0,0,0,0.5)] mx-auto">
                 <Typewriter 
                   text="Human Rights Affairs Trust" 
@@ -159,7 +158,7 @@ export default function Home() {
               </div>
             </div>
             
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-headline font-bold leading-tight max-w-5xl mx-auto bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-cyan-400 bg-[length:200%_auto] bg-clip-text text-transparent animate-gradient-x py-2">
+            <h1 className="text-5xl md:text-7xl lg:text-8xl font-headline font-bold leading-tight max-w-5xl mx-auto bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-cyan-400 bg-[length:200%_auto] bg-clip-text text-transparent animate-gradient-x py-4">
               Upholding Justice. Empowering Citizens.
             </h1>
             
@@ -179,18 +178,18 @@ export default function Home() {
             </div>
 
             <div className="w-full pt-12 max-w-6xl mx-auto">
-              <div className="glass-dark rounded-[2rem] md:rounded-[3.5rem] p-6 md:p-10 grid grid-cols-2 lg:grid-cols-4 gap-6 md:gap-12 border-white/10 overflow-hidden">
+              <div className="glass-dark rounded-[2rem] md:rounded-[3.5rem] p-6 md:p-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-12 border-white/10 overflow-hidden">
                 {[
                   { icon: <Gavel className="w-6 h-6 md:w-10 md:h-10 text-accent" />, count: "25k+", label: "Legal Cases Resolved" },
                   { icon: <Users className="w-6 h-6 md:w-10 md:h-10 text-emerald-400" />, count: "500+", label: "Expert Advocates" },
                   { icon: <Shield className="w-6 h-6 md:w-10 md:h-10 text-indigo-400" />, count: "100%", label: "Secure Data Handling" },
                   { icon: <HeartHandshake className="w-6 h-6 md:w-10 md:h-10 text-pink-400" />, count: "50+", label: "National Centers" }
                 ].map((stat, i) => (
-                  <div key={i} className="flex flex-col md:flex-row items-center gap-4 md:gap-6 text-white hover:scale-105 transition-transform cursor-default justify-center">
+                  <div key={i} className="flex items-center gap-4 md:gap-6 text-white hover:scale-105 transition-transform cursor-default justify-start sm:justify-center">
                     <div className="p-3 md:p-5 bg-white/10 rounded-xl md:rounded-3xl shrink-0">{stat.icon}</div>
-                    <div className="space-y-1 text-center md:text-left">
-                      <p className="text-xl md:text-3xl font-bold font-headline">{stat.count}</p>
-                      <p className="text-[9px] md:text-xs font-bold uppercase tracking-widest text-slate-300 leading-tight">
+                    <div className="space-y-1 text-left">
+                      <p className="text-2xl md:text-3xl font-bold font-headline">{stat.count}</p>
+                      <p className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-slate-300 leading-tight">
                         {stat.label}
                       </p>
                     </div>
