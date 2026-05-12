@@ -76,9 +76,8 @@ export default function Home() {
               </div>
             </div>
             
-            <h1 className="text-5xl md:text-7xl font-headline font-bold leading-tight">
-              Upholding <span className="text-accent italic">Justice</span> <br/> 
-              Empowering <span className="text-emerald-400">Citizens</span>.
+            <h1 className="text-4xl md:text-5xl font-headline font-bold leading-tight">
+              Upholding <span className="text-accent italic">Justice</span> & Empowering <span className="text-emerald-400">Citizens</span>.
             </h1>
             
             <p className="text-xl md:text-2xl text-slate-200 font-body max-w-2xl leading-relaxed">
