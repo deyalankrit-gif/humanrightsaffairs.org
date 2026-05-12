@@ -85,7 +85,7 @@ export default function Home() {
             <div className="flex flex-col items-center gap-2 w-full">
               {/* Official Emblem */}
               <div className="flex flex-col items-center group mb-4">
-                <div className="relative w-32 h-40 md:w-48 md:h-60 transition-transform hover:scale-105 duration-500">
+                <div className="relative w-32 h-40 md:w-40 md:h-52 transition-transform hover:scale-105 duration-500">
                   <Image 
                     src="/Niti3.png" 
                     alt="Official Emblem" 
@@ -95,9 +95,9 @@ export default function Home() {
                 </div>
               </div>
               
-              {/* Organization Title with Typewriter effect - Slightly smaller font size */}
-              <div className="font-headline font-bold text-3xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl tracking-tight leading-tight min-h-[1.5em] flex justify-center items-center">
-                <span className="bg-gradient-to-r from-[#FF9933] via-white to-[#138808] bg-clip-text text-transparent italic block drop-shadow-sm">
+              {/* Organization Title with Typewriter effect - Adjusted size for balance and fixed clipping */}
+              <div className="font-headline font-bold text-2xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl tracking-tight leading-tight min-h-[1.5em] flex justify-center items-center overflow-visible">
+                <span className="bg-gradient-to-r from-[#FF9933] via-white to-[#138808] bg-clip-text text-transparent italic block drop-shadow-sm px-4 pb-4">
                   <Typewriter 
                     text="Human Rights Affairs Trust" 
                     speed={80} 
