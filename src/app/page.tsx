@@ -19,9 +19,9 @@ function BackgroundDecor() {
   const heroImg = PlaceHolderImages.find(img => img.id === 'hero-human-rights')
 
   return (
-    <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden select-none opacity-40">
+    <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden select-none opacity-30">
       {/* Floating Faint Images */}
-      <div className="absolute top-[10%] right-[15%] w-64 h-64 rounded-full overflow-hidden opacity-[0.04] blur-[2px] animate-float">
+      <div className="absolute top-[10%] right-[15%] w-64 h-64 rounded-full overflow-hidden opacity-[0.05] blur-[2px] animate-float">
         <Image 
           src={libraryImg?.imageUrl || ''} 
           alt="Legal Heritage" 
@@ -29,7 +29,7 @@ function BackgroundDecor() {
           className="object-cover grayscale"
         />
       </div>
-      <div className="absolute bottom-[15%] right-[25%] w-80 h-80 rounded-[3rem] overflow-hidden opacity-[0.03] blur-[1px] animate-float animate-delay-500">
+      <div className="absolute bottom-[15%] right-[25%] w-80 h-80 rounded-[3rem] overflow-hidden opacity-[0.04] blur-[1px] animate-float animate-delay-500">
         <Image 
           src={heroImg?.imageUrl || ''} 
           alt="Unity" 
@@ -79,35 +79,35 @@ export default function Home() {
       <Navbar />
       
       {/* Hero Section */}
-      <section className="relative h-screen flex items-center overflow-hidden pt-20">
+      <section className="relative min-h-[90vh] flex items-center overflow-hidden pt-24 pb-32">
         <div className="absolute inset-0 z-0">
           <Image 
             src={heroImg?.imageUrl || ''} 
             alt="Human Rights Unity" 
             fill 
-            className="object-cover brightness-[0.3] scale-105"
+            className="object-cover brightness-[0.25] scale-105"
             priority
             data-ai-hint={heroImg?.imageHint}
           />
-          <div className="absolute inset-0 bg-gradient-to-tr from-primary via-primary/60 to-transparent"></div>
+          <div className="absolute inset-0 bg-gradient-to-tr from-primary via-primary/70 to-transparent"></div>
         </div>
 
         <div className="container mx-auto px-4 relative z-10 text-white">
-          <div className="max-w-7xl space-y-8 animate-fade-in-up">
+          <div className="max-w-6xl space-y-10 animate-fade-in-up">
             <div className="space-y-6">
-              <div className="flex flex-col md:flex-row items-start md:items-center gap-6 overflow-hidden">
+              <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
                 {/* Indian Tricolor Flag */}
-                <div className="flex flex-col w-20 h-12 rounded-md overflow-hidden shadow-2xl border border-white/20 shrink-0">
+                <div className="flex flex-col w-16 h-10 rounded shadow-2xl border border-white/20 shrink-0">
                   <div className="h-1/3 bg-[#FF9933]"></div>
                   <div className="h-1/3 bg-white flex items-center justify-center relative">
                     <div className="absolute inset-0 flex items-center justify-center">
-                       <div className="w-3 h-3 rounded-full border border-[#000080] flex items-center justify-center">
-                         <div className="w-1 h-1 bg-[#000080] rounded-full"></div>
+                       <div className="w-2.5 h-2.5 rounded-full border border-[#000080] flex items-center justify-center">
+                         <div className="w-0.5 h-0.5 bg-[#000080] rounded-full"></div>
                          <div className="absolute inset-0 flex items-center justify-center">
                             {[...Array(24)].map((_, i) => (
                               <div 
                                 key={i} 
-                                className="absolute w-px h-1.5 bg-[#000080]/30" 
+                                className="absolute w-px h-1 bg-[#000080]/30" 
                                 style={{ transform: `rotate(${i * 15}deg)` }}
                               />
                             ))}
@@ -118,12 +118,12 @@ export default function Home() {
                   <div className="h-1/3 bg-[#138808]"></div>
                 </div>
                 
-                <div className="font-headline font-bold text-4xl md:text-6xl lg:text-7xl tracking-tight leading-tight whitespace-nowrap">
+                <div className="font-headline font-bold text-3xl md:text-5xl lg:text-6xl tracking-tight leading-none whitespace-nowrap overflow-visible">
                   <Typewriter 
                     text="Human Rights Affairs Trust" 
-                    speed={100} 
-                    delay={500} 
-                    className="bg-gradient-to-r from-[#FF9933] via-white to-[#138808] bg-clip-text text-transparent drop-shadow-sm italic" 
+                    speed={80} 
+                    delay={400} 
+                    className="bg-gradient-to-r from-[#FF9933] via-white to-[#138808] bg-clip-text text-transparent drop-shadow-lg italic" 
                   />
                 </div>
               </div>
@@ -142,13 +142,13 @@ export default function Home() {
               We provide a robust shield against injustice through expert legal guidance, community-led support, and radical constitutional transparency.
             </p>
             
-            <div className="flex flex-wrap gap-4 pt-4">
+            <div className="flex flex-wrap gap-5 pt-4">
               <DonationDialog>
-                <Button size="lg" className="bg-accent text-primary font-bold hover:bg-accent/90 px-8 py-7 rounded-2xl text-xl shadow-lg shadow-accent/20 transition-all hover:-translate-y-1">
+                <Button size="lg" className="bg-accent text-primary font-bold hover:bg-accent/90 px-8 py-7 rounded-2xl text-xl shadow-xl shadow-accent/20 transition-all hover:-translate-y-1">
                   Get Free Legal Aid <ArrowRight className="ml-2 w-6 h-6" />
                 </Button>
               </DonationDialog>
-              <Button size="lg" variant="outline" className="border-white/40 text-white hover:bg-white/10 px-8 py-7 rounded-2xl text-xl backdrop-blur-sm transition-all">
+              <Button size="lg" variant="outline" className="border-white/50 text-white bg-white/5 hover:bg-white/10 px-8 py-7 rounded-2xl text-xl backdrop-blur-md transition-all border-2">
                 Explore Rights Library
               </Button>
             </div>
@@ -156,7 +156,7 @@ export default function Home() {
         </div>
 
         {/* Floating Stats */}
-        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 w-full container px-4 hidden lg:block animate-fade-in-up animate-delay-500">
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 w-full container px-4 hidden lg:block animate-fade-in-up animate-delay-500">
            <div className="glass-dark rounded-[2.5rem] p-8 grid grid-cols-4 gap-8">
              {[
                { icon: <Gavel className="w-6 h-6 text-accent" />, count: "25k+", label: "Legal Cases Resolved" },
@@ -177,7 +177,7 @@ export default function Home() {
       </section>
 
       {/* AI Search Section */}
-      <section className="py-24 bg-white/50 backdrop-blur-sm relative overflow-hidden">
+      <section id="search" className="py-24 bg-white/50 backdrop-blur-sm relative overflow-hidden">
         <div className="absolute top-0 right-0 w-64 h-64 bg-accent/5 rounded-full blur-[100px]"></div>
         <div className="container mx-auto px-4 relative z-10">
           <div className="text-center mb-16 animate-fade-in-up">

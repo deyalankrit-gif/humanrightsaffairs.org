@@ -37,7 +37,7 @@ export function Navbar() {
           if (el) {
             const rect = el.getBoundingClientRect()
             // If the section is near the top of the viewport
-            if (rect.top <= 150 && rect.bottom >= 150) {
+            if (rect.top <= 200 && rect.bottom >= 200) {
               currentSection = `#${section}`
               break
             }
@@ -54,7 +54,7 @@ export function Navbar() {
   }, [isHome])
 
   const navColorClass = (isScrolled || !isHome) ? 'text-primary' : 'text-white'
-  const bgColorClass = (isScrolled || !isHome) ? 'bg-white/90 backdrop-blur-md shadow-lg py-3' : 'bg-transparent py-5'
+  const bgColorClass = (isScrolled || !isHome) ? 'bg-white/95 backdrop-blur-md shadow-lg py-3' : 'bg-transparent py-6'
 
   return (
     <nav className={cn(
