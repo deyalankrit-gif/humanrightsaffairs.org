@@ -1,4 +1,3 @@
-
 import Image from 'next/image'
 import { Navbar } from '@/components/navbar'
 import { ChairmanMessage } from '@/components/chairman-message'
@@ -98,28 +97,30 @@ export default function Home() {
           <div className="max-w-full space-y-8 md:space-y-12 animate-fade-in-up">
             <div className="space-y-4 md:space-y-6">
               <div className="flex flex-col items-start gap-4 md:gap-6">
-                <div className="flex flex-col w-12 h-7 md:w-20 md:h-12 rounded shadow-2xl border border-white/30 shrink-0 overflow-hidden">
-                  <div className="h-1/3 bg-[#FF9933]"></div>
-                  <div className="h-1/3 bg-white flex items-center justify-center relative">
-                    <div className="absolute inset-0 flex items-center justify-center">
-                       <div className="w-1.5 h-1.5 md:w-3 md:h-3 rounded-full border border-[#000080] flex items-center justify-center">
-                         <div className="w-0.5 h-0.5 bg-[#000080] rounded-full"></div>
-                         <div className="absolute inset-0 flex items-center justify-center">
-                            {[...Array(24)].map((_, i) => (
-                              <div 
-                                key={i} 
-                                className="absolute w-px h-0.5 md:h-1 bg-[#000080]/40" 
-                                style={{ transform: `rotate(${i * 15}deg)` }}
-                              />
-                            ))}
+                <div className="animate-flag-wave origin-left">
+                  <div className="flex flex-col w-12 h-7 md:w-20 md:h-12 rounded shadow-2xl border border-white/30 shrink-0 overflow-hidden">
+                    <div className="h-1/3 bg-[#FF9933]"></div>
+                    <div className="h-1/3 bg-white flex items-center justify-center relative">
+                      <div className="absolute inset-0 flex items-center justify-center">
+                         <div className="w-1.5 h-1.5 md:w-3 md:h-3 rounded-full border border-[#000080] flex items-center justify-center">
+                           <div className="w-0.5 h-0.5 bg-[#000080] rounded-full"></div>
+                           <div className="absolute inset-0 flex items-center justify-center">
+                              {[...Array(24)].map((_, i) => (
+                                <div 
+                                  key={i} 
+                                  className="absolute w-px h-0.5 md:h-1 bg-[#000080]/40" 
+                                  style={{ transform: `rotate(${i * 15}deg)` }}
+                                />
+                              ))}
+                           </div>
                          </div>
-                       </div>
+                      </div>
                     </div>
+                    <div className="h-1/3 bg-[#138808]"></div>
                   </div>
-                  <div className="h-1/3 bg-[#138808]"></div>
                 </div>
                 
-                <div className="font-headline font-bold text-2xl sm:text-4xl md:text-6xl lg:text-7xl xl:text-8xl tracking-tighter leading-none whitespace-nowrap overflow-visible drop-shadow-2xl">
+                <div className="font-headline font-bold text-3xl sm:text-5xl md:text-7xl lg:text-8xl xl:text-9xl tracking-tighter leading-none whitespace-nowrap overflow-visible drop-shadow-2xl">
                   <Typewriter 
                     text="Human Rights Affairs Trust" 
                     speed={80} 
@@ -135,7 +136,7 @@ export default function Home() {
               </div>
             </div>
             
-            <h1 className="text-xl md:text-4xl lg:text-5xl font-headline font-bold leading-tight max-w-4xl">
+            <h1 className="text-xl md:text-3xl lg:text-4xl font-headline font-bold leading-tight max-w-4xl">
               Upholding Justice Empowering Citizens.
             </h1>
             

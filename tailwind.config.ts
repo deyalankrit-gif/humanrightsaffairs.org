@@ -88,6 +88,10 @@ export default {
         'blink': {
           '0%, 100%': { opacity: '1' },
           '50%': { opacity: '0' },
+        },
+        'flag-wave': {
+          '0%, 100%': { transform: 'rotate(-1deg) translateY(0)' },
+          '50%': { transform: 'rotate(2deg) translateY(-2px)' },
         }
       },
       animation: {
@@ -98,6 +102,7 @@ export default {
         'shimmer': 'shimmer 2s infinite',
         'glow': 'glow 2s ease-in-out infinite',
         'blink': 'blink 1s step-end infinite',
+        'flag-wave': 'flag-wave 3s ease-in-out infinite',
       },
     },
   },
