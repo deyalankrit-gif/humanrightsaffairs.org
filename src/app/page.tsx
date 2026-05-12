@@ -132,14 +132,14 @@ export default function Home() {
               <div className="flex flex-col items-start gap-4 md:gap-6">
                 <IndianFlag />
                 
-                {/* Emblem Image positioned directly above the organization name */}
+                {/* Emblem Image with blend mode and opacity for seamless background integration */}
                 {nityDarpanImg && (
                   <div className="relative w-48 h-20 md:w-80 md:h-32 -mb-2 md:-mb-4">
                     <Image
                       src={nityDarpanImg.imageUrl}
                       alt={nityDarpanImg.description}
                       fill
-                      className="object-contain"
+                      className="object-contain mix-blend-plus-lighter opacity-90 transition-opacity hover:opacity-100"
                     />
                   </div>
                 )}
