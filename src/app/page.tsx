@@ -133,14 +133,16 @@ export default function Home() {
                 <IndianFlag />
                 
                 {/* Emblem Image positioned directly above the organization name */}
-                <div className="relative w-48 h-20 md:w-80 md:h-32 -mb-2 md:-mb-4">
-                  <Image
-                    src={nityDarpanImg?.imageUrl || ''}
-                    alt="NITI DARPAN Emblem"
-                    fill
-                    className="object-contain"
-                  />
-                </div>
+                {nityDarpanImg && (
+                  <div className="relative w-48 h-20 md:w-80 md:h-32 -mb-2 md:-mb-4">
+                    <Image
+                      src={nityDarpanImg.imageUrl}
+                      alt={nityDarpanImg.description}
+                      fill
+                      className="object-contain"
+                    />
+                  </div>
+                )}
 
                 <div className="font-headline font-bold text-[8vw] sm:text-[7vw] md:text-[6.5vw] lg:text-[7vw] xl:text-[7.5vw] tracking-tighter leading-none whitespace-nowrap overflow-visible drop-shadow-2xl">
                   <Typewriter 
