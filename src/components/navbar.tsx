@@ -7,6 +7,7 @@ import { Shield, Menu, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import { usePathname } from 'next/navigation'
+import { DonationDialog } from './donation-dialog'
 
 const navLinks = [
   { name: 'Home', href: '/' },
@@ -56,12 +57,14 @@ export function Navbar() {
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-accent transition-all duration-300 group-hover:w-full"></span>
             </Link>
           ))}
-          <Button 
-            variant="default" 
-            className="bg-accent text-primary hover:bg-accent/90 rounded-full px-8 font-bold shadow-lg shadow-accent/20 transition-transform active:scale-95"
-          >
-            Donate
-          </Button>
+          <DonationDialog>
+            <Button 
+              variant="default" 
+              className="bg-accent text-primary hover:bg-accent/90 rounded-full px-8 font-bold shadow-lg shadow-accent/20 transition-transform active:scale-95"
+            >
+              Donate
+            </Button>
+          </DonationDialog>
         </div>
 
         {/* Mobile Nav */}
@@ -83,9 +86,11 @@ export function Navbar() {
                     {link.name}
                   </Link>
                 ))}
-                <Button className="w-full bg-primary text-white py-6 text-lg mt-4 shadow-xl">
-                  Donate Now
-                </Button>
+                <DonationDialog>
+                  <Button className="w-full bg-primary text-white py-6 text-lg mt-4 shadow-xl">
+                    Donate Now
+                  </Button>
+                </DonationDialog>
               </div>
             </SheetContent>
           </Sheet>

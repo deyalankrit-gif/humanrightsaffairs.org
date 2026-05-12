@@ -1,6 +1,7 @@
 
 import { Shield, Mail, Phone, MapPin, Facebook, Twitter, Instagram, Youtube } from 'lucide-react'
 import Link from 'next/link'
+import { DonationDialog } from './donation-dialog'
 
 export function Footer() {
   return (
@@ -37,11 +38,15 @@ export function Footer() {
           <div>
             <h4 className="text-lg font-headline font-bold mb-6 text-accent">Quick Links</h4>
             <ul className="space-y-4 text-indigo-100">
-              <li><Link href="#leadership" className="hover:text-white transition-colors">Chairman's Message</Link></li>
-              <li><Link href="#knowledge" className="hover:text-white transition-colors">Rights Center</Link></li>
-              <li><Link href="#membership" className="hover:text-white transition-colors">Become a Member</Link></li>
-              <li><Link href="#helpline" className="hover:text-white transition-colors">Emergency Contacts</Link></li>
-              <li><Link href="#" className="hover:text-white transition-colors">Donate Now</Link></li>
+              <li><Link href="/#leadership" className="hover:text-white transition-colors">Chairman's Message</Link></li>
+              <li><Link href="/#knowledge" className="hover:text-white transition-colors">Rights Center</Link></li>
+              <li><Link href="/#membership" className="hover:text-white transition-colors">Become a Member</Link></li>
+              <li><Link href="/#helpline" className="hover:text-white transition-colors">Emergency Contacts</Link></li>
+              <li>
+                <DonationDialog>
+                  <button className="hover:text-white transition-colors">Donate Now</button>
+                </DonationDialog>
+              </li>
             </ul>
           </div>
 

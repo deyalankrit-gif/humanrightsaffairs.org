@@ -1,3 +1,4 @@
+
 import Image from 'next/image'
 import { Navbar } from '@/components/navbar'
 import { ChairmanMessage } from '@/components/chairman-message'
@@ -10,6 +11,7 @@ import { Footer } from '@/components/footer'
 import { Button } from '@/components/ui/button'
 import { PlaceHolderImages } from '@/lib/placeholder-images'
 import { Shield, Scale, Users, HeartHandshake, ArrowRight, Gavel, CheckCircle2 } from 'lucide-react'
+import { DonationDialog } from '@/components/donation-dialog'
 
 export default function Home() {
   const heroImg = PlaceHolderImages.find(img => img.id === 'hero-human-rights')
@@ -46,9 +48,11 @@ export default function Home() {
               We provide a robust shield against injustice through expert legal guidance, community-led support, and radical constitutional transparency.
             </p>
             <div className="flex flex-wrap gap-4 pt-4">
-              <Button size="lg" className="bg-accent text-primary font-bold hover:bg-accent/90 px-8 py-7 rounded-2xl text-xl shadow-lg shadow-accent/20 transition-all hover:-translate-y-1">
-                Get Free Legal Aid <ArrowRight className="ml-2 w-6 h-6" />
-              </Button>
+              <DonationDialog>
+                <Button size="lg" className="bg-accent text-primary font-bold hover:bg-accent/90 px-8 py-7 rounded-2xl text-xl shadow-lg shadow-accent/20 transition-all hover:-translate-y-1">
+                  Get Free Legal Aid <ArrowRight className="ml-2 w-6 h-6" />
+                </Button>
+              </DonationDialog>
               <Button size="lg" variant="outline" className="border-white/40 text-white hover:bg-white/10 px-8 py-7 rounded-2xl text-xl backdrop-blur-sm transition-all">
                 Explore Rights Library
               </Button>
@@ -114,9 +118,11 @@ export default function Home() {
                 Your contributions help us provide free legal aid to the marginalized and run awareness campaigns across rural India. All donations are tax-exempt under 80G.
               </p>
               <div className="pt-4 flex flex-col md:flex-row gap-6 justify-center">
-                <Button className="bg-accent text-primary font-bold hover:bg-accent/90 hover:scale-105 active:scale-95 transition-all px-12 py-8 rounded-2xl text-xl shadow-xl shadow-accent/20">
-                  Donate Securely Now
-                </Button>
+                <DonationDialog>
+                  <Button className="bg-accent text-primary font-bold hover:bg-accent/90 hover:scale-105 active:scale-95 transition-all px-12 py-8 rounded-2xl text-xl shadow-xl shadow-accent/20">
+                    Donate Securely Now
+                  </Button>
+                </DonationDialog>
                 <div className="flex flex-col items-center md:items-start justify-center text-left space-y-2">
                   <p className="font-bold flex items-center gap-2 text-emerald-400">
                     <CheckCircle2 className="w-5 h-5" /> Instant Receipt Generation

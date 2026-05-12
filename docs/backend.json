@@ -1,0 +1,35 @@
+
+{
+  "entities": {
+    "Donation": {
+      "title": "Donation",
+      "description": "Details of a donation made to the Human Rights Affairs Trust.",
+      "type": "object",
+      "properties": {
+        "donorName": { "type": "string" },
+        "donorEmail": { "type": "string", "format": "email" },
+        "donorPhone": { "type": "string" },
+        "donorAddress": { "type": "string" },
+        "panNumber": { "type": "string" },
+        "aadhaarNumber": { "type": "string" },
+        "amount": { "type": "number" },
+        "currency": { "type": "string", "enum": ["INR", "USD", "EUR"] },
+        "paymentMethod": { "type": "string" },
+        "transactionId": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "completed", "failed"] },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "donorPhotoUrl": { "type": "string" }
+      },
+      "required": ["donorName", "donorEmail", "amount", "panNumber"]
+    }
+  },
+  "auth": {
+    "providers": ["google", "password"]
+  },
+  "firestore": {
+    "/donations/{donationId}": {
+      "schema": "Donation",
+      "description": "Collection of all donations received."
+    }
+  }
+}
