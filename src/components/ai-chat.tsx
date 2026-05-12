@@ -2,6 +2,7 @@
 "use client"
 
 import React from 'react'
+import Image from 'next/image'
 import { MessageSquare, Send, X, Bot, ShieldAlert, Sparkles } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -64,13 +65,20 @@ export function AIChat() {
       {!isOpen && (
         <Button 
           onClick={() => setIsOpen(true)}
-          className="h-16 w-16 rounded-full shadow-2xl bg-primary hover:bg-primary/90 flex items-center justify-center p-0 overflow-hidden group"
+          className="h-16 w-16 rounded-full shadow-2xl bg-primary hover:bg-primary/90 flex items-center justify-center p-0 overflow-hidden group border-2 border-white/20"
         >
           <div className="absolute inset-0 bg-accent transform scale-0 group-hover:scale-100 transition-transform duration-500 rounded-full opacity-20"></div>
-          <MessageSquare className="w-7 h-7 text-white relative z-10" />
-          <div className="absolute -top-1 -right-1 flex h-5 w-5">
+          <div className="relative w-full h-full">
+            <Image 
+              src="/advocate.jpeg" 
+              alt="AI Legal Advocate" 
+              fill 
+              className="object-cover"
+            />
+          </div>
+          <div className="absolute -top-1 -right-1 flex h-6 w-6 z-20">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-5 w-5 bg-accent text-[10px] font-bold text-primary items-center justify-center">AI</span>
+            <span className="relative inline-flex rounded-full h-6 w-6 bg-accent text-[11px] font-bold text-primary items-center justify-center border-2 border-primary shadow-sm">AI</span>
           </div>
         </Button>
       )}
@@ -79,9 +87,14 @@ export function AIChat() {
         <Card className="w-[350px] md:w-[400px] h-[550px] flex flex-col shadow-2xl border-2 border-primary/10 overflow-hidden animate-in slide-in-from-bottom-4 duration-300">
           <CardHeader className="bg-primary text-white p-4 space-y-1">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="bg-accent/20 p-2 rounded-lg">
-                  <Bot className="w-5 h-5 text-accent" />
+              <div className="flex items-center gap-3">
+                <div className="relative w-12 h-12 rounded-xl overflow-hidden border-2 border-accent/40 shadow-inner">
+                  <Image 
+                    src="/advocate.jpeg" 
+                    alt="JusticeBot Avatar" 
+                    fill 
+                    className="object-cover"
+                  />
                 </div>
                 <div>
                   <CardTitle className="text-lg font-headline">JusticeBot AI</CardTitle>

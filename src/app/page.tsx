@@ -1,4 +1,5 @@
 
+
 import Image from 'next/image'
 import { Navbar } from '@/components/navbar'
 import { ChairmanMessage } from '@/components/chairman-message'
@@ -63,8 +64,7 @@ export default function Home() {
       <BackgroundDecor />
       <Navbar />
       
-      {/* Increased padding-top to ensure the flag doesn't touch the header */}
-      <section className="relative min-h-screen flex flex-col items-center pt-32 md:pt-40 pb-20">
+      <section className="relative min-h-screen flex flex-col items-center pt-36 md:pt-48 pb-20">
         <div className="absolute inset-0 z-0">
           <Image 
             src="/Human R2.jpeg" 
@@ -94,12 +94,11 @@ export default function Home() {
                 <div className="flex flex-col items-center -mt-6 md:-mt-10 text-white drop-shadow-md space-y-1 relative z-20">
                    <p className="text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] leading-tight">Niti Aayog registered</p>
                    <p className="text-[9px] md:text-[11px] font-bold uppercase tracking-[0.15em] leading-tight opacity-90">National Informatics Centre</p>
-                   {/* Increased font size for Government of India */}
-                   <p className="text-[13px] md:text-[16px] font-bold uppercase tracking-[0.2em] leading-tight">Government of India</p>
+                   <p className="text-[15px] md:text-[18px] font-bold uppercase tracking-[0.2em] leading-tight">Government of India</p>
                 </div>
               </div>
               
-              <div className="font-headline font-bold text-4xl sm:text-6xl md:text-7xl lg:text-8xl tracking-tight leading-tight min-h-[1.5em] flex justify-center items-center overflow-visible mt-4 md:mt-8">
+              <div className="font-headline font-bold text-5xl sm:text-7xl md:text-8xl lg:text-9xl tracking-tight leading-tight min-h-[1.5em] flex justify-center items-center overflow-visible mt-4 md:mt-8">
                 <span className="bg-gradient-to-r from-[#FF9933] via-white to-[#138808] bg-clip-text text-transparent italic block drop-shadow-sm px-4 pb-4">
                   <Typewriter 
                     text="Human Rights Affairs Trust" 
