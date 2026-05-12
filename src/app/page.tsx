@@ -119,7 +119,7 @@ export default function Home() {
       <section className="relative min-h-screen flex flex-col items-center pt-32 pb-24">
         <div className="absolute inset-0 z-0">
           <Image 
-            src="/Human Rights.jpeg" 
+            src="/Human R2.jpeg" 
             alt="Human Rights Heritage" 
             fill 
             className="object-cover brightness-[0.25] scale-105 grayscale"
@@ -145,7 +145,7 @@ export default function Home() {
               </div>
               
               {/* Slightly smaller Title with Typewriter effect */}
-              <div className="font-headline font-bold text-2xl sm:text-4xl md:text-6xl lg:text-7xl tracking-tight leading-tight drop-shadow-xl min-h-[1.2em] flex justify-center items-center">
+              <div className="font-headline font-bold text-2xl sm:text-4xl md:text-5xl lg:text-6xl tracking-tight leading-tight drop-shadow-xl min-h-[1.2em] flex justify-center items-center">
                 <span className="bg-gradient-to-r from-[#FF9933] via-white to-[#138808] bg-clip-text text-transparent italic block">
                   <Typewriter 
                     text="Human Rights Affairs Trust" 
