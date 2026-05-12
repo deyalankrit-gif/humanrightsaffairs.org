@@ -17,7 +17,7 @@ const navLinks = [
   { name: 'Members', href: '/members' },
   { name: 'Rights Center', href: '/#knowledge' },
   { name: 'Helpline', href: '/#helpline' },
-  { name: 'Membership', href: '/#membership' },
+  { name: 'Be A Member', href: '/#membership' },
 ]
 
 export function Navbar() {
