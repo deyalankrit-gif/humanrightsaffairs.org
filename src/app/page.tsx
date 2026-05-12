@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button'
 import { PlaceHolderImages } from '@/lib/placeholder-images'
 import { Shield, Scale, Users, HeartHandshake, ArrowRight, Gavel, CheckCircle2, FileText, Heart, Globe } from 'lucide-react'
 import { DonationDialog } from '@/components/donation-dialog'
+import { Typewriter } from '@/components/typewriter'
 
 function BackgroundDecor() {
   const libraryImg = PlaceHolderImages.find(img => img.id === 'legal-library')
@@ -150,10 +151,14 @@ export default function Home() {
                 />
               </div>
               
-              {/* Human Rights Affairs Trust - Large static text */}
-              <div className="font-headline font-bold text-4xl sm:text-6xl md:text-8xl tracking-tight leading-tight drop-shadow-xl">
+              {/* Human Rights Affairs Trust - Large animated typewriter text */}
+              <div className="font-headline font-bold text-4xl sm:text-6xl md:text-8xl tracking-tight leading-tight drop-shadow-xl min-h-[1.2em] flex justify-center items-center">
                 <span className="bg-gradient-to-r from-[#FF9933] via-white to-[#138808] bg-clip-text text-transparent italic block">
-                  Human Rights Affairs Trust
+                  <Typewriter 
+                    text="Human Rights Affairs Trust" 
+                    speed={80} 
+                    delay={500}
+                  />
                 </span>
               </div>
               
