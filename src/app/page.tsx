@@ -75,24 +75,24 @@ function BackgroundDecor() {
 
 function IndianFlag() {
   return (
-    <div className="relative mb-6 md:mb-12 self-start ml-4 md:ml-12 h-10 md:h-24">
+    <div className="relative mb-6 md:mb-10 self-start ml-4 md:ml-12 h-8 md:h-16">
       {/* Static Flagpole */}
-      <div className="absolute -left-2 -top-4 bottom-[-15px] md:bottom-[-20px] w-1.5 md:w-2 bg-gradient-to-r from-slate-400 via-slate-100 to-slate-400 rounded-full shadow-2xl z-20">
-        <div className="absolute -top-2 -left-1 w-3 h-3 md:w-4 md:h-4 rounded-full bg-gradient-to-tr from-yellow-600 via-yellow-200 to-yellow-600 shadow-lg"></div>
+      <div className="absolute -left-1.5 -top-3 bottom-[-10px] md:bottom-[-15px] w-1 md:w-1.5 bg-gradient-to-r from-slate-400 via-slate-100 to-slate-400 rounded-full shadow-2xl z-20">
+        <div className="absolute -top-1.5 -left-0.5 w-2 h-2 md:w-3 md:h-3 rounded-full bg-gradient-to-tr from-yellow-600 via-yellow-200 to-yellow-600 shadow-lg"></div>
       </div>
 
-      {/* Fluttering Cloth Flag */}
-      <div className="animate-flag-wave origin-left flex flex-col w-20 h-12 md:w-44 md:h-28 rounded-sm shadow-[0_20px_50px_rgba(0,0,0,0.4)] shrink-0 overflow-hidden relative border-l border-white/20 z-10">
+      {/* Fluttering Cloth Flag - Smaller Dimensions */}
+      <div className="animate-flag-wave origin-left flex flex-col w-14 h-9 md:w-28 md:h-18 rounded-sm shadow-[0_15px_40px_rgba(0,0,0,0.4)] shrink-0 overflow-hidden relative border-l border-white/20 z-10">
         <div className="h-1/3 bg-[#FF9933] relative"></div>
         <div className="h-1/3 bg-white flex items-center justify-center relative">
           <div className="absolute inset-0 flex items-center justify-center">
-             <div className="w-3 h-3 md:w-8 md:h-8 rounded-full border-[0.5px] border-[#000080]/60 flex items-center justify-center">
+             <div className="w-2 h-2 md:w-5 md:h-5 rounded-full border-[0.3px] border-[#000080]/60 flex items-center justify-center">
                <div className="w-0.5 h-0.5 bg-[#000080] rounded-full"></div>
                <div className="absolute inset-0 flex items-center justify-center">
                   {[...Array(24)].map((_, i) => (
                     <div 
                       key={i} 
-                      className="absolute w-[0.2px] md:w-[0.5px] h-1.5 md:h-4 bg-[#000080]/70" 
+                      className="absolute w-[0.1px] md:w-[0.3px] h-1 md:h-2.5 bg-[#000080]/70" 
                       style={{ transform: `rotate(${i * 15}deg)` }}
                     />
                   ))}
@@ -151,8 +151,8 @@ export default function Home() {
                 />
               </div>
               
-              {/* Human Rights Affairs Trust - Large animated typewriter text */}
-              <div className="font-headline font-bold text-4xl sm:text-6xl md:text-8xl tracking-tight leading-tight drop-shadow-xl min-h-[1.2em] flex justify-center items-center">
+              {/* Human Rights Affairs Trust - Beautifully displayed typewriter text */}
+              <div className="font-headline font-bold text-4xl sm:text-6xl md:text-8xl lg:text-9xl tracking-tight leading-tight drop-shadow-xl min-h-[1.2em] flex justify-center items-center">
                 <span className="bg-gradient-to-r from-[#FF9933] via-white to-[#138808] bg-clip-text text-transparent italic block">
                   <Typewriter 
                     text="Human Rights Affairs Trust" 
