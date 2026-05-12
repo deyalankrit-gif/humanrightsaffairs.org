@@ -1,4 +1,3 @@
-
 import Image from 'next/image'
 import { Navbar } from '@/components/navbar'
 import { ChairmanMessage } from '@/components/chairman-message'
@@ -12,6 +11,7 @@ import { Button } from '@/components/ui/button'
 import { PlaceHolderImages } from '@/lib/placeholder-images'
 import { Shield, Scale, Users, HeartHandshake, ArrowRight, Gavel, CheckCircle2 } from 'lucide-react'
 import { DonationDialog } from '@/components/donation-dialog'
+import { Typewriter } from '@/components/typewriter'
 
 export default function Home() {
   const heroImg = PlaceHolderImages.find(img => img.id === 'hero-human-rights')
@@ -35,18 +35,26 @@ export default function Home() {
         </div>
 
         <div className="container mx-auto px-4 relative z-10 text-white">
-          <div className="max-w-4xl space-y-8 animate-fade-in-up">
-            <div className="inline-flex items-center gap-2 bg-accent/20 text-accent px-4 py-1.5 rounded-full text-sm font-bold border border-accent/30 backdrop-blur-md animate-pulse">
-              <Shield className="w-4 h-4" />
-              <span>India's Trusted Human Rights Shield</span>
+          <div className="max-w-4xl space-y-6 animate-fade-in-up">
+            <div className="space-y-2">
+              <p className="text-accent font-headline font-bold text-2xl md:text-3xl tracking-wide italic">
+                <Typewriter text="Human Rights Affairs Trust" speed={80} delay={500} />
+              </p>
+              <div className="inline-flex items-center gap-2 bg-accent/20 text-accent px-4 py-1.5 rounded-full text-sm font-bold border border-accent/30 backdrop-blur-md">
+                <Shield className="w-4 h-4" />
+                <span>India's Trusted Human Rights Shield</span>
+              </div>
             </div>
+            
             <h1 className="text-6xl md:text-8xl font-headline font-bold leading-tight">
               Upholding <span className="text-accent italic">Justice</span> <br/> 
               Empowering <span className="text-emerald-400">Citizens</span>.
             </h1>
+            
             <p className="text-xl md:text-2xl text-slate-200 font-body max-w-2xl leading-relaxed">
               We provide a robust shield against injustice through expert legal guidance, community-led support, and radical constitutional transparency.
             </p>
+            
             <div className="flex flex-wrap gap-4 pt-4">
               <DonationDialog>
                 <Button size="lg" className="bg-accent text-primary font-bold hover:bg-accent/90 px-8 py-7 rounded-2xl text-xl shadow-lg shadow-accent/20 transition-all hover:-translate-y-1">

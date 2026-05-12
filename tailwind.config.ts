@@ -84,6 +84,10 @@ export default {
         'glow': {
           '0%, 100%': { opacity: '1' },
           '50%': { opacity: '0.6' },
+        },
+        'blink': {
+          '0%, 100%': { opacity: '1' },
+          '50%': { opacity: '0' },
         }
       },
       animation: {
@@ -93,6 +97,7 @@ export default {
         'float': 'float 3s ease-in-out infinite',
         'shimmer': 'shimmer 2s infinite',
         'glow': 'glow 2s ease-in-out infinite',
+        'blink': 'blink 1s step-end infinite',
       },
     },
   },
