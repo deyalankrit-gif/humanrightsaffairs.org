@@ -75,24 +75,24 @@ function BackgroundDecor() {
 
 function IndianFlag() {
   return (
-    <div className="relative mb-4 self-start ml-4 md:ml-12 h-3 md:h-6">
+    <div className="relative mb-4 self-start ml-4 md:ml-12 h-2 md:h-4">
       {/* Static Flagpole */}
-      <div className="absolute -left-1 -top-2 bottom-[-6px] md:bottom-[-10px] w-0.5 md:w-1 bg-gradient-to-r from-slate-400 via-slate-100 to-slate-400 rounded-full shadow-2xl z-20">
-        <div className="absolute -top-1 -left-0.5 w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-gradient-to-tr from-yellow-600 via-yellow-200 to-yellow-600 shadow-lg"></div>
+      <div className="absolute -left-1 -top-2 bottom-[-4px] md:bottom-[-8px] w-0.5 md:w-0.5 bg-gradient-to-r from-slate-400 via-slate-100 to-slate-400 rounded-full shadow-2xl z-20">
+        <div className="absolute -top-1 -left-0.5 w-1 h-1 md:w-1.5 md:h-1.5 rounded-full bg-gradient-to-tr from-yellow-600 via-yellow-200 to-yellow-600 shadow-lg"></div>
       </div>
 
-      {/* Fluttering Cloth Flag */}
-      <div className="animate-flag-wave origin-left flex flex-col w-8 h-5 md:w-12 md:h-8 rounded-sm shadow-[0_5px_15px_rgba(0,0,0,0.4)] shrink-0 overflow-hidden relative border-l border-white/20 z-10">
+      {/* Fluttering Cloth Flag - Smaller Size */}
+      <div className="animate-flag-wave origin-left flex flex-col w-6 h-4 md:w-10 md:h-6 rounded-sm shadow-[0_5px_15px_rgba(0,0,0,0.4)] shrink-0 overflow-hidden relative border-l border-white/20 z-10">
         <div className="h-1/3 bg-[#FF9933] relative"></div>
         <div className="h-1/3 bg-white flex items-center justify-center relative">
           <div className="absolute inset-0 flex items-center justify-center">
-             <div className="w-1 h-1 md:w-2 md:h-2 rounded-full border-[0.1px] border-[#000080]/60 flex items-center justify-center">
-               <div className="w-0.5 h-0.5 bg-[#000080] rounded-full"></div>
+             <div className="w-0.5 h-0.5 md:w-1 md:h-1 rounded-full border-[0.1px] border-[#000080]/60 flex items-center justify-center">
+               <div className="w-px h-px bg-[#000080] rounded-full"></div>
                <div className="absolute inset-0 flex items-center justify-center">
                   {[...Array(24)].map((_, i) => (
                     <div 
                       key={i} 
-                      className="absolute w-[0.1px] md:w-[0.2px] h-0.5 md:h-1 bg-[#000080]/70" 
+                      className="absolute w-[0.1px] md:w-[0.1px] h-0.5 md:h-0.5 bg-[#000080]/70" 
                       style={{ transform: `rotate(${i * 15}deg)` }}
                     />
                   ))}
@@ -102,21 +102,15 @@ function IndianFlag() {
         </div>
         <div className="h-1/3 bg-[#138808]"></div>
         
-        {/* Cloth Texture Overlay */}
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/natural-paper.png')] opacity-30 pointer-events-none"></div>
-        
-        {/* Wave Animation Shaders */}
         <div className="absolute inset-0 bg-gradient-to-r from-black/30 via-transparent to-black/30 bg-[length:150%_100%] animate-flag-ripple pointer-events-none mix-blend-multiply"></div>
         <div className="absolute inset-0 bg-gradient-to-r from-white/10 via-white/40 to-white/10 bg-[length:200%_100%] animate-flag-ripple-alt pointer-events-none mix-blend-overlay"></div>
-        <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent opacity-40 pointer-events-none"></div>
       </div>
     </div>
   )
 }
 
 export default function Home() {
-  const heroImg = PlaceHolderImages.find(img => img.id === 'hero-human-rights')
-
   return (
     <main className="min-h-screen relative overflow-x-hidden">
       <BackgroundDecor />
@@ -125,24 +119,23 @@ export default function Home() {
       <section className="relative min-h-screen flex flex-col items-center pt-32 pb-24">
         <div className="absolute inset-0 z-0">
           <Image 
-            src={heroImg?.imageUrl || ''} 
-            alt="Human Rights Unity" 
+            src="/Human Rights.jpeg" 
+            alt="Human Rights Heritage" 
             fill 
             className="object-cover brightness-[0.25] scale-105 grayscale"
             priority
-            data-ai-hint={heroImg?.imageHint}
           />
           <div className="absolute inset-0 bg-gradient-to-tr from-primary via-primary/80 to-transparent"></div>
         </div>
 
         <div className="container mx-auto px-4 relative z-10 text-white text-center">
-          <div className="max-w-full space-y-8 md:space-y-12 flex flex-col items-center">
+          <div className="max-w-full space-y-8 md:space-y-10 flex flex-col items-center">
             
             <IndianFlag />
 
             <div className="flex flex-col items-center gap-6 md:gap-8 w-full">
-              {/* Center aligned Niti Aayog Emblem */}
-              <div className="relative w-32 h-32 md:w-64 md:h-64 transition-transform hover:scale-105">
+              {/* Centered Niti Aayog Emblem - Large Size */}
+              <div className="relative w-32 h-32 md:w-60 md:h-60 transition-transform hover:scale-105">
                 <Image 
                   src="/Niti.png" 
                   alt="Official Niti Aayog Emblem" 
@@ -151,8 +144,8 @@ export default function Home() {
                 />
               </div>
               
-              {/* Human Rights Affairs Trust - Typewriter text - Slightly Smaller Size */}
-              <div className="font-headline font-bold text-3xl sm:text-5xl md:text-7xl lg:text-8xl tracking-tight leading-tight drop-shadow-xl min-h-[1.2em] flex justify-center items-center">
+              {/* Slightly smaller Title with Typewriter effect */}
+              <div className="font-headline font-bold text-2xl sm:text-4xl md:text-6xl lg:text-7xl tracking-tight leading-tight drop-shadow-xl min-h-[1.2em] flex justify-center items-center">
                 <span className="bg-gradient-to-r from-[#FF9933] via-white to-[#138808] bg-clip-text text-transparent italic block">
                   <Typewriter 
                     text="Human Rights Affairs Trust" 
@@ -162,46 +155,46 @@ export default function Home() {
                 </span>
               </div>
               
-              <div className="inline-flex items-center gap-2 md:gap-3 bg-accent/30 text-accent px-4 py-2 md:px-8 md:py-3.5 rounded-full text-xs md:text-xl font-bold border border-accent/40 backdrop-blur-md">
-                <Shield className="w-4 h-4 md:w-7 md:h-7" />
+              <div className="inline-flex items-center gap-2 md:gap-3 bg-accent/30 text-accent px-4 py-2 md:px-6 md:py-2.5 rounded-full text-[10px] md:text-sm font-bold border border-accent/40 backdrop-blur-md uppercase tracking-widest">
+                <Shield className="w-3 h-3 md:w-4 md:h-4" />
                 <span>India's Trusted Human Rights Shield</span>
               </div>
             </div>
             
-            {/* Tagline - Cyan/Magenta Animated Gradient - One Line */}
-            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-headline font-bold leading-tight md:whitespace-nowrap bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-cyan-400 bg-[length:200%_auto] bg-clip-text text-transparent animate-gradient-x py-4 md:py-6 w-full">
+            {/* Tagline - Slightly larger, animated Cyan/Magenta gradient, One Line */}
+            <h1 className="text-xl sm:text-2xl md:text-4xl lg:text-5xl font-headline font-bold leading-tight md:whitespace-nowrap bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-cyan-400 bg-[length:200%_auto] bg-clip-text text-transparent animate-gradient-x py-2 md:py-4 w-full">
               Upholding Justice. Empowering Citizens.
             </h1>
             
-            <p className="text-base sm:text-xl md:text-2xl text-slate-200 font-body max-w-4xl leading-relaxed mx-auto px-4">
+            <p className="text-sm sm:text-lg md:text-xl text-slate-300 font-body max-w-4xl leading-relaxed mx-auto px-4">
               Providing a robust shield against injustice through expert legal guidance, community support, and radical constitutional transparency.
             </p>
             
-            <div className="flex flex-wrap gap-4 md:gap-8 pt-8 md:pt-12 justify-center">
+            <div className="flex flex-wrap gap-4 md:gap-6 pt-6 md:pt-10 justify-center">
               <DonationDialog>
-                <Button size="lg" className="bg-accent text-primary font-bold hover:bg-accent/90 px-8 py-8 md:px-16 md:py-10 rounded-xl md:rounded-2xl text-lg md:text-2xl shadow-2xl shadow-accent/30 transition-all hover:-translate-y-2">
-                  Get Free Legal Aid <ArrowRight className="ml-2 md:ml-4 w-5 h-5 md:w-7 md:h-7" />
+                <Button size="lg" className="bg-accent text-primary font-bold hover:bg-accent/90 px-6 py-6 md:px-12 md:py-8 rounded-xl text-base md:text-xl shadow-2xl shadow-accent/30 transition-all hover:-translate-y-1">
+                  Get Free Legal Aid <ArrowRight className="ml-2 w-4 h-4 md:w-5 md:h-5" />
                 </Button>
               </DonationDialog>
-              <Button size="lg" variant="outline" className="border-white/60 text-white bg-white/10 hover:bg-white/20 px-8 py-8 md:px-16 md:py-10 rounded-xl md:rounded-2xl text-lg md:text-2xl backdrop-blur-lg transition-all border-2 font-bold">
+              <Button size="lg" variant="outline" className="border-white/60 text-white bg-white/10 hover:bg-white/20 px-6 py-6 md:px-12 md:py-8 rounded-xl text-base md:text-xl backdrop-blur-lg transition-all border-2 font-bold">
                 Explore Rights Library
               </Button>
             </div>
 
-            {/* Statistics Dashboard - Small Text size */}
-            <div className="w-full pt-16 md:pt-20 max-w-6xl mx-auto">
-              <div className="glass-dark rounded-[2rem] md:rounded-[4rem] p-6 md:p-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-10 border-white/10">
+            {/* Statistics Dashboard - Small Text labels */}
+            <div className="w-full pt-12 md:pt-16 max-w-5xl mx-auto">
+              <div className="glass-dark rounded-[1.5rem] md:rounded-[3rem] p-4 md:p-8 grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8 border-white/10">
                 {[
-                  { icon: <Gavel className="w-6 h-6 md:w-10 md:h-10 text-accent" />, count: "25k+", label: "Legal Cases Resolved" },
-                  { icon: <Users className="w-6 h-6 md:w-10 md:h-10 text-emerald-400" />, count: "500+", label: "Expert Advocates" },
-                  { icon: <Shield className="w-6 h-6 md:w-10 md:h-10 text-indigo-400" />, count: "100%", label: "Secure Data Handling" },
-                  { icon: <HeartHandshake className="w-6 h-6 md:w-10 md:h-10 text-pink-400" />, count: "50+", label: "National Centers" }
+                  { icon: <Gavel className="w-5 h-5 md:w-8 md:h-8 text-accent" />, count: "25k+", label: "Legal Cases Resolved" },
+                  { icon: <Users className="w-5 h-5 md:w-8 md:h-8 text-emerald-400" />, count: "500+", label: "Expert Advocates" },
+                  { icon: <Shield className="w-5 h-5 md:w-8 md:h-8 text-indigo-400" />, count: "100%", label: "Secure Data Handling" },
+                  { icon: <HeartHandshake className="w-5 h-5 md:w-8 md:h-8 text-pink-400" />, count: "50+", label: "National Centers" }
                 ].map((stat, i) => (
-                  <div key={i} className="flex items-center gap-4 md:gap-6 text-white hover:scale-105 transition-transform cursor-default justify-start sm:justify-center">
-                    <div className="p-3 md:p-5 bg-white/10 rounded-xl md:rounded-3xl shrink-0">{stat.icon}</div>
-                    <div className="space-y-0.5 md:space-y-1 text-left">
-                      <p className="text-2xl md:text-4xl font-bold font-headline">{stat.count}</p>
-                      <p className="text-[9px] md:text-xs font-bold uppercase tracking-[0.1em] md:tracking-[0.15em] text-slate-300 leading-tight">
+                  <div key={i} className="flex flex-col sm:flex-row items-center gap-2 md:gap-4 text-white hover:scale-105 transition-transform cursor-default justify-center">
+                    <div className="p-2 md:p-4 bg-white/10 rounded-lg md:rounded-2xl shrink-0">{stat.icon}</div>
+                    <div className="space-y-0 text-center sm:text-left">
+                      <p className="text-xl md:text-3xl font-bold font-headline">{stat.count}</p>
+                      <p className="text-[8px] md:text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400 leading-tight">
                         {stat.label}
                       </p>
                     </div>
