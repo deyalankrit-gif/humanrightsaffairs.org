@@ -8,9 +8,9 @@
     },
     {
       "id": "hero-human-rights",
-      "description": "Cinematic background showing hands holding together symbolizing justice",
-      "imageUrl": "https://picsum.photos/seed/justice/1920/1080",
-      "imageHint": "justice human rights unity"
+      "description": "Cinematic black and white image related to human rights",
+      "imageUrl": "https://picsum.photos/seed/justice-bw/1920/1080",
+      "imageHint": "human rights hands black and white"
     },
     {
       "id": "id-card-sample",

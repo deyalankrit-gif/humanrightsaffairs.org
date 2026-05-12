@@ -33,7 +33,7 @@ function BackgroundDecor() {
           src={heroImg?.imageUrl || ''} 
           alt="Humanitarian Unity" 
           fill 
-          className="object-cover sepia"
+          className="object-cover grayscale"
         />
       </div>
 
@@ -119,11 +119,11 @@ export default function Home() {
             src={heroImg?.imageUrl || ''} 
             alt="Human Rights Unity" 
             fill 
-            className="object-cover brightness-[0.2] scale-105"
+            className="object-cover brightness-[0.25] scale-105 grayscale"
             priority
             data-ai-hint={heroImg?.imageHint}
           />
-          <div className="absolute inset-0 bg-gradient-to-tr from-primary via-primary/70 to-transparent"></div>
+          <div className="absolute inset-0 bg-gradient-to-tr from-primary via-primary/80 to-transparent"></div>
         </div>
 
         <div className="container mx-auto px-4 relative z-10 text-white text-center">
@@ -157,7 +157,7 @@ export default function Home() {
               </div>
             </div>
             
-            <h1 className="text-2xl md:text-4xl lg:text-5xl font-headline font-bold leading-tight max-w-5xl mx-auto bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-cyan-400 bg-[length:200%_auto] bg-clip-text text-transparent animate-gradient-x py-2">
+            <h1 className="text-3xl md:text-5xl lg:text-6xl font-headline font-bold leading-tight max-w-5xl mx-auto bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-cyan-400 bg-[length:200%_auto] bg-clip-text text-transparent animate-gradient-x py-2">
               Upholding Justice. Empowering Citizens.
             </h1>
             
