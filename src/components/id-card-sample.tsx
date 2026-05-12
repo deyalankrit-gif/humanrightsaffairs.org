@@ -69,7 +69,7 @@ export function IDCardShowcase() {
               
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/10 px-8 py-6 rounded-xl text-lg backdrop-blur-sm">
+                  <Button className="bg-secondary text-secondary-foreground hover:bg-secondary/90 px-8 py-6 rounded-xl text-lg shadow-lg shadow-secondary/20 transition-all border-none">
                     View Eligibility
                   </Button>
                 </AlertDialogTrigger>
