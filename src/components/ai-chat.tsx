@@ -1,0 +1,147 @@
+
+"use client"
+
+import React from 'react'
+import { MessageSquare, Send, X, Bot, ShieldAlert, Sparkles } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { inquireLegalAssistant } from '@/ai/flows/ai-legal-assistant-chatbot'
+
+type Message = {
+  id: string
+  text: string
+  sender: 'user' | 'ai'
+  timestamp: Date
+}
+
+export function AIChat() {
+  const [isOpen, setIsOpen] = React.useState(false)
+  const [messages, setMessages] = React.useState<Message[]>([
+    {
+      id: '1',
+      text: "Hello! I am JusticeBot, your AI legal assistant. How can I help you understand your rights today?",
+      sender: 'ai',
+      timestamp: new Date()
+    }
+  ])
+  const [input, setInput] = React.useState('')
+  const [isLoading, setIsLoading] = React.useState(false)
+
+  const handleSend = async () => {
+    if (!input.trim() || isLoading) return
+
+    const userMsg: Message = {
+      id: Date.now().toString(),
+      text: input,
+      sender: 'user',
+      timestamp: new Date()
+    }
+
+    setMessages(prev => [...prev, userMsg])
+    setInput('')
+    setIsLoading(true)
+
+    try {
+      const response = await inquireLegalAssistant(input)
+      const aiMsg: Message = {
+        id: (Date.now() + 1).toString(),
+        text: response,
+        sender: 'ai',
+        timestamp: new Date()
+      }
+      setMessages(prev => [...prev, aiMsg])
+    } catch (error) {
+      console.error(error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  return (
+    <div className="fixed bottom-6 right-6 z-[100]">
+      {!isOpen && (
+        <Button 
+          onClick={() => setIsOpen(true)}
+          className="h-16 w-16 rounded-full shadow-2xl bg-primary hover:bg-primary/90 flex items-center justify-center p-0 overflow-hidden group"
+        >
+          <div className="absolute inset-0 bg-accent transform scale-0 group-hover:scale-100 transition-transform duration-500 rounded-full opacity-20"></div>
+          <MessageSquare className="w-7 h-7 text-white relative z-10" />
+          <div className="absolute -top-1 -right-1 flex h-5 w-5">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-5 w-5 bg-accent text-[10px] font-bold text-primary items-center justify-center">AI</span>
+          </div>
+        </Button>
+      )}
+
+      {isOpen && (
+        <Card className="w-[350px] md:w-[400px] h-[550px] flex flex-col shadow-2xl border-2 border-primary/10 overflow-hidden animate-in slide-in-from-bottom-4 duration-300">
+          <CardHeader className="bg-primary text-white p-4 space-y-1">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="bg-accent/20 p-2 rounded-lg">
+                  <Bot className="w-5 h-5 text-accent" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg font-headline">JusticeBot AI</CardTitle>
+                  <p className="text-[10px] text-white/60 font-bold uppercase tracking-widest">Legal Assistant</p>
+                </div>
+              </div>
+              <Button variant="ghost" size="icon" className="text-white hover:bg-white/10" onClick={() => setIsOpen(false)}>
+                <X className="w-5 h-5" />
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent className="flex-1 p-0 bg-slate-50">
+            <ScrollArea className="h-[400px] p-4">
+              <div className="space-y-4">
+                {messages.map((msg) => (
+                  <div key={msg.id} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`max-w-[85%] p-3 rounded-2xl text-sm ${
+                      msg.sender === 'user' 
+                        ? 'bg-primary text-white rounded-tr-none' 
+                        : 'bg-white border border-slate-100 shadow-sm rounded-tl-none text-slate-700'
+                    }`}>
+                      {msg.text}
+                    </div>
+                  </div>
+                ))}
+                {isLoading && (
+                  <div className="flex justify-start">
+                    <div className="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm flex gap-1">
+                      <span className="w-1.5 h-1.5 bg-accent rounded-full animate-bounce"></span>
+                      <span className="w-1.5 h-1.5 bg-accent rounded-full animate-bounce [animation-delay:0.2s]"></span>
+                      <span className="w-1.5 h-1.5 bg-accent rounded-full animate-bounce [animation-delay:0.4s]"></span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </ScrollArea>
+          </CardContent>
+          <CardFooter className="p-4 border-t bg-white">
+            <div className="w-full space-y-3">
+              <div className="flex gap-2">
+                <Input 
+                  placeholder="Ask about your rights..." 
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+                  disabled={isLoading}
+                  className="rounded-full bg-slate-50 border-slate-200"
+                />
+                <Button size="icon" className="rounded-full shrink-0" onClick={handleSend} disabled={isLoading}>
+                  <Send className="w-4 h-4" />
+                </Button>
+              </div>
+              <div className="flex items-center gap-2 text-[9px] text-slate-400 font-bold uppercase tracking-tighter justify-center">
+                <ShieldAlert className="w-3 h-3" />
+                <span>AI Guidance: Not a substitute for legal advice</span>
+              </div>
+            </div>
+          </CardFooter>
+        </Card>
+      )}
+    </div>
+  )
+}

@@ -1,3 +1,28 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "chairman-photo",
+      "description": "Formal portrait of the Chairman of Human Rights Affairs Trust",
+      "imageUrl": "https://picsum.photos/seed/chairman/600/800",
+      "imageHint": "dignified man formal portrait"
+    },
+    {
+      "id": "hero-human-rights",
+      "description": "Cinematic background showing hands holding together symbolizing justice",
+      "imageUrl": "https://picsum.photos/seed/justice/1920/1080",
+      "imageHint": "justice human rights unity"
+    },
+    {
+      "id": "id-card-sample",
+      "description": "Sample Member Identity Card for JusticeShield",
+      "imageUrl": "https://picsum.photos/seed/idcard/400/250",
+      "imageHint": "identity card template"
+    },
+    {
+      "id": "legal-library",
+      "description": "Books and gavel symbolizing legal knowledge",
+      "imageUrl": "https://picsum.photos/seed/legal/800/600",
+      "imageHint": "legal books gavel"
+    }
+  ]
 }
