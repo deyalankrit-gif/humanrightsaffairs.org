@@ -84,20 +84,20 @@ export default function Home() {
             <IndianFlag />
 
             <div className="flex flex-col items-center gap-2 w-full">
-              {/* Niti Aayog Emblem */}
+              {/* Official Emblem */}
               <div className="flex flex-col items-center group mb-4">
                 <div className="relative w-32 h-40 md:w-48 md:h-60 transition-transform hover:scale-105 duration-500">
                   <Image 
                     src="/Niti3.png" 
-                    alt="Niti Aayog Emblem" 
+                    alt="Official Emblem" 
                     fill 
                     className="object-contain"
                   />
                 </div>
               </div>
               
-              {/* Organization Title with Typewriter effect - Increased Font Size */}
-              <div className="font-headline font-bold text-xl sm:text-3xl md:text-4xl lg:text-5xl tracking-tight leading-tight min-h-[1.5em] flex justify-center items-center">
+              {/* Organization Title with Typewriter effect */}
+              <div className="font-headline font-bold text-2xl sm:text-4xl md:text-5xl lg:text-6xl tracking-tight leading-tight min-h-[1.5em] flex justify-center items-center">
                 <span className="bg-gradient-to-r from-[#FF9933] via-white to-[#138808] bg-clip-text text-transparent italic block drop-shadow-sm">
                   <Typewriter 
                     text="Human Rights Affairs Trust" 
