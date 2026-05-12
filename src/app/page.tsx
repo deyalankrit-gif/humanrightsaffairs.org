@@ -15,8 +15,29 @@ import { DonationDialog } from '@/components/donation-dialog'
 import { Typewriter } from '@/components/typewriter'
 
 function BackgroundDecor() {
+  const libraryImg = PlaceHolderImages.find(img => img.id === 'legal-library')
+  const heroImg = PlaceHolderImages.find(img => img.id === 'hero-human-rights')
+
   return (
     <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden select-none opacity-40">
+      {/* Floating Faint Images */}
+      <div className="absolute top-[10%] right-[15%] w-64 h-64 rounded-full overflow-hidden opacity-[0.04] blur-[2px] animate-float">
+        <Image 
+          src={libraryImg?.imageUrl || ''} 
+          alt="Legal Heritage" 
+          fill 
+          className="object-cover grayscale"
+        />
+      </div>
+      <div className="absolute bottom-[15%] right-[25%] w-80 h-80 rounded-[3rem] overflow-hidden opacity-[0.03] blur-[1px] animate-float animate-delay-500">
+        <Image 
+          src={heroImg?.imageUrl || ''} 
+          alt="Unity" 
+          fill 
+          className="object-cover sepia"
+        />
+      </div>
+
       {/* Animated Scale of Justice */}
       <div className="absolute top-[15%] left-[5%] animate-float opacity-[0.08]">
         <Scale className="w-48 h-48 text-primary" />
@@ -41,6 +62,7 @@ function BackgroundDecor() {
       <div className="absolute bottom-[5%] right-[5%] animate-float animate-delay-100 opacity-[0.07]">
         <Gavel className="w-32 h-32 text-primary" />
       </div>
+      
       {/* Soft Glows */}
       <div className="absolute top-1/4 left-1/3 w-[500px] h-[500px] bg-accent/5 rounded-full blur-[120px] animate-glow"></div>
       <div className="absolute bottom-1/4 right-1/3 w-[400px] h-[400px] bg-primary/5 rounded-full blur-[100px] animate-glow animate-delay-500"></div>
@@ -71,9 +93,9 @@ export default function Home() {
         </div>
 
         <div className="container mx-auto px-4 relative z-10 text-white">
-          <div className="max-w-6xl space-y-8 animate-fade-in-up">
+          <div className="max-w-7xl space-y-8 animate-fade-in-up">
             <div className="space-y-6">
-              <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
+              <div className="flex flex-col md:flex-row items-start md:items-center gap-6 overflow-hidden">
                 {/* Indian Tricolor Flag */}
                 <div className="flex flex-col w-20 h-12 rounded-md overflow-hidden shadow-2xl border border-white/20 shrink-0">
                   <div className="h-1/3 bg-[#FF9933]"></div>
@@ -96,7 +118,7 @@ export default function Home() {
                   <div className="h-1/3 bg-[#138808]"></div>
                 </div>
                 
-                <div className="font-headline font-bold text-5xl md:text-7xl lg:text-8xl tracking-tight leading-tight whitespace-nowrap">
+                <div className="font-headline font-bold text-4xl md:text-6xl lg:text-7xl tracking-tight leading-tight whitespace-nowrap">
                   <Typewriter 
                     text="Human Rights Affairs Trust" 
                     speed={100} 
@@ -116,7 +138,7 @@ export default function Home() {
               Upholding <span className="text-accent italic">Justice</span> Empowering <span className="text-emerald-400">Citizens</span>.
             </h1>
             
-            <p className="text-lg md:text-2xl text-slate-200 font-body max-w-2xl leading-relaxed">
+            <p className="text-lg md:text-xl text-slate-200 font-body max-w-2xl leading-relaxed">
               We provide a robust shield against injustice through expert legal guidance, community-led support, and radical constitutional transparency.
             </p>
             
