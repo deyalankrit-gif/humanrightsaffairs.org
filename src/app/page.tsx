@@ -139,11 +139,10 @@ export default function Home() {
                     alt="Emblem"
                     fill
                     className="object-contain"
-                    data-ai-hint={nityDarpanImg?.imageHint}
                   />
                 </div>
 
-                <div className="font-headline font-bold text-3xl sm:text-5xl md:text-7xl lg:text-8xl xl:text-9xl tracking-tighter leading-none whitespace-nowrap overflow-visible drop-shadow-2xl">
+                <div className="font-headline font-bold text-4xl sm:text-6xl md:text-8xl lg:text-9xl xl:text-[10rem] tracking-tighter leading-none whitespace-nowrap overflow-visible drop-shadow-2xl">
                   <Typewriter 
                     text="Human Rights Affairs Trust" 
                     speed={80} 
