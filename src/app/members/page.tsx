@@ -43,7 +43,9 @@ const stateToDistricts: Record<string, string[]> = {
   "Delhi NCR": ["New Delhi Central", "North Delhi", "South Delhi", "West Delhi", "East Delhi"],
   "Maharashtra": ["Mumbai Suburban", "Pune City", "Nagpur", "Nashik", "Thane"],
   "West Bengal": ["Kolkata", "Howrah", "Darjeeling", "Hooghly"],
-  "Uttar Pradesh": ["Lucknow", "Kanpur", "Varanasi", "Agra"]
+  "Uttar Pradesh": ["Lucknow", "Kanpur", "Varanasi", "Agra"],
+  "Bihar": ["Patna", "Gaya", "Bhagalpur", "Muzaffarpur"],
+  "Tamil Nadu": ["Chennai", "Coimbatore", "Madurai", "Salem"]
 }
 
 const members: Member[] = [
