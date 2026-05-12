@@ -90,10 +90,10 @@ export default function Home() {
                     className="object-contain"
                   />
                 </div>
-                <div className="flex flex-col items-center mt-3 text-white drop-shadow-md space-y-1">
+                <div className="flex flex-col items-center mt-1 text-white drop-shadow-md space-y-1">
                    <p className="text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] leading-tight">Niti Aayog registered</p>
                    <p className="text-[9px] md:text-[11px] font-bold uppercase tracking-[0.15em] leading-tight opacity-90">National Informatics Centre</p>
-                   <p className="text-[14px] md:text-lg font-bold uppercase tracking-[0.2em] leading-tight">Government of India</p>
+                   <p className="text-[16px] md:text-xl font-bold uppercase tracking-[0.2em] leading-tight">Government of India</p>
                 </div>
               </div>
               
