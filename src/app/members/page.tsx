@@ -6,11 +6,17 @@ import Image from 'next/image'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 import { PlaceHolderImages } from '@/lib/placeholder-images'
-import { Search, MapPin, BadgeCheck, User, Users, Shield, Briefcase, Hash } from 'lucide-react'
+import { Search, MapPin, BadgeCheck, User, Users, Shield, Briefcase, Hash, ChevronDown } from 'lucide-react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 type Member = {
   id: string
@@ -18,8 +24,18 @@ type Member = {
   designation: string
   jurisdiction: string
   level: "National" | "State" | "District"
+  stateName?: string
   imageId: string
 }
+
+const indianStates = [
+  "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", 
+  "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jharkhand", 
+  "Karnataka", "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur", 
+  "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Punjab", 
+  "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura", 
+  "Uttar Pradesh", "Uttarakhand", "West Bengal", "Delhi NCR"
+]
 
 const members: Member[] = [
   {
@@ -51,6 +67,7 @@ const members: Member[] = [
     name: "Vikram Malhotra",
     designation: "State Chairman",
     jurisdiction: "Delhi NCR",
+    stateName: "Delhi NCR",
     level: "State",
     imageId: "leader-3"
   },
@@ -59,6 +76,7 @@ const members: Member[] = [
     name: "Sonia Gandhi",
     designation: "Vice Chairperson",
     jurisdiction: "Delhi NCR",
+    stateName: "Delhi NCR",
     level: "State",
     imageId: "leader-4"
   },
@@ -67,6 +85,7 @@ const members: Member[] = [
     name: "Rajesh Patil",
     designation: "State Chairman",
     jurisdiction: "Maharashtra",
+    stateName: "Maharashtra",
     level: "State",
     imageId: "leader-1"
   },
@@ -75,6 +94,7 @@ const members: Member[] = [
     name: "Amruta Fadnavis",
     designation: "Legal Head",
     jurisdiction: "Maharashtra",
+    stateName: "Maharashtra",
     level: "State",
     imageId: "leader-2"
   },
@@ -99,15 +119,32 @@ const members: Member[] = [
 export default function MembersPage() {
   const [search, setSearch] = useState("")
   const [levelFilter, setLevelFilter] = useState<string>("All")
+  const [selectedState, setSelectedState] = useState<string | null>(null)
 
-  const filteredMembers = members.filter(m => 
-    (levelFilter === "All" || m.level === levelFilter) &&
-    (m.name.toLowerCase().includes(search.toLowerCase()) || 
-     m.jurisdiction.toLowerCase().includes(search.toLowerCase()) ||
-     m.designation.toLowerCase().includes(search.toLowerCase()))
-  )
+  const handleLevelClick = (level: string) => {
+    setLevelFilter(level)
+    setSelectedState(null)
+  }
 
-  const levels = ["All", "National", "State", "District"]
+  const handleStateSelect = (state: string) => {
+    setLevelFilter("State")
+    setSelectedState(state)
+  }
+
+  const filteredMembers = members.filter(m => {
+    const matchesSearch = m.name.toLowerCase().includes(search.toLowerCase()) || 
+                          m.jurisdiction.toLowerCase().includes(search.toLowerCase()) ||
+                          m.designation.toLowerCase().includes(search.toLowerCase());
+    
+    const matchesLevel = levelFilter === "All" || m.level === levelFilter;
+    
+    // If filtering by State level and a specific state is chosen
+    if (levelFilter === "State" && selectedState) {
+      return matchesSearch && m.level === "State" && m.stateName === selectedState;
+    }
+
+    return matchesSearch && matchesLevel;
+  })
 
   return (
     <main className="min-h-screen bg-slate-50">
@@ -133,16 +170,49 @@ export default function MembersPage() {
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row gap-6 items-center justify-between">
             <div className="flex flex-wrap justify-center gap-2">
-              {levels.map((level) => (
-                <Button
-                  key={level}
-                  variant={levelFilter === level ? "default" : "outline"}
-                  onClick={() => setLevelFilter(level)}
-                  className={`rounded-full px-6 font-bold ${levelFilter === level ? 'bg-primary text-white' : 'hover:border-accent hover:text-accent'}`}
-                >
-                  {level}
-                </Button>
-              ))}
+              <Button
+                variant={levelFilter === "All" ? "default" : "outline"}
+                onClick={() => handleLevelClick("All")}
+                className={`rounded-full px-6 font-bold ${levelFilter === "All" ? 'bg-primary text-white' : 'hover:border-accent hover:text-accent'}`}
+              >
+                All
+              </Button>
+              <Button
+                variant={levelFilter === "National" ? "default" : "outline"}
+                onClick={() => handleLevelClick("National")}
+                className={`rounded-full px-6 font-bold ${levelFilter === "National" ? 'bg-primary text-white' : 'hover:border-accent hover:text-accent'}`}
+              >
+                National
+              </Button>
+              
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant={levelFilter === "State" ? "default" : "outline"}
+                    className={`rounded-full px-6 font-bold flex items-center gap-2 ${levelFilter === "State" ? 'bg-primary text-white' : 'hover:border-accent hover:text-accent'}`}
+                  >
+                    {selectedState || "State"} <ChevronDown className="w-4 h-4 opacity-50" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="max-h-80 overflow-y-auto w-56">
+                  <DropdownMenuItem onClick={() => handleLevelClick("State")}>
+                    All States
+                  </DropdownMenuItem>
+                  {indianStates.map((state) => (
+                    <DropdownMenuItem key={state} onClick={() => handleStateSelect(state)}>
+                      {state}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              <Button
+                variant={levelFilter === "District" ? "default" : "outline"}
+                onClick={() => handleLevelClick("District")}
+                className={`rounded-full px-6 font-bold ${levelFilter === "District" ? 'bg-primary text-white' : 'hover:border-accent hover:text-accent'}`}
+              >
+                District
+              </Button>
             </div>
             <div className="relative w-full md:w-96">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
@@ -210,17 +280,15 @@ export default function MembersPage() {
                       </CardHeader>
                     )}
                     <CardContent className="p-8 space-y-4 flex-1">
-                      {isDistrict && (
-                        <div className="flex items-start gap-4 mb-2">
-                          <div className="p-2 bg-slate-50 rounded-xl group-hover:bg-accent/10 transition-colors">
-                            <Hash className="w-5 h-5 text-slate-400 group-hover:text-accent" />
-                          </div>
-                          <div>
-                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">ID Card Number</p>
-                            <p className="font-bold text-accent font-mono">{member.id}</p>
-                          </div>
+                      <div className="flex items-start gap-4">
+                        <div className="p-2 bg-slate-50 rounded-xl group-hover:bg-accent/10 transition-colors">
+                          <Hash className="w-5 h-5 text-slate-400 group-hover:text-accent" />
                         </div>
-                      )}
+                        <div>
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">ID Card Number</p>
+                          <p className={`font-bold font-mono ${isDistrict ? 'text-accent' : 'text-primary'}`}>{member.id}</p>
+                        </div>
+                      </div>
 
                       <div className="flex items-start gap-4">
                         <div className="p-2 bg-slate-50 rounded-xl group-hover:bg-accent/10 transition-colors">
