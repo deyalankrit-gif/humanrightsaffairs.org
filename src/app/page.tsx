@@ -75,7 +75,7 @@ function BackgroundDecor() {
 
 function IndianFlag() {
   return (
-    <div className="animate-flag-wave origin-left relative">
+    <div className="animate-flag-wave origin-left relative mb-6">
       <div className="flex flex-col w-12 h-7 md:w-20 md:h-12 rounded-sm shadow-2xl border border-white/20 shrink-0 overflow-hidden relative">
         <div className="h-1/3 bg-[#FF9933]"></div>
         <div className="h-1/3 bg-white flex items-center justify-center relative">
@@ -112,7 +112,7 @@ export default function Home() {
       <BackgroundDecor />
       <Navbar />
       
-      <section className="relative min-h-screen flex items-center overflow-hidden pt-32 pb-48 md:pb-64">
+      <section className="relative min-h-screen flex flex-col justify-center overflow-hidden pt-32 pb-24 md:pb-32">
         <div className="absolute inset-0 z-0">
           <Image 
             src={heroImg?.imageUrl || ''} 
@@ -126,12 +126,12 @@ export default function Home() {
         </div>
 
         <div className="container mx-auto px-4 relative z-10 text-white">
-          <div className="max-w-full space-y-4 md:space-y-8 animate-fade-in-up">
-            <div className="space-y-4 md:space-y-6">
-              <div className="flex flex-col items-start gap-4 md:gap-6">
+          <div className="max-w-full space-y-8 animate-fade-in-up">
+            <div className="space-y-6">
+              <div className="flex flex-col items-start">
                 <IndianFlag />
                 
-                <div className="font-headline font-bold text-[6vw] sm:text-[5vw] md:text-[6.5vw] lg:text-[7vw] xl:text-[7.5vw] tracking-tighter leading-none whitespace-nowrap overflow-visible drop-shadow-2xl">
+                <div className="font-headline font-bold text-[7vw] sm:text-[6vw] md:text-[6.5vw] lg:text-[7vw] xl:text-[7.5vw] tracking-tighter leading-none whitespace-nowrap overflow-visible drop-shadow-2xl">
                   <Typewriter 
                     text="Human Rights Affairs Trust" 
                     speed={80} 
@@ -155,7 +155,7 @@ export default function Home() {
               We provide a robust shield against injustice through expert legal guidance, community-led support, and radical constitutional transparency.
             </p>
             
-            <div className="flex flex-wrap gap-4 md:gap-6 pt-4">
+            <div className="flex flex-wrap gap-4 md:gap-6 pt-4 pb-12">
               <DonationDialog>
                 <Button size="lg" className="bg-accent text-primary font-bold hover:bg-accent/90 px-6 py-6 md:px-10 md:py-8 rounded-xl md:rounded-2xl text-base md:text-2xl shadow-2xl shadow-accent/20 transition-all hover:-translate-y-1">
                   Get Free Legal Aid <ArrowRight className="ml-2 w-5 h-5 md:w-8 md:h-8" />
@@ -165,29 +165,29 @@ export default function Home() {
                 Explore Rights Library
               </Button>
             </div>
-          </div>
-        </div>
 
-        {/* Improved Statistics Section */}
-        <div className="absolute bottom-4 md:bottom-8 lg:bottom-12 left-0 right-0 w-full px-4 animate-fade-in-up animate-delay-500 z-20">
-           <div className="container mx-auto">
-             <div className="glass-dark rounded-[1.5rem] md:rounded-[3rem] p-4 md:p-8 lg:p-10 grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
-               {[
-                 { icon: <Gavel className="w-5 h-5 md:w-8 md:h-8 text-accent" />, count: "25k+", label: "Legal Cases Resolved" },
-                 { icon: <Users className="w-5 h-5 md:w-8 md:h-8 text-emerald-400" />, count: "500+", label: "Expert Advocates" },
-                 { icon: <Shield className="w-5 h-5 md:w-8 md:h-8 text-indigo-400" />, count: "100%", label: "Secure Data" },
-                 { icon: <HeartHandshake className="w-5 h-5 md:w-8 md:h-8 text-pink-400" />, count: "50+", label: "National Centers" }
-               ].map((stat, i) => (
-                 <div key={i} className="flex items-center gap-2 md:gap-4 lg:gap-5 text-white hover:scale-105 transition-transform cursor-default overflow-hidden">
-                   <div className="p-2 md:p-4 bg-white/10 rounded-lg md:rounded-2xl shrink-0">{stat.icon}</div>
-                   <div className="min-w-0">
-                     <p className="text-lg md:text-2xl lg:text-3xl font-bold font-headline truncate">{stat.count}</p>
-                     <p className="text-[8px] md:text-[10px] lg:text-xs font-bold uppercase tracking-widest text-slate-300 truncate">{stat.label}</p>
-                   </div>
-                 </div>
-               ))}
-             </div>
-           </div>
+            {/* Statistics Section - Now part of the flow to prevent overlap */}
+            <div className="w-full">
+              <div className="glass-dark rounded-[1.5rem] md:rounded-[3rem] p-4 md:p-8 lg:p-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+                {[
+                  { icon: <Gavel className="w-5 h-5 md:w-8 md:h-8 text-accent" />, count: "25k+", label: "Legal Cases Resolved" },
+                  { icon: <Users className="w-5 h-5 md:w-8 md:h-8 text-emerald-400" />, count: "500+", label: "Expert Advocates" },
+                  { icon: <Shield className="w-5 h-5 md:w-8 md:h-8 text-indigo-400" />, count: "100%", label: "Secure Data Handling" },
+                  { icon: <HeartHandshake className="w-5 h-5 md:w-8 md:h-8 text-pink-400" />, count: "50+", label: "National Centers" }
+                ].map((stat, i) => (
+                  <div key={i} className="flex items-center gap-4 text-white hover:scale-105 transition-transform cursor-default">
+                    <div className="p-3 md:p-4 bg-white/10 rounded-lg md:rounded-2xl shrink-0">{stat.icon}</div>
+                    <div>
+                      <p className="text-xl md:text-2xl lg:text-3xl font-bold font-headline">{stat.count}</p>
+                      <p className="text-[10px] lg:text-xs font-bold uppercase tracking-widest text-slate-300 whitespace-normal leading-tight">
+                        {stat.label}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
