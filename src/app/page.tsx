@@ -84,20 +84,20 @@ export default function Home() {
             <IndianFlag />
 
             <div className="flex flex-col items-center gap-2 w-full">
-              {/* Niti Aayog Registered Emblem Section */}
+              {/* Niti Aayog Emblem */}
               <div className="flex flex-col items-center group mb-4">
                 <div className="relative w-32 h-40 md:w-48 md:h-60 transition-transform hover:scale-105 duration-500">
                   <Image 
                     src="/Niti3.png" 
-                    alt="Niti Aayog Registered Emblem" 
+                    alt="Niti Aayog Emblem" 
                     fill 
                     className="object-contain"
                   />
                 </div>
               </div>
               
-              {/* Organization Title with Typewriter effect */}
-              <div className="font-headline font-bold text-lg sm:text-2xl md:text-3xl lg:text-4xl tracking-tight leading-tight min-h-[1.5em] flex justify-center items-center">
+              {/* Organization Title with Typewriter effect - Increased Font Size */}
+              <div className="font-headline font-bold text-xl sm:text-3xl md:text-4xl lg:text-5xl tracking-tight leading-tight min-h-[1.5em] flex justify-center items-center">
                 <span className="bg-gradient-to-r from-[#FF9933] via-white to-[#138808] bg-clip-text text-transparent italic block drop-shadow-sm">
                   <Typewriter 
                     text="Human Rights Affairs Trust" 
@@ -128,7 +128,7 @@ export default function Home() {
               </Button>
             </div>
 
-            {/* Statistics Dashboard - Small Text labels as requested */}
+            {/* Statistics Dashboard - Small Text labels */}
             <div className="w-full pt-12 md:pt-20 max-w-4xl mx-auto">
               <div className="glass-dark rounded-[1.5rem] md:rounded-[2.5rem] p-4 md:p-6 grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 border-white/5">
                 {[
