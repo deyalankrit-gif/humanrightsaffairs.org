@@ -26,7 +26,7 @@ const stateTeams = [
     ]
   },
   {
-    state: "Howrah Dist. Chapter",
+    state: "Tripura Chapter",
     leaders: [
       { name: "Rajesh Patil", title: "Chapter Chairman", imageId: "leader-1" },
       { name: "Amruta Fadnavis", title: "Legal Head", imageId: "leader-2" }
@@ -40,11 +40,11 @@ const districtTeams = [
     leaders: [{ name: "Anil Kapoor", title: "District Chairman", imageId: "leader-3" }]
   },
   {
-    district: "Howrah Sadar",
+    district: "Agartala",
     leaders: [{ name: "Sunil Shetty", title: "District Chairman", imageId: "leader-4" }]
   },
   {
-    district: "Uluberia",
+    district: "Udaipur",
     leaders: [{ name: "Prakash Jha", title: "District Chairman", imageId: "leader-1" }]
   }
 ]
@@ -175,3 +175,4 @@ export default function LeadershipPage() {
       <Footer />
     </main>
   )
+}

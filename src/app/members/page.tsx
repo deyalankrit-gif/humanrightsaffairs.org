@@ -29,7 +29,7 @@ type Member = {
 }
 
 const chapters = [
-  "West Bengal", "Howrah Dist. Chapter", "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", 
+  "West Bengal", "Tripura Chapter", "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", 
   "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jharkhand", 
   "Karnataka", "Kerala", "Madhya Pradesh", "Manipur", 
   "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Punjab", 
@@ -45,7 +45,9 @@ const chapterToDistricts: Record<string, string[]> = {
     "North 24 Parganas", "Paschim Bardhaman", "Paschim Medinipur",
     "Purba Bardhaman", "Purba Medinipur", "Purulia", "South 24 Parganas", "Uttar Dinajpur"
   ],
-  "Howrah Dist. Chapter": ["Howrah Sadar", "Uluberia", "Bally", "Domjur", "Amta"],
+  "Tripura Chapter": [
+    "Agartala", "Udaipur", "Dharmanagar", "Kailasahar", "Ambassa", "Khowai", "Belonia", "Bishalgarh"
+  ],
   "Andhra Pradesh": ["Visakhapatnam", "Vijayawada", "Guntur", "Nellore", "Kurnool", "Anantapur", "Kakinada"],
   "Arunachal Pradesh": ["Itanagar", "Tawang", "Ziro", "Pasighat", "Along", "Tezu"],
   "Assam": ["Guwahati", "Dibrugarh", "Jorhat", "Silchar", "Nagaon", "Tinsukia", "Tezpur"],
@@ -121,8 +123,8 @@ const members: Member[] = [
     id: "M006",
     name: "Rajesh Patil",
     designation: "Chapter Chairman",
-    jurisdiction: "Howrah Dist. Chapter",
-    stateName: "Howrah Dist. Chapter",
+    jurisdiction: "Tripura Chapter",
+    stateName: "Tripura Chapter",
     level: "State",
     imageId: "leader-1"
   },
@@ -130,8 +132,8 @@ const members: Member[] = [
     id: "M007",
     name: "Amruta Fadnavis",
     designation: "Legal Head",
-    jurisdiction: "Howrah Dist. Chapter",
-    stateName: "Howrah Dist. Chapter",
+    jurisdiction: "Tripura Chapter",
+    stateName: "Tripura Chapter",
     level: "State",
     imageId: "leader-2"
   },
@@ -149,9 +151,9 @@ const members: Member[] = [
     id: "M009",
     name: "Sunil Shetty",
     designation: "District Chairman",
-    jurisdiction: "Howrah Sadar",
-    stateName: "Howrah Dist. Chapter",
-    districtName: "Howrah Sadar",
+    jurisdiction: "Agartala",
+    stateName: "Tripura Chapter",
+    districtName: "Agartala",
     level: "District",
     imageId: "leader-4"
   },
@@ -159,9 +161,9 @@ const members: Member[] = [
     id: "M010",
     name: "Prakash Jha",
     designation: "District Chairman",
-    jurisdiction: "Uluberia",
-    stateName: "Howrah Dist. Chapter",
-    districtName: "Uluberia",
+    jurisdiction: "Udaipur",
+    stateName: "Tripura Chapter",
+    districtName: "Udaipur",
     level: "District",
     imageId: "leader-1"
   }
@@ -422,3 +424,4 @@ export default function MembersPage() {
       <Footer />
     </main>
   )
+}
