@@ -72,6 +72,40 @@ function BackgroundDecor() {
   )
 }
 
+function IndianFlag() {
+  return (
+    <div className="animate-flag-wave origin-left relative">
+      <div className="flex flex-col w-12 h-7 md:w-20 md:h-12 rounded-sm shadow-2xl border border-white/20 shrink-0 overflow-hidden relative">
+        {/* Colors */}
+        <div className="h-1/3 bg-[#FF9933]"></div>
+        <div className="h-1/3 bg-white flex items-center justify-center relative">
+          <div className="absolute inset-0 flex items-center justify-center">
+             <div className="w-1.5 h-1.5 md:w-3 md:h-3 rounded-full border border-[#000080] flex items-center justify-center">
+               <div className="w-0.5 h-0.5 bg-[#000080] rounded-full"></div>
+               <div className="absolute inset-0 flex items-center justify-center">
+                  {[...Array(24)].map((_, i) => (
+                    <div 
+                      key={i} 
+                      className="absolute w-px h-0.5 md:h-1 bg-[#000080]/60" 
+                      style={{ transform: `rotate(${i * 15}deg)` }}
+                    />
+                  ))}
+               </div>
+             </div>
+          </div>
+        </div>
+        <div className="h-1/3 bg-[#138808]"></div>
+        
+        {/* Real Ripple Shading Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black/5 via-white/20 to-black/5 bg-[length:400%_100%] animate-flag-ripple pointer-events-none mix-blend-overlay"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-black/10 to-transparent bg-[length:200%_100%] animate-flag-ripple pointer-events-none mix-blend-multiply opacity-30"></div>
+      </div>
+      {/* Flag Pole (Subtle) */}
+      <div className="absolute -left-1 top-0 bottom-0 w-1 bg-gradient-to-r from-slate-400 to-slate-200 rounded-full shadow-lg"></div>
+    </div>
+  )
+}
+
 export default function Home() {
   const heroImg = PlaceHolderImages.find(img => img.id === 'hero-human-rights')
 
@@ -95,30 +129,9 @@ export default function Home() {
 
         <div className="container mx-auto px-4 relative z-10 text-white">
           <div className="max-w-full space-y-8 md:space-y-12 animate-fade-in-up">
-            <div className="space-y-4 md:space-y-6">
-              <div className="flex flex-col items-start gap-4 md:gap-6">
-                <div className="animate-flag-wave origin-left">
-                  <div className="flex flex-col w-12 h-7 md:w-20 md:h-12 rounded shadow-2xl border border-white/30 shrink-0 overflow-hidden">
-                    <div className="h-1/3 bg-[#FF9933]"></div>
-                    <div className="h-1/3 bg-white flex items-center justify-center relative">
-                      <div className="absolute inset-0 flex items-center justify-center">
-                         <div className="w-1.5 h-1.5 md:w-3 md:h-3 rounded-full border border-[#000080] flex items-center justify-center">
-                           <div className="w-0.5 h-0.5 bg-[#000080] rounded-full"></div>
-                           <div className="absolute inset-0 flex items-center justify-center">
-                              {[...Array(24)].map((_, i) => (
-                                <div 
-                                  key={i} 
-                                  className="absolute w-px h-0.5 md:h-1 bg-[#000080]/40" 
-                                  style={{ transform: `rotate(${i * 15}deg)` }}
-                                />
-                              ))}
-                           </div>
-                         </div>
-                      </div>
-                    </div>
-                    <div className="h-1/3 bg-[#138808]"></div>
-                  </div>
-                </div>
+            <div className="space-y-6 md:space-y-8">
+              <div className="flex flex-col items-start gap-6 md:gap-8">
+                <IndianFlag />
                 
                 <div className="font-headline font-bold text-3xl sm:text-5xl md:text-7xl lg:text-8xl xl:text-9xl tracking-tighter leading-none whitespace-nowrap overflow-visible drop-shadow-2xl">
                   <Typewriter 
@@ -136,7 +149,7 @@ export default function Home() {
               </div>
             </div>
             
-            <h1 className="text-xl md:text-3xl lg:text-4xl font-headline font-bold leading-tight max-w-4xl">
+            <h1 className="text-xl md:text-3xl lg:text-4xl font-headline font-bold leading-tight max-w-5xl whitespace-nowrap">
               Upholding Justice Empowering Citizens.
             </h1>
             

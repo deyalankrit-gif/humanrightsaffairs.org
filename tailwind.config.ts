@@ -90,8 +90,12 @@ export default {
           '50%': { opacity: '0' },
         },
         'flag-wave': {
-          '0%, 100%': { transform: 'rotate(-1deg) translateY(0)' },
-          '50%': { transform: 'rotate(2deg) translateY(-2px)' },
+          '0%, 100%': { transform: 'perspective(1000px) rotateY(-5deg) rotateZ(-1deg) skewY(-1deg)' },
+          '50%': { transform: 'perspective(1000px) rotateY(10deg) rotateZ(1deg) skewY(1deg)' },
+        },
+        'flag-ripple': {
+          '0%': { backgroundPosition: '-200% 0' },
+          '100%': { backgroundPosition: '200% 0' },
         }
       },
       animation: {
@@ -103,6 +107,7 @@ export default {
         'glow': 'glow 2s ease-in-out infinite',
         'blink': 'blink 1s step-end infinite',
         'flag-wave': 'flag-wave 3s ease-in-out infinite',
+        'flag-ripple': 'flag-ripple 3s linear infinite',
       },
     },
   },
