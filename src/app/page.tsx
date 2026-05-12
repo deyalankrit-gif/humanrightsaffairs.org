@@ -94,9 +94,6 @@ export default function Home() {
                     className="object-contain"
                   />
                 </div>
-                <div className="flex flex-col items-center mt-2">
-                  <p className="text-white/95 text-sm md:text-lg font-body tracking-tight font-semibold">Niti Aayog Registrated</p>
-                </div>
               </div>
               
               {/* Organization Title with Typewriter effect */}
