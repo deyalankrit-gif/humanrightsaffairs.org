@@ -75,7 +75,7 @@ function BackgroundDecor() {
 
 function IndianFlag() {
   return (
-    <div className="animate-flag-wave origin-center relative mb-8 mx-auto">
+    <div className="animate-flag-wave origin-center relative mb-8 self-start">
       <div className="flex flex-col w-16 h-10 md:w-24 md:h-14 rounded-sm shadow-2xl border border-white/20 shrink-0 overflow-hidden relative">
         <div className="h-1/3 bg-[#FF9933]"></div>
         <div className="h-1/3 bg-white flex items-center justify-center relative">
