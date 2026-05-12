@@ -75,36 +75,30 @@ function BackgroundDecor() {
 
 function IndianFlag() {
   return (
-    <div className="relative mb-4 self-start ml-4 md:ml-12 h-2 md:h-4">
-      {/* Static Flagpole */}
-      <div className="absolute -left-1 -top-2 bottom-[-4px] md:bottom-[-8px] w-0.5 md:w-0.5 bg-gradient-to-r from-slate-400 via-slate-100 to-slate-400 rounded-full shadow-2xl z-20">
-        <div className="absolute -top-1 -left-0.5 w-1 h-1 md:w-1.5 md:h-1.5 rounded-full bg-gradient-to-tr from-yellow-600 via-yellow-200 to-yellow-600 shadow-lg"></div>
-      </div>
-
-      {/* Fluttering Cloth Flag - Smaller Size */}
-      <div className="animate-flag-wave origin-left flex flex-col w-6 h-4 md:w-10 md:h-6 rounded-sm shadow-[0_5px_15px_rgba(0,0,0,0.4)] shrink-0 overflow-hidden relative border-l border-white/20 z-10">
-        <div className="h-1/3 bg-[#FF9933] relative"></div>
+    <div className="relative mb-6 flex items-center justify-center">
+      {/* Animated Glow Ring */}
+      <div className="absolute inset-0 w-12 h-12 md:w-16 md:h-16 rounded-full border-2 border-accent/30 animate-ping opacity-20"></div>
+      
+      {/* Round Tricolor Flag */}
+      <div className="relative w-12 h-12 md:w-16 md:h-16 rounded-full overflow-hidden shadow-2xl border-2 border-white/40 animate-float">
+        <div className="h-1/3 bg-[#FF9933]"></div>
         <div className="h-1/3 bg-white flex items-center justify-center relative">
-          <div className="absolute inset-0 flex items-center justify-center">
-             <div className="w-0.5 h-0.5 md:w-1 md:h-1 rounded-full border-[0.1px] border-[#000080]/60 flex items-center justify-center">
-               <div className="w-px h-px bg-[#000080] rounded-full"></div>
-               <div className="absolute inset-0 flex items-center justify-center">
-                  {[...Array(24)].map((_, i) => (
-                    <div 
-                      key={i} 
-                      className="absolute w-[0.1px] md:w-[0.1px] h-0.5 md:h-0.5 bg-[#000080]/70" 
-                      style={{ transform: `rotate(${i * 15}deg)` }}
-                    />
-                  ))}
-               </div>
-             </div>
+          {/* Ashoka Chakra */}
+          <div className="w-3 h-3 md:w-4 md:h-4 rounded-full border-[0.5px] border-[#000080] flex items-center justify-center relative animate-[spin_10s_linear_infinite]">
+            {[...Array(24)].map((_, i) => (
+              <div 
+                key={i} 
+                className="absolute w-[0.2px] h-full bg-[#000080]/60" 
+                style={{ transform: `rotate(${i * 15}deg)` }}
+              />
+            ))}
+            <div className="w-0.5 h-0.5 md:w-1 md:h-1 bg-[#000080] rounded-full"></div>
           </div>
         </div>
         <div className="h-1/3 bg-[#138808]"></div>
         
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/natural-paper.png')] opacity-30 pointer-events-none"></div>
-        <div className="absolute inset-0 bg-gradient-to-r from-black/30 via-transparent to-black/30 bg-[length:150%_100%] animate-flag-ripple pointer-events-none mix-blend-multiply"></div>
-        <div className="absolute inset-0 bg-gradient-to-r from-white/10 via-white/40 to-white/10 bg-[length:200%_100%] animate-flag-ripple-alt pointer-events-none mix-blend-overlay"></div>
+        {/* Shine/Overlay Effect */}
+        <div className="absolute inset-0 bg-gradient-to-tr from-black/10 via-transparent to-white/20 pointer-events-none"></div>
       </div>
     </div>
   )
@@ -144,8 +138,8 @@ export default function Home() {
                 />
               </div>
               
-              {/* Slightly smaller Title with Typewriter effect */}
-              <div className="font-headline font-bold text-2xl sm:text-4xl md:text-5xl lg:text-6xl tracking-tight leading-tight drop-shadow-xl min-h-[1.2em] flex justify-center items-center">
+              {/* Organization Title with Typewriter effect - Slightly Smaller */}
+              <div className="font-headline font-bold text-xl sm:text-2xl md:text-3xl lg:text-4xl tracking-tight leading-tight drop-shadow-xl min-h-[1.2em] flex justify-center items-center">
                 <span className="bg-gradient-to-r from-[#FF9933] via-white to-[#138808] bg-clip-text text-transparent italic block">
                   <Typewriter 
                     text="Human Rights Affairs Trust" 
@@ -161,7 +155,7 @@ export default function Home() {
               </div>
             </div>
             
-            {/* Tagline - Slightly larger, animated Cyan/Magenta gradient, One Line */}
+            {/* Tagline - Large, One Line, Animated Gradient */}
             <h1 className="text-xl sm:text-2xl md:text-4xl lg:text-5xl font-headline font-bold leading-tight md:whitespace-nowrap bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-cyan-400 bg-[length:200%_auto] bg-clip-text text-transparent animate-gradient-x py-2 md:py-4 w-full">
               Upholding Justice. Empowering Citizens.
             </h1>
@@ -193,8 +187,8 @@ export default function Home() {
                   <div key={i} className="flex flex-col sm:flex-row items-center gap-2 md:gap-4 text-white hover:scale-105 transition-transform cursor-default justify-center">
                     <div className="p-2 md:p-4 bg-white/10 rounded-lg md:rounded-2xl shrink-0">{stat.icon}</div>
                     <div className="space-y-0 text-center sm:text-left">
-                      <p className="text-xl md:text-3xl font-bold font-headline">{stat.count}</p>
-                      <p className="text-[8px] md:text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400 leading-tight">
+                      <p className="text-lg md:text-2xl font-bold font-headline">{stat.count}</p>
+                      <p className="text-[7px] md:text-[9px] font-bold uppercase tracking-[0.1em] text-slate-400 leading-tight">
                         {stat.label}
                       </p>
                     </div>
