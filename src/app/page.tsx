@@ -76,14 +76,10 @@ function BackgroundDecor() {
 function IndianFlag() {
   return (
     <div className="relative mb-4 flex items-center justify-center">
-      {/* Animated Glow Ring */}
       <div className="absolute inset-0 w-12 h-12 md:w-16 md:h-16 rounded-full border-2 border-accent/30 animate-ping opacity-20"></div>
-      
-      {/* Round Tricolor Flag */}
       <div className="relative w-12 h-12 md:w-16 md:h-16 rounded-full overflow-hidden shadow-2xl border-2 border-white/40 animate-float">
         <div className="h-1/3 bg-[#FF9933]"></div>
         <div className="h-1/3 bg-white flex items-center justify-center relative">
-          {/* Ashoka Chakra */}
           <div className="w-3 h-3 md:w-4 md:h-4 rounded-full border-[0.5px] border-[#000080] flex items-center justify-center relative animate-[spin_10s_linear_infinite]">
             {[...Array(24)].map((_, i) => (
               <div 
@@ -96,8 +92,6 @@ function IndianFlag() {
           </div>
         </div>
         <div className="h-1/3 bg-[#138808]"></div>
-        
-        {/* Shine/Overlay Effect */}
         <div className="absolute inset-0 bg-gradient-to-tr from-black/10 via-transparent to-white/20 pointer-events-none"></div>
       </div>
     </div>
@@ -131,7 +125,7 @@ export default function Home() {
               {/* Niti Aayog Registered Satyamev Jayate Image */}
               <div className="relative w-40 h-52 md:w-72 md:h-96 transition-transform hover:scale-105">
                 <Image 
-                  src="/nity3.png" 
+                  src="/Nity3.png" 
                   alt="Niti Aayog Registered Emblem" 
                   fill 
                   className="object-contain"
