@@ -112,7 +112,7 @@ export default function Home() {
       <BackgroundDecor />
       <Navbar />
       
-      <section className="relative min-h-screen flex items-center overflow-hidden pt-32 pb-24 md:pb-32">
+      <section className="relative min-h-screen flex items-center overflow-hidden pt-32 pb-48 md:pb-64">
         <div className="absolute inset-0 z-0">
           <Image 
             src={heroImg?.imageUrl || ''} 
@@ -131,7 +131,7 @@ export default function Home() {
               <div className="flex flex-col items-start gap-4 md:gap-6">
                 <IndianFlag />
                 
-                <div className="font-headline font-bold text-[8vw] sm:text-[7vw] md:text-[6.5vw] lg:text-[7vw] xl:text-[7.5vw] tracking-tighter leading-none whitespace-nowrap overflow-visible drop-shadow-2xl">
+                <div className="font-headline font-bold text-[6vw] sm:text-[5vw] md:text-[6.5vw] lg:text-[7vw] xl:text-[7.5vw] tracking-tighter leading-none whitespace-nowrap overflow-visible drop-shadow-2xl">
                   <Typewriter 
                     text="Human Rights Affairs Trust" 
                     speed={80} 
@@ -147,8 +147,8 @@ export default function Home() {
               </div>
             </div>
             
-            <h1 className="text-xl md:text-3xl lg:text-4xl font-headline font-bold leading-tight max-w-5xl whitespace-nowrap">
-              Upholding Justice Empowering Citizens.
+            <h1 className="text-xl md:text-3xl lg:text-4xl font-headline font-bold leading-tight max-w-5xl">
+              Upholding Justice. Empowering Citizens.
             </h1>
             
             <p className="text-base md:text-2xl text-slate-200 font-body max-w-3xl leading-relaxed">
@@ -168,22 +168,25 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="absolute bottom-6 md:bottom-12 left-1/2 -translate-x-1/2 w-full container px-4 hidden lg:block animate-fade-in-up animate-delay-500">
-           <div className="glass-dark rounded-[2rem] md:rounded-[3rem] p-6 md:p-10 grid grid-cols-4 gap-6 md:gap-10">
-             {[
-               { icon: <Gavel className="w-6 h-6 md:w-8 md:h-8 text-accent" />, count: "25k+", label: "Legal Cases Resolved" },
-               { icon: <Users className="w-6 h-6 md:w-8 md:h-8 text-emerald-400" />, count: "500+", label: "Expert Advocates" },
-               { icon: <Shield className="w-6 h-6 md:w-8 md:h-8 text-indigo-400" />, count: "100%", label: "Secure Data" },
-               { icon: <HeartHandshake className="w-6 h-6 md:w-8 md:h-8 text-pink-400" />, count: "50+", label: "National Centers" }
-             ].map((stat, i) => (
-               <div key={i} className="flex items-center gap-3 md:gap-5 text-white hover:scale-105 transition-transform cursor-default">
-                 <div className="p-2 md:p-4 bg-white/10 rounded-xl md:rounded-2xl">{stat.icon}</div>
-                 <div>
-                   <p className="text-xl md:text-3xl font-bold font-headline">{stat.count}</p>
-                   <p className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-slate-300">{stat.label}</p>
+        {/* Improved Statistics Section */}
+        <div className="absolute bottom-4 md:bottom-8 lg:bottom-12 left-0 right-0 w-full px-4 animate-fade-in-up animate-delay-500 z-20">
+           <div className="container mx-auto">
+             <div className="glass-dark rounded-[1.5rem] md:rounded-[3rem] p-4 md:p-8 lg:p-10 grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
+               {[
+                 { icon: <Gavel className="w-5 h-5 md:w-8 md:h-8 text-accent" />, count: "25k+", label: "Legal Cases Resolved" },
+                 { icon: <Users className="w-5 h-5 md:w-8 md:h-8 text-emerald-400" />, count: "500+", label: "Expert Advocates" },
+                 { icon: <Shield className="w-5 h-5 md:w-8 md:h-8 text-indigo-400" />, count: "100%", label: "Secure Data" },
+                 { icon: <HeartHandshake className="w-5 h-5 md:w-8 md:h-8 text-pink-400" />, count: "50+", label: "National Centers" }
+               ].map((stat, i) => (
+                 <div key={i} className="flex items-center gap-2 md:gap-4 lg:gap-5 text-white hover:scale-105 transition-transform cursor-default overflow-hidden">
+                   <div className="p-2 md:p-4 bg-white/10 rounded-lg md:rounded-2xl shrink-0">{stat.icon}</div>
+                   <div className="min-w-0">
+                     <p className="text-lg md:text-2xl lg:text-3xl font-bold font-headline truncate">{stat.count}</p>
+                     <p className="text-[8px] md:text-[10px] lg:text-xs font-bold uppercase tracking-widest text-slate-300 truncate">{stat.label}</p>
+                   </div>
                  </div>
-               </div>
-             ))}
+               ))}
+             </div>
            </div>
         </div>
       </section>
