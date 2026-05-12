@@ -106,6 +106,7 @@ function IndianFlag() {
 
 export default function Home() {
   const heroImg = PlaceHolderImages.find(img => img.id === 'hero-human-rights')
+  const nitiLogo = PlaceHolderImages.find(img => img.id === 'niti-logo')
 
   return (
     <main className="min-h-screen relative">
@@ -130,6 +131,17 @@ export default function Home() {
             <div className="space-y-6">
               <div className="flex flex-col items-start">
                 <IndianFlag />
+                
+                {nitiLogo && (
+                  <div className="relative w-32 h-32 md:w-48 md:h-48 mb-4">
+                    <Image 
+                      src={nitiLogo.imageUrl} 
+                      alt="Niti Emblem" 
+                      fill 
+                      className="object-contain mix-blend-lighten opacity-90"
+                    />
+                  </div>
+                )}
                 
                 <div className="font-headline font-bold text-[7vw] sm:text-[6vw] md:text-[6.5vw] lg:text-[7vw] xl:text-[7.5vw] tracking-tighter leading-none whitespace-nowrap overflow-visible drop-shadow-2xl">
                   <Typewriter 
@@ -166,7 +178,6 @@ export default function Home() {
               </Button>
             </div>
 
-            {/* Statistics Section - Now part of the flow to prevent overlap */}
             <div className="w-full">
               <div className="glass-dark rounded-[1.5rem] md:rounded-[3rem] p-4 md:p-8 lg:p-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
                 {[

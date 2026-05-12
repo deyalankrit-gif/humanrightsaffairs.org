@@ -73,10 +73,10 @@
       "imageHint": "educational workshop classroom"
     },
     {
-      "id": "nity-darpan-logo",
-      "description": "Official emblem of NITI DARPAN / Human Rights Affairs Trust",
-      "imageUrl": "/nity darpan.jpeg",
-      "imageHint": "official emblem"
+      "id": "niti-logo",
+      "description": "Niti Emblem / Human Rights Affairs Trust Logo",
+      "imageUrl": "/niti .jpeg",
+      "imageHint": "official emblem logo"
     }
   ]
 }
