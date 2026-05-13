@@ -80,9 +80,17 @@ export default function Home() {
             
             <div className="flex flex-col items-center gap-4">
               <IndianFlag />
+              <div className="relative w-32 h-16 md:w-40 md:h-20 -mt-2">
+                <Image 
+                  src="/niti2.png" 
+                  alt="Niti Aayog" 
+                  fill 
+                  className="object-contain"
+                />
+              </div>
             </div>
 
-            <div className="flex flex-col items-center gap-0 w-full mt-4 md:mt-8">
+            <div className="flex flex-col items-center gap-0 w-full mt-2 md:mt-4">
               <div className="font-headline font-bold text-2xl sm:text-4xl md:text-5xl lg:text-6xl tracking-tight leading-tight min-h-[1.5em] flex justify-center items-center overflow-visible">
                 <span className="bg-gradient-to-r from-[#FF9933] via-white to-[#138808] bg-clip-text text-transparent italic block drop-shadow-sm px-4 pb-4">
                   <Typewriter 
