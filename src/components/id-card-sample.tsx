@@ -18,8 +18,6 @@ import {
 } from "@/components/ui/alert-dialog"
 
 export function IDCardShowcase() {
-  const idImg = PlaceHolderImages.find(img => img.id === 'id-card-sample')
-
   const eligibilityCriteria = [
     { title: "Citizenship", detail: "Must be a citizen of India (for Indian Chapters) or have valid residency." },
     { title: "Age Requirement", detail: "Minimum 18 years of age to register as a formal advocate/member." },
@@ -107,14 +105,13 @@ export function IDCardShowcase() {
           <div className="relative group perspective-1000">
             <div className="absolute -inset-10 bg-accent/20 rounded-full blur-[100px] animate-pulse"></div>
             <div className="relative transform transition-transform duration-700 group-hover:rotate-y-12">
-              {/* Front of ID */}
               <div className="bg-white text-primary p-8 rounded-[2rem] shadow-2xl border-4 border-accent relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-slate-50 rounded-bl-full -mr-10 -mt-10"></div>
                 <div className="flex items-start justify-between mb-8">
                   <div className="flex items-center gap-3">
                     <div className="relative w-12 h-12">
                       <Image 
-                        src="/HRAT Logo.jpeg" 
+                        src="/HRAT%20Logo.jpeg" 
                         alt="HRAT Logo" 
                         fill 
                         className="object-contain"

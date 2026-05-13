@@ -1,10 +1,10 @@
 
 "use client"
 
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Menu, X } from 'lucide-react'
+import { Menu } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger } from '@/components/ui/sheet'
 import { usePathname } from 'next/navigation'
@@ -22,24 +22,24 @@ const navLinks = [
 ]
 
 export function Navbar() {
-  const [isScrolled, setIsScrolled] = React.useState(false)
-  const [activeHash, setActiveHash] = React.useState('')
+  const [mounted, setMounted] = useState(false)
+  const [isScrolled, setIsScrolled] = useState(false)
+  const [activeHash, setActiveHash] = useState('')
   const pathname = usePathname()
   const isHome = pathname === '/'
 
-  React.useEffect(() => {
+  useEffect(() => {
+    setMounted(true)
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20)
       
       if (isHome) {
-        // Detection for home sections
         const sections = ['knowledge', 'helpline', 'membership']
         let currentSection = ''
         for (const section of sections) {
           const el = document.getElementById(section)
           if (el) {
             const rect = el.getBoundingClientRect()
-            // If the section is near the top of the viewport
             if (rect.top <= 200 && rect.bottom >= 200) {
               currentSection = `#${section}`
               break
@@ -51,13 +51,25 @@ export function Navbar() {
     }
     
     window.addEventListener('scroll', handleScroll)
-    // Initial check
     handleScroll()
     return () => window.removeEventListener('scroll', handleScroll)
   }, [isHome])
 
   const navColorClass = (isScrolled || !isHome) ? 'text-primary' : 'text-white'
   const bgColorClass = (isScrolled || !isHome) ? 'bg-white/95 backdrop-blur-md shadow-lg py-3' : 'bg-transparent py-6'
+
+  if (!mounted) {
+    return (
+      <nav className={cn("fixed top-0 w-full z-50 transition-all duration-500", bgColorClass)}>
+        <div className="container mx-auto px-4 flex items-center justify-between">
+           <div className="flex items-center gap-2">
+            <div className="w-12 h-12 rounded-full bg-slate-200/20 animate-pulse"></div>
+            <div className="h-6 w-24 bg-slate-200/20 animate-pulse rounded"></div>
+           </div>
+        </div>
+      </nav>
+    )
+  }
 
   return (
     <nav className={cn(
@@ -69,7 +81,7 @@ export function Navbar() {
           <div className="relative">
             <div className="relative w-12 h-12 transition-transform duration-500 group-hover:scale-110">
               <Image 
-                src="/HRAT Logo.jpeg" 
+                src="/HRAT%20Logo.jpeg" 
                 alt="HRAT Official Logo" 
                 fill 
                 className="object-contain"
@@ -90,11 +102,9 @@ export function Navbar() {
         {/* Desktop Nav */}
         <div className="hidden md:flex items-center gap-8">
           {navLinks.map((link) => {
-            // Determine if the link is active
             const isPageActive = pathname === link.href
             const isHashActive = isHome && activeHash && link.href === `/${activeHash}`
             const isHomeRootActive = link.href === '/' && isHome && !activeHash
-            
             const isActive = isPageActive || isHashActive || isHomeRootActive
 
             return (
@@ -138,7 +148,7 @@ export function Navbar() {
                 <SheetTitle className="flex items-center gap-2">
                    <div className="relative w-10 h-10">
                     <Image 
-                      src="/HRAT Logo.jpeg" 
+                      src="/HRAT%20Logo.jpeg" 
                       alt="HRAT Official Logo" 
                       fill 
                       className="object-contain"

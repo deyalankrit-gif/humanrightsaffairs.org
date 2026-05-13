@@ -9,7 +9,7 @@ import { AIChat } from '@/components/ai-chat'
 import { DocSearch } from '@/components/doc-search'
 import { Footer } from '@/components/footer'
 import { Button } from '@/components/ui/button'
-import { Shield, Scale, Users, HeartHandshake, ArrowRight, Gavel, CheckCircle2, FileText, Heart, Globe } from 'lucide-react'
+import { Shield, Scale, Users, HeartHandshake, ArrowRight, Gavel, CheckCircle2 } from 'lucide-react'
 import { DonationDialog } from '@/components/donation-dialog'
 import { Typewriter } from '@/components/typewriter'
 
@@ -66,7 +66,7 @@ export default function Home() {
       <section className="relative min-h-screen flex flex-col items-center pt-28 md:pt-36 pb-20">
         <div className="absolute inset-0 z-0">
           <Image 
-            src="/Human R2.jpeg" 
+            src="/Human%20R2.jpeg" 
             alt="Human Rights Heritage" 
             fill 
             className="object-cover brightness-[0.15] scale-105"
@@ -80,7 +80,7 @@ export default function Home() {
             
             <div className="flex flex-col items-center gap-4">
               <IndianFlag />
-              <div className="relative w-48 h-24 md:w-72 md:h-36">
+              <div className="relative w-48 h-24 md:w-80 md:h-48">
                 <Image 
                   src="/niti2.png" 
                   alt="Niti Aayog" 
@@ -124,7 +124,7 @@ export default function Home() {
             <div className="w-full pt-12 md:pt-20 max-w-4xl mx-auto">
               <div className="glass-dark rounded-[1.5rem] md:rounded-[2.5rem] p-4 md:p-6 grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 border-white/5">
                 {[
-                  { icon: <Gavel className="w-4 h-4 md:w-5 md:h-5 text-accent" />, count: "25k+", label: "Legal Cases Resolved" },
+                  { icon: <Scale className="w-4 h-4 md:w-5 md:h-5 text-accent" />, count: "25k+", label: "Legal Cases Resolved" },
                   { icon: <Users className="w-4 h-4 md:w-5 md:h-5 text-emerald-400" />, count: "500+", label: "Expert Advocates" },
                   { icon: <Shield className="w-4 h-4 md:w-5 md:h-5 text-indigo-400" />, count: "100%", label: "Secure Data Handling" },
                   { icon: <HeartHandshake className="w-4 h-4 md:w-5 md:h-5 text-pink-400" />, count: "50+", label: "National Centers" }

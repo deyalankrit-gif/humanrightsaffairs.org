@@ -27,13 +27,6 @@ import {
   FormMessage 
 } from '@/components/ui/form'
 import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from '@/components/ui/select'
-import { 
   CreditCard, 
   Download, 
   Printer, 
@@ -174,7 +167,7 @@ export function DonationDialog({ children }: { children: React.ReactNode }) {
             {step === 'payment' && "Secure Payment Gateway"}
             {step === 'success' && "Donation Successful"}
             <div className="relative w-10 h-10">
-              <Image src="/HRAT Logo.jpeg" alt="HRAT Logo" fill className="object-contain" />
+              <Image src="/HRAT%20Logo.jpeg" alt="HRAT Logo" fill className="object-contain" />
             </div>
           </DialogTitle>
           <DialogDescription>
@@ -325,7 +318,7 @@ export function DonationDialog({ children }: { children: React.ReactNode }) {
               <div className="header flex items-center justify-between border-b-2 pb-6">
                 <div className="flex items-center gap-3">
                   <div className="relative w-12 h-12">
-                    <Image src="/HRAT Logo.jpeg" alt="HRAT Logo" fill className="object-contain" />
+                    <Image src="/HRAT%20Logo.jpeg" alt="HRAT Logo" fill className="object-contain" />
                   </div>
                   <div>
                     <h4 className="font-headline font-bold text-xl leading-none">HRAT</h4>
