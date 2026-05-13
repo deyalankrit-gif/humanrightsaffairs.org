@@ -82,15 +82,7 @@ export default function Home() {
 
             <div className="flex flex-col items-center gap-0 w-full -mt-2 md:-mt-4">
               <div className="flex flex-col items-center group mb-0">
-                <div className="relative w-28 h-36 md:w-36 md:h-48 transition-transform hover:scale-105 duration-500">
-                  <Image 
-                    src="/Niti3.png" 
-                    alt="Official Emblem" 
-                    fill 
-                    className="object-contain"
-                  />
-                </div>
-                <div className="flex flex-col items-center -mt-6 md:-mt-10 text-white drop-shadow-md space-y-1 relative z-20">
+                <div className="flex flex-col items-center text-white drop-shadow-md space-y-1 relative z-20">
                    <p className="text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] leading-tight">Niti Aayog registered</p>
                    <p className="text-[9px] md:text-[11px] font-bold uppercase tracking-[0.15em] leading-tight opacity-90">National Informatics Centre</p>
                    <p className="text-[15px] md:text-[18px] font-bold uppercase tracking-[0.2em] leading-tight">Government of India</p>
