@@ -80,26 +80,10 @@ export default function Home() {
             
             <div className="flex flex-col items-center gap-4">
               <IndianFlag />
-              <div className="relative w-28 h-14 md:w-36 md:h-18 animate-fade-in-up">
-                <Image 
-                  src="/Niti3.png" 
-                  alt="Niti Aayog Logo" 
-                  fill 
-                  className="object-contain"
-                />
-              </div>
             </div>
 
-            <div className="flex flex-col items-center gap-0 w-full -mt-2 md:-mt-4">
-              <div className="flex flex-col items-center group mb-0">
-                <div className="flex flex-col items-center text-white drop-shadow-md space-y-1 relative z-20">
-                   <p className="text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] leading-tight">Niti Aayog registered</p>
-                   <p className="text-[9px] md:text-[11px] font-bold uppercase tracking-[0.15em] leading-tight opacity-90">National Informatics Centre</p>
-                   <p className="text-[15px] md:text-[18px] font-bold uppercase tracking-[0.2em] leading-tight">Government of India</p>
-                </div>
-              </div>
-              
-              <div className="font-headline font-bold text-2xl sm:text-4xl md:text-5xl lg:text-6xl tracking-tight leading-tight min-h-[1.5em] flex justify-center items-center overflow-visible mt-4 md:mt-8">
+            <div className="flex flex-col items-center gap-0 w-full mt-4 md:mt-8">
+              <div className="font-headline font-bold text-2xl sm:text-4xl md:text-5xl lg:text-6xl tracking-tight leading-tight min-h-[1.5em] flex justify-center items-center overflow-visible">
                 <span className="bg-gradient-to-r from-[#FF9933] via-white to-[#138808] bg-clip-text text-transparent italic block drop-shadow-sm px-4 pb-4">
                   <Typewriter 
                     text="Human Rights Affairs Trust" 
