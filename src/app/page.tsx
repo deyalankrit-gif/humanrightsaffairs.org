@@ -78,7 +78,17 @@ export default function Home() {
         <div className="container mx-auto px-4 relative z-10 text-white text-center">
           <div className="max-w-full space-y-4 md:space-y-6 flex flex-col items-center">
             
-            <IndianFlag />
+            <div className="flex flex-col items-center gap-4">
+              <IndianFlag />
+              <div className="relative w-28 h-14 md:w-36 md:h-18 animate-fade-in-up">
+                <Image 
+                  src="/Niti3.png" 
+                  alt="Niti Aayog Logo" 
+                  fill 
+                  className="object-contain"
+                />
+              </div>
+            </div>
 
             <div className="flex flex-col items-center gap-0 w-full -mt-2 md:-mt-4">
               <div className="flex flex-col items-center group mb-0">
