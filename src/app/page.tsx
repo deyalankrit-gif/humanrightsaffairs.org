@@ -80,7 +80,7 @@ export default function Home() {
             
             <div className="flex flex-col items-center gap-4">
               <IndianFlag />
-              <div className="relative w-32 h-16 md:w-40 md:h-20 -mt-2">
+              <div className="relative w-48 h-24 md:w-72 md:h-36">
                 <Image 
                   src="/niti2.png" 
                   alt="Niti Aayog" 
