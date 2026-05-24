@@ -90,7 +90,10 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="flex flex-col items-center gap-0 w-full mt-2 md:mt-4">
+            <div className="flex flex-col items-center gap-2 w-full mt-2 md:mt-4">
+              <p className="text-[#D4AF37] font-bold text-xs sm:text-sm md:text-base uppercase tracking-[0.25em] drop-shadow-lg animate-fade-in">
+                Government of India ( Niti Aayog Registered )
+              </p>
               <div className="font-headline font-bold text-2xl sm:text-4xl md:text-5xl lg:text-6xl tracking-tight leading-tight min-h-[1.5em] flex justify-center items-center overflow-visible">
                 <span className="bg-gradient-to-r from-[#FF9933] via-white to-[#138808] bg-clip-text text-transparent italic block drop-shadow-sm px-4 pb-4">
                   <Typewriter 
