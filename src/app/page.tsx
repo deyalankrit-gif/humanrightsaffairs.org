@@ -128,7 +128,7 @@ export default function Home() {
             <div className="w-full pt-12 md:pt-20 max-w-4xl mx-auto">
               <div className="glass-dark rounded-[1.5rem] md:rounded-[2.5rem] p-4 md:p-6 grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 border-white/5">
                 {[
-                  { icon: <Scale className="w-4 h-4 md:w-5 md:h-5 text-accent" />, count: "25k+", label: "Legal Cases Resolved" },
+                  { icon: <Scale className="w-4 h-4 md:w-5 md:h-5 text-accent" />, count: "2k+", label: "Legal Cases Resolved" },
                   { icon: <Users className="w-4 h-4 md:w-5 md:h-5 text-emerald-400" />, count: "50+", label: "Expert Advocates" },
                   { icon: <Shield className="w-4 h-4 md:w-5 md:h-5 text-indigo-400" />, count: "100%", label: "Secure Data Handling" },
                   { icon: <HeartHandshake className="w-4 h-4 md:w-5 md:h-5 text-pink-400" />, count: "20+", label: "National Centers" }
