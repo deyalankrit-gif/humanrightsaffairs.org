@@ -38,28 +38,34 @@ export function EmergencyHelpline() {
           </p>
           
           {/* Featured Chairman Contact */}
-          <div className="mt-8 max-w-2xl mx-auto">
-            <Card className="border-accent bg-accent/5 shadow-lg border-2 overflow-hidden transform hover:scale-[1.02] transition-transform duration-300">
-              <CardHeader className="flex flex-row items-center justify-between pb-2 text-left">
-                <CardTitle className="text-sm sm:text-base md:text-lg font-headline font-bold text-primary whitespace-nowrap overflow-hidden text-ellipsis">
+          <div className="mt-8 max-w-4xl mx-auto">
+            <Card className="border-accent bg-accent/5 shadow-2xl border-2 overflow-hidden transform hover:scale-[1.01] transition-all duration-500 relative group">
+              <div className="absolute inset-0 bg-gradient-to-r from-accent/10 via-transparent to-accent/10 opacity-0 group-hover:opacity-100 transition-opacity animate-pulse"></div>
+              <CardHeader className="flex flex-row items-center justify-between pb-2 text-left relative z-10">
+                <CardTitle className="text-base sm:text-lg md:text-xl lg:text-2xl font-headline font-bold bg-gradient-to-r from-primary via-accent to-secondary bg-[length:200%_auto] bg-clip-text text-transparent animate-gradient-x whitespace-nowrap overflow-visible">
                   Chairman, West Bengal Human Rights Affairs Trust
                 </CardTitle>
-                <div className="bg-accent/20 p-2 rounded-lg shrink-0">
-                  <UserCheck className="w-5 h-5 text-accent" />
+                <div className="bg-accent/20 p-2 rounded-xl shrink-0 group-hover:rotate-12 transition-transform">
+                  <UserCheck className="w-6 h-6 text-accent animate-bounce" />
                 </div>
               </CardHeader>
-              <CardContent className="text-left">
-                <div className="flex items-center gap-2 text-slate-500 text-xs mb-4">
-                  <MapPin className="w-3 h-3" />
+              <CardContent className="text-left relative z-10">
+                <div className="flex items-center gap-2 text-primary font-bold text-xs md:text-sm mb-6 bg-white/50 w-fit px-3 py-1 rounded-full border border-accent/20">
+                  <MapPin className="w-4 h-4 text-accent" />
                   <span>West Bengal State Chapter</span>
                 </div>
                 <a 
                   href="tel:9064990024" 
-                  className="flex items-center justify-between bg-primary text-white p-4 rounded-xl font-bold text-xl md:text-2xl hover:bg-primary/90 transition-colors"
+                  className="flex items-center justify-between bg-primary text-white p-5 md:p-6 rounded-[2rem] font-bold text-2xl md:text-4xl hover:bg-primary/95 transition-all shadow-xl shadow-primary/20 group/btn overflow-hidden relative"
                 >
-                  90649 90024
-                  <Phone className="w-6 h-6 fill-white" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-1000"></div>
+                  <span className="relative z-10">90649 90024</span>
+                  <Phone className="w-8 h-8 md:w-10 md:h-10 fill-white relative z-10 animate-pulse" />
                 </a>
+                <div className="mt-4 flex items-center justify-center gap-2 text-[10px] font-bold text-accent uppercase tracking-widest opacity-70 group-hover:opacity-100 transition-opacity">
+                  <span className="w-2 h-2 rounded-full bg-accent animate-ping"></span>
+                  Official Emergency Response Line
+                </div>
               </CardContent>
             </Card>
           </div>
