@@ -82,6 +82,8 @@ export function KnowledgeCenter() {
       window.open('https://www.indiacode.nic.in/bitstream/123456789/19150/1/constitution_of_india.pdf', '_blank');
     } else if (selectedGuide?.id === 'womens-rights') {
       window.open('https://clpr.org.in/wp-content/uploads/2024/12/Womens-Book_Accessible.pdf', '_blank');
+    } else if (selectedGuide?.id === 'labor-laws') {
+      window.open('https://ncib.in/pdf/ncib_pdf/Labour%20Act.pdf', '_blank');
     } else {
       scrollToSearch();
     }
