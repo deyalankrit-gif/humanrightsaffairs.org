@@ -69,6 +69,14 @@ const guides = [
 export function KnowledgeCenter() {
   const [selectedGuide, setSelectedGuide] = useState<typeof guides[0] | null>(null)
 
+  const scrollToSearch = () => {
+    setSelectedGuide(null);
+    const element = document.getElementById('search');
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  }
+
   return (
     <section id="knowledge" className="py-16 md:py-24 bg-slate-50">
       <div className="container mx-auto px-4">
@@ -81,7 +89,11 @@ export function KnowledgeCenter() {
             <h2 className="text-3xl md:text-4xl font-headline font-bold text-primary mb-4">Digital Library of Human Rights</h2>
             <p className="text-slate-600 text-sm md:text-base">Access legal manuals, rights guides, and educational materials in English, Hindi, and Bengali. Knowledge is your first line of defense.</p>
           </div>
-          <Button variant="outline" className="border-primary text-primary hover:bg-primary hover:text-white w-full md:w-auto font-bold">
+          <Button 
+            variant="outline" 
+            onClick={scrollToSearch}
+            className="border-primary text-primary hover:bg-primary hover:text-white w-full md:w-auto font-bold"
+          >
             View All Documentation
           </Button>
         </div>
@@ -111,7 +123,7 @@ export function KnowledgeCenter() {
                   Read More <ExternalLink className="w-3 h-3 md:w-4 md:h-4" />
                 </Button>
                 {guide.title.includes('Manuals') && (
-                  <Button size="sm" className="bg-primary text-white ml-auto text-xs h-8 md:h-9">
+                  <Button size="sm" onClick={scrollToSearch} className="bg-primary text-white ml-auto text-xs h-8 md:h-9">
                     <Download className="w-3 h-3 md:w-4 md:h-4 mr-2" /> Download
                   </Button>
                 )}
@@ -158,11 +170,14 @@ export function KnowledgeCenter() {
               </div>
 
               <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                <Button className="flex-1 bg-primary text-white font-bold py-6 rounded-xl hover:bg-primary/90 text-lg shadow-xl shadow-primary/10">
+                <Button 
+                  onClick={scrollToSearch}
+                  className="flex-1 bg-primary text-white font-bold py-6 rounded-xl hover:bg-primary/90 text-lg shadow-xl shadow-primary/10"
+                >
                   Access Full Repository
                 </Button>
                 {selectedGuide.id === 'manuals' && (
-                  <Button variant="outline" className="flex-1 border-primary text-primary font-bold py-6 rounded-xl hover:bg-slate-50 text-lg">
+                  <Button variant="outline" onClick={scrollToSearch} className="flex-1 border-primary text-primary font-bold py-6 rounded-xl hover:bg-slate-50 text-lg">
                     <Download className="w-5 h-5 mr-2" /> Download PDFs
                   </Button>
                 )}
