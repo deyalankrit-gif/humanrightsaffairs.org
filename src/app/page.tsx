@@ -2,6 +2,7 @@
 import Image from 'next/image'
 import { Navbar } from '@/components/navbar'
 import { ChairmanMessage } from '@/components/chairman-message'
+import { StateChairpersonMessage } from '@/components/state-chairperson-message'
 import { KnowledgeCenter } from '@/components/knowledge-center'
 import { EmergencyHelpline } from '@/components/emergency-helpline'
 import { IDCardShowcase } from '@/components/id-card-sample'
@@ -80,7 +81,7 @@ export default function Home() {
             
             <div className="flex flex-col items-center gap-4">
               <IndianFlag />
-              <div className="relative w-48 h-24 md:w-80 md:h-48">
+              <div className="relative w-72 h-36 md:w-[500px] md:h-[250px] transition-all duration-700">
                 <Image 
                   src="/niti2.png" 
                   alt="Niti Aayog" 
@@ -160,6 +161,8 @@ export default function Home() {
       </section>
 
       <ChairmanMessage />
+      
+      <StateChairpersonMessage />
       
       <KnowledgeCenter />
 
