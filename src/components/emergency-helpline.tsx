@@ -2,7 +2,7 @@
 "use client"
 
 import React from 'react'
-import { Phone, MapPin, Search, LifeBuoy } from 'lucide-react'
+import { Phone, MapPin, Search, LifeBuoy, UserCheck } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -33,7 +33,36 @@ export function EmergencyHelpline() {
             <Phone className="w-6 h-6 md:w-8 md:h-8" />
           </div>
           <h2 className="text-3xl md:text-4xl font-headline font-bold text-primary mb-4">Emergency Helpline Dashboard</h2>
-          <p className="text-slate-600 text-sm md:text-base">Immediate assistance is just a call away. Filter by state or service type to find the right help.</p>
+          <p className="text-slate-600 text-sm md:text-base">
+            Immediate assistance is just a call away. Filter by state or service type to find the right help.
+          </p>
+          
+          {/* Featured Chairman Contact */}
+          <div className="mt-8 max-w-md mx-auto">
+            <Card className="border-accent bg-accent/5 shadow-lg border-2 overflow-hidden transform hover:scale-105 transition-transform duration-300">
+              <CardHeader className="flex flex-row items-center justify-between pb-2 text-left">
+                <CardTitle className="text-lg font-headline font-bold text-primary">
+                  Chairman, West Bengal Human Rights Affairs Trust
+                </CardTitle>
+                <div className="bg-accent/20 p-2 rounded-lg shrink-0">
+                  <UserCheck className="w-5 h-5 text-accent" />
+                </div>
+              </CardHeader>
+              <CardContent className="text-left">
+                <div className="flex items-center gap-2 text-slate-500 text-xs mb-4">
+                  <MapPin className="w-3 h-3" />
+                  <span>West Bengal State Chapter</span>
+                </div>
+                <a 
+                  href="tel:9064990024" 
+                  className="flex items-center justify-between bg-primary text-white p-4 rounded-xl font-bold text-xl md:text-2xl hover:bg-primary/90 transition-colors"
+                >
+                  90649 90024
+                  <Phone className="w-6 h-6 fill-white" />
+                </a>
+              </CardContent>
+            </Card>
+          </div>
         </div>
 
         <div className="flex flex-col md:flex-row gap-4 mb-8 max-w-3xl mx-auto">
