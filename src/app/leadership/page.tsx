@@ -1,4 +1,3 @@
-
 import Image from 'next/image'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
@@ -13,7 +12,7 @@ type Leader = {
 }
 
 const centralTeam: Leader[] = [
-  { name: "Dhritimaan Dey", title: "Central Chairman & Founder", imageId: "chairman-photo" },
+  { name: "Dhritiman Dey", title: "Central Chairman (INDIA) & Founder", imageId: "chairman-photo" },
   { name: "Adv. Meera Deshmukh", title: "National Legal Advisor", imageId: "leader-1" },
   { name: "Dr. Arvind Swamy", title: "General Secretary", imageId: "leader-2" },
 ]

@@ -1,4 +1,3 @@
-
 import Image from 'next/image'
 import { Quote } from 'lucide-react'
 import { PlaceHolderImages } from '@/lib/placeholder-images'
@@ -22,8 +21,8 @@ export function ChairmanMessage() {
               />
             </div>
             <div className="absolute bottom-6 left-6 right-6 bg-white/90 backdrop-blur-md p-6 rounded-xl shadow-lg">
-              <h3 className="font-headline text-2xl font-bold text-primary">Dhritimaan Dey</h3>
-              <p className="text-accent font-semibold text-sm tracking-widest uppercase">Chairman, Human Rights Affairs Trust</p>
+              <h3 className="font-headline text-2xl font-bold text-primary">Dhritiman Dey</h3>
+              <p className="text-accent font-semibold text-sm tracking-widest uppercase">Central Chairman (INDIA) & Founder</p>
             </div>
           </div>
 
@@ -48,8 +47,8 @@ export function ChairmanMessage() {
                  DD
                </div>
                <div>
-                 <p className="font-bold text-lg text-primary">Dhritimaan Dey</p>
-                 <p className="text-slate-500">National Chairman & Founder</p>
+                 <p className="font-bold text-lg text-primary">Dhritiman Dey</p>
+                 <p className="text-slate-500">Central Chairman (INDIA) & Founder</p>
                </div>
             </div>
           </div>

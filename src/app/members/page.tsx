@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useMemo } from 'react'
@@ -80,8 +79,8 @@ const chapterToDistricts: Record<string, string[]> = {
 const members: Member[] = [
   {
     id: "M001",
-    name: "Dhritimaan Dey",
-    designation: "Central Chairman & Founder",
+    name: "Dhritiman Dey",
+    designation: "Central Chairman (INDIA) & Founder",
     jurisdiction: "All India",
     level: "National",
     imageId: "chairman-photo"
@@ -162,9 +161,9 @@ const members: Member[] = [
     id: "M010",
     name: "Prakash Jha",
     designation: "District Chairman",
-    jurisdiction: "Udaipur",
+    jurisdiction: "Howrah",
     stateName: "Tripura Chapter",
-    districtName: "Udaipur",
+    districtName: "Howrah",
     level: "District",
     imageId: "leader-1"
   }
