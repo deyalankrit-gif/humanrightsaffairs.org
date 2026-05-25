@@ -131,7 +131,7 @@ export default function Home() {
                   { icon: <Scale className="w-4 h-4 md:w-5 md:h-5 text-accent" />, count: "25k+", label: "Legal Cases Resolved" },
                   { icon: <Users className="w-4 h-4 md:w-5 md:h-5 text-emerald-400" />, count: "500+", label: "Expert Advocates" },
                   { icon: <Shield className="w-4 h-4 md:w-5 md:h-5 text-indigo-400" />, count: "100%", label: "Secure Data Handling" },
-                  { icon: <HeartHandshake className="w-4 h-4 md:w-5 md:h-5 text-pink-400" />, count: "50+", label: "National Centers" }
+                  { icon: <HeartHandshake className="w-4 h-4 md:w-5 md:h-5 text-pink-400" />, count: "20+", label: "National Centers" }
                 ].map((stat, i) => (
                   <div key={i} className="flex flex-col sm:flex-row items-center gap-2 md:gap-3 text-white hover:opacity-80 transition-opacity cursor-default justify-center">
                     <div className="p-2 md:p-3 bg-white/5 rounded-lg md:rounded-xl shrink-0">{stat.icon}</div>
