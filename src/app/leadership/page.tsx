@@ -1,3 +1,4 @@
+
 import Image from 'next/image'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
@@ -21,7 +22,7 @@ const stateTeams = [
   {
     state: "West Bengal",
     leaders: [
-      { name: "Moumita Saha", title: "State Chairman", imageId: "leader-2" },
+      { name: "Moumita Saha", title: "Chairman (West Bengal)", imageId: "leader-2" },
       { name: "Sonia Gandhi", title: "Vice Chairperson", imageId: "leader-4" }
     ]
   },

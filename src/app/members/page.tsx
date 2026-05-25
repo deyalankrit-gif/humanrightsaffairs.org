@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useMemo } from 'react'
@@ -5,7 +6,7 @@ import Image from 'next/image'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 import { PlaceHolderImages } from '@/lib/placeholder-images'
-import { Search, MapPin, BadgeCheck, User, Users, Shield, Briefcase, Hash, ChevronDown } from 'lucide-react'
+import { Search, MapPin, BadgeCheck, User, Users, Briefcase, Hash, ChevronDown } from 'lucide-react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -104,7 +105,7 @@ const members: Member[] = [
   {
     id: "M004",
     name: "Moumita Saha",
-    designation: "State Chairman",
+    designation: "Chairman (West Bengal)",
     jurisdiction: "West Bengal",
     stateName: "West Bengal",
     level: "State",

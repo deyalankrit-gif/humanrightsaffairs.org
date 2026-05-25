@@ -2,7 +2,7 @@
 "use client"
 
 import Image from 'next/image'
-import { Quote, ShieldCheck } from 'lucide-react'
+import { ShieldCheck } from 'lucide-react'
 import { PlaceHolderImages } from '@/lib/placeholder-images'
 
 export function StateChairpersonMessage() {
@@ -12,7 +12,7 @@ export function StateChairpersonMessage() {
     <section className="py-20 bg-white relative overflow-hidden">
       <div className="container mx-auto px-4">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
-          {/* Text Content - Swapped order for visual variety */}
+          {/* Text Content */}
           <div className="space-y-6 order-2 lg:order-1">
             <div className="inline-flex items-center gap-2 bg-emerald-50 text-emerald-600 px-4 py-1.5 rounded-full text-sm font-bold border border-emerald-100">
               <ShieldCheck className="w-4 h-4" />
@@ -23,7 +23,7 @@ export function StateChairpersonMessage() {
             </h2>
             <div className="space-y-4 text-base text-slate-600 font-body leading-relaxed">
               <p>
-                "As the State Chairperson of West Bengal, my focus is to ensure that the mission of JusticeShield reaches every corner of our state. We are dedicated to providing accessible legal support and awareness to the marginalized communities across all districts."
+                "As the Chairman of West Bengal, my focus is to ensure that the mission of JusticeShield reaches every corner of our state. We are dedicated to providing accessible legal support and awareness to the marginalized communities across all districts."
               </p>
               <p>
                 "Our state chapter is actively working with legal experts and local volunteers to bridge the gap between rights and reality. We believe that an informed citizen is a protected citizen."
@@ -35,7 +35,7 @@ export function StateChairpersonMessage() {
                </div>
                <div>
                  <p className="font-bold text-lg text-primary">Moumita Saha</p>
-                 <p className="text-slate-500 text-sm">State Chairperson, West Bengal</p>
+                 <p className="text-slate-500 text-sm">Chairman (West Bengal)</p>
                </div>
             </div>
           </div>
