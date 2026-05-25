@@ -1,4 +1,3 @@
-
 "use client"
 
 import React from 'react'
@@ -113,8 +112,8 @@ export function IDCardShowcase() {
                   data-ai-hint="official identification card"
                 />
                 {/* Privacy Blur Overlay - Reduced size for more precise masking */}
-                <div className="absolute bottom-[24%] right-[12%] w-[18%] h-[5%] backdrop-blur-md bg-white/10 rounded-sm border border-white/20 pointer-events-none flex items-center justify-center">
-                  <span className="text-[6px] text-primary/60 font-bold uppercase tracking-tighter">Protected</span>
+                <div className="absolute bottom-[24.5%] right-[13%] w-[14%] h-[4%] backdrop-blur-md bg-white/10 rounded-sm border border-white/20 pointer-events-none flex items-center justify-center">
+                  <span className="text-[5px] text-primary/60 font-bold uppercase tracking-tighter">Private</span>
                 </div>
               </div>
               <div className="absolute -bottom-6 -right-6 bg-accent text-primary p-4 rounded-2xl shadow-xl border-4 border-primary animate-bounce hidden md:block">
