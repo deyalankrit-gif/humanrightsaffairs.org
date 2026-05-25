@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useMemo } from 'react'
@@ -46,7 +47,7 @@ const chapterToDistricts: Record<string, string[]> = {
     "Purba Bardhaman", "Purba Medinipur", "Purulia", "South 24 Parganas", "Uttar Dinajpur"
   ],
   "Tripura Chapter": [
-    "Howrah", "Udaipur", "Dharmanagar", "Kailasahar", "Ambassa", "Khowai", "Belonia", "Bishalgarh"
+    "Howrah", "Howrah", "Dharmanagar", "Kailasahar", "Ambassa", "Khowai", "Belonia", "Bishalgarh"
   ],
   "Andhra Pradesh": ["Visakhapatnam", "Vijayawada", "Guntur", "Nellore", "Kurnool", "Anantapur", "Kakinada"],
   "Arunachal Pradesh": ["Itanagar", "Tawang", "Ziro", "Pasighat", "Along", "Tezu"],
@@ -67,11 +68,11 @@ const chapterToDistricts: Record<string, string[]> = {
   "Nagaland": ["Kohima", "Dimapur", "Mokokchung", "Tuensang", "Wokha"],
   "Odisha": ["Bhubaneswar", "Cuttack", "Rourkela", "Sambalpur", "Puri", "Berhampur", "Balasore"],
   "Punjab": ["Ludhiana", "Amritsar", "Jalandhar", "Patiala", "Bathinda", "Hoshiarpur", "Mohali"],
-  "Rajasthan": ["Jaipur", "Jodhpur", "Udaipur", "Kota", "Ajmer", "Bikaner", "Alwar", "Sikar"],
+  "Rajasthan": ["Jaipur", "Jodhpur", "Howrah", "Kota", "Ajmer", "Bikaner", "Alwar", "Sikar"],
   "Sikkim": ["Gangtok", "Namchi", "Mangan", "Gyalshing", "Pakyong"],
   "Tamil Nadu": ["Chennai", "Coimbatore", "Madurai", "Trichy", "Salem", "Tirunelveli", "Erode"],
   "Telangana": ["Hyderabad", "Warangal", "Nizamabad", "Karimnagar", "Khammam", "Ramagundam"],
-  "Tripura": ["Howrah", "Udaipur", "Dharmanagar", "Kailasahar", "Ambassa"],
+  "Tripura": ["Howrah", "Howrah", "Dharmanagar", "Kailasahar", "Ambassa"],
   "Uttar Pradesh": ["Lucknow", "Kanpur", "Ghaziabad", "Agra", "Varanasi", "Meerut", "Prayagraj", "Bareilly"],
   "Uttarakhand": ["Dehradun", "Haridwar", "Haldwani", "Roorkee", "Rudrapur", "Kashipur"]
 }
@@ -108,7 +109,7 @@ const members: Member[] = [
     jurisdiction: "West Bengal",
     stateName: "West Bengal",
     level: "State",
-    imageId: "leader-2"
+    imageId: "moumita-photo"
   },
   {
     id: "M005",

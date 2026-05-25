@@ -7,6 +7,12 @@
       "imageHint": "dignified man formal portrait"
     },
     {
+      "id": "moumita-photo",
+      "description": "Chairman (West Bengal) & Founder - Moumita Saha",
+      "imageUrl": "/Moumita.jpeg",
+      "imageHint": "moumita saha portrait"
+    },
+    {
       "id": "hero-human-rights",
       "description": "Cinematic black and white image related to human rights",
       "imageUrl": "https://picsum.photos/seed/justice-bw/1920/1080",

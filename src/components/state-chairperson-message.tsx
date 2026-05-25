@@ -1,3 +1,4 @@
+
 "use client"
 
 import Image from 'next/image'
@@ -5,7 +6,7 @@ import { ShieldCheck } from 'lucide-react'
 import { PlaceHolderImages } from '@/lib/placeholder-images'
 
 export function StateChairpersonMessage() {
-  const chairpersonImg = PlaceHolderImages.find(img => img.id === 'leader-2')
+  const chairpersonImg = PlaceHolderImages.find(img => img.id === 'moumita-photo')
   
   return (
     <section className="py-20 bg-white relative overflow-hidden">
@@ -48,7 +49,7 @@ export function StateChairpersonMessage() {
                 alt="Moumita Saha" 
                 fill 
                 className="object-cover group-hover:scale-110 transition-transform duration-700"
-                data-ai-hint="professional woman portrait"
+                data-ai-hint="moumita saha portrait"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-emerald-900/40 to-transparent"></div>
             </div>
