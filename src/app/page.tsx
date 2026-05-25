@@ -1,5 +1,6 @@
 
 import Image from 'next/image'
+import Link from 'next/link'
 import { Navbar } from '@/components/navbar'
 import { ChairmanMessage } from '@/components/chairman-message'
 import { StateChairpersonMessage } from '@/components/state-chairperson-message'
@@ -120,9 +121,11 @@ export default function Home() {
                   Get Free Legal Aid <ArrowRight className="ml-2 w-4 h-4 md:w-5 md:h-5" />
                 </Button>
               </DonationDialog>
-              <Button size="lg" variant="outline" className="border-white/30 text-white bg-white/5 hover:bg-white/15 px-8 py-6 md:px-10 md:py-7 rounded-xl text-base md:text-lg backdrop-blur-md transition-all border-2 font-bold">
-                Explore Rights Library
-              </Button>
+              <Link href="/#knowledge">
+                <Button size="lg" variant="outline" className="border-white/30 text-white bg-white/5 hover:bg-white/15 px-8 py-6 md:px-10 md:py-7 rounded-xl text-base md:text-lg backdrop-blur-md transition-all border-2 font-bold">
+                  Explore Rights Library
+                </Button>
+              </Link>
             </div>
 
             <div className="w-full pt-12 md:pt-20 max-w-4xl mx-auto">
