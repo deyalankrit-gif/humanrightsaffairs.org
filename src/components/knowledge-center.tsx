@@ -77,6 +77,14 @@ export function KnowledgeCenter() {
     }
   }
 
+  const handleAccessRepository = () => {
+    if (selectedGuide?.id === 'constitution') {
+      window.open('https://www.indiacode.nic.in/bitstream/123456789/19150/1/constitution_of_india.pdf', '_blank');
+    } else {
+      scrollToSearch();
+    }
+  }
+
   return (
     <section id="knowledge" className="py-16 md:py-24 bg-slate-50">
       <div className="container mx-auto px-4">
@@ -171,7 +179,7 @@ export function KnowledgeCenter() {
 
               <div className="flex flex-col sm:flex-row gap-4 pt-4">
                 <Button 
-                  onClick={scrollToSearch}
+                  onClick={handleAccessRepository}
                   className="flex-1 bg-primary text-white font-bold py-6 rounded-xl hover:bg-primary/90 text-lg shadow-xl shadow-primary/10"
                 >
                   Access Full Repository
