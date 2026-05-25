@@ -84,6 +84,8 @@ export function KnowledgeCenter() {
       window.open('https://clpr.org.in/wp-content/uploads/2024/12/Womens-Book_Accessible.pdf', '_blank');
     } else if (selectedGuide?.id === 'labor-laws') {
       window.open('https://ncib.in/pdf/ncib_pdf/Labour%20Act.pdf', '_blank');
+    } else if (selectedGuide?.id === 'rti') {
+      window.open('https://rti.dopt.gov.in/', '_blank');
     } else {
       scrollToSearch();
     }
