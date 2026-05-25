@@ -80,6 +80,8 @@ export function KnowledgeCenter() {
   const handleAccessRepository = () => {
     if (selectedGuide?.id === 'constitution') {
       window.open('https://www.indiacode.nic.in/bitstream/123456789/19150/1/constitution_of_india.pdf', '_blank');
+    } else if (selectedGuide?.id === 'womens-rights') {
+      window.open('https://www.ncw.gov.in/important-links/laws-related-to-women/', '_blank');
     } else {
       scrollToSearch();
     }
