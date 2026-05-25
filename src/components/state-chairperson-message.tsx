@@ -35,7 +35,7 @@ export function StateChairpersonMessage() {
                </div>
                <div>
                  <p className="font-bold text-lg text-primary">Moumita Saha</p>
-                 <p className="text-slate-500 text-sm">Chairman (West Bengal)</p>
+                 <p className="text-slate-500 text-sm">Chairman (West Bengal) & founder</p>
                </div>
             </div>
           </div>

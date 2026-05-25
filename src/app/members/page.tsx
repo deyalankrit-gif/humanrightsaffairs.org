@@ -105,7 +105,7 @@ const members: Member[] = [
   {
     id: "M004",
     name: "Moumita Saha",
-    designation: "Chairman (West Bengal)",
+    designation: "Chairman (West Bengal) & founder",
     jurisdiction: "West Bengal",
     stateName: "West Bengal",
     level: "State",
@@ -299,7 +299,7 @@ export default function MembersPage() {
                       </DropdownMenuItem>
                       {availableDistricts.length > 0 ? (
                         availableDistricts.map((district) => (
-                          <DropdownMenuItem key={district} onClick={() => handleDistrictSelect(district)}>
+                          <DropdownMenuItem key={district} onClick={() => handleStateSelect(district)}>
                             {district}
                           </DropdownMenuItem>
                         ))
