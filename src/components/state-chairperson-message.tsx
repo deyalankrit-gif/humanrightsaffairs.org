@@ -1,4 +1,3 @@
-
 "use client"
 
 import Image from 'next/image'
@@ -35,7 +34,7 @@ export function StateChairpersonMessage() {
                </div>
                <div>
                  <p className="font-bold text-lg text-primary">Moumita Saha</p>
-                 <p className="text-slate-500 text-sm">Chairman (West Bengal) & founder</p>
+                 <p className="text-slate-500 text-sm">Chairman (West Bengal) & Founder</p>
                </div>
             </div>
           </div>

@@ -21,7 +21,7 @@ const stateTeams = [
   {
     state: "West Bengal",
     leaders: [
-      { name: "Moumita Saha", title: "Chairman (West Bengal) & founder", imageId: "leader-2" },
+      { name: "Moumita Saha", title: "Chairman (West Bengal) & Founder", imageId: "leader-2" },
       { name: "Sonia Gandhi", title: "Vice Chairperson", imageId: "leader-4" }
     ]
   },

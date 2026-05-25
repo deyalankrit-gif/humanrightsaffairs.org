@@ -104,7 +104,7 @@ const members: Member[] = [
   {
     id: "M004",
     name: "Moumita Saha",
-    designation: "Chairman (West Bengal) & founder",
+    designation: "Chairman (West Bengal) & Founder",
     jurisdiction: "West Bengal",
     stateName: "West Bengal",
     level: "State",
