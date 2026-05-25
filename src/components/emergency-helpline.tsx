@@ -38,10 +38,10 @@ export function EmergencyHelpline() {
           </p>
           
           {/* Featured Chairman Contact */}
-          <div className="mt-8 max-w-md mx-auto">
-            <Card className="border-accent bg-accent/5 shadow-lg border-2 overflow-hidden transform hover:scale-105 transition-transform duration-300">
+          <div className="mt-8 max-w-2xl mx-auto">
+            <Card className="border-accent bg-accent/5 shadow-lg border-2 overflow-hidden transform hover:scale-[1.02] transition-transform duration-300">
               <CardHeader className="flex flex-row items-center justify-between pb-2 text-left">
-                <CardTitle className="text-lg font-headline font-bold text-primary">
+                <CardTitle className="text-sm sm:text-base md:text-lg font-headline font-bold text-primary whitespace-nowrap overflow-hidden text-ellipsis">
                   Chairman, West Bengal Human Rights Affairs Trust
                 </CardTitle>
                 <div className="bg-accent/20 p-2 rounded-lg shrink-0">
