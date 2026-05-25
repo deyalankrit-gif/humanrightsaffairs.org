@@ -45,7 +45,7 @@ export function StateChairpersonMessage() {
             <div className="absolute -inset-4 bg-emerald-500/10 rounded-3xl blur-2xl group-hover:bg-emerald-500/20 transition duration-500"></div>
             <div className="relative aspect-square md:aspect-[4/3] rounded-[2.5rem] overflow-hidden shadow-xl border-4 border-white">
               <Image 
-                src={chairpersonImg?.imageUrl || ''} 
+                src={chairpersonImg?.imageUrl || '/Moumita.jpeg'} 
                 alt="Moumita Saha" 
                 fill 
                 className="object-cover group-hover:scale-110 transition-transform duration-700"

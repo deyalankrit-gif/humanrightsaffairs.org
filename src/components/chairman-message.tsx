@@ -1,3 +1,4 @@
+
 import Image from 'next/image'
 import { Quote } from 'lucide-react'
 import { PlaceHolderImages } from '@/lib/placeholder-images'
@@ -14,7 +15,7 @@ export function ChairmanMessage() {
             <div className="relative aspect-[3/4] rounded-2xl overflow-hidden shadow-2xl border-8 border-white">
               <Image 
                 src={chairmanImg?.imageUrl || ''} 
-                alt="Chairman" 
+                alt="Dhritiman Dey" 
                 fill 
                 className="object-cover"
                 data-ai-hint={chairmanImg?.imageHint}

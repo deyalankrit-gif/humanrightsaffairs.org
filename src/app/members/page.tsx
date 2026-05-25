@@ -1,7 +1,7 @@
 
 "use client"
 
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import Image from 'next/image'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
@@ -47,7 +47,7 @@ const chapterToDistricts: Record<string, string[]> = {
     "Purba Bardhaman", "Purba Medinipur", "Purulia", "South 24 Parganas", "Uttar Dinajpur"
   ],
   "Tripura Chapter": [
-    "Howrah", "Howrah", "Dharmanagar", "Kailasahar", "Ambassa", "Khowai", "Belonia", "Bishalgarh"
+    "Dharmanagar", "Kailasahar", "Ambassa", "Khowai", "Belonia", "Bishalgarh", "Agartala"
   ],
   "Andhra Pradesh": ["Visakhapatnam", "Vijayawada", "Guntur", "Nellore", "Kurnool", "Anantapur", "Kakinada"],
   "Arunachal Pradesh": ["Itanagar", "Tawang", "Ziro", "Pasighat", "Along", "Tezu"],
@@ -68,11 +68,11 @@ const chapterToDistricts: Record<string, string[]> = {
   "Nagaland": ["Kohima", "Dimapur", "Mokokchung", "Tuensang", "Wokha"],
   "Odisha": ["Bhubaneswar", "Cuttack", "Rourkela", "Sambalpur", "Puri", "Berhampur", "Balasore"],
   "Punjab": ["Ludhiana", "Amritsar", "Jalandhar", "Patiala", "Bathinda", "Hoshiarpur", "Mohali"],
-  "Rajasthan": ["Jaipur", "Jodhpur", "Howrah", "Kota", "Ajmer", "Bikaner", "Alwar", "Sikar"],
+  "Rajasthan": ["Jaipur", "Jodhpur", "Kota", "Ajmer", "Bikaner", "Alwar", "Sikar"],
   "Sikkim": ["Gangtok", "Namchi", "Mangan", "Gyalshing", "Pakyong"],
   "Tamil Nadu": ["Chennai", "Coimbatore", "Madurai", "Trichy", "Salem", "Tirunelveli", "Erode"],
   "Telangana": ["Hyderabad", "Warangal", "Nizamabad", "Karimnagar", "Khammam", "Ramagundam"],
-  "Tripura": ["Howrah", "Howrah", "Dharmanagar", "Kailasahar", "Ambassa"],
+  "Tripura": ["Dharmanagar", "Kailasahar", "Ambassa", "West Tripura"],
   "Uttar Pradesh": ["Lucknow", "Kanpur", "Ghaziabad", "Agra", "Varanasi", "Meerut", "Prayagraj", "Bareilly"],
   "Uttarakhand": ["Dehradun", "Haridwar", "Haldwani", "Roorkee", "Rudrapur", "Kashipur"]
 }
@@ -175,6 +175,11 @@ export default function MembersPage() {
   const [levelFilter, setLevelFilter] = useState<string>("All")
   const [selectedState, setSelectedState] = useState<string | null>(null)
   const [selectedDistrict, setSelectedDistrict] = useState<string | null>(null)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const availableDistricts = useMemo(() => {
     if (!selectedState) return []
@@ -221,6 +226,8 @@ export default function MembersPage() {
 
     return matchesSearch && matchesLevel;
   })
+
+  if (!mounted) return null
 
   return (
     <main className="min-h-screen bg-slate-50">
@@ -298,8 +305,8 @@ export default function MembersPage() {
                         All Districts in {selectedState}
                       </DropdownMenuItem>
                       {availableDistricts.length > 0 ? (
-                        availableDistricts.map((district) => (
-                          <DropdownMenuItem key={district} onClick={() => handleStateSelect(district)}>
+                        availableDistricts.map((district, index) => (
+                          <DropdownMenuItem key={`${district}-${index}`} onClick={() => handleDistrictSelect(district)}>
                             {district}
                           </DropdownMenuItem>
                         ))
