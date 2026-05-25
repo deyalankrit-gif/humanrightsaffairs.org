@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState } from 'react'
@@ -85,7 +84,7 @@ export function KnowledgeCenter() {
     } else if (selectedGuide?.id === 'labor-laws') {
       window.open('https://ncib.in/pdf/ncib_pdf/Labour%20Act.pdf', '_blank');
     } else if (selectedGuide?.id === 'rti') {
-      window.open('https://rti.dopt.gov.in/', '_blank');
+      window.open('https://cic.gov.in/sites/default/files/RTI-Act_English.pdf', '_blank');
     } else {
       scrollToSearch();
     }
