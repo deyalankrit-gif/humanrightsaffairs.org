@@ -85,6 +85,8 @@ export function KnowledgeCenter() {
       window.open('https://ncib.in/pdf/ncib_pdf/Labour%20Act.pdf', '_blank');
     } else if (selectedGuide?.id === 'rti') {
       window.open('https://cic.gov.in/sites/default/files/RTI-Act_English.pdf', '_blank');
+    } else if (selectedGuide?.id === 'manuals') {
+      window.open('https://bprd.nic.in/uploads/pdf/BNS%20Book_After%20Correction.pdf', '_blank');
     } else {
       scrollToSearch();
     }
@@ -135,8 +137,8 @@ export function KnowledgeCenter() {
                 >
                   Read More <ExternalLink className="w-3 h-3 md:w-4 md:h-4" />
                 </Button>
-                {guide.title.includes('Manuals') && (
-                  <Button size="sm" onClick={scrollToSearch} className="bg-primary text-white ml-auto text-xs h-8 md:h-9">
+                {guide.id === 'manuals' && (
+                  <Button size="sm" onClick={() => window.open('https://bprd.nic.in/uploads/pdf/BNS%20Book_After%20Correction.pdf', '_blank')} className="bg-primary text-white ml-auto text-xs h-8 md:h-9">
                     <Download className="w-3 h-3 md:w-4 md:h-4 mr-2" /> Download
                   </Button>
                 )}
@@ -190,7 +192,7 @@ export function KnowledgeCenter() {
                   Access Full Repository
                 </Button>
                 {selectedGuide.id === 'manuals' && (
-                  <Button variant="outline" onClick={scrollToSearch} className="flex-1 border-primary text-primary font-bold py-6 rounded-xl hover:bg-slate-50 text-lg">
+                  <Button variant="outline" onClick={() => window.open('https://bprd.nic.in/uploads/pdf/BNS%20Book_After%20Correction.pdf', '_blank')} className="flex-1 border-primary text-primary font-bold py-6 rounded-xl hover:bg-slate-50 text-lg">
                     <Download className="w-5 h-5 mr-2" /> Download PDFs
                   </Button>
                 )}
