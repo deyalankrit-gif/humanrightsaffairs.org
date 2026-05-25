@@ -20,7 +20,7 @@ export function ChairmanMessage() {
                 data-ai-hint={chairmanImg?.imageHint}
               />
             </div>
-            <div className="absolute bottom-6 left-6 right-6 bg-white/20 backdrop-blur-md p-6 rounded-xl shadow-lg border border-white/20">
+            <div className="absolute bottom-6 left-6 right-6 bg-white/5 backdrop-blur-md p-6 rounded-xl shadow-lg border border-white/10">
               <h3 className="font-headline text-2xl font-bold text-primary">Dhritiman Dey</h3>
               <p className="text-primary font-bold text-sm tracking-widest uppercase">Central Chairman (INDIA) & Founder</p>
             </div>
