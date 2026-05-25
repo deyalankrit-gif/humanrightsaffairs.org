@@ -1,4 +1,3 @@
-
 import Image from 'next/image'
 import { Quote } from 'lucide-react'
 import { PlaceHolderImages } from '@/lib/placeholder-images'
@@ -14,14 +13,14 @@ export function ChairmanMessage() {
             <div className="absolute -inset-4 bg-accent/20 rounded-3xl blur-2xl group-hover:bg-accent/30 transition duration-500"></div>
             <div className="relative aspect-[3/4] rounded-2xl overflow-hidden shadow-2xl border-8 border-white">
               <Image 
-                src={chairmanImg?.imageUrl || ''} 
+                src={chairmanImg?.imageUrl || '/Dhritiman.jpeg'} 
                 alt="Dhritiman Dey" 
                 fill 
                 className="object-cover"
                 data-ai-hint={chairmanImg?.imageHint}
               />
             </div>
-            <div className="absolute bottom-6 left-6 right-6 bg-white/90 backdrop-blur-md p-6 rounded-xl shadow-lg">
+            <div className="absolute bottom-6 left-6 right-6 bg-white/60 backdrop-blur-md p-6 rounded-xl shadow-lg border border-white/20">
               <h3 className="font-headline text-2xl font-bold text-primary">Dhritiman Dey</h3>
               <p className="text-accent font-semibold text-sm tracking-widest uppercase">Central Chairman (INDIA) & Founder</p>
             </div>
