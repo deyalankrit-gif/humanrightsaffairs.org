@@ -2,9 +2,9 @@
   "placeholderImages": [
     {
       "id": "chairman-photo",
-      "description": "Formal portrait of the Chairman of Human Rights Affairs Trust",
-      "imageUrl": "https://picsum.photos/seed/chairman/600/800",
-      "imageHint": "dignified man formal portrait"
+      "description": "Central Chairman (INDIA) & Founder - Dhritiman Dey",
+      "imageUrl": "/Dhritiman.jpeg",
+      "imageHint": "dhritiman dey portrait"
     },
     {
       "id": "moumita-photo",
