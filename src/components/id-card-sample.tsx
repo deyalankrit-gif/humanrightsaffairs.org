@@ -112,9 +112,12 @@ export function IDCardShowcase() {
                   className="object-contain"
                   data-ai-hint="official identification card"
                 />
-                {/* Privacy Blur Overlay - Optimized for Mobile No. (+91 7003798032) */}
-                <div className="absolute bottom-[17.2%] right-[11.2%] w-[22%] h-[3.8%] backdrop-blur-md bg-white/40 rounded-sm border border-blue-500/30 shadow-[0_0_8px_rgba(59,130,246,0.2)] pointer-events-none flex items-center justify-center">
-                  <span className="text-[4px] text-blue-600 font-bold uppercase tracking-tighter opacity-80">Privacy Shield</span>
+                {/* Privacy Blur Overlay - Targeted coverage for Mobile No. (+91 7003798032) */}
+                <div className="absolute bottom-[16%] right-[10%] w-[25%] h-[6%] backdrop-blur-xl bg-white/60 rounded-md border border-blue-500/40 shadow-[0_0_15px_rgba(59,130,246,0.3)] pointer-events-none flex items-center justify-center">
+                  <div className="flex flex-col items-center">
+                    <span className="text-[6px] text-blue-700 font-bold uppercase tracking-widest opacity-90">Privacy Protected</span>
+                    <div className="w-full h-[1px] bg-blue-500/50 mt-0.5"></div>
+                  </div>
                 </div>
               </div>
               <div className="absolute -bottom-6 -right-6 bg-accent text-primary p-4 rounded-2xl shadow-xl border-4 border-primary animate-bounce hidden md:block">
