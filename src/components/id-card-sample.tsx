@@ -111,9 +111,9 @@ export function IDCardShowcase() {
                   className="object-contain"
                   data-ai-hint="official identification card"
                 />
-                {/* Privacy Blur Overlay - Reduced size for more precise masking */}
-                <div className="absolute bottom-[24.5%] right-[13%] w-[14%] h-[4%] backdrop-blur-md bg-white/10 rounded-sm border border-white/20 pointer-events-none flex items-center justify-center">
-                  <span className="text-[5px] text-primary/60 font-bold uppercase tracking-tighter">Private</span>
+                {/* Privacy Blur Overlay - Smaller size for more precise masking of Mobile No. */}
+                <div className="absolute bottom-[24.5%] right-[14%] w-[10%] h-[2.5%] backdrop-blur-md bg-white/10 rounded-sm border border-white/20 pointer-events-none flex items-center justify-center">
+                  <span className="text-[4px] text-primary/60 font-bold uppercase tracking-tighter">Private</span>
                 </div>
               </div>
               <div className="absolute -bottom-6 -right-6 bg-accent text-primary p-4 rounded-2xl shadow-xl border-4 border-primary animate-bounce hidden md:block">
