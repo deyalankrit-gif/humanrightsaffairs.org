@@ -36,10 +36,10 @@ export function IDCardShowcase() {
               <BadgeCheck className="w-4 h-4" />
               <span>Verified Membership</span>
             </div>
-            <h2 className="text-4xl md:text-5xl font-headline font-bold leading-tight">
+            <h2 className="text-3xl md:text-5xl font-headline font-bold leading-tight">
               Get Your Digital <span className="text-accent">Member Identity</span> Card Instantly
             </h2>
-            <p className="text-xl text-indigo-100 font-body">
+            <p className="text-lg md:text-xl text-indigo-100 font-body">
               Join a network of thousands of human rights defenders. Our secure digital ID cards feature QR-code verification, making your organizational status verifiable anywhere, anytime.
             </p>
             
@@ -54,36 +54,36 @@ export function IDCardShowcase() {
                   <div className="bg-secondary p-1 rounded-full">
                     <CheckCircle2 className="w-4 h-4" />
                   </div>
-                  <span className="font-semibold text-lg">{item}</span>
+                  <span className="font-semibold text-base md:text-lg">{item}</span>
                 </li>
               ))}
             </ul>
 
             <div className="flex flex-wrap gap-4 pt-4">
-              <Button className="bg-accent text-primary font-bold hover:bg-accent/90 px-8 py-6 rounded-xl text-lg shadow-lg shadow-accent/20">
+              <Button className="bg-accent text-primary font-bold hover:bg-accent/90 px-8 py-6 rounded-xl text-lg shadow-lg shadow-accent/20 w-full sm:w-auto">
                 Register as Member
               </Button>
               
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button className="bg-secondary text-secondary-foreground hover:bg-secondary/90 px-8 py-6 rounded-xl text-lg shadow-lg shadow-secondary/20 transition-all border-none">
+                  <Button className="bg-secondary text-secondary-foreground hover:bg-secondary/90 px-8 py-6 rounded-xl text-lg shadow-lg shadow-secondary/20 transition-all border-none w-full sm:w-auto">
                     View Eligibility
                   </Button>
                 </AlertDialogTrigger>
-                <AlertDialogContent className="bg-white text-primary rounded-[2rem] border-none shadow-2xl max-w-lg">
+                <AlertDialogContent className="bg-white text-primary rounded-[2rem] border-none shadow-2xl max-w-lg w-[95vw]">
                   <AlertDialogHeader>
                     <div className="w-12 h-12 bg-accent/10 rounded-2xl flex items-center justify-center mb-4">
                       <Info className="w-6 h-6 text-accent" />
                     </div>
-                    <AlertDialogTitle className="text-2xl font-headline font-bold">Membership Eligibility</AlertDialogTitle>
-                    <AlertDialogDescription className="text-slate-600 text-base">
+                    <AlertDialogTitle className="text-xl md:text-2xl font-headline font-bold">Membership Eligibility</AlertDialogTitle>
+                    <AlertDialogDescription className="text-slate-600 text-sm md:text-base">
                       To maintain the integrity of our human rights network, all members must meet the following criteria:
                     </AlertDialogDescription>
                   </AlertDialogHeader>
-                  <div className="py-4 space-y-4">
+                  <div className="py-4 space-y-4 max-h-[50vh] overflow-y-auto pr-2">
                     {eligibilityCriteria.map((c, i) => (
                       <div key={i} className="flex gap-3">
-                        <div className="mt-1"><CheckCircle2 className="w-4 h-4 text-emerald-500" /></div>
+                        <div className="mt-1 shrink-0"><CheckCircle2 className="w-4 h-4 text-emerald-500" /></div>
                         <div>
                           <p className="font-bold text-sm">{c.title}</p>
                           <p className="text-xs text-slate-500">{c.detail}</p>
@@ -92,7 +92,7 @@ export function IDCardShowcase() {
                     ))}
                   </div>
                   <AlertDialogFooter>
-                    <AlertDialogAction className="bg-primary text-white rounded-xl px-8 font-bold">
+                    <AlertDialogAction className="bg-primary text-white rounded-xl px-8 font-bold w-full sm:w-auto">
                       Understood
                     </AlertDialogAction>
                   </AlertDialogFooter>
@@ -101,10 +101,10 @@ export function IDCardShowcase() {
             </div>
           </div>
 
-          <div className="relative group perspective-1000">
+          <div className="relative group perspective-1000 w-full max-w-2xl mx-auto">
             <div className="absolute -inset-10 bg-accent/20 rounded-full blur-[100px] animate-pulse"></div>
             <div className="relative transform transition-transform duration-700 group-hover:rotate-y-12">
-              <div className="relative aspect-[4/2.5] w-full rounded-[2rem] overflow-hidden shadow-2xl border-4 border-accent bg-white">
+              <div className="relative aspect-[4/2.5] w-full rounded-[1.5rem] md:rounded-[2rem] overflow-hidden shadow-2xl border-4 border-accent bg-white">
                 <Image 
                   src="/HRAT I Card.jpeg" 
                   alt="HRAT Official ID Card Sample" 
@@ -112,16 +112,21 @@ export function IDCardShowcase() {
                   className="object-contain"
                   data-ai-hint="official identification card"
                 />
-                {/* Privacy Blur Overlay - Targeted coverage for Mobile No. +91 7003798032 */}
-                <div className="absolute bottom-[16%] right-[8%] w-[35%] h-[7%] backdrop-blur-xl bg-white/60 rounded-md border border-blue-500/40 shadow-[0_0_15px_rgba(59,130,246,0.3)] pointer-events-none flex items-center justify-center">
-                  <div className="flex flex-col items-center">
-                    <span className="text-[6px] text-blue-700 font-bold uppercase tracking-widest opacity-90">Privacy Protected</span>
-                    <div className="w-full h-[1px] bg-blue-500/50 mt-0.5"></div>
+                
+                {/* Privacy Overlay with Blue Cross-out Line */}
+                <div className="absolute bottom-[16%] right-[8%] w-[35%] h-[8%] backdrop-blur-xl bg-white/40 rounded-md border border-blue-500/40 shadow-[0_0_15px_rgba(59,130,246,0.3)] pointer-events-none flex flex-col items-center justify-center overflow-hidden">
+                  {/* The Blue Cross-out Line */}
+                  <div className="absolute inset-0 flex items-center justify-center opacity-60">
+                    <div className="w-[120%] h-[2px] bg-blue-600 -rotate-[8deg] shadow-[0_0_8px_rgba(37,99,235,0.8)]"></div>
+                  </div>
+                  <div className="relative z-10 flex flex-col items-center">
+                    <span className="text-[5px] md:text-[7px] text-blue-800 font-bold uppercase tracking-widest opacity-90 text-center">Privacy Protected</span>
+                    <div className="w-full h-[0.5px] bg-blue-600/30 mt-0.5"></div>
                   </div>
                 </div>
               </div>
-              <div className="absolute -bottom-6 -right-6 bg-accent text-primary p-4 rounded-2xl shadow-xl border-4 border-primary animate-bounce hidden md:block">
-                 <p className="text-[10px] font-bold uppercase tracking-widest">Official Card</p>
+              <div className="absolute -bottom-4 -right-4 bg-accent text-primary p-3 md:p-4 rounded-2xl shadow-xl border-2 md:border-4 border-primary animate-bounce z-20">
+                 <p className="text-[8px] md:text-[10px] font-bold uppercase tracking-widest">Official Card</p>
               </div>
             </div>
           </div>

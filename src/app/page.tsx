@@ -82,7 +82,7 @@ export default function Home() {
             
             <div className="flex flex-col items-center gap-4">
               <IndianFlag />
-              <div className="relative w-72 h-36 md:w-[500px] md:h-[250px] transition-all duration-700">
+              <div className="relative w-full max-w-[300px] h-[150px] md:max-w-[500px] md:h-[250px] transition-all duration-700">
                 <Image 
                   src="/niti2.png" 
                   alt="Niti Aayog" 
@@ -93,11 +93,11 @@ export default function Home() {
             </div>
 
             <div className="flex flex-col items-center gap-2 w-full mt-2 md:mt-4">
-              <p className="text-[#D4AF37] font-bold text-xs sm:text-sm md:text-base uppercase tracking-[0.25em] drop-shadow-lg animate-fade-in">
+              <p className="text-[#D4AF37] font-bold text-[10px] sm:text-sm md:text-base uppercase tracking-[0.25em] drop-shadow-lg animate-fade-in">
                 Government of India ( Niti Aayog Registered )
               </p>
-              <div className="font-headline font-bold text-2xl sm:text-4xl md:text-5xl lg:text-6xl tracking-tight leading-tight min-h-[1.5em] flex justify-center items-center overflow-visible">
-                <span className="bg-gradient-to-r from-[#FF9933] via-white to-[#138808] bg-clip-text text-transparent italic block drop-shadow-sm px-4 pb-4">
+              <div className="font-headline font-bold text-xl sm:text-3xl md:text-5xl lg:text-6xl tracking-tight leading-tight min-h-[1.5em] flex justify-center items-center overflow-visible w-full">
+                <span className="bg-gradient-to-r from-[#FF9933] via-white to-[#138808] bg-clip-text text-transparent italic block drop-shadow-sm px-2 pb-4">
                   <Typewriter 
                     text="Human Rights Affairs Trust" 
                     speed={80} 
@@ -107,22 +107,22 @@ export default function Home() {
               </div>
             </div>
             
-            <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-headline font-bold leading-tight md:whitespace-nowrap bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-cyan-400 bg-[length:200%_auto] bg-clip-text text-transparent animate-gradient-x py-2 w-full drop-shadow-md">
+            <h1 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-headline font-bold leading-tight bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-cyan-400 bg-[length:200%_auto] bg-clip-text text-transparent animate-gradient-x py-2 w-full drop-shadow-md">
               Upholding Justice. Empowering Citizens.
             </h1>
             
-            <p className="text-sm sm:text-base md:text-lg text-slate-300 font-body max-w-2xl leading-relaxed mx-auto px-4 opacity-90">
+            <p className="text-xs sm:text-base md:text-lg text-slate-300 font-body max-w-2xl leading-relaxed mx-auto px-4 opacity-90">
               Providing a robust shield against injustice through expert legal guidance, community support, and constitutional transparency.
             </p>
             
             <div className="flex flex-wrap gap-4 md:gap-6 pt-8 justify-center">
               <DonationDialog>
-                <Button size="lg" className="bg-accent text-primary font-bold hover:bg-accent/90 px-8 py-6 md:px-10 md:py-7 rounded-xl text-base md:text-lg shadow-xl shadow-accent/20 transition-all hover:-translate-y-1">
+                <Button size="lg" className="bg-accent text-primary font-bold hover:bg-accent/90 px-6 py-5 md:px-10 md:py-7 rounded-xl text-sm md:text-lg shadow-xl shadow-accent/20 transition-all hover:-translate-y-1">
                   Get Free Legal Aid <ArrowRight className="ml-2 w-4 h-4 md:w-5 md:h-5" />
                 </Button>
               </DonationDialog>
               <Link href="/#knowledge">
-                <Button size="lg" variant="outline" className="border-white/30 text-white bg-white/5 hover:bg-white/15 px-8 py-6 md:px-10 md:py-7 rounded-xl text-base md:text-lg backdrop-blur-md transition-all border-2 font-bold">
+                <Button size="lg" variant="outline" className="border-white/30 text-white bg-white/5 hover:bg-white/15 px-6 py-5 md:px-10 md:py-7 rounded-xl text-sm md:text-lg backdrop-blur-md transition-all border-2 font-bold">
                   Explore Rights Library
                 </Button>
               </Link>
@@ -157,7 +157,7 @@ export default function Home() {
         <div className="container mx-auto px-4 relative z-10">
           <div className="text-center mb-12 md:mb-20">
             <h2 className="text-3xl md:text-6xl font-headline font-bold text-primary mb-6">AI-Enhanced <span className="text-accent">Rights</span> Explorer</h2>
-            <p className="text-slate-500 max-w-3xl mx-auto text-base md:text-xl">Instantly navigate complex legal frameworks. Our AI highlights exactly what you need to know about your constitutional protections.</p>
+            <p className="text-slate-500 max-w-3xl mx-auto text-sm md:text-xl">Instantly navigate complex legal frameworks. Our AI highlights exactly what you need to know about your constitutional protections.</p>
           </div>
           <DocSearch />
         </div>
@@ -184,21 +184,21 @@ export default function Home() {
                 <Scale className="w-12 h-12 md:w-24 md:h-24 text-accent mx-auto" />
               </div>
               <h2 className="text-3xl md:text-7xl font-headline font-bold">Support the Cause of <span className="text-accent italic">Justice</span></h2>
-              <p className="text-base md:text-xl text-indigo-100 leading-relaxed max-w-2xl mx-auto">
+              <p className="text-sm md:text-xl text-indigo-100 leading-relaxed max-w-2xl mx-auto">
                 Your contributions help us provide free legal aid to the marginalized and run awareness campaigns across rural India. All donations are tax-exempt under 80G.
               </p>
               <div className="pt-8 flex flex-col md:flex-row gap-4 md:gap-8 justify-center items-center">
                 <DonationDialog>
-                  <Button className="bg-accent text-primary font-bold hover:bg-accent/90 hover:scale-105 active:scale-95 transition-all px-10 py-6 md:px-14 md:py-8 rounded-xl text-lg md:text-2xl shadow-xl shadow-accent/20">
+                  <Button className="bg-accent text-primary font-bold hover:bg-accent/90 hover:scale-105 active:scale-95 transition-all px-8 py-5 md:px-14 md:py-8 rounded-xl text-base md:text-2xl shadow-xl shadow-accent/20">
                     Donate Securely Now
                   </Button>
                 </DonationDialog>
                 <div className="flex flex-col items-start space-y-2">
-                  <p className="font-bold flex items-center gap-2 text-emerald-400 text-xs md:text-lg">
-                    <CheckCircle2 className="w-4 h-4 md:w-5 md:h-5" /> Instant Receipt Generation
+                  <p className="font-bold flex items-center gap-2 text-emerald-400 text-[10px] md:text-lg">
+                    <CheckCircle2 className="w-3 h-3 md:w-5 md:h-5" /> Instant Receipt Generation
                   </p>
-                  <p className="font-bold flex items-center gap-2 text-emerald-400 text-xs md:text-lg">
-                    <CheckCircle2 className="w-4 h-4 md:w-5 md:h-5" /> Transparent Fund Tracking
+                  <p className="font-bold flex items-center gap-2 text-emerald-400 text-[10px] md:text-lg">
+                    <CheckCircle2 className="w-3 h-3 md:w-5 md:h-5" /> Transparent Fund Tracking
                   </p>
                 </div>
               </div>
