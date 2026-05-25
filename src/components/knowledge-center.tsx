@@ -81,7 +81,7 @@ export function KnowledgeCenter() {
     if (selectedGuide?.id === 'constitution') {
       window.open('https://www.indiacode.nic.in/bitstream/123456789/19150/1/constitution_of_india.pdf', '_blank');
     } else if (selectedGuide?.id === 'womens-rights') {
-      window.open('https://www.ncw.gov.in/important-links/laws-related-to-women/', '_blank');
+      window.open('https://clpr.org.in/wp-content/uploads/2024/12/Womens-Book_Accessible.pdf', '_blank');
     } else {
       scrollToSearch();
     }
