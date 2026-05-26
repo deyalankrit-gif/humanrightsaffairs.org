@@ -1,4 +1,3 @@
-
 import Image from 'next/image'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
@@ -61,6 +60,8 @@ function LeaderCard({ leader, variant = "default" }: { leader: Leader, variant?:
     small: "w-24 h-32 md:w-32 md:h-40"
   }
 
+  const isFounder = leader.title.includes("Founder")
+
   return (
     <div className="flex flex-col items-center group">
       <div className={`relative ${sizeClasses[variant]} rounded-2xl overflow-hidden shadow-xl border-2 md:border-4 border-white group-hover:border-accent transition-all duration-500 bg-slate-100`}>
@@ -74,8 +75,8 @@ function LeaderCard({ leader, variant = "default" }: { leader: Leader, variant?:
         <div className="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
       </div>
       <div className="mt-4 text-center px-2">
-        <h4 className={`font-headline font-bold text-primary ${variant === 'large' ? 'text-lg md:text-xl' : 'text-sm md:text-lg'}`}>{leader.name}</h4>
-        <p className="text-accent text-[8px] md:text-xs font-bold uppercase tracking-widest">{leader.title}</p>
+        <h4 className={`font-headline font-bold text-primary ${variant === 'large' ? 'text-lg md:text-2xl' : 'text-sm md:text-lg'}`}>{leader.name}</h4>
+        <p className={`text-accent font-bold uppercase tracking-widest ${variant === 'large' || isFounder ? 'text-xs md:text-base' : 'text-[8px] md:text-xs'}`}>{leader.title}</p>
       </div>
     </div>
   )

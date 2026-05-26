@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useMemo, useEffect } from 'react'
@@ -323,6 +322,7 @@ export default function MembersPage() {
               filteredMembers.map((member) => {
                 const img = PlaceHolderImages.find(i => i.id === member.imageId)
                 const fallback = member.gender === 'female' ? '/dummy w.png' : '/dummy m.png'
+                const isChairman = member.designation.includes("Central Chairman")
                 
                 return (
                   <Card key={member.id} className="group border-none shadow-sm hover:shadow-2xl transition-all duration-500 rounded-[2.5rem] overflow-hidden bg-white border border-slate-100 flex flex-col h-full">
@@ -368,7 +368,7 @@ export default function MembersPage() {
                         </div>
                         <div>
                           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Designation</p>
-                          <p className="font-bold text-primary">{member.designation}</p>
+                          <p className={`font-bold text-primary ${isChairman ? 'text-lg md:text-xl' : ''}`}>{member.designation}</p>
                         </div>
                       </div>
                       
