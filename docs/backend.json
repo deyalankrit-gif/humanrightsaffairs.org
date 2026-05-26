@@ -21,6 +21,24 @@
         "donorPhotoUrl": { "type": "string" }
       },
       "required": ["donorName", "donorEmail", "amount", "panNumber"]
+    },
+    "MemberProfile": {
+      "title": "Member Profile",
+      "description": "Detailed profile information for verified members, including sensitive contact details.",
+      "type": "object",
+      "properties": {
+        "memberId": { "type": "string" },
+        "name": { "type": "string" },
+        "designation": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "phone": { "type": "string" },
+        "address": { "type": "string" },
+        "bloodGroup": { "type": "string" },
+        "emergencyContact": { "type": "string" },
+        "joiningDate": { "type": "string", "format": "date" },
+        "status": { "type": "string", "enum": ["Active", "Inactive", "Suspended"] }
+      },
+      "required": ["memberId", "name", "email", "phone"]
     }
   },
   "auth": {
@@ -30,6 +48,10 @@
     "/donations/{donationId}": {
       "schema": "Donation",
       "description": "Collection of all donations received."
+    },
+    "/memberProfiles/{profileId}": {
+      "schema": "MemberProfile",
+      "description": "Secure member profiles accessible only to authenticated internal users."
     }
   }
 }
