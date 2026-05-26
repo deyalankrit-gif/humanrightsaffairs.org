@@ -10,27 +10,28 @@ type Leader = {
   title: string
   imageId: string
   description?: string
+  gender: 'male' | 'female'
 }
 
 const centralTeam: Leader[] = [
-  { name: "Dhritiman Dey", title: "Central Chairman (INDIA) & Founder", imageId: "chairman-photo" },
-  { name: "Adv. Meera Deshmukh", title: "National Legal Advisor", imageId: "female-avatar" },
-  { name: "Dr. Arvind Swamy", title: "General Secretary", imageId: "male-avatar" },
+  { name: "Dhritiman Dey", title: "Central Chairman (INDIA) & Founder", imageId: "chairman-photo", gender: 'male' },
+  { name: "Adv. Meera Deshmukh", title: "National Legal Advisor", imageId: "female-avatar", gender: 'female' },
+  { name: "Dr. Arvind Swamy", title: "General Secretary", imageId: "male-avatar", gender: 'male' },
 ]
 
 const stateTeams = [
   {
     state: "West Bengal",
     leaders: [
-      { name: "Moumita Saha", title: "Chairman (West Bengal) & Founder", imageId: "moumita-photo" },
-      { name: "Sonia Gandhi", title: "Vice Chairperson", imageId: "female-avatar" }
+      { name: "Moumita Saha", title: "Chairman (West Bengal) & Founder", imageId: "moumita-photo", gender: 'female' },
+      { name: "Sonia Gandhi", title: "Vice Chairperson", imageId: "female-avatar", gender: 'female' }
     ]
   },
   {
     state: "Tripura Chapter",
     leaders: [
-      { name: "Rajesh Patil", title: "Chapter Chairman", imageId: "male-avatar" },
-      { name: "Amruta Fadnavis", title: "Legal Head", imageId: "female-avatar" }
+      { name: "Rajesh Patil", title: "Chapter Chairman", imageId: "male-avatar", gender: 'male' },
+      { name: "Amruta Fadnavis", title: "Legal Head", imageId: "female-avatar", gender: 'female' }
     ]
   }
 ]
@@ -38,20 +39,21 @@ const stateTeams = [
 const districtTeams = [
   {
     district: "Kolkata",
-    leaders: [{ name: "Anil Kapoor", title: "District Chairman", imageId: "male-avatar" }]
+    leaders: [{ name: "Anil Kapoor", title: "District Chairman", imageId: "male-avatar", gender: 'male' }]
   },
   {
     district: "Howrah",
-    leaders: [{ name: "Sunil Shetty", title: "District Chairman", imageId: "male-avatar" }]
+    leaders: [{ name: "Sunil Shetty", title: "District Chairman", imageId: "male-avatar", gender: 'male' }]
   },
   {
     district: "Howrah",
-    leaders: [{ name: "Prakash Jha", title: "District Chairman", imageId: "male-avatar" }]
+    leaders: [{ name: "Prakash Jha", title: "District Chairman", imageId: "male-avatar", gender: 'male' }]
   }
 ]
 
 function LeaderCard({ leader, variant = "default" }: { leader: Leader, variant?: "large" | "default" | "small" }) {
   const img = PlaceHolderImages.find(i => i.id === leader.imageId)
+  const fallback = leader.gender === 'female' ? '/dummy w.png' : '/dummy m.png'
   
   const sizeClasses = {
     large: "w-48 h-60 md:w-64 md:h-80",
@@ -63,7 +65,7 @@ function LeaderCard({ leader, variant = "default" }: { leader: Leader, variant?:
     <div className="flex flex-col items-center group">
       <div className={`relative ${sizeClasses[variant]} rounded-2xl overflow-hidden shadow-xl border-2 md:border-4 border-white group-hover:border-accent transition-all duration-500 bg-slate-100`}>
         <Image 
-          src={img?.imageUrl || '/dummy m.png'} 
+          src={img?.imageUrl || fallback} 
           alt={leader.name} 
           fill 
           className="object-cover group-hover:scale-110 transition-transform duration-700"

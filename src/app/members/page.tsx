@@ -27,6 +27,7 @@ type Member = {
   stateName?: string
   districtName?: string
   imageId: string
+  gender: 'male' | 'female'
 }
 
 const chapters = [
@@ -58,7 +59,8 @@ const members: Member[] = [
     designation: "Central Chairman (INDIA) & Founder",
     jurisdiction: "All India",
     level: "National",
-    imageId: "chairman-photo"
+    imageId: "chairman-photo",
+    gender: 'male'
   },
   {
     id: "M002",
@@ -66,7 +68,8 @@ const members: Member[] = [
     designation: "National Legal Advisor",
     jurisdiction: "Supreme Court Division",
     level: "National",
-    imageId: "female-avatar"
+    imageId: "female-avatar",
+    gender: 'female'
   },
   {
     id: "M003",
@@ -74,7 +77,8 @@ const members: Member[] = [
     designation: "General Secretary",
     jurisdiction: "Central Secretariat",
     level: "National",
-    imageId: "male-avatar"
+    imageId: "male-avatar",
+    gender: 'male'
   },
   {
     id: "M004",
@@ -83,7 +87,8 @@ const members: Member[] = [
     jurisdiction: "West Bengal",
     stateName: "West Bengal",
     level: "State",
-    imageId: "moumita-photo"
+    imageId: "moumita-photo",
+    gender: 'female'
   },
   {
     id: "M005",
@@ -92,7 +97,8 @@ const members: Member[] = [
     jurisdiction: "West Bengal",
     stateName: "West Bengal",
     level: "State",
-    imageId: "female-avatar"
+    imageId: "female-avatar",
+    gender: 'female'
   },
   {
     id: "M006",
@@ -101,7 +107,8 @@ const members: Member[] = [
     jurisdiction: "Tripura Chapter",
     stateName: "Tripura Chapter",
     level: "State",
-    imageId: "male-avatar"
+    imageId: "male-avatar",
+    gender: 'male'
   },
   {
     id: "M007",
@@ -110,7 +117,8 @@ const members: Member[] = [
     jurisdiction: "Tripura Chapter",
     stateName: "Tripura Chapter",
     level: "State",
-    imageId: "female-avatar"
+    imageId: "female-avatar",
+    gender: 'female'
   },
   {
     id: "M008",
@@ -120,7 +128,8 @@ const members: Member[] = [
     stateName: "West Bengal",
     districtName: "Kolkata",
     level: "District",
-    imageId: "male-avatar"
+    imageId: "male-avatar",
+    gender: 'male'
   },
   {
     id: "M009",
@@ -130,7 +139,8 @@ const members: Member[] = [
     stateName: "West Bengal",
     districtName: "Howrah",
     level: "District",
-    imageId: "male-avatar"
+    imageId: "male-avatar",
+    gender: 'male'
   },
   {
     id: "M010",
@@ -140,7 +150,8 @@ const members: Member[] = [
     stateName: "West Bengal",
     districtName: "Howrah",
     level: "District",
-    imageId: "male-avatar"
+    imageId: "male-avatar",
+    gender: 'male'
   }
 ]
 
@@ -311,13 +322,14 @@ export default function MembersPage() {
             {filteredMembers.length > 0 ? (
               filteredMembers.map((member) => {
                 const img = PlaceHolderImages.find(i => i.id === member.imageId)
+                const fallback = member.gender === 'female' ? '/dummy w.png' : '/dummy m.png'
                 
                 return (
                   <Card key={member.id} className="group border-none shadow-sm hover:shadow-2xl transition-all duration-500 rounded-[2.5rem] overflow-hidden bg-white border border-slate-100 flex flex-col h-full">
                     <CardHeader className="p-0">
                       <div className="relative aspect-[4/5] overflow-hidden">
                         <Image 
-                          src={img?.imageUrl || '/dummy m.png'} 
+                          src={img?.imageUrl || fallback} 
                           alt={member.name} 
                           fill 
                           className="object-cover group-hover:scale-110 transition-transform duration-700"
