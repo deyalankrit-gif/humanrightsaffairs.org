@@ -71,6 +71,12 @@
       "description": "Official Niti Aayog Emblem",
       "imageUrl": "https://picsum.photos/seed/niti-aayog/400/200",
       "imageHint": "official emblem logo"
+    },
+    {
+      "id": "ai-bot-avatar",
+      "description": "AI Advocate Bot Avatar",
+      "imageUrl": "/Advocate.jpeg",
+      "imageHint": "legal advocate avatar"
     }
   ]
 }

@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { inquireLegalAssistant } from '@/ai/flows/ai-legal-assistant-chatbot'
+import { PlaceHolderImages } from '@/lib/placeholder-images'
 
 type Message = {
   id: string
@@ -19,6 +20,7 @@ type Message = {
 
 export function AIChat() {
   const [isOpen, setIsOpen] = React.useState(false)
+  const aiAvatar = PlaceHolderImages.find(i => i.id === 'ai-bot-avatar')
   const [messages, setMessages] = React.useState<Message[]>([
     {
       id: '1',
@@ -70,11 +72,11 @@ export function AIChat() {
           <div className="absolute inset-0 bg-accent transform scale-0 group-hover:scale-100 transition-transform duration-500 rounded-full opacity-20"></div>
           <div className="relative w-full h-full">
             <Image 
-              src="https://picsum.photos/seed/legal-ai-bot/400/400" 
+              src={aiAvatar?.imageUrl || "/Advocate.jpeg"} 
               alt="AI Legal Advocate" 
               fill 
               className="object-cover"
-              data-ai-hint="professional advocate"
+              data-ai-hint={aiAvatar?.imageHint || "professional advocate"}
             />
           </div>
           <div className="absolute -top-1 -right-1 flex h-6 w-6 z-20">
@@ -91,11 +93,11 @@ export function AIChat() {
               <div className="flex items-center gap-3">
                 <div className="relative w-12 h-12 rounded-xl overflow-hidden border-2 border-accent/40 shadow-inner">
                   <Image 
-                    src="https://picsum.photos/seed/legal-ai-bot/400/400" 
+                    src={aiAvatar?.imageUrl || "/Advocate.jpeg"} 
                     alt="JusticeBot Avatar" 
                     fill 
                     className="object-cover"
-                    data-ai-hint="professional profile"
+                    data-ai-hint={aiAvatar?.imageHint || "professional profile"}
                   />
                 </div>
                 <div>
