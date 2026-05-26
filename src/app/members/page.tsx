@@ -348,7 +348,7 @@ export default function MembersPage() {
                               <BadgeCheck className="w-3 h-3 md:w-4 md:h-4 fill-accent text-primary" />
                               <span className="text-[6px] md:text-[8px] font-bold uppercase tracking-[0.2em] text-white">ID: {member.id}</span>
                             </div>
-                            <h3 className={`font-headline font-bold group-hover:text-accent transition-colors ${isChairman || isStateChairman ? 'text-sm md:text-base' : 'text-xs md:text-sm'} ${isDhritiman ? 'text-red-600' : isMoumita ? 'text-secondary' : 'text-white'}`}>
+                            <h3 className={`font-headline font-bold group-hover:text-accent transition-colors ${isChairman || isStateChairman ? 'text-sm md:text-base' : 'text-xs md:text-sm'} ${isDhritiman ? 'text-secondary' : isMoumita ? 'text-secondary' : 'text-white'}`}>
                             {member.name}
                           </h3>
                         </div>
