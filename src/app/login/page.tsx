@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
-import { ShieldAlert, Lock, ArrowRight, Loader2, Home } from 'lucide-react'
+import { ShieldAlert, Lock, ArrowRight, Loader2, Home, Eye, EyeOff } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -17,6 +17,7 @@ import Link from 'next/link'
 export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const auth = useAuth()
   const { user } = useUser()
@@ -98,14 +99,21 @@ export default function LoginPage() {
                 <Label className="text-slate-400 text-[10px] font-bold uppercase tracking-wider">Security Key</Label>
                 <div className="relative">
                   <Input 
-                    type="password" 
+                    type={showPassword ? "text" : "password"} 
                     placeholder="••••••••" 
-                    className="bg-white/5 border-white/10 text-white pl-10 h-12 focus:ring-accent"
+                    className="bg-white/5 border-white/10 text-white pl-10 pr-10 h-12 focus:ring-accent"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
                   />
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-600" />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-600 hover:text-slate-400 transition-colors"
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
                 </div>
               </div>
               <Button 

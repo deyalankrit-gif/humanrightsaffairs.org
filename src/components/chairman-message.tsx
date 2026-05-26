@@ -1,3 +1,4 @@
+
 import Image from 'next/image'
 import { Quote } from 'lucide-react'
 import { PlaceHolderImages } from '@/lib/placeholder-images'
