@@ -12,7 +12,7 @@ import { Label } from '@/components/ui/label'
 import { ShieldAlert, Lock, ArrowRight, Loader2, Home } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import Image from 'next/image'
-import Link from 'next/Link'
+import Link from 'next/link'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
