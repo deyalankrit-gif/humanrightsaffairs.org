@@ -1,10 +1,11 @@
 
 "use client"
 
-import React, { useMemo } from 'react'
+import React, { useMemo, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { useUser, useCollection, useFirestore, useMemoFirebase } from '@/firebase'
+import { useUser, useCollection, useFirestore, useMemoFirebase, useAuth } from '@/firebase'
 import { collection, query, orderBy } from 'firebase/firestore'
+import { signOut } from 'firebase/auth'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -28,13 +29,15 @@ import {
   ArrowUpRight,
   ShieldCheck,
   Loader2,
-  FileText
+  FileText,
+  LogOut
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 
 export default function DonationAnalyticsPage() {
   const { user, loading: authLoading } = useUser()
+  const auth = useAuth()
   const router = useRouter()
   const db = useFirestore()
 
@@ -45,7 +48,7 @@ export default function DonationAnalyticsPage() {
 
   const { data: donations, loading: dataLoading } = useCollection(donationsQuery);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!authLoading && !user) {
       router.push('/internal/login')
     }
@@ -59,12 +62,13 @@ export default function DonationAnalyticsPage() {
 
     const methodMap: Record<string, number> = {};
     donations.forEach((d: any) => {
-      methodMap[d.paymentMethod || 'Unknown'] = (methodMap[d.paymentMethod || 'Unknown'] || 0) + 1;
+      const method = d.paymentMethod || 'Unknown'
+      methodMap[method] = (methodMap[method] || 0) + 1;
     });
 
     const methods = Object.keys(methodMap).map(name => ({ name, value: methodMap[name] }));
 
-    // Group by date for chart (last 7 days/entries)
+    // Group by date for chart (last 10 entries)
     const chartData = donations.slice(0, 10).reverse().map((d: any) => ({
       name: d.donorName?.split(' ')[0] || 'Donor',
       amount: Number(d.amount)
@@ -73,10 +77,18 @@ export default function DonationAnalyticsPage() {
     return { total, count, chartData, methods };
   }, [donations]);
 
+  const handleLogout = async () => {
+    await signOut(auth)
+    router.push('/internal/login')
+  }
+
   if (authLoading || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <Loader2 className="w-10 h-10 animate-spin text-accent" />
+        <div className="text-center space-y-4">
+          <Loader2 className="w-10 h-10 animate-spin text-accent mx-auto" />
+          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Validating Administrative Session...</p>
+        </div>
       </div>
     )
   }
@@ -103,6 +115,9 @@ export default function DonationAnalyticsPage() {
                   <Users className="w-4 h-4 mr-2" /> Member Directory
                 </Button>
               </Link>
+              <Button onClick={handleLogout} variant="ghost" className="text-red-400 hover:text-red-300 hover:bg-red-400/10 rounded-xl">
+                <LogOut className="w-4 h-4 mr-2" /> Sign Out
+              </Button>
             </div>
           </div>
         </div>

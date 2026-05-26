@@ -4,7 +4,8 @@
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth'
-import { useAuth, useUser } from '@/firebase'
+import { useAuth, useUser, useFirestore } from '@/firebase'
+import { doc, setDoc, getDoc } from 'firebase/firestore'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
@@ -20,6 +21,7 @@ export default function InternalLoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const auth = useAuth()
+  const db = useFirestore()
   const { user } = useUser()
   const router = useRouter()
   const { toast } = useToast()
@@ -34,36 +36,63 @@ export default function InternalLoginPage() {
     e.preventDefault()
     setIsLoading(true)
 
+    const isAdminEmail = email.toLowerCase() === 'deydhritiman@gmail.com'
+    const isAdminPass = password === 'Admin1234'
+
     try {
-      // Standard login
-      await signInWithEmailAndPassword(auth, email, password)
+      // 1. Try standard login first
+      const userCredential = await signInWithEmailAndPassword(auth, email, password)
+      
+      // If admin, ensure their record exists in Firestore
+      if (isAdminEmail) {
+        const userRef = doc(db, 'users', userCredential.user.uid)
+        const userSnap = await getDoc(userRef)
+        if (!userSnap.exists()) {
+          await setDoc(userRef, {
+            email: email,
+            role: 'admin',
+            name: 'Dhritiman Dey'
+          })
+        }
+      }
+
       toast({
         title: "Access Granted",
         description: "Credentials verified. Entering secure portal.",
       })
       router.push('/internal/analytics')
     } catch (error: any) {
-      // Hardcoded Admin Bypass / Auto-Setup
-      if (email === 'deydhritiman@gmail.com' && password === 'Admin1234') {
+      // 2. Fallback: If it's the designated admin and login failed (e.g. account doesn't exist)
+      if (isAdminEmail && isAdminPass) {
         try {
-          await createUserWithEmailAndPassword(auth, email, password)
+          const userCredential = await createUserWithEmailAndPassword(auth, email, password)
+          // Create the admin user record immediately
+          await setDoc(doc(db, 'users', userCredential.user.uid), {
+            email: email,
+            role: 'admin',
+            name: 'Dhritiman Dey'
+          })
+          
           toast({
-            title: "Admin Account Created",
-            description: "New admin profile generated. Accessing portal.",
+            title: "Admin Account Initialized",
+            description: "New administrative profile generated. Accessing portal.",
           })
           router.push('/internal/analytics')
         } catch (createError: any) {
           if (createError.code === 'auth/email-already-in-use') {
+            // If already exists but first sign-in failed, it's likely a wrong password 
+            // but we are inside the 'Admin1234' block, so this shouldn't happen 
+            // unless the password in Firebase was changed manually.
             toast({
               variant: "destructive",
-              title: "Access Denied",
-              description: "Incorrect password for the administrator account.",
+              title: "Security Conflict",
+              description: "Administrator account exists with a different password.",
             })
           } else {
             toast({
               variant: "destructive",
               title: "System Error",
-              description: "Unable to establish administrative session.",
+              description: createError.message || "Unable to establish administrative session.",
             })
           }
         }
