@@ -318,7 +318,7 @@ export default function MembersPage() {
 
       <section className="py-20">
         <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
             {filteredMembers.length > 0 ? (
               filteredMembers.map((member) => {
                 const img = PlaceHolderImages.find(i => i.id === member.imageId)
@@ -328,9 +328,9 @@ export default function MembersPage() {
                 const isMoumita = member.name === "Moumita Saha"
                 
                 return (
-                  <Card key={member.id} className="group border-none shadow-sm hover:shadow-2xl transition-all duration-500 rounded-[2.5rem] overflow-hidden bg-white border border-slate-100 flex flex-col h-full">
+                  <Card key={member.id} className="group border-none shadow-sm hover:shadow-xl transition-all duration-500 rounded-[1.5rem] md:rounded-[2rem] overflow-hidden bg-white border border-slate-100 flex flex-col h-full">
                     <CardHeader className="p-0">
-                      <div className="relative aspect-[4/5] overflow-hidden">
+                      <div className="relative aspect-[3/4] overflow-hidden">
                         <Image 
                           src={img?.imageUrl || fallback} 
                           alt={member.name} 
@@ -338,50 +338,40 @@ export default function MembersPage() {
                           className="object-cover group-hover:scale-110 transition-transform duration-700"
                           data-ai-hint={img?.imageHint}
                         />
-                        <div className="absolute top-6 right-6">
-                          <Badge className="bg-white/90 backdrop-blur-md text-primary font-bold shadow-lg border-none px-4 py-1">
+                        <div className="absolute top-3 right-3">
+                          <Badge className="bg-white/90 backdrop-blur-md text-primary font-bold shadow-lg border-none px-2 py-0.5 text-[8px] md:text-[10px]">
                             {member.level}
                           </Badge>
                         </div>
-                        <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-primary/90 via-primary/40 to-transparent">
-                            <div className="flex items-center gap-2 text-accent mb-2">
-                              <BadgeCheck className="w-5 h-5 fill-accent text-primary" />
-                              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white">Verified ID: {member.id}</span>
+                        <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-primary/95 via-primary/60 to-transparent">
+                            <div className="flex items-center gap-1.5 text-accent mb-1">
+                              <BadgeCheck className="w-3 h-3 md:w-4 md:h-4 fill-accent text-primary" />
+                              <span className="text-[6px] md:text-[8px] font-bold uppercase tracking-[0.2em] text-white">ID: {member.id}</span>
                             </div>
-                            <h3 className={`font-headline font-bold group-hover:text-accent transition-colors ${isChairman || isStateChairman ? 'text-xl md:text-2xl' : 'text-xl'} ${isMoumita ? 'text-accent' : 'text-white'}`}>
+                            <h3 className={`font-headline font-bold group-hover:text-accent transition-colors ${isChairman || isStateChairman ? 'text-sm md:text-base' : 'text-xs md:text-sm'} ${isMoumita ? 'text-accent' : 'text-white'}`}>
                             {member.name}
                           </h3>
                         </div>
                       </div>
                     </CardHeader>
-                    <CardContent className="p-8 space-y-4 flex-1">
-                      <div className="flex items-start gap-4">
-                        <div className="p-2 bg-slate-50 rounded-xl group-hover:bg-accent/10 transition-colors">
-                          <Hash className="w-5 h-5 text-slate-400 group-hover:text-accent" />
+                    <CardContent className="p-4 space-y-3 flex-1">
+                      <div className="flex items-start gap-2">
+                        <div className="p-1.5 bg-slate-50 rounded-lg group-hover:bg-accent/10 transition-colors">
+                          <Briefcase className="w-3 h-3 md:w-4 md:h-4 text-slate-400 group-hover:text-accent" />
                         </div>
                         <div>
-                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">ID Card Number</p>
-                          <p className="font-bold font-mono text-primary">{member.id}</p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-start gap-4">
-                        <div className="p-2 bg-slate-50 rounded-xl group-hover:bg-accent/10 transition-colors">
-                          <Briefcase className="w-5 h-5 text-slate-400 group-hover:text-accent" />
-                        </div>
-                        <div>
-                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Designation</p>
-                          <p className={`font-bold text-primary ${isChairman || isStateChairman ? 'text-base md:text-lg' : 'text-sm'}`}>{member.designation}</p>
+                          <p className="text-[6px] md:text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Designation</p>
+                          <p className={`font-bold text-primary leading-tight ${isChairman || isStateChairman ? 'text-[10px] md:text-xs' : 'text-[9px] md:text-[11px]'}`}>{member.designation}</p>
                         </div>
                       </div>
                       
-                      <div className="flex items-start gap-4 pt-2">
-                        <div className="p-2 bg-slate-50 rounded-xl group-hover:bg-accent/10 transition-colors">
-                          <MapPin className="w-5 h-5 text-slate-400 group-hover:text-accent" />
+                      <div className="flex items-start gap-2">
+                        <div className="p-1.5 bg-slate-50 rounded-lg group-hover:bg-accent/10 transition-colors">
+                          <MapPin className="w-3 h-3 md:w-4 md:h-4 text-slate-400 group-hover:text-accent" />
                         </div>
                         <div>
-                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Jurisdiction</p>
-                          <p className="font-bold text-slate-600">{member.jurisdiction}</p>
+                          <p className="text-[6px] md:text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Jurisdiction</p>
+                          <p className="font-bold text-slate-600 text-[9px] md:text-[11px] leading-tight">{member.jurisdiction}</p>
                         </div>
                       </div>
                     </CardContent>
