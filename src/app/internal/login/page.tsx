@@ -79,22 +79,11 @@ export default function InternalLoginPage() {
           })
           router.push('/internal/analytics')
         } catch (createError: any) {
-          if (createError.code === 'auth/email-already-in-use') {
-            // If already exists but first sign-in failed, it's likely a wrong password 
-            // but we are inside the 'Admin1234' block, so this shouldn't happen 
-            // unless the password in Firebase was changed manually.
-            toast({
-              variant: "destructive",
-              title: "Security Conflict",
-              description: "Administrator account exists with a different password.",
-            })
-          } else {
-            toast({
-              variant: "destructive",
-              title: "System Error",
-              description: createError.message || "Unable to establish administrative session.",
-            })
-          }
+          toast({
+            variant: "destructive",
+            title: "System Error",
+            description: createError.message || "Unable to establish administrative session.",
+          })
         }
       } else {
         toast({
