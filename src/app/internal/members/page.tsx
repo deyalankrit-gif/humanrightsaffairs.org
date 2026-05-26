@@ -1,11 +1,10 @@
-
 "use client"
 
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useUser, useCollection, useFirestore, useMemoFirebase } from '@/firebase'
 import { collection, query, orderBy } from 'firebase/firestore'
-import { Navbar } from '@/components/navbar'
+import { AdminNavbar } from '@/components/admin-navbar'
 import { Footer } from '@/components/footer'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -13,14 +12,13 @@ import { Badge } from '@/components/ui/badge'
 import { 
   Search, 
   Lock, 
-  FileText, 
   ShieldCheck,
   Hash,
   Mail,
   Phone,
   ArrowRight,
   Loader2,
-  BarChart3
+  FileText
 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import Link from 'next/link'
@@ -69,7 +67,7 @@ export default function InternalMembersDirectory() {
 
   return (
     <main className="min-h-screen bg-slate-50">
-      <Navbar />
+      <AdminNavbar />
 
       <section className="pt-32 pb-16 bg-slate-900 text-white relative">
         <div className="container mx-auto px-4">
@@ -83,17 +81,6 @@ export default function InternalMembersDirectory() {
               <p className="text-slate-400 max-w-xl text-sm">
                 Internal dashboard for verified HRAT personnel to access operational contact protocols.
               </p>
-            </div>
-            <div className="flex flex-col items-end gap-3">
-              <Link href="/internal/analytics">
-                <Button className="bg-accent text-primary font-bold hover:bg-accent/90 rounded-xl">
-                  <BarChart3 className="w-4 h-4 mr-2" /> View Analytics
-                </Button>
-              </Link>
-              <div className="bg-white/5 backdrop-blur-md px-4 py-2 rounded-xl border border-white/10">
-                <p className="text-[8px] text-slate-500 font-bold uppercase tracking-widest mb-1 text-right">Clearance Level: Admin</p>
-                <p className="text-xs font-bold text-accent">{user.email}</p>
-              </div>
             </div>
           </div>
         </div>

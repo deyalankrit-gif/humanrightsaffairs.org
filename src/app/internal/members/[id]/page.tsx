@@ -1,11 +1,10 @@
-
 "use client"
 
 import React, { useEffect, useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase'
 import { doc } from 'firebase/firestore'
-import { Navbar } from '@/components/navbar'
+import { AdminNavbar } from '@/components/admin-navbar'
 import { Footer } from '@/components/footer'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -33,7 +32,6 @@ export default function MemberDetailsPage() {
   const memberId = params.id as string
   const db = useFirestore()
 
-  // Dynamic fetch from Firestore - only if user is authorized
   const docRef = useMemoFirebase(() => {
     if (!db || !memberId || !user) return null;
     return doc(db, 'memberProfiles', memberId);
@@ -41,7 +39,6 @@ export default function MemberDetailsPage() {
 
   const { data: firestoreProfile, loading: profileLoading } = useDoc(docRef);
 
-  // Demo data for member details as fallback
   const demoProfiles: Record<string, any> = {
     'M001': {
       memberId: 'M001',
@@ -114,7 +111,7 @@ export default function MemberDetailsPage() {
 
   return (
     <main className="min-h-screen bg-slate-50">
-      <Navbar />
+      <AdminNavbar />
 
       <section className="pt-32 pb-12 bg-slate-900 text-white border-b-8 border-accent/20">
         <div className="container mx-auto px-4">

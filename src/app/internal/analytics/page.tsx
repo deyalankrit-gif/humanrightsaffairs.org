@@ -1,12 +1,10 @@
-
 "use client"
 
 import React, { useMemo, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { useUser, useCollection, useFirestore, useMemoFirebase, useAuth } from '@/firebase'
+import { useUser, useCollection, useFirestore, useMemoFirebase } from '@/firebase'
 import { collection, query, orderBy } from 'firebase/firestore'
-import { signOut } from 'firebase/auth'
-import { Navbar } from '@/components/navbar'
+import { AdminNavbar } from '@/components/admin-navbar'
 import { Footer } from '@/components/footer'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { 
@@ -24,25 +22,19 @@ import {
 import { 
   IndianRupee, 
   TrendingUp, 
-  Users, 
   Calendar,
   ArrowUpRight,
   ShieldCheck,
   Loader2,
-  FileText,
-  LogOut
+  FileText
 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import Link from 'next/link'
 
 export default function DonationAnalyticsPage() {
   const { user, loading: authLoading } = useUser()
-  const auth = useAuth()
   const router = useRouter()
   const db = useFirestore()
 
   const donationsQuery = useMemoFirebase(() => {
-    // Only initiate query if user is authenticated to prevent permission errors on signout
     if (!db || !user) return null;
     return query(collection(db, 'donations'), orderBy('createdAt', 'desc'));
   }, [db, user]);
@@ -69,7 +61,6 @@ export default function DonationAnalyticsPage() {
 
     const methods = Object.keys(methodMap).map(name => ({ name, value: methodMap[name] }));
 
-    // Group by date for chart (last 10 entries)
     const chartData = donations.slice(0, 10).reverse().map((d: any) => ({
       name: d.donorName?.split(' ')[0] || 'Donor',
       amount: Number(d.amount)
@@ -77,15 +68,6 @@ export default function DonationAnalyticsPage() {
 
     return { total, count, chartData, methods };
   }, [donations]);
-
-  const handleLogout = async () => {
-    try {
-      await signOut(auth)
-      router.push('/internal/login')
-    } catch (e) {
-      // Error handled by central listener if relevant
-    }
-  }
 
   if (authLoading || !user) {
     return (
@@ -102,7 +84,7 @@ export default function DonationAnalyticsPage() {
 
   return (
     <main className="min-h-screen bg-slate-50">
-      <Navbar />
+      <AdminNavbar />
 
       <section className="pt-32 pb-12 bg-slate-900 text-white border-b-8 border-accent/20">
         <div className="container mx-auto px-4">
@@ -113,16 +95,6 @@ export default function DonationAnalyticsPage() {
               </div>
               <h1 className="text-4xl md:text-5xl font-headline font-bold">Donation <span className="text-accent italic">Analytics</span></h1>
               <p className="text-slate-400">Financial oversight of the Human Rights Affairs Trust (JusticeShield).</p>
-            </div>
-            <div className="flex gap-4">
-              <Link href="/internal/members">
-                <Button variant="outline" className="bg-white/5 border-white/10 text-white hover:bg-white/10 rounded-xl">
-                  <Users className="w-4 h-4 mr-2" /> Member Directory
-                </Button>
-              </Link>
-              <Button onClick={handleLogout} variant="ghost" className="text-red-400 hover:text-red-300 hover:bg-red-400/10 rounded-xl">
-                <LogOut className="w-4 h-4 mr-2" /> Sign Out
-              </Button>
             </div>
           </div>
         </div>
