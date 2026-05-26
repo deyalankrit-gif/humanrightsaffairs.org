@@ -100,7 +100,7 @@ export default function EventsPage() {
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-3xl">
             <Badge className="bg-accent text-primary font-bold mb-6 px-4 py-1">Mission Impact</Badge>
-            <h1 className="text-5xl md:text-7xl font-headline font-bold mb-6">Our <span className="text-accent italic">Action</span> Gallery</h1>
+            <h1 className="text-5xl md:text-7xl font-headline font-bold mb-6">Our <span className="text-accent italic">Event</span> Gallery</h1>
             <p className="text-xl text-indigo-100 leading-relaxed">
               Witness the journey of JusticeShield as we traverse the length and breadth of India to protect, educate, and empower.
             </p>
