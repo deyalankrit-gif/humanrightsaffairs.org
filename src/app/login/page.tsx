@@ -34,6 +34,19 @@ export default function LoginPage() {
     e.preventDefault()
     setIsLoading(true)
 
+    // Hardcoded Admin Check
+    if (email === 'deydhritiman@gmail.com' && password === 'Admin1234') {
+      toast({
+        title: "Admin Access Granted",
+        description: "Hardcoded credentials accepted. Accessing secure portal.",
+      })
+      // Note: In a real app, you should also create this user in Firebase Console 
+      // so the session persists correctly across the app's protected routes.
+      router.push('/internal/members')
+      setIsLoading(false)
+      return
+    }
+
     try {
       await signInWithEmailAndPassword(auth, email, password)
       toast({
