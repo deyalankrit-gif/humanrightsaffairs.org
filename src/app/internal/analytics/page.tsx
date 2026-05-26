@@ -42,9 +42,10 @@ export default function DonationAnalyticsPage() {
   const db = useFirestore()
 
   const donationsQuery = useMemoFirebase(() => {
-    if (!db) return null;
+    // Only initiate query if user is authenticated to prevent permission errors on signout
+    if (!db || !user) return null;
     return query(collection(db, 'donations'), orderBy('createdAt', 'desc'));
-  }, [db]);
+  }, [db, user]);
 
   const { data: donations, loading: dataLoading } = useCollection(donationsQuery);
 
@@ -78,8 +79,12 @@ export default function DonationAnalyticsPage() {
   }, [donations]);
 
   const handleLogout = async () => {
-    await signOut(auth)
-    router.push('/internal/login')
+    try {
+      await signOut(auth)
+      router.push('/internal/login')
+    } catch (e) {
+      // Error handled by central listener if relevant
+    }
   }
 
   if (authLoading || !user) {
@@ -229,7 +234,7 @@ export default function DonationAnalyticsPage() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-50">
-                        {donations.slice(0, 10).map((d: any, i: number) => (
+                        {donations && donations.slice(0, 10).map((d: any, i: number) => (
                           <tr key={i} className="hover:bg-slate-50/50 transition-colors">
                             <td className="px-8 py-4 font-bold text-primary">{d.donorName}</td>
                             <td className="px-8 py-4 text-emerald-600 font-bold">₹{d.amount}</td>

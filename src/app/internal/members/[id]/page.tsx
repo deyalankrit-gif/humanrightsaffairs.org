@@ -33,11 +33,11 @@ export default function MemberDetailsPage() {
   const memberId = params.id as string
   const db = useFirestore()
 
-  // Dynamic fetch from Firestore
+  // Dynamic fetch from Firestore - only if user is authorized
   const docRef = useMemoFirebase(() => {
-    if (!db || !memberId) return null;
+    if (!db || !memberId || !user) return null;
     return doc(db, 'memberProfiles', memberId);
-  }, [db, memberId]);
+  }, [db, memberId, user]);
 
   const { data: firestoreProfile, loading: profileLoading } = useDoc(docRef);
 

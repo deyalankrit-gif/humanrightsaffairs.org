@@ -32,9 +32,9 @@ export default function InternalMembersDirectory() {
   const [search, setSearch] = useState('')
 
   const profilesQuery = useMemoFirebase(() => {
-    if (!db) return null;
+    if (!db || !user) return null;
     return query(collection(db, 'memberProfiles'), orderBy('name', 'asc'));
-  }, [db]);
+  }, [db, user]);
 
   const { data: firestoreProfiles, loading: profilesLoading } = useCollection(profilesQuery);
 
