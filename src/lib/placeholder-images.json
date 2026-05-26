@@ -3,26 +3,26 @@
     {
       "id": "chairman-photo",
       "description": "Central Chairman (INDIA) & Founder - Dhritiman Dey",
-      "imageUrl": "/Dhritiman.jpeg",
+      "imageUrl": "https://picsum.photos/seed/dhritiman/600/800",
       "imageHint": "dhritiman dey portrait"
     },
     {
       "id": "moumita-photo",
       "description": "Chairman (West Bengal) & Founder - Moumita Saha",
-      "imageUrl": "/Moumita.jpeg",
+      "imageUrl": "https://picsum.photos/seed/moumita/600/800",
       "imageHint": "moumita saha portrait"
     },
     {
       "id": "male-avatar",
       "description": "Official Generic Male Personnel Avatar",
-      "imageUrl": "/avatar-male.png",
-      "imageHint": "male avatar"
+      "imageUrl": "https://picsum.photos/seed/male-official-avatar/400/500",
+      "imageHint": "professional man avatar"
     },
     {
       "id": "female-avatar",
       "description": "Official Generic Female Personnel Avatar",
-      "imageUrl": "https://picsum.photos/seed/female-staff/400/500",
-      "imageHint": "female avatar"
+      "imageUrl": "https://picsum.photos/seed/female-official-avatar/400/500",
+      "imageHint": "professional woman avatar"
     },
     {
       "id": "hero-human-rights",
@@ -69,7 +69,7 @@
     {
       "id": "niti-logo",
       "description": "Official Niti Aayog Emblem",
-      "imageUrl": "/Niti.png",
+      "imageUrl": "https://picsum.photos/seed/niti-aayog/400/200",
       "imageHint": "official emblem logo"
     }
   ]

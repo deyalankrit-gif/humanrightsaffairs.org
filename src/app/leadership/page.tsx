@@ -61,13 +61,13 @@ function LeaderCard({ leader, variant = "default" }: { leader: Leader, variant?:
 
   return (
     <div className="flex flex-col items-center group">
-      <div className={`relative ${sizeClasses[variant]} rounded-2xl overflow-hidden shadow-xl border-2 md:border-4 border-white group-hover:border-accent transition-all duration-500`}>
+      <div className={`relative ${sizeClasses[variant]} rounded-2xl overflow-hidden shadow-xl border-2 md:border-4 border-white group-hover:border-accent transition-all duration-500 bg-slate-100`}>
         <Image 
-          src={img?.imageUrl || '/avatar-male.png'} 
+          src={img?.imageUrl || 'https://picsum.photos/seed/generic-avatar/400/500'} 
           alt={leader.name} 
           fill 
           className="object-cover group-hover:scale-110 transition-transform duration-700"
-          data-ai-hint={img?.imageHint}
+          data-ai-hint={img?.imageHint || "profile photo"}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
       </div>

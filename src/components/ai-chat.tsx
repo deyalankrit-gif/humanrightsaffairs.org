@@ -70,10 +70,11 @@ export function AIChat() {
           <div className="absolute inset-0 bg-accent transform scale-0 group-hover:scale-100 transition-transform duration-500 rounded-full opacity-20"></div>
           <div className="relative w-full h-full">
             <Image 
-              src="/advocate.jpeg" 
+              src="https://picsum.photos/seed/legal-ai-bot/400/400" 
               alt="AI Legal Advocate" 
               fill 
               className="object-cover"
+              data-ai-hint="professional advocate"
             />
           </div>
           <div className="absolute -top-1 -right-1 flex h-6 w-6 z-20">
@@ -90,10 +91,11 @@ export function AIChat() {
               <div className="flex items-center gap-3">
                 <div className="relative w-12 h-12 rounded-xl overflow-hidden border-2 border-accent/40 shadow-inner">
                   <Image 
-                    src="/advocate.jpeg" 
+                    src="https://picsum.photos/seed/legal-ai-bot/400/400" 
                     alt="JusticeBot Avatar" 
                     fill 
                     className="object-cover"
+                    data-ai-hint="professional profile"
                   />
                 </div>
                 <div>
