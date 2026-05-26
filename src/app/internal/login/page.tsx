@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { signInWithEmailAndPassword } from 'firebase/auth'
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth'
 import { useAuth, useUser } from '@/firebase'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -26,7 +26,7 @@ export default function InternalLoginPage() {
 
   useEffect(() => {
     if (user) {
-      router.push('/internal/members')
+      router.push('/internal/analytics')
     }
   }, [user, router])
 
@@ -34,31 +34,46 @@ export default function InternalLoginPage() {
     e.preventDefault()
     setIsLoading(true)
 
-    // Hardcoded Admin Check
-    if (email === 'deydhritiman@gmail.com' && password === 'Admin1234') {
-      toast({
-        title: "Admin Access Granted",
-        description: "Hardcoded credentials accepted. Accessing secure portal.",
-      })
-      // Note: For full functionality, ensure this user exists in your Firebase project.
-      router.push('/internal/members')
-      setIsLoading(false)
-      return
-    }
-
     try {
+      // Standard login
       await signInWithEmailAndPassword(auth, email, password)
       toast({
         title: "Access Granted",
         description: "Credentials verified. Entering secure portal.",
       })
-      router.push('/internal/members')
+      router.push('/internal/analytics')
     } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Access Denied",
-        description: "Invalid credentials or insufficient clearance.",
-      })
+      // Hardcoded Admin Bypass / Auto-Setup
+      if (email === 'deydhritiman@gmail.com' && password === 'Admin1234') {
+        try {
+          await createUserWithEmailAndPassword(auth, email, password)
+          toast({
+            title: "Admin Account Created",
+            description: "New admin profile generated. Accessing portal.",
+          })
+          router.push('/internal/analytics')
+        } catch (createError: any) {
+          if (createError.code === 'auth/email-already-in-use') {
+            toast({
+              variant: "destructive",
+              title: "Access Denied",
+              description: "Incorrect password for the administrator account.",
+            })
+          } else {
+            toast({
+              variant: "destructive",
+              title: "System Error",
+              description: "Unable to establish administrative session.",
+            })
+          }
+        }
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Access Denied",
+          description: "Invalid credentials or insufficient clearance.",
+        })
+      }
     } finally {
       setIsLoading(false)
     }
@@ -66,7 +81,6 @@ export default function InternalLoginPage() {
 
   return (
     <main className="min-h-screen flex items-center justify-center bg-slate-950 p-4 relative overflow-hidden">
-      {/* Dynamic Background */}
       <div className="absolute inset-0 opacity-20 pointer-events-none">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-red-600/10 rounded-full blur-[120px] animate-pulse"></div>
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
@@ -85,9 +99,9 @@ export default function InternalLoginPage() {
               </div>
             </div>
             <div className="space-y-1">
-              <CardTitle className="text-2xl font-headline font-bold text-white tracking-tight">Restricted Access</CardTitle>
+              <CardTitle className="text-2xl font-headline font-bold text-white tracking-tight">Personnel Portal</CardTitle>
               <CardDescription className="text-red-500 font-bold uppercase tracking-[0.2em] text-[10px] flex items-center justify-center gap-2">
-                <ShieldAlert className="w-3 h-3" /> Personnel Only
+                <ShieldAlert className="w-3 h-3" /> Restricted Entry
               </CardDescription>
             </div>
           </CardHeader>
@@ -136,13 +150,13 @@ export default function InternalLoginPage() {
                 {isLoading ? (
                   <Loader2 className="w-5 h-5 animate-spin" />
                 ) : (
-                  <>Authorize Entry <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" /></>
+                  <>Authenticate Access <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" /></>
                 )}
               </Button>
             </form>
             <div className="mt-8 pt-6 border-t border-white/5">
               <p className="text-center text-[9px] text-slate-600 font-bold uppercase tracking-widest leading-relaxed">
-                Unauthorized access attempts are logged and reported to the National Security Cell.
+                Security clearance required for the Donation Analytics dashboard.
               </p>
             </div>
           </CardContent>

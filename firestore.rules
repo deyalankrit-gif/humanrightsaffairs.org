@@ -1,9 +1,12 @@
+
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     // Helper function to check if the user is the designated Admin
     function isAdmin() {
-      return request.auth != null && request.auth.token.email == 'deydhritiman@gmail.com';
+      return request.auth != null && 
+             (request.auth.token.email == 'deydhritiman@gmail.com' || 
+              get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin');
     }
 
     // Member profiles are restricted to the designated Admin only
@@ -11,8 +14,14 @@ service cloud.firestore {
       allow read, write: if isAdmin();
     }
     
+    // User roles collection for granular authorization
+    match /users/{userId} {
+      allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
+      allow write: if isAdmin();
+    }
+    
     // Anyone can submit a donation for processing
-    // But viewing donation records/history is restricted to the designated Admin
+    // But viewing donation records/history/analytics is restricted to the designated Admin
     match /donations/{donationId} {
       allow create: if true;
       allow read: if isAdmin();

@@ -12,14 +12,15 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { 
   Search, 
-  Eye, 
   Lock, 
   FileText, 
   ShieldCheck,
   Hash,
   Mail,
   Phone,
-  ArrowRight
+  ArrowRight,
+  Loader2,
+  BarChart3
 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import Link from 'next/link'
@@ -30,7 +31,6 @@ export default function InternalMembersDirectory() {
   const db = useFirestore()
   const [search, setSearch] = useState('')
 
-  // Fetch real profiles from Firestore
   const profilesQuery = useMemoFirebase(() => {
     if (!db) return null;
     return query(collection(db, 'memberProfiles'), orderBy('name', 'asc'));
@@ -38,7 +38,6 @@ export default function InternalMembersDirectory() {
 
   const { data: firestoreProfiles, loading: profilesLoading } = useCollection(profilesQuery);
 
-  // Fallback demo data if Firestore is empty
   const internalMembers = firestoreProfiles && firestoreProfiles.length > 0 ? firestoreProfiles : [
     { id: 'M001', name: 'Dhritiman Dey', designation: 'Central Chairman', email: 'chairman@hrat.org', phone: '+91 90649 90024', status: 'Active' },
     { id: 'M004', name: 'Moumita Saha', designation: 'State Chairman (WB)', email: 'moumita.s@hrat.org', phone: '+91 98765 43210', status: 'Active' },
@@ -78,19 +77,23 @@ export default function InternalMembersDirectory() {
             <div className="space-y-2 text-center md:text-left">
               <div className="inline-flex items-center gap-2 bg-red-500/20 text-red-400 px-4 py-1.5 rounded-full text-[10px] font-bold border border-red-500/30 uppercase tracking-[0.2em]">
                 <Lock className="w-3 h-3" />
-                <span>Confidential Personnel Access</span>
+                <span>Personnel Directory</span>
               </div>
               <h1 className="text-4xl md:text-5xl font-headline font-bold">Secure <span className="text-accent italic">Member</span> Data</h1>
               <p className="text-slate-400 max-w-xl text-sm">
-                Internal dashboard for verified HRAT personnel to access sensitive member information and operational contact protocols.
+                Internal dashboard for verified HRAT personnel to access operational contact protocols.
               </p>
             </div>
-            <div className="bg-white/5 backdrop-blur-md p-6 rounded-2xl border border-white/10 text-right">
-              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1">Authenticated Personnel</p>
-              <p className="text-base font-bold text-accent">{user.email}</p>
-              <Button variant="ghost" size="sm" className="mt-2 text-red-400 hover:text-red-300 hover:bg-white/5 p-0 h-auto font-bold text-[10px] uppercase tracking-widest">
-                Log Out System
-              </Button>
+            <div className="flex flex-col items-end gap-3">
+              <Link href="/internal/analytics">
+                <Button className="bg-accent text-primary font-bold hover:bg-accent/90 rounded-xl">
+                  <BarChart3 className="w-4 h-4 mr-2" /> View Analytics
+                </Button>
+              </Link>
+              <div className="bg-white/5 backdrop-blur-md px-4 py-2 rounded-xl border border-white/10">
+                <p className="text-[8px] text-slate-500 font-bold uppercase tracking-widest mb-1 text-right">Clearance Level: Admin</p>
+                <p className="text-xs font-bold text-accent">{user.email}</p>
+              </div>
             </div>
           </div>
         </div>

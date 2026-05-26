@@ -21,6 +21,7 @@ export function ChairmanMessage() {
                 data-ai-hint={chairmanImg?.imageHint}
               />
             </div>
+            {/* Red Branding on Photo Overlay */}
             <div className="absolute bottom-6 left-6 right-6 bg-white/5 backdrop-blur-md p-6 rounded-xl shadow-lg border border-white/10">
               <h3 className="font-headline text-3xl md:text-4xl font-bold text-red-600">Dhritiman Dey</h3>
               <p className="text-primary font-bold text-sm md:text-lg tracking-widest uppercase">Central Chairman (INDIA) & Founder</p>
@@ -48,6 +49,7 @@ export function ChairmanMessage() {
                  DD
                </div>
                <div>
+                 {/* Green Branding for everywhere else */}
                  <p className="font-bold text-2xl md:text-3xl text-secondary">Dhritiman Dey</p>
                  <p className="text-slate-500 font-bold text-xl md:text-2xl italic">Central Chairman (INDIA) & Founder</p>
                </div>
