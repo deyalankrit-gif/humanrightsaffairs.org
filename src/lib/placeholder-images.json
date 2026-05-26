@@ -75,7 +75,7 @@
     {
       "id": "ai-bot-avatar",
       "description": "AI Advocate Bot Avatar",
-      "imageUrl": "/Advocate.jpeg",
+      "imageUrl": "/advocate.jpeg",
       "imageHint": "legal advocate avatar"
     }
   ]
