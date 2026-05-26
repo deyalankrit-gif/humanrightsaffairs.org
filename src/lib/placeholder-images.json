@@ -3,13 +3,13 @@
     {
       "id": "chairman-photo",
       "description": "Central Chairman (INDIA) & Founder - Dhritiman Dey",
-      "imageUrl": "https://picsum.photos/seed/dhritiman/600/800",
+      "imageUrl": "/Dhritiman.jpeg",
       "imageHint": "dhritiman dey portrait"
     },
     {
       "id": "moumita-photo",
       "description": "Chairman (West Bengal) & Founder - Moumita Saha",
-      "imageUrl": "https://picsum.photos/seed/moumita/600/800",
+      "imageUrl": "/Moumita.jpeg",
       "imageHint": "moumita saha portrait"
     },
     {
