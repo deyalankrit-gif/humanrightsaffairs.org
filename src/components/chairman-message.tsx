@@ -47,7 +47,7 @@ export function ChairmanMessage() {
                  DD
                </div>
                <div>
-                 <p className="font-bold text-2xl md:text-3xl text-accent">Dhritiman Dey</p>
+                 <p className="font-bold text-2xl md:text-3xl text-secondary">Dhritiman Dey</p>
                  <p className="text-slate-500 font-bold text-xl md:text-2xl italic">Central Chairman (INDIA) & Founder</p>
                </div>
             </div>
