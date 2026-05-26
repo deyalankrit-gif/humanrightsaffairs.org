@@ -48,33 +48,7 @@ const chapterToDistricts: Record<string, string[]> = {
   ],
   "Tripura Chapter": [
     "Dharmanagar", "Kailasahar", "Ambassa", "Khowai", "Belonia", "Bishalgarh", "Agartala"
-  ],
-  "Andhra Pradesh": ["Visakhapatnam", "Vijayawada", "Guntur", "Nellore", "Kurnool", "Anantapur", "Kakinada"],
-  "Arunachal Pradesh": ["Itanagar", "Tawang", "Ziro", "Pasighat", "Along", "Tezu"],
-  "Assam": ["Guwahati", "Dibrugarh", "Jorhat", "Silchar", "Nagaon", "Tinsukia", "Tezpur"],
-  "Bihar": ["Patna", "Gaya", "Bhagalpur", "Muzaffarpur", "Purnia", "Darbhanga", "Arrah"],
-  "Chhattisgarh": ["Raipur", "Bhilai", "Bilaspur", "Korba", "Rajnandgaon", "Jagdalpur"],
-  "Goa": ["North Goa", "South Goa", "Panaji", "Margao", "Vasco da Gama"],
-  "Gujarat": ["Ahmedabad", "Surat", "Vadodara", "Rajkot", "Bhavnagar", "Jamnagar", "Gandhinagar"],
-  "Haryana": ["Gurgaon", "Faridabad", "Panipat", "Ambala", "Rohtak", "Hisar", "Karnal"],
-  "Himachal Pradesh": ["Shimla", "Dharamshala", "Solan", "Mandi", "Kullu", "Hamirpur"],
-  "Jharkhand": ["Ranchi", "Jamshedpur", "Dhanbad", "Bokaro", "Deoghar", "Hazaribagh"],
-  "Karnataka": ["Bangalore", "Mysore", "Hubli", "Mangalore", "Belgaum", "Gulbarga", "Davangere"],
-  "Kerala": ["Thiruvananthapuram", "Kochi", "Kozhikode", "Thrissur", "Kollam", "Alappuzha", "Palakkad"],
-  "Madhya Pradesh": ["Indore", "Bhopal", "Jabalpur", "Gwalior", "Ujjain", "Sagar", "Dewas"],
-  "Manipur": ["Imphal", "Churachandpur", "Thoubal", "Bishnupur", "Senapati"],
-  "Meghalaya": ["Shillong", "Tura", "Jowai", "Nongpoh", "Williamnagar"],
-  "Mizoram": ["Aizawl", "Lunglei", "Champhai", "Serchhip", "Kolasib"],
-  "Nagaland": ["Kohima", "Dimapur", "Mokokchung", "Tuensang", "Wokha"],
-  "Odisha": ["Bhubaneswar", "Cuttack", "Rourkela", "Sambalpur", "Puri", "Berhampur", "Balasore"],
-  "Punjab": ["Ludhiana", "Amritsar", "Jalandhar", "Patiala", "Bathinda", "Hoshiarpur", "Mohali"],
-  "Rajasthan": ["Jaipur", "Jodhpur", "Kota", "Ajmer", "Bikaner", "Alwar", "Sikar"],
-  "Sikkim": ["Gangtok", "Namchi", "Mangan", "Gyalshing", "Pakyong"],
-  "Tamil Nadu": ["Chennai", "Coimbatore", "Madurai", "Trichy", "Salem", "Tirunelveli", "Erode"],
-  "Telangana": ["Hyderabad", "Warangal", "Nizamabad", "Karimnagar", "Khammam", "Ramagundam"],
-  "Tripura": ["Dharmanagar", "Kailasahar", "Ambassa", "West Tripura"],
-  "Uttar Pradesh": ["Lucknow", "Kanpur", "Ghaziabad", "Agra", "Varanasi", "Meerut", "Prayagraj", "Bareilly"],
-  "Uttarakhand": ["Dehradun", "Haridwar", "Haldwani", "Roorkee", "Rudrapur", "Kashipur"]
+  ]
 }
 
 const members: Member[] = [
@@ -92,7 +66,7 @@ const members: Member[] = [
     designation: "National Legal Advisor",
     jurisdiction: "Supreme Court Division",
     level: "National",
-    imageId: "leader-1"
+    imageId: "female-avatar"
   },
   {
     id: "M003",
@@ -100,7 +74,7 @@ const members: Member[] = [
     designation: "General Secretary",
     jurisdiction: "Central Secretariat",
     level: "National",
-    imageId: "leader-2"
+    imageId: "male-avatar"
   },
   {
     id: "M004",
@@ -118,7 +92,7 @@ const members: Member[] = [
     jurisdiction: "West Bengal",
     stateName: "West Bengal",
     level: "State",
-    imageId: "leader-4"
+    imageId: "female-avatar"
   },
   {
     id: "M006",
@@ -127,7 +101,7 @@ const members: Member[] = [
     jurisdiction: "Tripura Chapter",
     stateName: "Tripura Chapter",
     level: "State",
-    imageId: "leader-1"
+    imageId: "male-avatar"
   },
   {
     id: "M007",
@@ -136,7 +110,7 @@ const members: Member[] = [
     jurisdiction: "Tripura Chapter",
     stateName: "Tripura Chapter",
     level: "State",
-    imageId: "leader-2"
+    imageId: "female-avatar"
   },
   {
     id: "M008",
@@ -146,27 +120,27 @@ const members: Member[] = [
     stateName: "West Bengal",
     districtName: "Kolkata",
     level: "District",
-    imageId: "leader-3"
+    imageId: "male-avatar"
   },
   {
     id: "M009",
     name: "Sunil Shetty",
     designation: "District Chairman",
     jurisdiction: "Howrah",
-    stateName: "Tripura Chapter",
+    stateName: "West Bengal",
     districtName: "Howrah",
     level: "District",
-    imageId: "leader-4"
+    imageId: "male-avatar"
   },
   {
     id: "M010",
     name: "Prakash Jha",
     designation: "District Chairman",
     jurisdiction: "Howrah",
-    stateName: "Tripura Chapter",
+    stateName: "West Bengal",
     districtName: "Howrah",
     level: "District",
-    imageId: "leader-1"
+    imageId: "male-avatar"
   }
 ]
 
@@ -341,47 +315,31 @@ export default function MembersPage() {
 
                 return (
                   <Card key={member.id} className="group border-none shadow-sm hover:shadow-2xl transition-all duration-500 rounded-[2.5rem] overflow-hidden bg-white border border-slate-100 flex flex-col h-full">
-                    {!isDistrict ? (
-                      <CardHeader className="p-0">
-                        <div className="relative aspect-[4/5] overflow-hidden">
-                          <Image 
-                            src={img?.imageUrl || ''} 
-                            alt={member.name} 
-                            fill 
-                            className="object-cover group-hover:scale-110 transition-transform duration-700"
-                            data-ai-hint={img?.imageHint}
-                          />
-                          <div className="absolute top-6 right-6">
-                            <Badge className="bg-white/90 backdrop-blur-md text-primary font-bold shadow-lg border-none px-4 py-1">
-                              {member.level}
-                            </Badge>
-                          </div>
-                          <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-primary/90 via-primary/40 to-transparent">
-                             <div className="flex items-center gap-2 text-accent mb-2">
-                               <BadgeCheck className="w-5 h-5 fill-accent text-primary" />
-                               <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white">Verified ID: {member.id}</span>
-                             </div>
-                             <h3 className="text-2xl font-headline font-bold text-white group-hover:text-accent transition-colors">
-                              {member.name}
-                            </h3>
-                          </div>
-                        </div>
-                      </CardHeader>
-                    ) : (
-                      <CardHeader className="p-8 pb-0 flex flex-col items-center text-center">
-                        <div className="mb-6">
-                           <Badge className="bg-primary text-white font-bold px-4 py-1">
+                    <CardHeader className="p-0">
+                      <div className="relative aspect-[4/5] overflow-hidden">
+                        <Image 
+                          src={img?.imageUrl || '/avatar-male.png'} 
+                          alt={member.name} 
+                          fill 
+                          className="object-cover group-hover:scale-110 transition-transform duration-700"
+                          data-ai-hint={img?.imageHint}
+                        />
+                        <div className="absolute top-6 right-6">
+                          <Badge className="bg-white/90 backdrop-blur-md text-primary font-bold shadow-lg border-none px-4 py-1">
                             {member.level}
                           </Badge>
                         </div>
-                        <div className="w-20 h-20 rounded-full bg-slate-50 flex items-center justify-center mb-4 group-hover:bg-accent/10 transition-colors">
-                          <User className="w-10 h-10 text-slate-300 group-hover:text-accent transition-colors" />
+                        <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-primary/90 via-primary/40 to-transparent">
+                            <div className="flex items-center gap-2 text-accent mb-2">
+                              <BadgeCheck className="w-5 h-5 fill-accent text-primary" />
+                              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white">Verified ID: {member.id}</span>
+                            </div>
+                            <h3 className="text-2xl font-headline font-bold text-white group-hover:text-accent transition-colors">
+                            {member.name}
+                          </h3>
                         </div>
-                        <h3 className="text-2xl font-headline font-bold text-primary group-hover:text-accent transition-colors">
-                          {member.name}
-                        </h3>
-                      </CardHeader>
-                    )}
+                      </div>
+                    </CardHeader>
                     <CardContent className="p-8 space-y-4 flex-1">
                       <div className="flex items-start gap-4">
                         <div className="p-2 bg-slate-50 rounded-xl group-hover:bg-accent/10 transition-colors">
@@ -389,7 +347,7 @@ export default function MembersPage() {
                         </div>
                         <div>
                           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">ID Card Number</p>
-                          <p className={`font-bold font-mono ${isDistrict ? 'text-accent' : 'text-primary'}`}>{member.id}</p>
+                          <p className="font-bold font-mono text-primary">{member.id}</p>
                         </div>
                       </div>
 

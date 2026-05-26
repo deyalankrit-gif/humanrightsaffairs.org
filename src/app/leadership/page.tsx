@@ -14,8 +14,8 @@ type Leader = {
 
 const centralTeam: Leader[] = [
   { name: "Dhritiman Dey", title: "Central Chairman (INDIA) & Founder", imageId: "chairman-photo" },
-  { name: "Adv. Meera Deshmukh", title: "National Legal Advisor", imageId: "leader-1" },
-  { name: "Dr. Arvind Swamy", title: "General Secretary", imageId: "leader-2" },
+  { name: "Adv. Meera Deshmukh", title: "National Legal Advisor", imageId: "female-avatar" },
+  { name: "Dr. Arvind Swamy", title: "General Secretary", imageId: "male-avatar" },
 ]
 
 const stateTeams = [
@@ -23,14 +23,14 @@ const stateTeams = [
     state: "West Bengal",
     leaders: [
       { name: "Moumita Saha", title: "Chairman (West Bengal) & Founder", imageId: "moumita-photo" },
-      { name: "Sonia Gandhi", title: "Vice Chairperson", imageId: "leader-4" }
+      { name: "Sonia Gandhi", title: "Vice Chairperson", imageId: "female-avatar" }
     ]
   },
   {
     state: "Tripura Chapter",
     leaders: [
-      { name: "Rajesh Patil", title: "Chapter Chairman", imageId: "leader-1" },
-      { name: "Amruta Fadnavis", title: "Legal Head", imageId: "leader-2" }
+      { name: "Rajesh Patil", title: "Chapter Chairman", imageId: "male-avatar" },
+      { name: "Amruta Fadnavis", title: "Legal Head", imageId: "female-avatar" }
     ]
   }
 ]
@@ -38,15 +38,15 @@ const stateTeams = [
 const districtTeams = [
   {
     district: "Kolkata",
-    leaders: [{ name: "Anil Kapoor", title: "District Chairman", imageId: "leader-3" }]
+    leaders: [{ name: "Anil Kapoor", title: "District Chairman", imageId: "male-avatar" }]
   },
   {
     district: "Howrah",
-    leaders: [{ name: "Sunil Shetty", title: "District Chairman", imageId: "leader-4" }]
+    leaders: [{ name: "Sunil Shetty", title: "District Chairman", imageId: "male-avatar" }]
   },
   {
     district: "Howrah",
-    leaders: [{ name: "Prakash Jha", title: "District Chairman", imageId: "leader-1" }]
+    leaders: [{ name: "Prakash Jha", title: "District Chairman", imageId: "male-avatar" }]
   }
 ]
 
@@ -63,7 +63,7 @@ function LeaderCard({ leader, variant = "default" }: { leader: Leader, variant?:
     <div className="flex flex-col items-center group">
       <div className={`relative ${sizeClasses[variant]} rounded-2xl overflow-hidden shadow-xl border-2 md:border-4 border-white group-hover:border-accent transition-all duration-500`}>
         <Image 
-          src={img?.imageUrl || ''} 
+          src={img?.imageUrl || '/avatar-male.png'} 
           alt={leader.name} 
           fill 
           className="object-cover group-hover:scale-110 transition-transform duration-700"
