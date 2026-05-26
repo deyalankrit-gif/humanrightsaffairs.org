@@ -1,0 +1,15 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Member profiles are restricted to authenticated internal personnel only
+    match /memberProfiles/{profileId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // Anyone can submit a donation, but viewing records is restricted to authenticated personnel
+    match /donations/{donationId} {
+      allow create: if true;
+      allow read: if request.auth != null;
+    }
+  }
+}
