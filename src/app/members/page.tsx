@@ -290,7 +290,7 @@ export default function MembersPage() {
                       </DropdownMenuItem>
                       {availableDistricts.length > 0 ? (
                         availableDistricts.map((district, index) => (
-                          <DropdownMenuItem key={`${district}-${index}`} onClick={() => handleDistrictSelect(district)}>
+                          <DropdownMenuItem key={`${district}-${index}`} onClick={() => handleStateSelect(district)}>
                             {district}
                           </DropdownMenuItem>
                         ))
@@ -346,7 +346,7 @@ export default function MembersPage() {
                               <BadgeCheck className="w-5 h-5 fill-accent text-primary" />
                               <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white">Verified ID: {member.id}</span>
                             </div>
-                            <h3 className={`font-headline font-bold text-white group-hover:text-accent transition-colors ${isChairman || isStateChairman ? 'text-3xl md:text-4xl' : 'text-2xl'}`}>
+                            <h3 className={`font-headline font-bold text-white group-hover:text-accent transition-colors ${isChairman || isStateChairman ? 'text-4xl md:text-5xl lg:text-6xl' : 'text-2xl'}`}>
                             {member.name}
                           </h3>
                         </div>
@@ -369,7 +369,7 @@ export default function MembersPage() {
                         </div>
                         <div>
                           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Designation</p>
-                          <p className={`font-bold text-primary ${isChairman || isStateChairman ? 'text-lg md:text-2xl' : ''}`}>{member.designation}</p>
+                          <p className={`font-bold text-primary ${isChairman || isStateChairman ? 'text-xl md:text-3xl' : ''}`}>{member.designation}</p>
                         </div>
                       </div>
                       
