@@ -29,12 +29,12 @@ export function StateChairpersonMessage() {
               </p>
             </div>
             <div className="flex items-center gap-4 pt-4 border-t border-slate-100">
-               <div className="w-12 h-12 rounded-full bg-indigo-50 flex items-center justify-center text-primary font-bold text-lg">
+               <div className="w-16 h-16 rounded-full bg-indigo-50 flex items-center justify-center text-primary font-bold text-xl">
                  MS
                </div>
                <div>
-                 <p className="font-bold text-lg text-primary">Moumita Saha</p>
-                 <p className="text-slate-500 text-sm font-bold">Chairman (West Bengal) & Founder</p>
+                 <p className="font-bold text-2xl md:text-3xl text-primary">Moumita Saha</p>
+                 <p className="text-slate-500 text-lg md:text-xl font-bold">Chairman (West Bengal) & Founder</p>
                </div>
             </div>
           </div>
@@ -53,7 +53,7 @@ export function StateChairpersonMessage() {
               <div className="absolute inset-0 bg-gradient-to-t from-emerald-900/40 to-transparent"></div>
             </div>
             <div className="absolute bottom-6 left-6 bg-white/5 backdrop-blur-md px-6 py-3 rounded-full shadow-lg border border-white/10">
-              <p className="text-primary font-bold text-sm tracking-wide">Moumita Saha</p>
+              <p className="text-primary font-bold text-lg tracking-wide">Moumita Saha</p>
             </div>
           </div>
         </div>

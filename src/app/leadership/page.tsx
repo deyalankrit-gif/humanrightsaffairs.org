@@ -61,6 +61,7 @@ function LeaderCard({ leader, variant = "default" }: { leader: Leader, variant?:
   }
 
   const isFounder = leader.title.includes("Founder")
+  const isStateChairman = leader.title.includes("Chairman (West Bengal)")
 
   return (
     <div className="flex flex-col items-center group">
@@ -75,7 +76,7 @@ function LeaderCard({ leader, variant = "default" }: { leader: Leader, variant?:
         <div className="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
       </div>
       <div className="mt-4 text-center px-2">
-        <h4 className={`font-headline font-bold text-primary ${variant === 'large' ? 'text-lg md:text-2xl' : 'text-sm md:text-lg'}`}>{leader.name}</h4>
+        <h4 className={`font-headline font-bold text-primary ${variant === 'large' || isStateChairman ? 'text-lg md:text-2xl' : 'text-sm md:text-lg'}`}>{leader.name}</h4>
         <p className={`text-accent font-bold uppercase tracking-widest ${variant === 'large' || isFounder ? 'text-xs md:text-base' : 'text-[8px] md:text-xs'}`}>{leader.title}</p>
       </div>
     </div>

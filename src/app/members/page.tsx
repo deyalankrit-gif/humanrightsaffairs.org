@@ -323,6 +323,7 @@ export default function MembersPage() {
                 const img = PlaceHolderImages.find(i => i.id === member.imageId)
                 const fallback = member.gender === 'female' ? '/dummy w.png' : '/dummy m.png'
                 const isChairman = member.designation.includes("Central Chairman")
+                const isStateChairman = member.designation.includes("Chairman (West Bengal)")
                 
                 return (
                   <Card key={member.id} className="group border-none shadow-sm hover:shadow-2xl transition-all duration-500 rounded-[2.5rem] overflow-hidden bg-white border border-slate-100 flex flex-col h-full">
@@ -345,7 +346,7 @@ export default function MembersPage() {
                               <BadgeCheck className="w-5 h-5 fill-accent text-primary" />
                               <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white">Verified ID: {member.id}</span>
                             </div>
-                            <h3 className="text-2xl font-headline font-bold text-white group-hover:text-accent transition-colors">
+                            <h3 className={`font-headline font-bold text-white group-hover:text-accent transition-colors ${isChairman || isStateChairman ? 'text-3xl md:text-4xl' : 'text-2xl'}`}>
                             {member.name}
                           </h3>
                         </div>
@@ -368,7 +369,7 @@ export default function MembersPage() {
                         </div>
                         <div>
                           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Designation</p>
-                          <p className={`font-bold text-primary ${isChairman ? 'text-lg md:text-xl' : ''}`}>{member.designation}</p>
+                          <p className={`font-bold text-primary ${isChairman || isStateChairman ? 'text-lg md:text-2xl' : ''}`}>{member.designation}</p>
                         </div>
                       </div>
                       
