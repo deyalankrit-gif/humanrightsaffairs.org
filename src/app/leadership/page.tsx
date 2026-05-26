@@ -63,7 +63,7 @@ function LeaderCard({ leader, variant = "default" }: { leader: Leader, variant?:
     <div className="flex flex-col items-center group">
       <div className={`relative ${sizeClasses[variant]} rounded-2xl overflow-hidden shadow-xl border-2 md:border-4 border-white group-hover:border-accent transition-all duration-500 bg-slate-100`}>
         <Image 
-          src={img?.imageUrl || 'https://picsum.photos/seed/generic-avatar/400/500'} 
+          src={img?.imageUrl || '/dummy m.png'} 
           alt={leader.name} 
           fill 
           className="object-cover group-hover:scale-110 transition-transform duration-700"

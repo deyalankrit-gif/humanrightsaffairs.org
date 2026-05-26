@@ -311,14 +311,13 @@ export default function MembersPage() {
             {filteredMembers.length > 0 ? (
               filteredMembers.map((member) => {
                 const img = PlaceHolderImages.find(i => i.id === member.imageId)
-                const isDistrict = member.level === "District"
-
+                
                 return (
                   <Card key={member.id} className="group border-none shadow-sm hover:shadow-2xl transition-all duration-500 rounded-[2.5rem] overflow-hidden bg-white border border-slate-100 flex flex-col h-full">
                     <CardHeader className="p-0">
                       <div className="relative aspect-[4/5] overflow-hidden">
                         <Image 
-                          src={img?.imageUrl || '/avatar-male.png'} 
+                          src={img?.imageUrl || '/dummy m.png'} 
                           alt={member.name} 
                           fill 
                           className="object-cover group-hover:scale-110 transition-transform duration-700"
