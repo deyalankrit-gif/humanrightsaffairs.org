@@ -1,3 +1,4 @@
+
 import Image from 'next/image'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
@@ -79,8 +80,12 @@ function LeaderCard({ leader, variant = "default" }: { leader: Leader, variant?:
         <div className="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
       </div>
       <div className="mt-4 text-center px-2">
-        <h4 className={`font-headline font-bold ${isDhritiman || isMoumita ? 'text-emerald-500' : 'text-primary'} ${variant === 'large' || isStateChairman || isChairman ? 'text-xl md:text-2xl lg:text-3xl' : 'text-sm md:text-lg'}`}>{leader.name}</h4>
-        <p className={`text-accent font-bold uppercase tracking-widest ${variant === 'large' || isFounder ? 'text-xs md:text-base' : 'text-[8px] md:text-xs'}`}>{leader.title}</p>
+        <h4 className={`font-headline font-bold ${isDhritiman ? 'text-secondary' : isMoumita ? 'text-secondary' : 'text-primary'} ${variant === 'large' || isStateChairman || isChairman ? 'text-lg md:text-xl lg:text-2xl' : 'text-sm md:text-base'}`}>
+          {leader.name}
+        </h4>
+        <p className={`text-accent font-bold uppercase tracking-widest ${variant === 'large' || isFounder ? 'text-[10px] md:text-xs' : 'text-[8px] md:text-[10px]'}`}>
+          {leader.title}
+        </p>
       </div>
     </div>
   )
