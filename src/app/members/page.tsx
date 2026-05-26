@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useMemo, useEffect } from 'react'
@@ -347,7 +348,7 @@ export default function MembersPage() {
                               <BadgeCheck className="w-5 h-5 fill-accent text-primary" />
                               <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white">Verified ID: {member.id}</span>
                             </div>
-                            <h3 className={`font-headline font-bold group-hover:text-accent transition-colors ${isChairman || isStateChairman ? 'text-4xl md:text-5xl lg:text-6xl' : 'text-2xl'} ${isMoumita ? 'text-secondary' : 'text-white'}`}>
+                            <h3 className={`font-headline font-bold group-hover:text-accent transition-colors ${isChairman || isStateChairman ? 'text-4xl md:text-5xl lg:text-6xl' : 'text-2xl'} ${isMoumita ? 'text-accent' : 'text-white'}`}>
                             {member.name}
                           </h3>
                         </div>

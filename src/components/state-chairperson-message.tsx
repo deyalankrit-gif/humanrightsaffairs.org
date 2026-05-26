@@ -54,7 +54,7 @@ export function StateChairpersonMessage() {
               <div className="absolute inset-0 bg-gradient-to-t from-emerald-900/40 to-transparent"></div>
             </div>
             <div className="absolute bottom-6 left-6 bg-white/20 backdrop-blur-3xl px-8 py-4 rounded-full shadow-2xl border border-white/30">
-              <p className="text-emerald-500 font-bold text-2xl tracking-wide">Moumita Saha</p>
+              <p className="text-accent font-bold text-2xl tracking-wide">Moumita Saha</p>
             </div>
           </div>
         </div>
