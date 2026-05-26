@@ -324,6 +324,7 @@ export default function MembersPage() {
                 const fallback = member.gender === 'female' ? '/dummy w.png' : '/dummy m.png'
                 const isChairman = member.designation.includes("Central Chairman")
                 const isStateChairman = member.designation.includes("Chairman (West Bengal)")
+                const isMoumita = member.name === "Moumita Saha"
                 
                 return (
                   <Card key={member.id} className="group border-none shadow-sm hover:shadow-2xl transition-all duration-500 rounded-[2.5rem] overflow-hidden bg-white border border-slate-100 flex flex-col h-full">
@@ -346,7 +347,7 @@ export default function MembersPage() {
                               <BadgeCheck className="w-5 h-5 fill-accent text-primary" />
                               <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white">Verified ID: {member.id}</span>
                             </div>
-                            <h3 className={`font-headline font-bold text-white group-hover:text-accent transition-colors ${isChairman || isStateChairman ? 'text-4xl md:text-5xl lg:text-6xl' : 'text-2xl'}`}>
+                            <h3 className={`font-headline font-bold group-hover:text-accent transition-colors ${isChairman || isStateChairman ? 'text-4xl md:text-5xl lg:text-6xl' : 'text-2xl'} ${isMoumita ? 'text-secondary' : 'text-white'}`}>
                             {member.name}
                           </h3>
                         </div>

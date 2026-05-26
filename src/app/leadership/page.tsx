@@ -63,6 +63,7 @@ function LeaderCard({ leader, variant = "default" }: { leader: Leader, variant?:
   const isFounder = leader.title.includes("Founder")
   const isStateChairman = leader.title.includes("Chairman (West Bengal)")
   const isChairman = leader.title.includes("Central Chairman")
+  const isMoumita = leader.name === "Moumita Saha"
 
   return (
     <div className="flex flex-col items-center group">
@@ -77,7 +78,7 @@ function LeaderCard({ leader, variant = "default" }: { leader: Leader, variant?:
         <div className="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
       </div>
       <div className="mt-4 text-center px-2">
-        <h4 className={`font-headline font-bold text-primary ${variant === 'large' || isStateChairman || isChairman ? 'text-xl md:text-3xl lg:text-4xl' : 'text-sm md:text-lg'}`}>{leader.name}</h4>
+        <h4 className={`font-headline font-bold ${isMoumita ? 'text-secondary' : 'text-primary'} ${variant === 'large' || isStateChairman || isChairman ? 'text-xl md:text-3xl lg:text-4xl' : 'text-sm md:text-lg'}`}>{leader.name}</h4>
         <p className={`text-accent font-bold uppercase tracking-widest ${variant === 'large' || isFounder ? 'text-sm md:text-xl' : 'text-[8px] md:text-xs'}`}>{leader.title}</p>
       </div>
     </div>
@@ -94,7 +95,7 @@ export default function LeadershipPage() {
         <div className="absolute top-0 right-0 w-1/2 h-full bg-accent/5 -skew-x-12"></div>
         <div className="container mx-auto px-4 text-center relative z-10">
           <div className="inline-flex items-center gap-2 bg-accent/20 text-accent px-4 py-1.5 rounded-full text-xs md:text-sm font-bold border border-accent/30 mb-6">
-            <Users className="w-4 h-4" />
+            <span className="w-1.5 h-1.5 rounded-full bg-accent"></span>
             <span>Organizational Hierarchy</span>
           </div>
           <h1 className="text-4xl md:text-7xl font-headline font-bold mb-6">Our <span className="text-accent italic">Leadership</span> Tree</h1>
