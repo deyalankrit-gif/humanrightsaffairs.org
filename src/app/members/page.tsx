@@ -348,7 +348,7 @@ export default function MembersPage() {
                               <BadgeCheck className="w-5 h-5 fill-accent text-primary" />
                               <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white">Verified ID: {member.id}</span>
                             </div>
-                            <h3 className={`font-headline font-bold group-hover:text-accent transition-colors ${isChairman || isStateChairman ? 'text-4xl md:text-5xl lg:text-6xl' : 'text-2xl'} ${isMoumita ? 'text-accent' : 'text-white'}`}>
+                            <h3 className={`font-headline font-bold group-hover:text-accent transition-colors ${isChairman || isStateChairman ? 'text-2xl md:text-3xl' : 'text-xl'} ${isMoumita ? 'text-accent' : 'text-white'}`}>
                             {member.name}
                           </h3>
                         </div>
@@ -371,7 +371,7 @@ export default function MembersPage() {
                         </div>
                         <div>
                           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Designation</p>
-                          <p className={`font-bold text-primary ${isChairman || isStateChairman ? 'text-xl md:text-3xl' : ''}`}>{member.designation}</p>
+                          <p className={`font-bold text-primary ${isChairman || isStateChairman ? 'text-lg md:text-xl' : ''}`}>{member.designation}</p>
                         </div>
                       </div>
                       
