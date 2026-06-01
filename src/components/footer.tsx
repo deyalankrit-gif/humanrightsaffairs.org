@@ -70,21 +70,37 @@ export function Footer() {
           </div>
 
           <div>
-            <h4 className="text-lg font-headline font-bold mb-6 text-accent">Head Office</h4>
-            <ul className="space-y-6 text-indigo-100">
-              <li className="flex gap-3">
-                <MapPin className="w-5 h-5 text-accent shrink-0" />
-                <span className="text-sm">Human Rights Bhawan, Lodhi Road, New Delhi, India - 110003</span>
-              </li>
-              <li className="flex gap-3">
-                <Phone className="w-5 h-5 text-accent shrink-0" />
-                <span className="text-sm">+91 (011) 2345 6789</span>
-              </li>
-              <li className="flex gap-3">
-                <Mail className="w-5 h-5 text-accent shrink-0" />
-                <span className="text-sm">contact@hrat-india.org</span>
-              </li>
-            </ul>
+            <div className="mb-10">
+              <h4 className="text-lg font-headline font-bold mb-6 text-accent">Head Office</h4>
+              <ul className="space-y-4 text-indigo-100">
+                <li className="flex gap-3">
+                  <MapPin className="w-5 h-5 text-accent shrink-0" />
+                  <span className="text-sm">Human Rights Bhawan, Lodhi Road, New Delhi, India - 110003</span>
+                </li>
+                <li className="flex gap-3">
+                  <Phone className="w-5 h-5 text-accent shrink-0" />
+                  <span className="text-sm">+91 (011) 2345 6789</span>
+                </li>
+                <li className="flex gap-3">
+                  <Mail className="w-5 h-5 text-accent shrink-0" />
+                  <span className="text-sm">contact@hrat-india.org</span>
+                </li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="text-lg font-headline font-bold mb-6 text-accent">West Bengal State Office</h4>
+              <ul className="space-y-4 text-indigo-100">
+                <li className="flex gap-3">
+                  <MapPin className="w-5 h-5 text-accent shrink-0" />
+                  <span className="text-sm">Kolkata Zonal Office, Salt Lake City, West Bengal, India</span>
+                </li>
+                <li className="flex gap-3">
+                  <Phone className="w-5 h-5 text-accent shrink-0" />
+                  <span className="text-sm">+91 70631 11471</span>
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
 
