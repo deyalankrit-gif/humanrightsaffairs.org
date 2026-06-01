@@ -40,7 +40,7 @@ export function IDCardShowcase() {
               <span>Verified Membership</span>
             </div>
             <h2 className="text-3xl md:text-5xl font-headline font-bold leading-tight">
-              Get Your Digital <span className="text-accent">Member Identity</span> Card Instantly
+              Get Your Digital <span className="text-accent">Member Identity</span> Card Now
             </h2>
             <p className="text-lg md:text-xl text-indigo-100 font-body">
               Join a network of thousands of human rights defenders. Our secure digital ID cards feature QR-code verification, making your organizational status verifiable anywhere, anytime.
@@ -106,12 +106,10 @@ export function IDCardShowcase() {
 
           <div className="flex flex-col items-center gap-10 w-full max-w-2xl mx-auto">
             <div className="relative group perspective-1000 w-full">
-              {/* Background Halo Outline - Green */}
               <div className="absolute -inset-10 bg-secondary/25 rounded-full blur-[100px] animate-pulse opacity-50"></div>
               <div className="absolute -inset-4 border border-secondary/20 rounded-[2.5rem] md:rounded-[3rem] pointer-events-none"></div>
               
               <div className="relative transform transition-all duration-700 group-hover:rotate-y-6 group-hover:scale-[1.02]">
-                {/* Outer Card Frame Outline - Green */}
                 <div className="relative aspect-[4/2.5] w-full rounded-[1.5rem] md:rounded-[2rem] overflow-hidden shadow-[0_40px_100px_-20px_rgba(0,0,0,0.6)] border-8 border-secondary/80 bg-white ring-4 ring-secondary/20">
                   <Image 
                     src={idImg?.imageUrl || "/sample i card.jpeg"} 
@@ -120,14 +118,11 @@ export function IDCardShowcase() {
                     className="object-contain"
                     data-ai-hint={idImg?.imageHint}
                   />
-                  
-                  {/* Subtle Sheen Over Card */}
                   <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/5 to-white/0 pointer-events-none"></div>
                 </div>
               </div>
             </div>
 
-            {/* Repositioned Status Badge - Smaller and Bouncing */}
             <div className="bg-accent text-primary px-4 py-1.5 rounded-full shadow-2xl border-2 border-primary animate-bounce flex items-center gap-2 mt-4">
                <ShieldCheck className="w-4 h-4" />
                <p className="text-[10px] md:text-xs font-bold uppercase tracking-widest leading-none">Sample Official Identity Card</p>
