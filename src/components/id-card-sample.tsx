@@ -1,10 +1,10 @@
-
 "use client"
 
 import React from 'react'
 import Image from 'next/image'
 import { CheckCircle2, BadgeCheck, Info } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { PlaceHolderImages } from '@/lib/placeholder-images'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,6 +17,8 @@ import {
 } from "@/components/ui/alert-dialog"
 
 export function IDCardShowcase() {
+  const idImg = PlaceHolderImages.find(img => img.id === 'id-card-sample')
+  
   const eligibilityCriteria = [
     { title: "Citizenship", detail: "Must be a citizen of India (for Indian Chapters) or have valid residency." },
     { title: "Age Requirement", detail: "Minimum 18 years of age to register as a formal advocate/member." },
@@ -106,11 +108,11 @@ export function IDCardShowcase() {
             <div className="relative transform transition-transform duration-700 group-hover:rotate-y-12">
               <div className="relative aspect-[4/2.5] w-full rounded-[1.5rem] md:rounded-[2rem] overflow-hidden shadow-2xl border-4 border-accent bg-white">
                 <Image 
-                  src="/HRAT I Card.jpeg" 
+                  src={idImg?.imageUrl || "/sample i card.jpeg"} 
                   alt="HRAT Official ID Card Sample" 
                   fill 
                   className="object-contain"
-                  data-ai-hint="official identification card"
+                  data-ai-hint={idImg?.imageHint}
                 />
                 
                 {/* Privacy Overlay with Blue Cross-out Line */}

@@ -33,8 +33,8 @@
     {
       "id": "id-card-sample",
       "description": "Sample Member Identity Card for JusticeShield",
-      "imageUrl": "https://picsum.photos/seed/idcard/400/250",
-      "imageHint": "identity card template"
+      "imageUrl": "/sample i card.jpeg",
+      "imageHint": "official identification card"
     },
     {
       "id": "legal-library",
