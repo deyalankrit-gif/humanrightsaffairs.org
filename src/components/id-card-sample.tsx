@@ -121,17 +121,6 @@ export function IDCardShowcase() {
                     data-ai-hint={idImg?.imageHint}
                   />
                   
-                  {/* Privacy Overlay with Blue Cross-out Line */}
-                  <div className="absolute bottom-[16%] right-[8%] w-[35%] h-[8%] backdrop-blur-xl bg-white/40 rounded-md border border-blue-500/40 shadow-[0_0_15px_rgba(59,130,246,0.3)] pointer-events-none flex flex-col items-center justify-center overflow-hidden">
-                    <div className="absolute inset-0 flex items-center justify-center opacity-60">
-                      <div className="w-[120%] h-[2px] bg-blue-600 -rotate-[8deg] shadow-[0_0_8px_rgba(37,99,235,0.8)]"></div>
-                    </div>
-                    <div className="relative z-10 flex flex-col items-center">
-                      <span className="text-[5px] md:text-[7px] text-blue-800 font-bold uppercase tracking-widest opacity-90 text-center">Privacy Protected</span>
-                      <div className="w-full h-[0.5px] bg-blue-600/30 mt-0.5"></div>
-                    </div>
-                  </div>
-
                   {/* Subtle Sheen Over Card */}
                   <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/5 to-white/0 pointer-events-none"></div>
                 </div>
