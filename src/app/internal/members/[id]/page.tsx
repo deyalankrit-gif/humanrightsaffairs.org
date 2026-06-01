@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useEffect, useState } from 'react'
@@ -24,7 +23,7 @@ import {
   Loader2,
   AlertCircle
 } from 'lucide-react'
-import Link from 'link'
+import Link from 'next/link'
 
 export default function MemberDetailsPage() {
   const { user, loading: authLoading } = useUser()
@@ -66,6 +65,19 @@ export default function MemberDetailsPage() {
       joiningDate: '15 Mar 2018',
       status: 'Active',
       level: 'State Chapter'
+    },
+    'M002': {
+      memberId: 'M002',
+      name: 'Adv. Malabika Roy',
+      designation: 'National Legal Advisor',
+      email: 'malabika.roy@hrat-india.org',
+      phone: '+91 91234 56789',
+      address: 'High Court Premises, Kolkata, 700001',
+      bloodGroup: 'A+',
+      emergencyContact: 'Mr. Roy (+91 98888 77777)',
+      joiningDate: '10 Feb 2019',
+      status: 'Active',
+      level: 'National Council'
     }
   }
 

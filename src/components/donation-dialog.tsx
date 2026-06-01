@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useRef } from 'react'
@@ -201,14 +200,14 @@ export function DonationDialog({ children }: { children: React.ReactNode }) {
                 <FormField control={form.control} name="name" render={({ field }) => (
                   <FormItem>
                     <FormLabel>Full Name</FormLabel>
-                    <FormControl><Input placeholder="John Doe" {...field} /></FormControl>
+                    <FormControl><Input placeholder="Jayanta Kumar Paul" {...field} /></FormControl>
                     <FormMessage />
                   </FormItem>
                 )} />
                 <FormField control={form.control} name="email" render={({ field }) => (
                   <FormItem>
                     <FormLabel>Email Address</FormLabel>
-                    <FormControl><Input placeholder="john@example.com" {...field} /></FormControl>
+                    <FormControl><Input placeholder="jayanta@example.com" {...field} /></FormControl>
                     <FormMessage />
                   </FormItem>
                 )} />

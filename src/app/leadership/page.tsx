@@ -1,4 +1,3 @@
-
 import Image from 'next/image'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
@@ -15,8 +14,8 @@ type Leader = {
 
 const centralTeam: Leader[] = [
   { name: "Dhritiman Dey", title: "Central Chairman (INDIA) & Founder", imageId: "chairman-photo", gender: 'male' },
-  { name: "Adv. Meera Deshmukh", title: "National Legal Advisor", imageId: "female-avatar", gender: 'female' },
-  { name: "Dr. Arvind Swamy", title: "General Secretary", imageId: "male-avatar", gender: 'male' },
+  { name: "Adv. Malabika Roy", title: "National Legal Advisor", imageId: "female-avatar", gender: 'female' },
+  { name: "Dr. Arindam Ghosh", title: "General Secretary", imageId: "male-avatar", gender: 'male' },
 ]
 
 const stateTeams = [
@@ -24,14 +23,14 @@ const stateTeams = [
     state: "West Bengal",
     leaders: [
       { name: "Moumita Saha", title: "Chairman (West Bengal) & Founder", imageId: "moumita-photo", gender: 'female' },
-      { name: "Sonia Gandhi", title: "Vice Chairperson", imageId: "female-avatar", gender: 'female' }
+      { name: "Sanchita Banerjee", title: "Vice Chairperson", imageId: "female-avatar", gender: 'female' }
     ]
   },
   {
     state: "Tripura Chapter",
     leaders: [
-      { name: "Rajesh Patil", title: "Chapter Chairman", imageId: "male-avatar", gender: 'male' },
-      { name: "Amruta Fadnavis", title: "Legal Head", imageId: "female-avatar", gender: 'female' }
+      { name: "Ratul Chowdhury", title: "Chapter Chairman", imageId: "male-avatar", gender: 'male' },
+      { name: "Aditi Chakraborty", title: "Legal Head", imageId: "female-avatar", gender: 'female' }
     ]
   }
 ]
@@ -39,15 +38,15 @@ const stateTeams = [
 const districtTeams = [
   {
     district: "Kolkata",
-    leaders: [{ name: "Anil Kapoor", title: "District Chairman", imageId: "male-avatar", gender: 'male' }]
+    leaders: [{ name: "Abir Chatterjee", title: "District Chairman", imageId: "male-avatar", gender: 'male' }]
   },
   {
     district: "Howrah",
-    leaders: [{ name: "Sunil Shetty", title: "District Chairman", imageId: "male-avatar", gender: 'male' }]
+    leaders: [{ name: "Sujit Barua", title: "District Chairman", imageId: "male-avatar", gender: 'male' }]
   },
   {
-    district: "Howrah",
-    leaders: [{ name: "Prakash Jha", title: "District Chairman", imageId: "male-avatar", gender: 'male' }]
+    district: "Hooghly",
+    leaders: [{ name: "Partha Sarathi Bose", title: "District Chairman", imageId: "male-avatar", gender: 'male' }]
   }
 ]
 

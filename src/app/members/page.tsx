@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useMemo, useEffect } from 'react'
@@ -64,7 +63,7 @@ const members: Member[] = [
   },
   {
     id: "M002",
-    name: "Adv. Meera Deshmukh",
+    name: "Adv. Malabika Roy",
     designation: "National Legal Advisor",
     jurisdiction: "Supreme Court Division",
     level: "National",
@@ -73,7 +72,7 @@ const members: Member[] = [
   },
   {
     id: "M003",
-    name: "Dr. Arvind Swamy",
+    name: "Dr. Arindam Ghosh",
     designation: "General Secretary",
     jurisdiction: "Central Secretariat",
     level: "National",
@@ -92,7 +91,7 @@ const members: Member[] = [
   },
   {
     id: "M005",
-    name: "Sonia Gandhi",
+    name: "Sanchita Banerjee",
     designation: "Vice Chairperson",
     jurisdiction: "West Bengal",
     stateName: "West Bengal",
@@ -102,7 +101,7 @@ const members: Member[] = [
   },
   {
     id: "M006",
-    name: "Rajesh Patil",
+    name: "Ratul Chowdhury",
     designation: "Chapter Chairman",
     jurisdiction: "Tripura Chapter",
     stateName: "Tripura Chapter",
@@ -112,7 +111,7 @@ const members: Member[] = [
   },
   {
     id: "M007",
-    name: "Amruta Fadnavis",
+    name: "Aditi Chakraborty",
     designation: "Legal Head",
     jurisdiction: "Tripura Chapter",
     stateName: "Tripura Chapter",
@@ -122,7 +121,7 @@ const members: Member[] = [
   },
   {
     id: "M008",
-    name: "Anil Kapoor",
+    name: "Abir Chatterjee",
     designation: "District Chairman",
     jurisdiction: "Kolkata",
     stateName: "West Bengal",
@@ -133,7 +132,7 @@ const members: Member[] = [
   },
   {
     id: "M009",
-    name: "Sunil Shetty",
+    name: "Sujit Barua",
     designation: "District Chairman",
     jurisdiction: "Howrah",
     stateName: "West Bengal",
@@ -144,11 +143,11 @@ const members: Member[] = [
   },
   {
     id: "M010",
-    name: "Prakash Jha",
+    name: "Partha Sarathi Bose",
     designation: "District Chairman",
-    jurisdiction: "Howrah",
+    jurisdiction: "Hooghly",
     stateName: "West Bengal",
-    districtName: "Howrah",
+    districtName: "Hooghly",
     level: "District",
     imageId: "male-avatar",
     gender: 'male'
@@ -291,7 +290,7 @@ export default function MembersPage() {
                       </DropdownMenuItem>
                       {availableDistricts.length > 0 ? (
                         availableDistricts.map((district, index) => (
-                          <DropdownMenuItem key={`${district}-${index}`} onClick={() => handleStateSelect(district)}>
+                          <DropdownMenuItem key={`${district}-${index}`} onClick={() => handleDistrictSelect(district)}>
                             {district}
                           </DropdownMenuItem>
                         ))
