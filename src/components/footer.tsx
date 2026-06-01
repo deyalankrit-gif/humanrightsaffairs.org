@@ -99,6 +99,10 @@ export function Footer() {
                   <Phone className="w-5 h-5 text-accent shrink-0" />
                   <span className="text-sm">+91 70631 11471</span>
                 </li>
+                <li className="flex gap-3">
+                  <Mail className="w-5 h-5 text-accent shrink-0" />
+                  <span className="text-sm">wb@hrat-india.org</span>
+                </li>
               </ul>
             </div>
           </div>
