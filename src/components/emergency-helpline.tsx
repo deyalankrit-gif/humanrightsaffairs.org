@@ -55,11 +55,11 @@ export function EmergencyHelpline() {
                   <span>West Bengal State Chapter</span>
                 </div>
                 <a 
-                  href="tel:9064990024" 
+                  href="tel:7063111471" 
                   className="flex items-center justify-between bg-primary text-white p-4 md:p-6 rounded-[2rem] font-bold text-xl md:text-4xl hover:bg-primary/95 transition-all shadow-xl shadow-primary/20 group/btn overflow-hidden relative"
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-1000"></div>
-                  <span className="relative z-10">90649 90024</span>
+                  <span className="relative z-10">70631 11471</span>
                   <Phone className="w-6 h-6 md:w-10 md:h-10 fill-white relative z-10 animate-pulse" />
                 </a>
                 <div className="mt-4 flex items-center justify-center gap-2 text-[10px] font-bold text-accent uppercase tracking-widest opacity-70 group-hover:opacity-100 transition-opacity">

@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useEffect, useState } from 'react'
@@ -23,7 +24,7 @@ import {
   Loader2,
   AlertCircle
 } from 'lucide-react'
-import Link from 'next/link'
+import Link from 'link'
 
 export default function MemberDetailsPage() {
   const { user, loading: authLoading } = useUser()
@@ -45,7 +46,7 @@ export default function MemberDetailsPage() {
       name: 'Dhritiman Dey',
       designation: 'Central Chairman (INDIA) & Founder',
       email: 'dhritiman.dey@hrat-india.org',
-      phone: '+91 90649 90024',
+      phone: '+91 70631 11471',
       address: 'Human Rights Bhawan, Lodhi Road, New Delhi, 110003',
       bloodGroup: 'B+',
       emergencyContact: 'Mrs. Dey (+91 90000 00000)',

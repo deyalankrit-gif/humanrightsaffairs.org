@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useEffect, useState } from 'react'
@@ -21,7 +22,7 @@ import {
   FileText
 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
-import Link from 'next/link'
+import Link from 'link'
 
 export default function InternalMembersDirectory() {
   const { user, loading: authLoading } = useUser()
@@ -37,7 +38,7 @@ export default function InternalMembersDirectory() {
   const { data: firestoreProfiles, loading: profilesLoading } = useCollection(profilesQuery);
 
   const internalMembers = firestoreProfiles && firestoreProfiles.length > 0 ? firestoreProfiles : [
-    { id: 'M001', name: 'Dhritiman Dey', designation: 'Central Chairman', email: 'chairman@hrat.org', phone: '+91 90649 90024', status: 'Active' },
+    { id: 'M001', name: 'Dhritiman Dey', designation: 'Central Chairman', email: 'chairman@hrat.org', phone: '+91 70631 11471', status: 'Active' },
     { id: 'M004', name: 'Moumita Saha', designation: 'State Chairman (WB)', email: 'moumita.s@hrat.org', phone: '+91 98765 43210', status: 'Active' },
     { id: 'M002', name: 'Adv. Meera Deshmukh', designation: 'Legal Advisor', email: 'meera.law@hrat.org', phone: '+91 91234 56789', status: 'Active' }
   ]
