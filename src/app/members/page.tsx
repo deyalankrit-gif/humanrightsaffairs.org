@@ -225,7 +225,7 @@ export default function MembersPage() {
             <Users className="w-4 h-4" />
             <span>Official Personnel Directory</span>
           </div>
-          <h1 className="text-5xl md:text-7xl font-headline font-bold mb-6">Verified <span className="text-accent italic">Members</span></h1>
+          <h1 className="text-5xl md:text-7xl font-headline font-bold mb-6">Verified <span className="text-accent italic">Membership</span></h1>
           <p className="text-indigo-100 max-w-2xl mx-auto text-lg">
             Meet the dedicated human rights defenders of JusticeShield, operating with transparency and integrity across the nation.
           </p>

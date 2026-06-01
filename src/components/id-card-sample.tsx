@@ -40,7 +40,7 @@ export function IDCardShowcase() {
               <span>Verified Membership</span>
             </div>
             <h2 className="text-3xl md:text-5xl font-headline font-bold leading-tight">
-              Get Your Digital <span className="text-accent">Member Identity</span> Card Now
+              Get Your Digital <span className="text-accent">Membership Identity</span> Card Now
             </h2>
             <p className="text-lg md:text-xl text-indigo-100 font-body">
               Join a network of thousands of human rights defenders. Our secure digital ID cards feature QR-code verification, making your organizational status verifiable anywhere, anytime.
