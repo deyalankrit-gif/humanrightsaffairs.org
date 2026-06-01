@@ -105,13 +105,13 @@ export function IDCardShowcase() {
           </div>
 
           <div className="relative group perspective-1000 w-full max-w-2xl mx-auto">
-            {/* Background Halo Outline */}
-            <div className="absolute -inset-10 bg-accent/25 rounded-full blur-[100px] animate-pulse opacity-50"></div>
-            <div className="absolute -inset-4 border border-white/10 rounded-[2.5rem] md:rounded-[3rem] pointer-events-none"></div>
+            {/* Background Halo Outline - Now Green */}
+            <div className="absolute -inset-10 bg-secondary/25 rounded-full blur-[100px] animate-pulse opacity-50"></div>
+            <div className="absolute -inset-4 border border-secondary/20 rounded-[2.5rem] md:rounded-[3rem] pointer-events-none"></div>
             
             <div className="relative transform transition-all duration-700 group-hover:rotate-y-6 group-hover:scale-[1.02]">
-              {/* Outer Card Frame Outline */}
-              <div className="relative aspect-[4/2.5] w-full rounded-[1.5rem] md:rounded-[2rem] overflow-hidden shadow-[0_40px_100px_-20px_rgba(0,0,0,0.6)] border-8 border-slate-900 bg-white ring-4 ring-white/10">
+              {/* Outer Card Frame Outline - Enhanced with Green tones */}
+              <div className="relative aspect-[4/2.5] w-full rounded-[1.5rem] md:rounded-[2rem] overflow-hidden shadow-[0_40px_100px_-20px_rgba(0,0,0,0.6)] border-8 border-secondary/80 bg-white ring-4 ring-secondary/20">
                 <Image 
                   src={idImg?.imageUrl || "/sample i card.jpeg"} 
                   alt="HRAT Official ID Card Sample" 
