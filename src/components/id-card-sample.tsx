@@ -104,45 +104,44 @@ export function IDCardShowcase() {
             </div>
           </div>
 
-          <div className="relative group perspective-1000 w-full max-w-2xl mx-auto">
-            {/* Background Halo Outline - Now Green */}
-            <div className="absolute -inset-10 bg-secondary/25 rounded-full blur-[100px] animate-pulse opacity-50"></div>
-            <div className="absolute -inset-4 border border-secondary/20 rounded-[2.5rem] md:rounded-[3rem] pointer-events-none"></div>
-            
-            <div className="relative transform transition-all duration-700 group-hover:rotate-y-6 group-hover:scale-[1.02]">
-              {/* Outer Card Frame Outline - Enhanced with Green tones */}
-              <div className="relative aspect-[4/2.5] w-full rounded-[1.5rem] md:rounded-[2rem] overflow-hidden shadow-[0_40px_100px_-20px_rgba(0,0,0,0.6)] border-8 border-secondary/80 bg-white ring-4 ring-secondary/20">
-                <Image 
-                  src={idImg?.imageUrl || "/sample i card.jpeg"} 
-                  alt="HRAT Official ID Card Sample" 
-                  fill 
-                  className="object-contain"
-                  data-ai-hint={idImg?.imageHint}
-                />
-                
-                {/* Privacy Overlay with Blue Cross-out Line */}
-                <div className="absolute bottom-[16%] right-[8%] w-[35%] h-[8%] backdrop-blur-xl bg-white/40 rounded-md border border-blue-500/40 shadow-[0_0_15px_rgba(59,130,246,0.3)] pointer-events-none flex flex-col items-center justify-center overflow-hidden">
-                  <div className="absolute inset-0 flex items-center justify-center opacity-60">
-                    <div className="w-[120%] h-[2px] bg-blue-600 -rotate-[8deg] shadow-[0_0_8px_rgba(37,99,235,0.8)]"></div>
+          <div className="flex flex-col items-center gap-8 w-full max-w-2xl mx-auto">
+            <div className="relative group perspective-1000 w-full">
+              {/* Background Halo Outline - Green */}
+              <div className="absolute -inset-10 bg-secondary/25 rounded-full blur-[100px] animate-pulse opacity-50"></div>
+              <div className="absolute -inset-4 border border-secondary/20 rounded-[2.5rem] md:rounded-[3rem] pointer-events-none"></div>
+              
+              <div className="relative transform transition-all duration-700 group-hover:rotate-y-6 group-hover:scale-[1.02]">
+                {/* Outer Card Frame Outline - Enhanced with Green tones */}
+                <div className="relative aspect-[4/2.5] w-full rounded-[1.5rem] md:rounded-[2rem] overflow-hidden shadow-[0_40px_100px_-20px_rgba(0,0,0,0.6)] border-8 border-secondary/80 bg-white ring-4 ring-secondary/20">
+                  <Image 
+                    src={idImg?.imageUrl || "/sample i card.jpeg"} 
+                    alt="HRAT Official ID Card Sample" 
+                    fill 
+                    className="object-contain"
+                    data-ai-hint={idImg?.imageHint}
+                  />
+                  
+                  {/* Privacy Overlay with Blue Cross-out Line */}
+                  <div className="absolute bottom-[16%] right-[8%] w-[35%] h-[8%] backdrop-blur-xl bg-white/40 rounded-md border border-blue-500/40 shadow-[0_0_15px_rgba(59,130,246,0.3)] pointer-events-none flex flex-col items-center justify-center overflow-hidden">
+                    <div className="absolute inset-0 flex items-center justify-center opacity-60">
+                      <div className="w-[120%] h-[2px] bg-blue-600 -rotate-[8deg] shadow-[0_0_8px_rgba(37,99,235,0.8)]"></div>
+                    </div>
+                    <div className="relative z-10 flex flex-col items-center">
+                      <span className="text-[5px] md:text-[7px] text-blue-800 font-bold uppercase tracking-widest opacity-90 text-center">Privacy Protected</span>
+                      <div className="w-full h-[0.5px] bg-blue-600/30 mt-0.5"></div>
+                    </div>
                   </div>
-                  <div className="relative z-10 flex flex-col items-center">
-                    <span className="text-[5px] md:text-[7px] text-blue-800 font-bold uppercase tracking-widest opacity-90 text-center">Privacy Protected</span>
-                    <div className="w-full h-[0.5px] bg-blue-600/30 mt-0.5"></div>
-                  </div>
+
+                  {/* Subtle Sheen Over Card */}
+                  <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/5 to-white/0 pointer-events-none"></div>
                 </div>
-
-                {/* Subtle Sheen Over Card */}
-                <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/5 to-white/0 pointer-events-none"></div>
               </div>
+            </div>
 
-              {/* Verified Badge Overlay */}
-              <div className="absolute -bottom-6 -right-6 bg-accent text-primary p-4 md:p-5 rounded-[2rem] shadow-2xl border-4 border-primary animate-float z-20 flex items-center gap-3">
-                 <ShieldCheck className="w-6 h-6 md:w-8 md:h-8" />
-                 <div className="hidden md:block">
-                   <p className="text-[8px] font-bold uppercase tracking-widest text-primary/60 leading-none">Status</p>
-                   <p className="text-sm font-bold uppercase tracking-tight">Verified Official</p>
-                 </div>
-              </div>
+            {/* Repositioned Status Badge */}
+            <div className="bg-accent text-primary px-6 py-2 rounded-full shadow-2xl border-2 border-primary animate-fade-in flex items-center gap-3">
+               <ShieldCheck className="w-5 h-5" />
+               <p className="text-xs font-bold uppercase tracking-widest leading-none">Sample Official Identity Card</p>
             </div>
           </div>
         </div>
