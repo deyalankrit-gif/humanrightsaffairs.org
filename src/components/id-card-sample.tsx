@@ -104,14 +104,14 @@ export function IDCardShowcase() {
             </div>
           </div>
 
-          <div className="flex flex-col items-center gap-8 w-full max-w-2xl mx-auto">
+          <div className="flex flex-col items-center gap-10 w-full max-w-2xl mx-auto">
             <div className="relative group perspective-1000 w-full">
               {/* Background Halo Outline - Green */}
               <div className="absolute -inset-10 bg-secondary/25 rounded-full blur-[100px] animate-pulse opacity-50"></div>
               <div className="absolute -inset-4 border border-secondary/20 rounded-[2.5rem] md:rounded-[3rem] pointer-events-none"></div>
               
               <div className="relative transform transition-all duration-700 group-hover:rotate-y-6 group-hover:scale-[1.02]">
-                {/* Outer Card Frame Outline - Enhanced with Green tones */}
+                {/* Outer Card Frame Outline - Green */}
                 <div className="relative aspect-[4/2.5] w-full rounded-[1.5rem] md:rounded-[2rem] overflow-hidden shadow-[0_40px_100px_-20px_rgba(0,0,0,0.6)] border-8 border-secondary/80 bg-white ring-4 ring-secondary/20">
                   <Image 
                     src={idImg?.imageUrl || "/sample i card.jpeg"} 
@@ -138,10 +138,10 @@ export function IDCardShowcase() {
               </div>
             </div>
 
-            {/* Repositioned Status Badge */}
-            <div className="bg-accent text-primary px-6 py-2 rounded-full shadow-2xl border-2 border-primary animate-fade-in flex items-center gap-3">
-               <ShieldCheck className="w-5 h-5" />
-               <p className="text-xs font-bold uppercase tracking-widest leading-none">Sample Official Identity Card</p>
+            {/* Repositioned Status Badge - Smaller and Bouncing */}
+            <div className="bg-accent text-primary px-4 py-1.5 rounded-full shadow-2xl border-2 border-primary animate-bounce flex items-center gap-2 mt-4">
+               <ShieldCheck className="w-4 h-4" />
+               <p className="text-[10px] md:text-xs font-bold uppercase tracking-widest leading-none">Sample Official Identity Card</p>
             </div>
           </div>
         </div>
