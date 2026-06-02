@@ -202,6 +202,7 @@ export default function DonationAnalyticsPage() {
                           <th className="px-8 py-4">Amount</th>
                           <th className="px-8 py-4">Method</th>
                           <th className="px-8 py-4">PAN Ref</th>
+                          <th className="px-8 py-4">Aadhaar Ref</th>
                           <th className="px-8 py-4">Status</th>
                         </tr>
                       </thead>
@@ -212,6 +213,7 @@ export default function DonationAnalyticsPage() {
                             <td className="px-8 py-4 text-emerald-600 font-bold">₹{d.amount}</td>
                             <td className="px-8 py-4 text-slate-500 text-xs">{d.paymentMethod}</td>
                             <td className="px-8 py-4 font-mono text-xs text-slate-400">{d.pan}</td>
+                            <td className="px-8 py-4 font-mono text-xs text-slate-400">{d.aadhaar}</td>
                             <td className="px-8 py-4">
                               <span className="px-3 py-1 bg-emerald-100 text-emerald-600 rounded-full text-[9px] font-bold uppercase tracking-widest">
                                 {d.status}
