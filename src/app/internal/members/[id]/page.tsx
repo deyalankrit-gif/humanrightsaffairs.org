@@ -1,14 +1,18 @@
+
 "use client"
 
 import React, { useEffect, useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase'
-import { doc } from 'firebase/firestore'
+import { doc, updateDoc } from 'firebase/firestore'
 import { AdminNavbar } from '@/components/admin-navbar'
 import { Footer } from '@/components/footer'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { 
   ArrowLeft, 
   User, 
@@ -21,8 +25,13 @@ import {
   Heart,
   FileCheck,
   Loader2,
-  AlertCircle
+  AlertCircle,
+  Edit,
+  Save,
+  X,
+  Camera
 } from 'lucide-react'
+import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'
 
 export default function MemberDetailsPage() {
@@ -31,63 +40,51 @@ export default function MemberDetailsPage() {
   const params = useParams()
   const memberId = params.id as string
   const db = useFirestore()
+  const { toast } = useToast()
+  
+  const [isEditing, setIsEditing] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+  const [editForm, setEditForm] = useState<any>(null)
 
   const docRef = useMemoFirebase(() => {
     if (!db || !memberId || !user) return null;
     return doc(db, 'memberProfiles', memberId);
   }, [db, memberId, user]);
 
-  const { data: firestoreProfile, loading: profileLoading } = useDoc(docRef);
-
-  const demoProfiles: Record<string, any> = {
-    'M001': {
-      memberId: 'M001',
-      name: 'Dhritiman Dey',
-      designation: 'Central Chairman (INDIA) & Founder',
-      email: 'dhritiman.dey@hrat-india.org',
-      phone: '+91 70631 11471',
-      address: 'Human Rights Bhawan, Lodhi Road, New Delhi, 110003',
-      bloodGroup: 'B+',
-      emergencyContact: 'Mrs. Dey (+91 90000 00000)',
-      joiningDate: '12 Jan 2018',
-      status: 'Active',
-      level: 'National Council'
-    },
-    'M004': {
-      memberId: 'M004',
-      name: 'Moumita Saha',
-      designation: 'Chairman (West Bengal) & Founder',
-      email: 'moumita.saha@hrat-india.org',
-      phone: '+91 98765 43210',
-      address: 'Kolkata Zonal Office, Salt Lake, West Bengal',
-      bloodGroup: 'O+',
-      emergencyContact: 'Mr. Saha (+91 91111 22222)',
-      joiningDate: '15 Mar 2018',
-      status: 'Active',
-      level: 'State Chapter'
-    },
-    'M002': {
-      memberId: 'M002',
-      name: 'Adv. Malabika Roy',
-      designation: 'National Legal Advisor',
-      email: 'malabika.roy@hrat-india.org',
-      phone: '+91 91234 56789',
-      address: 'High Court Premises, Kolkata, 700001',
-      bloodGroup: 'A+',
-      emergencyContact: 'Mr. Roy (+91 98888 77777)',
-      joiningDate: '10 Feb 2019',
-      status: 'Active',
-      level: 'National Council'
-    }
-  }
-
-  const profile = firestoreProfile || demoProfiles[memberId]
+  const { data: profile, loading: profileLoading } = useDoc(docRef);
 
   useEffect(() => {
     if (!authLoading && !user) {
       router.push('/internal/login')
     }
   }, [user, authLoading, router])
+
+  useEffect(() => {
+    if (profile) {
+      setEditForm(profile)
+    }
+  }, [profile])
+
+  const handleSave = async () => {
+    if (!docRef) return
+    setIsSaving(true)
+    try {
+      await updateDoc(docRef, editForm)
+      toast({
+        title: "Record Updated",
+        description: "The personnel profile has been securely updated in the database."
+      })
+      setIsEditing(false)
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "System Error",
+        description: error.message
+      })
+    } finally {
+      setIsSaving(false)
+    }
+  }
 
   if (authLoading || !user) {
     return (
@@ -128,28 +125,91 @@ export default function MemberDetailsPage() {
 
       <section className="pt-32 pb-12 bg-slate-900 text-white border-b-8 border-accent/20">
         <div className="container mx-auto px-4">
-          <Link href="/internal/members" className="inline-flex items-center gap-2 text-slate-400 hover:text-accent transition-colors mb-8 font-bold text-xs uppercase tracking-widest">
-            <ArrowLeft className="w-4 h-4" /> Back to Secure Database
-          </Link>
+          <div className="flex items-center justify-between mb-8">
+            <Link href="/internal/members" className="inline-flex items-center gap-2 text-slate-400 hover:text-accent transition-colors font-bold text-xs uppercase tracking-widest">
+              <ArrowLeft className="w-4 h-4" /> Back to Secure Database
+            </Link>
+            <div className="flex gap-4">
+              {isEditing ? (
+                <>
+                  <Button onClick={() => setIsEditing(false)} variant="outline" className="border-white/10 bg-white/5 text-white h-12 rounded-xl">
+                    <X className="w-4 h-4 mr-2" /> Discard
+                  </Button>
+                  <Button onClick={handleSave} disabled={isSaving} className="bg-accent text-primary font-bold h-12 rounded-xl">
+                    {isSaving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />} Save Changes
+                  </Button>
+                </>
+              ) : (
+                <Button onClick={() => setIsEditing(true)} className="bg-white/10 hover:bg-white/20 text-white border border-white/10 h-12 rounded-xl px-8">
+                  <Edit className="w-4 h-4 mr-2" /> Modify Profile
+                </Button>
+              )}
+            </div>
+          </div>
+          
           <div className="flex flex-col md:flex-row items-center gap-10">
-            <div className="w-40 h-40 bg-white/5 rounded-[2.5rem] flex items-center justify-center border-2 border-white/10 shadow-2xl relative">
+            <div className="w-40 h-40 bg-white/5 rounded-[2.5rem] flex items-center justify-center border-2 border-white/10 shadow-2xl relative group">
               <User className="w-20 h-20 text-slate-400" />
               <div className="absolute -bottom-2 -right-2 bg-emerald-500 p-2 rounded-full border-4 border-slate-900 shadow-xl">
                 <ShieldCheck className="w-5 h-5 text-white" />
               </div>
+              {isEditing && (
+                <div className="absolute inset-0 bg-black/60 rounded-[2.5rem] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Camera className="w-8 h-8 text-white" />
+                </div>
+              )}
             </div>
-            <div className="text-center md:text-left space-y-3">
-              <Badge className="bg-accent text-primary font-bold px-4 py-1 uppercase tracking-widest text-[10px] rounded-full">
-                {profile.level || 'Operational Personnel'}
-              </Badge>
-              <h1 className={`text-5xl md:text-6xl font-headline font-bold transition-colors ${isDhritiman ? 'text-secondary' : 'text-white'}`}>
-                {profile.name}
-              </h1>
-              <div className="flex flex-wrap justify-center md:justify-start gap-4 items-center">
-                <p className="text-accent font-bold tracking-[0.2em] uppercase text-xs">{profile.designation}</p>
-                <div className="w-1.5 h-1.5 rounded-full bg-white/20"></div>
-                <p className="text-slate-400 font-mono text-sm tracking-tighter">REF: {profile.memberId || profile.id}</p>
-              </div>
+            
+            <div className="text-center md:text-left space-y-3 flex-1">
+              {isEditing ? (
+                <div className="space-y-4 max-w-xl">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <Label className="text-white">Operational Level</Label>
+                      <Select value={editForm?.level} onValueChange={(val) => setEditForm({...editForm, level: val})}>
+                        <SelectTrigger className="bg-white/5 border-white/10 text-white">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="National">National Council</SelectItem>
+                          <SelectItem value="State">State Chapter</SelectItem>
+                          <SelectItem value="District">District Division</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-white">Full Name</Label>
+                      <Input 
+                        value={editForm?.name} 
+                        onChange={(e) => setEditForm({...editForm, name: e.target.value})}
+                        className="bg-white/5 border-white/10 text-white"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-white">Designation</Label>
+                    <Input 
+                      value={editForm?.designation} 
+                      onChange={(e) => setEditForm({...editForm, designation: e.target.value})}
+                      className="bg-white/5 border-white/10 text-white"
+                    />
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <Badge className="bg-accent text-primary font-bold px-4 py-1 uppercase tracking-widest text-[10px] rounded-full">
+                    {profile.level || 'Operational Personnel'}
+                  </Badge>
+                  <h1 className={`text-5xl md:text-6xl font-headline font-bold transition-colors ${isDhritiman ? 'text-secondary' : 'text-white'}`}>
+                    {profile.name}
+                  </h1>
+                  <div className="flex flex-wrap justify-center md:justify-start gap-4 items-center">
+                    <p className="text-accent font-bold tracking-[0.2em] uppercase text-xs">{profile.designation}</p>
+                    <div className="w-1.5 h-1.5 rounded-full bg-white/20"></div>
+                    <p className="text-slate-400 font-mono text-sm tracking-tighter">REF: {profile.memberId || profile.id}</p>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -169,21 +229,45 @@ export default function MemberDetailsPage() {
                 <CardContent className="p-10 grid md:grid-cols-2 gap-10">
                   <div className="space-y-2">
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Secure Communication</p>
-                    <p className="text-xl font-bold text-primary flex items-center gap-3 break-all">
-                      <Mail className="w-6 h-6 text-accent shrink-0" /> {profile.email}
-                    </p>
+                    {isEditing ? (
+                      <Input 
+                        value={editForm?.email} 
+                        onChange={(e) => setEditForm({...editForm, email: e.target.value})}
+                        className="bg-slate-50 border-slate-100"
+                      />
+                    ) : (
+                      <p className="text-xl font-bold text-primary flex items-center gap-3 break-all">
+                        <Mail className="w-6 h-6 text-accent shrink-0" /> {profile.email}
+                      </p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Dedicated Hotline</p>
-                    <p className="text-xl font-bold text-primary flex items-center gap-3">
-                      <Phone className="w-6 h-6 text-accent shrink-0" /> {profile.phone}
-                    </p>
+                    {isEditing ? (
+                      <Input 
+                        value={editForm?.phone} 
+                        onChange={(e) => setEditForm({...editForm, phone: e.target.value})}
+                        className="bg-slate-50 border-slate-100"
+                      />
+                    ) : (
+                      <p className="text-xl font-bold text-primary flex items-center gap-3">
+                        <Phone className="w-6 h-6 text-accent shrink-0" /> {profile.phone}
+                      </p>
+                    )}
                   </div>
                   <div className="space-y-2 md:col-span-2 pt-6 border-t border-slate-50">
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Registered Operational Base / Address</p>
-                    <p className="text-xl font-bold text-primary flex items-center gap-3 leading-relaxed">
-                      <MapPin className="w-6 h-6 text-accent shrink-0" /> {profile.address}
-                    </p>
+                    {isEditing ? (
+                      <Input 
+                        value={editForm?.address} 
+                        onChange={(e) => setEditForm({...editForm, address: e.target.value})}
+                        className="bg-slate-50 border-slate-100"
+                      />
+                    ) : (
+                      <p className="text-xl font-bold text-primary flex items-center gap-3 leading-relaxed">
+                        <MapPin className="w-6 h-6 text-accent shrink-0" /> {profile.address}
+                      </p>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -197,15 +281,36 @@ export default function MemberDetailsPage() {
                 <CardContent className="p-10 grid md:grid-cols-2 gap-10">
                   <div className="bg-red-50/50 p-8 rounded-[2rem] space-y-2 border border-red-100/50">
                     <p className="text-[10px] font-bold text-red-400 uppercase tracking-widest">Blood Type</p>
-                    <p className="text-4xl font-headline font-bold text-red-600 flex items-center gap-3">
-                      <Droplets className="w-8 h-8" /> {profile.bloodGroup}
-                    </p>
+                    {isEditing ? (
+                      <Select value={editForm?.bloodGroup} onValueChange={(val) => setEditForm({...editForm, bloodGroup: val})}>
+                        <SelectTrigger className="bg-white/50 border-red-100">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map(bg => (
+                            <SelectItem key={bg} value={bg}>{bg}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <p className="text-4xl font-headline font-bold text-red-600 flex items-center gap-3">
+                        <Droplets className="w-8 h-8" /> {profile.bloodGroup || 'Not Set'}
+                      </p>
+                    )}
                   </div>
                   <div className="bg-slate-50 p-8 rounded-[2rem] space-y-2 border border-slate-100">
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Priority Kin / Contact</p>
-                    <p className="text-xl font-bold text-primary flex items-center gap-3">
-                      <Phone className="w-6 h-6 text-accent shrink-0" /> {profile.emergencyContact}
-                    </p>
+                    {isEditing ? (
+                      <Input 
+                        value={editForm?.emergencyContact} 
+                        onChange={(e) => setEditForm({...editForm, emergencyContact: e.target.value})}
+                        className="bg-white/50 border-slate-200"
+                      />
+                    ) : (
+                      <p className="text-xl font-bold text-primary flex items-center gap-3">
+                        <Phone className="w-6 h-6 text-accent shrink-0" /> {profile.emergencyContact || 'Not Set'}
+                      </p>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -222,14 +327,36 @@ export default function MemberDetailsPage() {
                 <div className="space-y-8 relative z-10">
                   <div className="space-y-1">
                     <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Commission Date</p>
-                    <p className="text-3xl font-headline font-bold">{profile.joiningDate}</p>
+                    {isEditing ? (
+                      <Input 
+                        value={editForm?.joiningDate} 
+                        onChange={(e) => setEditForm({...editForm, joiningDate: e.target.value})}
+                        className="bg-white/5 border-white/10 text-white"
+                        placeholder="e.g. 12 Jan 2018"
+                      />
+                    ) : (
+                      <p className="text-3xl font-headline font-bold">{profile.joiningDate || 'Date Unavailable'}</p>
+                    )}
                   </div>
                   <div className="space-y-3">
                     <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Operational Status</p>
-                    <div className="flex items-center gap-3 bg-emerald-500/10 w-fit px-4 py-2 rounded-xl border border-emerald-500/20">
-                      <div className="w-2.5 h-2.5 bg-emerald-400 rounded-full animate-pulse shadow-[0_0_10px_rgba(52,211,153,0.5)]"></div>
-                      <p className="text-lg font-bold text-emerald-400 uppercase tracking-widest">{profile.status}</p>
-                    </div>
+                    {isEditing ? (
+                      <Select value={editForm?.status} onValueChange={(val) => setEditForm({...editForm, status: val})}>
+                        <SelectTrigger className="bg-white/5 border-white/10 text-white">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Active">Active</SelectItem>
+                          <SelectItem value="Inactive">Inactive</SelectItem>
+                          <SelectItem value="Suspended">Suspended</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <div className="flex items-center gap-3 bg-emerald-500/10 w-fit px-4 py-2 rounded-xl border border-emerald-500/20">
+                        <div className="w-2.5 h-2.5 bg-emerald-400 rounded-full animate-pulse shadow-[0_0_10px_rgba(52,211,153,0.5)]"></div>
+                        <p className="text-lg font-bold text-emerald-400 uppercase tracking-widest">{profile.status}</p>
+                      </div>
+                    )}
                   </div>
                   <div className="pt-8 border-t border-white/5">
                     <p className="text-[10px] font-bold text-accent uppercase tracking-[0.2em] mb-3">Verification Hash</p>
@@ -237,9 +364,6 @@ export default function MemberDetailsPage() {
                       #{profile.memberId || profile.id}
                     </div>
                   </div>
-                  <Button className="w-full bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold h-14 rounded-2xl">
-                    Generate Identity Certificate
-                  </Button>
                 </div>
               </Card>
 

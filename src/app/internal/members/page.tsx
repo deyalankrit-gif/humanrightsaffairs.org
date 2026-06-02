@@ -1,9 +1,10 @@
+
 "use client"
 
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useUser, useCollection, useFirestore, useMemoFirebase } from '@/firebase'
-import { collection, query, orderBy } from 'firebase/firestore'
+import { collection, query, orderBy, addDoc, serverTimestamp } from 'firebase/firestore'
 import { AdminNavbar } from '@/components/admin-navbar'
 import { Footer } from '@/components/footer'
 import { Card, CardContent } from '@/components/ui/card'
@@ -18,16 +19,42 @@ import {
   Phone,
   ArrowRight,
   Loader2,
-  FileText
+  FileText,
+  UserPlus,
+  Plus
 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogTrigger,
+  DialogFooter
+} from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'
 
 export default function InternalMembersDirectory() {
   const { user, loading: authLoading } = useUser()
   const router = useRouter()
   const db = useFirestore()
+  const { toast } = useToast()
   const [search, setSearch] = useState('')
+  const [isAdding, setIsAdding] = useState(false)
+  
+  // New member form state
+  const [newMember, setNewMember] = useState({
+    name: '',
+    designation: '',
+    email: '',
+    phone: '',
+    level: 'National',
+    status: 'Active',
+    memberId: ''
+  })
 
   const profilesQuery = useMemoFirebase(() => {
     if (!db || !user) return null;
@@ -36,17 +63,57 @@ export default function InternalMembersDirectory() {
 
   const { data: firestoreProfiles, loading: profilesLoading } = useCollection(profilesQuery);
 
-  const internalMembers = firestoreProfiles && firestoreProfiles.length > 0 ? firestoreProfiles : [
-    { id: 'M001', name: 'Dhritiman Dey', designation: 'Central Chairman', email: 'chairman@hrat.org', phone: '+91 70631 11471', status: 'Active' },
-    { id: 'M004', name: 'Moumita Saha', designation: 'State Chairman (WB)', email: 'moumita.s@hrat.org', phone: '+91 98765 43210', status: 'Active' },
-    { id: 'M002', name: 'Adv. Malabika Roy', designation: 'Legal Advisor', email: 'malabika.roy@hrat.org', phone: '+91 91234 56789', status: 'Active' }
-  ]
+  const internalMembers = firestoreProfiles || []
 
   useEffect(() => {
     if (!authLoading && !user) {
       router.push('/internal/login')
     }
   }, [user, authLoading, router])
+
+  const handleAddMember = async () => {
+    if (!newMember.name || !newMember.email || !newMember.memberId) {
+      toast({
+        variant: "destructive",
+        title: "Validation Error",
+        description: "Name, Email, and Member ID are required."
+      })
+      return
+    }
+
+    setIsAdding(true)
+    try {
+      await addDoc(collection(db, 'memberProfiles'), {
+        ...newMember,
+        createdAt: serverTimestamp(),
+        // Defaults for required display fields if not provided
+        jurisdiction: newMember.level === 'National' ? 'All India' : 'Regional',
+        gender: 'male' // Default
+      })
+      toast({
+        title: "Success",
+        description: "New personnel record established."
+      })
+      setIsAdding(false)
+      // Reset form (simplistic)
+      setNewMember({
+        name: '',
+        designation: '',
+        email: '',
+        phone: '',
+        level: 'National',
+        status: 'Active',
+        memberId: ''
+      })
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "System Error",
+        description: error.message
+      })
+      setIsAdding(false)
+    }
+  }
 
   if (authLoading || !user) {
     return (
@@ -77,11 +144,88 @@ export default function InternalMembersDirectory() {
                 <Lock className="w-3 h-3" />
                 <span>Personnel Directory</span>
               </div>
-              <h1 className="text-4xl md:text-5xl font-headline font-bold">Secure <span className="text-accent italic">Member</span> Data</h1>
+              <h1 className="text-4xl md:text-5xl font-headline font-bold">Secure <span className="text-accent italic">Membership</span> Data</h1>
               <p className="text-slate-400 max-w-xl text-sm">
-                Internal dashboard for verified HRAT personnel to access operational contact protocols.
+                Internal dashboard for verified HRAT personnel to access and manage operational contact protocols.
               </p>
             </div>
+            
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button className="bg-accent text-primary font-bold rounded-2xl h-14 px-8 flex gap-2 hover:bg-accent/90 shadow-xl shadow-accent/20">
+                  <UserPlus className="w-5 h-5" /> Commission New Member
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-md bg-white rounded-[2rem] border-none shadow-2xl">
+                <DialogHeader>
+                  <DialogTitle className="text-2xl font-headline font-bold text-primary">New Personnel Record</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div className="space-y-2">
+                    <Label>Full Name</Label>
+                    <Input 
+                      placeholder="e.g. Animesh Dasgupta" 
+                      value={newMember.name} 
+                      onChange={(e) => setNewMember({...newMember, name: e.target.value})}
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Member ID</Label>
+                      <Input 
+                        placeholder="e.g. M1024" 
+                        value={newMember.memberId} 
+                        onChange={(e) => setNewMember({...newMember, memberId: e.target.value})}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Operational Level</Label>
+                      <Select value={newMember.level} onValueChange={(val) => setNewMember({...newMember, level: val as any})}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select Level" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="National">National</SelectItem>
+                          <SelectItem value="State">State</SelectItem>
+                          <SelectItem value="District">District</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Designation</Label>
+                    <Input 
+                      placeholder="e.g. State Secretary" 
+                      value={newMember.designation} 
+                      onChange={(e) => setNewMember({...newMember, designation: e.target.value})}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Official Email</Label>
+                    <Input 
+                      type="email" 
+                      placeholder="name@hrat-india.org" 
+                      value={newMember.email} 
+                      onChange={(e) => setNewMember({...newMember, email: e.target.value})}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Contact Phone</Label>
+                    <Input 
+                      placeholder="+91 XXXXX XXXXX" 
+                      value={newMember.phone} 
+                      onChange={(e) => setNewMember({...newMember, phone: e.target.value})}
+                    />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button onClick={handleAddMember} disabled={isAdding} className="w-full h-12 rounded-xl bg-primary text-white font-bold">
+                    {isAdding ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Plus className="w-4 h-4 mr-2" />}
+                    Confirm Commissioning
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
       </section>
@@ -98,9 +242,6 @@ export default function InternalMembersDirectory() {
                 onChange={(e) => setSearch(e.target.value)}
               />
             </div>
-            <Button variant="outline" className="h-14 px-8 rounded-2xl border-slate-200 font-bold text-primary flex gap-2">
-              <FileText className="w-5 h-5" /> Export Logs
-            </Button>
           </div>
         </div>
       </section>
@@ -121,7 +262,7 @@ export default function InternalMembersDirectory() {
                       <div className="p-8 bg-slate-50 md:w-56 text-center border-r border-slate-100 flex flex-col items-center justify-center shrink-0">
                          <Hash className="w-5 h-5 text-accent mb-2" />
                          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-1">RECORD ID</span>
-                         <span className="text-2xl font-headline font-bold text-primary tracking-tighter">{member.id || member.memberId}</span>
+                         <span className="text-2xl font-headline font-bold text-primary tracking-tighter">{member.memberId || member.id}</span>
                       </div>
                       <div className="flex-1 p-8 grid lg:grid-cols-3 gap-8 items-center">
                         <div className="space-y-1">
@@ -137,7 +278,7 @@ export default function InternalMembersDirectory() {
                             <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center group-hover:bg-accent/10 transition-colors">
                               <Mail className="w-4 h-4 text-accent" />
                             </div>
-                            <span className="text-slate-600 font-bold">{member.email}</span>
+                            <span className="text-slate-600 font-bold truncate max-w-[150px]">{member.email}</span>
                           </div>
                           <div className="flex items-center gap-3 text-sm">
                             <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center group-hover:bg-accent/10 transition-colors">
@@ -150,7 +291,7 @@ export default function InternalMembersDirectory() {
                           <Badge className="bg-emerald-100 text-emerald-600 border-none px-6 py-2 font-bold uppercase tracking-widest text-[10px] rounded-full">
                             {member.status || 'Active'}
                           </Badge>
-                          <Link href={`/internal/members/${member.id || member.memberId}`}>
+                          <Link href={`/internal/members/${member.id}`}>
                             <Button className="bg-primary text-white hover:bg-accent rounded-2xl h-12 px-6 group/btn transition-all flex gap-2">
                               Full Profile <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
                             </Button>
