@@ -6,7 +6,7 @@ import Image from 'next/image'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 import { PlaceHolderImages } from '@/lib/placeholder-images'
-import { Search, UserX, AlertTriangle, ShieldAlert, Calendar, Hash, Info, Plus, Edit, Trash2, Loader2 } from 'lucide-react'
+import { Search, UserX, AlertTriangle, ShieldAlert, Calendar, Hash, Info, Plus, Edit, Trash2, Loader2, Upload } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -74,8 +74,24 @@ export default function TerminatedMembersPage() {
     reason: '',
     status: 'Revoked' as const,
     gender: 'male' as const,
-    imageId: 'male-avatar'
+    imageId: ''
   })
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, isEdit: boolean) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        const dataUri = reader.result as string
+        if (isEdit) {
+          setEditMember({ ...editMember, imageId: dataUri })
+        } else {
+          setNewMember({ ...newMember, imageId: dataUri })
+        }
+      }
+      reader.readAsDataURL(file)
+    }
+  }
 
   const handleAdd = async () => {
     if (!newMember.name || !newMember.terminationDate) return
@@ -86,7 +102,7 @@ export default function TerminatedMembersPage() {
         createdAt: serverTimestamp()
       })
       toast({ title: "Entry Added", description: "Termination notice has been published." })
-      setNewMember({ name: '', designation: '', terminationDate: '', reason: '', status: 'Revoked', gender: 'male', imageId: 'male-avatar' })
+      setNewMember({ name: '', designation: '', terminationDate: '', reason: '', status: 'Revoked', gender: 'male', imageId: '' })
     } catch (e: any) {
       toast({ variant: "destructive", title: "Error", description: e.message })
     } finally {
@@ -147,11 +163,33 @@ export default function TerminatedMembersPage() {
                   <Plus className="w-6 h-6" /> Add Termination Entry
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-md bg-white rounded-[2rem]">
+              <DialogContent className="max-w-md bg-white rounded-[2rem] max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>New Termination Notice</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4 py-4">
+                  <div className="space-y-2">
+                    <Label>Profile Picture</Label>
+                    <div className="flex flex-col items-center gap-4 p-4 border-2 border-dashed rounded-2xl">
+                      <div className="relative w-24 h-24 bg-slate-100 rounded-2xl overflow-hidden grayscale">
+                        <Image 
+                          src={newMember.imageId?.startsWith('data:') ? newMember.imageId : (newMember.gender === 'female' ? '/dummy w.png' : '/dummy m.png')} 
+                          alt="Preview" 
+                          fill 
+                          className="object-cover"
+                        />
+                      </div>
+                      <Button variant="outline" className="w-full relative h-12 rounded-xl">
+                        <Upload className="w-4 h-4 mr-2" /> Upload Photo
+                        <input 
+                          type="file" 
+                          accept="image/*" 
+                          className="absolute inset-0 opacity-0 cursor-pointer"
+                          onChange={(e) => handleFileChange(e, false)}
+                        />
+                      </Button>
+                    </div>
+                  </div>
                   <div className="space-y-2">
                     <Label>Full Name</Label>
                     <Input value={newMember.name} onChange={e => setNewMember({...newMember, name: e.target.value})} placeholder="e.g. Subhashis Ganguly" />
@@ -178,7 +216,7 @@ export default function TerminatedMembersPage() {
                   </div>
                 </div>
                 <DialogFooter>
-                  <Button onClick={handleAdd} disabled={isActionLoading} className="w-full bg-red-500 hover:bg-red-600">Publish Notice</Button>
+                  <Button onClick={handleAdd} disabled={isActionLoading} className="w-full bg-red-500 hover:bg-red-600 text-white h-12 rounded-xl">Publish Notice</Button>
                 </DialogFooter>
               </DialogContent>
             </Dialog>
@@ -223,6 +261,7 @@ export default function TerminatedMembersPage() {
                 {filtered.length > 0 ? (
                   filtered.map((member) => {
                     const fallback = member.gender === 'female' ? '/dummy w.png' : '/dummy m.png'
+                    const displayImg = member.imageId?.startsWith('data:') ? member.imageId : (PlaceHolderImages.find(i => i.id === member.imageId)?.imageUrl || fallback)
                     return (
                       <Card key={member.id} className="group border-none shadow-sm hover:shadow-xl transition-all duration-500 rounded-[2.5rem] overflow-hidden bg-white relative">
                         <CardContent className="p-0">
@@ -230,7 +269,7 @@ export default function TerminatedMembersPage() {
                             <div className="p-8 bg-slate-50 md:w-48 flex flex-col items-center justify-center border-r border-slate-100 text-center shrink-0">
                               <div className="relative w-24 h-24 rounded-2xl overflow-hidden mb-3 grayscale opacity-70 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-700">
                                 <Image 
-                                  src={member.imageId ? PlaceHolderImages.find(i => i.id === member.imageId)?.imageUrl || fallback : fallback} 
+                                  src={displayImg} 
                                   alt={member.name} 
                                   fill 
                                   className="object-cover"
@@ -279,15 +318,39 @@ export default function TerminatedMembersPage() {
                                   <Edit className="w-4 h-4" />
                                 </Button>
                               </DialogTrigger>
-                              <DialogContent className="max-w-md">
+                              <DialogContent className="max-w-md bg-white rounded-[2rem] max-h-[90vh] overflow-y-auto">
                                 <DialogHeader><DialogTitle>Edit Notice</DialogTitle></DialogHeader>
                                 {editMember && (
                                   <div className="space-y-4 py-4">
+                                    <div className="space-y-2">
+                                      <Label>Profile Picture</Label>
+                                      <div className="flex flex-col items-center gap-4 p-4 border-2 border-dashed rounded-2xl">
+                                        <div className="relative w-24 h-24 bg-slate-100 rounded-2xl overflow-hidden grayscale">
+                                          <Image 
+                                            src={editMember.imageId?.startsWith('data:') ? editMember.imageId : (editMember.gender === 'female' ? '/dummy w.png' : '/dummy m.png')} 
+                                            alt="Preview" 
+                                            fill 
+                                            className="object-cover"
+                                          />
+                                        </div>
+                                        <Button variant="outline" className="w-full relative h-12 rounded-xl">
+                                          <Upload className="w-4 h-4 mr-2" /> Change Photo
+                                          <input 
+                                            type="file" 
+                                            accept="image/*" 
+                                            className="absolute inset-0 opacity-0 cursor-pointer"
+                                            onChange={(e) => handleFileChange(e, true)}
+                                          />
+                                        </Button>
+                                      </div>
+                                    </div>
                                     <Input value={editMember.name} onChange={e => setEditMember({...editMember, name: e.target.value})} />
                                     <Input value={editMember.designation} onChange={e => setEditMember({...editMember, designation: e.target.value})} />
                                     <Input value={editMember.terminationDate} onChange={e => setEditMember({...editMember, terminationDate: e.target.value})} />
                                     <Textarea value={editMember.reason} onChange={e => setEditMember({...editMember, reason: e.target.value})} />
-                                    <Button onClick={handleUpdate} className="w-full bg-primary text-white">Save Changes</Button>
+                                    <Button onClick={handleUpdate} disabled={isActionLoading} className="w-full bg-primary text-white h-12 rounded-xl">
+                                      {isActionLoading ? <Loader2 className="animate-spin mr-2" /> : "Save Changes"}
+                                    </Button>
                                   </div>
                                 )}
                               </DialogContent>
@@ -298,12 +361,12 @@ export default function TerminatedMembersPage() {
                                   <Trash2 className="w-4 h-4" />
                                 </Button>
                               </AlertDialogTrigger>
-                              <AlertDialogContent>
+                              <AlertDialogContent className="rounded-[2rem]">
                                 <AlertDialogHeader><AlertDialogTitle>Remove Notice?</AlertDialogTitle></AlertDialogHeader>
-                                <AlertDialogFooter>
-                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                  <AlertDialogAction onClick={() => handleDelete(member.id)} className="bg-red-500">Remove</AlertDialogAction>
-                                </AlertDialogFooter>
+                                <div className="flex justify-end gap-3 mt-4">
+                                  <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+                                  <AlertDialogAction onClick={() => handleDelete(member.id)} className="bg-red-500 rounded-xl border-none">Remove</AlertDialogAction>
+                                </div>
                               </AlertDialogContent>
                             </AlertDialog>
                           </div>

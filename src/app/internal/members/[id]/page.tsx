@@ -29,10 +29,13 @@ import {
   Edit,
   Save,
   X,
-  Camera
+  Camera,
+  Upload
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'
+import Image from 'next/image'
+import { PlaceHolderImages } from '@/lib/placeholder-images'
 
 export default function MemberDetailsPage() {
   const { user, loading: authLoading } = useUser()
@@ -64,6 +67,17 @@ export default function MemberDetailsPage() {
       setEditForm(profile)
     }
   }, [profile])
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setEditForm({ ...editForm, imageId: reader.result as string })
+      }
+      reader.readAsDataURL(file)
+    }
+  }
 
   const handleSave = async () => {
     if (!docRef) return
@@ -117,7 +131,10 @@ export default function MemberDetailsPage() {
     )
   }
 
-  const isDhritiman = profile.name === 'Dhritiman Dey'
+  const fallback = profile.gender === 'female' ? '/dummy w.png' : '/dummy m.png'
+  const displayImg = isEditing 
+    ? (editForm?.imageId?.startsWith('data:') ? editForm.imageId : (PlaceHolderImages.find(i => i.id === editForm?.imageId)?.imageUrl || fallback))
+    : (profile.imageId?.startsWith('data:') ? profile.imageId : (PlaceHolderImages.find(i => i.id === profile.imageId)?.imageUrl || fallback))
 
   return (
     <main className="min-h-screen bg-slate-50">
@@ -148,14 +165,21 @@ export default function MemberDetailsPage() {
           </div>
           
           <div className="flex flex-col md:flex-row items-center gap-10">
-            <div className="w-40 h-40 bg-white/5 rounded-[2.5rem] flex items-center justify-center border-2 border-white/10 shadow-2xl relative group">
-              <User className="w-20 h-20 text-slate-400" />
-              <div className="absolute -bottom-2 -right-2 bg-emerald-500 p-2 rounded-full border-4 border-slate-900 shadow-xl">
+            <div className="w-40 h-40 bg-white/5 rounded-[2.5rem] flex items-center justify-center border-2 border-white/10 shadow-2xl relative group overflow-hidden">
+              <Image src={displayImg} alt={profile.name} fill className="object-cover" />
+              <div className="absolute -bottom-2 -right-2 bg-emerald-500 p-2 rounded-full border-4 border-slate-900 shadow-xl z-20">
                 <ShieldCheck className="w-5 h-5 text-white" />
               </div>
               {isEditing && (
-                <div className="absolute inset-0 bg-black/60 rounded-[2.5rem] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Camera className="w-8 h-8 text-white" />
+                <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                  <Camera className="w-8 h-8 text-white mb-2" />
+                  <p className="text-[10px] text-white font-bold uppercase tracking-widest">Change Photo</p>
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    className="absolute inset-0 opacity-0 cursor-pointer"
+                    onChange={handleFileChange}
+                  />
                 </div>
               )}
             </div>
@@ -200,7 +224,7 @@ export default function MemberDetailsPage() {
                   <Badge className="bg-accent text-primary font-bold px-4 py-1 uppercase tracking-widest text-[10px] rounded-full">
                     {profile.level || 'Operational Personnel'}
                   </Badge>
-                  <h1 className={`text-5xl md:text-6xl font-headline font-bold transition-colors ${isDhritiman ? 'text-secondary' : 'text-white'}`}>
+                  <h1 className="text-5xl md:text-6xl font-headline font-bold text-white transition-colors">
                     {profile.name}
                   </h1>
                   <div className="flex flex-wrap justify-center md:justify-start gap-4 items-center">

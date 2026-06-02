@@ -6,7 +6,7 @@ import Image from 'next/image'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 import { PlaceHolderImages } from '@/lib/placeholder-images'
-import { Calendar, MapPin, Search, Filter, ArrowRight, Camera, Plus, Edit, Trash2, AlertTriangle, Loader2 } from 'lucide-react'
+import { Calendar, MapPin, Search, Filter, ArrowRight, Camera, Plus, Edit, Trash2, AlertTriangle, Loader2, Upload } from 'lucide-react'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -28,7 +28,6 @@ import {
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
-  AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
@@ -74,6 +73,22 @@ export default function EventsPage() {
     description: '',
     imageId: 'event-legal-aid'
   })
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, isEdit: boolean) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        const dataUri = reader.result as string
+        if (isEdit) {
+          setEditEvent({ ...editEvent, imageId: dataUri })
+        } else {
+          setNewEvent({ ...newEvent, imageId: dataUri })
+        }
+      }
+      reader.readAsDataURL(file)
+    }
+  }
 
   const handleAddEvent = async () => {
     if (!newEvent.title || !newEvent.date || !newEvent.location) return
@@ -145,12 +160,36 @@ export default function EventsPage() {
                     <Plus className="w-6 h-6" /> Create New Event Entry
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-md bg-white rounded-[2rem]">
+                <DialogContent className="max-w-md bg-white rounded-[2rem] max-h-[90vh] overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle>New Event Entry</DialogTitle>
                     <DialogDescription>Add a new highlight to the mission gallery.</DialogDescription>
                   </DialogHeader>
                   <div className="space-y-4 py-4">
+                    <div className="space-y-2">
+                      <Label>Event Picture</Label>
+                      <div className="flex flex-col items-center gap-4 p-4 border-2 border-dashed rounded-2xl">
+                        {newEvent.imageId && (
+                          <div className="relative w-full aspect-video rounded-xl overflow-hidden">
+                            <Image 
+                              src={newEvent.imageId.startsWith('data:') ? newEvent.imageId : (PlaceHolderImages.find(i => i.id === newEvent.imageId)?.imageUrl || '')} 
+                              alt="Preview" 
+                              fill 
+                              className="object-cover"
+                            />
+                          </div>
+                        )}
+                        <Button variant="outline" className="w-full relative h-12 rounded-xl">
+                          <Upload className="w-4 h-4 mr-2" /> Upload Photo
+                          <input 
+                            type="file" 
+                            accept="image/*" 
+                            className="absolute inset-0 opacity-0 cursor-pointer"
+                            onChange={(e) => handleFileChange(e, false)}
+                          />
+                        </Button>
+                      </div>
+                    </div>
                     <div className="space-y-2">
                       <Label>Event Title</Label>
                       <Input value={newEvent.title} onChange={e => setNewEvent({...newEvent, title: e.target.value})} placeholder="e.g. Legal Aid Camp" />
@@ -230,12 +269,13 @@ export default function EventsPage() {
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {filteredEvents.length > 0 ? (
                 filteredEvents.map((event) => {
-                  const img = PlaceHolderImages.find(i => i.id === event.imageId)
+                  const isCustomImg = event.imageId?.startsWith('data:')
+                  const img = isCustomImg ? event.imageId : PlaceHolderImages.find(i => i.id === event.imageId)?.imageUrl
                   return (
                     <Card key={event.id} className="group border-none shadow-sm hover:shadow-2xl transition-all duration-500 rounded-[2rem] overflow-hidden bg-white relative">
                       <div className="relative aspect-[4/3] overflow-hidden">
                         <Image 
-                          src={img?.imageUrl || 'https://picsum.photos/seed/event/800/600'} 
+                          src={img || 'https://picsum.photos/seed/event/800/600'} 
                           alt={event.title} 
                           fill 
                           className="object-cover group-hover:scale-110 transition-transform duration-700"
@@ -254,12 +294,34 @@ export default function EventsPage() {
                                   <Edit className="w-4 h-4" />
                                 </Button>
                               </DialogTrigger>
-                              <DialogContent className="max-w-md bg-white rounded-[2rem]">
+                              <DialogContent className="max-w-md bg-white rounded-[2rem] max-h-[90vh] overflow-y-auto">
                                 <DialogHeader>
                                   <DialogTitle>Modify Event</DialogTitle>
                                 </DialogHeader>
                                 {editEvent && (
                                   <div className="space-y-4 py-4">
+                                    <div className="space-y-2">
+                                      <Label>Event Picture</Label>
+                                      <div className="flex flex-col items-center gap-4 p-4 border-2 border-dashed rounded-2xl">
+                                        <div className="relative w-full aspect-video rounded-xl overflow-hidden">
+                                          <Image 
+                                            src={editEvent.imageId?.startsWith('data:') ? editEvent.imageId : (PlaceHolderImages.find(i => i.id === editEvent.imageId)?.imageUrl || 'https://picsum.photos/seed/event/800/600')} 
+                                            alt="Preview" 
+                                            fill 
+                                            className="object-cover"
+                                          />
+                                        </div>
+                                        <Button variant="outline" className="w-full relative h-12 rounded-xl">
+                                          <Upload className="w-4 h-4 mr-2" /> Change Photo
+                                          <input 
+                                            type="file" 
+                                            accept="image/*" 
+                                            className="absolute inset-0 opacity-0 cursor-pointer"
+                                            onChange={(e) => handleFileChange(e, true)}
+                                          />
+                                        </Button>
+                                      </div>
+                                    </div>
                                     <div className="space-y-2">
                                       <Label>Event Title</Label>
                                       <Input value={editEvent.title} onChange={e => setEditEvent({...editEvent, title: e.target.value})} />
@@ -287,7 +349,9 @@ export default function EventsPage() {
                                       <Label>Description</Label>
                                       <Textarea value={editEvent.description} onChange={e => setEditEvent({...editEvent, description: e.target.value})} />
                                     </div>
-                                    <Button onClick={handleUpdateEvent} className="w-full mt-4 h-12 rounded-xl">Save Changes</Button>
+                                    <Button onClick={handleUpdateEvent} disabled={isActionLoading} className="w-full mt-4 h-12 rounded-xl">
+                                      {isActionLoading ? <Loader2 className="animate-spin mr-2" /> : "Save Changes"}
+                                    </Button>
                                   </div>
                                 )}
                               </DialogContent>
@@ -304,10 +368,10 @@ export default function EventsPage() {
                                   <AlertDialogTitle>Delete Record?</AlertDialogTitle>
                                   <AlertDialogDescription>This will permanently remove this event from the public gallery.</AlertDialogDescription>
                                 </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                  <AlertDialogAction onClick={() => handleDeleteEvent(event.id)} className="bg-red-500 hover:bg-red-600">Delete</AlertDialogAction>
-                                </AlertDialogFooter>
+                                <div className="flex justify-end gap-3 mt-4">
+                                  <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+                                  <AlertDialogAction onClick={() => handleDeleteEvent(event.id)} className="bg-red-500 hover:bg-red-600 rounded-xl border-none">Delete</AlertDialogAction>
+                                </div>
                               </AlertDialogContent>
                             </AlertDialog>
                           </div>

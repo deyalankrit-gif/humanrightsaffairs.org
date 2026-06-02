@@ -6,7 +6,7 @@ import Image from 'next/image'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 import { PlaceHolderImages } from '@/lib/placeholder-images'
-import { Users, Shield, Award, ChevronDown, Plus, Edit, Trash2, Loader2 } from 'lucide-react'
+import { Users, Shield, Award, ChevronDown, Plus, Edit, Trash2, Loader2, Upload, Camera } from 'lucide-react'
 import { useCollection, useFirestore, useMemoFirebase, useUser } from '@/firebase'
 import { collection, query, orderBy, addDoc, deleteDoc, doc, updateDoc, serverTimestamp } from 'firebase/firestore'
 import { Button } from '@/components/ui/button'
@@ -36,7 +36,7 @@ type Leader = {
 
 function LeaderCard({ leader, variant = "default", isAdmin, onEdit, onDelete }: { leader: Leader, variant?: "large" | "default" | "small", isAdmin?: boolean, onEdit?: (l: Leader) => void, onDelete?: (id: string) => void }) {
   const fallback = leader.gender === 'female' ? '/dummy w.png' : '/dummy m.png'
-  const img = leader.imageId ? PlaceHolderImages.find(i => i.id === leader.imageId)?.imageUrl || fallback : fallback
+  const img = leader.imageId?.startsWith('data:') ? leader.imageId : (PlaceHolderImages.find(i => i.id === leader.imageId)?.imageUrl || fallback)
   
   const sizeClasses = {
     large: "w-48 h-60 md:w-64 md:h-80",
@@ -44,7 +44,6 @@ function LeaderCard({ leader, variant = "default", isAdmin, onEdit, onDelete }: 
     small: "w-24 h-32 md:w-32 md:h-40"
   }
 
-  const isFounder = leader.title.includes("Founder")
   const isChairman = leader.title.includes("Chairman")
 
   return (
@@ -69,7 +68,7 @@ function LeaderCard({ leader, variant = "default", isAdmin, onEdit, onDelete }: 
         <h4 className={`font-headline font-bold text-primary ${variant === 'large' || isChairman ? 'text-lg md:text-xl lg:text-2xl' : 'text-sm md:text-base'}`}>
           {leader.name}
         </h4>
-        <p className={`text-accent font-bold uppercase tracking-widest ${variant === 'large' || isFounder ? 'text-[10px] md:text-xs' : 'text-[8px] md:text-[10px]'}`}>
+        <p className={`text-accent font-bold uppercase tracking-widest ${variant === 'large' || leader.title.includes("Founder") ? 'text-[10px] md:text-xs' : 'text-[8px] md:text-[10px]'}`}>
           {leader.title}
         </p>
       </div>
@@ -100,6 +99,22 @@ export default function LeadershipPage() {
     parentRegion: '',
     imageId: 'male-avatar'
   })
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, isEdit: boolean) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        const dataUri = reader.result as string
+        if (isEdit) {
+          setEditLeader({ ...editLeader, imageId: dataUri })
+        } else {
+          setNewLeader({ ...newLeader, imageId: dataUri })
+        }
+      }
+      reader.readAsDataURL(file)
+    }
+  }
 
   const handleAdd = async () => {
     if (!newLeader.name || !newLeader.title) return
@@ -167,9 +182,31 @@ export default function LeadershipPage() {
                   <Plus className="w-5 h-5" /> Commission Leadership Member
                 </Button>
               </DialogTrigger>
-              <DialogContent className="bg-white rounded-[2rem]">
+              <DialogContent className="bg-white rounded-[2rem] max-h-[90vh] overflow-y-auto">
                 <DialogHeader><DialogTitle>New Leader Profile</DialogTitle></DialogHeader>
                 <div className="space-y-4 py-4">
+                  <div className="space-y-2">
+                    <Label>Profile Picture</Label>
+                    <div className="flex flex-col items-center gap-4 p-4 border-2 border-dashed rounded-2xl">
+                      <div className="relative w-32 h-40 bg-slate-100 rounded-xl overflow-hidden border">
+                        <Image 
+                          src={newLeader.imageId?.startsWith('data:') ? newLeader.imageId : (newLeader.gender === 'female' ? '/dummy w.png' : '/dummy m.png')} 
+                          alt="Preview" 
+                          fill 
+                          className="object-cover"
+                        />
+                      </div>
+                      <Button variant="outline" className="w-full relative h-12 rounded-xl">
+                        <Upload className="w-4 h-4 mr-2" /> Upload Photo
+                        <input 
+                          type="file" 
+                          accept="image/*" 
+                          className="absolute inset-0 opacity-0 cursor-pointer"
+                          onChange={(e) => handleFileChange(e, false)}
+                        />
+                      </Button>
+                    </div>
+                  </div>
                   <Input value={newLeader.name} onChange={e => setNewLeader({...newLeader, name: e.target.value})} placeholder="Full Name" />
                   <Input value={newLeader.title} onChange={e => setNewLeader({...newLeader, title: e.target.value})} placeholder="Designation" />
                   <div className="grid grid-cols-2 gap-4">
@@ -274,10 +311,32 @@ export default function LeadershipPage() {
 
       {/* Edit Leader Dialog */}
       <Dialog open={!!editLeader} onOpenChange={(open) => !open && setEditLeader(null)}>
-        <DialogContent className="bg-white rounded-[2rem]">
+        <DialogContent className="bg-white rounded-[2rem] max-h-[90vh] overflow-y-auto">
           <DialogHeader><DialogTitle>Edit Leader Profile</DialogTitle></DialogHeader>
           {editLeader && (
             <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Profile Picture</Label>
+                <div className="flex flex-col items-center gap-4 p-4 border-2 border-dashed rounded-2xl">
+                  <div className="relative w-32 h-40 bg-slate-100 rounded-xl overflow-hidden border">
+                    <Image 
+                      src={editLeader.imageId?.startsWith('data:') ? editLeader.imageId : (editLeader.gender === 'female' ? '/dummy w.png' : '/dummy m.png')} 
+                      alt="Preview" 
+                      fill 
+                      className="object-cover"
+                    />
+                  </div>
+                  <Button variant="outline" className="w-full relative h-12 rounded-xl">
+                    <Upload className="w-4 h-4 mr-2" /> Change Photo
+                    <input 
+                      type="file" 
+                      accept="image/*" 
+                      className="absolute inset-0 opacity-0 cursor-pointer"
+                      onChange={(e) => handleFileChange(e, true)}
+                    />
+                  </Button>
+                </div>
+              </div>
               <Input value={editLeader.name} onChange={e => setEditLeader({...editLeader, name: e.target.value})} placeholder="Name" />
               <Input value={editLeader.title} onChange={e => setEditLeader({...editLeader, title: e.target.value})} placeholder="Title" />
               <div className="grid grid-cols-2 gap-4">

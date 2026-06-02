@@ -18,7 +18,8 @@ import {
   Plus, 
   Edit, 
   Trash2, 
-  AlertTriangle 
+  AlertTriangle,
+  Upload
 } from 'lucide-react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -86,16 +87,17 @@ export default function MembersPage() {
   const db = useFirestore()
   const { toast } = useToast()
 
-  // New member form state
   const [newMember, setNewMember] = useState({
     name: '',
     designation: '',
     email: '',
     phone: '',
-    level: 'National',
+    level: 'National' as const,
     status: 'Active',
     memberId: '',
-    stateName: ''
+    stateName: '',
+    gender: 'male' as 'male' | 'female',
+    imageId: ''
   })
 
   useEffect(() => {
@@ -111,6 +113,17 @@ export default function MembersPage() {
 
   const isAdmin = user?.email === 'deydhritiman@gmail.com'
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setNewMember({ ...newMember, imageId: reader.result as string })
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
   const handleLevelClick = (level: string) => {
     setLevelFilter(level)
     setSelectedState(null)
@@ -124,26 +137,15 @@ export default function MembersPage() {
   const handleDelete = async (id: string) => {
     try {
       await deleteDoc(doc(db, 'memberProfiles', id))
-      toast({
-        title: "Record Deleted",
-        description: "The personnel profile has been removed from the directory."
-      })
+      toast({ title: "Record Deleted", description: "The personnel profile has been removed." })
     } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Deletion Failed",
-        description: error.message
-      })
+      toast({ variant: "destructive", title: "Deletion Failed", description: error.message })
     }
   }
 
   const handleAddMember = async () => {
     if (!newMember.name || !newMember.email || !newMember.memberId) {
-      toast({
-        variant: "destructive",
-        title: "Validation Error",
-        description: "Name, Email, and Member ID are required."
-      })
+      toast({ variant: "destructive", title: "Validation Error", description: "Name, Email, and Member ID are required." })
       return
     }
 
@@ -153,27 +155,11 @@ export default function MembersPage() {
         ...newMember,
         createdAt: serverTimestamp(),
       })
-      toast({
-        title: "Success",
-        description: "New personnel record established."
-      })
+      toast({ title: "Success", description: "New personnel record established." })
       setIsAdding(false)
-      setNewMember({
-        name: '',
-        designation: '',
-        email: '',
-        phone: '',
-        level: 'National',
-        status: 'Active',
-        memberId: '',
-        stateName: ''
-      })
+      setNewMember({ name: '', designation: '', email: '', phone: '', level: 'National', status: 'Active', memberId: '', stateName: '', gender: 'male', imageId: '' })
     } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "System Error",
-        description: error.message
-      })
+      toast({ variant: "destructive", title: "System Error", description: error.message })
       setIsAdding(false)
     }
   }
@@ -187,11 +173,9 @@ export default function MembersPage() {
       m.memberId?.toLowerCase().includes(search.toLowerCase());
     
     let matchesLevel = levelFilter === "All" || m.level === levelFilter;
-    
     if (levelFilter === "State" && selectedState) {
       matchesLevel = m.level === "State" && m.stateName === selectedState;
     }
-
     return matchesSearch && matchesLevel;
   })
 
@@ -220,35 +204,46 @@ export default function MembersPage() {
                   <Plus className="w-6 h-6" /> Commission New Membership
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-md bg-white rounded-[2rem] border-none shadow-2xl">
+              <DialogContent className="max-w-md bg-white rounded-[2rem] border-none shadow-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle className="text-2xl font-headline font-bold text-primary">New Personnel Record</DialogTitle>
-                  <DialogDescription>Add a new verified member to the public directory.</DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4 py-4">
                   <div className="space-y-2">
+                    <Label>Profile Picture</Label>
+                    <div className="flex flex-col items-center gap-4 p-4 border-2 border-dashed rounded-2xl">
+                      <div className="relative w-32 h-32 bg-slate-100 rounded-full overflow-hidden border">
+                        <Image 
+                          src={newMember.imageId?.startsWith('data:') ? newMember.imageId : (newMember.gender === 'female' ? '/dummy w.png' : '/dummy m.png')} 
+                          alt="Preview" 
+                          fill 
+                          className="object-cover"
+                        />
+                      </div>
+                      <Button variant="outline" className="w-full relative h-12 rounded-xl">
+                        <Upload className="w-4 h-4 mr-2" /> Upload Photo
+                        <input 
+                          type="file" 
+                          accept="image/*" 
+                          className="absolute inset-0 opacity-0 cursor-pointer"
+                          onChange={handleFileChange}
+                        />
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
                     <Label>Full Name</Label>
-                    <Input 
-                      placeholder="e.g. Animesh Dasgupta" 
-                      value={newMember.name} 
-                      onChange={(e) => setNewMember({...newMember, name: e.target.value})}
-                    />
+                    <Input placeholder="e.g. Animesh Dasgupta" value={newMember.name} onChange={(e) => setNewMember({...newMember, name: e.target.value})} />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label>Member ID</Label>
-                      <Input 
-                        placeholder="e.g. M1024" 
-                        value={newMember.memberId} 
-                        onChange={(e) => setNewMember({...newMember, memberId: e.target.value})}
-                      />
+                      <Input placeholder="e.g. M1024" value={newMember.memberId} onChange={(e) => setNewMember({...newMember, memberId: e.target.value})} />
                     </div>
                     <div className="space-y-2">
                       <Label>Operational Level</Label>
                       <Select value={newMember.level} onValueChange={(val) => setNewMember({...newMember, level: val as any})}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select Level" />
-                        </SelectTrigger>
+                        <SelectTrigger><SelectValue placeholder="Select Level" /></SelectTrigger>
                         <SelectContent>
                           <SelectItem value="National">National</SelectItem>
                           <SelectItem value="State">State</SelectItem>
@@ -261,9 +256,7 @@ export default function MembersPage() {
                     <div className="space-y-2">
                       <Label>State Chapter</Label>
                       <Select value={newMember.stateName} onValueChange={(val) => setNewMember({...newMember, stateName: val})}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select State" />
-                        </SelectTrigger>
+                        <SelectTrigger><SelectValue placeholder="Select State" /></SelectTrigger>
                         <SelectContent>
                           {chapters.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                         </SelectContent>
@@ -272,28 +265,37 @@ export default function MembersPage() {
                   )}
                   <div className="space-y-2">
                     <Label>Designation</Label>
-                    <Input 
-                      placeholder="e.g. State Secretary" 
-                      value={newMember.designation} 
-                      onChange={(e) => setNewMember({...newMember, designation: e.target.value})}
-                    />
+                    <Input placeholder="e.g. State Secretary" value={newMember.designation} onChange={(e) => setNewMember({...newMember, designation: e.target.value})} />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Gender</Label>
+                      <Select value={newMember.gender} onValueChange={(val: any) => setNewMember({...newMember, gender: val})}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="male">Male</SelectItem>
+                          <SelectItem value="female">Female</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Status</Label>
+                      <Select value={newMember.status} onValueChange={(val) => setNewMember({...newMember, status: val})}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Active">Active</SelectItem>
+                          <SelectItem value="Inactive">Inactive</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
                   <div className="space-y-2">
                     <Label>Official Email</Label>
-                    <Input 
-                      type="email" 
-                      placeholder="name@hrat-india.org" 
-                      value={newMember.email} 
-                      onChange={(e) => setNewMember({...newMember, email: e.target.value})}
-                    />
+                    <Input type="email" placeholder="name@hrat-india.org" value={newMember.email} onChange={(e) => setNewMember({...newMember, email: e.target.value})} />
                   </div>
                   <div className="space-y-2">
                     <Label>Contact Phone</Label>
-                    <Input 
-                      placeholder="+91 XXXXX XXXXX" 
-                      value={newMember.phone} 
-                      onChange={(e) => setNewMember({...newMember, phone: e.target.value})}
-                    />
+                    <Input placeholder="+91 XXXXX XXXXX" value={newMember.phone} onChange={(e) => setNewMember({...newMember, phone: e.target.value})} />
                   </div>
                 </div>
                 <DialogFooter>
@@ -313,42 +315,22 @@ export default function MembersPage() {
           <div className="flex flex-col md:flex-row gap-6 items-center justify-between">
             <div className="flex flex-wrap justify-center gap-2">
               {["All", "National", "State", "District"].map((level) => (
-                <Button
-                  key={level}
-                  variant={levelFilter === level ? "default" : "outline"}
-                  onClick={() => handleLevelClick(level)}
-                  className={`rounded-full px-6 font-bold ${levelFilter === level ? 'bg-primary text-white' : 'hover:border-accent hover:text-accent'}`}
-                >
-                  {level}
-                </Button>
+                <Button key={level} variant={levelFilter === level ? "default" : "outline"} onClick={() => handleLevelClick(level)} className={`rounded-full px-6 font-bold ${levelFilter === level ? 'bg-primary text-white' : 'hover:border-accent hover:text-accent'}`}>{level}</Button>
               ))}
-              
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button
-                    variant={levelFilter === "State" ? "default" : "outline"}
-                    className={`rounded-full px-6 font-bold flex items-center gap-2 ${levelFilter === "State" ? 'bg-primary text-white' : 'hover:border-accent hover:text-accent'}`}
-                  >
-                    {selectedState || "Filter by Chapter"} <ChevronDown className="w-4 h-4 opacity-50" />
-                  </Button>
+                  <Button variant={levelFilter === "State" ? "default" : "outline"} className={`rounded-full px-6 font-bold flex items-center gap-2 ${levelFilter === "State" ? 'bg-primary text-white' : 'hover:border-accent hover:text-accent'}`}>{selectedState || "Filter by Chapter"} <ChevronDown className="w-4 h-4 opacity-50" /></Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="max-h-80 overflow-y-auto w-56">
                   {chapters.map((chapter) => (
-                    <DropdownMenuItem key={chapter} onClick={() => handleStateSelect(chapter)}>
-                      {chapter}
-                    </DropdownMenuItem>
+                    <DropdownMenuItem key={chapter} onClick={() => handleStateSelect(chapter)}>{chapter}</DropdownMenuItem>
                   ))}
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
             <div className="relative w-full md:w-96">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-              <Input 
-                placeholder="Search by name, ID or role..." 
-                className="pl-12 h-14 rounded-2xl border-slate-200"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
+              <Input placeholder="Search by name, ID or role..." className="pl-12 h-14 rounded-2xl border-slate-200" value={search} onChange={(e) => setSearch(e.target.value)} />
             </div>
           </div>
         </div>
@@ -366,54 +348,29 @@ export default function MembersPage() {
               {filteredMembers.length > 0 ? (
                 filteredMembers.map((member) => {
                   const fallback = member.gender === 'female' ? '/dummy w.png' : '/dummy m.png'
+                  const displayImg = member.imageId?.startsWith('data:') ? member.imageId : (PlaceHolderImages.find(i => i.id === member.imageId)?.imageUrl || fallback)
                   return (
                     <Card key={member.id} className="group border-none shadow-sm hover:shadow-xl transition-all duration-500 rounded-[2rem] overflow-hidden bg-white border border-slate-100 relative">
                       <CardHeader className="p-0">
                         <div className="relative aspect-square overflow-hidden bg-slate-100">
-                          <Image 
-                            src={member.imageId || fallback} 
-                            alt={member.name} 
-                            fill 
-                            className="object-cover group-hover:scale-105 transition-transform duration-500"
-                          />
+                          <Image src={displayImg} alt={member.name} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
                           <div className="absolute top-4 right-4">
-                            <Badge className="bg-primary/80 backdrop-blur-md text-white font-bold border-none">
-                              {member.level}
-                            </Badge>
+                            <Badge className="bg-primary/80 backdrop-blur-md text-white font-bold border-none">{member.level}</Badge>
                           </div>
-
                           {isAdmin && (
                             <div className="absolute top-4 left-4 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <Link href={`/internal/members/${member.id}`}>
-                                <Button size="icon" className="bg-white/90 hover:bg-white text-primary rounded-full shadow-lg">
-                                  <Edit className="w-4 h-4" />
-                                </Button>
-                              </Link>
-                              
+                              <Link href={`/internal/members/${member.id}`}><Button size="icon" className="bg-white/90 hover:bg-white text-primary rounded-full shadow-lg"><Edit className="w-4 h-4" /></Button></Link>
                               <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                  <Button size="icon" className="bg-red-500/90 hover:bg-red-500 text-white rounded-full shadow-lg">
-                                    <Trash2 className="w-4 h-4" />
-                                  </Button>
-                                </AlertDialogTrigger>
+                                <AlertDialogTrigger asChild><Button size="icon" className="bg-red-500/90 hover:bg-red-500 text-white rounded-full shadow-lg"><Trash2 className="w-4 h-4" /></Button></AlertDialogTrigger>
                                 <AlertDialogContent className="rounded-[2rem]">
                                   <AlertDialogHeader>
-                                    <AlertDialogTitle className="flex items-center gap-2">
-                                      <AlertTriangle className="text-red-500 w-5 h-5" /> Confirm Deletion
-                                    </AlertDialogTitle>
-                                    <AlertDialogDescription>
-                                      Are you sure you want to remove <strong>{member.name}</strong> from the membership directory? This action cannot be undone.
-                                    </AlertDialogDescription>
+                                    <AlertDialogTitle className="flex items-center gap-2"><AlertTriangle className="text-red-500 w-5 h-5" /> Confirm Deletion</AlertDialogTitle>
+                                    <AlertDialogDescription>Are you sure you want to remove <strong>{member.name}</strong>? This cannot be undone.</AlertDialogDescription>
                                   </AlertDialogHeader>
-                                  <AlertDialogFooter>
+                                  <div className="flex justify-end gap-3 mt-4">
                                     <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
-                                    <AlertDialogAction 
-                                      onClick={() => handleDelete(member.id)}
-                                      className="bg-red-500 hover:bg-red-600 rounded-xl"
-                                    >
-                                      Delete Record
-                                    </AlertDialogAction>
-                                  </AlertDialogFooter>
+                                    <AlertDialogAction onClick={() => handleDelete(member.id)} className="bg-red-500 hover:bg-red-600 rounded-xl border-none">Delete Record</AlertDialogAction>
+                                  </div>
                                 </AlertDialogContent>
                               </AlertDialog>
                             </div>
@@ -429,14 +386,8 @@ export default function MembersPage() {
                            </div>
                         </div>
                         <div className="space-y-2 pt-2 border-t border-slate-100">
-                          <div className="flex items-center gap-2 text-xs text-slate-500">
-                            <MapPin className="w-3 h-3 text-slate-400" />
-                            <span>{member.stateName || 'All India'}</span>
-                          </div>
-                          <div className="flex items-center gap-2 text-xs text-slate-500">
-                            <Briefcase className="w-3 h-3 text-slate-400" />
-                            <span>ID: {member.memberId || 'N/A'}</span>
-                          </div>
+                          <div className="flex items-center gap-2 text-xs text-slate-500"><MapPin className="w-3 h-3 text-slate-400" /><span>{member.stateName || 'All India'}</span></div>
+                          <div className="flex items-center gap-2 text-xs text-slate-500"><Briefcase className="w-3 h-3 text-slate-400" /><span>ID: {member.memberId || 'N/A'}</span></div>
                         </div>
                       </CardContent>
                     </Card>
