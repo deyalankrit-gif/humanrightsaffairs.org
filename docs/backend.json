@@ -8,50 +8,79 @@
       "properties": {
         "donorName": { "type": "string" },
         "donorEmail": { "type": "string", "format": "email" },
-        "donorPhone": { "type": "string" },
-        "donorAddress": { "type": "string" },
-        "panNumber": { "type": "string" },
-        "aadhaarNumber": { "type": "string" },
         "amount": { "type": "number" },
-        "currency": { "type": "string", "enum": ["INR", "USD", "EUR"] },
+        "pan": { "type": "string" },
+        "aadhaar": { "type": "string" },
         "paymentMethod": { "type": "string" },
         "transactionId": { "type": "string" },
-        "status": { "type": "string", "enum": ["pending", "completed", "failed"] },
-        "timestamp": { "type": "string", "format": "date-time" },
-        "donorPhotoUrl": { "type": "string" }
-      },
-      "required": ["donorName", "donorEmail", "amount", "panNumber"]
+        "status": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      }
     },
     "MemberProfile": {
       "title": "Member Profile",
-      "description": "Detailed profile information for verified members, including sensitive contact details.",
+      "description": "Detailed profile information for verified members.",
       "type": "object",
       "properties": {
-        "memberId": { "type": "string" },
         "name": { "type": "string" },
         "designation": { "type": "string" },
-        "email": { "type": "string", "format": "email" },
+        "email": { "type": "string" },
         "phone": { "type": "string" },
-        "address": { "type": "string" },
-        "bloodGroup": { "type": "string" },
-        "emergencyContact": { "type": "string" },
-        "joiningDate": { "type": "string", "format": "date" },
-        "status": { "type": "string", "enum": ["Active", "Inactive", "Suspended"] }
-      },
-      "required": ["memberId", "name", "email", "phone"]
+        "level": { "type": "string" },
+        "status": { "type": "string" },
+        "memberId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "Event": {
+      "title": "Event",
+      "description": "Organizational events and mission highlights.",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "date": { "type": "string" },
+        "location": { "type": "string" },
+        "category": { "type": "string" },
+        "description": { "type": "string" },
+        "imageId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "TerminatedMember": {
+      "title": "Terminated Member",
+      "description": "Public notice of revoked or cancelled memberships.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "designation": { "type": "string" },
+        "terminationDate": { "type": "string" },
+        "reason": { "type": "string" },
+        "status": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "LeadershipMember": {
+      "title": "Leadership Member",
+      "description": "Personnel in the organizational hierarchy tree.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "title": { "type": "string" },
+        "level": { "type": "string" },
+        "parentRegion": { "type": "string" },
+        "gender": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      }
     }
   },
   "auth": {
     "providers": ["google", "password"]
   },
   "firestore": {
-    "/donations/{donationId}": {
-      "schema": "Donation",
-      "description": "Collection of all donations received."
-    },
-    "/memberProfiles/{profileId}": {
-      "schema": "MemberProfile",
-      "description": "Secure member profiles accessible only to authenticated internal users."
-    }
+    "/donations/{donationId}": { "schema": "Donation" },
+    "/memberProfiles/{profileId}": { "schema": "MemberProfile" },
+    "/events/{eventId}": { "schema": "Event" },
+    "/terminatedMembers/{memberId}": { "schema": "TerminatedMember" },
+    "/leadership/{leaderId}": { "schema": "LeadershipMember" }
   }
 }

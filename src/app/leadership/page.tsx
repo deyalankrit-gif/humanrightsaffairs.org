@@ -1,58 +1,42 @@
+
+"use client"
+
+import React, { useState } from 'react'
 import Image from 'next/image'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 import { PlaceHolderImages } from '@/lib/placeholder-images'
-import { Users, Shield, Award, ChevronDown } from 'lucide-react'
+import { Users, Shield, Award, ChevronDown, Plus, Edit, Trash2, Loader2 } from 'lucide-react'
+import { useCollection, useFirestore, useMemoFirebase, useUser } from '@/firebase'
+import { collection, query, orderBy, addDoc, deleteDoc, doc, updateDoc, serverTimestamp } from 'firebase/firestore'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Badge } from '@/components/ui/badge'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from "@/components/ui/dialog"
+import { useToast } from '@/hooks/use-toast'
 
 type Leader = {
+  id: string
   name: string
   title: string
-  imageId: string
-  description?: string
+  imageId?: string
   gender: 'male' | 'female'
+  level: "Central" | "State" | "District"
+  parentRegion?: string // e.g. "West Bengal"
 }
 
-const centralTeam: Leader[] = [
-  { name: "Dhritiman Dey", title: "Central Chairman (INDIA) & Founder", imageId: "chairman-photo", gender: 'male' },
-  { name: "Adv. Malabika Roy", title: "National Legal Advisor", imageId: "female-avatar", gender: 'female' },
-  { name: "Dr. Arindam Ghosh", title: "General Secretary", imageId: "male-avatar", gender: 'male' },
-]
-
-const stateTeams = [
-  {
-    state: "West Bengal",
-    leaders: [
-      { name: "Moumita Saha", title: "Chairman (West Bengal) & Founder", imageId: "moumita-photo", gender: 'female' },
-      { name: "Sanchita Banerjee", title: "Vice Chairperson", imageId: "female-avatar", gender: 'female' }
-    ]
-  },
-  {
-    state: "Tripura Chapter",
-    leaders: [
-      { name: "Ratul Chowdhury", title: "Chapter Chairman", imageId: "male-avatar", gender: 'male' },
-      { name: "Aditi Chakraborty", title: "Legal Head", imageId: "female-avatar", gender: 'female' }
-    ]
-  }
-]
-
-const districtTeams = [
-  {
-    district: "Kolkata",
-    leaders: [{ name: "Abir Chatterjee", title: "District Chairman", imageId: "male-avatar", gender: 'male' }]
-  },
-  {
-    district: "Howrah",
-    leaders: [{ name: "Sujit Barua", title: "District Chairman", imageId: "male-avatar", gender: 'male' }]
-  },
-  {
-    district: "Hooghly",
-    leaders: [{ name: "Partha Sarathi Bose", title: "District Chairman", imageId: "male-avatar", gender: 'male' }]
-  }
-]
-
-function LeaderCard({ leader, variant = "default" }: { leader: Leader, variant?: "large" | "default" | "small" }) {
-  const img = PlaceHolderImages.find(i => i.id === leader.imageId)
+function LeaderCard({ leader, variant = "default", isAdmin, onEdit, onDelete }: { leader: Leader, variant?: "large" | "default" | "small", isAdmin?: boolean, onEdit?: (l: Leader) => void, onDelete?: (id: string) => void }) {
   const fallback = leader.gender === 'female' ? '/dummy w.png' : '/dummy m.png'
+  const img = leader.imageId ? PlaceHolderImages.find(i => i.id === leader.imageId)?.imageUrl || fallback : fallback
   
   const sizeClasses = {
     large: "w-48 h-60 md:w-64 md:h-80",
@@ -61,25 +45,28 @@ function LeaderCard({ leader, variant = "default" }: { leader: Leader, variant?:
   }
 
   const isFounder = leader.title.includes("Founder")
-  const isStateChairman = leader.title.includes("Chairman (West Bengal)")
-  const isChairman = leader.title.includes("Central Chairman")
-  const isMoumita = leader.name === "Moumita Saha"
-  const isDhritiman = leader.name === "Dhritiman Dey"
+  const isChairman = leader.title.includes("Chairman")
 
   return (
-    <div className="flex flex-col items-center group">
+    <div className="flex flex-col items-center group relative">
       <div className={`relative ${sizeClasses[variant]} rounded-2xl overflow-hidden shadow-xl border-2 md:border-4 border-white group-hover:border-accent transition-all duration-500 bg-slate-100`}>
         <Image 
-          src={img?.imageUrl || fallback} 
+          src={img} 
           alt={leader.name} 
           fill 
           className="object-cover group-hover:scale-110 transition-transform duration-700"
-          data-ai-hint={img?.imageHint || "profile photo"}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+          {isAdmin && (
+            <div className="flex gap-2">
+              <Button onClick={() => onEdit?.(leader)} size="icon" className="bg-white text-primary rounded-full hover:bg-accent hover:text-white"><Edit className="w-4 h-4" /></Button>
+              <Button onClick={() => onDelete?.(leader.id)} size="icon" className="bg-red-500 text-white rounded-full"><Trash2 className="w-4 h-4" /></Button>
+            </div>
+          )}
+        </div>
       </div>
       <div className="mt-4 text-center px-2">
-        <h4 className={`font-headline font-bold ${isDhritiman ? 'text-secondary' : isMoumita ? 'text-secondary' : 'text-primary'} ${variant === 'large' || isStateChairman || isChairman ? 'text-lg md:text-xl lg:text-2xl' : 'text-sm md:text-base'}`}>
+        <h4 className={`font-headline font-bold text-primary ${variant === 'large' || isChairman ? 'text-lg md:text-xl lg:text-2xl' : 'text-sm md:text-base'}`}>
           {leader.name}
         </h4>
         <p className={`text-accent font-bold uppercase tracking-widest ${variant === 'large' || isFounder ? 'text-[10px] md:text-xs' : 'text-[8px] md:text-[10px]'}`}>
@@ -91,11 +78,76 @@ function LeaderCard({ leader, variant = "default" }: { leader: Leader, variant?:
 }
 
 export default function LeadershipPage() {
+  const [isActionLoading, setIsActionLoading] = useState(false)
+  const { user } = useUser()
+  const db = useFirestore()
+  const { toast } = useToast()
+  const isAdmin = user?.email === 'deydhritiman@gmail.com'
+
+  const leadersQuery = useMemoFirebase(() => {
+    if (!db) return null;
+    return query(collection(db, 'leadership'), orderBy('createdAt', 'asc'));
+  }, [db]);
+
+  const { data: firestoreLeaders, loading: dataLoading } = useCollection(leadersQuery);
+
+  const [editLeader, setEditLeader] = useState<any>(null)
+  const [newLeader, setNewLeader] = useState({
+    name: '',
+    title: '',
+    gender: 'male' as const,
+    level: 'Central' as const,
+    parentRegion: '',
+    imageId: 'male-avatar'
+  })
+
+  const handleAdd = async () => {
+    if (!newLeader.name || !newLeader.title) return
+    setIsActionLoading(true)
+    try {
+      await addDoc(collection(db, 'leadership'), { ...newLeader, createdAt: serverTimestamp() })
+      toast({ title: "Leader Commissioned" })
+      setNewLeader({ name: '', title: '', gender: 'male', level: 'Central', parentRegion: '', imageId: 'male-avatar' })
+    } catch (e: any) {
+      toast({ variant: "destructive", title: "Error", description: e.message })
+    } finally {
+      setIsActionLoading(false)
+    }
+  }
+
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteDoc(doc(db, 'leadership', id))
+      toast({ title: "Leader Removed" })
+    } catch (e: any) {
+      toast({ variant: "destructive", title: "Error", description: e.message })
+    }
+  }
+
+  const handleUpdate = async () => {
+    if (!editLeader) return
+    setIsActionLoading(true)
+    try {
+      const { id, ...data } = editLeader
+      await updateDoc(doc(db, 'leadership', id), data)
+      toast({ title: "Leader Profile Updated" })
+      setEditLeader(null)
+    } catch (e: any) {
+      toast({ variant: "destructive", title: "Error", description: e.message })
+    } finally {
+      setIsActionLoading(false)
+    }
+  }
+
+  const leaders = (firestoreLeaders || []) as Leader[]
+  const centralTeam = leaders.filter(l => l.level === 'Central')
+  const stateChapters = Array.from(new Set(leaders.filter(l => l.level === 'State').map(l => l.parentRegion))).filter(Boolean) as string[]
+  const districtRegions = Array.from(new Set(leaders.filter(l => l.level === 'District').map(l => l.parentRegion))).filter(Boolean) as string[]
+
   return (
     <main className="min-h-screen bg-slate-50">
       <Navbar />
       
-      {/* Header */}
       <section className="pt-32 md:pt-40 pb-16 md:pb-20 bg-primary text-white relative overflow-hidden">
         <div className="absolute top-0 right-0 w-1/2 h-full bg-accent/5 -skew-x-12"></div>
         <div className="container mx-auto px-4 text-center relative z-10">
@@ -104,85 +156,153 @@ export default function LeadershipPage() {
             <span>Organizational Hierarchy</span>
           </div>
           <h1 className="text-4xl md:text-7xl font-headline font-bold mb-6">Our <span className="text-accent italic">Leadership</span> Tree</h1>
-          <p className="text-indigo-100 max-w-2xl mx-auto text-base md:text-lg">
-            A unified force of dedicated human rights defenders operating across national, state, and district levels to ensure justice reaches every corner.
+          <p className="text-indigo-100 max-w-2xl mx-auto text-base md:text-lg mb-8">
+            A unified force of dedicated human rights defenders operating across national, state, and district levels.
           </p>
-        </div>
-      </section>
 
-      {/* Hierarchy Section */}
-      <section className="py-16 md:py-24 relative">
-        <div className="container mx-auto px-4">
-          
-          {/* Level 1: Central */}
-          <div className="flex flex-col items-center mb-16 md:mb-24">
-            <div className="flex items-center gap-2 text-primary font-bold uppercase tracking-[0.2em] md:tracking-[0.3em] mb-8 md:mb-12">
-              <Award className="w-5 h-5 md:w-6 md:h-6 text-accent" />
-              <span className="text-xs md:text-base">Central Governance</span>
-            </div>
-            <div className="flex flex-wrap justify-center gap-6 md:gap-12">
-              {centralTeam.map((leader, i) => (
-                <div key={i} className="relative">
-                  <LeaderCard leader={leader} variant={i === 0 ? "large" : "default"} />
-                  {i === 0 && (
-                    <div className="absolute -bottom-12 md:-bottom-16 left-1/2 -translate-x-1/2">
-                      <ChevronDown className="w-6 h-6 md:w-8 md:h-8 text-slate-300 animate-bounce" />
-                    </div>
+          {isAdmin && (
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button className="bg-accent text-primary font-bold rounded-2xl h-14 px-8 flex gap-2 hover:bg-accent/90 shadow-xl shadow-accent/20 mx-auto">
+                  <Plus className="w-5 h-5" /> Commission Leadership Member
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="bg-white rounded-[2rem]">
+                <DialogHeader><DialogTitle>New Leader Profile</DialogTitle></DialogHeader>
+                <div className="space-y-4 py-4">
+                  <Input value={newLeader.name} onChange={e => setNewLeader({...newLeader, name: e.target.value})} placeholder="Full Name" />
+                  <Input value={newLeader.title} onChange={e => setNewLeader({...newLeader, title: e.target.value})} placeholder="Designation" />
+                  <div className="grid grid-cols-2 gap-4">
+                    <Select value={newLeader.level} onValueChange={(val: any) => setNewLeader({...newLeader, level: val})}>
+                      <SelectTrigger><SelectValue placeholder="Level" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Central">Central</SelectItem>
+                        <SelectItem value="State">State</SelectItem>
+                        <SelectItem value="District">District</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Select value={newLeader.gender} onValueChange={(val: any) => setNewLeader({...newLeader, gender: val})}>
+                      <SelectTrigger><SelectValue placeholder="Gender" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="male">Male</SelectItem>
+                        <SelectItem value="female">Female</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  {newLeader.level !== 'Central' && (
+                    <Input value={newLeader.parentRegion} onChange={e => setNewLeader({...newLeader, parentRegion: e.target.value})} placeholder="State/District Name" />
                   )}
                 </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Visual Connector Line */}
-          <div className="hidden md:block w-px h-24 bg-gradient-to-b from-slate-300 to-transparent mx-auto -mt-12 mb-12"></div>
-
-          {/* Level 2: State */}
-          <div className="space-y-16 md:space-y-24">
-            <div className="flex items-center justify-center gap-2 text-primary font-bold uppercase tracking-[0.2em] md:tracking-[0.3em] mb-8 md:mb-12">
-              <Shield className="w-5 h-5 md:w-6 md:h-6 text-emerald-500" />
-              <span className="text-xs md:text-base">Regional Chapters</span>
-            </div>
-            
-            <div className="grid md:grid-cols-2 gap-8 md:gap-12 max-w-6xl mx-auto">
-              {stateTeams.map((team, i) => (
-                <div key={i} className="bg-white p-6 md:p-12 rounded-[2rem] md:rounded-[3rem] shadow-sm border border-slate-100 flex flex-col items-center">
-                  <div className="bg-emerald-50 text-emerald-600 px-4 md:px-6 py-2 rounded-full font-bold text-xs md:text-sm mb-8 md:mb-12">
-                    {team.state}
-                  </div>
-                  <div className="flex flex-wrap justify-center gap-4 md:gap-8">
-                    {team.leaders.map((leader, j) => (
-                      <LeaderCard key={j} leader={leader} />
-                    ))}
-                  </div>
-                  {/* District Connectors */}
-                  <div className="hidden md:block w-px h-12 bg-slate-200 mt-12"></div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Level 3: District */}
-          <div className="mt-16 md:mt-24">
-            <div className="flex items-center justify-center gap-2 text-primary font-bold uppercase tracking-[0.2em] md:tracking-[0.3em] mb-8 md:mb-12">
-              <div className="w-5 h-5 md:w-6 md:h-6 rounded-full border-2 border-indigo-400 flex items-center justify-center text-[8px] md:text-[10px]">D</div>
-              <span className="text-xs md:text-base">District Divisions</span>
-            </div>
-            
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8">
-              {districtTeams.map((team, i) => (
-                <div key={i} className="bg-slate-100/50 p-4 md:p-6 rounded-[1.5rem] md:rounded-[2rem] border border-white flex flex-col items-center hover:bg-white hover:shadow-lg transition-all">
-                  <p className="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">{team.district}</p>
-                  {team.leaders.map((leader, j) => (
-                    <LeaderCard key={j} leader={leader} variant="small" />
-                  ))}
-                </div>
-              ))}
-            </div>
-          </div>
-
+                <DialogFooter>
+                  <Button onClick={handleAdd} disabled={isActionLoading} className="w-full h-12 rounded-xl">Publish Profile</Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          )}
         </div>
       </section>
+
+      <section className="py-16 md:py-24">
+        <div className="container mx-auto px-4">
+          {dataLoading ? (
+            <div className="text-center py-20"><Loader2 className="w-10 h-10 animate-spin text-accent mx-auto" /></div>
+          ) : (
+            <>
+              {/* Central Governance */}
+              <div className="flex flex-col items-center mb-24">
+                <div className="flex items-center gap-2 text-primary font-bold uppercase tracking-[0.2em] mb-12">
+                  <Award className="w-6 h-6 text-accent" />
+                  <span>Central Governance</span>
+                </div>
+                <div className="flex flex-wrap justify-center gap-12">
+                  {centralTeam.map((leader, i) => (
+                    <LeaderCard 
+                      key={leader.id} 
+                      leader={leader} 
+                      variant={i === 0 ? "large" : "default"} 
+                      isAdmin={isAdmin} 
+                      onEdit={setEditLeader} 
+                      onDelete={handleDelete}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              {/* State Chapters */}
+              <div className="space-y-24">
+                <div className="flex items-center justify-center gap-2 text-primary font-bold uppercase tracking-[0.2em] mb-12">
+                  <Shield className="w-6 h-6 text-emerald-500" />
+                  <span>Regional Chapters</span>
+                </div>
+                <div className="grid md:grid-cols-2 gap-12 max-w-6xl mx-auto">
+                  {stateChapters.map((region) => (
+                    <div key={region} className="bg-white p-12 rounded-[3rem] shadow-sm border border-slate-100 flex flex-col items-center">
+                      <div className="bg-emerald-50 text-emerald-600 px-6 py-2 rounded-full font-bold text-sm mb-12">
+                        {region}
+                      </div>
+                      <div className="flex flex-wrap justify-center gap-8">
+                        {leaders.filter(l => l.level === 'State' && l.parentRegion === region).map(leader => (
+                          <LeaderCard key={leader.id} leader={leader} isAdmin={isAdmin} onEdit={setEditLeader} onDelete={handleDelete} />
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* District Divisions */}
+              <div className="mt-24">
+                <div className="flex items-center justify-center gap-2 text-primary font-bold uppercase tracking-[0.2em] mb-12">
+                  <div className="w-6 h-6 rounded-full border-2 border-indigo-400 flex items-center justify-center text-[10px]">D</div>
+                  <span>District Divisions</span>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+                  {districtRegions.map((region) => (
+                    <div key={region} className="bg-slate-100/50 p-6 rounded-[2rem] border border-white flex flex-col items-center">
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">{region}</p>
+                      {leaders.filter(l => l.level === 'District' && l.parentRegion === region).map(leader => (
+                        <LeaderCard key={leader.id} leader={leader} variant="small" isAdmin={isAdmin} onEdit={setEditLeader} onDelete={handleDelete} />
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      </section>
+
+      {/* Edit Leader Dialog */}
+      <Dialog open={!!editLeader} onOpenChange={(open) => !open && setEditLeader(null)}>
+        <DialogContent className="bg-white rounded-[2rem]">
+          <DialogHeader><DialogTitle>Edit Leader Profile</DialogTitle></DialogHeader>
+          {editLeader && (
+            <div className="space-y-4 py-4">
+              <Input value={editLeader.name} onChange={e => setEditLeader({...editLeader, name: e.target.value})} placeholder="Name" />
+              <Input value={editLeader.title} onChange={e => setEditLeader({...editLeader, title: e.target.value})} placeholder="Title" />
+              <div className="grid grid-cols-2 gap-4">
+                <Select value={editLeader.level} onValueChange={(val: any) => setEditLeader({...editLeader, level: val})}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Central">Central</SelectItem>
+                    <SelectItem value="State">State</SelectItem>
+                    <SelectItem value="District">District</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select value={editLeader.gender} onValueChange={(val: any) => setEditLeader({...editLeader, gender: val})}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="male">Male</SelectItem>
+                    <SelectItem value="female">Female</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <Input value={editLeader.parentRegion} onChange={e => setEditLeader({...editLeader, parentRegion: e.target.value})} placeholder="State/District Name" />
+              <Button onClick={handleUpdate} disabled={isActionLoading} className="w-full h-12 rounded-xl mt-4">Save Changes</Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       <Footer />
     </main>
