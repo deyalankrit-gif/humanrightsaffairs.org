@@ -22,7 +22,8 @@ import {
   FileText,
   UserPlus,
   Plus,
-  Layers
+  Layers,
+  MapPin
 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { 
@@ -37,45 +38,7 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'
-
-const chapters = [
-  "Andaman and Nicobar Islands",
-  "Andhra Pradesh",
-  "Arunachal Pradesh",
-  "Assam",
-  "Bihar",
-  "Chandigarh",
-  "Chhattisgarh",
-  "Dadra and Nagar Haveli and Daman and Diu",
-  "Delhi",
-  "Goa",
-  "Gujarat",
-  "Haryana",
-  "Himachal Pradesh",
-  "Jammu and Kashmir",
-  "Jharkhand",
-  "Karnataka",
-  "Kerala",
-  "Ladakh",
-  "Lakshadweep",
-  "Madhya Pradesh",
-  "Maharashtra",
-  "Manipur",
-  "Meghalaya",
-  "Mizoram",
-  "Nagaland",
-  "Odisha",
-  "Puducherry",
-  "Punjab",
-  "Rajasthan",
-  "Sikkim",
-  "Tamil Nadu",
-  "Telangana",
-  "Tripura",
-  "Uttar Pradesh",
-  "Uttarakhand",
-  "West Bengal"
-]
+import { INDIA_DATA } from '@/lib/india-data'
 
 export default function InternalMembersDirectory() {
   const { user, loading: authLoading } = useUser()
@@ -94,7 +57,8 @@ export default function InternalMembersDirectory() {
     level: 'National',
     status: 'Active',
     memberId: '',
-    stateName: ''
+    stateName: '',
+    districtName: ''
   })
 
   const profilesQuery = useMemoFirebase(() => {
@@ -127,8 +91,6 @@ export default function InternalMembersDirectory() {
       await addDoc(collection(db, 'memberProfiles'), {
         ...newMember,
         createdAt: serverTimestamp(),
-        // Defaults for required display fields if not provided
-        jurisdiction: newMember.level === 'National' ? 'All India' : (newMember.stateName || 'Regional'),
         gender: 'male' // Default
       })
       toast({
@@ -145,7 +107,8 @@ export default function InternalMembersDirectory() {
         level: 'National',
         status: 'Active',
         memberId: '',
-        stateName: ''
+        stateName: '',
+        districtName: ''
       })
     } catch (error: any) {
       toast({
@@ -174,6 +137,8 @@ export default function InternalMembersDirectory() {
     m.memberId?.toLowerCase().includes(search.toLowerCase())
   )
 
+  const states = Object.keys(INDIA_DATA).sort();
+
   return (
     <main className="min-h-screen bg-slate-50">
       <AdminNavbar />
@@ -198,7 +163,7 @@ export default function InternalMembersDirectory() {
                   <UserPlus className="w-5 h-5" /> Commission New Member
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-md bg-white rounded-[2rem] border-none shadow-2xl">
+              <DialogContent className="max-w-md bg-white rounded-[2rem] border-none shadow-2xl overflow-y-auto max-h-[90vh]">
                 <DialogHeader>
                   <DialogTitle className="text-2xl font-headline font-bold text-primary">New Personnel Record</DialogTitle>
                 </DialogHeader>
@@ -206,7 +171,7 @@ export default function InternalMembersDirectory() {
                   <div className="space-y-2">
                     <Label>Full Name</Label>
                     <Input 
-                      placeholder="e.g. Animesh Dasgupta" 
+                      placeholder="e.g. Sanchita Banerjee" 
                       value={newMember.name} 
                       onChange={(e) => setNewMember({...newMember, name: e.target.value})}
                     />
@@ -234,17 +199,36 @@ export default function InternalMembersDirectory() {
                       </Select>
                     </div>
                   </div>
-                  {newMember.level === 'State' && (
-                    <div className="space-y-2">
-                      <Label>State Chapter</Label>
-                      <Select value={newMember.stateName} onValueChange={(val) => setNewMember({...newMember, stateName: val})}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select State" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {chapters.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
+                  {(newMember.level === 'State' || newMember.level === 'District') && (
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>State Chapter</Label>
+                        <Select value={newMember.stateName} onValueChange={(val) => setNewMember({...newMember, stateName: val, districtName: ''})}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select State" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {states.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>District</Label>
+                        <Select 
+                          value={newMember.districtName} 
+                          onValueChange={(val) => setNewMember({...newMember, districtName: val})}
+                          disabled={!newMember.stateName}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select District" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {(newMember.stateName ? INDIA_DATA[newMember.stateName] : []).map(d => (
+                              <SelectItem key={d} value={d}>{d}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
                   )}
                   <div className="space-y-2">
@@ -325,6 +309,10 @@ export default function InternalMembersDirectory() {
                              <Badge variant="outline" className="border-accent text-accent text-[9px] font-bold uppercase px-2 py-0">
                                 {member.level || 'Operational'}
                              </Badge>
+                             <div className="flex items-center gap-1 text-[9px] text-slate-400 font-bold uppercase">
+                               <MapPin className="w-3 h-3" />
+                               {member.districtName ? `${member.districtName}, ` : ''}{member.stateName || 'National'}
+                             </div>
                           </div>
                           <h3 className={`text-2xl font-bold transition-colors ${member.name === 'Dhritiman Dey' ? 'text-secondary' : 'text-primary'}`}>
                             {member.name}

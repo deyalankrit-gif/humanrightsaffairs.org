@@ -36,6 +36,7 @@ import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'
 import Image from 'next/image'
 import { PlaceHolderImages } from '@/lib/placeholder-images'
+import { INDIA_DATA } from '@/lib/india-data'
 
 export default function MemberDetailsPage() {
   const { user, loading: authLoading } = useUser()
@@ -136,6 +137,8 @@ export default function MemberDetailsPage() {
     ? (editForm?.imageId?.startsWith('data:') ? editForm.imageId : (PlaceHolderImages.find(i => i.id === editForm?.imageId)?.imageUrl || fallback))
     : (profile.imageId?.startsWith('data:') ? profile.imageId : (PlaceHolderImages.find(i => i.id === profile.imageId)?.imageUrl || fallback))
 
+  const states = Object.keys(INDIA_DATA).sort();
+
   return (
     <main className="min-h-screen bg-slate-50">
       <AdminNavbar />
@@ -221,9 +224,15 @@ export default function MemberDetailsPage() {
                 </div>
               ) : (
                 <>
-                  <Badge className="bg-accent text-primary font-bold px-4 py-1 uppercase tracking-widest text-[10px] rounded-full">
-                    {profile.level || 'Operational Personnel'}
-                  </Badge>
+                  <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
+                    <Badge className="bg-accent text-primary font-bold px-4 py-1 uppercase tracking-widest text-[10px] rounded-full">
+                      {profile.level || 'Operational Personnel'}
+                    </Badge>
+                    <div className="flex items-center gap-2 text-slate-400 text-xs font-bold uppercase tracking-widest">
+                      <MapPin className="w-3 h-3 text-accent" />
+                      {profile.districtName ? `${profile.districtName}, ` : ''}{profile.stateName || 'National'}
+                    </div>
+                  </div>
                   <h1 className="text-5xl md:text-6xl font-headline font-bold text-white transition-colors">
                     {profile.name}
                   </h1>
@@ -250,36 +259,74 @@ export default function MemberDetailsPage() {
                     <FileCheck className="w-8 h-8 text-accent" /> Personnel Credentials
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="p-10 grid md:grid-cols-2 gap-10">
-                  <div className="space-y-2">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Secure Communication</p>
-                    {isEditing ? (
-                      <Input 
-                        value={editForm?.email} 
-                        onChange={(e) => setEditForm({...editForm, email: e.target.value})}
-                        className="bg-slate-50 border-slate-100"
-                      />
-                    ) : (
-                      <p className="text-xl font-bold text-primary flex items-center gap-3 break-all">
-                        <Mail className="w-6 h-6 text-accent shrink-0" /> {profile.email}
-                      </p>
-                    )}
+                <CardContent className="p-10 space-y-10">
+                  {isEditing && (
+                    <div className="grid md:grid-cols-2 gap-10">
+                      <div className="space-y-2">
+                        <Label>State Chapter</Label>
+                        <Select 
+                          value={editForm?.stateName} 
+                          onValueChange={(val) => setEditForm({...editForm, stateName: val, districtName: ''})}
+                        >
+                          <SelectTrigger className="bg-slate-50 border-slate-100">
+                            <SelectValue placeholder="Select State" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {states.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>District Division</Label>
+                        <Select 
+                          value={editForm?.districtName} 
+                          onValueChange={(val) => setEditForm({...editForm, districtName: val})}
+                          disabled={!editForm?.stateName}
+                        >
+                          <SelectTrigger className="bg-slate-50 border-slate-100">
+                            <SelectValue placeholder="Select District" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {(editForm?.stateName ? INDIA_DATA[editForm.stateName] : []).map(d => (
+                              <SelectItem key={d} value={d}>{d}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="grid md:grid-cols-2 gap-10">
+                    <div className="space-y-2">
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Secure Communication</p>
+                      {isEditing ? (
+                        <Input 
+                          value={editForm?.email} 
+                          onChange={(e) => setEditForm({...editForm, email: e.target.value})}
+                          className="bg-slate-50 border-slate-100"
+                        />
+                      ) : (
+                        <p className="text-xl font-bold text-primary flex items-center gap-3 break-all">
+                          <Mail className="w-6 h-6 text-accent shrink-0" /> {profile.email}
+                        </p>
+                      )}
+                    </div>
+                    <div className="space-y-2">
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Dedicated Hotline</p>
+                      {isEditing ? (
+                        <Input 
+                          value={editForm?.phone} 
+                          onChange={(e) => setEditForm({...editForm, phone: e.target.value})}
+                          className="bg-slate-50 border-slate-100"
+                        />
+                      ) : (
+                        <p className="text-xl font-bold text-primary flex items-center gap-3">
+                          <Phone className="w-6 h-6 text-accent shrink-0" /> {profile.phone}
+                        </p>
+                      )}
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Dedicated Hotline</p>
-                    {isEditing ? (
-                      <Input 
-                        value={editForm?.phone} 
-                        onChange={(e) => setEditForm({...editForm, phone: e.target.value})}
-                        className="bg-slate-50 border-slate-100"
-                      />
-                    ) : (
-                      <p className="text-xl font-bold text-primary flex items-center gap-3">
-                        <Phone className="w-6 h-6 text-accent shrink-0" /> {profile.phone}
-                      </p>
-                    )}
-                  </div>
-                  <div className="space-y-2 md:col-span-2 pt-6 border-t border-slate-50">
+                  <div className="space-y-2 pt-6 border-t border-slate-50">
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Registered Operational Base / Address</p>
                     {isEditing ? (
                       <Input 

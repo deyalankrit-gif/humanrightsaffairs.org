@@ -19,7 +19,8 @@ import {
   Edit, 
   Trash2, 
   AlertTriangle,
-  Upload
+  Upload,
+  Globe
 } from 'lucide-react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -57,6 +58,7 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'
+import { INDIA_DATA } from '@/lib/india-data'
 
 type Member = {
   id: string
@@ -73,49 +75,11 @@ type Member = {
   status?: string
 }
 
-const chapters = [
-  "Andaman and Nicobar Islands",
-  "Andhra Pradesh",
-  "Arunachal Pradesh",
-  "Assam",
-  "Bihar",
-  "Chandigarh",
-  "Chhattisgarh",
-  "Dadra and Nagar Haveli and Daman and Diu",
-  "Delhi",
-  "Goa",
-  "Gujarat",
-  "Haryana",
-  "Himachal Pradesh",
-  "Jammu and Kashmir",
-  "Jharkhand",
-  "Karnataka",
-  "Kerala",
-  "Ladakh",
-  "Lakshadweep",
-  "Madhya Pradesh",
-  "Maharashtra",
-  "Manipur",
-  "Meghalaya",
-  "Mizoram",
-  "Nagaland",
-  "Odisha",
-  "Puducherry",
-  "Punjab",
-  "Rajasthan",
-  "Sikkim",
-  "Tamil Nadu",
-  "Telangana",
-  "Tripura",
-  "Uttar Pradesh",
-  "Uttarakhand",
-  "West Bengal"
-]
-
 export default function MembersPage() {
   const [search, setSearch] = useState("")
   const [levelFilter, setLevelFilter] = useState<string>("All")
   const [selectedState, setSelectedState] = useState<string | null>(null)
+  const [selectedDistrict, setSelectedDistrict] = useState<string | null>(null)
   const [mounted, setMounted] = useState(false)
   const [isAdding, setIsAdding] = useState(false)
   const { user } = useUser()
@@ -131,6 +95,7 @@ export default function MembersPage() {
     status: 'Active',
     memberId: '',
     stateName: '',
+    districtName: '',
     gender: 'male' as 'male' | 'female',
     imageId: ''
   })
@@ -162,11 +127,17 @@ export default function MembersPage() {
   const handleLevelClick = (level: string) => {
     setLevelFilter(level)
     setSelectedState(null)
+    setSelectedDistrict(null)
   }
 
   const handleStateSelect = (state: string) => {
     setLevelFilter("State")
     setSelectedState(state)
+    setSelectedDistrict(null)
+  }
+
+  const handleDistrictSelect = (district: string) => {
+    setSelectedDistrict(district)
   }
 
   const handleDelete = async (id: string) => {
@@ -192,7 +163,7 @@ export default function MembersPage() {
       })
       toast({ title: "Success", description: "New personnel record established." })
       setIsAdding(false)
-      setNewMember({ name: '', designation: '', email: '', phone: '', level: 'National', status: 'Active', memberId: '', stateName: '', gender: 'male', imageId: '' })
+      setNewMember({ name: '', designation: '', email: '', phone: '', level: 'National', status: 'Active', memberId: '', stateName: '', districtName: '', gender: 'male', imageId: '' })
     } catch (error: any) {
       toast({ variant: "destructive", title: "System Error", description: error.message })
       setIsAdding(false)
@@ -210,11 +181,17 @@ export default function MembersPage() {
     let matchesLevel = levelFilter === "All" || m.level === levelFilter;
     if (levelFilter === "State" && selectedState) {
       matchesLevel = m.level === "State" && m.stateName === selectedState;
+      if (selectedDistrict) {
+        matchesLevel = matchesLevel && m.districtName === selectedDistrict;
+      }
     }
     return matchesSearch && matchesLevel;
   })
 
   if (!mounted) return null
+
+  const states = Object.keys(INDIA_DATA).sort();
+  const districts = selectedState ? INDIA_DATA[selectedState] : [];
 
   return (
     <main className="min-h-screen bg-slate-50">
@@ -268,7 +245,7 @@ export default function MembersPage() {
                   </div>
                   <div className="space-y-2">
                     <Label>Full Name</Label>
-                    <Input placeholder="e.g. Animesh Dasgupta" value={newMember.name} onChange={(e) => setNewMember({...newMember, name: e.target.value})} />
+                    <Input placeholder="e.g. Sanchita Banerjee" value={newMember.name} onChange={(e) => setNewMember({...newMember, name: e.target.value})} />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
@@ -287,15 +264,32 @@ export default function MembersPage() {
                       </Select>
                     </div>
                   </div>
-                  {newMember.level === 'State' && (
-                    <div className="space-y-2">
-                      <Label>State Chapter</Label>
-                      <Select value={newMember.stateName} onValueChange={(val) => setNewMember({...newMember, stateName: val})}>
-                        <SelectTrigger><SelectValue placeholder="Select State" /></SelectTrigger>
-                        <SelectContent>
-                          {chapters.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
+                  {(newMember.level === 'State' || newMember.level === 'District') && (
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>State Chapter</Label>
+                        <Select value={newMember.stateName} onValueChange={(val) => setNewMember({...newMember, stateName: val, districtName: ''})}>
+                          <SelectTrigger><SelectValue placeholder="Select State" /></SelectTrigger>
+                          <SelectContent>
+                            {states.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>District</Label>
+                        <Select 
+                          value={newMember.districtName} 
+                          onValueChange={(val) => setNewMember({...newMember, districtName: val})}
+                          disabled={!newMember.stateName}
+                        >
+                          <SelectTrigger><SelectValue placeholder="Select District" /></SelectTrigger>
+                          <SelectContent>
+                            {(newMember.stateName ? INDIA_DATA[newMember.stateName] : []).map(d => (
+                              <SelectItem key={d} value={d}>{d}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
                   )}
                   <div className="space-y-2">
@@ -354,14 +348,27 @@ export default function MembersPage() {
               ))}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant={levelFilter === "State" ? "default" : "outline"} className={`rounded-full px-6 font-bold flex items-center gap-2 ${levelFilter === "State" ? 'bg-primary text-white' : 'hover:border-accent hover:text-accent'}`}>{selectedState || "Filter by Chapter"} <ChevronDown className="w-4 h-4 opacity-50" /></Button>
+                  <Button variant={selectedState ? "default" : "outline"} className={`rounded-full px-6 font-bold flex items-center gap-2 ${selectedState ? 'bg-primary text-white' : 'hover:border-accent hover:text-accent'}`}>{selectedState || "Filter by State"} <ChevronDown className="w-4 h-4 opacity-50" /></Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="max-h-80 overflow-y-auto w-56">
-                  {chapters.map((chapter) => (
-                    <DropdownMenuItem key={chapter} onClick={() => handleStateSelect(chapter)}>{chapter}</DropdownMenuItem>
+                  {states.map((state) => (
+                    <DropdownMenuItem key={state} onClick={() => handleStateSelect(state)}>{state}</DropdownMenuItem>
                   ))}
                 </DropdownMenuContent>
               </DropdownMenu>
+
+              {selectedState && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant={selectedDistrict ? "default" : "outline"} className={`rounded-full px-6 font-bold flex items-center gap-2 ${selectedDistrict ? 'bg-primary text-white' : 'hover:border-accent hover:text-accent'}`}>{selectedDistrict || "Filter by District"} <ChevronDown className="w-4 h-4 opacity-50" /></Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="max-h-80 overflow-y-auto w-56">
+                    {districts.map((district) => (
+                      <DropdownMenuItem key={district} onClick={() => handleDistrictSelect(district)}>{district}</DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
             </div>
             <div className="relative w-full md:w-96">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
@@ -421,7 +428,12 @@ export default function MembersPage() {
                            </div>
                         </div>
                         <div className="space-y-2 pt-2 border-t border-slate-100">
-                          <div className="flex items-center gap-2 text-xs text-slate-500"><MapPin className="w-3 h-3 text-slate-400" /><span>{member.stateName || 'All India'}</span></div>
+                          <div className="flex items-center gap-2 text-xs text-slate-500">
+                            <MapPin className="w-3 h-3 text-slate-400" />
+                            <span className="truncate">
+                              {member.districtName ? `${member.districtName}, ` : ''}{member.stateName || 'All India'}
+                            </span>
+                          </div>
                           <div className="flex items-center gap-2 text-xs text-slate-500"><Briefcase className="w-3 h-3 text-slate-400" /><span>ID: {member.memberId || 'N/A'}</span></div>
                         </div>
                       </CardContent>
