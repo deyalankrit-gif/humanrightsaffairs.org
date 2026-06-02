@@ -1,24 +1,61 @@
 
 "use client"
 
-import React, { useState, useMemo, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 import { PlaceHolderImages } from '@/lib/placeholder-images'
-import { Search, MapPin, BadgeCheck, User, Users, Briefcase, ChevronDown, Loader2 } from 'lucide-react'
+import { 
+  Search, 
+  MapPin, 
+  BadgeCheck, 
+  User, 
+  Users, 
+  Briefcase, 
+  ChevronDown, 
+  Loader2, 
+  Plus, 
+  Edit, 
+  Trash2, 
+  AlertTriangle 
+} from 'lucide-react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { useCollection, useFirestore, useMemoFirebase } from '@/firebase'
-import { collection, query, orderBy } from 'firebase/firestore'
+import { useCollection, useFirestore, useMemoFirebase, useUser } from '@/firebase'
+import { collection, query, orderBy, deleteDoc, doc, addDoc, serverTimestamp } from 'firebase/firestore'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+  DialogDescription,
+} from "@/components/ui/dialog"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { useToast } from '@/hooks/use-toast'
+import Link from 'next/link'
 
 type Member = {
   id: string
@@ -32,6 +69,7 @@ type Member = {
   gender?: 'male' | 'female'
   email?: string
   phone?: string
+  status?: string
 }
 
 const chapters = [
@@ -43,7 +81,22 @@ export default function MembersPage() {
   const [levelFilter, setLevelFilter] = useState<string>("All")
   const [selectedState, setSelectedState] = useState<string | null>(null)
   const [mounted, setMounted] = useState(false)
+  const [isAdding, setIsAdding] = useState(false)
+  const { user } = useUser()
   const db = useFirestore()
+  const { toast } = useToast()
+
+  // New member form state
+  const [newMember, setNewMember] = useState({
+    name: '',
+    designation: '',
+    email: '',
+    phone: '',
+    level: 'National',
+    status: 'Active',
+    memberId: '',
+    stateName: ''
+  })
 
   useEffect(() => {
     setMounted(true)
@@ -56,6 +109,8 @@ export default function MembersPage() {
 
   const { data: firestoreMembers, loading: membersLoading } = useCollection(membersQuery);
 
+  const isAdmin = user?.email === 'deydhritiman@gmail.com'
+
   const handleLevelClick = (level: string) => {
     setLevelFilter(level)
     setSelectedState(null)
@@ -64,6 +119,63 @@ export default function MembersPage() {
   const handleStateSelect = (state: string) => {
     setLevelFilter("State")
     setSelectedState(state)
+  }
+
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteDoc(doc(db, 'memberProfiles', id))
+      toast({
+        title: "Record Deleted",
+        description: "The personnel profile has been removed from the directory."
+      })
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Deletion Failed",
+        description: error.message
+      })
+    }
+  }
+
+  const handleAddMember = async () => {
+    if (!newMember.name || !newMember.email || !newMember.memberId) {
+      toast({
+        variant: "destructive",
+        title: "Validation Error",
+        description: "Name, Email, and Member ID are required."
+      })
+      return
+    }
+
+    setIsAdding(true)
+    try {
+      await addDoc(collection(db, 'memberProfiles'), {
+        ...newMember,
+        createdAt: serverTimestamp(),
+      })
+      toast({
+        title: "Success",
+        description: "New personnel record established."
+      })
+      setIsAdding(false)
+      setNewMember({
+        name: '',
+        designation: '',
+        email: '',
+        phone: '',
+        level: 'National',
+        status: 'Active',
+        memberId: '',
+        stateName: ''
+      })
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "System Error",
+        description: error.message
+      })
+      setIsAdding(false)
+    }
   }
 
   const members = (firestoreMembers || []) as Member[]
@@ -97,13 +209,106 @@ export default function MembersPage() {
             <span>Official Membership Records</span>
           </div>
           <h1 className="text-5xl md:text-7xl font-headline font-bold mb-6">Verified <span className="text-accent italic">Personnel</span></h1>
-          <p className="text-indigo-100 max-w-2xl mx-auto text-lg">
+          <p className="text-indigo-100 max-w-2xl mx-auto text-lg mb-8">
             A dynamic ledger of our dedicated human rights defenders, updated in real-time by the central administration.
           </p>
+
+          {isAdmin && (
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button className="bg-accent text-primary font-bold rounded-2xl h-14 px-10 flex gap-2 hover:bg-accent/90 shadow-2xl shadow-accent/20 mx-auto transform hover:scale-105 transition-all">
+                  <Plus className="w-6 h-6" /> Commission New Membership
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-md bg-white rounded-[2rem] border-none shadow-2xl">
+                <DialogHeader>
+                  <DialogTitle className="text-2xl font-headline font-bold text-primary">New Personnel Record</DialogTitle>
+                  <DialogDescription>Add a new verified member to the public directory.</DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div className="space-y-2">
+                    <Label>Full Name</Label>
+                    <Input 
+                      placeholder="e.g. Animesh Dasgupta" 
+                      value={newMember.name} 
+                      onChange={(e) => setNewMember({...newMember, name: e.target.value})}
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Member ID</Label>
+                      <Input 
+                        placeholder="e.g. M1024" 
+                        value={newMember.memberId} 
+                        onChange={(e) => setNewMember({...newMember, memberId: e.target.value})}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Operational Level</Label>
+                      <Select value={newMember.level} onValueChange={(val) => setNewMember({...newMember, level: val as any})}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select Level" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="National">National</SelectItem>
+                          <SelectItem value="State">State</SelectItem>
+                          <SelectItem value="District">District</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  {newMember.level === 'State' && (
+                    <div className="space-y-2">
+                      <Label>State Chapter</Label>
+                      <Select value={newMember.stateName} onValueChange={(val) => setNewMember({...newMember, stateName: val})}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select State" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {chapters.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+                  <div className="space-y-2">
+                    <Label>Designation</Label>
+                    <Input 
+                      placeholder="e.g. State Secretary" 
+                      value={newMember.designation} 
+                      onChange={(e) => setNewMember({...newMember, designation: e.target.value})}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Official Email</Label>
+                    <Input 
+                      type="email" 
+                      placeholder="name@hrat-india.org" 
+                      value={newMember.email} 
+                      onChange={(e) => setNewMember({...newMember, email: e.target.value})}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Contact Phone</Label>
+                    <Input 
+                      placeholder="+91 XXXXX XXXXX" 
+                      value={newMember.phone} 
+                      onChange={(e) => setNewMember({...newMember, phone: e.target.value})}
+                    />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button onClick={handleAddMember} disabled={isAdding} className="w-full h-12 rounded-xl bg-primary text-white font-bold">
+                    {isAdding ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Plus className="w-4 h-4 mr-2" />}
+                    Confirm Commissioning
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          )}
         </div>
       </section>
 
-      <section className="py-12 bg-white border-b border-slate-200 sticky top-[72px] md:top-[84px] z-30">
+      <section className="py-12 bg-white border-b border-slate-200 sticky top-[72px] md:top-[84px] z-30 shadow-sm">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row gap-6 items-center justify-between">
             <div className="flex flex-wrap justify-center gap-2">
@@ -162,7 +367,7 @@ export default function MembersPage() {
                 filteredMembers.map((member) => {
                   const fallback = member.gender === 'female' ? '/dummy w.png' : '/dummy m.png'
                   return (
-                    <Card key={member.id} className="group border-none shadow-sm hover:shadow-xl transition-all duration-500 rounded-[2rem] overflow-hidden bg-white border border-slate-100">
+                    <Card key={member.id} className="group border-none shadow-sm hover:shadow-xl transition-all duration-500 rounded-[2rem] overflow-hidden bg-white border border-slate-100 relative">
                       <CardHeader className="p-0">
                         <div className="relative aspect-square overflow-hidden bg-slate-100">
                           <Image 
@@ -176,6 +381,43 @@ export default function MembersPage() {
                               {member.level}
                             </Badge>
                           </div>
+
+                          {isAdmin && (
+                            <div className="absolute top-4 left-4 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Link href={`/internal/members/${member.id}`}>
+                                <Button size="icon" className="bg-white/90 hover:bg-white text-primary rounded-full shadow-lg">
+                                  <Edit className="w-4 h-4" />
+                                </Button>
+                              </Link>
+                              
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button size="icon" className="bg-red-500/90 hover:bg-red-500 text-white rounded-full shadow-lg">
+                                    <Trash2 className="w-4 h-4" />
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent className="rounded-[2rem]">
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle className="flex items-center gap-2">
+                                      <AlertTriangle className="text-red-500 w-5 h-5" /> Confirm Deletion
+                                    </AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      Are you sure you want to remove <strong>{member.name}</strong> from the membership directory? This action cannot be undone.
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+                                    <AlertDialogAction 
+                                      onClick={() => handleDelete(member.id)}
+                                      className="bg-red-500 hover:bg-red-600 rounded-xl"
+                                    >
+                                      Delete Record
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            </div>
+                          )}
                         </div>
                       </CardHeader>
                       <CardContent className="p-6 space-y-4">
