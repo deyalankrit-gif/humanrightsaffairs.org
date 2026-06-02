@@ -16,9 +16,9 @@ const navLinks = [
   { name: 'Events', href: '/events' },
   { name: 'Leadership', href: '/leadership' },
   { name: 'Membership Dir', href: '/members' },
+  { name: 'Terminated List', href: '/terminated-members' },
   { name: 'Rights Center', href: '/#knowledge' },
   { name: 'Helpline', href: '/#helpline' },
-  { name: 'Be A Member', href: '/#membership' },
 ]
 
 export function Navbar() {
@@ -100,7 +100,7 @@ export function Navbar() {
         </Link>
 
         {/* Desktop Nav */}
-        <div className="hidden md:flex items-center gap-8">
+        <div className="hidden md:flex items-center gap-6">
           {navLinks.map((link) => {
             const isPageActive = pathname === link.href
             const isHashActive = isHome && activeHash && link.href === `/${activeHash}`
@@ -112,7 +112,7 @@ export function Navbar() {
                 key={link.name} 
                 href={link.href} 
                 className={cn(
-                  "text-sm font-bold tracking-wide transition-all duration-500 relative group py-2",
+                  "text-xs font-bold tracking-wide transition-all duration-500 relative group py-2",
                   navColorClass,
                   isActive ? "text-accent" : "hover:text-accent/80"
                 )}
@@ -128,7 +128,7 @@ export function Navbar() {
           <DonationDialog>
             <Button 
               variant="default" 
-              className="bg-accent text-primary hover:bg-accent/90 rounded-full px-8 font-bold shadow-lg shadow-accent/20 transition-transform active:scale-95"
+              className="bg-accent text-primary hover:bg-accent/90 rounded-full px-6 font-bold shadow-lg shadow-accent/20 transition-transform active:scale-95 text-xs"
             >
               Donate
             </Button>
