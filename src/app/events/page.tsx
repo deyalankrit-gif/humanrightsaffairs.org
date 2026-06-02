@@ -42,7 +42,7 @@ type Event = {
   title: string
   date: string
   location: string
-  category: "Campaign" | "Workshop" | "Convention" | "Relief"
+  category: "Campaign" | "Workshop" | "Convention" | "Relief" | "Social Projects"
   imageId?: string
   description: string
 }
@@ -137,7 +137,7 @@ export default function EventsPage() {
     (e.title.toLowerCase().includes(search.toLowerCase()) || e.location.toLowerCase().includes(search.toLowerCase()))
   )
 
-  const categories = ["All", "Campaign", "Workshop", "Convention", "Relief"]
+  const categories = ["All", "Campaign", "Workshop", "Convention", "Relief", "Social Projects"]
 
   return (
     <main className="min-h-screen bg-slate-50">
