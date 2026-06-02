@@ -21,7 +21,8 @@ import {
   Loader2,
   FileText,
   UserPlus,
-  Plus
+  Plus,
+  Layers
 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { 
@@ -95,7 +96,7 @@ export default function InternalMembersDirectory() {
         description: "New personnel record established."
       })
       setIsAdding(false)
-      // Reset form (simplistic)
+      // Reset form
       setNewMember({
         name: '',
         designation: '',
@@ -266,7 +267,11 @@ export default function InternalMembersDirectory() {
                       </div>
                       <div className="flex-1 p-8 grid lg:grid-cols-3 gap-8 items-center">
                         <div className="space-y-1">
-                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Personnel Name</p>
+                          <div className="flex items-center gap-2 mb-1">
+                             <Badge variant="outline" className="border-accent text-accent text-[9px] font-bold uppercase px-2 py-0">
+                                {member.level || 'Operational'}
+                             </Badge>
+                          </div>
                           <h3 className={`text-2xl font-bold transition-colors ${member.name === 'Dhritiman Dey' ? 'text-secondary' : 'text-primary'}`}>
                             {member.name}
                           </h3>

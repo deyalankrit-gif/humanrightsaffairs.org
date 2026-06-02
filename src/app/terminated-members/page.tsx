@@ -6,7 +6,7 @@ import Image from 'next/image'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 import { PlaceHolderImages } from '@/lib/placeholder-images'
-import { Search, UserX, AlertTriangle, ShieldAlert, Calendar, Hash, Info, Plus, Edit, Trash2, Loader2, Upload } from 'lucide-react'
+import { Search, UserX, AlertTriangle, ShieldAlert, Calendar, Hash, Info, Plus, Edit, Trash2, Loader2, Upload, Layers } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -43,6 +43,7 @@ type TerminatedMember = {
   id: string
   name: string
   designation: string
+  level?: "National" | "State" | "District"
   terminationDate: string
   reason: string
   status: "Revoked" | "Cancelled"
@@ -70,6 +71,7 @@ export default function TerminatedMembersPage() {
   const [newMember, setNewMember] = useState({
     name: '',
     designation: '',
+    level: 'National' as const,
     terminationDate: '',
     reason: '',
     status: 'Revoked' as const,
@@ -102,7 +104,7 @@ export default function TerminatedMembersPage() {
         createdAt: serverTimestamp()
       })
       toast({ title: "Entry Added", description: "Termination notice has been published." })
-      setNewMember({ name: '', designation: '', terminationDate: '', reason: '', status: 'Revoked', gender: 'male', imageId: '' })
+      setNewMember({ name: '', designation: '', level: 'National', terminationDate: '', reason: '', status: 'Revoked', gender: 'male', imageId: '' })
     } catch (e: any) {
       toast({ variant: "destructive", title: "Error", description: e.message })
     } finally {
@@ -200,12 +202,39 @@ export default function TerminatedMembersPage() {
                       <Input value={newMember.terminationDate} onChange={e => setNewMember({...newMember, terminationDate: e.target.value})} placeholder="Feb 12, 2024" />
                     </div>
                     <div className="space-y-2">
+                      <Label>Operational Level</Label>
+                      <Select value={newMember.level} onValueChange={(val: any) => setNewMember({...newMember, level: val})}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="National">National</SelectItem>
+                          <SelectItem value="State">State</SelectItem>
+                          <SelectItem value="District">District</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Designation (Last Held)</Label>
+                    <Input value={newMember.designation} onChange={e => setNewMember({...newMember, designation: e.target.value})} placeholder="e.g. District Observer" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
                       <Label>Status</Label>
                       <Select value={newMember.status} onValueChange={(val: any) => setNewMember({...newMember, status: val})}>
                         <SelectTrigger><SelectValue /></SelectTrigger>
                         <SelectContent>
                           <SelectItem value="Revoked">Revoked</SelectItem>
                           <SelectItem value="Cancelled">Cancelled</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Gender</Label>
+                      <Select value={newMember.gender} onValueChange={(val: any) => setNewMember({...newMember, gender: val})}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="male">Male</SelectItem>
+                          <SelectItem value="female">Female</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -283,8 +312,15 @@ export default function TerminatedMembersPage() {
                             
                             <div className="flex-1 p-8 grid md:grid-cols-2 gap-8 items-center">
                               <div className="space-y-2">
-                                <div className="flex items-center gap-2 text-slate-400 text-[10px] font-bold uppercase tracking-widest">
-                                  <Hash className="w-3 h-3" /> REF: {member.id.slice(-6).toUpperCase()}
+                                <div className="flex items-center gap-2">
+                                  <div className="flex items-center gap-1 text-slate-400 text-[10px] font-bold uppercase tracking-widest">
+                                    <Hash className="w-3 h-3" /> REF: {member.id.slice(-6).toUpperCase()}
+                                  </div>
+                                  {member.level && (
+                                    <Badge variant="outline" className="border-red-200 text-red-400 text-[9px] font-bold uppercase py-0">
+                                      {member.level}
+                                    </Badge>
+                                  )}
                                 </div>
                                 <h3 className="text-3xl font-headline font-bold text-primary group-hover:text-red-600 transition-colors">
                                   {member.name}
@@ -345,8 +381,21 @@ export default function TerminatedMembersPage() {
                                       </div>
                                     </div>
                                     <Input value={editMember.name} onChange={e => setEditMember({...editMember, name: e.target.value})} />
-                                    <Input value={editMember.designation} onChange={e => setEditMember({...editMember, designation: e.target.value})} />
-                                    <Input value={editMember.terminationDate} onChange={e => setEditMember({...editMember, terminationDate: e.target.value})} />
+                                    <div className="grid grid-cols-2 gap-4">
+                                      <div className="space-y-1">
+                                        <Label>Operational Level</Label>
+                                        <Select value={editMember.level} onValueChange={(val: any) => setEditMember({...editMember, level: val})}>
+                                          <SelectTrigger><SelectValue /></SelectTrigger>
+                                          <SelectContent>
+                                            <SelectItem value="National">National</SelectItem>
+                                            <SelectItem value="State">State</SelectItem>
+                                            <SelectItem value="District">District</SelectItem>
+                                          </SelectContent>
+                                        </Select>
+                                      </div>
+                                      <Input value={editMember.terminationDate} onChange={e => setEditMember({...editMember, terminationDate: e.target.value})} className="mt-5" />
+                                    </div>
+                                    <Input value={editMember.designation} onChange={e => setEditMember({...editMember, designation: e.target.value})} placeholder="Designation" />
                                     <Textarea value={editMember.reason} onChange={e => setEditMember({...editMember, reason: e.target.value})} />
                                     <Button onClick={handleUpdate} disabled={isActionLoading} className="w-full bg-primary text-white h-12 rounded-xl">
                                       {isActionLoading ? <Loader2 className="animate-spin mr-2" /> : "Save Changes"}
