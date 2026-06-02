@@ -6,7 +6,7 @@ import Image from 'next/image'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 import { PlaceHolderImages } from '@/lib/placeholder-images'
-import { Search, MapPin, BadgeCheck, User, Users, Briefcase, Hash, ChevronDown, Loader2 } from 'lucide-react'
+import { Search, MapPin, BadgeCheck, User, Users, Briefcase, ChevronDown, Loader2 } from 'lucide-react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -25,41 +25,23 @@ type Member = {
   memberId?: string
   name: string
   designation: string
-  jurisdiction: string
   level: "National" | "State" | "District"
   stateName?: string
   districtName?: string
   imageId?: string
   gender?: 'male' | 'female'
+  email?: string
+  phone?: string
 }
 
 const chapters = [
-  "West Bengal", "Tripura Chapter", "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", 
-  "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jharkhand", 
-  "Karnataka", "Kerala", "Madhya Pradesh", "Manipur", 
-  "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Punjab", 
-  "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura", 
-  "Uttar Pradesh", "Uttarakhand"
+  "West Bengal", "Tripura Chapter", "Delhi", "Maharashtra", "Tamil Nadu", "Karnataka", "Uttar Pradesh", "Bihar"
 ]
-
-const chapterToDistricts: Record<string, string[]> = {
-  "West Bengal": [
-    "Alipurduar", "Bankura", "Birbhum", "Cooch Behar", "Dakshin Dinajpur",
-    "Darjeeling", "Hooghly", "Howrah", "Jalpaiguri", "Jhargram",
-    "Kalimpong", "Kolkata", "Malda", "Murshidabad", "Nadia",
-    "North 24 Parganas", "Paschim Bardhaman", "Paschim Medinipur",
-    "Purba Bardhaman", "Purba Medinipur", "Purulia", "South 24 Parganas", "Uttar Dinajpur"
-  ],
-  "Tripura Chapter": [
-    "Dharmanagar", "Kailasahar", "Ambassa", "Khowai", "Belonia", "Bishalgarh", "Agartala"
-  ]
-}
 
 export default function MembersPage() {
   const [search, setSearch] = useState("")
   const [levelFilter, setLevelFilter] = useState<string>("All")
   const [selectedState, setSelectedState] = useState<string | null>(null)
-  const [selectedDistrict, setSelectedDistrict] = useState<string | null>(null)
   const [mounted, setMounted] = useState(false)
   const db = useFirestore()
 
@@ -74,51 +56,28 @@ export default function MembersPage() {
 
   const { data: firestoreMembers, loading: membersLoading } = useCollection(membersQuery);
 
-  const availableDistricts = useMemo(() => {
-    if (!selectedState) return []
-    return chapterToDistricts[selectedState] || []
-  }, [selectedState])
-
   const handleLevelClick = (level: string) => {
     setLevelFilter(level)
     setSelectedState(null)
-    setSelectedDistrict(null)
   }
 
   const handleStateSelect = (state: string) => {
     setLevelFilter("State")
     setSelectedState(state)
-    setSelectedDistrict(null) 
   }
 
-  const handleDistrictSelect = (district: string) => {
-    setLevelFilter("District")
-    setSelectedDistrict(district)
-  }
-
-  const members = useMemo(() => {
-    return (firestoreMembers || []) as Member[]
-  }, [firestoreMembers])
+  const members = (firestoreMembers || []) as Member[]
 
   const filteredMembers = members.filter(m => {
-    const matchesSearch = m.name.toLowerCase().includes(search.toLowerCase()) || 
-                          m.jurisdiction?.toLowerCase().includes(search.toLowerCase()) ||
-                          m.designation?.toLowerCase().includes(search.toLowerCase());
+    const matchesSearch = 
+      m.name.toLowerCase().includes(search.toLowerCase()) || 
+      m.designation?.toLowerCase().includes(search.toLowerCase()) ||
+      m.memberId?.toLowerCase().includes(search.toLowerCase());
     
     let matchesLevel = levelFilter === "All" || m.level === levelFilter;
     
     if (levelFilter === "State" && selectedState) {
       matchesLevel = m.level === "State" && m.stateName === selectedState;
-    }
-
-    if (levelFilter === "District") {
-      if (selectedState && selectedDistrict) {
-        matchesLevel = m.level === "District" && m.stateName === selectedState && m.districtName === selectedDistrict;
-      } else if (selectedState) {
-        matchesLevel = m.level === "District" && m.stateName === selectedState;
-      } else {
-        matchesLevel = m.level === "District";
-      }
     }
 
     return matchesSearch && matchesLevel;
@@ -135,11 +94,11 @@ export default function MembersPage() {
         <div className="container mx-auto px-4 relative z-10 text-center">
           <div className="inline-flex items-center gap-2 bg-accent/20 text-accent px-4 py-1.5 rounded-full text-sm font-bold border border-accent/30 mb-6">
             <Users className="w-4 h-4" />
-            <span>Official Personnel Directory</span>
+            <span>Official Membership Records</span>
           </div>
-          <h1 className="text-5xl md:text-7xl font-headline font-bold mb-6">Verified <span className="text-accent italic">Membership</span></h1>
+          <h1 className="text-5xl md:text-7xl font-headline font-bold mb-6">Verified <span className="text-accent italic">Personnel</span></h1>
           <p className="text-indigo-100 max-w-2xl mx-auto text-lg">
-            Meet the dedicated human rights defenders of JusticeShield, operating with transparency and integrity across the nation.
+            A dynamic ledger of our dedicated human rights defenders, updated in real-time by the central administration.
           </p>
         </div>
       </section>
@@ -148,20 +107,16 @@ export default function MembersPage() {
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row gap-6 items-center justify-between">
             <div className="flex flex-wrap justify-center gap-2">
-              <Button
-                variant={levelFilter === "All" ? "default" : "outline"}
-                onClick={() => handleLevelClick("All")}
-                className={`rounded-full px-6 font-bold ${levelFilter === "All" ? 'bg-primary text-white' : 'hover:border-accent hover:text-accent'}`}
-              >
-                All
-              </Button>
-              <Button
-                variant={levelFilter === "National" ? "default" : "outline"}
-                onClick={() => handleLevelClick("National")}
-                className={`rounded-full px-6 font-bold ${levelFilter === "National" ? 'bg-primary text-white' : 'hover:border-accent hover:text-accent'}`}
-              >
-                National
-              </Button>
+              {["All", "National", "State", "District"].map((level) => (
+                <Button
+                  key={level}
+                  variant={levelFilter === level ? "default" : "outline"}
+                  onClick={() => handleLevelClick(level)}
+                  className={`rounded-full px-6 font-bold ${levelFilter === level ? 'bg-primary text-white' : 'hover:border-accent hover:text-accent'}`}
+                >
+                  {level}
+                </Button>
+              ))}
               
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -169,13 +124,10 @@ export default function MembersPage() {
                     variant={levelFilter === "State" ? "default" : "outline"}
                     className={`rounded-full px-6 font-bold flex items-center gap-2 ${levelFilter === "State" ? 'bg-primary text-white' : 'hover:border-accent hover:text-accent'}`}
                   >
-                    {selectedState || "State/Chapter"} <ChevronDown className="w-4 h-4 opacity-50" />
+                    {selectedState || "Filter by Chapter"} <ChevronDown className="w-4 h-4 opacity-50" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="max-h-80 overflow-y-auto w-56">
-                  <DropdownMenuItem onClick={() => handleLevelClick("State")}>
-                    All States/Chapters
-                  </DropdownMenuItem>
                   {chapters.map((chapter) => (
                     <DropdownMenuItem key={chapter} onClick={() => handleStateSelect(chapter)}>
                       {chapter}
@@ -183,43 +135,12 @@ export default function MembersPage() {
                   ))}
                 </DropdownMenuContent>
               </DropdownMenu>
-
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant={levelFilter === "District" ? "default" : "outline"}
-                    className={`rounded-full px-6 font-bold flex items-center gap-2 ${levelFilter === "District" ? 'bg-primary text-white' : 'hover:border-accent hover:text-accent'}`}
-                  >
-                    {selectedDistrict || "District"} <ChevronDown className="w-4 h-4 opacity-50" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="max-h-80 overflow-y-auto w-56">
-                  {!selectedState ? (
-                    <div className="p-4 text-xs text-slate-400 italic">Select a State/Chapter first</div>
-                  ) : (
-                    <>
-                      <DropdownMenuItem onClick={() => handleLevelClick("District")}>
-                        All Districts in {selectedState}
-                      </DropdownMenuItem>
-                      {availableDistricts.length > 0 ? (
-                        availableDistricts.map((district, index) => (
-                          <DropdownMenuItem key={`${district}-${index}`} onClick={() => handleDistrictSelect(district)}>
-                            {district}
-                          </DropdownMenuItem>
-                        ))
-                      ) : (
-                        <div className="p-4 text-xs text-slate-400 italic">No districts listed for this region</div>
-                      )}
-                    </>
-                  )}
-                </DropdownMenuContent>
-              </DropdownMenu>
             </div>
             <div className="relative w-full md:w-96">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
               <Input 
-                placeholder="Search by name, designation or location..." 
-                className="pl-12 h-14 rounded-2xl border-slate-200 focus:ring-accent"
+                placeholder="Search by name, ID or role..." 
+                className="pl-12 h-14 rounded-2xl border-slate-200"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
@@ -233,64 +154,46 @@ export default function MembersPage() {
           {membersLoading ? (
             <div className="text-center py-20">
               <Loader2 className="w-10 h-10 animate-spin text-accent mx-auto mb-4" />
-              <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Accessing Verified Database...</p>
+              <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Fetching Live Directory...</p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {filteredMembers.length > 0 ? (
                 filteredMembers.map((member) => {
-                  const img = PlaceHolderImages.find(i => i.id === member.imageId)
                   const fallback = member.gender === 'female' ? '/dummy w.png' : '/dummy m.png'
-                  const isChairman = member.designation?.includes("Central Chairman")
-                  const isStateChairman = member.designation?.includes("Chairman (West Bengal)")
-                  const isMoumita = member.name === "Moumita Saha"
-                  const isDhritiman = member.name === "Dhritiman Dey"
-                  
                   return (
-                    <Card key={member.id} className="group border-none shadow-sm hover:shadow-xl transition-all duration-500 rounded-[1.5rem] md:rounded-[2rem] overflow-hidden bg-white border border-slate-100 flex flex-col h-full">
+                    <Card key={member.id} className="group border-none shadow-sm hover:shadow-xl transition-all duration-500 rounded-[2rem] overflow-hidden bg-white border border-slate-100">
                       <CardHeader className="p-0">
-                        <div className="relative aspect-[3/4] overflow-hidden">
+                        <div className="relative aspect-square overflow-hidden bg-slate-100">
                           <Image 
-                            src={img?.imageUrl || fallback} 
+                            src={member.imageId || fallback} 
                             alt={member.name} 
                             fill 
-                            className="object-cover group-hover:scale-110 transition-transform duration-700"
-                            data-ai-hint={img?.imageHint}
+                            className="object-cover group-hover:scale-105 transition-transform duration-500"
                           />
-                          <div className="absolute top-3 right-3">
-                            <Badge className="bg-white/90 backdrop-blur-md text-primary font-bold shadow-lg border-none px-2 py-0.5 text-[8px] md:text-[10px]">
+                          <div className="absolute top-4 right-4">
+                            <Badge className="bg-primary/80 backdrop-blur-md text-white font-bold border-none">
                               {member.level}
                             </Badge>
                           </div>
-                          <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-primary/95 via-primary/60 to-transparent">
-                              <div className="flex items-center gap-1.5 text-accent mb-1">
-                                <BadgeCheck className="w-3 h-3 md:w-4 md:h-4 fill-accent text-primary" />
-                                <span className="text-[6px] md:text-[8px] font-bold uppercase tracking-[0.2em] text-white">ID: {member.memberId || member.id.slice(0, 5)}</span>
-                              </div>
-                              <h3 className={`font-headline font-bold group-hover:text-accent transition-colors ${isChairman || isStateChairman ? 'text-sm md:text-base' : 'text-xs md:text-sm'} ${isDhritiman ? 'text-secondary' : isMoumita ? 'text-secondary' : 'text-white'}`}>
-                              {member.name}
-                            </h3>
-                          </div>
                         </div>
                       </CardHeader>
-                      <CardContent className="p-4 space-y-3 flex-1">
+                      <CardContent className="p-6 space-y-4">
                         <div className="flex items-start gap-2">
-                          <div className="p-1.5 bg-slate-50 rounded-lg group-hover:bg-accent/10 transition-colors">
-                            <Briefcase className="w-3 h-3 md:w-4 md:h-4 text-slate-400 group-hover:text-accent" />
-                          </div>
-                          <div>
-                            <p className="text-[6px] md:text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Designation</p>
-                            <p className={`font-bold text-primary leading-tight ${isChairman || isStateChairman ? 'text-[10px] md:text-xs' : 'text-[9px] md:text-[11px]'}`}>{member.designation}</p>
-                          </div>
+                           <BadgeCheck className="w-5 h-5 text-accent shrink-0 mt-1" />
+                           <div>
+                             <h3 className="font-headline font-bold text-xl text-primary leading-tight">{member.name}</h3>
+                             <p className="text-xs font-bold text-accent uppercase tracking-widest mt-1">{member.designation}</p>
+                           </div>
                         </div>
-                        
-                        <div className="flex items-start gap-2">
-                          <div className="p-1.5 bg-slate-50 rounded-lg group-hover:bg-accent/10 transition-colors">
-                            <MapPin className="w-3 h-3 md:w-4 md:h-4 text-slate-400 group-hover:text-accent" />
+                        <div className="space-y-2 pt-2 border-t border-slate-100">
+                          <div className="flex items-center gap-2 text-xs text-slate-500">
+                            <MapPin className="w-3 h-3 text-slate-400" />
+                            <span>{member.stateName || 'All India'}</span>
                           </div>
-                          <div>
-                            <p className="text-[6px] md:text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Jurisdiction</p>
-                            <p className="font-bold text-slate-600 text-[9px] md:text-[11px] leading-tight">{member.jurisdiction}</p>
+                          <div className="flex items-center gap-2 text-xs text-slate-500">
+                            <Briefcase className="w-3 h-3 text-slate-400" />
+                            <span>ID: {member.memberId || 'N/A'}</span>
                           </div>
                         </div>
                       </CardContent>
@@ -299,11 +202,9 @@ export default function MembersPage() {
                 })
               ) : (
                 <div className="col-span-full py-32 text-center">
-                  <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-300">
-                    <User className="w-10 h-10" />
-                  </div>
+                  <User className="w-16 h-16 text-slate-200 mx-auto mb-4" />
                   <h3 className="text-2xl font-headline font-bold text-primary">No members found</h3>
-                  <p className="text-slate-500">Try adjusting your filters or search terms.</p>
+                  <p className="text-slate-500">The directory is empty or no matches were found.</p>
                 </div>
               )}
             </div>

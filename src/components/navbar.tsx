@@ -4,12 +4,13 @@
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Menu } from 'lucide-react'
+import { Menu, LayoutDashboard } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger } from '@/components/ui/sheet'
 import { usePathname } from 'next/navigation'
 import { DonationDialog } from './donation-dialog'
 import { cn } from '@/lib/utils'
+import { useUser } from '@/firebase'
 
 const navLinks = [
   { name: 'Home', href: '/' },
@@ -27,6 +28,7 @@ export function Navbar() {
   const [activeHash, setActiveHash] = useState('')
   const pathname = usePathname()
   const isHome = pathname === '/'
+  const { user } = useUser()
 
   useEffect(() => {
     setMounted(true)
@@ -58,18 +60,7 @@ export function Navbar() {
   const navColorClass = (isScrolled || !isHome) ? 'text-primary' : 'text-white'
   const bgColorClass = (isScrolled || !isHome) ? 'bg-white/95 backdrop-blur-md shadow-lg py-3' : 'bg-transparent py-6'
 
-  if (!mounted) {
-    return (
-      <nav className={cn("fixed top-0 w-full z-50 transition-all duration-500", bgColorClass)}>
-        <div className="container mx-auto px-4 flex items-center justify-between">
-           <div className="flex items-center gap-2">
-            <div className="w-12 h-12 rounded-full bg-slate-200/20 animate-pulse"></div>
-            <div className="h-6 w-24 bg-slate-200/20 animate-pulse rounded"></div>
-           </div>
-        </div>
-      </nav>
-    )
-  }
+  if (!mounted) return null
 
   return (
     <nav className={cn(
@@ -88,7 +79,6 @@ export function Navbar() {
                 priority
               />
             </div>
-            <div className="absolute inset-0 bg-accent/20 blur-lg rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
           </div>
           <div className="flex flex-col">
             <span className={cn(
@@ -104,8 +94,7 @@ export function Navbar() {
           {navLinks.map((link) => {
             const isPageActive = pathname === link.href
             const isHashActive = isHome && activeHash && link.href === `/${activeHash}`
-            const isHomeRootActive = link.href === '/' && isHome && !activeHash
-            const isActive = isPageActive || isHashActive || isHomeRootActive
+            const isActive = isPageActive || isHashActive || (link.href === '/' && isHome && !activeHash)
 
             return (
               <Link 
@@ -118,17 +107,29 @@ export function Navbar() {
                 )}
               >
                 {link.name}
-                <span className={cn(
-                  "absolute bottom-0 left-0 h-0.5 bg-accent transition-all duration-300",
-                  isActive ? "w-full" : "w-0 group-hover:w-full"
-                )}></span>
               </Link>
             )
           })}
+          
+          {user && (
+            <Link href="/internal/analytics">
+              <Button 
+                variant="outline" 
+                className={cn(
+                  "border-accent/30 text-accent hover:bg-accent hover:text-primary rounded-full px-4 font-bold text-[10px] uppercase tracking-widest flex gap-2 h-9",
+                  !isScrolled && isHome ? "bg-white/10 border-white/20 text-white" : ""
+                )}
+              >
+                <LayoutDashboard className="w-3.5 h-3.5" />
+                Admin Panel
+              </Button>
+            </Link>
+          )}
+
           <DonationDialog>
             <Button 
               variant="default" 
-              className="bg-accent text-primary hover:bg-accent/90 rounded-full px-6 font-bold shadow-lg shadow-accent/20 transition-transform active:scale-95 text-xs"
+              className="bg-accent text-primary hover:bg-accent/90 rounded-full px-6 font-bold shadow-lg shadow-accent/20 transition-transform active:scale-95 text-xs h-9"
             >
               Donate
             </Button>
@@ -136,7 +137,14 @@ export function Navbar() {
         </div>
 
         {/* Mobile Nav */}
-        <div className="md:hidden">
+        <div className="md:hidden flex items-center gap-4">
+           {user && (
+             <Link href="/internal/analytics">
+               <Button variant="ghost" size="icon" className={navColorClass}>
+                 <LayoutDashboard className="w-6 h-6" />
+               </Button>
+             </Link>
+           )}
           <Sheet>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className={navColorClass}>
@@ -147,41 +155,28 @@ export function Navbar() {
               <SheetHeader className="text-left mb-8">
                 <SheetTitle className="flex items-center gap-2">
                    <div className="relative w-10 h-10">
-                    <Image 
-                      src="/HRAT%20Logo.jpeg" 
-                      alt="HRAT Official Logo" 
-                      fill 
-                      className="object-contain"
-                    />
+                    <Image src="/HRAT%20Logo.jpeg" alt="HRAT" fill className="object-contain" />
                    </div>
                    <span className="font-headline font-bold text-2xl text-primary">JusticeShield</span>
                 </SheetTitle>
-                <SheetDescription className="text-[10px] font-bold tracking-widest text-accent uppercase">
-                  Central Government Registered Human Rights Organization
-                </SheetDescription>
               </SheetHeader>
-              <div className="flex flex-col gap-6">
-                {navLinks.map((link) => {
-                  const isPageActive = pathname === link.href
-                  const isHashActive = isHome && activeHash && link.href === `/${activeHash}`
-                  const isHomeRootActive = link.href === '/' && isHome && !activeHash
-                  const isActive = isPageActive || isHashActive || isHomeRootActive
-                  
-                  return (
-                    <Link 
-                      key={link.name} 
-                      href={link.href} 
-                      className={cn(
-                        "text-2xl font-headline font-bold transition-colors border-l-4 pl-4",
-                        isActive ? "text-accent border-accent" : "text-primary border-transparent hover:text-accent"
-                      )}
-                    >
-                      {link.name}
-                    </Link>
-                  )
-                })}
+              <div className="flex flex-col gap-4">
+                {navLinks.map((link) => (
+                  <Link 
+                    key={link.name} 
+                    href={link.href} 
+                    className="text-xl font-headline font-bold text-primary hover:text-accent"
+                  >
+                    {link.name}
+                  </Link>
+                ))}
+                {user && (
+                  <Link href="/internal/analytics" className="text-xl font-headline font-bold text-accent">
+                    Admin Panel
+                  </Link>
+                )}
                 <DonationDialog>
-                  <Button className="w-full bg-primary text-white py-8 text-xl mt-8 shadow-xl rounded-2xl">
+                  <Button className="w-full bg-primary text-white py-6 text-lg mt-4">
                     Donate Now
                   </Button>
                 </DonationDialog>
