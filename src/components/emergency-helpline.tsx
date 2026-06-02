@@ -16,6 +16,45 @@ const helplines = [
   { id: 6, name: "Cyber Crime Helpline", phone: "1930", state: "National", type: "Cyber" },
 ]
 
+const statesAndUTs = [
+  "Andaman and Nicobar Islands",
+  "Andhra Pradesh",
+  "Arunachal Pradesh",
+  "Assam",
+  "Bihar",
+  "Chandigarh",
+  "Chhattisgarh",
+  "Dadra and Nagar Haveli and Daman and Diu",
+  "Delhi",
+  "Goa",
+  "Gujarat",
+  "Haryana",
+  "Himachal Pradesh",
+  "Jammu and Kashmir",
+  "Jharkhand",
+  "Karnataka",
+  "Kerala",
+  "Ladakh",
+  "Lakshadweep",
+  "Madhya Pradesh",
+  "Maharashtra",
+  "Manipur",
+  "Meghalaya",
+  "Mizoram",
+  "Nagaland",
+  "Odisha",
+  "Puducherry",
+  "Punjab",
+  "Rajasthan",
+  "Sikkim",
+  "Tamil Nadu",
+  "Telangana",
+  "Tripura",
+  "Uttar Pradesh",
+  "Uttarakhand",
+  "West Bengal"
+]
+
 export function EmergencyHelpline() {
   const [filter, setFilter] = React.useState("")
   const [stateFilter, setStateFilter] = React.useState("all")
@@ -88,8 +127,9 @@ export function EmergencyHelpline() {
             <SelectContent>
               <SelectItem value="all">All States</SelectItem>
               <SelectItem value="national">National</SelectItem>
-              <SelectItem value="delhi">Delhi</SelectItem>
-              <SelectItem value="mumbai">Maharashtra</SelectItem>
+              {statesAndUTs.map(s => (
+                <SelectItem key={s} value={s.toLowerCase()}>{s}</SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>

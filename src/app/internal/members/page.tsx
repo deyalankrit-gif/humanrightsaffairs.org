@@ -38,6 +38,45 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'
 
+const chapters = [
+  "Andaman and Nicobar Islands",
+  "Andhra Pradesh",
+  "Arunachal Pradesh",
+  "Assam",
+  "Bihar",
+  "Chandigarh",
+  "Chhattisgarh",
+  "Dadra and Nagar Haveli and Daman and Diu",
+  "Delhi",
+  "Goa",
+  "Gujarat",
+  "Haryana",
+  "Himachal Pradesh",
+  "Jammu and Kashmir",
+  "Jharkhand",
+  "Karnataka",
+  "Kerala",
+  "Ladakh",
+  "Lakshadweep",
+  "Madhya Pradesh",
+  "Maharashtra",
+  "Manipur",
+  "Meghalaya",
+  "Mizoram",
+  "Nagaland",
+  "Odisha",
+  "Puducherry",
+  "Punjab",
+  "Rajasthan",
+  "Sikkim",
+  "Tamil Nadu",
+  "Telangana",
+  "Tripura",
+  "Uttar Pradesh",
+  "Uttarakhand",
+  "West Bengal"
+]
+
 export default function InternalMembersDirectory() {
   const { user, loading: authLoading } = useUser()
   const router = useRouter()
@@ -54,7 +93,8 @@ export default function InternalMembersDirectory() {
     phone: '',
     level: 'National',
     status: 'Active',
-    memberId: ''
+    memberId: '',
+    stateName: ''
   })
 
   const profilesQuery = useMemoFirebase(() => {
@@ -88,7 +128,7 @@ export default function InternalMembersDirectory() {
         ...newMember,
         createdAt: serverTimestamp(),
         // Defaults for required display fields if not provided
-        jurisdiction: newMember.level === 'National' ? 'All India' : 'Regional',
+        jurisdiction: newMember.level === 'National' ? 'All India' : (newMember.stateName || 'Regional'),
         gender: 'male' // Default
       })
       toast({
@@ -104,7 +144,8 @@ export default function InternalMembersDirectory() {
         phone: '',
         level: 'National',
         status: 'Active',
-        memberId: ''
+        memberId: '',
+        stateName: ''
       })
     } catch (error: any) {
       toast({
@@ -193,6 +234,19 @@ export default function InternalMembersDirectory() {
                       </Select>
                     </div>
                   </div>
+                  {newMember.level === 'State' && (
+                    <div className="space-y-2">
+                      <Label>State Chapter</Label>
+                      <Select value={newMember.stateName} onValueChange={(val) => setNewMember({...newMember, stateName: val})}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select State" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {chapters.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
                   <div className="space-y-2">
                     <Label>Designation</Label>
                     <Input 
