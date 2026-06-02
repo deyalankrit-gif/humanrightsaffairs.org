@@ -9,9 +9,10 @@ service cloud.firestore {
               get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin');
     }
 
-    // Member profiles are restricted to the designated Admin only
+    // Member profiles: Publicly readable for the directory, Admin write
     match /memberProfiles/{profileId} {
-      allow read, write: if isAdmin();
+      allow read: if true;
+      allow write: if isAdmin();
     }
     
     // User roles collection for granular authorization
@@ -25,6 +26,24 @@ service cloud.firestore {
     match /donations/{donationId} {
       allow create: if true;
       allow read: if isAdmin();
+    }
+
+    // Organizational Events: Public read, Admin write
+    match /events/{eventId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Leadership Hierarchy: Public read, Admin write
+    match /leadership/{leaderId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Public Termination Notices: Public read, Admin write
+    match /terminatedMembers/{memberId} {
+      allow read: if true;
+      allow write: if isAdmin();
     }
   }
 }
