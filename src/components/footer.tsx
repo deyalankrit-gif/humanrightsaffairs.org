@@ -92,7 +92,7 @@ export function Footer() {
               <ul className="space-y-4 text-indigo-100">
                 <li className="flex gap-3">
                   <MapPin className="w-5 h-5 text-accent shrink-0" />
-                  <span className="text-sm">Vill - Biswanathpur, P.O. & P.S. - Ramnathpur, Deganga, West Bengal - 743423</span>
+                  <span className="text-sm">Vill. - Biswanathpur, P.O. - Ramnathpur, P.S. - Deganga, Dist. - North 24 Parganas, West Bengal - 743423</span>
                 </li>
                 <li className="flex gap-3">
                   <Phone className="w-5 h-5 text-accent shrink-0" />
