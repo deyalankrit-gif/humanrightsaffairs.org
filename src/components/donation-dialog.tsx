@@ -91,7 +91,10 @@ export function DonationDialog({ children, defaultAmount }: { children: React.Re
       timestamp: new Date().toLocaleString()
     }
     setDonationData(data)
+    
+    // Simulate data verification
     setTimeout(() => {
+      // If a preset was clicked, we can guide them straight to the QR option logic
       setStep('payment')
       setLoading(false)
     }, 1000)
