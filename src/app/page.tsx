@@ -180,11 +180,11 @@ export default function Home() {
           <div className="bg-primary rounded-[2rem] md:rounded-[4rem] p-8 md:p-24 flex flex-col items-center text-center text-white shadow-2xl relative overflow-hidden group">
             
             {/* 2D Animated Illustrations on Blank Sections */}
-            <div className="absolute left-4 md:left-12 top-1/2 -translate-y-1/2 w-32 h-44 md:w-64 md:h-80 hidden lg:block animate-float pointer-events-none">
+            <div className="absolute left-4 md:left-12 top-1/2 -translate-y-1/2 w-32 h-44 md:w-64 md:h-80 hidden lg:block animate-float pointer-events-none z-20">
               <div className="relative w-full h-full rounded-[2rem] md:rounded-[3rem] overflow-hidden border-4 md:border-8 border-white shadow-2xl rotate-[-6deg] bg-slate-200">
                 <Image 
                   src="/female.jpeg" 
-                  alt="Hope" 
+                  alt="Inspiration 1" 
                   fill 
                   className="object-cover grayscale group-hover:grayscale-0 transition-all duration-1000"
                 />
@@ -192,11 +192,11 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="absolute right-4 md:right-12 top-1/2 -translate-y-1/2 w-32 h-44 md:w-64 md:h-80 hidden lg:block animate-float animate-delay-500 pointer-events-none">
+            <div className="absolute right-4 md:right-12 top-1/2 -translate-y-1/2 w-32 h-44 md:w-64 md:h-80 hidden lg:block animate-float animate-delay-500 pointer-events-none z-20">
               <div className="relative w-full h-full rounded-[2rem] md:rounded-[3rem] overflow-hidden border-4 md:border-8 border-white shadow-2xl rotate-[6deg] bg-slate-200">
                 <Image 
                   src="/child.jpeg" 
-                  alt="Future" 
+                  alt="Inspiration 2" 
                   fill 
                   className="object-cover grayscale group-hover:grayscale-0 transition-all duration-1000"
                 />
@@ -204,20 +204,18 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Main Background atmospheric overlay */}
-            <div className="absolute top-0 left-0 w-full h-full pointer-events-none select-none">
-              <div className="absolute inset-0 bg-primary/80 z-10"></div>
-              <div className="absolute inset-0 opacity-30 grayscale overflow-hidden">
-                <Image 
-                  src="/female.jpeg" 
-                  alt="Background Story" 
-                  fill 
-                  className="object-cover"
-                />
-              </div>
+            {/* Background Texture Overlay */}
+            <div className="absolute inset-0 z-0 opacity-10 pointer-events-none">
+              <Image 
+                src="/female.jpeg" 
+                alt="Background" 
+                fill 
+                className="object-cover grayscale"
+              />
+              <div className="absolute inset-0 bg-primary/90"></div>
             </div>
 
-            <div className="max-w-4xl space-y-6 md:space-y-10 relative z-20">
+            <div className="max-w-4xl space-y-6 md:space-y-10 relative z-30">
               <div className="animate-float">
                 <Scale className="w-12 h-12 md:w-24 md:h-24 text-accent mx-auto" />
               </div>
