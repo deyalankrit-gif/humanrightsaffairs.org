@@ -178,10 +178,36 @@ export default function Home() {
         <div className="absolute -top-24 -left-24 w-96 h-96 bg-accent/10 rounded-full blur-3xl animate-pulse"></div>
         <div className="container mx-auto px-4 relative z-10">
           <div className="bg-primary rounded-[2rem] md:rounded-[4rem] p-8 md:p-24 flex flex-col items-center text-center text-white shadow-2xl relative overflow-hidden group">
-            {/* Background images as atmospheric overlays */}
+            
+            {/* 2D Animated Illustrations on Blank Sections */}
+            <div className="absolute left-4 md:left-12 top-1/2 -translate-y-1/2 w-32 h-44 md:w-64 md:h-80 hidden lg:block animate-float pointer-events-none">
+              <div className="relative w-full h-full rounded-[2rem] md:rounded-[3rem] overflow-hidden border-4 md:border-8 border-white shadow-2xl rotate-[-6deg] bg-slate-200">
+                <Image 
+                  src="/female.jpeg" 
+                  alt="Hope" 
+                  fill 
+                  className="object-cover grayscale group-hover:grayscale-0 transition-all duration-1000"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-primary/40 to-transparent"></div>
+              </div>
+            </div>
+
+            <div className="absolute right-4 md:right-12 top-1/2 -translate-y-1/2 w-32 h-44 md:w-64 md:h-80 hidden lg:block animate-float animate-delay-500 pointer-events-none">
+              <div className="relative w-full h-full rounded-[2rem] md:rounded-[3rem] overflow-hidden border-4 md:border-8 border-white shadow-2xl rotate-[6deg] bg-slate-200">
+                <Image 
+                  src="/child.jpeg" 
+                  alt="Future" 
+                  fill 
+                  className="object-cover grayscale group-hover:grayscale-0 transition-all duration-1000"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-primary/40 to-transparent"></div>
+              </div>
+            </div>
+
+            {/* Main Background atmospheric overlay */}
             <div className="absolute top-0 left-0 w-full h-full pointer-events-none select-none">
-              <div className="absolute inset-0 bg-primary/60 z-10"></div>
-              <div className="absolute inset-0 opacity-20 md:opacity-40 grayscale group-hover:grayscale-0 transition-all duration-1000 overflow-hidden">
+              <div className="absolute inset-0 bg-primary/80 z-10"></div>
+              <div className="absolute inset-0 opacity-30 grayscale overflow-hidden">
                 <Image 
                   src="/female.jpeg" 
                   alt="Background Story" 
