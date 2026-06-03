@@ -1,4 +1,3 @@
-
 import type {Metadata} from 'next';
 import './globals.css';
 import { FirebaseClientProvider } from '@/firebase';
@@ -7,7 +6,7 @@ import { Toaster } from '@/components/ui/toaster';
 
 export const metadata: Metadata = {
   title: 'Human Rights Affairs Trust (JusticeShield)',
-  description: 'Central Government Registered Human Rights Organization in India. Protecting constitutional rights through legal aid and awareness.',
+  description: 'Human Rights Affairs Trust (Justice Shield) is a Central Government Registered Human Rights Organization in India (Reg. No. WB/2025/0762605). Dedicated to constitutional literacy and legal aid Social Justice.',
 };
 
 export default function RootLayout({
