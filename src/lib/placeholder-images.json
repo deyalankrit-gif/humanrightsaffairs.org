@@ -86,15 +86,15 @@
     },
     {
       "id": "child-illustration-1",
-      "description": "Inspirational 2D illustration of a child for donation appeal",
-      "imageUrl": "https://picsum.photos/seed/childsmile/400/400",
-      "imageHint": "child illustration"
+      "description": "Inspirational image for donation appeal (Female)",
+      "imageUrl": "/female.jpeg",
+      "imageHint": "woman portrait"
     },
     {
       "id": "child-illustration-2",
-      "description": "Inspirational 2D illustration of children studying",
-      "imageUrl": "https://picsum.photos/seed/childstudy/400/400",
-      "imageHint": "children studying"
+      "description": "Inspirational image for donation appeal (Child)",
+      "imageUrl": "/child.jpeg",
+      "imageHint": "child portrait"
     }
   ]
 }

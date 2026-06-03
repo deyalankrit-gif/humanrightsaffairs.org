@@ -1,4 +1,3 @@
-
 import Image from 'next/image'
 import Link from 'next/link'
 import { Navbar } from '@/components/navbar'
@@ -186,19 +185,19 @@ export default function Home() {
             {/* 2D Animated Illustrations for the blank sections */}
             <div className="absolute top-10 left-10 w-32 h-32 md:w-48 md:h-48 opacity-20 md:opacity-40 animate-float pointer-events-none hidden md:block">
                <Image 
-                src={child1?.imageUrl || "https://picsum.photos/seed/child1/400/400"} 
+                src={child1?.imageUrl || "/female.jpeg"} 
                 alt="Support Justice" 
                 fill 
-                className="object-contain rounded-full shadow-2xl border-4 border-white/20"
+                className="object-cover rounded-full shadow-2xl border-4 border-white/20"
                 data-ai-hint={child1?.imageHint}
                />
             </div>
             <div className="absolute bottom-10 right-10 w-32 h-32 md:w-56 md:h-56 opacity-20 md:opacity-40 animate-float animate-delay-300 pointer-events-none hidden md:block">
                <Image 
-                src={child2?.imageUrl || "https://picsum.photos/seed/child2/400/400"} 
+                src={child2?.imageUrl || "/child.jpeg"} 
                 alt="Empowerment" 
                 fill 
-                className="object-contain rounded-full shadow-2xl border-4 border-white/20"
+                className="object-cover rounded-full shadow-2xl border-4 border-white/20"
                 data-ai-hint={child2?.imageHint}
                />
             </div>
