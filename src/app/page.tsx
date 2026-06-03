@@ -182,28 +182,26 @@ export default function Home() {
         <div className="container mx-auto px-4 relative z-10">
           <div className="bg-primary rounded-[2rem] md:rounded-[4rem] p-8 md:p-24 flex flex-col items-center text-center text-white shadow-2xl relative overflow-hidden group">
             
-            {/* 2D Animated Illustrations on Sides */}
-            <div className="absolute left-4 md:left-12 top-1/2 -translate-y-1/2 w-32 h-44 md:w-64 md:h-80 hidden lg:block animate-float pointer-events-none z-20">
+            {/* 2D Animated Illustrations on Sides - Refined positioning to avoid obscuring text */}
+            <div className="absolute -left-12 top-1/2 -translate-y-1/2 w-44 h-60 md:w-64 md:h-80 hidden xl:block animate-float pointer-events-none z-10 opacity-30 group-hover:opacity-100 transition-opacity">
               <div className="relative w-full h-full rounded-[2rem] md:rounded-[3rem] overflow-hidden border-4 md:border-8 border-white shadow-2xl rotate-[-6deg] bg-slate-200">
                 <Image 
                   src={donationImg1?.imageUrl || "/female.jpeg"} 
                   alt="Inspiration Female" 
                   fill 
                   className="object-cover grayscale group-hover:grayscale-0 transition-all duration-1000"
-                  data-ai-hint="inspiring portrait"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-primary/40 to-transparent"></div>
               </div>
             </div>
 
-            <div className="absolute right-4 md:right-12 top-1/2 -translate-y-1/2 w-32 h-44 md:w-64 md:h-80 hidden lg:block animate-float animate-delay-500 pointer-events-none z-20">
+            <div className="absolute -right-12 top-1/2 -translate-y-1/2 w-44 h-60 md:w-64 md:h-80 hidden xl:block animate-float animate-delay-500 pointer-events-none z-10 opacity-30 group-hover:opacity-100 transition-opacity">
               <div className="relative w-full h-full rounded-[2rem] md:rounded-[3rem] overflow-hidden border-4 md:border-8 border-white shadow-2xl rotate-[6deg] bg-slate-200">
                 <Image 
                   src={donationImg2?.imageUrl || "/child.jpeg"} 
                   alt="Inspiration Child" 
                   fill 
                   className="object-cover grayscale group-hover:grayscale-0 transition-all duration-1000"
-                  data-ai-hint="hopeful child"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-primary/40 to-transparent"></div>
               </div>
@@ -220,10 +218,10 @@ export default function Home() {
               <div className="absolute inset-0 bg-primary/90"></div>
             </div>
 
-            <div className="max-w-4xl space-y-6 md:space-y-10 relative z-30">
-              {/* Pictures flanking the Scale icon */}
-              <div className="flex items-center justify-center gap-6 md:gap-12 animate-float">
-                <div className="relative w-16 h-20 md:w-32 md:h-44 rounded-2xl md:rounded-[2.5rem] overflow-hidden border-2 md:border-4 border-white/20 rotate-[-8deg] shadow-2xl hidden sm:block">
+            <div className="max-w-4xl space-y-6 md:space-y-10 relative z-30 px-4 md:px-10">
+              {/* Pictures flanking the Scale icon - Refined for better spacing */}
+              <div className="flex items-center justify-center gap-4 md:gap-16 animate-float">
+                <div className="relative w-14 h-16 md:w-28 md:h-36 rounded-2xl md:rounded-[2rem] overflow-hidden border-2 md:border-4 border-white/20 rotate-[-8deg] shadow-2xl hidden sm:block shrink-0">
                   <Image 
                     src={donationImg1?.imageUrl || "/female.jpeg"} 
                     alt="Support" 
@@ -231,8 +229,8 @@ export default function Home() {
                     className="object-cover"
                   />
                 </div>
-                <Scale className="w-12 h-12 md:w-24 md:h-24 text-accent shrink-0" />
-                <div className="relative w-16 h-20 md:w-32 md:h-44 rounded-2xl md:rounded-[2.5rem] overflow-hidden border-2 md:border-4 border-white/20 rotate-[8deg] shadow-2xl hidden sm:block">
+                <Scale className="w-10 h-10 md:w-20 md:h-20 text-accent shrink-0" />
+                <div className="relative w-14 h-16 md:w-28 md:h-36 rounded-2xl md:rounded-[2rem] overflow-hidden border-2 md:border-4 border-white/20 rotate-[8deg] shadow-2xl hidden sm:block shrink-0">
                   <Image 
                     src={donationImg2?.imageUrl || "/child.jpeg"} 
                     alt="Support" 
@@ -243,7 +241,7 @@ export default function Home() {
               </div>
 
               <h2 className="text-3xl md:text-7xl font-headline font-bold">Support the Cause of <span className="text-accent italic">Justice</span></h2>
-              <p className="text-sm md:text-xl text-indigo-100 leading-relaxed max-w-2xl mx-auto">
+              <p className="text-sm md:text-xl text-indigo-100 leading-relaxed max-w-2xl mx-auto font-medium">
                 Your contributions help us provide free legal aid to the marginalized and run awareness campaigns across rural India. All donations are tax-exempt under 80G.
               </p>
               
