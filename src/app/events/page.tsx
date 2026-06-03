@@ -1,18 +1,20 @@
 
 "use client"
 
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import Image from 'next/image'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 import { PlaceHolderImages } from '@/lib/placeholder-images'
-import { Calendar, MapPin, Search, Filter, ArrowRight, Camera, Plus, Edit, Trash2, AlertTriangle, Loader2, Upload } from 'lucide-react'
+import { Calendar, MapPin, Search, ArrowRight, Camera, Plus, Edit, Trash2, Loader2, Upload } from 'lucide-react'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { useCollection, useFirestore, useMemoFirebase, useUser } from '@/firebase'
 import { collection, query, orderBy, addDoc, deleteDoc, doc, updateDoc, serverTimestamp } from 'firebase/firestore'
+import { errorEmitter } from '@/firebase/error-emitter'
+import { FirestorePermissionError, type SecurityRuleContext } from '@/firebase/errors'
 import {
   Dialog,
   DialogContent,
@@ -51,6 +53,7 @@ export default function EventsPage() {
   const [filter, setFilter] = useState("All")
   const [search, setSearch] = useState("")
   const [isActionLoading, setIsActionLoading] = useState(false)
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const { user } = useUser()
   const db = useFirestore()
   const { toast } = useToast()
@@ -90,45 +93,69 @@ export default function EventsPage() {
     }
   }
 
-  const handleAddEvent = async () => {
+  const handleAddEvent = () => {
     if (!newEvent.title || !newEvent.date || !newEvent.location) return
     setIsActionLoading(true)
-    try {
-      await addDoc(collection(db, 'events'), {
-        ...newEvent,
-        createdAt: serverTimestamp()
+    
+    const eventData = {
+      ...newEvent,
+      createdAt: serverTimestamp()
+    }
+
+    addDoc(collection(db, 'events'), eventData)
+      .then(() => {
+        toast({ title: "Event Created", description: "The new event has been added to the gallery." })
+        setNewEvent({ title: '', date: '', location: '', category: 'Campaign', description: '', imageId: 'event-legal-aid' })
+        setIsAddDialogOpen(false)
+        setIsActionLoading(false)
       })
-      toast({ title: "Event Created", description: "The new event has been added to the gallery." })
-      setNewEvent({ title: '', date: '', location: '', category: 'Campaign', description: '', imageId: 'event-legal-aid' })
-    } catch (e: any) {
-      toast({ variant: "destructive", title: "Error", description: e.message })
-    } finally {
-      setIsActionLoading(false)
-    }
+      .catch(async (err) => {
+        const permissionError = new FirestorePermissionError({
+          path: 'events',
+          operation: 'create',
+          requestResourceData: eventData,
+        } satisfies SecurityRuleContext);
+        errorEmitter.emit('permission-error', permissionError);
+        setIsActionLoading(false)
+      })
   }
 
-  const handleDeleteEvent = async (id: string) => {
-    try {
-      await deleteDoc(doc(db, 'events', id))
-      toast({ title: "Event Deleted" })
-    } catch (e: any) {
-      toast({ variant: "destructive", title: "Error", description: e.message })
-    }
+  const handleDeleteEvent = (id: string) => {
+    const docRef = doc(db, 'events', id)
+    deleteDoc(docRef)
+      .then(() => {
+        toast({ title: "Event Deleted" })
+      })
+      .catch(async (err) => {
+        const permissionError = new FirestorePermissionError({
+          path: docRef.path,
+          operation: 'delete',
+        } satisfies SecurityRuleContext);
+        errorEmitter.emit('permission-error', permissionError);
+      })
   }
 
-  const handleUpdateEvent = async () => {
+  const handleUpdateEvent = () => {
     if (!editEvent) return
     setIsActionLoading(true)
-    try {
-      const { id, ...data } = editEvent
-      await updateDoc(doc(db, 'events', id), data)
-      toast({ title: "Event Updated" })
-      setEditEvent(null)
-    } catch (e: any) {
-      toast({ variant: "destructive", title: "Error", description: e.message })
-    } finally {
-      setIsActionLoading(false)
-    }
+    const { id, ...data } = editEvent
+    const docRef = doc(db, 'events', id)
+
+    updateDoc(docRef, data)
+      .then(() => {
+        toast({ title: "Event Updated" })
+        setEditEvent(null)
+        setIsActionLoading(false)
+      })
+      .catch(async (err) => {
+        const permissionError = new FirestorePermissionError({
+          path: docRef.path,
+          operation: 'update',
+          requestResourceData: data,
+        } satisfies SecurityRuleContext);
+        errorEmitter.emit('permission-error', permissionError);
+        setIsActionLoading(false)
+      })
   }
 
   const events = (firestoreEvents || []) as Event[]
@@ -154,7 +181,7 @@ export default function EventsPage() {
             </p>
 
             {isAdmin && (
-              <Dialog>
+              <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                 <DialogTrigger asChild>
                   <Button className="bg-accent text-primary font-bold rounded-2xl h-14 px-10 flex gap-2 hover:bg-accent/90 shadow-2xl shadow-accent/20 mx-auto">
                     <Plus className="w-6 h-6" /> Create New Event Entry
