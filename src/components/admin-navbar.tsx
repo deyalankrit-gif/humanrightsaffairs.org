@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useEffect } from 'react'
@@ -13,7 +14,8 @@ import {
   ExternalLink, 
   ShieldCheck, 
   Menu,
-  X 
+  X,
+  Calendar
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
@@ -40,6 +42,7 @@ export function AdminNavbar() {
   const navLinks = [
     { name: 'Analytics', href: '/internal/analytics', icon: <LayoutDashboard className="w-4 h-4" /> },
     { name: 'Personnel', href: '/internal/members', icon: <Users className="w-4 h-4" /> },
+    { name: 'Events', href: '/internal/events', icon: <Calendar className="w-4 h-4" /> },
   ]
 
   return (

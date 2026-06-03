@@ -72,7 +72,7 @@ export default function EventsPage() {
     title: '',
     date: '',
     location: '',
-    category: 'Campaign',
+    category: 'Campaign' as const,
     description: '',
     imageId: 'event-legal-aid'
   })
@@ -94,7 +94,17 @@ export default function EventsPage() {
   }
 
   const handleAddEvent = () => {
-    if (!newEvent.title || !newEvent.date || !newEvent.location) return
+    if (!db) return;
+    
+    if (!newEvent.title.trim() || !newEvent.date.trim() || !newEvent.location.trim()) {
+      toast({
+        variant: "destructive",
+        title: "Missing Fields",
+        description: "Please fill in the title, date, and location before publishing."
+      });
+      return;
+    }
+
     setIsActionLoading(true)
     
     const eventData = {
@@ -121,6 +131,7 @@ export default function EventsPage() {
   }
 
   const handleDeleteEvent = (id: string) => {
+    if (!db) return;
     const docRef = doc(db, 'events', id)
     deleteDoc(docRef)
       .then(() => {
@@ -136,7 +147,7 @@ export default function EventsPage() {
   }
 
   const handleUpdateEvent = () => {
-    if (!editEvent) return
+    if (!db || !editEvent) return
     setIsActionLoading(true)
     const { id, ...data } = editEvent
     const docRef = doc(db, 'events', id)
