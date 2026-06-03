@@ -181,7 +181,7 @@ export default function Home() {
         <div className="container mx-auto px-4 relative z-10">
           <div className="bg-primary rounded-[2rem] md:rounded-[4rem] p-8 md:p-24 flex flex-col items-center text-center text-white shadow-2xl relative overflow-hidden group">
             
-            {/* 2D Animated Illustrations */}
+            {/* 2D Animated Illustrations on Sides */}
             <div className="absolute left-4 md:left-12 top-1/2 -translate-y-1/2 w-32 h-44 md:w-64 md:h-80 hidden lg:block animate-float pointer-events-none z-20">
               <div className="relative w-full h-full rounded-[2rem] md:rounded-[3rem] overflow-hidden border-4 md:border-8 border-white shadow-2xl rotate-[-6deg] bg-slate-200">
                 <Image 
@@ -220,9 +220,27 @@ export default function Home() {
             </div>
 
             <div className="max-w-4xl space-y-6 md:space-y-10 relative z-30">
-              <div className="animate-float">
-                <Scale className="w-12 h-12 md:w-24 md:h-24 text-accent mx-auto" />
+              {/* Pictures flanking the Scale icon */}
+              <div className="flex items-center justify-center gap-6 md:gap-12 animate-float">
+                <div className="relative w-16 h-20 md:w-32 md:h-44 rounded-2xl md:rounded-[2.5rem] overflow-hidden border-2 md:border-4 border-white/20 rotate-[-8deg] shadow-2xl hidden sm:block">
+                  <Image 
+                    src={donationImg1?.imageUrl || "https://picsum.photos/seed/female/600/800"} 
+                    alt="Support" 
+                    fill 
+                    className="object-cover"
+                  />
+                </div>
+                <Scale className="w-12 h-12 md:w-24 md:h-24 text-accent shrink-0" />
+                <div className="relative w-16 h-20 md:w-32 md:h-44 rounded-2xl md:rounded-[2.5rem] overflow-hidden border-2 md:border-4 border-white/20 rotate-[8deg] shadow-2xl hidden sm:block">
+                  <Image 
+                    src={donationImg2?.imageUrl || "https://picsum.photos/seed/child/600/800"} 
+                    alt="Support" 
+                    fill 
+                    className="object-cover"
+                  />
+                </div>
               </div>
+
               <h2 className="text-3xl md:text-7xl font-headline font-bold">Support the Cause of <span className="text-accent italic">Justice</span></h2>
               <p className="text-sm md:text-xl text-indigo-100 leading-relaxed max-w-2xl mx-auto">
                 Your contributions help us provide free legal aid to the marginalized and run awareness campaigns across rural India. All donations are tax-exempt under 80G.
