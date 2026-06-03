@@ -6,7 +6,7 @@ import Image from 'next/image'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 import { PlaceHolderImages } from '@/lib/placeholder-images'
-import { Search, UserX, AlertTriangle, ShieldAlert, Calendar, Hash, Info, Plus, Edit, Trash2, Loader2, Upload, Layers } from 'lucide-react'
+import { Search, UserX, AlertTriangle, ShieldAlert, Calendar, Hash, Info, Plus, Edit, Trash2, Loader2, Upload } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -271,14 +271,27 @@ export default function TerminatedMembersPage() {
 
       <section className="py-20">
         <div className="container mx-auto px-4">
-          <div className="max-w-5xl mx-auto space-y-8">
-            <Alert variant="destructive" className="bg-red-50 border-red-200 rounded-[2rem] p-6">
-              <AlertTriangle className="h-5 w-5" />
-              <AlertTitle className="font-bold text-lg mb-2">Important Disclaimer</AlertTitle>
-              <AlertDescription className="text-red-700 font-bold">
-                The individuals listed below are no longer affiliated with Justice Shield. Any attempt to use organizational logos, car sticker, official designation plate for car, ID cards, or represent themselves as member/officials is a punishable offense. If any such misuse is observed, the police authorities or the administration may immediately take any appropriate legal action.
-              </AlertDescription>
-            </Alert>
+          <div className="max-w-5xl mx-auto space-y-12">
+            
+            {/* Attention Grabbing Disclaimer */}
+            <div className="relative group">
+              <div className="absolute -inset-1 bg-gradient-to-r from-red-600 via-orange-600 to-red-600 rounded-[2.5rem] blur-xl opacity-20 group-hover:opacity-40 transition duration-1000 animate-pulse"></div>
+              <Alert variant="destructive" className="relative bg-white border-4 border-red-600 rounded-[2.5rem] p-8 md:p-12 shadow-2xl">
+                <div className="flex flex-col items-center text-center space-y-6">
+                  <div className="bg-red-600 text-white p-4 rounded-full shadow-lg">
+                    <ShieldAlert className="h-10 w-10 md:h-12 md:w-12" />
+                  </div>
+                  <div className="space-y-4">
+                    <AlertTitle className="font-headline font-black text-2xl md:text-4xl text-red-600 uppercase tracking-tighter mb-4">
+                      Urgent Public Security Disclaimer
+                    </AlertTitle>
+                    <AlertDescription className="text-red-950 font-black text-lg md:text-2xl leading-relaxed max-w-5xl mx-auto">
+                      "The individuals listed below are no longer affiliated with Justice Shield. Any attempt to use organizational logos, car sticker, official designation plate for car, ID cards, or represent themselves as member/officials is a punishable offense. If any such misuse is observed, the police authorities or the administration may immediately take any appropriate legal action."
+                    </AlertDescription>
+                  </div>
+                </div>
+              </Alert>
+            </div>
 
             {dataLoading ? (
               <div className="text-center py-20">
