@@ -1,3 +1,4 @@
+
 import Image from 'next/image'
 import Link from 'next/link'
 import { Navbar } from '@/components/navbar'
@@ -194,17 +195,17 @@ export default function Home() {
                     Donate Instantly
                   </div>
                   <div className="flex flex-wrap justify-center gap-3 md:gap-4">
-                    <DonationDialog defaultAmount="100">
+                    <DonationDialog defaultAmount="100" initialStep="qr">
                       <Button variant="outline" className="border-accent/30 text-white hover:bg-accent hover:text-primary rounded-full px-6 md:px-8 font-bold h-10 md:h-12 transition-all hover:scale-105 active:scale-95 bg-white/5 backdrop-blur-sm">
                         ₹100
                       </Button>
                     </DonationDialog>
-                    <DonationDialog defaultAmount="500">
+                    <DonationDialog defaultAmount="500" initialStep="qr">
                       <Button variant="outline" className="border-accent/30 text-white hover:bg-accent hover:text-primary rounded-full px-6 md:px-8 font-bold h-10 md:h-12 transition-all hover:scale-105 active:scale-95 bg-white/5 backdrop-blur-sm">
                         ₹500
                       </Button>
                     </DonationDialog>
-                    <DonationDialog defaultAmount="1000">
+                    <DonationDialog defaultAmount="1000" initialStep="qr">
                       <Button variant="outline" className="border-accent/30 text-white hover:bg-accent hover:text-primary rounded-full px-6 md:px-8 font-bold h-10 md:h-12 transition-all hover:scale-105 active:scale-95 bg-white/5 backdrop-blur-sm">
                         ₹1,000
                       </Button>

@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useRef, useEffect } from 'react'
@@ -43,6 +44,7 @@ import { useFirestore } from '@/firebase'
 import { errorEmitter } from '@/firebase/error-emitter'
 import { FirestorePermissionError, type SecurityRuleContext } from '@/firebase/errors'
 import { PlaceHolderImages } from '@/lib/placeholder-images'
+import { useToast } from '@/hooks/use-toast'
 
 const formSchema = z.object({
   name: z.string().min(2, "Name is required"),
@@ -57,9 +59,10 @@ const formSchema = z.object({
 
 type Step = 'details' | 'payment' | 'qr' | 'success'
 
-export function DonationDialog({ children, defaultAmount }: { children: React.ReactNode, defaultAmount?: string }) {
+export function DonationDialog({ children, defaultAmount, initialStep = 'details' }: { children: React.ReactNode, defaultAmount?: string, initialStep?: Step }) {
   const db = useFirestore()
-  const [step, setStep] = useState<Step>('details')
+  const { toast } = useToast()
+  const [step, setStep] = useState<Step>(initialStep)
   const [loading, setLoading] = useState(false)
   const [photo, setPhoto] = useState<string | null>(null)
   const [donationData, setDonationData] = useState<any>(null)
@@ -76,48 +79,63 @@ export function DonationDialog({ children, defaultAmount }: { children: React.Re
   })
 
   useEffect(() => {
-    if (open && defaultAmount) {
-      form.setValue('amount', defaultAmount)
+    if (open) {
+      setStep(initialStep)
+      if (defaultAmount) {
+        form.setValue('amount', defaultAmount)
+        // For instant QR mode, initialize donationData with amount so QR shows it
+        if (initialStep === 'qr') {
+          setDonationData({ amount: defaultAmount })
+        }
+      }
     }
-  }, [open, defaultAmount, form])
+  }, [open, defaultAmount, initialStep, form])
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setLoading(true)
     const data = {
       ...values,
       photo,
-      transactionId: `TXN-${Math.random().toString(36).substr(2, 9).toUpperCase()}`,
+      transactionId: donationData?.transactionId || `TXN-${Math.random().toString(36).substr(2, 9).toUpperCase()}`,
       timestamp: new Date().toLocaleString()
     }
     setDonationData(data)
     
-    // Simulate data verification
-    setTimeout(() => {
-      setStep('payment')
-      setLoading(false)
-    }, 1000)
+    // If they came from QR step, go straight to success
+    if (step === 'details' && donationData?.paymentMethod === 'UPI QR Code') {
+       handlePayment('UPI QR Code', data)
+    } else {
+      setTimeout(() => {
+        setStep('payment')
+        setLoading(false)
+      }, 1000)
+    }
   }
 
-  const handlePayment = async (method: string) => {
+  const handlePayment = async (method: string, dataOverride?: any) => {
     if (method === 'QR') {
       setStep('qr')
       return
     }
 
     setLoading(true)
-    const donationId = donationData.transactionId
+    const activeData = dataOverride || donationData
+    const donationId = activeData.transactionId || `TXN-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
     
     const finalData = {
-      ...donationData,
+      ...activeData,
+      transactionId: donationId,
       paymentMethod: method,
       status: 'completed',
-      createdAt: serverTimestamp()
+      createdAt: serverTimestamp(),
+      timestamp: activeData.timestamp || new Date().toLocaleString()
     }
     
     const docRef = doc(db, "donations", donationId)
     
     setDoc(docRef, finalData)
       .then(() => {
+        setDonationData(finalData)
         setStep('success')
         setLoading(false)
       })
@@ -134,6 +152,17 @@ export function DonationDialog({ children, defaultAmount }: { children: React.Re
   }
 
   const confirmQrPayment = () => {
+    if (!donationData?.name) {
+      // If no details provided yet (Instant Mode), go to details step to get info for 80G receipt
+      setStep('details')
+      toast({
+        title: "Payment Received?",
+        description: "Please provide your details to generate your official 80G Tax Receipt.",
+      })
+      // Ensure we track that they chose QR
+      setDonationData(prev => ({ ...prev, paymentMethod: 'UPI QR Code' }))
+      return
+    }
     handlePayment('UPI QR Code')
   }
 
@@ -180,6 +209,7 @@ export function DonationDialog({ children, defaultAmount }: { children: React.Re
           amount: defaultAmount || ""
         })
         setPhoto(null)
+        setDonationData(null)
       }
     }}>
       <DialogTrigger asChild>
@@ -188,7 +218,7 @@ export function DonationDialog({ children, defaultAmount }: { children: React.Re
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto rounded-[2rem] border-none shadow-2xl">
         <DialogHeader>
           <DialogTitle className="text-3xl font-headline font-bold text-primary flex items-center gap-3">
-            {step === 'details' && "Donor Information"}
+            {step === 'details' && (donationData?.paymentMethod === 'UPI QR Code' ? "Receipt Generation" : "Donor Information")}
             {step === 'payment' && "Payment Selection"}
             {step === 'qr' && "Scan to Donate"}
             {step === 'success' && "Donation Successful"}
@@ -199,7 +229,7 @@ export function DonationDialog({ children, defaultAmount }: { children: React.Re
           <DialogDescription className="text-base">
             {step === 'details' && "Please provide your details for tax-exemption receipts (80G)."}
             {step === 'payment' && "Choose your preferred secure payment method."}
-            {step === 'qr' && "Scan the QR code below using any UPI app (GPay, PhonePe, Paytm)."}
+            {step === 'qr' && `Please scan to donate ₹${donationData?.amount || defaultAmount} via UPI.`}
             {step === 'success' && "Thank you for your contribution to human rights."}
           </DialogDescription>
         </DialogHeader>
@@ -286,7 +316,7 @@ export function DonationDialog({ children, defaultAmount }: { children: React.Re
               </div>
 
               <Button type="submit" className="w-full bg-accent text-primary font-bold py-7 text-xl rounded-2xl hover:bg-accent/90 shadow-xl shadow-accent/20 transition-all hover:-translate-y-1" disabled={loading}>
-                {loading ? <Loader2 className="animate-spin mr-2" /> : <>Continue to Payment <ArrowRight className="ml-2 w-6 h-6" /></>}
+                {loading ? <Loader2 className="animate-spin mr-2" /> : <>Generate My Official Receipt <ArrowRight className="ml-2 w-6 h-6" /></>}
               </Button>
             </form>
           </Form>
