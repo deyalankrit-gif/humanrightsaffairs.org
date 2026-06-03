@@ -181,23 +181,13 @@ export default function Home() {
             {/* Background images as atmospheric overlays */}
             <div className="absolute top-0 left-0 w-full h-full pointer-events-none select-none">
               <div className="absolute inset-0 bg-primary/60 z-10"></div>
-              <div className="absolute top-0 left-0 w-full md:w-1/2 h-full opacity-20 md:opacity-40 grayscale group-hover:grayscale-0 transition-all duration-1000 overflow-hidden">
+              <div className="absolute inset-0 opacity-20 md:opacity-40 grayscale group-hover:grayscale-0 transition-all duration-1000 overflow-hidden">
                 <Image 
                   src="/female.jpeg" 
                   alt="Background Story" 
                   fill 
                   className="object-cover"
                 />
-                <div className="absolute inset-0 bg-gradient-to-r from-primary via-transparent to-transparent"></div>
-              </div>
-              <div className="absolute top-0 right-0 w-full md:w-1/2 h-full opacity-20 md:opacity-40 grayscale group-hover:grayscale-0 transition-all duration-1000 overflow-hidden">
-                <Image 
-                  src="/child.jpeg" 
-                  alt="Background Story" 
-                  fill 
-                  className="object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-l from-primary via-transparent to-transparent"></div>
               </div>
             </div>
 
