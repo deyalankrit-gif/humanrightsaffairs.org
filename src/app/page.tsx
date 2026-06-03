@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button'
 import { Shield, Scale, Users, HeartHandshake, ArrowRight, Gavel, CheckCircle2 } from 'lucide-react'
 import { DonationDialog } from '@/components/donation-dialog'
 import { Typewriter } from '@/components/typewriter'
+import { PlaceHolderImages } from '@/lib/placeholder-images'
 
 function BackgroundDecor() {
   return (
@@ -60,6 +61,9 @@ function IndianFlag() {
 }
 
 export default function Home() {
+  const child1 = PlaceHolderImages.find(i => i.id === 'child-illustration-1')
+  const child2 = PlaceHolderImages.find(i => i.id === 'child-illustration-2')
+
   return (
     <main className="min-h-screen relative overflow-x-hidden">
       <BackgroundDecor />
@@ -179,6 +183,26 @@ export default function Home() {
           <div className="bg-primary rounded-[2rem] md:rounded-[4rem] p-8 md:p-24 flex flex-col items-center text-center text-white shadow-2xl relative overflow-hidden group">
             <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10"></div>
             
+            {/* 2D Animated Illustrations for the blank sections */}
+            <div className="absolute top-10 left-10 w-32 h-32 md:w-48 md:h-48 opacity-20 md:opacity-40 animate-float pointer-events-none hidden md:block">
+               <Image 
+                src={child1?.imageUrl || "https://picsum.photos/seed/child1/400/400"} 
+                alt="Support Justice" 
+                fill 
+                className="object-contain rounded-full shadow-2xl border-4 border-white/20"
+                data-ai-hint={child1?.imageHint}
+               />
+            </div>
+            <div className="absolute bottom-10 right-10 w-32 h-32 md:w-56 md:h-56 opacity-20 md:opacity-40 animate-float animate-delay-300 pointer-events-none hidden md:block">
+               <Image 
+                src={child2?.imageUrl || "https://picsum.photos/seed/child2/400/400"} 
+                alt="Empowerment" 
+                fill 
+                className="object-contain rounded-full shadow-2xl border-4 border-white/20"
+                data-ai-hint={child2?.imageHint}
+               />
+            </div>
+
             <div className="max-w-4xl space-y-6 md:space-y-10 relative z-10">
               <div className="animate-float">
                 <Scale className="w-12 h-12 md:w-24 md:h-24 text-accent mx-auto" />
