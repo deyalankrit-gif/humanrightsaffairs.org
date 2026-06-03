@@ -1,4 +1,3 @@
-
 import Image from 'next/image'
 import Link from 'next/link'
 import { Navbar } from '@/components/navbar'
@@ -187,19 +186,44 @@ export default function Home() {
               <p className="text-sm md:text-xl text-indigo-100 leading-relaxed max-w-2xl mx-auto">
                 Your contributions help us provide free legal aid to the marginalized and run awareness campaigns across rural India. All donations are tax-exempt under 80G.
               </p>
-              <div className="pt-8 flex flex-col md:flex-row gap-4 md:gap-8 justify-center items-center">
-                <DonationDialog>
-                  <Button className="bg-accent text-primary font-bold hover:bg-accent/90 hover:scale-105 active:scale-95 transition-all px-8 py-5 md:px-14 md:py-8 rounded-xl text-base md:text-2xl shadow-xl shadow-accent/20">
-                    Donate Securely Now
-                  </Button>
-                </DonationDialog>
-                <div className="flex flex-col items-start space-y-2">
-                  <p className="font-bold flex items-center gap-2 text-emerald-400 text-[10px] md:text-lg">
-                    <CheckCircle2 className="w-3 h-3 md:w-5 md:h-5" /> Instant Receipt Generation
-                  </p>
-                  <p className="font-bold flex items-center gap-2 text-emerald-400 text-[10px] md:text-lg">
-                    <CheckCircle2 className="w-3 h-3 md:w-5 md:h-5" /> Transparent Fund Tracking
-                  </p>
+              
+              <div className="pt-8 flex flex-col items-center space-y-8">
+                {/* Donate Instantly Buttons */}
+                <div className="flex flex-col items-center space-y-4">
+                  <p className="text-[10px] md:text-xs font-bold text-accent uppercase tracking-[0.3em] opacity-80">Donate Instantly</p>
+                  <div className="flex flex-wrap justify-center gap-3 md:gap-4">
+                    <DonationDialog defaultAmount="100">
+                      <Button variant="outline" className="border-accent/30 text-white hover:bg-accent hover:text-primary rounded-full px-6 md:px-8 font-bold h-10 md:h-12 transition-all hover:scale-105 active:scale-95 bg-white/5 backdrop-blur-sm">
+                        ₹100
+                      </Button>
+                    </DonationDialog>
+                    <DonationDialog defaultAmount="500">
+                      <Button variant="outline" className="border-accent/30 text-white hover:bg-accent hover:text-primary rounded-full px-6 md:px-8 font-bold h-10 md:h-12 transition-all hover:scale-105 active:scale-95 bg-white/5 backdrop-blur-sm">
+                        ₹500
+                      </Button>
+                    </DonationDialog>
+                    <DonationDialog defaultAmount="1000">
+                      <Button variant="outline" className="border-accent/30 text-white hover:bg-accent hover:text-primary rounded-full px-6 md:px-8 font-bold h-10 md:h-12 transition-all hover:scale-105 active:scale-95 bg-white/5 backdrop-blur-sm">
+                        ₹1,000
+                      </Button>
+                    </DonationDialog>
+                  </div>
+                </div>
+
+                <div className="flex flex-col md:flex-row gap-4 md:gap-8 justify-center items-center">
+                  <DonationDialog>
+                    <Button className="bg-accent text-primary font-bold hover:bg-accent/90 hover:scale-105 active:scale-95 transition-all px-8 py-5 md:px-14 md:py-8 rounded-xl text-base md:text-2xl shadow-xl shadow-accent/20">
+                      Donate Securely Now
+                    </Button>
+                  </DonationDialog>
+                  <div className="flex flex-col items-start space-y-2">
+                    <p className="font-bold flex items-center gap-2 text-emerald-400 text-[10px] md:text-lg">
+                      <CheckCircle2 className="w-3 h-3 md:w-5 md:h-5" /> Instant Receipt Generation
+                    </p>
+                    <p className="font-bold flex items-center gap-2 text-emerald-400 text-[10px] md:text-lg">
+                      <CheckCircle2 className="w-3 h-3 md:w-5 md:h-5" /> Transparent Fund Tracking
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>

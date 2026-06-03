@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import Image from 'next/image'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -53,7 +53,7 @@ const formSchema = z.object({
 
 type Step = 'details' | 'payment' | 'success'
 
-export function DonationDialog({ children }: { children: React.ReactNode }) {
+export function DonationDialog({ children, defaultAmount }: { children: React.ReactNode, defaultAmount?: string }) {
   const db = useFirestore()
   const [step, setStep] = useState<Step>('details')
   const [loading, setLoading] = useState(false)
@@ -65,9 +65,17 @@ export function DonationDialog({ children }: { children: React.ReactNode }) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      currency: "INR"
+      currency: "INR",
+      amount: defaultAmount || ""
     }
   })
+
+  // Synchronize amount field if defaultAmount changes while open
+  useEffect(() => {
+    if (open && defaultAmount) {
+      form.setValue('amount', defaultAmount)
+    }
+  }, [open, defaultAmount, form])
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setLoading(true)
@@ -152,7 +160,10 @@ export function DonationDialog({ children }: { children: React.ReactNode }) {
       setOpen(val)
       if(!val) {
         setStep('details')
-        form.reset()
+        form.reset({
+          currency: "INR",
+          amount: defaultAmount || ""
+        })
         setPhoto(null)
       }
     }}>
