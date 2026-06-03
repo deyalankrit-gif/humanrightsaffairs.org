@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useEffect } from 'react'
@@ -274,7 +275,7 @@ export default function TerminatedMembersPage() {
             <Alert variant="destructive" className="bg-red-50 border-red-200 rounded-[2rem] p-6">
               <AlertTriangle className="h-5 w-5" />
               <AlertTitle className="font-bold text-lg mb-2">Important Disclaimer</AlertTitle>
-              <AlertDescription className="text-red-700">
+              <AlertDescription className="text-red-700 font-bold">
                 The individuals listed below are no longer affiliated with Justice Shield. Any attempt to use organizational logos, car sticker, official designation plate for car, ID cards, or represent themselves as member/officials is a punishable offense. If any such misuse is observed, the police authorities or the administration may immediately take any appropriate legal action.
               </AlertDescription>
             </Alert>
