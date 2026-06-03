@@ -285,7 +285,7 @@ export default function TerminatedMembersPage() {
                     <AlertTitle className="font-headline font-black text-2xl md:text-3xl text-red-600 uppercase tracking-[0.2em] mb-4">
                       Urgent  Public  Security  Disclaimer
                     </AlertTitle>
-                    <AlertDescription className="text-red-950 font-black text-sm md:text-lg leading-relaxed max-w-5xl mx-auto">
+                    <AlertDescription className="text-secondary font-black text-sm md:text-lg leading-relaxed max-w-5xl mx-auto">
                       "The individuals listed below are no longer affiliated with Justice Shield. Any attempt to use organizational logos, car sticker, official designation plate for car, ID cards, or represent themselves as member/officials is a punishable offense. If any such misuse is observed, the police authorities or the administration may immediately take any appropriate legal action."
                     </AlertDescription>
                   </div>
