@@ -86,15 +86,15 @@
     },
     {
       "id": "child-illustration-1",
-      "description": "Inspirational image for donation appeal (Female)",
+      "description": "Emotive 2D illustration of an underprivileged person needing support",
       "imageUrl": "/female.jpeg",
-      "imageHint": "woman portrait"
+      "imageHint": "underprivileged person portrait"
     },
     {
       "id": "child-illustration-2",
-      "description": "Inspirational image for donation appeal (Child)",
+      "description": "Emotive 2D illustration of an underprivileged child needing support",
       "imageUrl": "/child.jpeg",
-      "imageHint": "child portrait"
+      "imageHint": "underprivileged child portrait"
     }
   ]
 }
