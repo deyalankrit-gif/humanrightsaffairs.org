@@ -85,16 +85,16 @@
       "imageHint": "upi qr code"
     },
     {
-      "id": "child-illustration-1",
-      "description": "Emotive 2D illustration of an underprivileged person needing support",
+      "id": "donation-bg-1",
+      "description": "Emotive story image for donation background",
       "imageUrl": "/female.jpeg",
-      "imageHint": "underprivileged person portrait"
+      "imageHint": "person in need portrait"
     },
     {
-      "id": "child-illustration-2",
-      "description": "Emotive 2D illustration of an underprivileged child needing support",
+      "id": "donation-bg-2",
+      "description": "Emotive story image of a child for donation background",
       "imageUrl": "/child.jpeg",
-      "imageHint": "underprivileged child portrait"
+      "imageHint": "child in need portrait"
     }
   ]
 }

@@ -61,9 +61,6 @@ function IndianFlag() {
 }
 
 export default function Home() {
-  const child1 = PlaceHolderImages.find(i => i.id === 'child-illustration-1')
-  const child2 = PlaceHolderImages.find(i => i.id === 'child-illustration-2')
-
   return (
     <main className="min-h-screen relative overflow-x-hidden">
       <BackgroundDecor />
@@ -181,35 +178,30 @@ export default function Home() {
         <div className="absolute -top-24 -left-24 w-96 h-96 bg-accent/10 rounded-full blur-3xl animate-pulse"></div>
         <div className="container mx-auto px-4 relative z-10">
           <div className="bg-primary rounded-[2rem] md:rounded-[4rem] p-8 md:p-24 flex flex-col items-center text-center text-white shadow-2xl relative overflow-hidden group">
-            <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10"></div>
-            
-            {/* 2D Animated Emotive Illustrations */}
-            <div className="absolute top-10 left-10 w-40 h-40 md:w-64 md:h-64 opacity-20 md:opacity-50 animate-float pointer-events-none hidden md:block">
-               <div className="relative w-full h-full p-4">
-                 <div className="absolute inset-0 bg-white/5 rounded-full blur-2xl"></div>
-                 <Image 
-                  src={child1?.imageUrl || "/female.jpeg"} 
-                  alt="Needs Support" 
+            {/* Background images as atmospheric overlays */}
+            <div className="absolute top-0 left-0 w-full h-full pointer-events-none select-none">
+              <div className="absolute inset-0 bg-primary/60 z-10"></div>
+              <div className="absolute top-0 left-0 w-full md:w-1/2 h-full opacity-20 md:opacity-40 grayscale group-hover:grayscale-0 transition-all duration-1000 overflow-hidden">
+                <Image 
+                  src="/female.jpeg" 
+                  alt="Background Story" 
                   fill 
-                  className="object-cover rounded-3xl shadow-2xl border-4 border-white/20 grayscale group-hover:grayscale-0 transition-all duration-700"
-                  data-ai-hint={child1?.imageHint}
-                 />
-               </div>
-            </div>
-            <div className="absolute bottom-10 right-10 w-40 h-40 md:w-72 md:h-72 opacity-20 md:opacity-50 animate-float animate-delay-500 pointer-events-none hidden md:block">
-               <div className="relative w-full h-full p-4">
-                 <div className="absolute inset-0 bg-white/5 rounded-full blur-2xl"></div>
-                 <Image 
-                  src={child2?.imageUrl || "/child.jpeg"} 
-                  alt="Awaiting Justice" 
+                  className="object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-r from-primary via-transparent to-transparent"></div>
+              </div>
+              <div className="absolute top-0 right-0 w-full md:w-1/2 h-full opacity-20 md:opacity-40 grayscale group-hover:grayscale-0 transition-all duration-1000 overflow-hidden">
+                <Image 
+                  src="/child.jpeg" 
+                  alt="Background Story" 
                   fill 
-                  className="object-cover rounded-3xl shadow-2xl border-4 border-white/20 grayscale group-hover:grayscale-0 transition-all duration-700"
-                  data-ai-hint={child2?.imageHint}
-                 />
-               </div>
+                  className="object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-l from-primary via-transparent to-transparent"></div>
+              </div>
             </div>
 
-            <div className="max-w-4xl space-y-6 md:space-y-10 relative z-10">
+            <div className="max-w-4xl space-y-6 md:space-y-10 relative z-20">
               <div className="animate-float">
                 <Scale className="w-12 h-12 md:w-24 md:h-24 text-accent mx-auto" />
               </div>
@@ -219,7 +211,6 @@ export default function Home() {
               </p>
               
               <div className="pt-8 flex flex-col items-center space-y-8">
-                {/* Donate Instantly Buttons */}
                 <div className="flex flex-col items-center space-y-4">
                   <div className="bg-secondary text-white px-8 py-3 rounded-full font-bold text-xs md:text-sm uppercase tracking-widest shadow-xl shadow-secondary/20 hover:scale-105 transition-transform cursor-default border-2 border-white/10">
                     Donate Instantly
