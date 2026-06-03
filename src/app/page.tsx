@@ -179,12 +179,12 @@ export default function Home() {
         <div className="container mx-auto px-4 relative z-10">
           <div className="bg-primary rounded-[2rem] md:rounded-[4rem] p-8 md:p-24 flex flex-col items-center text-center text-white shadow-2xl relative overflow-hidden group">
             
-            {/* 2D Animated Illustrations on Blank Sections */}
+            {/* 2D Animated Illustrations */}
             <div className="absolute left-4 md:left-12 top-1/2 -translate-y-1/2 w-32 h-44 md:w-64 md:h-80 hidden lg:block animate-float pointer-events-none z-20">
               <div className="relative w-full h-full rounded-[2rem] md:rounded-[3rem] overflow-hidden border-4 md:border-8 border-white shadow-2xl rotate-[-6deg] bg-slate-200">
                 <Image 
                   src="/female.jpeg" 
-                  alt="Inspiration 1" 
+                  alt="Inspiration Female" 
                   fill 
                   className="object-cover grayscale group-hover:grayscale-0 transition-all duration-1000"
                 />
@@ -196,7 +196,7 @@ export default function Home() {
               <div className="relative w-full h-full rounded-[2rem] md:rounded-[3rem] overflow-hidden border-4 md:border-8 border-white shadow-2xl rotate-[6deg] bg-slate-200">
                 <Image 
                   src="/child.jpeg" 
-                  alt="Inspiration 2" 
+                  alt="Inspiration Child" 
                   fill 
                   className="object-cover grayscale group-hover:grayscale-0 transition-all duration-1000"
                 />
@@ -204,11 +204,11 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Background Texture Overlay */}
+            {/* Background Image Overlay */}
             <div className="absolute inset-0 z-0 opacity-10 pointer-events-none">
               <Image 
                 src="/female.jpeg" 
-                alt="Background" 
+                alt="Donation Background" 
                 fill 
                 className="object-cover grayscale"
               />
