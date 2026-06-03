@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useRef, useEffect } from 'react'
@@ -94,7 +93,6 @@ export function DonationDialog({ children, defaultAmount }: { children: React.Re
     
     // Simulate data verification
     setTimeout(() => {
-      // If a preset was clicked, we can guide them straight to the QR option logic
       setStep('payment')
       setLoading(false)
     }, 1000)
@@ -308,7 +306,6 @@ export function DonationDialog({ children, defaultAmount }: { children: React.Re
             </div>
 
             <div className="grid gap-4">
-              {/* Recommended UPI Step */}
               <div 
                 className="border-2 rounded-2xl p-6 bg-white shadow-sm hover:border-accent hover:bg-accent/5 transition-all cursor-pointer group relative overflow-hidden" 
                 onClick={() => handlePayment('QR')}
@@ -367,7 +364,7 @@ export function DonationDialog({ children, defaultAmount }: { children: React.Re
           <div className="py-6 flex flex-col items-center">
              <div className="relative w-full max-w-[400px] aspect-[3/4] bg-white rounded-3xl shadow-2xl border-4 border-slate-50 overflow-hidden mb-8">
                <Image 
-                src={qrImage?.imageUrl || "/QR.jpeg"} 
+                src={qrImage?.imageUrl || "/HRAT QR CODE.jpeg"} 
                 alt="Donation QR Code" 
                 fill 
                 className="object-contain"
