@@ -190,7 +190,9 @@ export default function Home() {
               <div className="pt-8 flex flex-col items-center space-y-8">
                 {/* Donate Instantly Buttons */}
                 <div className="flex flex-col items-center space-y-4">
-                  <p className="text-[10px] md:text-xs font-bold text-accent uppercase tracking-[0.3em] opacity-80">Donate Instantly</p>
+                  <div className="bg-secondary text-white px-6 py-2 rounded-full font-bold text-xs uppercase tracking-widest shadow-xl shadow-secondary/20 hover:scale-105 transition-transform cursor-default">
+                    Donate Instantly
+                  </div>
                   <div className="flex flex-wrap justify-center gap-3 md:gap-4">
                     <DonationDialog defaultAmount="100">
                       <Button variant="outline" className="border-accent/30 text-white hover:bg-accent hover:text-primary rounded-full px-6 md:px-8 font-bold h-10 md:h-12 transition-all hover:scale-105 active:scale-95 bg-white/5 backdrop-blur-sm">
