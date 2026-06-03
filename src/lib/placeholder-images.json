@@ -87,13 +87,13 @@
     {
       "id": "donation-bg-1",
       "description": "Inspirational female portrait for donation section",
-      "imageUrl": "https://picsum.photos/seed/female/800/1200",
+      "imageUrl": "/female.jpeg",
       "imageHint": "inspiring portrait"
     },
     {
       "id": "donation-bg-2",
       "description": "Inspirational child portrait for donation section",
-      "imageUrl": "https://picsum.photos/seed/child/800/1200",
+      "imageUrl": "/child.jpeg",
       "imageHint": "hopeful child"
     }
   ]

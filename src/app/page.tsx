@@ -1,3 +1,4 @@
+
 import Image from 'next/image'
 import Link from 'next/link'
 import { Navbar } from '@/components/navbar'
@@ -185,11 +186,11 @@ export default function Home() {
             <div className="absolute left-4 md:left-12 top-1/2 -translate-y-1/2 w-32 h-44 md:w-64 md:h-80 hidden lg:block animate-float pointer-events-none z-20">
               <div className="relative w-full h-full rounded-[2rem] md:rounded-[3rem] overflow-hidden border-4 md:border-8 border-white shadow-2xl rotate-[-6deg] bg-slate-200">
                 <Image 
-                  src={donationImg1?.imageUrl || "https://picsum.photos/seed/female/600/800"} 
+                  src={donationImg1?.imageUrl || "/female.jpeg"} 
                   alt="Inspiration Female" 
                   fill 
                   className="object-cover grayscale group-hover:grayscale-0 transition-all duration-1000"
-                  data-ai-hint={donationImg1?.imageHint || "inspiring portrait"}
+                  data-ai-hint="inspiring portrait"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-primary/40 to-transparent"></div>
               </div>
@@ -198,11 +199,11 @@ export default function Home() {
             <div className="absolute right-4 md:right-12 top-1/2 -translate-y-1/2 w-32 h-44 md:w-64 md:h-80 hidden lg:block animate-float animate-delay-500 pointer-events-none z-20">
               <div className="relative w-full h-full rounded-[2rem] md:rounded-[3rem] overflow-hidden border-4 md:border-8 border-white shadow-2xl rotate-[6deg] bg-slate-200">
                 <Image 
-                  src={donationImg2?.imageUrl || "https://picsum.photos/seed/child/600/800"} 
+                  src={donationImg2?.imageUrl || "/child.jpeg"} 
                   alt="Inspiration Child" 
                   fill 
                   className="object-cover grayscale group-hover:grayscale-0 transition-all duration-1000"
-                  data-ai-hint={donationImg2?.imageHint || "hopeful child"}
+                  data-ai-hint="hopeful child"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-primary/40 to-transparent"></div>
               </div>
@@ -211,7 +212,7 @@ export default function Home() {
             {/* Background Image Overlay */}
             <div className="absolute inset-0 z-0 opacity-10 pointer-events-none">
               <Image 
-                src={donationImg1?.imageUrl || "https://picsum.photos/seed/female/1200/800"} 
+                src={donationImg1?.imageUrl || "/female.jpeg"} 
                 alt="Donation Background" 
                 fill 
                 className="object-cover grayscale"
@@ -224,7 +225,7 @@ export default function Home() {
               <div className="flex items-center justify-center gap-6 md:gap-12 animate-float">
                 <div className="relative w-16 h-20 md:w-32 md:h-44 rounded-2xl md:rounded-[2.5rem] overflow-hidden border-2 md:border-4 border-white/20 rotate-[-8deg] shadow-2xl hidden sm:block">
                   <Image 
-                    src={donationImg1?.imageUrl || "https://picsum.photos/seed/female/600/800"} 
+                    src={donationImg1?.imageUrl || "/female.jpeg"} 
                     alt="Support" 
                     fill 
                     className="object-cover"
@@ -233,7 +234,7 @@ export default function Home() {
                 <Scale className="w-12 h-12 md:w-24 md:h-24 text-accent shrink-0" />
                 <div className="relative w-16 h-20 md:w-32 md:h-44 rounded-2xl md:rounded-[2.5rem] overflow-hidden border-2 md:border-4 border-white/20 rotate-[8deg] shadow-2xl hidden sm:block">
                   <Image 
-                    src={donationImg2?.imageUrl || "https://picsum.photos/seed/child/600/800"} 
+                    src={donationImg2?.imageUrl || "/child.jpeg"} 
                     alt="Support" 
                     fill 
                     className="object-cover"
