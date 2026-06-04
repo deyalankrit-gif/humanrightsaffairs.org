@@ -102,7 +102,7 @@ export default function DonationAnalyticsPage() {
 
   if (authLoading || !user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
         <div className="text-center space-y-4">
           <Loader2 className="w-10 h-10 animate-spin text-accent mx-auto" />
           <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Validating Administrative Session...</p>
@@ -120,7 +120,7 @@ export default function DonationAnalyticsPage() {
       <section className="pt-32 pb-12 bg-primary text-primary-foreground border-b-8 border-accent/20">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="space-y-2">
+            <div className="space-y-2 text-center md:text-left">
               <div className="inline-flex items-center gap-2 bg-accent/20 text-accent px-4 py-1 rounded-full text-[10px] font-bold uppercase tracking-[0.2em] border border-accent/30">
                 <ShieldCheck className="w-3 h-3" /> Secure Governance
               </div>
@@ -153,10 +153,10 @@ export default function DonationAnalyticsPage() {
                   { label: "Avg. Donation", value: `₹${stats.count ? Math.round(stats.total / stats.count).toLocaleString() : 0}`, icon: <ArrowUpRight className="w-5 h-5 text-indigo-500" />, trend: "Steady" },
                   { label: "Last Reconciliation", value: "Today", icon: <Calendar className="w-5 h-5 text-pink-500" />, trend: "Live" }
                 ].map((stat, i) => (
-                  <Card key={i} className="border-none shadow-sm rounded-3xl bg-card overflow-hidden group hover:shadow-xl transition-all">
+                  <Card key={i} className="border-none shadow-sm rounded-3xl bg-card dark:bg-slate-900 overflow-hidden group hover:shadow-xl transition-all">
                     <CardContent className="p-6">
                       <div className="flex justify-between items-start mb-4">
-                        <div className="p-3 bg-muted rounded-2xl group-hover:bg-accent/10 transition-colors">
+                        <div className="p-3 bg-muted dark:bg-slate-800 rounded-2xl group-hover:bg-accent/10 transition-colors">
                           {stat.icon}
                         </div>
                         <span className="text-[10px] font-bold text-emerald-500 bg-emerald-50 dark:bg-emerald-500/10 px-2 py-0.5 rounded-full">{stat.trend}</span>
@@ -169,7 +169,7 @@ export default function DonationAnalyticsPage() {
               </div>
 
               <div className="grid lg:grid-cols-3 gap-6">
-                <Card className="lg:col-span-2 border-none shadow-sm rounded-[2.5rem] bg-card">
+                <Card className="lg:col-span-2 border-none shadow-sm rounded-[2.5rem] bg-card dark:bg-slate-900">
                   <CardHeader>
                     <CardTitle className="text-xl font-headline font-bold">Revenue Timeline (Latest)</CardTitle>
                   </CardHeader>
@@ -189,7 +189,7 @@ export default function DonationAnalyticsPage() {
                   </CardContent>
                 </Card>
 
-                <Card className="border-none shadow-sm rounded-[2.5rem] bg-card">
+                <Card className="border-none shadow-sm rounded-[2.5rem] bg-card dark:bg-slate-900">
                   <CardHeader>
                     <CardTitle className="text-xl font-headline font-bold">Payment Channels</CardTitle>
                   </CardHeader>
@@ -224,8 +224,8 @@ export default function DonationAnalyticsPage() {
                 </Card>
               </div>
 
-              <Card className="border-none shadow-sm rounded-[2.5rem] bg-card overflow-hidden">
-                <CardHeader className="bg-muted border-b p-8">
+              <Card className="border-none shadow-sm rounded-[2.5rem] bg-card dark:bg-slate-900 overflow-hidden">
+                <CardHeader className="bg-muted dark:bg-slate-800/50 border-b p-8">
                   <CardTitle className="text-2xl font-headline font-bold flex items-center gap-3">
                     <FileText className="w-6 h-6 text-accent" /> Contribution Ledger
                   </CardTitle>
@@ -233,7 +233,7 @@ export default function DonationAnalyticsPage() {
                 <CardContent className="p-0">
                   <div className="overflow-x-auto">
                     <table className="w-full text-left">
-                      <thead className="bg-muted/50 text-[10px] font-bold text-muted-foreground uppercase tracking-widest border-b">
+                      <thead className="bg-muted/50 dark:bg-slate-800/80 text-[10px] font-bold text-muted-foreground uppercase tracking-widest border-b dark:border-slate-700">
                         <tr>
                           <th className="px-8 py-4">Donor Name</th>
                           <th className="px-8 py-4">Amount</th>
@@ -243,9 +243,9 @@ export default function DonationAnalyticsPage() {
                           <th className="px-8 py-4">Action</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-border">
+                      <tbody className="divide-y divide-border dark:divide-slate-800">
                         {donations && donations.map((d: any) => (
-                          <tr key={d.id} className="hover:bg-muted/30 transition-colors">
+                          <tr key={d.id} className="hover:bg-muted/30 dark:hover:bg-slate-800/50 transition-colors">
                             <td className="px-8 py-4 font-bold">{d.donorName || d.name}</td>
                             <td className="px-8 py-4 text-emerald-600 dark:text-emerald-400 font-bold">₹{d.amount}</td>
                             <td className="px-8 py-4 text-muted-foreground text-xs">{d.paymentMethod}</td>
@@ -258,11 +258,11 @@ export default function DonationAnalyticsPage() {
                             <td className="px-8 py-4">
                               <AlertDialog>
                                 <AlertDialogTrigger asChild>
-                                  <Button variant="ghost" size="icon" className="text-slate-400 hover:text-red-500 rounded-full">
+                                  <Button variant="ghost" size="icon" className="text-slate-400 hover:text-red-500 hover:bg-red-500/10 rounded-full">
                                     <Trash2 className="w-4 h-4" />
                                   </Button>
                                 </AlertDialogTrigger>
-                                <AlertDialogContent className="rounded-[2rem]">
+                                <AlertDialogContent className="rounded-[2rem] bg-white dark:bg-slate-900 border-none">
                                   <AlertDialogHeader>
                                     <AlertDialogTitle>Delete Record?</AlertDialogTitle>
                                     <AlertDialogDescription>This transaction will be permanently removed from the ledger. This action is recorded.</AlertDialogDescription>

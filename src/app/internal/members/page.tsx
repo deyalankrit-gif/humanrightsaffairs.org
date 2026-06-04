@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useEffect, useState } from 'react'
@@ -115,7 +114,7 @@ export default function InternalMembersDirectory() {
 
   if (authLoading || !user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
         <Loader2 className="w-10 h-10 animate-spin text-accent" />
       </div>
     )
@@ -164,6 +163,7 @@ export default function InternalMembersDirectory() {
                       placeholder="e.g. Sanchita Banerjee" 
                       value={newMember.name} 
                       onChange={(e) => setNewMember({...newMember, name: e.target.value})}
+                      className="bg-slate-50 dark:bg-slate-800"
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
@@ -173,12 +173,13 @@ export default function InternalMembersDirectory() {
                         placeholder="e.g. M1024" 
                         value={newMember.memberId} 
                         onChange={(e) => setNewMember({...newMember, memberId: e.target.value})}
+                        className="bg-slate-50 dark:bg-slate-800"
                       />
                     </div>
                     <div className="space-y-2">
                       <Label>Operational Level</Label>
                       <Select value={newMember.level} onValueChange={(val: any) => setNewMember({...newMember, level: val, stateName: '', districtName: ''})}>
-                        <SelectTrigger>
+                        <SelectTrigger className="bg-slate-50 dark:bg-slate-800">
                           <SelectValue placeholder="Select Level" />
                         </SelectTrigger>
                         <SelectContent>
@@ -194,7 +195,7 @@ export default function InternalMembersDirectory() {
                     <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
                       <Label className="flex items-center gap-2"><Globe className="w-3 h-3 text-accent" /> Select State / UT</Label>
                       <Select value={newMember.stateName} onValueChange={(val) => setNewMember({...newMember, stateName: val, districtName: ''})}>
-                        <SelectTrigger className="h-11 rounded-xl">
+                        <SelectTrigger className="h-11 rounded-xl bg-slate-50 dark:bg-slate-800">
                           <SelectValue placeholder="Choose State" />
                         </SelectTrigger>
                         <SelectContent className="max-h-60">
@@ -208,7 +209,7 @@ export default function InternalMembersDirectory() {
                     <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
                       <Label className="flex items-center gap-2"><MapPin className="w-3 h-3 text-accent" /> Select District</Label>
                       <Select value={newMember.districtName} onValueChange={(val) => setNewMember({...newMember, districtName: val})}>
-                        <SelectTrigger className="h-11 rounded-xl">
+                        <SelectTrigger className="h-11 rounded-xl bg-slate-50 dark:bg-slate-800">
                           <SelectValue placeholder="Choose District" />
                         </SelectTrigger>
                         <SelectContent className="max-h-60">
@@ -224,6 +225,7 @@ export default function InternalMembersDirectory() {
                       placeholder="e.g. State Secretary" 
                       value={newMember.designation} 
                       onChange={(e) => setNewMember({...newMember, designation: e.target.value})}
+                      className="bg-slate-50 dark:bg-slate-800"
                     />
                   </div>
                   <div className="space-y-2">
@@ -233,6 +235,7 @@ export default function InternalMembersDirectory() {
                       placeholder="name@hrat-india.org" 
                       value={newMember.email} 
                       onChange={(e) => setNewMember({...newMember, email: e.target.value})}
+                      className="bg-slate-50 dark:bg-slate-800"
                     />
                   </div>
                   <div className="space-y-2">
@@ -241,11 +244,12 @@ export default function InternalMembersDirectory() {
                       placeholder="+91 XXXXX XXXXX" 
                       value={newMember.phone} 
                       onChange={(e) => setNewMember({...newMember, phone: e.target.value})}
+                      className="bg-slate-50 dark:bg-slate-800"
                     />
                   </div>
                 </div>
                 <DialogFooter>
-                  <Button onClick={handleAddMember} disabled={isAdding} className="w-full h-12 rounded-xl bg-primary text-white font-bold">
+                  <Button onClick={handleAddMember} disabled={isAdding} className="w-full h-12 rounded-xl bg-primary text-white dark:bg-accent dark:text-primary font-bold">
                     {isAdding ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Plus className="w-4 h-4 mr-2" />}
                     Confirm Commissioning
                   </Button>
@@ -262,7 +266,7 @@ export default function InternalMembersDirectory() {
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
             <Input 
               placeholder="Search Secure Database (Member ID or Name)..." 
-              className="pl-12 h-14 rounded-2xl border-slate-200 dark:border-slate-800 focus:ring-accent font-medium"
+              className="pl-12 h-14 rounded-2xl border-slate-200 dark:border-slate-800 focus:ring-accent font-medium bg-slate-50 dark:bg-slate-800"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -302,7 +306,7 @@ export default function InternalMembersDirectory() {
                           <h3 className="text-2xl font-bold text-primary dark:text-white">
                             {member.name}
                           </h3>
-                          <p className="text-sm text-slate-500 font-bold italic">{member.designation}</p>
+                          <p className="text-sm text-slate-500 dark:text-slate-400 font-bold italic">{member.designation}</p>
                         </div>
                         <div className="space-y-3">
                           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Contact Lines</p>
@@ -310,13 +314,13 @@ export default function InternalMembersDirectory() {
                             <div className="w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-800 flex items-center justify-center">
                               <Mail className="w-4 h-4 text-accent" />
                             </div>
-                            <span className="text-slate-600 dark:text-slate-400 font-bold truncate max-w-[150px]">{member.email}</span>
+                            <span className="text-slate-600 dark:text-slate-300 font-bold truncate max-w-[150px]">{member.email}</span>
                           </div>
                           <div className="flex items-center gap-3 text-sm">
                             <div className="w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-800 flex items-center justify-center">
                               <Phone className="w-4 h-4 text-accent" />
                             </div>
-                            <span className="text-slate-600 dark:text-slate-400 font-bold">{member.phone}</span>
+                            <span className="text-slate-600 dark:text-slate-300 font-bold">{member.phone}</span>
                           </div>
                         </div>
                         <div className="flex items-center justify-end gap-4">

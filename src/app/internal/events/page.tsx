@@ -153,7 +153,7 @@ export default function InternalEventsManagement() {
 
   if (authLoading || !user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
         <Loader2 className="w-10 h-10 animate-spin text-accent" />
       </div>
     )
@@ -167,13 +167,13 @@ export default function InternalEventsManagement() {
   const categories = ["Campaign", "Workshop", "Convention", "Relief", "Social Projects"]
 
   return (
-    <main className="min-h-screen bg-slate-50">
+    <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
       <AdminNavbar />
 
       <section className="pt-32 pb-12 bg-slate-900 text-white border-b-8 border-accent/20">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="space-y-2">
+            <div className="space-y-2 text-center md:text-left">
               <div className="inline-flex items-center gap-2 bg-accent/20 text-accent px-4 py-1 rounded-full text-[10px] font-bold uppercase tracking-[0.2em] border border-accent/30">
                 <ShieldCheck className="w-3 h-3" /> Event Governance
               </div>
@@ -187,7 +187,7 @@ export default function InternalEventsManagement() {
                   <Plus className="w-5 h-5" /> Publish New Event
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-md bg-white rounded-[2rem] max-h-[90vh] overflow-y-auto">
+              <DialogContent className="max-w-md bg-white dark:bg-slate-900 rounded-[2rem] max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>New Event Record</DialogTitle>
                 </DialogHeader>
@@ -195,7 +195,7 @@ export default function InternalEventsManagement() {
                   <div className="space-y-2">
                     <Label>Cover Image</Label>
                     <div className="flex flex-col items-center gap-4 p-4 border-2 border-dashed rounded-2xl">
-                      <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-slate-100">
+                      <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800">
                         <Image 
                           src={newEvent.imageId.startsWith('data:') ? newEvent.imageId : (PlaceHolderImages.find(i => i.id === newEvent.imageId)?.imageUrl || '')} 
                           alt="Preview" 
@@ -262,13 +262,13 @@ export default function InternalEventsManagement() {
         </div>
       </section>
 
-      <section className="py-12 border-b bg-white sticky top-[72px] md:top-[84px] z-30 shadow-sm">
+      <section className="py-12 border-b bg-white dark:bg-slate-900 sticky top-[72px] md:top-[84px] z-30 shadow-sm">
         <div className="container mx-auto px-4">
           <div className="relative max-w-2xl">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
             <Input 
               placeholder="Filter by event title or location..." 
-              className="pl-12 h-14 rounded-2xl border-slate-200 focus:ring-accent"
+              className="pl-12 h-14 rounded-2xl border-slate-200 dark:border-slate-800 focus:ring-accent"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -286,7 +286,7 @@ export default function InternalEventsManagement() {
           ) : (
             <div className="grid gap-6">
               {filtered.map((event: any) => (
-                <Card key={event.id} className="group hover:shadow-2xl transition-all duration-500 border-none shadow-sm overflow-hidden bg-white rounded-[2rem]">
+                <Card key={event.id} className="group hover:shadow-2xl transition-all duration-500 border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-100 dark:border-slate-800">
                   <CardContent className="p-0">
                     <div className="flex flex-col md:flex-row items-stretch">
                       <div className="relative w-full md:w-64 aspect-video md:aspect-auto overflow-hidden">
@@ -307,26 +307,26 @@ export default function InternalEventsManagement() {
                                <MapPin className="w-3 h-3" /> {event.location}
                              </div>
                           </div>
-                          <h3 className="text-2xl font-bold text-primary">{event.title}</h3>
+                          <h3 className="text-2xl font-bold text-primary dark:text-white">{event.title}</h3>
                           <div className="flex items-center gap-2 text-xs font-bold text-slate-500">
                             <CalendarIcon className="w-3.5 h-3.5" /> {event.date}
                           </div>
                         </div>
                         
-                        <div className="text-sm text-slate-500 line-clamp-3">
+                        <div className="text-sm text-slate-500 dark:text-slate-400 line-clamp-3">
                           {event.description}
                         </div>
 
                         <div className="flex items-center justify-end gap-3">
                           <Link href="/events" target="_blank">
-                            <Button variant="ghost" size="icon" className="rounded-xl"><ExternalLink className="w-4 h-4" /></Button>
+                            <Button variant="ghost" size="icon" className="rounded-xl hover:bg-accent/10 hover:text-accent"><ExternalLink className="w-4 h-4" /></Button>
                           </Link>
                           
                           <Dialog>
                             <DialogTrigger asChild>
-                              <Button onClick={() => setEditEvent(event)} variant="outline" size="icon" className="rounded-xl"><Edit className="w-4 h-4" /></Button>
+                              <Button onClick={() => setEditEvent(event)} variant="outline" size="icon" className="rounded-xl border-slate-200 dark:border-slate-700 hover:bg-accent/10 hover:text-accent"><Edit className="w-4 h-4" /></Button>
                             </DialogTrigger>
-                            <DialogContent className="max-w-md bg-white rounded-[2rem]">
+                            <DialogContent className="max-w-md bg-white dark:bg-slate-900 rounded-[2rem]">
                               <DialogHeader><DialogTitle>Edit Event</DialogTitle></DialogHeader>
                               {editEvent && (
                                 <div className="space-y-4 py-4">
@@ -381,11 +381,11 @@ export default function InternalEventsManagement() {
                             <AlertDialogTrigger asChild>
                               <Button variant="destructive" size="icon" className="rounded-xl"><Trash2 className="w-4 h-4" /></Button>
                             </AlertDialogTrigger>
-                            <AlertDialogContent className="rounded-[2rem]">
+                            <AlertDialogContent className="rounded-[2rem] bg-white dark:bg-slate-900 border-none">
                               <AlertDialogHeader><AlertDialogTitle>Confirm Deletion</AlertDialogTitle></AlertDialogHeader>
                               <AlertDialogFooter>
                                 <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => handleDeleteEvent(event.id)} className="bg-red-500 rounded-xl border-none">Delete</AlertDialogAction>
+                                <AlertDialogAction onClick={() => handleDeleteEvent(event.id)} className="bg-red-500 hover:bg-red-600 rounded-xl border-none">Delete</AlertDialogAction>
                               </AlertDialogFooter>
                             </AlertDialogContent>
                           </AlertDialog>
