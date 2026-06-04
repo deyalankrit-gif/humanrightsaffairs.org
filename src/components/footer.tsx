@@ -70,7 +70,7 @@ export function Footer() {
 
           <div>
             <div className="mb-10">
-              <h4 className="text-lg font-headline font-bold mb-6 text-accent">Head Office</h4>
+              <h4 className="text-lg font-headline font-bold mb-6 text-accent">National Head Office</h4>
               <ul className="space-y-4 text-indigo-100">
                 <li className="flex gap-3">
                   <MapPin className="w-5 h-5 text-accent shrink-0" />
