@@ -55,7 +55,7 @@ export default function MeetingsPage() {
 
   const meetingsQuery = useMemoFirebase(() => {
     if (!db) return null;
-    return query(collection(db, 'meetings'), orderBy('date', 'desc'));
+    return query(collection(db, 'meetings'), orderBy('createdAt', 'desc'));
   }, [db]);
 
   const { data: meetings, loading: dataLoading } = useCollection(meetingsQuery);

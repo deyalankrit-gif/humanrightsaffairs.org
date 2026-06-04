@@ -589,7 +589,7 @@ export default function InternalMeetingsManagement() {
                                               onCheckedChange={(checked) => {
                                                 const attendees = checked 
                                                   ? [...(editMeeting.attendees || []), leader.name]
-                                                  : (editMeeting.attendees || []).filter(a => a !== leader.name);
+                                                  : (editMeeting.attendees || []).filter((a: any) => a !== leader.name);
                                                 setEditMeeting({...editMeeting, attendees});
                                               }}
                                             />
