@@ -1,9 +1,9 @@
 "use client"
 
-import React, { useMemo, useEffect } from 'react'
+import React, { useMemo, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useUser, useCollection, useFirestore, useMemoFirebase } from '@/firebase'
-import { collection, query, orderBy } from 'firebase/firestore'
+import { collection, query, orderBy, deleteDoc, doc } from 'firebase/firestore'
 import { AdminNavbar } from '@/components/admin-navbar'
 import { Footer } from '@/components/footer'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -29,13 +29,28 @@ import {
   ShieldCheck,
   Loader2,
   FileText,
-  Plus
+  Plus,
+  Trash2
 } from 'lucide-react'
+import { useToast } from '@/hooks/use-toast'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 export default function DonationAnalyticsPage() {
   const { user, loading: authLoading } = useUser()
   const router = useRouter()
   const db = useFirestore()
+  const { toast } = useToast()
+  const [isDeleting, setIsDeleting] = useState<string | null>(null)
 
   const donationsQuery = useMemoFirebase(() => {
     if (!db || !user) return null;
@@ -72,6 +87,19 @@ export default function DonationAnalyticsPage() {
     return { total, count, chartData, methods };
   }, [donations]);
 
+  const handleDelete = async (id: string) => {
+    if (!db) return
+    setIsDeleting(id)
+    try {
+      await deleteDoc(doc(db, 'donations', id))
+      toast({ title: "Record Removed", description: "The transaction has been deleted from history." })
+    } catch (e: any) {
+      toast({ variant: "destructive", title: "Error", description: e.message })
+    } finally {
+      setIsDeleting(null)
+    }
+  }
+
   if (authLoading || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
@@ -97,7 +125,7 @@ export default function DonationAnalyticsPage() {
                 <ShieldCheck className="w-3 h-3" /> Secure Governance
               </div>
               <h1 className="text-4xl md:text-5xl font-headline font-bold">Donation <span className="text-accent italic">Analytics</span></h1>
-              <p className="text-indigo-100/70">Financial oversight of the Human Rights Affairs Trust (JusticeShield).</p>
+              <p className="opacity-70 text-sm md:text-base">Financial oversight of the Human Rights Affairs Trust (JusticeShield).</p>
             </div>
 
             <ManualDonationDialog>
@@ -199,7 +227,7 @@ export default function DonationAnalyticsPage() {
               <Card className="border-none shadow-sm rounded-[2.5rem] bg-card overflow-hidden">
                 <CardHeader className="bg-muted border-b p-8">
                   <CardTitle className="text-2xl font-headline font-bold flex items-center gap-3">
-                    <FileText className="w-6 h-6 text-accent" /> Recent Contribution Records
+                    <FileText className="w-6 h-6 text-accent" /> Contribution Ledger
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-0">
@@ -212,11 +240,12 @@ export default function DonationAnalyticsPage() {
                           <th className="px-8 py-4">Method</th>
                           <th className="px-8 py-4">Ref/PAN</th>
                           <th className="px-8 py-4">Status</th>
+                          <th className="px-8 py-4">Action</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-border">
-                        {donations && donations.slice(0, 10).map((d: any, i: number) => (
-                          <tr key={i} className="hover:bg-muted/30 transition-colors">
+                        {donations && donations.map((d: any) => (
+                          <tr key={d.id} className="hover:bg-muted/30 transition-colors">
                             <td className="px-8 py-4 font-bold">{d.donorName || d.name}</td>
                             <td className="px-8 py-4 text-emerald-600 dark:text-emerald-400 font-bold">₹{d.amount}</td>
                             <td className="px-8 py-4 text-muted-foreground text-xs">{d.paymentMethod}</td>
@@ -225,6 +254,25 @@ export default function DonationAnalyticsPage() {
                               <span className="px-3 py-1 bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400 rounded-full text-[9px] font-bold uppercase tracking-widest">
                                 {d.status}
                               </span>
+                            </td>
+                            <td className="px-8 py-4">
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button variant="ghost" size="icon" className="text-slate-400 hover:text-red-500 rounded-full">
+                                    <Trash2 className="w-4 h-4" />
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent className="rounded-[2rem]">
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>Delete Record?</AlertDialogTitle>
+                                    <AlertDialogDescription>This transaction will be permanently removed from the ledger. This action is recorded.</AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => handleDelete(d.id)} className="bg-red-500 hover:bg-red-600 border-none rounded-xl">Delete Forever</AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
                             </td>
                           </tr>
                         ))}
