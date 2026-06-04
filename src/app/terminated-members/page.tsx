@@ -28,7 +28,6 @@ import {
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
-  AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
@@ -112,9 +111,9 @@ export default function TerminatedMembersPage() {
       })
       toast({ title: "Entry Added", description: "Termination notice has been published." })
       setNewMember({ name: '', designation: '', level: 'National', terminationDate: '', reason: '', status: 'Revoked', gender: 'male', imageId: '' })
-    } catch (e: any) (
+    } catch (e: any) {
       toast({ variant: "destructive", title: "Error", description: e.message })
-    ) finally {
+    } finally {
       setIsActionLoading(false)
     }
   }
@@ -294,9 +293,7 @@ export default function TerminatedMembersPage() {
         <div className="container mx-auto px-4">
           <div className="max-w-5xl mx-auto space-y-12">
             
-            {/* Attention Grabbing Disclaimer with Pulse Animation */}
             <div className="relative group">
-              {/* Pulsing Animated Background Glow */}
               <div className="absolute -inset-1 bg-gradient-to-r from-red-600 via-orange-600 to-red-600 rounded-[2.5rem] blur-xl opacity-20 group-hover:opacity-40 transition duration-1000 animate-pulse"></div>
               <Alert variant="destructive" className="relative bg-white dark:bg-slate-900 border-4 border-red-600 rounded-[2.5rem] p-8 md:p-12 shadow-2xl">
                 <div className="flex flex-col items-center text-center space-y-6">
