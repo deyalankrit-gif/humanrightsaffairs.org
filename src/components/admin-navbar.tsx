@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useEffect } from 'react'
@@ -11,7 +10,6 @@ import {
   LayoutDashboard, 
   Users, 
   LogOut, 
-  ExternalLink, 
   ShieldCheck, 
   Menu,
   X,
@@ -95,13 +93,6 @@ export function AdminNavbar() {
 
           <ThemeToggle className="text-white hover:bg-white/10" />
 
-          <Link href="/">
-            <Button variant="outline" className="hidden md:flex border-white/10 bg-white/5 text-white hover:bg-white/10 rounded-xl h-10 px-4 text-xs font-bold gap-2">
-              <ExternalLink className="w-3.5 h-3.5" />
-              Public Website
-            </Button>
-          </Link>
-
           <Button 
             onClick={handleLogout}
             variant="ghost" 
@@ -149,12 +140,6 @@ export function AdminNavbar() {
                 </div>
 
                 <div className="p-6 border-t border-white/5 space-y-3">
-                  <Link href="/" className="block">
-                    <Button className="w-full bg-white/10 hover:bg-white/20 text-white font-bold h-14 rounded-2xl gap-3">
-                      <ExternalLink className="w-5 h-5" />
-                      Public Website
-                    </Button>
-                  </Link>
                   <Button 
                     onClick={handleLogout}
                     className="w-full bg-red-500/10 hover:bg-red-500/20 text-red-500 font-bold h-14 rounded-2xl gap-3"

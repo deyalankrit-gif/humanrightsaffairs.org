@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useEffect } from 'react'
@@ -115,21 +114,6 @@ export function Navbar() {
           })}
           
           <ThemeToggle className={navColorClass} />
-          
-          {user && (
-            <Link href="/internal/analytics">
-              <Button 
-                variant="outline" 
-                className={cn(
-                  "border-accent/30 text-accent hover:bg-accent hover:text-primary rounded-full px-4 font-bold text-[10px] uppercase tracking-widest flex gap-2 h-9",
-                  !isScrolled && isHome ? "bg-white/10 border-white/20 text-white" : "dark:border-white/10"
-                )}
-              >
-                <LayoutDashboard className="w-3.5 h-3.5" />
-                Admin Panel
-              </Button>
-            </Link>
-          )}
 
           <DonationDialog>
             <Button 
@@ -144,13 +128,6 @@ export function Navbar() {
         {/* Mobile Nav */}
         <div className="lg:hidden flex items-center gap-4">
            <ThemeToggle className={navColorClass} />
-           {user && (
-             <Link href="/internal/analytics">
-               <Button variant="ghost" size="icon" className={navColorClass}>
-                 <LayoutDashboard className="w-6 h-6" />
-               </Button>
-             </Link>
-           )}
           <Sheet>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className={navColorClass}>
@@ -176,11 +153,6 @@ export function Navbar() {
                     {link.name}
                   </Link>
                 ))}
-                {user && (
-                  <Link href="/internal/analytics" className="text-xl font-headline font-bold text-accent">
-                    Admin Panel
-                  </Link>
-                )}
                 <DonationDialog>
                   <Button className="w-full bg-primary text-white py-6 text-lg mt-4 dark:bg-accent dark:text-primary">
                     Donate Now

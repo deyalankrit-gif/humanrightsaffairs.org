@@ -4,6 +4,7 @@ import { FirebaseClientProvider } from '@/firebase';
 import { FirebaseErrorListener } from '@/components/FirebaseErrorListener';
 import { Toaster } from '@/components/ui/toaster';
 import { ThemeProvider } from '@/components/theme-provider';
+import { PortalSwitcher } from '@/components/portal-switcher';
 
 export const metadata: Metadata = {
   title: 'Human Rights Affairs Trust (JusticeShield)',
@@ -31,6 +32,7 @@ export default function RootLayout({
         >
           <FirebaseClientProvider>
             <FirebaseErrorListener />
+            <PortalSwitcher />
             {children}
             <Toaster />
           </FirebaseClientProvider>
