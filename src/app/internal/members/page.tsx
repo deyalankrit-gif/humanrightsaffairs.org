@@ -123,16 +123,21 @@ export default function InternalMembersDirectory() {
   }
 
   const filtered = (firestoreProfiles || []).filter((m: any) => {
-    const matchesSearch = m.name.toLowerCase().includes(search.toLowerCase()) || 
-      m.id?.toLowerCase().includes(search.toLowerCase()) ||
-      m.memberId?.toLowerCase().includes(search.toLowerCase());
+    const matchesSearch = (m.name || '').toLowerCase().includes(search.toLowerCase()) || 
+      (m.id || '').toLowerCase().includes(search.toLowerCase()) ||
+      (m.memberId || '').toLowerCase().includes(search.toLowerCase());
     
     const matchesLevel = levelFilter === 'All' || m.level === levelFilter;
     return matchesSearch && matchesLevel;
   })
 
   const states = Object.keys(INDIA_DATA).sort()
-  const levels = ["All", "National", "State", "District"]
+  const levels = [
+    { label: "All Levels", value: "All" },
+    { label: "National Level", value: "National" },
+    { label: "State Level", value: "State" },
+    { label: "District Level", value: "District" }
+  ]
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
@@ -272,17 +277,17 @@ export default function InternalMembersDirectory() {
             <div className="flex flex-wrap gap-2">
               {levels.map((lvl) => (
                 <Button
-                  key={lvl}
-                  variant={levelFilter === lvl ? "default" : "outline"}
-                  onClick={() => setLevelFilter(lvl)}
+                  key={lvl.value}
+                  variant={levelFilter === lvl.value ? "default" : "outline"}
+                  onClick={() => setLevelFilter(lvl.value)}
                   className={cn(
-                    "rounded-full px-6 font-bold transition-all",
-                    levelFilter === lvl 
+                    "rounded-full px-6 font-bold transition-all border-slate-200 dark:border-slate-700",
+                    levelFilter === lvl.value 
                       ? "bg-accent text-slate-900 shadow-lg border-accent" 
-                      : "text-primary dark:text-white border-slate-200 dark:border-slate-700 hover:bg-accent hover:text-slate-900 hover:border-accent"
+                      : "text-primary dark:text-white hover:bg-accent hover:text-slate-900 hover:border-accent"
                   )}
                 >
-                  {lvl === 'All' ? 'All Levels' : `${lvl} Level`}
+                  {lvl.label}
                 </Button>
               ))}
             </div>
@@ -353,7 +358,7 @@ export default function InternalMembersDirectory() {
                             {member.status || 'Active'}
                           </Badge>
                           <Link href={`/internal/members/${member.id}`}>
-                            <Button className="bg-primary dark:bg-white dark:text-slate-900 text-white hover:bg-accent rounded-2xl h-12 px-6 group/btn transition-all flex gap-2">
+                            <Button className="bg-primary text-white dark:bg-white dark:text-slate-900 hover:bg-accent hover:text-slate-900 dark:hover:bg-accent dark:hover:text-slate-900 rounded-2xl h-12 px-6 group/btn transition-all flex gap-2 font-bold">
                               Full Profile <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
                             </Button>
                           </Link>

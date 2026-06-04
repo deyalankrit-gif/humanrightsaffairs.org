@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState } from 'react'
@@ -73,10 +72,15 @@ export default function MeetingsPage() {
 
   const filteredMeetings = (meetings as Meeting[] || []).filter(m => 
     (filter === "All" || m.level === filter) &&
-    (m.title.toLowerCase().includes(search.toLowerCase()) || m.location.toLowerCase().includes(search.toLowerCase()))
+    ((m.title || '').toLowerCase().includes(search.toLowerCase()) || (m.location || '').toLowerCase().includes(search.toLowerCase()))
   )
 
-  const levels = ["All", "National", "State", "District"]
+  const levels = [
+    { label: "All Levels", value: "All" },
+    { label: "National Level", value: "National" },
+    { label: "State Level", value: "State" },
+    { label: "District Level", value: "District" }
+  ]
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
@@ -104,17 +108,17 @@ export default function MeetingsPage() {
             <div className="flex flex-wrap gap-2">
               {levels.map((lvl) => (
                 <Button
-                  key={lvl}
-                  variant={filter === lvl ? "default" : "outline"}
-                  onClick={() => setFilter(lvl)}
+                  key={lvl.value}
+                  variant={filter === lvl.value ? "default" : "outline"}
+                  onClick={() => setFilter(lvl.value)}
                   className={cn(
-                    "rounded-full px-6 font-bold transition-all",
-                    filter === lvl 
+                    "rounded-full px-6 font-bold transition-all border-slate-200 dark:border-slate-700",
+                    filter === lvl.value 
                       ? "bg-accent text-slate-900 shadow-lg border-accent" 
-                      : "text-primary dark:text-white border-slate-200 dark:border-slate-700 hover:bg-accent hover:text-slate-900 hover:border-accent"
+                      : "text-primary dark:text-white hover:bg-accent hover:text-slate-900 hover:border-accent"
                   )}
                 >
-                  {lvl === 'All' ? 'All Levels' : `${lvl} Level`}
+                  {lvl.label}
                 </Button>
               ))}
             </div>
@@ -150,7 +154,7 @@ export default function MeetingsPage() {
                         <Badge className={cn(
                           "font-bold text-[10px] px-3",
                           meeting.status === 'Upcoming' ? 'bg-emerald-500 text-white' : 
-                          meeting.status === 'Completed' ? 'bg-primary text-primary-foreground' : 'bg-red-500 text-white'
+                          meeting.status === 'Completed' ? 'bg-primary text-primary-foreground dark:text-slate-900 dark:bg-white' : 'bg-red-500 text-white'
                         )}>
                           {meeting.status}
                         </Badge>
@@ -189,7 +193,7 @@ export default function MeetingsPage() {
                     <CardFooter className="p-8 pt-0 mt-auto">
                       <Dialog>
                         <DialogTrigger asChild>
-                          <Button className="w-full bg-slate-900 dark:bg-white dark:text-slate-900 text-white font-bold h-12 rounded-xl group/btn">
+                          <Button className="w-full bg-slate-900 text-white dark:bg-white dark:text-slate-900 font-bold h-12 rounded-xl group/btn hover:bg-accent hover:text-slate-900 dark:hover:bg-accent dark:hover:text-slate-900 transition-colors">
                             View Details & Minutes <ExternalLink className="ml-2 w-4 h-4 group-hover/btn:scale-110 transition-transform" />
                           </Button>
                         </DialogTrigger>

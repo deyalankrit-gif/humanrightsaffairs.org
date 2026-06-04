@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useEffect, useState } from 'react'
@@ -315,7 +314,8 @@ export default function InternalMeetingsManagement() {
                         <SelectContent className="max-h-60">
                           {(INDIA_DATA[newMeeting.stateName] || []).map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}
                         </SelectContent>
-                      </div>
+                      </Select>
+                    </div>
                   )}
 
                   <div className="space-y-2">
@@ -348,10 +348,10 @@ export default function InternalMeetingsManagement() {
                   variant={levelFilter === lvl.value ? "default" : "outline"}
                   onClick={() => setLevelFilter(lvl.value)}
                   className={cn(
-                    "rounded-full px-6 font-bold transition-all",
+                    "rounded-full px-6 font-bold transition-all border-slate-200 dark:border-slate-700",
                     levelFilter === lvl.value 
                       ? "bg-accent text-slate-900 shadow-lg border-accent" 
-                      : "text-primary dark:text-white border-slate-200 dark:border-slate-700 hover:bg-accent hover:text-slate-900 hover:border-accent"
+                      : "text-primary dark:text-white hover:bg-accent hover:text-slate-900 hover:border-accent"
                   )}
                 >
                   {lvl.label}

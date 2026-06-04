@@ -179,8 +179,8 @@ export default function EventsPage() {
   const events = (firestoreEvents || []) as Event[]
   const filteredEvents = events.filter(e => {
     const matchesCategory = filter === "All" || e.category === filter;
-    const matchesSearch = (e.title?.toLowerCase() || '').includes(search.toLowerCase()) || 
-                          (e.location?.toLowerCase() || '').includes(search.toLowerCase());
+    const matchesSearch = (e.title || '').toLowerCase().includes(search.toLowerCase()) || 
+                          (e.location || '').toLowerCase().includes(search.toLowerCase());
     return matchesCategory && matchesSearch;
   })
 
@@ -189,7 +189,8 @@ export default function EventsPage() {
   const parseEventDate = (dateStr: string) => {
     if (!dateStr) return undefined;
     try {
-      return new Date(dateStr);
+      const d = new Date(dateStr);
+      return isNaN(d.getTime()) ? undefined : d;
     } catch {
       return undefined;
     }
@@ -228,7 +229,7 @@ export default function EventsPage() {
                         {newEvent.imageId && (
                           <div className="relative w-full aspect-video rounded-xl overflow-hidden">
                             <Image 
-                              src={newEvent.imageId.startsWith('data:') ? newEvent.imageId : (PlaceHolderImages.find(i => i.id === newEvent.imageId)?.imageUrl || '')} 
+                              src={newEvent.imageId.startsWith('data:') ? newMeeting.imageId : (PlaceHolderImages.find(i => i.id === newEvent.imageId)?.imageUrl || '')} 
                               alt="Preview" 
                               fill 
                               className="object-cover"
@@ -301,7 +302,7 @@ export default function EventsPage() {
         </div>
       </section>
 
-      <section className="py-12 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-[72px] md:top-[84px] z-30 shadow-sm">
+      <section className="py-12 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-[72px] md:top-[84px] z-30 shadow-sm transition-colors">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row gap-6 items-center justify-between">
             <div className="flex flex-wrap gap-2">
@@ -311,10 +312,10 @@ export default function EventsPage() {
                   variant={filter === cat ? "default" : "outline"}
                   onClick={() => setFilter(cat)}
                   className={cn(
-                    "rounded-full px-6 font-bold transition-all",
+                    "rounded-full px-6 font-bold transition-all border-slate-200 dark:border-slate-700",
                     filter === cat 
-                      ? "bg-primary text-primary-foreground" 
-                      : "text-primary dark:text-white border-slate-200 dark:border-slate-700 hover:bg-accent hover:text-slate-900 hover:border-accent"
+                      ? "bg-accent text-slate-900 shadow-lg border-accent" 
+                      : "text-primary dark:text-white hover:bg-accent hover:text-slate-900 hover:border-accent"
                   )}
                 >
                   {cat}
