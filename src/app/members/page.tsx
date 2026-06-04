@@ -341,8 +341,8 @@ export default function MembersPage() {
                   className={cn(
                     "rounded-full px-6 font-bold transition-all",
                     levelFilter === level 
-                      ? "bg-accent text-primary dark:bg-accent dark:text-primary shadow-lg" 
-                      : "text-primary dark:text-white border-slate-200 dark:border-white/20 hover:border-accent hover:text-accent"
+                      ? "bg-accent text-slate-900 shadow-lg border-accent" 
+                      : "text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-accent hover:text-accent"
                   )}
                 >
                   {level === 'All' ? 'All Levels' : `${level} Level`}
@@ -352,7 +352,7 @@ export default function MembersPage() {
                 <DropdownMenuTrigger asChild>
                   <Button variant={selectedState ? "default" : "outline"} className={cn(
                     "rounded-full px-6 font-bold flex items-center gap-2",
-                    selectedState ? "bg-accent text-primary" : "text-primary dark:text-white dark:border-white/20"
+                    selectedState ? "bg-accent text-slate-900" : "text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-accent hover:text-accent"
                   )}>{selectedState || "Filter by State"} <ChevronDown className="w-4 h-4 opacity-50" /></Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="max-h-80 overflow-y-auto w-56">
@@ -367,7 +367,7 @@ export default function MembersPage() {
                   <DropdownMenuTrigger asChild>
                     <Button variant={selectedDistrict ? "default" : "outline"} className={cn(
                       "rounded-full px-6 font-bold flex items-center gap-2",
-                      selectedDistrict ? "bg-accent text-primary" : "text-primary dark:text-white dark:border-white/20"
+                      selectedDistrict ? "bg-accent text-slate-900" : "text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-accent hover:text-accent"
                     )}>{selectedDistrict || "Filter by District"} <ChevronDown className="w-4 h-4 opacity-50" /></Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="max-h-80 overflow-y-auto w-56">

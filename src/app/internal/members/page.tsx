@@ -278,8 +278,8 @@ export default function InternalMembersDirectory() {
                   className={cn(
                     "rounded-full px-6 font-bold transition-all",
                     levelFilter === lvl 
-                      ? "bg-accent text-primary dark:bg-accent dark:text-primary shadow-lg" 
-                      : "text-primary dark:text-white border-slate-200 dark:border-white/20 hover:border-accent hover:text-accent"
+                      ? "bg-accent text-slate-900 shadow-lg border-accent" 
+                      : "text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-accent hover:text-accent"
                   )}
                 >
                   {lvl === 'All' ? 'All Levels' : `${lvl} Level`}
