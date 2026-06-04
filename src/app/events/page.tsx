@@ -177,10 +177,12 @@ export default function EventsPage() {
   }
 
   const events = (firestoreEvents || []) as Event[]
-  const filteredEvents = events.filter(e => 
-    (filter === "All" || e.category === filter) &&
-    (e.title.toLowerCase().includes(search.toLowerCase()) || e.location.toLowerCase().includes(search.toLowerCase()))
-  )
+  const filteredEvents = events.filter(e => {
+    const matchesCategory = filter === "All" || e.category === filter;
+    const matchesSearch = (e.title?.toLowerCase() || '').includes(search.toLowerCase()) || 
+                          (e.location?.toLowerCase() || '').includes(search.toLowerCase());
+    return matchesCategory && matchesSearch;
+  })
 
   const categories = ["All", "Campaign", "Workshop", "Convention", "Relief", "Social Projects"]
 

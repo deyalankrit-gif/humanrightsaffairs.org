@@ -144,8 +144,8 @@ export default function TerminatedMembersPage() {
 
   const members = (firestoreTerminated || []) as TerminatedMember[]
   const filtered = members.filter(m => 
-    m.name.toLowerCase().includes(search.toLowerCase()) || 
-    m.id.toLowerCase().includes(search.toLowerCase())
+    (m.name?.toLowerCase() || '').includes(search.toLowerCase()) || 
+    (m.id?.toLowerCase() || '').includes(search.toLowerCase())
   )
 
   const parseTerminationDate = (dateStr: string) => {

@@ -51,7 +51,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
-import { format, parse } from "date-fns"
+import { format } from "date-fns"
 import { useToast } from '@/hooks/use-toast'
 import { errorEmitter } from '@/firebase/error-emitter'
 import { FirestorePermissionError, type SecurityRuleContext } from '@/firebase/errors'
@@ -175,23 +175,27 @@ export default function InternalMeetingsManagement() {
   }
 
   const filtered = (meetings || []).filter((m: any) => {
-    const matchesSearch = m.title.toLowerCase().includes(search.toLowerCase()) || 
-      m.location.toLowerCase().includes(search.toLowerCase()) ||
-      m.stateName?.toLowerCase().includes(search.toLowerCase()) ||
-      m.districtName?.toLowerCase().includes(search.toLowerCase());
+    const matchesSearch = (m.title?.toLowerCase() || '').includes(search.toLowerCase()) || 
+      (m.location?.toLowerCase() || '').includes(search.toLowerCase()) ||
+      (m.stateName?.toLowerCase() || '').includes(search.toLowerCase()) ||
+      (m.districtName?.toLowerCase() || '').includes(search.toLowerCase());
     
     const matchesLevel = levelFilter === 'All' || m.level === levelFilter;
     return matchesSearch && matchesLevel;
   })
 
   const states = Object.keys(INDIA_DATA).sort()
-  const levels = ["All", "National Level", "State Level", "District Level"]
+  const levels = [
+    { label: "All Levels", value: "All" },
+    { label: "National Level", value: "National" },
+    { label: "State Level", value: "State" },
+    { label: "District Level", value: "District" }
+  ]
 
-  const parseDateString = (dateStr: string) => {
+  const parseMeetingDate = (dateStr: string) => {
     if (!dateStr) return undefined;
     try {
-      const d = new Date(dateStr);
-      return isNaN(d.getTime()) ? undefined : d;
+      return new Date(dateStr);
     } catch {
       return undefined;
     }
@@ -238,7 +242,7 @@ export default function InternalMeetingsManagement() {
                         <PopoverContent className="w-auto p-0" align="start">
                           <Calendar
                             mode="single"
-                            selected={parseDateString(newMeeting.date)}
+                            selected={parseMeetingDate(newMeeting.date)}
                             onSelect={(date) => setNewMeeting({...newMeeting, date: date ? format(date, "PPP") : ''})}
                             initialFocus
                           />
@@ -325,24 +329,21 @@ export default function InternalMeetingsManagement() {
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row gap-6 items-center justify-between">
             <div className="flex flex-wrap gap-2">
-              {levels.map((lvl) => {
-                const levelVal = lvl === 'All Levels' ? 'All' : lvl.split(' ')[0];
-                return (
-                  <Button
-                    key={lvl}
-                    variant={levelFilter === levelVal ? "default" : "outline"}
-                    onClick={() => setLevelFilter(levelVal)}
-                    className={cn(
-                      "rounded-full px-6 font-bold transition-all",
-                      levelFilter === levelVal 
-                        ? "bg-accent text-slate-900 shadow-lg border-accent" 
-                        : "text-slate-900 dark:text-slate-100 border-slate-200 dark:border-slate-700 hover:bg-accent hover:text-slate-900 hover:border-accent"
-                    )}
-                  >
-                    {lvl}
-                  </Button>
-                )
-              })}
+              {levels.map((lvl) => (
+                <Button
+                  key={lvl.value}
+                  variant={levelFilter === lvl.value ? "default" : "outline"}
+                  onClick={() => setLevelFilter(lvl.value)}
+                  className={cn(
+                    "rounded-full px-6 font-bold transition-all",
+                    levelFilter === lvl.value 
+                      ? "bg-accent text-slate-900 shadow-lg border-accent" 
+                      : "text-primary dark:text-white border-slate-200 dark:border-slate-700 hover:bg-accent hover:text-slate-900 hover:border-accent"
+                  )}
+                >
+                  {lvl.label}
+                </Button>
+              ))}
             </div>
             <div className="relative w-full md:w-80">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
@@ -366,8 +367,8 @@ export default function InternalMeetingsManagement() {
                          <Badge variant="outline" className="border-accent text-accent text-[9px] font-bold uppercase px-3 py-1 mb-3">
                             {meeting.level} {meeting.stateName ? `(${meeting.districtName || meeting.stateName})` : ''}
                          </Badge>
-                         <span className="text-2xl font-headline font-bold text-slate-900 dark:text-white leading-none mb-1">{meeting.date.split(' ')[0]}</span>
-                         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{meeting.date.split(' ').slice(1).join(' ')}</span>
+                         <span className="text-2xl font-headline font-bold text-slate-900 dark:text-white leading-none mb-1">{meeting.date?.split(' ')[0] || '--'}</span>
+                         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{meeting.date?.split(' ').slice(1).join(' ') || ''}</span>
                       </div>
                       
                       <div className="flex-1 p-8 grid lg:grid-cols-4 gap-8 items-center">
@@ -415,7 +416,7 @@ export default function InternalMeetingsManagement() {
                                         <PopoverContent className="w-auto p-0" align="start">
                                           <Calendar
                                             mode="single"
-                                            selected={parseDateString(editMeeting.date)}
+                                            selected={parseMeetingDate(editMeeting.date)}
                                             onSelect={(date) => setEditMeeting({...editMeeting, date: date ? format(date, "PPP") : ''})}
                                             initialFocus
                                           />
