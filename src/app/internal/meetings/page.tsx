@@ -209,7 +209,7 @@ export default function InternalMeetingsManagement() {
                 <div className="space-y-4 py-4">
                   <div className="space-y-2">
                     <Label>Meeting Title</Label>
-                    <Input value={newMeeting.title} onChange={e => setNewMeeting({...newMeeting, title: e.target.value})} placeholder="e.g. Annual State Council" />
+                    <Input value={newMeeting.title} onChange={e => setNewMeeting({...newMeeting, title: e.target.value})} placeholder="e.g. Annual State Council" className="h-12 rounded-xl" />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
@@ -292,7 +292,7 @@ export default function InternalMeetingsManagement() {
                   </div>
                   <div className="space-y-2">
                     <Label>Agenda</Label>
-                    <Textarea value={newMeeting.agenda} onChange={e => setNewMeeting({...newMeeting, agenda: e.target.value})} placeholder="Outline the meeting goals..." className="rounded-xl" />
+                    <Textarea value={newMeeting.agenda} onChange={e => setNewMeeting({...newMeeting, agenda: e.target.value})} placeholder="Outline the meeting goals..." className="rounded-xl min-h-[100px]" />
                   </div>
                 </div>
                 <DialogFooter>
@@ -310,7 +310,7 @@ export default function InternalMeetingsManagement() {
         <div className="container mx-auto px-4">
           <div className="relative max-w-2xl">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-            <Input placeholder="Filter archives..." className="pl-12 h-14 rounded-2xl border-slate-200 dark:border-slate-700 dark:bg-slate-800" value={search} onChange={(e) => setSearch(e.target.value)} />
+            <Input placeholder="Filter archives by title, venue or region..." className="pl-12 h-14 rounded-2xl border-slate-200 dark:border-slate-700 dark:bg-slate-800" value={search} onChange={(e) => setSearch(e.target.value)} />
           </div>
         </div>
       </section>
@@ -344,7 +344,12 @@ export default function InternalMeetingsManagement() {
                         </div>
                         
                         <div className="flex items-center justify-center">
-                           <Badge className={cn("font-bold uppercase tracking-widest text-[9px] px-4 py-1", meeting.status === 'Upcoming' ? 'bg-emerald-500' : 'bg-primary text-white')}>{meeting.status}</Badge>
+                           <Badge className={cn(
+                             "font-bold uppercase tracking-widest text-[9px] px-4 py-1",
+                             meeting.status === 'Upcoming' ? 'bg-emerald-500 text-white' : 'bg-primary text-white'
+                           )}>
+                             {meeting.status}
+                           </Badge>
                         </div>
 
                         <div className="flex items-center justify-end gap-3">
@@ -356,7 +361,10 @@ export default function InternalMeetingsManagement() {
                               <DialogHeader><DialogTitle>Edit Assembly Archive</DialogTitle></DialogHeader>
                               {editMeeting && (
                                 <div className="space-y-4 py-4">
-                                  <Input value={editMeeting.title} onChange={e => setEditMeeting({...editMeeting, title: e.target.value})} className="h-12 rounded-xl" />
+                                  <div className="space-y-1">
+                                    <Label>Meeting Title</Label>
+                                    <Input value={editMeeting.title} onChange={e => setEditMeeting({...editMeeting, title: e.target.value})} className="h-12 rounded-xl" />
+                                  </div>
                                   <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-1">
                                       <Label>Date</Label>
@@ -424,8 +432,18 @@ export default function InternalMeetingsManagement() {
                                     </div>
                                   )}
 
-                                  <Textarea value={editMeeting.agenda} onChange={e => setEditMeeting({...editMeeting, agenda: e.target.value})} className="rounded-xl" />
-                                  <Textarea value={editMeeting.minutes} onChange={e => setEditMeeting({...editMeeting, minutes: e.target.value})} placeholder="Minutes (Post-Meeting)..." className="rounded-xl" />
+                                  <div className="space-y-1">
+                                    <Label>Venue / Link</Label>
+                                    <Input value={editMeeting.location} onChange={e => setEditMeeting({...editMeeting, location: e.target.value})} className="h-12 rounded-xl" />
+                                  </div>
+                                  <div className="space-y-1">
+                                    <Label>Agenda</Label>
+                                    <Textarea value={editMeeting.agenda} onChange={e => setEditMeeting({...editMeeting, agenda: e.target.value})} className="rounded-xl min-h-[100px]" />
+                                  </div>
+                                  <div className="space-y-1">
+                                    <Label>Minutes (Post-Meeting)</Label>
+                                    <Textarea value={editMeeting.minutes} onChange={e => setEditMeeting({...editMeeting, minutes: e.target.value})} placeholder="Minutes..." className="rounded-xl min-h-[100px]" />
+                                  </div>
                                   <Button onClick={handleUpdate} disabled={isActionLoading} className="w-full h-12 rounded-xl mt-4">Commit Changes</Button>
                                 </div>
                               )}
@@ -433,8 +451,9 @@ export default function InternalMeetingsManagement() {
                           </Dialog>
                           <AlertDialog>
                             <AlertDialogTrigger asChild><Button variant="ghost" size="icon" className="rounded-xl text-slate-400 hover:text-red-500"><Trash2 className="w-4 h-4" /></Button></AlertDialogTrigger>
-                            <AlertDialogContent className="rounded-[2rem]">
+                            <AlertDialogContent className="rounded-[2rem] bg-white dark:bg-slate-900 border-none shadow-2xl">
                               <AlertDialogHeader><AlertDialogTitle>Delete Assembly Record?</AlertDialogTitle></AlertDialogHeader>
+                              <AlertDialogDescription>This action is irreversible and will remove the meeting from public archive.</AlertDialogDescription>
                               <AlertDialogFooter>
                                 <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
                                 <AlertDialogAction onClick={() => handleDelete(meeting.id)} className="bg-red-500 hover:bg-red-600 rounded-xl border-none">Confirm Deletion</AlertDialogAction>
