@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState } from 'react'
@@ -56,6 +57,19 @@ export default function MeetingsPage() {
   }, [db]);
 
   const { data: meetings, loading: dataLoading } = useCollection(meetingsQuery);
+
+  const formatTo12Hour = (time24: string) => {
+    if (!time24) return '';
+    if (time24.includes('AM') || time24.includes('PM')) return time24;
+    try {
+      const [hours, minutes] = time24.split(':').map(Number);
+      const period = hours >= 12 ? 'PM' : 'AM';
+      const hours12 = hours % 12 || 12;
+      return `${hours12}:${minutes.toString().padStart(2, '0')} ${period}`;
+    } catch {
+      return time24;
+    }
+  };
 
   const filteredMeetings = (meetings as Meeting[] || []).filter(m => 
     (filter === "All" || m.level === filter) &&
@@ -154,7 +168,7 @@ export default function MeetingsPage() {
                         </div>
                         <div className="flex items-center gap-3 text-sm font-bold text-muted-foreground">
                           <div className="p-2 bg-slate-50 dark:bg-slate-800 rounded-lg"><Clock className="w-4 h-4 text-accent" /></div>
-                          <span>{meeting.time}</span>
+                          <span>{formatTo12Hour(meeting.time)}</span>
                         </div>
                         <div className="flex items-center gap-3 text-sm font-bold text-muted-foreground">
                           <div className="p-2 bg-slate-50 dark:bg-slate-800 rounded-lg"><MapPin className="w-4 h-4 text-accent" /></div>
@@ -193,7 +207,7 @@ export default function MeetingsPage() {
                                </div>
                                <div className="bg-slate-50 dark:bg-slate-900 p-4 rounded-2xl border border-slate-100 dark:border-slate-800">
                                   <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Time</p>
-                                  <p className="font-bold text-sm text-foreground">{meeting.time}</p>
+                                  <p className="font-bold text-sm text-foreground">{formatTo12Hour(meeting.time)}</p>
                                </div>
                                <div className="bg-slate-50 dark:bg-slate-900 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 col-span-2 md:col-span-1">
                                   <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Venue</p>

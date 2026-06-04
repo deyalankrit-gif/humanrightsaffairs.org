@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useEffect, useState } from 'react'
@@ -95,6 +96,19 @@ export default function InternalMeetingsManagement() {
   }, [db, user]);
 
   const { data: meetings, loading: dataLoading } = useCollection(meetingsQuery);
+
+  const formatTo12Hour = (time24: string) => {
+    if (!time24) return '';
+    if (time24.includes('AM') || time24.includes('PM')) return time24;
+    try {
+      const [hours, minutes] = time24.split(':').map(Number);
+      const period = hours >= 12 ? 'PM' : 'AM';
+      const hours12 = hours % 12 || 12;
+      return `${hours12}:${minutes.toString().padStart(2, '0')} ${period}`;
+    } catch {
+      return time24;
+    }
+  };
 
   const handleAdd = () => {
     if (!db) return;
@@ -301,8 +315,7 @@ export default function InternalMeetingsManagement() {
                         <SelectContent className="max-h-60">
                           {(INDIA_DATA[newMeeting.stateName] || []).map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}
                         </SelectContent>
-                      </Select>
-                    </div>
+                      </div>
                   )}
 
                   <div className="space-y-2">
@@ -375,7 +388,7 @@ export default function InternalMeetingsManagement() {
                         <div className="lg:col-span-2 space-y-1">
                           <h3 className="text-2xl font-bold text-slate-900 dark:text-white">{meeting.title}</h3>
                           <div className="flex items-center gap-3 text-xs font-bold text-slate-500">
-                            <Clock className="w-3.5 h-3.5 text-accent" /> {meeting.time}
+                            <Clock className="w-3.5 h-3.5 text-accent" /> {formatTo12Hour(meeting.time)}
                             <div className="w-1 h-1 rounded-full bg-slate-300"></div>
                             <MapPin className="w-3.5 h-3.5 text-accent" /> {meeting.location}
                           </div>
