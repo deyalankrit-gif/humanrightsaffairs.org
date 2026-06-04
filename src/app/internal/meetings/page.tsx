@@ -237,7 +237,7 @@ export default function InternalMeetingsManagement() {
   }
 
   const hours = Array.from({ length: 12 }, (_, i) => (i + 1).toString().padStart(2, '0'));
-  const minutes = Array.from({ length: 60 }, (_, i) => (i).toString().padStart(2, '0'));
+  const minutesArr = Array.from({ length: 60 }, (_, i) => (i).toString().padStart(2, '0'));
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
@@ -296,7 +296,7 @@ export default function InternalMeetingsManagement() {
                         </Select>
                         <Select value={newTime.minute} onValueChange={(v) => setNewTime({...newTime, minute: v})}>
                           <SelectTrigger className="h-12 rounded-xl px-2"><SelectValue /></SelectTrigger>
-                          <SelectContent className="max-h-48">{minutes.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}</SelectContent>
+                          <SelectContent className="max-h-48">{minutesArr.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}</SelectContent>
                         </Select>
                         <Select value={newTime.period} onValueChange={(v) => setNewTime({...newTime, period: v})}>
                           <SelectTrigger className="h-12 rounded-xl px-2"><SelectValue /></SelectTrigger>
@@ -539,7 +539,7 @@ export default function InternalMeetingsManagement() {
                                         </Select>
                                         <Select value={editTime.minute} onValueChange={(v) => setEditTime({...editTime, minute: v})}>
                                           <SelectTrigger className="h-12 rounded-xl px-2"><SelectValue /></SelectTrigger>
-                                          <SelectContent className="max-h-48">{minutes.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}</SelectContent>
+                                          <SelectContent className="max-h-48">{minutesArr.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}</SelectContent>
                                         </Select>
                                         <Select value={editTime.period} onValueChange={(v) => setEditTime({...editTime, period: v})}>
                                           <SelectTrigger className="h-12 rounded-xl px-2"><SelectValue /></SelectTrigger>

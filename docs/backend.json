@@ -45,6 +45,8 @@
         "address": { "type": "string" },
         "pan": { "type": "string" },
         "aadhaar": { "type": "string" },
+        "education": { "type": "string", "description": "Educational qualifications of the applicant." },
+        "experience": { "type": "string", "description": "Prior work or social service experience." },
         "level": { "type": "string", "enum": ["National", "State", "District"] },
         "stateName": { "type": "string" },
         "districtName": { "type": "string" },

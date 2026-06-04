@@ -60,6 +60,22 @@ export default function MeetingsPage() {
 
   const { data: meetings, loading: dataLoading } = useCollection(meetingsQuery);
 
+  const formatToCustom12h = (timeStr: string) => {
+    if (!timeStr) return '';
+    // Expected format from DB: "HH.mm AM/PM" or "HH:mm"
+    if (timeStr.includes('.')) return timeStr; // Already formatted
+    const match = timeStr.match(/^(\d{1,2}):(\d{2})$/);
+    if (match) {
+      let h = parseInt(match[1]);
+      const m = match[2];
+      const ampm = h >= 12 ? 'P.M.' : 'A.M.';
+      h = h % 12;
+      h = h ? h : 12;
+      return `${h.toString().padStart(2, '0')}.${m} ${ampm}`;
+    }
+    return timeStr;
+  }
+
   const filteredMeetings = (meetings as Meeting[] || []).filter(m => 
     (filter === "All" || m.level === filter) &&
     ((m.title || '').toLowerCase().includes(search.toLowerCase()) || 
@@ -165,7 +181,7 @@ export default function MeetingsPage() {
                         </div>
                         <div className="flex items-center gap-3 text-sm font-bold text-muted-foreground">
                           <div className="p-2 bg-slate-50 dark:bg-slate-800 rounded-lg"><Clock className="w-4 h-4 text-accent" /></div>
-                          <span>{meeting.time}</span>
+                          <span>{formatToCustom12h(meeting.time)}</span>
                         </div>
                         <div className="flex items-center gap-3 text-sm font-bold text-muted-foreground">
                           <div className="p-2 bg-slate-50 dark:bg-slate-800 rounded-lg"><MapPin className="w-4 h-4 text-accent" /></div>
@@ -215,7 +231,7 @@ export default function MeetingsPage() {
                                </div>
                                <div className="bg-slate-50 dark:bg-slate-900 p-4 rounded-2xl border border-slate-100 dark:border-slate-800">
                                   <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Time</p>
-                                  <p className="font-bold text-sm text-foreground">{meeting.time}</p>
+                                  <p className="font-bold text-sm text-foreground">{formatToCustom12h(meeting.time)}</p>
                                </div>
                                <div className="bg-slate-50 dark:bg-slate-900 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 col-span-2 md:col-span-1">
                                   <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Region</p>

@@ -45,7 +45,9 @@ import {
   ArrowRight,
   Globe,
   CheckCircle2,
-  Users
+  Users,
+  GraduationCap,
+  Briefcase
 } from 'lucide-react'
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
 import { useFirestore } from '@/firebase'
@@ -59,6 +61,8 @@ const formSchema = z.object({
   address: z.string().min(10, "Full address is required"),
   pan: z.string().length(10, "PAN must be 10 characters"),
   aadhaar: z.string().length(12, "Aadhaar must be 12 digits"),
+  education: z.string().min(5, "Please specify your educational qualifications"),
+  experience: z.string().min(5, "Please specify your work/service experience"),
   level: z.string().min(1, "Operational level required"),
   stateName: z.string().optional(),
   districtName: z.string().optional(),
@@ -81,6 +85,8 @@ export function MembershipRegistrationDialog({ children }: { children: React.Rea
       address: '',
       pan: '',
       aadhaar: '',
+      education: '',
+      experience: '',
       level: 'National',
       memberType: 'Regular Member',
     }
@@ -226,6 +232,27 @@ export function MembershipRegistrationDialog({ children }: { children: React.Rea
                 )} />
               </div>
             )}
+
+            <div className="grid md:grid-cols-2 gap-4">
+              <FormField control={form.control} name="education" render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400 flex items-center gap-2">
+                    <GraduationCap className="w-3 h-3 text-accent" /> Educational Qualifications
+                  </FormLabel>
+                  <FormControl><Input placeholder="e.g. B.A. LLB, Master of Social Work" className="h-11 rounded-xl" {...field} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+              <FormField control={form.control} name="experience" render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400 flex items-center gap-2">
+                    <Briefcase className="w-3 h-3 text-accent" /> Professional Experience
+                  </FormLabel>
+                  <FormControl><Input placeholder="e.g. 5 Years in Human Rights Activism" className="h-11 rounded-xl" {...field} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+            </div>
 
             <FormField control={form.control} name="address" render={({ field }) => (
               <FormItem>

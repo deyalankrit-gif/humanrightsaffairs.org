@@ -18,24 +18,18 @@ import {
   ShieldCheck, 
   Loader2, 
   Trash2, 
-  CheckCircle2, 
-  XCircle, 
   User, 
   Mail, 
   Phone, 
   MapPin, 
   FileText,
   Clock,
-  MoreVertical,
   Check,
-  X
+  X,
+  GraduationCap,
+  Briefcase,
+  ExternalLink
 } from 'lucide-react'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import {
   Dialog,
   DialogContent,
@@ -213,21 +207,34 @@ export default function InternalApplicationsPage() {
                             </div>
                           </div>
                           
-                          <div className="bg-slate-50 dark:bg-slate-950 p-6 rounded-3xl border border-slate-100 dark:border-slate-800 grid md:grid-cols-2 gap-6">
-                            <div>
-                               <p className="text-[10px] font-bold text-slate-400 uppercase mb-2">Residential Address</p>
-                               <p className="text-xs leading-relaxed text-slate-600 dark:text-slate-400 italic">"{a.address}"</p>
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                               <div>
-                                 <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">PAN Card</p>
-                                 <p className="font-mono text-xs font-bold">{a.pan || 'N/A'}</p>
-                               </div>
-                               <div>
-                                 <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Aadhaar</p>
-                                 <p className="font-mono text-xs font-bold">**** {a.aadhaar?.slice(-4) || 'N/A'}</p>
-                               </div>
-                            </div>
+                          <div className="grid md:grid-cols-2 gap-6">
+                             <div className="bg-slate-50 dark:bg-slate-950 p-6 rounded-3xl border border-slate-100 dark:border-slate-800 space-y-4">
+                                <div>
+                                  <p className="text-[10px] font-bold text-slate-400 uppercase mb-1 flex items-center gap-2"><GraduationCap className="w-3 h-3" /> Educational Qualifications</p>
+                                  <p className="text-sm font-bold text-slate-700 dark:text-slate-300">{a.education || 'Not Provided'}</p>
+                                </div>
+                                <div>
+                                  <p className="text-[10px] font-bold text-slate-400 uppercase mb-1 flex items-center gap-2"><Briefcase className="w-3 h-3" /> Work Experience</p>
+                                  <p className="text-sm font-bold text-slate-700 dark:text-slate-300">{a.experience || 'Not Provided'}</p>
+                                </div>
+                             </div>
+
+                             <div className="bg-slate-50 dark:bg-slate-950 p-6 rounded-3xl border border-slate-100 dark:border-slate-800 space-y-4">
+                                <div>
+                                  <p className="text-[10px] font-bold text-slate-400 uppercase mb-2">Residential Address</p>
+                                  <p className="text-xs leading-relaxed text-slate-600 dark:text-slate-400 italic">"{a.address}"</p>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4 pt-2 border-t border-slate-200 dark:border-slate-800">
+                                   <div>
+                                     <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">PAN Card</p>
+                                     <p className="font-mono text-xs font-bold">{a.pan || 'N/A'}</p>
+                                   </div>
+                                   <div>
+                                     <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Aadhaar</p>
+                                     <p className="font-mono text-xs font-bold">**** {a.aadhaar?.slice(-4) || 'N/A'}</p>
+                                   </div>
+                                </div>
+                             </div>
                           </div>
 
                           {a.statusUpdateReason && (
@@ -269,7 +276,7 @@ export default function InternalApplicationsPage() {
                               </AlertDialogHeader>
                               <AlertDialogFooter>
                                 <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => handleDelete(a.id)} className="bg-red-500 hover:bg-red-600 rounded-xl border-none">Delete Forever</AlertDialogAction>
+                                <AlertDialogAction onClick={() => handleDelete(a.id)} className="bg-red-500 hover:bg-red-600 rounded-xl border-none text-white font-bold">Delete Forever</AlertDialogAction>
                               </AlertDialogFooter>
                             </AlertDialogContent>
                           </AlertDialog>
