@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useEffect, useState } from 'react'
@@ -29,7 +30,8 @@ import {
   Save,
   X,
   Camera,
-  Globe
+  Globe,
+  Briefcase
 } from 'lucide-react'
 import {
   Popover,
@@ -125,7 +127,7 @@ export default function MemberDetailsPage() {
     )
   }
 
-  const fallback = profile.gender === 'female' ? '/dummy w.png' : '/dummy m.png'
+  const fallback = profile.gender?.toLowerCase() === 'female' ? '/dummy w.png' : '/dummy m.png'
   const displayImg = profile.imageId?.startsWith('data:') ? profile.imageId : (PlaceHolderImages.find(i => i.id === profile.imageId)?.imageUrl || fallback)
   const states = Object.keys(INDIA_DATA).sort()
 
@@ -215,8 +217,26 @@ export default function MemberDetailsPage() {
                            <Input value={editForm?.name} onChange={e => setEditForm({...editForm, name: e.target.value})} className="h-12 rounded-xl" />
                          </div>
                          <div className="space-y-2">
+                            <Label>Gender</Label>
+                            <Select value={editForm?.gender} onValueChange={(val) => setEditForm({...editForm, gender: val})}>
+                              <SelectTrigger className="h-12 rounded-xl"><SelectValue /></SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="Male">Male</SelectItem>
+                                <SelectItem value="Female">Female</SelectItem>
+                                <SelectItem value="Other">Other</SelectItem>
+                              </SelectContent>
+                            </Select>
+                         </div>
+                      </div>
+
+                      <div className="grid md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
                            <Label>Designation</Label>
                            <Input value={editForm?.designation} onChange={e => setEditForm({...editForm, designation: e.target.value})} className="h-12 rounded-xl" />
+                         </div>
+                         <div className="space-y-2">
+                           <Label>Profession</Label>
+                           <Input value={editForm?.profession} onChange={e => setEditForm({...editForm, profession: e.target.value})} className="h-12 rounded-xl" />
                          </div>
                       </div>
                       
@@ -269,17 +289,33 @@ export default function MemberDetailsPage() {
                     </div>
                   ) : (
                     <div className="grid md:grid-cols-2 gap-10">
-                      <div className="space-y-2">
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Secure Communication</p>
-                        <p className="text-xl font-bold text-primary dark:text-white flex items-center gap-3 break-all">
-                          <Mail className="w-6 h-6 text-accent shrink-0" /> {profile.email}
-                        </p>
+                      <div className="space-y-6">
+                        <div className="space-y-1">
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Profession</p>
+                          <p className="text-xl font-bold text-primary dark:text-white flex items-center gap-3">
+                            <Briefcase className="w-6 h-6 text-accent" /> {profile.profession || 'N/A'}
+                          </p>
+                        </div>
+                        <div className="space-y-1">
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Gender Identity</p>
+                          <p className="text-xl font-bold text-primary dark:text-white flex items-center gap-3">
+                            <User className="w-6 h-6 text-accent" /> {profile.gender || 'N/A'}
+                          </p>
+                        </div>
                       </div>
-                      <div className="space-y-2">
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Dedicated Hotline</p>
-                        <p className="text-xl font-bold text-primary dark:text-white flex items-center gap-3">
-                          <Phone className="w-6 h-6 text-accent shrink-0" /> {profile.phone}
-                        </p>
+                      <div className="space-y-6">
+                        <div className="space-y-1">
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Secure Communication</p>
+                          <p className="text-lg font-bold text-primary dark:text-white flex items-center gap-3 break-all">
+                            <Mail className="w-5 h-5 text-accent shrink-0" /> {profile.email}
+                          </p>
+                        </div>
+                        <div className="space-y-1">
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Dedicated Hotline</p>
+                          <p className="text-xl font-bold text-primary dark:text-white flex items-center gap-3">
+                            <Phone className="w-6 h-6 text-accent shrink-0" /> {profile.phone}
+                          </p>
+                        </div>
                       </div>
                     </div>
                   )}

@@ -28,7 +28,8 @@ import {
   X,
   GraduationCap,
   Briefcase,
-  ExternalLink
+  ExternalLink,
+  Info
 } from 'lucide-react'
 import {
   Dialog,
@@ -197,11 +198,13 @@ export default function InternalApplicationsPage() {
                           <div className="space-y-1">
                             <h3 className="text-2xl font-bold text-primary dark:text-white">{a.name}</h3>
                             <div className="flex flex-wrap gap-4 text-xs font-bold text-slate-500">
+                               <span className="flex items-center gap-1.5"><User className="w-3.5 h-3.5 text-accent" /> {a.gender || 'N/A'}</span>
                                <span className="flex items-center gap-1.5"><Mail className="w-3.5 h-3.5 text-accent" /> {a.email}</span>
                                <span className="flex items-center gap-1.5"><Phone className="w-3.5 h-3.5 text-accent" /> {a.phone}</span>
                                <span className="flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5 text-accent" /> Role: {a.memberType}</span>
                             </div>
                             <div className="flex flex-wrap gap-4 text-xs font-bold text-slate-400 mt-2">
+                               <span className="flex items-center gap-1.5"><Briefcase className="w-3.5 h-3.5" /> Profession: {a.profession || 'Not Specified'}</span>
                                <span className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5" /> {a.districtName ? `${a.districtName}, ` : ''}{a.stateName || 'National'}</span>
                                <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> Applied: {a.createdAt?.toDate ? a.createdAt.toDate().toLocaleDateString() : 'Recently'}</span>
                             </div>
@@ -242,7 +245,7 @@ export default function InternalApplicationsPage() {
                               "p-4 rounded-2xl border flex gap-3 items-start",
                               a.status === 'Approved' ? "bg-emerald-50/50 border-emerald-100 text-emerald-800" : "bg-red-50/50 border-red-100 text-red-800"
                             )}>
-                              <FileText className="w-4 h-4 shrink-0 mt-0.5" />
+                              <Info className="w-4 h-4 shrink-0 mt-0.5" />
                               <div>
                                 <p className="text-[10px] font-bold uppercase tracking-widest mb-1">Decision Note</p>
                                 <p className="text-sm font-medium">"{a.statusUpdateReason}"</p>
@@ -298,7 +301,6 @@ export default function InternalApplicationsPage() {
         </div>
       </section>
 
-      {/* Approve/Reject Reason Dialog */}
       <Dialog open={actionDialog.open} onOpenChange={(open) => !open && setActionDialog({ ...actionDialog, open })}>
         <DialogContent className="rounded-[2.5rem] border-none shadow-2xl max-w-md">
            <DialogHeader>

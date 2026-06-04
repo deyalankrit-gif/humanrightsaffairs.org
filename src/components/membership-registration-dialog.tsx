@@ -47,7 +47,8 @@ import {
   CheckCircle2,
   Users,
   GraduationCap,
-  Briefcase
+  Briefcase,
+  User
 } from 'lucide-react'
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
 import { useFirestore } from '@/firebase'
@@ -61,6 +62,8 @@ const formSchema = z.object({
   address: z.string().min(10, "Full address is required"),
   pan: z.string().length(10, "PAN must be 10 characters"),
   aadhaar: z.string().length(12, "Aadhaar must be 12 digits"),
+  profession: z.string().min(2, "Profession is required"),
+  gender: z.string().min(1, "Please select gender"),
   education: z.string().min(5, "Please specify your educational qualifications"),
   experience: z.string().min(5, "Please specify your work/service experience"),
   level: z.string().min(1, "Operational level required"),
@@ -85,6 +88,8 @@ export function MembershipRegistrationDialog({ children }: { children: React.Rea
       address: '',
       pan: '',
       aadhaar: '',
+      profession: '',
+      gender: '',
       education: '',
       experience: '',
       level: 'National',
@@ -178,6 +183,23 @@ export function MembershipRegistrationDialog({ children }: { children: React.Rea
                   <FormMessage />
                 </FormItem>
               )} />
+              <FormField control={form.control} name="gender" render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Gender</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl><SelectTrigger className="h-11 rounded-xl"><SelectValue placeholder="Select Gender" /></SelectTrigger></FormControl>
+                    <SelectContent>
+                      <SelectItem value="Male">Male</SelectItem>
+                      <SelectItem value="Female">Female</SelectItem>
+                      <SelectItem value="Other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )} />
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-4">
               <FormField control={form.control} name="email" render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Official Email</FormLabel>
@@ -189,6 +211,16 @@ export function MembershipRegistrationDialog({ children }: { children: React.Rea
                 <FormItem>
                   <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Contact Number</FormLabel>
                   <FormControl><Input placeholder="+91 XXXXX XXXXX" className="h-11 rounded-xl" {...field} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-4">
+              <FormField control={form.control} name="profession" render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Current Profession</FormLabel>
+                  <FormControl><Input placeholder="e.g. Advocate, Teacher" className="h-11 rounded-xl" {...field} /></FormControl>
                   <FormMessage />
                 </FormItem>
               )} />

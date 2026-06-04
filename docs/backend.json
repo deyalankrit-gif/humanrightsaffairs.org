@@ -24,6 +24,8 @@
       "properties": {
         "name": { "type": "string" },
         "designation": { "type": "string" },
+        "profession": { "type": "string" },
+        "gender": { "type": "string", "enum": ["Male", "Female", "Other"] },
         "email": { "type": "string" },
         "phone": { "type": "string" },
         "level": { "type": "string", "enum": ["National", "State", "District"] },
@@ -45,6 +47,8 @@
         "address": { "type": "string" },
         "pan": { "type": "string" },
         "aadhaar": { "type": "string" },
+        "profession": { "type": "string" },
+        "gender": { "type": "string", "enum": ["Male", "Female", "Other"] },
         "education": { "type": "string", "description": "Educational qualifications of the applicant." },
         "experience": { "type": "string", "description": "Prior work or social service experience." },
         "level": { "type": "string", "enum": ["National", "State", "District"] },
@@ -54,7 +58,7 @@
         "status": { "type": "string", "enum": ["Pending", "Reviewed", "Approved", "Rejected"] },
         "createdAt": { "type": "string", "format": "date-time" }
       },
-      "required": ["name", "email", "phone", "memberType"]
+      "required": ["name", "email", "phone", "memberType", "gender"]
     },
     "Event": {
       "title": "Event",
@@ -131,8 +135,7 @@
         "description": { "type": "string" },
         "status": { "type": "string", "enum": ["Pending", "Reviewed", "Resolved"] },
         "createdAt": { "type": "string", "format": "date-time" }
-      },
-      "required": ["name", "email", "description"]
+      }
     }
   },
   "auth": {

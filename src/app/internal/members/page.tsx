@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useEffect, useState } from 'react'
@@ -21,7 +22,9 @@ import {
   UserPlus,
   Plus,
   MapPin,
-  Globe
+  Globe,
+  User,
+  Briefcase
 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { 
@@ -51,6 +54,8 @@ export default function InternalMembersDirectory() {
   const [newMember, setNewMember] = useState({
     name: '',
     designation: '',
+    profession: '',
+    gender: 'Male',
     email: '',
     phone: '',
     level: 'National' as 'National' | 'State' | 'District',
@@ -92,14 +97,15 @@ export default function InternalMembersDirectory() {
     try {
       await addDoc(collection(db, 'memberProfiles'), {
         ...newMember,
-        createdAt: serverTimestamp(),
-        gender: 'male'
+        createdAt: serverTimestamp()
       })
       toast({ title: "Success", description: "New personnel record established." })
       setIsAdding(false)
       setNewMember({
         name: '',
         designation: '',
+        profession: '',
+        gender: 'Male',
         email: '',
         phone: '',
         level: 'National',
@@ -168,15 +174,31 @@ export default function InternalMembersDirectory() {
                   <DialogTitle className="text-2xl font-headline font-bold text-primary dark:text-white">New Personnel Record</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4 py-4">
-                  <div className="space-y-2">
-                    <Label>Full Name</Label>
-                    <Input 
-                      placeholder="e.g. Sanchita Banerjee" 
-                      value={newMember.name} 
-                      onChange={(e) => setNewMember({...newMember, name: e.target.value})}
-                      className="bg-slate-50 dark:bg-slate-800"
-                    />
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Full Name</Label>
+                      <Input 
+                        placeholder="e.g. Sanchita Banerjee" 
+                        value={newMember.name} 
+                        onChange={(e) => setNewMember({...newMember, name: e.target.value})}
+                        className="bg-slate-50 dark:bg-slate-800"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Gender</Label>
+                      <Select value={newMember.gender} onValueChange={(val) => setNewMember({...newMember, gender: val})}>
+                        <SelectTrigger className="bg-slate-50 dark:bg-slate-800">
+                          <SelectValue placeholder="Select" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Male">Male</SelectItem>
+                          <SelectItem value="Female">Female</SelectItem>
+                          <SelectItem value="Other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
+
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label>Member ID</Label>
@@ -200,6 +222,16 @@ export default function InternalMembersDirectory() {
                         </SelectContent>
                       </Select>
                     </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Profession</Label>
+                    <Input 
+                      placeholder="e.g. Advocate, Teacher" 
+                      value={newMember.profession} 
+                      onChange={(e) => setNewMember({...newMember, profession: e.target.value})}
+                      className="bg-slate-50 dark:bg-slate-800"
+                    />
                   </div>
 
                   {(newMember.level === 'State' || newMember.level === 'District') && (
@@ -314,7 +346,7 @@ export default function InternalMembersDirectory() {
           ) : (
             <div className="grid gap-6">
               {filtered.map((member: any) => (
-                <Card key={member.id} className="group hover:shadow-2xl transition-all duration-500 border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-100 dark:border-slate-800">
+                <Card key={member.id} className="group hover:shadow-2xl transition-all duration-500 border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-100 dark:border-slate-800 relative">
                   <CardContent className="p-0">
                     <div className="flex flex-col md:flex-row items-stretch">
                       <div className="p-8 bg-slate-50 dark:bg-slate-800 md:w-56 text-center border-r border-slate-100 dark:border-slate-700 flex flex-col items-center justify-center shrink-0">
@@ -336,7 +368,13 @@ export default function InternalMembersDirectory() {
                           <h3 className="text-2xl font-bold text-primary dark:text-white">
                             {member.name}
                           </h3>
-                          <p className="text-sm text-slate-500 dark:text-slate-400 font-bold italic">{member.designation}</p>
+                          <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 font-bold">
+                             <span className="text-accent uppercase">{member.designation}</span>
+                             <span className="w-1 h-1 rounded-full bg-slate-300"></span>
+                             <span className="flex items-center gap-1"><Briefcase className="w-3 h-3" /> {member.profession || 'Personnel'}</span>
+                             <span className="w-1 h-1 rounded-full bg-slate-300"></span>
+                             <span className="flex items-center gap-1"><User className="w-3 h-3" /> {member.gender || 'N/A'}</span>
+                          </div>
                         </div>
                         <div className="space-y-3">
                           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Contact Lines</p>
