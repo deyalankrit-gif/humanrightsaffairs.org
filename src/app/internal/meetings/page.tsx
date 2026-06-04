@@ -69,6 +69,11 @@ export default function InternalMeetingsManagement() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [editMeeting, setEditMeeting] = useState<any>(null)
   
+  // 12-hour selection helpers for New Meeting
+  const [newTime, setNewTime] = useState({ hour: '08', minute: '00', period: 'AM' })
+  // 12-hour selection helpers for Edit Meeting
+  const [editTime, setEditTime] = useState({ hour: '08', minute: '00', period: 'AM' })
+
   const [newMeeting, setNewMeeting] = useState({
     title: '',
     date: '',
@@ -95,18 +100,13 @@ export default function InternalMeetingsManagement() {
 
   const { data: meetings, loading: dataLoading } = useCollection(meetingsQuery);
 
-  const formatTo12Hour = (time24: string) => {
-    if (!time24) return '';
-    // If it already matches the custom punctuated format, return it
-    if (time24.includes('A.M.') || time24.includes('P.M.')) return time24;
-    try {
-      const [hours, minutes] = time24.split(':').map(Number);
-      const period = hours >= 12 ? 'P.M.' : 'A.M.';
-      const hours12 = hours % 12 || 12;
-      return `${hours12}.${minutes.toString().padStart(2, '0')} ${period}`;
-    } catch {
-      return time24;
+  const parse12hToState = (timeStr: string) => {
+    if (!timeStr) return { hour: '08', minute: '00', period: 'AM' };
+    const match = timeStr.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+    if (match) {
+      return { hour: match[1].padStart(2, '0'), minute: match[2], period: match[3].toUpperCase() };
     }
+    return { hour: '08', minute: '00', period: 'AM' };
   };
 
   const handleAdd = () => {
@@ -122,12 +122,14 @@ export default function InternalMeetingsManagement() {
     }
 
     setIsActionLoading(true)
-    const data = { ...newMeeting, createdAt: serverTimestamp() }
+    const formattedTime = `${newTime.hour}:${newTime.minute} ${newTime.period}`;
+    const data = { ...newMeeting, time: formattedTime, createdAt: serverTimestamp() }
 
     addDoc(collection(db, 'meetings'), data)
       .then(() => {
         toast({ title: "Meeting Scheduled", description: "Record has been added to the registry." })
         setNewMeeting({ title: '', date: '', time: '', location: '', agenda: '', minutes: '', level: 'National', stateName: '', districtName: '', status: 'Upcoming' })
+        setNewTime({ hour: '08', minute: '00', period: 'AM' })
         setIsAddDialogOpen(false)
         setIsActionLoading(false)
       })
@@ -159,7 +161,9 @@ export default function InternalMeetingsManagement() {
   const handleUpdate = () => {
     if (!db || !editMeeting) return
     setIsActionLoading(true)
-    const { id, ...data } = editMeeting
+    
+    const formattedTime = `${editTime.hour}:${editTime.minute} ${editTime.period}`;
+    const { id, ...data } = { ...editMeeting, time: formattedTime }
     const docRef = doc(db, 'meetings', id)
     
     updateDoc(docRef, data)
@@ -215,6 +219,9 @@ export default function InternalMeetingsManagement() {
     }
   }
 
+  const hours = Array.from({ length: 12 }, (_, i) => (i + 1).toString().padStart(2, '0'));
+  const minutes = Array.from({ length: 12 }, (_, i) => (i * 5).toString().padStart(2, '0'));
+
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
       <AdminNavbar />
@@ -264,10 +271,20 @@ export default function InternalMeetingsManagement() {
                       </Popover>
                     </div>
                     <div className="space-y-2">
-                      <Label>Time</Label>
-                      <div className="relative">
-                        <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                        <Input type="time" className="pl-10 h-12 rounded-xl" value={newMeeting.time} onChange={e => setNewMeeting({...newMeeting, time: e.target.value})} />
+                      <Label>Time (12h)</Label>
+                      <div className="flex gap-1">
+                        <Select value={newTime.hour} onValueChange={(v) => setNewTime({...newTime, hour: v})}>
+                          <SelectTrigger className="h-12 rounded-xl px-2"><SelectValue /></SelectTrigger>
+                          <SelectContent className="max-h-48">{hours.map(h => <SelectItem key={h} value={h}>{h}</SelectItem>)}</SelectContent>
+                        </Select>
+                        <Select value={newTime.minute} onValueChange={(v) => setNewTime({...newTime, minute: v})}>
+                          <SelectTrigger className="h-12 rounded-xl px-2"><SelectValue /></SelectTrigger>
+                          <SelectContent className="max-h-48">{minutes.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}</SelectContent>
+                        </Select>
+                        <Select value={newTime.period} onValueChange={(v) => setNewTime({...newTime, period: v})}>
+                          <SelectTrigger className="h-12 rounded-xl px-2"><SelectValue /></SelectTrigger>
+                          <SelectContent><SelectItem value="AM">AM</SelectItem><SelectItem value="PM">PM</SelectItem></SelectContent>
+                        </Select>
                       </div>
                     </div>
                   </div>
@@ -352,7 +369,7 @@ export default function InternalMeetingsManagement() {
                     "rounded-full px-6 font-bold transition-all border-slate-200 dark:border-slate-700",
                     levelFilter === lvl.value 
                       ? "bg-accent text-slate-900 shadow-lg border-accent" 
-                      : "text-primary dark:text-white hover:bg-accent hover:text-slate-900 hover:border-accent"
+                      : "text-slate-700 dark:text-slate-300 hover:bg-accent hover:text-slate-900 hover:border-accent"
                   )}
                 >
                   {lvl.label}
@@ -389,7 +406,7 @@ export default function InternalMeetingsManagement() {
                         <div className="lg:col-span-2 space-y-1">
                           <h3 className="text-2xl font-bold text-slate-900 dark:text-white">{meeting.title}</h3>
                           <div className="flex items-center gap-3 text-xs font-bold text-slate-500">
-                            <Clock className="w-3.5 h-3.5 text-accent" /> {formatTo12Hour(meeting.time)}
+                            <Clock className="w-3.5 h-3.5 text-accent" /> {meeting.time}
                             <div className="w-1 h-1 rounded-full bg-slate-300"></div>
                             <MapPin className="w-3.5 h-3.5 text-accent" /> {meeting.location}
                           </div>
@@ -407,7 +424,10 @@ export default function InternalMeetingsManagement() {
                         <div className="flex items-center justify-end gap-3">
                           <Dialog>
                             <DialogTrigger asChild>
-                              <Button onClick={() => setEditMeeting(meeting)} variant="outline" size="icon" className="rounded-xl border-slate-200 dark:border-slate-700 hover:bg-accent/10 hover:text-accent"><Edit className="w-4 h-4" /></Button>
+                              <Button onClick={() => {
+                                setEditMeeting(meeting);
+                                setEditTime(parse12hToState(meeting.time));
+                              }} variant="outline" size="icon" className="rounded-xl border-slate-200 dark:border-slate-700 hover:bg-accent hover:text-slate-900"><Edit className="w-4 h-4" /></Button>
                             </DialogTrigger>
                             <DialogContent className="max-w-md bg-white dark:bg-slate-900 rounded-[2rem] max-h-[90vh] overflow-y-auto">
                               <DialogHeader><DialogTitle>Edit Assembly Archive</DialogTitle></DialogHeader>
@@ -449,16 +469,35 @@ export default function InternalMeetingsManagement() {
                                     </div>
                                   </div>
 
-                                  <div className="space-y-1">
-                                    <Label>Level</Label>
-                                    <Select value={editMeeting.level} onValueChange={(val: any) => setEditMeeting({...editMeeting, level: val, stateName: '', districtName: ''})}>
-                                      <SelectTrigger className="h-12 rounded-xl"><SelectValue /></SelectTrigger>
-                                      <SelectContent>
-                                        <SelectItem value="National">National</SelectItem>
-                                        <SelectItem value="State">State</SelectItem>
-                                        <SelectItem value="District">District</SelectItem>
-                                      </SelectContent>
-                                    </Select>
+                                  <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-1">
+                                      <Label>Level</Label>
+                                      <Select value={editMeeting.level} onValueChange={(val: any) => setEditMeeting({...editMeeting, level: val, stateName: '', districtName: ''})}>
+                                        <SelectTrigger className="h-12 rounded-xl"><SelectValue /></SelectTrigger>
+                                        <SelectContent>
+                                          <SelectItem value="National">National</SelectItem>
+                                          <SelectItem value="State">State</SelectItem>
+                                          <SelectItem value="District">District</SelectItem>
+                                        </SelectContent>
+                                      </Select>
+                                    </div>
+                                    <div className="space-y-1">
+                                      <Label>Time (12h)</Label>
+                                      <div className="flex gap-1">
+                                        <Select value={editTime.hour} onValueChange={(v) => setEditTime({...editTime, hour: v})}>
+                                          <SelectTrigger className="h-12 rounded-xl px-2"><SelectValue /></SelectTrigger>
+                                          <SelectContent className="max-h-48">{hours.map(h => <SelectItem key={h} value={h}>{h}</SelectItem>)}</SelectContent>
+                                        </Select>
+                                        <Select value={editTime.minute} onValueChange={(v) => setEditTime({...editTime, minute: v})}>
+                                          <SelectTrigger className="h-12 rounded-xl px-2"><SelectValue /></SelectTrigger>
+                                          <SelectContent className="max-h-48">{minutes.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}</SelectContent>
+                                        </Select>
+                                        <Select value={editTime.period} onValueChange={(v) => setEditTime({...editTime, period: v})}>
+                                          <SelectTrigger className="h-12 rounded-xl px-2"><SelectValue /></SelectTrigger>
+                                          <SelectContent><SelectItem value="AM">AM</SelectItem><SelectItem value="PM">PM</SelectItem></SelectContent>
+                                        </Select>
+                                      </div>
+                                    </div>
                                   </div>
 
                                   {(editMeeting.level === 'State' || editMeeting.level === 'District') && (
