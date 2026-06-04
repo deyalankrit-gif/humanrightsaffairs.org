@@ -13,7 +13,8 @@ import {
   Users, 
   Loader2,
   Info,
-  ExternalLink
+  ExternalLink,
+  Globe
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -42,6 +43,7 @@ type Meeting = {
   minutes?: string
   level: "National" | "State" | "District"
   stateName?: string
+  districtName?: string
   status: "Upcoming" | "Completed" | "Postponed"
 }
 
@@ -59,7 +61,9 @@ export function MeetingsPage() {
 
   const filteredMeetings = (meetings as Meeting[] || []).filter(m => 
     (filter === "All" || m.level === filter) &&
-    ((m.title || '').toLowerCase().includes(search.toLowerCase()) || (m.location || '').toLowerCase().includes(search.toLowerCase()))
+    ((m.title || '').toLowerCase().includes(search.toLowerCase()) || 
+     (m.location || '').toLowerCase().includes(search.toLowerCase()) ||
+     (m.stateName || '').toLowerCase().includes(search.toLowerCase()))
   )
 
   const levels = [
@@ -111,7 +115,7 @@ export function MeetingsPage() {
             </div>
             <div className="relative w-full md:w-80">
               <Input 
-                placeholder="Search by title or venue..." 
+                placeholder="Search by title, state or venue..." 
                 className="pl-4 h-12 rounded-full border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -165,6 +169,12 @@ export function MeetingsPage() {
                           <div className="p-2 bg-slate-50 dark:bg-slate-800 rounded-lg"><MapPin className="w-4 h-4 text-accent" /></div>
                           <span className="truncate">{meeting.location}</span>
                         </div>
+                        {meeting.stateName && (
+                          <div className="flex items-center gap-3 text-sm font-bold text-accent uppercase tracking-tighter">
+                            <div className="p-2 bg-accent/10 rounded-lg"><Globe className="w-4 h-4 text-accent" /></div>
+                            <span>{meeting.districtName ? `${meeting.districtName}, ` : ''}{meeting.stateName}</span>
+                          </div>
+                        )}
                       </div>
                       
                       <div className="pt-4 border-t border-slate-100 dark:border-slate-800">
@@ -201,8 +211,8 @@ export function MeetingsPage() {
                                   <p className="font-bold text-sm text-foreground">{meeting.time}</p>
                                </div>
                                <div className="bg-slate-50 dark:bg-slate-900 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 col-span-2 md:col-span-1">
-                                  <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Venue</p>
-                                  <p className="font-bold text-sm text-foreground">{meeting.location}</p>
+                                  <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Region</p>
+                                  <p className="font-bold text-sm text-foreground">{meeting.districtName ? `${meeting.districtName}, ` : ''}{meeting.stateName || 'National'}</p>
                                </div>
                             </div>
 

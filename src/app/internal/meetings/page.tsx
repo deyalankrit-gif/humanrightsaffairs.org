@@ -24,6 +24,7 @@ import {
   Loader2, 
   ShieldCheck,
   Globe,
+  ArrowRight
 } from 'lucide-react'
 import {
   Dialog,
@@ -50,7 +51,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
-import { format } from "date-fns"
+import { format, parse } from "date-fns"
 import { useToast } from '@/hooks/use-toast'
 import { errorEmitter } from '@/firebase/error-emitter'
 import { FirestorePermissionError, type SecurityRuleContext } from '@/firebase/errors'
@@ -69,10 +70,8 @@ export default function InternalMeetingsManagement() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [editMeeting, setEditMeeting] = useState<any>(null)
   
-  // 12-hour selection helpers for New Meeting
-  const [newTime, setNewTime] = useState({ hour: '08', minute: '00', period: 'AM' })
-  // 12-hour selection helpers for Edit Meeting
-  const [editTime, setEditTime] = useState({ hour: '08', minute: '00', period: 'AM' })
+  const [newTime, setNewTime] = useState({ hour: '10', minute: '30', period: 'AM' })
+  const [editTime, setEditTime] = useState({ hour: '10', minute: '30', period: 'AM' })
 
   const [newMeeting, setNewMeeting] = useState({
     title: '',
@@ -101,13 +100,22 @@ export default function InternalMeetingsManagement() {
   const { data: meetings, loading: dataLoading } = useCollection(meetingsQuery);
 
   const parse12hToState = (timeStr: string) => {
-    if (!timeStr) return { hour: '08', minute: '00', period: 'AM' };
-    const match = timeStr.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+    if (!timeStr) return { hour: '10', minute: '30', period: 'AM' };
+    const match = timeStr.match(/^(\d{1,2})\.(\d{2})\s*(A\.M\.|P\.M\.)/i);
     if (match) {
-      return { hour: match[1].padStart(2, '0'), minute: match[2], period: match[3].toUpperCase() };
+      return { 
+        hour: match[1].padStart(2, '0'), 
+        minute: match[2], 
+        period: match[3].replace(/\./g, '').toUpperCase() 
+      };
     }
-    return { hour: '08', minute: '00', period: 'AM' };
+    return { hour: '10', minute: '30', period: 'AM' };
   };
+
+  const formatToDotted12h = (t: { hour: string, minute: string, period: string }) => {
+    const p = t.period === 'AM' ? 'A.M.' : 'P.M.';
+    return `${t.hour}.${t.minute} ${p}`;
+  }
 
   const handleAdd = () => {
     if (!db) return;
@@ -122,14 +130,14 @@ export default function InternalMeetingsManagement() {
     }
 
     setIsActionLoading(true)
-    const formattedTime = `${newTime.hour}:${newTime.minute} ${newTime.period}`;
+    const formattedTime = formatToDotted12h(newTime);
     const data = { ...newMeeting, time: formattedTime, createdAt: serverTimestamp() }
 
     addDoc(collection(db, 'meetings'), data)
       .then(() => {
         toast({ title: "Meeting Scheduled", description: "Record has been added to the registry." })
         setNewMeeting({ title: '', date: '', time: '', location: '', agenda: '', minutes: '', level: 'National', stateName: '', districtName: '', status: 'Upcoming' })
-        setNewTime({ hour: '08', minute: '00', period: 'AM' })
+        setNewTime({ hour: '10', minute: '30', period: 'AM' })
         setIsAddDialogOpen(false)
         setIsActionLoading(false)
       })
@@ -162,7 +170,7 @@ export default function InternalMeetingsManagement() {
     if (!db || !editMeeting) return
     setIsActionLoading(true)
     
-    const formattedTime = `${editTime.hour}:${editTime.minute} ${editTime.period}`;
+    const formattedTime = formatToDotted12h(editTime);
     const { id, ...data } = { ...editMeeting, time: formattedTime }
     const docRef = doc(db, 'meetings', id)
     
@@ -209,11 +217,10 @@ export default function InternalMeetingsManagement() {
     { label: "District Level", value: "District" }
   ]
 
-  const parseMeetingDate = (dateStr: string) => {
+  const parseDateString = (dateStr: string) => {
     if (!dateStr) return undefined;
     try {
-      const d = new Date(dateStr);
-      return isNaN(d.getTime()) ? undefined : d;
+      return parse(dateStr, "PPP", new Date());
     } catch {
       return undefined;
     }
@@ -263,7 +270,7 @@ export default function InternalMeetingsManagement() {
                         <PopoverContent className="w-auto p-0" align="start">
                           <Calendar
                             mode="single"
-                            selected={parseMeetingDate(newMeeting.date)}
+                            selected={parseDateString(newMeeting.date)}
                             onSelect={(date) => setNewMeeting({...newMeeting, date: date ? format(date, "PPP") : ''})}
                             initialFocus
                           />
@@ -396,7 +403,7 @@ export default function InternalMeetingsManagement() {
                     <div className="flex flex-col md:flex-row items-stretch">
                       <div className="p-8 bg-slate-50 dark:bg-slate-800 md:w-56 text-center border-r border-slate-100 dark:border-slate-700 flex flex-col items-center justify-center shrink-0">
                          <Badge variant="outline" className="border-accent text-accent text-[9px] font-bold uppercase px-3 py-1 mb-3">
-                            {meeting.level} {meeting.stateName ? `(${meeting.districtName || meeting.stateName})` : ''}
+                            {meeting.level}
                          </Badge>
                          <span className="text-2xl font-headline font-bold text-slate-900 dark:text-white leading-none mb-1">{meeting.date?.split(' ')[0] || '--'}</span>
                          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{meeting.date?.split(' ').slice(1).join(' ') || ''}</span>
@@ -405,10 +412,18 @@ export default function InternalMeetingsManagement() {
                       <div className="flex-1 p-8 grid lg:grid-cols-4 gap-8 items-center">
                         <div className="lg:col-span-2 space-y-1">
                           <h3 className="text-2xl font-bold text-slate-900 dark:text-white">{meeting.title}</h3>
-                          <div className="flex items-center gap-3 text-xs font-bold text-slate-500">
-                            <Clock className="w-3.5 h-3.5 text-accent" /> {meeting.time}
+                          <div className="flex flex-wrap items-center gap-3 text-xs font-bold text-slate-500">
+                            <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-accent" /> {meeting.time}</span>
                             <div className="w-1 h-1 rounded-full bg-slate-300"></div>
-                            <MapPin className="w-3.5 h-3.5 text-accent" /> {meeting.location}
+                            <span className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5 text-accent" /> {meeting.location}</span>
+                            {meeting.stateName && (
+                              <>
+                                <div className="w-1 h-1 rounded-full bg-slate-300"></div>
+                                <span className="flex items-center gap-1.5 text-accent uppercase tracking-tighter">
+                                  <Globe className="w-3 h-3" /> {meeting.districtName ? `${meeting.districtName}, ` : ''}{meeting.stateName}
+                                </span>
+                              </>
+                            )}
                           </div>
                         </div>
                         
@@ -450,7 +465,7 @@ export default function InternalMeetingsManagement() {
                                         <PopoverContent className="w-auto p-0" align="start">
                                           <Calendar
                                             mode="single"
-                                            selected={parseMeetingDate(editMeeting.date)}
+                                            selected={parseDateString(editMeeting.date)}
                                             onSelect={(date) => setEditMeeting({...editMeeting, date: date ? format(date, "PPP") : ''})}
                                             initialFocus
                                           />

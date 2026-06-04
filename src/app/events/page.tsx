@@ -39,7 +39,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
-import { format } from "date-fns"
+import { format, parse } from "date-fns"
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
@@ -186,11 +186,10 @@ export default function EventsPage() {
 
   const categories = ["All", "Campaign", "Workshop", "Convention", "Relief", "Social Projects"]
 
-  const parseEventDate = (dateStr: string) => {
+  const parseDateString = (dateStr: string) => {
     if (!dateStr) return undefined;
     try {
-      const d = new Date(dateStr);
-      return isNaN(d.getTime()) ? undefined : d;
+      return parse(dateStr, "PPP", new Date());
     } catch {
       return undefined;
     }
@@ -258,13 +257,13 @@ export default function EventsPage() {
                           <PopoverTrigger asChild>
                             <Button variant="outline" className={cn("w-full justify-start text-left font-normal h-12 rounded-xl", !newEvent.date && "text-muted-foreground")}>
                               <CalendarIcon className="mr-2 h-4 w-4" />
-                              {newEvent.date ? newMeeting.date : "Pick a date"}
+                              {newEvent.date ? newEvent.date : "Pick a date"}
                             </Button>
                           </PopoverTrigger>
                           <PopoverContent className="w-auto p-0" align="start">
                             <Calendar
                               mode="single"
-                              selected={parseEventDate(newEvent.date)}
+                              selected={parseDateString(newEvent.date)}
                               onSelect={(date) => setNewEvent({...newEvent, date: date ? format(date, "PPP") : ''})}
                               initialFocus
                             />
@@ -416,7 +415,7 @@ export default function EventsPage() {
                                           <PopoverContent className="w-auto p-0" align="start">
                                             <Calendar
                                               mode="single"
-                                              selected={parseEventDate(editEvent.date)}
+                                              selected={parseDateString(editEvent.date)}
                                               onSelect={(date) => setEditEvent({...editEvent, date: date ? format(date, "PPP") : ''})}
                                               initialFocus
                                             />
