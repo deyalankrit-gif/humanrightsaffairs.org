@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState } from 'react'
@@ -216,7 +217,7 @@ export default function EventsPage() {
                     <Plus className="w-6 h-6" /> Create New Event Entry
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-md bg-white dark:bg-slate-900 rounded-[2rem] max-h-[90vh] overflow-y-auto">
+                <DialogContent className="max-w-md bg-white dark:bg-slate-900 rounded-[2rem] max-h-[90vh] overflow-y-auto border-none shadow-2xl">
                   <DialogHeader>
                     <DialogTitle>New Event Entry</DialogTitle>
                     <DialogDescription>Add a new highlight to the mission gallery.</DialogDescription>
@@ -290,7 +291,7 @@ export default function EventsPage() {
                     </div>
                   </div>
                   <DialogFooter>
-                    <Button onClick={handleAddEvent} disabled={isActionLoading} className="w-full h-12 rounded-xl">
+                    <Button onClick={handleAddEvent} disabled={isActionLoading} className="w-full h-12 rounded-xl bg-accent text-primary font-bold">
                       {isActionLoading ? <Loader2 className="animate-spin" /> : "Publish Event"}
                     </Button>
                   </DialogFooter>
@@ -314,7 +315,7 @@ export default function EventsPage() {
                     "rounded-full px-6 font-bold transition-all border-slate-200 dark:border-slate-700",
                     filter === cat 
                       ? "bg-accent text-slate-900 shadow-lg border-accent" 
-                      : "text-slate-700 dark:text-slate-300 hover:bg-accent hover:text-slate-900 hover:border-accent"
+                      : "text-primary dark:text-slate-300 hover:bg-accent hover:text-slate-900 hover:border-accent"
                   )}
                 >
                   {cat}
@@ -370,7 +371,7 @@ export default function EventsPage() {
                                   <Edit className="w-4 h-4" />
                                 </Button>
                               </DialogTrigger>
-                              <DialogContent className="max-w-md bg-white dark:bg-slate-900 rounded-[2rem] max-h-[90vh] overflow-y-auto">
+                              <DialogContent className="max-w-md bg-white dark:bg-slate-900 rounded-[2rem] max-h-[90vh] overflow-y-auto border-none shadow-2xl">
                                 <DialogHeader>
                                   <DialogTitle>Modify Event</DialogTitle>
                                 </DialogHeader>
@@ -440,7 +441,7 @@ export default function EventsPage() {
                                       <Label>Description</Label>
                                       <Textarea value={editEvent.description} onChange={e => setEditEvent({...editEvent, description: e.target.value})} className="rounded-xl" />
                                     </div>
-                                    <Button onClick={handleUpdateEvent} disabled={isActionLoading} className="w-full mt-4 h-12 rounded-xl">
+                                    <Button onClick={handleUpdateEvent} disabled={isActionLoading} className="w-full mt-4 h-12 rounded-xl bg-accent text-primary font-bold">
                                       {isActionLoading ? <Loader2 className="animate-spin mr-2" /> : "Save Changes"}
                                     </Button>
                                   </div>
@@ -454,14 +455,14 @@ export default function EventsPage() {
                                   <Trash2 className="w-4 h-4" />
                                 </Button>
                               </AlertDialogTrigger>
-                              <AlertDialogContent className="rounded-[2rem] bg-white dark:bg-slate-900 border-none">
+                              <AlertDialogContent className="rounded-[2rem] bg-white dark:bg-slate-900 border-none shadow-2xl">
                                 <AlertDialogHeader>
                                   <AlertDialogTitle>Delete Record?</AlertDialogTitle>
                                   <AlertDialogDescription>This will permanently remove this event from the public gallery.</AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <div className="flex justify-end gap-3 mt-4">
                                   <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
-                                  <AlertDialogAction onClick={() => handleDeleteEvent(event.id)} className="bg-red-500 hover:bg-red-600 rounded-xl border-none">Delete</AlertDialogAction>
+                                  <AlertDialogAction onClick={() => handleDeleteEvent(event.id)} className="bg-red-500 hover:bg-red-600 rounded-xl border-none text-white font-bold">Delete</AlertDialogAction>
                                 </div>
                               </AlertDialogContent>
                             </AlertDialog>

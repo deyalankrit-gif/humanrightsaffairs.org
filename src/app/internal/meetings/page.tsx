@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useEffect, useState } from 'react'
@@ -23,8 +24,7 @@ import {
   Trash2, 
   Loader2, 
   ShieldCheck,
-  Globe,
-  ArrowRight
+  Globe
 } from 'lucide-react'
 import {
   Dialog,
@@ -250,7 +250,7 @@ export default function InternalMeetingsManagement() {
                   <Plus className="w-5 h-5" /> Schedule Assembly
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-md bg-white dark:bg-slate-900 rounded-[2rem] max-h-[90vh] overflow-y-auto">
+              <DialogContent className="max-w-md bg-white dark:bg-slate-900 rounded-[2rem] max-h-[90vh] overflow-y-auto border-none shadow-2xl">
                 <DialogHeader><DialogTitle>New Assembly Record</DialogTitle></DialogHeader>
                 <div className="space-y-4 py-4">
                   <div className="space-y-2">
@@ -353,7 +353,7 @@ export default function InternalMeetingsManagement() {
                   </div>
                 </div>
                 <DialogFooter>
-                  <Button onClick={handleAdd} disabled={isActionLoading} className="w-full h-12 rounded-xl">
+                  <Button onClick={handleAdd} disabled={isActionLoading} className="w-full h-12 rounded-xl bg-accent text-primary font-bold">
                     {isActionLoading ? <Loader2 className="animate-spin" /> : "Publish Record"}
                   </Button>
                 </DialogFooter>
@@ -376,7 +376,7 @@ export default function InternalMeetingsManagement() {
                     "rounded-full px-6 font-bold transition-all border-slate-200 dark:border-slate-700",
                     levelFilter === lvl.value 
                       ? "bg-accent text-slate-900 shadow-lg border-accent" 
-                      : "text-slate-700 dark:text-slate-300 hover:bg-accent hover:text-slate-900 hover:border-accent"
+                      : "text-primary dark:text-slate-300 hover:bg-accent hover:text-slate-900 hover:border-accent"
                   )}
                 >
                   {lvl.label}
@@ -410,21 +410,22 @@ export default function InternalMeetingsManagement() {
                       </div>
                       
                       <div className="flex-1 p-8 grid lg:grid-cols-4 gap-8 items-center">
-                        <div className="lg:col-span-2 space-y-1">
-                          <h3 className="text-2xl font-bold text-slate-900 dark:text-white">{meeting.title}</h3>
+                        <div className="lg:col-span-2 space-y-3">
+                          <h3 className="text-2xl font-bold text-slate-900 dark:text-white group-hover:text-accent transition-colors">{meeting.title}</h3>
                           <div className="flex flex-wrap items-center gap-3 text-xs font-bold text-slate-500">
                             <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-accent" /> {meeting.time}</span>
                             <div className="w-1 h-1 rounded-full bg-slate-300"></div>
                             <span className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5 text-accent" /> {meeting.location}</span>
-                            {meeting.stateName && (
-                              <>
-                                <div className="w-1 h-1 rounded-full bg-slate-300"></div>
-                                <span className="flex items-center gap-1.5 text-accent uppercase tracking-tighter">
-                                  <Globe className="w-3 h-3" /> {meeting.districtName ? `${meeting.districtName}, ` : ''}{meeting.stateName}
-                                </span>
-                              </>
-                            )}
                           </div>
+                          
+                          {meeting.stateName && (
+                            <div className="bg-accent/5 p-3 rounded-xl border border-accent/20 w-fit animate-in fade-in slide-in-from-left-2 duration-500">
+                               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Operational region</p>
+                               <p className="text-sm font-bold text-accent">
+                                 {meeting.districtName ? `${meeting.districtName.toUpperCase()}, ` : ''}{meeting.stateName.toUpperCase()}
+                               </p>
+                            </div>
+                          )}
                         </div>
                         
                         <div className="flex items-center justify-center">
@@ -444,7 +445,7 @@ export default function InternalMeetingsManagement() {
                                 setEditTime(parse12hToState(meeting.time));
                               }} variant="outline" size="icon" className="rounded-xl border-slate-200 dark:border-slate-700 hover:bg-accent hover:text-slate-900"><Edit className="w-4 h-4" /></Button>
                             </DialogTrigger>
-                            <DialogContent className="max-w-md bg-white dark:bg-slate-900 rounded-[2rem] max-h-[90vh] overflow-y-auto">
+                            <DialogContent className="max-w-md bg-white dark:bg-slate-900 rounded-[2rem] max-h-[90vh] overflow-y-auto border-none shadow-2xl">
                               <DialogHeader><DialogTitle>Edit Assembly Archive</DialogTitle></DialogHeader>
                               {editMeeting && (
                                 <div className="space-y-4 py-4">
@@ -551,7 +552,7 @@ export default function InternalMeetingsManagement() {
                                     <Label>Minutes (Post-Meeting)</Label>
                                     <Textarea value={editMeeting.minutes} onChange={e => setEditMeeting({...editMeeting, minutes: e.target.value})} placeholder="Minutes..." className="rounded-xl min-h-[100px]" />
                                   </div>
-                                  <Button onClick={handleUpdate} disabled={isActionLoading} className="w-full h-12 rounded-xl mt-4">Commit Changes</Button>
+                                  <Button onClick={handleUpdate} disabled={isActionLoading} className="w-full h-12 rounded-xl mt-4 bg-accent text-primary font-bold">Commit Changes</Button>
                                 </div>
                               )}
                             </DialogContent>
@@ -563,7 +564,7 @@ export default function InternalMeetingsManagement() {
                               <AlertDialogDescription>This action is irreversible and will remove the meeting from public archive.</AlertDialogDescription>
                               <AlertDialogFooter>
                                 <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => handleDelete(meeting.id)} className="bg-red-500 hover:bg-red-600 rounded-xl border-none text-white">Confirm Deletion</AlertDialogAction>
+                                <AlertDialogAction onClick={() => handleDelete(meeting.id)} className="bg-red-500 hover:bg-red-600 rounded-xl border-none text-white font-bold">Confirm Deletion</AlertDialogAction>
                               </AlertDialogFooter>
                             </AlertDialogContent>
                           </AlertDialog>

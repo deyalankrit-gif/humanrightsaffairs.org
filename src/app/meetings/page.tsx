@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState } from 'react'
@@ -7,7 +8,6 @@ import {
   Calendar, 
   MapPin, 
   Clock, 
-  ChevronDown, 
   Handshake, 
   FileText, 
   Users, 
@@ -30,7 +30,6 @@ import {
   DialogTrigger,
   DialogDescription,
 } from "@/components/ui/dialog"
-import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
 
 type Meeting = {
@@ -47,7 +46,7 @@ type Meeting = {
   status: "Upcoming" | "Completed" | "Postponed"
 }
 
-export function MeetingsPage() {
+export default function MeetingsPage() {
   const [filter, setFilter] = useState("All")
   const [search, setSearch] = useState("")
   const db = useFirestore()
@@ -106,7 +105,7 @@ export function MeetingsPage() {
                     "rounded-full px-6 font-bold transition-all border-slate-200 dark:border-slate-700",
                     filter === lvl.value 
                       ? "bg-accent text-slate-900 shadow-lg border-accent" 
-                      : "text-slate-700 dark:text-slate-300 hover:bg-accent hover:text-slate-900 hover:border-accent"
+                      : "text-primary dark:text-slate-300 hover:bg-accent hover:text-slate-900 hover:border-accent"
                   )}
                 >
                   {lvl.label}
@@ -169,10 +168,15 @@ export function MeetingsPage() {
                           <div className="p-2 bg-slate-50 dark:bg-slate-800 rounded-lg"><MapPin className="w-4 h-4 text-accent" /></div>
                           <span className="truncate">{meeting.location}</span>
                         </div>
+                        
                         {meeting.stateName && (
-                          <div className="flex items-center gap-3 text-sm font-bold text-accent uppercase tracking-tighter">
-                            <div className="p-2 bg-accent/10 rounded-lg"><Globe className="w-4 h-4 text-accent" /></div>
-                            <span>{meeting.districtName ? `${meeting.districtName}, ` : ''}{meeting.stateName}</span>
+                          <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 animate-in fade-in slide-in-from-top-2 duration-500">
+                             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 flex items-center gap-2">
+                               <Globe className="w-3 h-3 text-accent" /> Operational Region
+                             </p>
+                             <p className="text-lg font-headline font-bold text-accent drop-shadow-sm">
+                                {meeting.districtName ? `${meeting.districtName.toUpperCase()}, ` : ''}{meeting.stateName.toUpperCase()}
+                             </p>
                           </div>
                         )}
                       </div>
@@ -190,11 +194,11 @@ export function MeetingsPage() {
                     <CardFooter className="p-8 pt-0 mt-auto">
                       <Dialog>
                         <DialogTrigger asChild>
-                          <Button className="w-full bg-slate-900 text-white dark:bg-white dark:text-slate-900 font-bold h-12 rounded-xl group/btn hover:bg-accent hover:text-slate-900 dark:hover:bg-accent dark:hover:text-slate-900 transition-colors">
+                          <Button className="w-full bg-slate-900 text-white dark:bg-white dark:text-slate-900 font-bold h-12 rounded-xl group/btn hover:bg-accent hover:text-slate-900 dark:hover:bg-accent dark:hover:text-slate-900 transition-colors shadow-lg">
                             View Details & Minutes <ExternalLink className="ml-2 w-4 h-4 group-hover/btn:scale-110 transition-transform" />
                           </Button>
                         </DialogTrigger>
-                        <DialogContent className="max-w-2xl rounded-[2.5rem] bg-white dark:bg-slate-950 max-h-[90vh] overflow-y-auto">
+                        <DialogContent className="max-w-2xl rounded-[2.5rem] bg-white dark:bg-slate-950 max-h-[90vh] overflow-y-auto border-none shadow-2xl">
                           <DialogHeader>
                             <DialogTitle className="text-3xl font-headline font-bold text-primary dark:text-white">{meeting.title}</DialogTitle>
                             <DialogDescription className="font-bold text-accent uppercase tracking-widest text-xs">{meeting.level} Meeting Details</DialogDescription>
@@ -270,5 +274,3 @@ export function MeetingsPage() {
     </main>
   )
 }
-
-export default MeetingsPage;
