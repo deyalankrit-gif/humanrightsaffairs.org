@@ -266,7 +266,7 @@ export default function InternalMembersDirectory() {
         </div>
       </section>
 
-      <section className="py-12 border-b bg-white dark:bg-slate-900 sticky top-[72px] md:top-[84px] z-30 shadow-sm">
+      <section className="py-12 border-b bg-white dark:bg-slate-900 transition-colors sticky top-[72px] md:top-[84px] z-30 shadow-sm">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row gap-6 items-center justify-between">
             <div className="flex flex-wrap gap-2">
@@ -282,7 +282,7 @@ export default function InternalMembersDirectory() {
                       : "text-primary dark:text-white border-slate-200 dark:border-white/20 hover:border-accent hover:text-accent"
                   )}
                 >
-                  {lvl} {lvl === 'All' ? 'Levels' : 'Level'}
+                  {lvl === 'All' ? 'All Levels' : `${lvl} Level`}
                 </Button>
               ))}
             </div>

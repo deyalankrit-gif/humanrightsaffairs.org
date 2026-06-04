@@ -100,7 +100,7 @@ export default function MeetingsPage() {
                       : "text-primary dark:text-white border-slate-200 dark:border-white/20 hover:border-accent hover:text-accent"
                   )}
                 >
-                  {lvl} {lvl === 'All' ? 'Levels' : 'Level'}
+                  {lvl === 'All' ? 'All Levels' : `${lvl} Level`}
                 </Button>
               ))}
             </div>

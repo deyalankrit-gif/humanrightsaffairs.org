@@ -345,7 +345,7 @@ export default function MembersPage() {
                       : "text-primary dark:text-white border-slate-200 dark:border-white/20 hover:border-accent hover:text-accent"
                   )}
                 >
-                  {level} {level === 'All' ? 'Levels' : ''}
+                  {level === 'All' ? 'All Levels' : `${level} Level`}
                 </Button>
               ))}
               <DropdownMenu>
