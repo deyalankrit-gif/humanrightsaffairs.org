@@ -74,7 +74,7 @@ export function Footer() {
               <ul className="space-y-4 text-indigo-100">
                 <li className="flex gap-3">
                   <MapPin className="w-5 h-5 text-accent shrink-0" />
-                  <span className="text-sm">Human Rights Bhawan, Lodhi Road, New Delhi, India - 110003</span>
+                  <span className="text-sm">9567, Tokri Walan Azad Market, Delhi. Pin - 110006</span>
                 </li>
                 <li className="flex gap-3">
                   <Phone className="w-5 h-5 text-accent shrink-0" />
