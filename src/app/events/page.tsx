@@ -229,7 +229,7 @@ export default function EventsPage() {
                         {newEvent.imageId && (
                           <div className="relative w-full aspect-video rounded-xl overflow-hidden">
                             <Image 
-                              src={newEvent.imageId.startsWith('data:') ? newMeeting.imageId : (PlaceHolderImages.find(i => i.id === newEvent.imageId)?.imageUrl || '')} 
+                              src={newEvent.imageId.startsWith('data:') ? newEvent.imageId : (PlaceHolderImages.find(i => i.id === newEvent.imageId)?.imageUrl || 'https://picsum.photos/seed/event/800/600')} 
                               alt="Preview" 
                               fill 
                               className="object-cover"

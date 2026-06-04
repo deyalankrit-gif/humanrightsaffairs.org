@@ -22,7 +22,6 @@ import {
   Edit, 
   Trash2, 
   Loader2, 
-  Handshake,
   ShieldCheck,
   Globe,
 } from 'lucide-react'
@@ -208,7 +207,8 @@ export default function InternalMeetingsManagement() {
   const parseMeetingDate = (dateStr: string) => {
     if (!dateStr) return undefined;
     try {
-      return new Date(dateStr);
+      const d = new Date(dateStr);
+      return isNaN(d.getTime()) ? undefined : d;
     } catch {
       return undefined;
     }
