@@ -45,5 +45,11 @@ service cloud.firestore {
       allow read: if true;
       allow write: if isAdmin();
     }
+
+    // General Meetings: Public read, Admin write
+    match /meetings/{meetingId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
   }
 }

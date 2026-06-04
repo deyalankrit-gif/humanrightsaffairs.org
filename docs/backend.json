@@ -71,6 +71,24 @@
         "gender": { "type": "string" },
         "createdAt": { "type": "string", "format": "date-time" }
       }
+    },
+    "GeneralMeeting": {
+      "title": "General Meeting",
+      "description": "Records of official organizational assemblies and meetings.",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "date": { "type": "string" },
+        "time": { "type": "string" },
+        "location": { "type": "string" },
+        "agenda": { "type": "string" },
+        "minutes": { "type": "string" },
+        "level": { "type": "string", "enum": ["National", "State", "District"] },
+        "stateName": { "type": "string" },
+        "status": { "type": "string", "enum": ["Upcoming", "Completed", "Postponed"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "date", "level"]
     }
   },
   "auth": {
@@ -81,6 +99,7 @@
     "/memberProfiles/{profileId}": { "schema": "MemberProfile" },
     "/events/{eventId}": { "schema": "Event" },
     "/terminatedMembers/{memberId}": { "schema": "TerminatedMember" },
-    "/leadership/{leaderId}": { "schema": "LeadershipMember" }
+    "/leadership/{leaderId}": { "schema": "LeadershipMember" },
+    "/meetings/{meetingId}": { "schema": "GeneralMeeting" }
   }
 }

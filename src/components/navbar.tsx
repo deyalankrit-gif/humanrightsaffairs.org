@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useEffect } from 'react'
@@ -5,7 +6,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Menu, LayoutDashboard } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger } from '@/components/ui/sheet'
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { usePathname } from 'next/navigation'
 import { DonationDialog } from './donation-dialog'
 import { cn } from '@/lib/utils'
@@ -14,6 +15,7 @@ import { ThemeToggle } from './theme-toggle'
 
 const navLinks = [
   { name: 'Home', href: '/' },
+  { name: 'Meetings', href: '/meetings' },
   { name: 'Events', href: '/events' },
   { name: 'Leadership', href: '/leadership' },
   { name: 'Membership Dir', href: '/members' },
@@ -57,7 +59,7 @@ export function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [isHome])
 
-  const navColorClass = (isScrolled || !isHome) ? 'text-primary' : 'text-white'
+  const navColorClass = (isScrolled || !isHome) ? 'text-primary dark:text-white' : 'text-white'
   const bgColorClass = (isScrolled || !isHome) ? 'bg-white/95 backdrop-blur-md shadow-lg py-3 dark:bg-slate-950/95' : 'bg-transparent py-6'
 
   if (!mounted) return null
@@ -90,7 +92,7 @@ export function Navbar() {
         </Link>
 
         {/* Desktop Nav */}
-        <div className="hidden md:flex items-center gap-6">
+        <div className="hidden lg:flex items-center gap-6">
           {navLinks.map((link) => {
             const isPageActive = pathname === link.href
             const isHashActive = isHome && activeHash && link.href === `/${activeHash}`
@@ -119,7 +121,7 @@ export function Navbar() {
                 variant="outline" 
                 className={cn(
                   "border-accent/30 text-accent hover:bg-accent hover:text-primary rounded-full px-4 font-bold text-[10px] uppercase tracking-widest flex gap-2 h-9",
-                  !isScrolled && isHome ? "bg-white/10 border-white/20 text-white" : ""
+                  !isScrolled && isHome ? "bg-white/10 border-white/20 text-white" : "dark:border-white/10"
                 )}
               >
                 <LayoutDashboard className="w-3.5 h-3.5" />
@@ -139,7 +141,7 @@ export function Navbar() {
         </div>
 
         {/* Mobile Nav */}
-        <div className="md:hidden flex items-center gap-4">
+        <div className="lg:hidden flex items-center gap-4">
            <ThemeToggle className={navColorClass} />
            {user && (
              <Link href="/internal/analytics">

@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useEffect } from 'react'
@@ -14,7 +15,8 @@ import {
   ShieldCheck, 
   Menu,
   X,
-  Calendar
+  Calendar,
+  Handshake
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
@@ -42,6 +44,7 @@ export function AdminNavbar() {
   const navLinks = [
     { name: 'Analytics', href: '/internal/analytics', icon: <LayoutDashboard className="w-4 h-4" /> },
     { name: 'Personnel', href: '/internal/members', icon: <Users className="w-4 h-4" /> },
+    { name: 'Meetings', href: '/internal/meetings', icon: <Handshake className="w-4 h-4" /> },
     { name: 'Events', href: '/internal/events', icon: <Calendar className="w-4 h-4" /> },
   ]
 
@@ -122,7 +125,7 @@ export function AdminNavbar() {
                 
                 <div className="flex-1 p-6 space-y-4">
                   <div className="p-4 bg-white/5 rounded-2xl border border-white/10 mb-6">
-                    <p className="text-[10px] text-slate-500 font-bold uppercase mb-1">Authenticated Personnel</p>
+                    <p className="text-[10px] text-slate-500 font-bold uppercase mb-1">Personnel</p>
                     <p className="text-xs font-bold text-emerald-400 truncate">{user?.email}</p>
                   </div>
 
