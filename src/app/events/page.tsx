@@ -187,7 +187,7 @@ export default function EventsPage() {
 
   const categories = ["All", "Campaign", "Workshop", "Convention", "Relief", "Social Projects"]
 
-  const parseDateString = (dateStr: string) => {
+  const parseEventDate = (dateStr: string) => {
     if (!dateStr) return undefined;
     try {
       return parse(dateStr, "PPP", new Date());
@@ -264,7 +264,7 @@ export default function EventsPage() {
                           <PopoverContent className="w-auto p-0" align="start">
                             <Calendar
                               mode="single"
-                              selected={parseDateString(newEvent.date)}
+                              selected={parseEventDate(newEvent.date)}
                               onSelect={(date) => setNewEvent({...newEvent, date: date ? format(date, "PPP") : ''})}
                               initialFocus
                             />
@@ -416,7 +416,7 @@ export default function EventsPage() {
                                           <PopoverContent className="w-auto p-0" align="start">
                                             <Calendar
                                               mode="single"
-                                              selected={parseDateString(editEvent.date)}
+                                              selected={parseEventDate(editEvent.date)}
                                               onSelect={(date) => setEditEvent({...editEvent, date: date ? format(date, "PPP") : ''})}
                                               initialFocus
                                             />

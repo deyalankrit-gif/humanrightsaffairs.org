@@ -62,7 +62,8 @@ export default function MeetingsPage() {
     (filter === "All" || m.level === filter) &&
     ((m.title || '').toLowerCase().includes(search.toLowerCase()) || 
      (m.location || '').toLowerCase().includes(search.toLowerCase()) ||
-     (m.stateName || '').toLowerCase().includes(search.toLowerCase()))
+     (m.stateName || '').toLowerCase().includes(search.toLowerCase()) ||
+     (m.districtName || '').toLowerCase().includes(search.toLowerCase()))
   )
 
   const levels = [
@@ -169,13 +170,13 @@ export default function MeetingsPage() {
                           <span className="truncate">{meeting.location}</span>
                         </div>
                         
-                        {meeting.stateName && (
+                        {(meeting.stateName || meeting.districtName) && (
                           <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 animate-in fade-in slide-in-from-top-2 duration-500">
                              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 flex items-center gap-2">
                                <Globe className="w-3 h-3 text-accent" /> Operational Region
                              </p>
-                             <p className="text-lg font-headline font-bold text-accent drop-shadow-sm">
-                                {meeting.districtName ? `${meeting.districtName.toUpperCase()}, ` : ''}{meeting.stateName.toUpperCase()}
+                             <p className="text-lg font-headline font-bold text-accent drop-shadow-sm uppercase">
+                                {meeting.districtName ? `${meeting.districtName}, ` : ''}{meeting.stateName}
                              </p>
                           </div>
                         )}
@@ -216,7 +217,7 @@ export default function MeetingsPage() {
                                </div>
                                <div className="bg-slate-50 dark:bg-slate-900 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 col-span-2 md:col-span-1">
                                   <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Region</p>
-                                  <p className="font-bold text-sm text-foreground">{meeting.districtName ? `${meeting.districtName}, ` : ''}{meeting.stateName || 'National'}</p>
+                                  <p className="font-bold text-sm text-foreground uppercase">{meeting.districtName ? `${meeting.districtName}, ` : ''}{meeting.stateName || 'National'}</p>
                                </div>
                             </div>
 

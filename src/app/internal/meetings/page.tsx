@@ -217,7 +217,7 @@ export default function InternalMeetingsManagement() {
     { label: "District Level", value: "District" }
   ]
 
-  const parseDateString = (dateStr: string) => {
+  const parseMeetingDate = (dateStr: string) => {
     if (!dateStr) return undefined;
     try {
       return parse(dateStr, "PPP", new Date());
@@ -270,7 +270,7 @@ export default function InternalMeetingsManagement() {
                         <PopoverContent className="w-auto p-0" align="start">
                           <Calendar
                             mode="single"
-                            selected={parseDateString(newMeeting.date)}
+                            selected={parseMeetingDate(newMeeting.date)}
                             onSelect={(date) => setNewMeeting({...newMeeting, date: date ? format(date, "PPP") : ''})}
                             initialFocus
                           />
@@ -418,11 +418,11 @@ export default function InternalMeetingsManagement() {
                             <span className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5 text-accent" /> {meeting.location}</span>
                           </div>
                           
-                          {meeting.stateName && (
+                          {(meeting.stateName || meeting.districtName) && (
                             <div className="bg-accent/5 p-3 rounded-xl border border-accent/20 w-fit animate-in fade-in slide-in-from-left-2 duration-500">
                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Operational region</p>
-                               <p className="text-sm font-bold text-accent">
-                                 {meeting.districtName ? `${meeting.districtName.toUpperCase()}, ` : ''}{meeting.stateName.toUpperCase()}
+                               <p className="text-sm font-bold text-accent uppercase">
+                                 {meeting.districtName ? `${meeting.districtName}, ` : ''}{meeting.stateName}
                                </p>
                             </div>
                           )}
@@ -466,7 +466,7 @@ export default function InternalMeetingsManagement() {
                                         <PopoverContent className="w-auto p-0" align="start">
                                           <Calendar
                                             mode="single"
-                                            selected={parseDateString(editMeeting.date)}
+                                            selected={parseMeetingDate(editMeeting.date)}
                                             onSelect={(date) => setEditMeeting({...editMeeting, date: date ? format(date, "PPP") : ''})}
                                             initialFocus
                                           />
