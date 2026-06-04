@@ -203,8 +203,8 @@ export default function MembersPage() {
             <Users className="w-4 h-4" />
             <span>Official Membership Records</span>
           </div>
-          <h1 className="text-5xl md:text-7xl font-headline font-bold mb-6">Verified <span className="text-accent italic">Personnel</span></h1>
-          <p className="text-xl opacity-80 max-w-2xl mx-auto text-lg mb-8">
+          <h1 className="text-5xl md:text-7xl font-headline font-bold mb-6 text-primary-foreground">Verified <span className="text-accent italic">Personnel</span></h1>
+          <p className="text-xl opacity-80 max-w-2xl mx-auto text-lg mb-8 text-primary-foreground">
             A dynamic ledger of our dedicated human rights defenders, updated in real-time by the central administration.
           </p>
 
@@ -342,7 +342,7 @@ export default function MembersPage() {
                     "rounded-full px-6 font-bold transition-all",
                     levelFilter === level 
                       ? "bg-accent text-slate-900 shadow-lg border-accent" 
-                      : "text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-accent hover:text-accent"
+                      : "text-primary dark:text-white border-slate-200 dark:border-slate-700 hover:border-accent hover:text-accent"
                   )}
                 >
                   {level === 'All' ? 'All Levels' : `${level} Level`}
@@ -352,7 +352,7 @@ export default function MembersPage() {
                 <DropdownMenuTrigger asChild>
                   <Button variant={selectedState ? "default" : "outline"} className={cn(
                     "rounded-full px-6 font-bold flex items-center gap-2",
-                    selectedState ? "bg-accent text-slate-900" : "text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-accent hover:text-accent"
+                    selectedState ? "bg-accent text-slate-900" : "text-primary dark:text-white border-slate-200 dark:border-slate-700 hover:border-accent hover:text-accent"
                   )}>{selectedState || "Filter by State"} <ChevronDown className="w-4 h-4 opacity-50" /></Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="max-h-80 overflow-y-auto w-56">
@@ -367,7 +367,7 @@ export default function MembersPage() {
                   <DropdownMenuTrigger asChild>
                     <Button variant={selectedDistrict ? "default" : "outline"} className={cn(
                       "rounded-full px-6 font-bold flex items-center gap-2",
-                      selectedDistrict ? "bg-accent text-slate-900" : "text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-accent hover:text-accent"
+                      selectedDistrict ? "bg-accent text-slate-900" : "text-primary dark:text-white border-slate-200 dark:border-slate-700 hover:border-accent hover:text-accent"
                     )}>{selectedDistrict || "Filter by District"} <ChevronDown className="w-4 h-4 opacity-50" /></Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="max-h-80 overflow-y-auto w-56">

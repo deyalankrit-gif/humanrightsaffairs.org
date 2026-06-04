@@ -76,8 +76,8 @@ export default function MeetingsPage() {
         <div className="container mx-auto px-4 relative z-10 text-center">
           <div className="max-w-3xl mx-auto space-y-6">
             <Badge className="bg-accent text-primary font-bold px-4 py-1.5 uppercase tracking-widest text-xs border-none">Organizational Assemblies</Badge>
-            <h1 className="text-5xl md:text-7xl font-headline font-bold mb-6">General <span className="text-accent italic">Meetings</span></h1>
-            <p className="text-xl opacity-80 leading-relaxed max-w-2xl mx-auto">
+            <h1 className="text-5xl md:text-7xl font-headline font-bold mb-6 text-primary-foreground">General <span className="text-accent italic">Meetings</span></h1>
+            <p className="text-xl opacity-80 leading-relaxed max-w-2xl mx-auto text-primary-foreground">
               A transparent record of our democratic decision-making processes, assemblies, and strategic planning sessions.
             </p>
           </div>
@@ -97,7 +97,7 @@ export default function MeetingsPage() {
                     "rounded-full px-6 font-bold transition-all",
                     filter === lvl 
                       ? "bg-accent text-slate-900 shadow-lg border-accent" 
-                      : "text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-accent hover:text-accent"
+                      : "text-primary dark:text-white border-slate-200 dark:border-slate-700 hover:border-accent hover:text-accent"
                   )}
                 >
                   {lvl === 'All' ? 'All Levels' : `${lvl} Level`}
