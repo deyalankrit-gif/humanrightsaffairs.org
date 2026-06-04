@@ -93,9 +93,14 @@ export default function MeetingsPage() {
                   key={lvl}
                   variant={filter === lvl ? "default" : "outline"}
                   onClick={() => setFilter(lvl)}
-                  className={`rounded-full px-6 font-bold ${filter === lvl ? 'bg-primary text-primary-foreground' : 'hover:border-accent hover:text-accent'}`}
+                  className={cn(
+                    "rounded-full px-6 font-bold transition-all",
+                    filter === lvl 
+                      ? "bg-accent text-primary dark:bg-accent dark:text-primary shadow-lg" 
+                      : "text-primary dark:text-white border-slate-200 dark:border-white/20 hover:border-accent hover:text-accent"
+                  )}
                 >
-                  {lvl} Level
+                  {lvl} {lvl === 'All' ? 'Levels' : 'Level'}
                 </Button>
               ))}
             </div>

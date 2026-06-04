@@ -57,6 +57,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'
 import { INDIA_DATA } from '@/lib/india-data'
+import { cn } from '@/lib/utils'
 
 type Member = {
   id: string
@@ -333,11 +334,26 @@ export default function MembersPage() {
           <div className="flex flex-col md:flex-row gap-6 items-center justify-between">
             <div className="flex flex-wrap justify-center gap-2">
               {["All", "National", "State", "District"].map((level) => (
-                <Button key={level} variant={levelFilter === level ? "default" : "outline"} onClick={() => handleLevelClick(level)} className={`rounded-full px-6 font-bold ${levelFilter === level ? 'bg-primary text-primary-foreground' : 'hover:border-accent hover:text-accent'}`}>{level}</Button>
+                <Button 
+                  key={level} 
+                  variant={levelFilter === level ? "default" : "outline"} 
+                  onClick={() => handleLevelClick(level)} 
+                  className={cn(
+                    "rounded-full px-6 font-bold transition-all",
+                    levelFilter === level 
+                      ? "bg-accent text-primary dark:bg-accent dark:text-primary shadow-lg" 
+                      : "text-primary dark:text-white border-slate-200 dark:border-white/20 hover:border-accent hover:text-accent"
+                  )}
+                >
+                  {level} {level === 'All' ? 'Levels' : ''}
+                </Button>
               ))}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant={selectedState ? "default" : "outline"} className={`rounded-full px-6 font-bold flex items-center gap-2 ${selectedState ? 'bg-primary text-primary-foreground' : 'hover:border-accent hover:text-accent'}`}>{selectedState || "Filter by State"} <ChevronDown className="w-4 h-4 opacity-50" /></Button>
+                  <Button variant={selectedState ? "default" : "outline"} className={cn(
+                    "rounded-full px-6 font-bold flex items-center gap-2",
+                    selectedState ? "bg-accent text-primary" : "text-primary dark:text-white dark:border-white/20"
+                  )}>{selectedState || "Filter by State"} <ChevronDown className="w-4 h-4 opacity-50" /></Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="max-h-80 overflow-y-auto w-56">
                   {states.map((state) => (
@@ -349,7 +365,10 @@ export default function MembersPage() {
               {selectedState && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant={selectedDistrict ? "default" : "outline"} className={`rounded-full px-6 font-bold flex items-center gap-2 ${selectedDistrict ? 'bg-primary text-primary-foreground' : 'hover:border-accent hover:text-accent'}`}>{selectedDistrict || "Filter by District"} <ChevronDown className="w-4 h-4 opacity-50" /></Button>
+                    <Button variant={selectedDistrict ? "default" : "outline"} className={cn(
+                      "rounded-full px-6 font-bold flex items-center gap-2",
+                      selectedDistrict ? "bg-accent text-primary" : "text-primary dark:text-white dark:border-white/20"
+                    )}>{selectedDistrict || "Filter by District"} <ChevronDown className="w-4 h-4 opacity-50" /></Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="max-h-80 overflow-y-auto w-56">
                     {districts.map((district) => (

@@ -65,6 +65,7 @@ export default function InternalMeetingsManagement() {
   const { toast } = useToast()
   
   const [search, setSearch] = useState('')
+  const [levelFilter, setLevelFilter] = useState('All')
   const [isActionLoading, setIsActionLoading] = useState(false)
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [editMeeting, setEditMeeting] = useState<any>(null)
@@ -173,14 +174,18 @@ export default function InternalMeetingsManagement() {
     )
   }
 
-  const filtered = (meetings || []).filter((m: any) => 
-    m.title.toLowerCase().includes(search.toLowerCase()) || 
-    m.location.toLowerCase().includes(search.toLowerCase()) ||
-    m.stateName?.toLowerCase().includes(search.toLowerCase()) ||
-    m.districtName?.toLowerCase().includes(search.toLowerCase())
-  )
+  const filtered = (meetings || []).filter((m: any) => {
+    const matchesSearch = m.title.toLowerCase().includes(search.toLowerCase()) || 
+      m.location.toLowerCase().includes(search.toLowerCase()) ||
+      m.stateName?.toLowerCase().includes(search.toLowerCase()) ||
+      m.districtName?.toLowerCase().includes(search.toLowerCase());
+    
+    const matchesLevel = levelFilter === 'All' || m.level === levelFilter;
+    return matchesSearch && matchesLevel;
+  })
 
   const states = Object.keys(INDIA_DATA).sort()
+  const levels = ["All", "National", "State", "District"]
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
@@ -307,9 +312,28 @@ export default function InternalMeetingsManagement() {
 
       <section className="py-12 border-b bg-white dark:bg-slate-900 transition-colors sticky top-[72px] md:top-[84px] z-30 shadow-sm">
         <div className="container mx-auto px-4">
-          <div className="relative max-w-2xl">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-            <Input placeholder="Filter archives by title, venue or region..." className="pl-12 h-14 rounded-2xl border-slate-200 dark:border-slate-700 dark:bg-slate-800" value={search} onChange={(e) => setSearch(e.target.value)} />
+          <div className="flex flex-col md:flex-row gap-6 items-center justify-between">
+            <div className="flex flex-wrap gap-2">
+              {levels.map((lvl) => (
+                <Button
+                  key={lvl}
+                  variant={levelFilter === lvl ? "default" : "outline"}
+                  onClick={() => setLevelFilter(lvl)}
+                  className={cn(
+                    "rounded-full px-6 font-bold transition-all",
+                    levelFilter === lvl 
+                      ? "bg-accent text-primary dark:bg-accent dark:text-primary shadow-lg" 
+                      : "text-primary dark:text-white border-slate-200 dark:border-white/20 hover:border-accent hover:text-accent"
+                  )}
+                >
+                  {lvl} {lvl === 'All' ? 'Levels' : 'Level'}
+                </Button>
+              ))}
+            </div>
+            <div className="relative w-full md:w-80">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+              <Input placeholder="Filter archives..." className="pl-12 h-14 rounded-2xl border-slate-200 dark:border-slate-700 dark:bg-slate-800" value={search} onChange={(e) => setSearch(e.target.value)} />
+            </div>
           </div>
         </div>
       </section>
