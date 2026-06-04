@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState } from 'react'
@@ -156,7 +155,7 @@ export default function LeadershipPage() {
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
       <Navbar />
       
-      <section className="pt-32 md:pt-40 pb-16 md:pb-20 bg-primary text-white relative overflow-hidden">
+      <section className="pt-32 md:pt-40 pb-16 md:pb-20 bg-primary text-primary-foreground relative overflow-hidden">
         <div className="absolute top-0 right-0 w-1/2 h-full bg-accent/5 -skew-x-12"></div>
         <div className="container mx-auto px-4 text-center relative z-10">
           <div className="inline-flex items-center gap-2 bg-accent/20 text-accent px-4 py-1.5 rounded-full text-xs md:text-sm font-bold border border-accent/30 mb-6">
@@ -167,7 +166,7 @@ export default function LeadershipPage() {
           {isAdmin && (
             <Dialog>
               <DialogTrigger asChild><Button className="bg-accent text-primary font-bold rounded-2xl h-14 px-8 flex gap-2 hover:bg-accent/90 shadow-xl shadow-accent/20 mx-auto"><Plus className="w-5 h-5" /> Commission Leadership Member</Button></DialogTrigger>
-              <DialogContent className="bg-white dark:bg-slate-900 rounded-[2rem] max-h-[90vh] overflow-y-auto">
+              <DialogContent className="bg-white dark:bg-slate-900 rounded-[2rem] border-none shadow-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader><DialogTitle>New Leader Profile</DialogTitle></DialogHeader>
                 <div className="space-y-4 py-4">
                   <div className="flex flex-col items-center gap-4 p-4 border-2 border-dashed rounded-2xl">
@@ -224,7 +223,7 @@ export default function LeadershipPage() {
       <section className="py-16 md:py-24">
         <div className="container mx-auto px-4">
           {dataLoading ? (
-            <div className="text-center py-20"><Loader2 className="w-10 h-10 animate-spin text-accent mx-auto" /></div>
+            <div className="text-center py-20"><Loader2 className="w-10 h-10 animate-spin text-accent mx-auto mb-4" /></div>
           ) : (
             <>
               <div className="flex flex-col items-center mb-24">
@@ -251,7 +250,7 @@ export default function LeadershipPage() {
       </section>
 
       <Dialog open={!!editLeader} onOpenChange={(open) => !open && setEditLeader(null)}>
-        <DialogContent className="bg-white dark:bg-slate-900 rounded-[2rem] max-h-[90vh] overflow-y-auto">
+        <DialogContent className="bg-white dark:bg-slate-900 rounded-[2rem] border-none shadow-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader><DialogTitle>Edit Leader Profile</DialogTitle></DialogHeader>
           {editLeader && (
             <div className="space-y-4 py-4">

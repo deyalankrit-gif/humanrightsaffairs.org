@@ -68,16 +68,16 @@ export default function MeetingsPage() {
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
       <Navbar />
 
-      <section className="pt-40 pb-20 bg-primary text-white relative overflow-hidden">
+      <section className="pt-40 pb-20 bg-primary text-primary-foreground relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-full opacity-5 pointer-events-none">
           <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-accent rounded-full blur-[100px]"></div>
           <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-secondary rounded-full blur-[100px]"></div>
         </div>
         <div className="container mx-auto px-4 relative z-10 text-center">
           <div className="max-w-3xl mx-auto space-y-6">
-            <Badge className="bg-accent text-primary font-bold px-4 py-1.5 uppercase tracking-widest text-xs">Organizational Assemblies</Badge>
+            <Badge className="bg-accent text-primary font-bold px-4 py-1.5 uppercase tracking-widest text-xs border-none">Organizational Assemblies</Badge>
             <h1 className="text-5xl md:text-7xl font-headline font-bold mb-6">General <span className="text-accent italic">Meetings</span></h1>
-            <p className="text-xl text-slate-300 leading-relaxed max-w-2xl mx-auto">
+            <p className="text-xl opacity-80 leading-relaxed max-w-2xl mx-auto">
               A transparent record of our democratic decision-making processes, assemblies, and strategic planning sessions.
             </p>
           </div>
@@ -93,7 +93,7 @@ export default function MeetingsPage() {
                   key={lvl}
                   variant={filter === lvl ? "default" : "outline"}
                   onClick={() => setFilter(lvl)}
-                  className={`rounded-full px-6 font-bold ${filter === lvl ? 'bg-primary text-white' : 'hover:border-accent hover:text-accent'}`}
+                  className={`rounded-full px-6 font-bold ${filter === lvl ? 'bg-primary text-primary-foreground' : 'hover:border-accent hover:text-accent'}`}
                 >
                   {lvl} Level
                 </Button>
@@ -130,8 +130,8 @@ export default function MeetingsPage() {
                         </Badge>
                         <Badge className={cn(
                           "font-bold text-[10px] px-3",
-                          meeting.status === 'Upcoming' ? 'bg-emerald-500' : 
-                          meeting.status === 'Completed' ? 'bg-primary text-white' : 'bg-red-500'
+                          meeting.status === 'Upcoming' ? 'bg-emerald-500 text-white' : 
+                          meeting.status === 'Completed' ? 'bg-primary text-primary-foreground' : 'bg-red-500 text-white'
                         )}>
                           {meeting.status}
                         </Badge>
@@ -143,15 +143,15 @@ export default function MeetingsPage() {
                     
                     <CardContent className="p-8 pt-6 space-y-4 flex-1">
                       <div className="space-y-3">
-                        <div className="flex items-center gap-3 text-sm font-bold text-slate-500 dark:text-slate-400">
+                        <div className="flex items-center gap-3 text-sm font-bold text-muted-foreground">
                           <div className="p-2 bg-slate-50 dark:bg-slate-800 rounded-lg"><Calendar className="w-4 h-4 text-accent" /></div>
                           <span>{meeting.date}</span>
                         </div>
-                        <div className="flex items-center gap-3 text-sm font-bold text-slate-500 dark:text-slate-400">
+                        <div className="flex items-center gap-3 text-sm font-bold text-muted-foreground">
                           <div className="p-2 bg-slate-50 dark:bg-slate-800 rounded-lg"><Clock className="w-4 h-4 text-accent" /></div>
                           <span>{meeting.time}</span>
                         </div>
-                        <div className="flex items-center gap-3 text-sm font-bold text-slate-500 dark:text-slate-400">
+                        <div className="flex items-center gap-3 text-sm font-bold text-muted-foreground">
                           <div className="p-2 bg-slate-50 dark:bg-slate-800 rounded-lg"><MapPin className="w-4 h-4 text-accent" /></div>
                           <span className="truncate">{meeting.location}</span>
                         </div>
@@ -161,7 +161,7 @@ export default function MeetingsPage() {
                          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2">
                            <Info className="w-3 h-3" /> Agenda Preview
                          </p>
-                         <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-3 italic">
+                         <p className="text-sm text-muted-foreground line-clamp-3 italic">
                            "{meeting.agenda}"
                          </p>
                       </div>
@@ -201,7 +201,7 @@ export default function MeetingsPage() {
                                  <FileText className="w-5 h-5 text-accent" /> Meeting Agenda
                                </h4>
                                <div className="p-6 bg-slate-50 dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800">
-                                 <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-400 whitespace-pre-line">
+                                 <p className="text-sm leading-relaxed text-muted-foreground whitespace-pre-line">
                                    {meeting.agenda}
                                  </p>
                                </div>

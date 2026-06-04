@@ -185,16 +185,16 @@ export default function EventsPage() {
   const categories = ["All", "Campaign", "Workshop", "Convention", "Relief", "Social Projects"]
 
   return (
-    <main className="min-h-screen bg-slate-50">
+    <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
       <Navbar />
 
-      <section className="pt-40 pb-20 bg-primary text-white relative overflow-hidden">
+      <section className="pt-40 pb-20 bg-primary text-primary-foreground relative overflow-hidden">
         <div className="absolute top-0 right-0 w-1/2 h-full bg-accent/10 -skew-x-12"></div>
         <div className="container mx-auto px-4 relative z-10 text-center">
           <div className="max-w-3xl mx-auto">
-            <Badge className="bg-accent text-primary font-bold mb-6 px-4 py-1">Mission Impact</Badge>
+            <Badge className="bg-accent text-primary font-bold mb-6 px-4 py-1 border-none">Mission Impact</Badge>
             <h1 className="text-5xl md:text-7xl font-headline font-bold mb-6">Our <span className="text-accent italic">Event</span> Gallery</h1>
-            <p className="text-xl text-indigo-100 leading-relaxed mb-8">
+            <p className="text-xl opacity-80 leading-relaxed mb-8">
               Witness the journey of JusticeShield as we traverse the length and breadth of India to protect, educate, and empower.
             </p>
 
@@ -205,7 +205,7 @@ export default function EventsPage() {
                     <Plus className="w-6 h-6" /> Create New Event Entry
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-md bg-white rounded-[2rem] max-h-[90vh] overflow-y-auto">
+                <DialogContent className="max-w-md bg-white dark:bg-slate-900 rounded-[2rem] max-h-[90vh] overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle>New Event Entry</DialogTitle>
                     <DialogDescription>Add a new highlight to the mission gallery.</DialogDescription>
@@ -289,7 +289,7 @@ export default function EventsPage() {
         </div>
       </section>
 
-      <section className="py-12 bg-white border-b border-slate-200 sticky top-[72px] md:top-[84px] z-30 shadow-sm">
+      <section className="py-12 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-[72px] md:top-[84px] z-30 shadow-sm">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row gap-6 items-center justify-between">
             <div className="flex flex-wrap gap-2">
@@ -298,7 +298,7 @@ export default function EventsPage() {
                   key={cat}
                   variant={filter === cat ? "default" : "outline"}
                   onClick={() => setFilter(cat)}
-                  className={`rounded-full px-6 ${filter === cat ? 'bg-primary text-white' : 'hover:border-accent hover:text-accent'}`}
+                  className={`rounded-full px-6 ${filter === cat ? 'bg-primary text-primary-foreground' : 'hover:border-accent hover:text-accent'}`}
                 >
                   {cat}
                 </Button>
@@ -308,7 +308,7 @@ export default function EventsPage() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <Input 
                 placeholder="Search events or locations..." 
-                className="pl-10 h-12 rounded-full border-slate-200"
+                className="pl-10 h-12 rounded-full border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
@@ -331,7 +331,7 @@ export default function EventsPage() {
                   const isCustomImg = event.imageId?.startsWith('data:')
                   const img = isCustomImg ? event.imageId : PlaceHolderImages.find(i => i.id === event.imageId)?.imageUrl
                   return (
-                    <Card key={event.id} className="group border-none shadow-sm hover:shadow-2xl transition-all duration-500 rounded-[2rem] overflow-hidden bg-white relative">
+                    <Card key={event.id} className="group border-none shadow-sm hover:shadow-2xl transition-all duration-500 rounded-[2rem] overflow-hidden bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 relative">
                       <div className="relative aspect-[4/3] overflow-hidden">
                         <Image 
                           src={img || 'https://picsum.photos/seed/event/800/600'} 
@@ -340,7 +340,7 @@ export default function EventsPage() {
                           className="object-cover group-hover:scale-110 transition-transform duration-700"
                         />
                         <div className="absolute top-4 right-4">
-                          <Badge className="bg-white/90 backdrop-blur-md text-primary font-bold shadow-lg">
+                          <Badge className="bg-white/90 backdrop-blur-md text-primary font-bold shadow-lg border-none">
                             {event.category}
                           </Badge>
                         </div>
@@ -353,7 +353,7 @@ export default function EventsPage() {
                                   <Edit className="w-4 h-4" />
                                 </Button>
                               </DialogTrigger>
-                              <DialogContent className="max-w-md bg-white rounded-[2rem] max-h-[90vh] overflow-y-auto">
+                              <DialogContent className="max-w-md bg-white dark:bg-slate-900 rounded-[2rem] max-h-[90vh] overflow-y-auto">
                                 <DialogHeader>
                                   <DialogTitle>Modify Event</DialogTitle>
                                 </DialogHeader>
@@ -436,7 +436,7 @@ export default function EventsPage() {
                                   <Trash2 className="w-4 h-4" />
                                 </Button>
                               </AlertDialogTrigger>
-                              <AlertDialogContent className="rounded-[2rem]">
+                              <AlertDialogContent className="rounded-[2rem] bg-white dark:bg-slate-900 border-none">
                                 <AlertDialogHeader>
                                   <AlertDialogTitle>Delete Record?</AlertDialogTitle>
                                   <AlertDialogDescription>This will permanently remove this event from the public gallery.</AlertDialogDescription>
@@ -455,17 +455,17 @@ export default function EventsPage() {
                           <span className="flex items-center gap-1"><CalendarIcon className="w-3 h-3" /> {event.date}</span>
                           <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> {event.location}</span>
                         </div>
-                        <CardTitle className="text-2xl font-headline font-bold text-primary group-hover:text-accent transition-colors">
+                        <CardTitle className="text-2xl font-headline font-bold text-primary dark:text-white group-hover:text-accent transition-colors leading-tight">
                           {event.title}
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="p-8 pt-4">
-                        <p className="text-slate-500 text-sm leading-relaxed">
+                        <p className="text-muted-foreground text-sm leading-relaxed">
                           {event.description}
                         </p>
                       </CardContent>
-                      <CardFooter className="p-8 pt-0 border-t border-slate-50 mt-auto">
-                        <Button variant="ghost" className="p-0 h-auto font-bold text-primary hover:text-accent flex items-center gap-2 group/btn">
+                      <CardFooter className="p-8 pt-0 border-t border-slate-50 dark:border-slate-800 mt-auto">
+                        <Button variant="ghost" className="p-0 h-auto font-bold text-primary dark:text-white hover:text-accent flex items-center gap-2 group/btn">
                           View Event Details <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-2 transition-transform" />
                         </Button>
                       </CardFooter>
@@ -474,11 +474,11 @@ export default function EventsPage() {
                 })
               ) : (
                 <div className="col-span-full py-32 text-center">
-                  <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-300">
+                  <div className="w-20 h-20 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-300 dark:text-slate-600">
                     <Camera className="w-10 h-10" />
                   </div>
-                  <h3 className="text-2xl font-headline font-bold text-primary">No events found</h3>
-                  <p className="text-slate-500">Try adjusting your filters or search terms.</p>
+                  <h3 className="text-2xl font-headline font-bold text-primary dark:text-white">No events found</h3>
+                  <p className="text-muted-foreground">Try adjusting your filters or search terms.</p>
                 </div>
               )}
             </div>

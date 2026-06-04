@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useEffect } from 'react'
@@ -193,10 +192,10 @@ export default function MembersPage() {
   const districts = selectedState ? INDIA_DATA[selectedState] : [];
 
   return (
-    <main className="min-h-screen bg-slate-50">
+    <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
       <Navbar />
 
-      <section className="pt-40 pb-20 bg-primary text-white relative overflow-hidden">
+      <section className="pt-40 pb-20 bg-primary text-primary-foreground relative overflow-hidden">
         <div className="absolute top-0 right-0 w-1/2 h-full bg-accent/5 -skew-x-12"></div>
         <div className="container mx-auto px-4 relative z-10 text-center">
           <div className="inline-flex items-center gap-2 bg-accent/20 text-accent px-4 py-1.5 rounded-full text-sm font-bold border border-accent/30 mb-6">
@@ -204,7 +203,7 @@ export default function MembersPage() {
             <span>Official Membership Records</span>
           </div>
           <h1 className="text-5xl md:text-7xl font-headline font-bold mb-6">Verified <span className="text-accent italic">Personnel</span></h1>
-          <p className="text-indigo-100 max-w-2xl mx-auto text-lg mb-8">
+          <p className="text-xl opacity-80 max-w-2xl mx-auto text-lg mb-8">
             A dynamic ledger of our dedicated human rights defenders, updated in real-time by the central administration.
           </p>
 
@@ -215,15 +214,15 @@ export default function MembersPage() {
                   <Plus className="w-6 h-6" /> Commission New Membership
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-md bg-white rounded-[2rem] border-none shadow-2xl max-h-[90vh] overflow-y-auto">
+              <DialogContent className="max-w-md bg-white dark:bg-slate-900 rounded-[2rem] border-none shadow-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                  <DialogTitle className="text-2xl font-headline font-bold text-primary">New Personnel Record</DialogTitle>
+                  <DialogTitle className="text-2xl font-headline font-bold text-primary dark:text-white">New Personnel Record</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4 py-4">
                   <div className="space-y-2">
                     <Label>Profile Picture</Label>
                     <div className="flex flex-col items-center gap-4 p-4 border-2 border-dashed rounded-2xl">
-                      <div className="relative w-32 h-32 bg-slate-100 rounded-full overflow-hidden border">
+                      <div className="relative w-32 h-32 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden border">
                         <Image 
                           src={newMember.imageId?.startsWith('data:') ? newMember.imageId : (newMember.gender === 'female' ? '/dummy w.png' : '/dummy m.png')} 
                           alt="Preview" 
@@ -318,7 +317,7 @@ export default function MembersPage() {
                   </div>
                 </div>
                 <DialogFooter>
-                  <Button onClick={handleAddMember} disabled={isAdding} className="w-full h-12 rounded-xl bg-primary text-white font-bold">
+                  <Button onClick={handleAddMember} disabled={isAdding} className="w-full h-12 rounded-xl bg-primary text-primary-foreground font-bold">
                     {isAdding ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Plus className="w-4 h-4 mr-2" />}
                     Confirm Commissioning
                   </Button>
@@ -329,16 +328,16 @@ export default function MembersPage() {
         </div>
       </section>
 
-      <section className="py-12 bg-white border-b border-slate-200 sticky top-[72px] md:top-[84px] z-30 shadow-sm">
+      <section className="py-12 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-[72px] md:top-[84px] z-30 shadow-sm transition-colors">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row gap-6 items-center justify-between">
             <div className="flex flex-wrap justify-center gap-2">
               {["All", "National", "State", "District"].map((level) => (
-                <Button key={level} variant={levelFilter === level ? "default" : "outline"} onClick={() => handleLevelClick(level)} className={`rounded-full px-6 font-bold ${levelFilter === level ? 'bg-primary text-white' : 'hover:border-accent hover:text-accent'}`}>{level}</Button>
+                <Button key={level} variant={levelFilter === level ? "default" : "outline"} onClick={() => handleLevelClick(level)} className={`rounded-full px-6 font-bold ${levelFilter === level ? 'bg-primary text-primary-foreground' : 'hover:border-accent hover:text-accent'}`}>{level}</Button>
               ))}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant={selectedState ? "default" : "outline"} className={`rounded-full px-6 font-bold flex items-center gap-2 ${selectedState ? 'bg-primary text-white' : 'hover:border-accent hover:text-accent'}`}>{selectedState || "Filter by State"} <ChevronDown className="w-4 h-4 opacity-50" /></Button>
+                  <Button variant={selectedState ? "default" : "outline"} className={`rounded-full px-6 font-bold flex items-center gap-2 ${selectedState ? 'bg-primary text-primary-foreground' : 'hover:border-accent hover:text-accent'}`}>{selectedState || "Filter by State"} <ChevronDown className="w-4 h-4 opacity-50" /></Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="max-h-80 overflow-y-auto w-56">
                   {states.map((state) => (
@@ -350,7 +349,7 @@ export default function MembersPage() {
               {selectedState && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant={selectedDistrict ? "default" : "outline"} className={`rounded-full px-6 font-bold flex items-center gap-2 ${selectedDistrict ? 'bg-primary text-white' : 'hover:border-accent hover:text-accent'}`}>{selectedDistrict || "Filter by District"} <ChevronDown className="w-4 h-4 opacity-50" /></Button>
+                    <Button variant={selectedDistrict ? "default" : "outline"} className={`rounded-full px-6 font-bold flex items-center gap-2 ${selectedDistrict ? 'bg-primary text-primary-foreground' : 'hover:border-accent hover:text-accent'}`}>{selectedDistrict || "Filter by District"} <ChevronDown className="w-4 h-4 opacity-50" /></Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="max-h-80 overflow-y-auto w-56">
                     {districts.map((district) => (
@@ -362,7 +361,7 @@ export default function MembersPage() {
             </div>
             <div className="relative w-full md:w-96">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-              <Input placeholder="Search by name, ID or role..." className="pl-12 h-14 rounded-2xl border-slate-200" value={search} onChange={(e) => setSearch(e.target.value)} />
+              <Input placeholder="Search by name, ID or role..." className="pl-12 h-14 rounded-2xl border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800" value={search} onChange={(e) => setSearch(e.target.value)} />
             </div>
           </div>
         </div>
@@ -379,9 +378,9 @@ export default function MembersPage() {
                   const fallback = member.gender === 'female' ? '/dummy w.png' : '/dummy m.png'
                   const displayImg = member.imageId?.startsWith('data:') ? member.imageId : (PlaceHolderImages.find(i => i.id === member.imageId)?.imageUrl || fallback)
                   return (
-                    <Card key={member.id} className="group border-none shadow-sm hover:shadow-xl transition-all duration-500 rounded-[2rem] overflow-hidden bg-white border border-slate-100 relative">
+                    <Card key={member.id} className="group border-none shadow-sm hover:shadow-xl transition-all duration-500 rounded-[2rem] overflow-hidden bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 relative">
                       <CardHeader className="p-0">
-                        <div className="relative aspect-square overflow-hidden bg-slate-100">
+                        <div className="relative aspect-square overflow-hidden bg-slate-100 dark:bg-slate-800">
                           <Image src={displayImg} alt={member.name} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
                           <div className="absolute top-4 right-4"><Badge className="bg-primary/80 backdrop-blur-md text-white font-bold border-none">{member.level}</Badge></div>
                         </div>
@@ -390,16 +389,16 @@ export default function MembersPage() {
                         <div className="flex items-start gap-2">
                            <BadgeCheck className="w-5 h-5 text-accent shrink-0 mt-1" />
                            <div>
-                             <h3 className="font-headline font-bold text-xl text-primary leading-tight">{member.name}</h3>
+                             <h3 className="font-headline font-bold text-xl text-primary dark:text-white leading-tight">{member.name}</h3>
                              <p className="text-xs font-bold text-accent uppercase tracking-widest mt-1">{member.designation}</p>
                            </div>
                         </div>
-                        <div className="space-y-2 pt-2 border-t border-slate-100">
-                          <div className="flex items-center gap-2 text-xs text-slate-500">
+                        <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
                             <MapPin className="w-3 h-3 text-slate-400" />
                             <span className="truncate">{member.districtName ? `${member.districtName}, ` : ''}{member.stateName || 'All India'}</span>
                           </div>
-                          <div className="flex items-center gap-2 text-xs text-slate-500"><Briefcase className="w-3 h-3 text-slate-400" /><span>ID: {member.memberId || member.id.slice(-6).toUpperCase()}</span></div>
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground"><Briefcase className="w-3 h-3 text-slate-400" /><span>ID: {member.memberId || member.id.slice(-6).toUpperCase()}</span></div>
                         </div>
                       </CardContent>
                     </Card>
@@ -407,8 +406,8 @@ export default function MembersPage() {
                 })
               ) : (
                 <div className="col-span-full py-32 text-center">
-                  <User className="w-16 h-16 text-slate-200 mx-auto mb-4" />
-                  <h3 className="text-2xl font-headline font-bold text-primary">No members found</h3>
+                  <User className="w-16 h-16 text-slate-200 dark:text-slate-800 mx-auto mb-4" />
+                  <h3 className="text-2xl font-headline font-bold text-primary dark:text-white">No members found</h3>
                 </div>
               )}
             </div>
