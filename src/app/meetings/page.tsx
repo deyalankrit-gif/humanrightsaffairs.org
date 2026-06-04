@@ -14,7 +14,8 @@ import {
   Loader2,
   Info,
   ExternalLink,
-  Globe
+  Globe,
+  UserCheck
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -44,6 +45,7 @@ type Meeting = {
   stateName?: string
   districtName?: string
   status: "Upcoming" | "Completed" | "Postponed"
+  attendees?: string[]
 }
 
 export default function MeetingsPage() {
@@ -220,6 +222,21 @@ export default function MeetingsPage() {
                                   <p className="font-bold text-sm text-foreground uppercase">{meeting.districtName ? `${meeting.districtName}, ` : ''}{meeting.stateName || 'National'}</p>
                                </div>
                             </div>
+
+                            {meeting.attendees && meeting.attendees.length > 0 && (
+                              <div className="space-y-4">
+                                <h4 className="font-headline font-bold text-xl flex items-center gap-2 text-foreground">
+                                  <UserCheck className="w-5 h-5 text-accent" /> Leadership Presence
+                                </h4>
+                                <div className="flex flex-wrap gap-2">
+                                  {meeting.attendees.map((attendee, idx) => (
+                                    <Badge key={idx} variant="secondary" className="bg-accent/10 text-accent border-accent/20 px-4 py-1 rounded-full font-bold">
+                                      {attendee}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
 
                             <div className="space-y-4">
                                <h4 className="font-headline font-bold text-xl flex items-center gap-2 text-foreground">

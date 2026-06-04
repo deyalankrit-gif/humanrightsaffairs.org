@@ -14,6 +14,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Checkbox } from '@/components/ui/checkbox'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import { 
   Plus, 
   Search, 
@@ -24,7 +26,8 @@ import {
   Trash2, 
   Loader2, 
   ShieldCheck,
-  Globe
+  Globe,
+  Users
 } from 'lucide-react'
 import {
   Dialog,
@@ -84,6 +87,7 @@ export default function InternalMeetingsManagement() {
     stateName: '',
     districtName: '',
     status: 'Upcoming' as const,
+    attendees: [] as string[]
   })
 
   useEffect(() => {
@@ -98,6 +102,13 @@ export default function InternalMeetingsManagement() {
   }, [db, user]);
 
   const { data: meetings, loading: dataLoading } = useCollection(meetingsQuery);
+
+  const leadershipQuery = useMemoFirebase(() => {
+    if (!db || !user) return null;
+    return query(collection(db, 'leadership'), orderBy('name', 'asc'));
+  }, [db, user]);
+
+  const { data: leadershipMembers } = useCollection(leadershipQuery);
 
   const parse12hToState = (timeStr: string) => {
     if (!timeStr) return { hour: '10', minute: '30', period: 'AM' };
@@ -136,7 +147,7 @@ export default function InternalMeetingsManagement() {
     addDoc(collection(db, 'meetings'), data)
       .then(() => {
         toast({ title: "Meeting Scheduled", description: "Record has been added to the registry." })
-        setNewMeeting({ title: '', date: '', time: '', location: '', agenda: '', minutes: '', level: 'National', stateName: '', districtName: '', status: 'Upcoming' })
+        setNewMeeting({ title: '', date: '', time: '', location: '', agenda: '', minutes: '', level: 'National', stateName: '', districtName: '', status: 'Upcoming', attendees: [] })
         setNewTime({ hour: '10', minute: '30', period: 'AM' })
         setIsAddDialogOpen(false)
         setIsActionLoading(false)
@@ -344,6 +355,32 @@ export default function InternalMeetingsManagement() {
                   )}
 
                   <div className="space-y-2">
+                    <Label className="flex items-center gap-2"><Users className="w-3 h-3 text-accent" /> Leadership Presence</Label>
+                    <ScrollArea className="h-32 border rounded-xl p-3 bg-slate-50 dark:bg-slate-800">
+                      <div className="space-y-2">
+                        {leadershipMembers?.map((leader: any) => (
+                          <div key={leader.id} className="flex items-center gap-2">
+                            <Checkbox 
+                              id={`new-leader-${leader.id}`}
+                              checked={(newMeeting.attendees || []).includes(leader.name)}
+                              onCheckedChange={(checked) => {
+                                const attendees = checked 
+                                  ? [...(newMeeting.attendees || []), leader.name]
+                                  : (newMeeting.attendees || []).filter(a => a !== leader.name);
+                                setNewMeeting({...newMeeting, attendees});
+                              }}
+                            />
+                            <Label htmlFor={`new-leader-${leader.id}`} className="text-xs cursor-pointer">{leader.name} <span className="text-[10px] text-slate-400">({leader.title})</span></Label>
+                          </div>
+                        ))}
+                        {(!leadershipMembers || leadershipMembers.length === 0) && (
+                          <p className="text-[10px] text-slate-400 italic">No leadership members registered.</p>
+                        )}
+                      </div>
+                    </ScrollArea>
+                  </div>
+
+                  <div className="space-y-2">
                     <Label>Venue / Link</Label>
                     <Input value={newMeeting.location} onChange={e => setNewMeeting({...newMeeting, location: e.target.value})} placeholder="Kolkata Head Office" className="h-12 rounded-xl" />
                   </div>
@@ -441,7 +478,7 @@ export default function InternalMeetingsManagement() {
                           <Dialog>
                             <DialogTrigger asChild>
                               <Button onClick={() => {
-                                setEditMeeting(meeting);
+                                setEditMeeting({ ...meeting, attendees: meeting.attendees || [] });
                                 setEditTime(parse12hToState(meeting.time));
                               }} variant="outline" size="icon" className="rounded-xl border-slate-200 dark:border-slate-700 hover:bg-accent hover:text-slate-900"><Edit className="w-4 h-4" /></Button>
                             </DialogTrigger>
@@ -539,6 +576,29 @@ export default function InternalMeetingsManagement() {
                                       </Select>
                                     </div>
                                   )}
+
+                                  <div className="space-y-2">
+                                    <Label className="flex items-center gap-2"><Users className="w-3 h-3 text-accent" /> Leadership Presence</Label>
+                                    <ScrollArea className="h-32 border rounded-xl p-3 bg-slate-50 dark:bg-slate-800">
+                                      <div className="space-y-2">
+                                        {leadershipMembers?.map((leader: any) => (
+                                          <div key={leader.id} className="flex items-center gap-2">
+                                            <Checkbox 
+                                              id={`edit-leader-${leader.id}`}
+                                              checked={(editMeeting.attendees || []).includes(leader.name)}
+                                              onCheckedChange={(checked) => {
+                                                const attendees = checked 
+                                                  ? [...(editMeeting.attendees || []), leader.name]
+                                                  : (editMeeting.attendees || []).filter(a => a !== leader.name);
+                                                setEditMeeting({...editMeeting, attendees});
+                                              }}
+                                            />
+                                            <Label htmlFor={`edit-leader-${leader.id}`} className="text-xs cursor-pointer">{leader.name} <span className="text-[10px] text-slate-400">({leader.title})</span></Label>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </ScrollArea>
+                                  </div>
 
                                   <div className="space-y-1">
                                     <Label>Venue / Link</Label>

@@ -90,6 +90,7 @@
         "stateName": { "type": "string" },
         "districtName": { "type": "string" },
         "status": { "type": "string", "enum": ["Upcoming", "Completed", "Postponed"] },
+        "attendees": { "type": "array", "items": { "type": "string" }, "description": "Names of leadership members present at the meeting." },
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["title", "date", "level"]
