@@ -170,7 +170,7 @@ export default function MeetingsPage() {
                     <CardFooter className="p-8 pt-0 mt-auto">
                       <Dialog>
                         <DialogTrigger asChild>
-                          <Button className="w-full bg-slate-900 dark:bg-slate-100 dark:text-primary text-white font-bold h-12 rounded-xl group/btn">
+                          <Button className="w-full bg-slate-900 dark:bg-white dark:text-slate-900 text-white font-bold h-12 rounded-xl group/btn">
                             View Details & Minutes <ExternalLink className="ml-2 w-4 h-4 group-hover/btn:scale-110 transition-transform" />
                           </Button>
                         </DialogTrigger>
@@ -184,20 +184,20 @@ export default function MeetingsPage() {
                             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                                <div className="bg-slate-50 dark:bg-slate-900 p-4 rounded-2xl border border-slate-100 dark:border-slate-800">
                                   <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Date</p>
-                                  <p className="font-bold text-sm">{meeting.date}</p>
+                                  <p className="font-bold text-sm text-foreground">{meeting.date}</p>
                                </div>
                                <div className="bg-slate-50 dark:bg-slate-900 p-4 rounded-2xl border border-slate-100 dark:border-slate-800">
                                   <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Time</p>
-                                  <p className="font-bold text-sm">{meeting.time}</p>
+                                  <p className="font-bold text-sm text-foreground">{meeting.time}</p>
                                </div>
                                <div className="bg-slate-50 dark:bg-slate-900 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 col-span-2 md:col-span-1">
                                   <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Venue</p>
-                                  <p className="font-bold text-sm">{meeting.location}</p>
+                                  <p className="font-bold text-sm text-foreground">{meeting.location}</p>
                                </div>
                             </div>
 
                             <div className="space-y-4">
-                               <h4 className="font-headline font-bold text-xl flex items-center gap-2">
+                               <h4 className="font-headline font-bold text-xl flex items-center gap-2 text-foreground">
                                  <FileText className="w-5 h-5 text-accent" /> Meeting Agenda
                                </h4>
                                <div className="p-6 bg-slate-50 dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800">
@@ -209,7 +209,7 @@ export default function MeetingsPage() {
 
                             {meeting.minutes && (
                               <div className="space-y-4">
-                                <h4 className="font-headline font-bold text-xl flex items-center gap-2">
+                                <h4 className="font-headline font-bold text-xl flex items-center gap-2 text-foreground">
                                   <Users className="w-5 h-5 text-secondary" /> Minutes & Resolutions
                                 </h4>
                                 <div className="p-6 bg-emerald-50/30 dark:bg-emerald-900/10 rounded-3xl border border-emerald-100 dark:border-emerald-900/30">

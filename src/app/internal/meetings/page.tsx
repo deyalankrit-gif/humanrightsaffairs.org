@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useEffect, useState } from 'react'
@@ -276,7 +275,7 @@ export default function InternalMeetingsManagement() {
 
                   {(newMeeting.level === 'State' || newMeeting.level === 'District') && newMeeting.stateName && (
                     <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
-                      <Label className="flex items-center gap-2"><MapPin className="w-3 h-3 text-accent" /> Select District (Optional for State Level)</Label>
+                      <Label className="flex items-center gap-2"><MapPin className="w-3 h-3 text-accent" /> Select District</Label>
                       <Select value={newMeeting.districtName} onValueChange={(val) => setNewMeeting({...newMeeting, districtName: val})}>
                         <SelectTrigger className="h-12 rounded-xl"><SelectValue placeholder="Choose District" /></SelectTrigger>
                         <SelectContent className="max-h-60">
@@ -346,7 +345,7 @@ export default function InternalMeetingsManagement() {
                         <div className="flex items-center justify-center">
                            <Badge className={cn(
                              "font-bold uppercase tracking-widest text-[9px] px-4 py-1",
-                             meeting.status === 'Upcoming' ? 'bg-emerald-500 text-white' : 'bg-primary text-white'
+                             meeting.status === 'Upcoming' ? 'bg-emerald-500 text-white' : 'bg-primary text-primary-foreground'
                            )}>
                              {meeting.status}
                            </Badge>
@@ -408,7 +407,7 @@ export default function InternalMeetingsManagement() {
                                     </Select>
                                   </div>
 
-                                  {editMeeting.level !== 'National' && (
+                                  {(editMeeting.level === 'State' || editMeeting.level === 'District') && (
                                     <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
                                       <Label>State / UT</Label>
                                       <Select value={editMeeting.stateName} onValueChange={(val) => setEditMeeting({...editMeeting, stateName: val, districtName: ''})}>

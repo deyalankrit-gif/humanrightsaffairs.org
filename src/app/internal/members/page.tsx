@@ -328,7 +328,7 @@ export default function InternalMembersDirectory() {
                             {member.status || 'Active'}
                           </Badge>
                           <Link href={`/internal/members/${member.id}`}>
-                            <Button className="bg-primary dark:bg-white dark:text-primary text-white hover:bg-accent rounded-2xl h-12 px-6 group/btn transition-all flex gap-2">
+                            <Button className="bg-primary dark:bg-slate-100 dark:text-slate-900 text-white hover:bg-accent rounded-2xl h-12 px-6 group/btn transition-all flex gap-2">
                               Full Profile <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
                             </Button>
                           </Link>
