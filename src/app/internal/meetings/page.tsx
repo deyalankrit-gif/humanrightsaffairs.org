@@ -342,7 +342,7 @@ export default function InternalMeetingsManagement() {
                     </div>
                   )}
 
-                  {(newMeeting.level === 'State' || newMeeting.level === 'District') && newMeeting.stateName && (
+                  {(newMeeting.level === 'District') && newMeeting.stateName && (
                     <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
                       <Label className="flex items-center gap-2"><MapPin className="w-3 h-3 text-accent" /> Select District</Label>
                       <Select value={newMeeting.districtName} onValueChange={(val) => setNewMeeting({...newMeeting, districtName: val})}>
@@ -562,7 +562,7 @@ export default function InternalMeetingsManagement() {
                                     </div>
                                   )}
 
-                                  {(editMeeting.level === 'State' || editMeeting.level === 'District') && editMeeting.stateName && (
+                                  {(editMeeting.level === 'District') && editMeeting.stateName && (
                                     <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
                                       <Label>District</Label>
                                       <Select value={editMeeting.districtName} onValueChange={(val) => setEditMeeting({...editMeeting, districtName: val})}>

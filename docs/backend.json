@@ -48,10 +48,11 @@
         "level": { "type": "string", "enum": ["National", "State", "District"] },
         "stateName": { "type": "string" },
         "districtName": { "type": "string" },
+        "memberType": { "type": "string", "enum": ["Executive Designation", "Regular Member", "Volunteer"] },
         "status": { "type": "string", "enum": ["Pending", "Reviewed", "Approved", "Rejected"] },
         "createdAt": { "type": "string", "format": "date-time" }
       },
-      "required": ["name", "email", "phone"]
+      "required": ["name", "email", "phone", "memberType"]
     },
     "Event": {
       "title": "Event",
