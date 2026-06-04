@@ -57,6 +57,8 @@ import {
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
 import { useFirestore } from '@/firebase'
 import { useToast } from '@/hooks/use-toast'
+import { errorEmitter } from '@/firebase/error-emitter'
+import { FirestorePermissionError, type SecurityRuleContext } from '@/firebase/errors'
 import { INDIA_DATA } from '@/lib/india-data'
 
 const formSchema = z.object({
@@ -68,8 +70,8 @@ const formSchema = z.object({
   aadhaar: z.string().length(12, "Aadhaar must be 12 digits"),
   profession: z.string().min(2, "Profession is required"),
   gender: z.string().min(1, "Please select gender"),
-  education: z.string().min(5, "Please specify your educational qualifications"),
-  experience: z.string().min(5, "Please specify your work/service experience"),
+  education: z.string().min(2, "Please specify your educational qualifications"),
+  experience: z.string().min(2, "Please specify your work/service experience"),
   level: z.string().min(1, "Operational level required"),
   stateName: z.string().optional(),
   districtName: z.string().optional(),
@@ -111,7 +113,7 @@ export function MembershipRegistrationDialog({ children }: { children: React.Rea
   const selectedState = form.watch('stateName')
   const states = Object.keys(INDIA_DATA).sort()
 
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+  const onSubmit = (values: z.infer<typeof formSchema>) => {
     if (!db) return
     setLoading(true)
 
@@ -121,20 +123,26 @@ export function MembershipRegistrationDialog({ children }: { children: React.Rea
       createdAt: serverTimestamp()
     }
 
-    try {
-      await addDoc(collection(db, "memberApplications"), applicationData)
-      setIsSuccess(true)
-      toast({ title: "Application Submitted", description: "Your registration is under review." })
-    } catch (error: any) {
-      toast({ variant: "destructive", title: "Error", description: error.message })
-    } finally {
-      setLoading(false)
-    }
+    addDoc(collection(db, "memberApplications"), applicationData)
+      .then(() => {
+        setIsSuccess(true)
+        toast({ title: "Application Submitted", description: "Your registration is under review." })
+        setLoading(false)
+      })
+      .catch(async (error) => {
+        const permissionError = new FirestorePermissionError({
+          path: 'memberApplications',
+          operation: 'create',
+          requestResourceData: applicationData,
+        } satisfies SecurityRuleContext);
+        errorEmitter.emit('permission-error', permissionError);
+        setLoading(false)
+      })
   }
 
   if (isSuccess) {
     return (
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog open={open} onOpenChange={(val) => { setOpen(val); if(!val) setIsSuccess(false); }}>
         <DialogContent className="max-w-md rounded-[2.5rem] border-none shadow-2xl text-center p-12">
           <div className="flex flex-col items-center gap-6">
             <div className="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center animate-bounce">
@@ -152,7 +160,7 @@ export function MembershipRegistrationDialog({ children }: { children: React.Rea
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={(val) => { setOpen(val); if(!val) form.reset(); }}>
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto rounded-[2.5rem] border-none shadow-2xl">
         <DialogHeader>
@@ -166,7 +174,7 @@ export function MembershipRegistrationDialog({ children }: { children: React.Rea
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 pt-4">
-            <div className="bg-accent/5 p-6 rounded-3xl border border-accent/20 mb-4 grid md:grid-cols-2 gap-6">
+            <div className="bg-accent/5 p-6 rounded-3xl border border-accent/20 mb-4 grid grid-cols-1 md:grid-cols-2 gap-6">
                <FormField control={form.control} name="memberType" render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-accent mb-2 flex items-center gap-2">
@@ -202,7 +210,7 @@ export function MembershipRegistrationDialog({ children }: { children: React.Rea
               )} />
             </div>
 
-            <div className="grid md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField control={form.control} name="name" render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Full Legal Name</FormLabel>
@@ -226,7 +234,7 @@ export function MembershipRegistrationDialog({ children }: { children: React.Rea
               )} />
             </div>
 
-            <div className="grid md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField control={form.control} name="email" render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Official Email</FormLabel>
@@ -243,7 +251,7 @@ export function MembershipRegistrationDialog({ children }: { children: React.Rea
               )} />
             </div>
 
-            <div className="grid md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField control={form.control} name="profession" render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Current Profession</FormLabel>
@@ -268,7 +276,7 @@ export function MembershipRegistrationDialog({ children }: { children: React.Rea
             </div>
 
             {(level === 'State' || level === 'District') && (
-              <div className="grid grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-2">
                 <FormField control={form.control} name="stateName" render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">State Chapter</FormLabel>
@@ -292,13 +300,20 @@ export function MembershipRegistrationDialog({ children }: { children: React.Rea
               </div>
             )}
 
-            <div className="grid md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField control={form.control} name="education" render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400 flex items-center gap-2">
                     <GraduationCap className="w-3 h-3 text-accent" /> Educational Qualifications
                   </FormLabel>
-                  <FormControl><Input placeholder="e.g. B.A. LLB, Master of Social Work" className="h-11 rounded-xl" {...field} /></FormControl>
+                  <FormControl>
+                    <Input 
+                      placeholder="e.g. B.A. LLB, Master of Social Work" 
+                      className="h-11 rounded-xl" 
+                      {...field} 
+                      value={field.value || ""} 
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )} />
@@ -307,7 +322,14 @@ export function MembershipRegistrationDialog({ children }: { children: React.Rea
                   <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400 flex items-center gap-2">
                     <Briefcase className="w-3 h-3 text-accent" /> Professional Experience
                   </FormLabel>
-                  <FormControl><Input placeholder="e.g. 5 Years in Human Rights Activism" className="h-11 rounded-xl" {...field} /></FormControl>
+                  <FormControl>
+                    <Input 
+                      placeholder="e.g. 5 Years in Human Rights Activism" 
+                      className="h-11 rounded-xl" 
+                      {...field} 
+                      value={field.value || ""}
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )} />
@@ -316,7 +338,7 @@ export function MembershipRegistrationDialog({ children }: { children: React.Rea
             <FormField control={form.control} name="address" render={({ field }) => (
               <FormItem>
                 <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Residential Address</FormLabel>
-                <FormControl><Textarea placeholder="Complete address for background verification..." className="rounded-xl" {...field} /></FormControl>
+                <FormControl><Textarea placeholder="Complete address for background verification..." className="rounded-xl min-h-[100px]" {...field} /></FormControl>
                 <FormMessage />
               </FormItem>
             )} />
