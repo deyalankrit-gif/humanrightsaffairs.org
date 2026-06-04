@@ -51,7 +51,7 @@ export function AdminNavbar() {
   return (
     <nav className={cn(
       "fixed top-0 w-full z-50 transition-all duration-300 py-4",
-      isScrolled ? "bg-slate-900/95 backdrop-blur-md border-b border-white/10 shadow-2xl dark:bg-black/90" : "bg-slate-900 border-b border-white/5"
+      isScrolled ? "bg-slate-900/95 backdrop-blur-md border-b border-white/10 shadow-2xl" : "bg-slate-900 border-b border-white/5"
     )}>
       <div className="container mx-auto px-4 flex items-center justify-between">
         <div className="flex items-center gap-8">
@@ -66,28 +66,31 @@ export function AdminNavbar() {
           </Link>
 
           {/* Desktop Links */}
-          <div className="hidden md:flex items-center gap-6">
-            {navLinks.map((link) => (
-              <Link 
-                key={link.name} 
-                href={link.href}
-                className={cn(
-                  "flex items-center gap-2 text-sm font-bold transition-colors py-2 px-3 rounded-lg",
-                  pathname === link.href 
-                    ? "bg-accent/10 text-accent" 
-                    : "text-slate-400 hover:text-white hover:bg-white/5"
-                )}
-              >
-                {link.icon}
-                {link.name}
-              </Link>
-            ))}
+          <div className="hidden md:flex items-center gap-2 lg:gap-4">
+            {navLinks.map((link) => {
+              const isActive = pathname === link.href
+              return (
+                <Link 
+                  key={link.name} 
+                  href={link.href}
+                  className={cn(
+                    "flex items-center gap-2 text-sm font-bold transition-all py-2 px-4 rounded-xl border border-transparent",
+                    isActive 
+                      ? "bg-accent text-primary shadow-lg shadow-accent/20 scale-105" 
+                      : "text-slate-400 hover:text-white hover:bg-white/5"
+                  )}
+                >
+                  {link.icon}
+                  {link.name}
+                </Link>
+              )
+            })}
           </div>
         </div>
 
         <div className="flex items-center gap-4">
           <div className="hidden lg:flex flex-col items-end mr-2">
-            <p className="text-[8px] text-slate-500 font-bold uppercase tracking-widest">Signed in as</p>
+            <p className="text-[8px] text-slate-500 font-bold uppercase tracking-widest">Personnel Clearance</p>
             <p className="text-xs font-bold text-emerald-400">{user?.email}</p>
           </div>
 
@@ -118,25 +121,30 @@ export function AdminNavbar() {
                 
                 <div className="flex-1 p-6 space-y-4">
                   <div className="p-4 bg-white/5 rounded-2xl border border-white/10 mb-6">
-                    <p className="text-[10px] text-slate-500 font-bold uppercase mb-1">Personnel</p>
+                    <p className="text-[10px] text-slate-500 font-bold uppercase mb-1">Authenticated Personnel</p>
                     <p className="text-xs font-bold text-emerald-400 truncate">{user?.email}</p>
                   </div>
 
-                  {navLinks.map((link) => (
-                    <Link 
-                      key={link.name} 
-                      href={link.href}
-                      className={cn(
-                        "flex items-center gap-4 p-4 rounded-2xl text-lg font-bold transition-all",
-                        pathname === link.href 
-                          ? "bg-accent text-primary" 
-                          : "hover:bg-white/5"
-                      )}
-                    >
-                      {link.icon}
-                      {link.name}
-                    </Link>
-                  ))}
+                  {navLinks.map((link) => {
+                    const isActive = pathname === link.href
+                    return (
+                      <Link 
+                        key={link.name} 
+                        href={link.href}
+                        className={cn(
+                          "flex items-center gap-4 p-4 rounded-2xl text-lg font-bold transition-all border border-transparent",
+                          isActive 
+                            ? "bg-accent text-primary shadow-xl shadow-accent/20" 
+                            : "hover:bg-white/5 text-slate-300"
+                        )}
+                      >
+                        <div className={cn("p-2 rounded-lg", isActive ? "bg-primary/10" : "bg-white/5")}>
+                          {link.icon}
+                        </div>
+                        {link.name}
+                      </Link>
+                    )
+                  })}
                 </div>
 
                 <div className="p-6 border-t border-white/5 space-y-3">
