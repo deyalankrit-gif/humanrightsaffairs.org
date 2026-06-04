@@ -246,7 +246,7 @@ export default function EventsPage() {
                           <PopoverTrigger asChild>
                             <Button variant="outline" className={cn("w-full justify-start text-left font-normal h-12 rounded-xl", !newEvent.date && "text-muted-foreground")}>
                               <CalendarIcon className="mr-2 h-4 w-4" />
-                              {newEvent.date ? newEvent.date : "Pick a date"}
+                              {newEvent.date ? newMeeting.date : "Pick a date"}
                             </Button>
                           </PopoverTrigger>
                           <PopoverContent className="w-auto p-0" align="start">
@@ -298,7 +298,12 @@ export default function EventsPage() {
                   key={cat}
                   variant={filter === cat ? "default" : "outline"}
                   onClick={() => setFilter(cat)}
-                  className={`rounded-full px-6 ${filter === cat ? 'bg-primary text-primary-foreground' : 'hover:border-accent hover:text-accent'}`}
+                  className={cn(
+                    "rounded-full px-6 font-bold transition-all",
+                    filter === cat 
+                      ? "bg-primary text-primary-foreground" 
+                      : "text-primary dark:text-white border-slate-200 dark:border-slate-700 hover:bg-accent hover:text-slate-900 hover:border-accent"
+                  )}
                 >
                   {cat}
                 </Button>
@@ -435,7 +440,7 @@ export default function EventsPage() {
                                 <Button size="icon" className="bg-red-500/90 hover:bg-red-600 text-white rounded-full shadow-lg border border-white/20">
                                   <Trash2 className="w-4 h-4" />
                                 </Button>
-                              </AlertDialogTrigger>
+                              </DialogTrigger>
                               <AlertDialogContent className="rounded-[2rem] bg-white dark:bg-slate-900 border-none">
                                 <AlertDialogHeader>
                                   <AlertDialogTitle>Delete Record?</AlertDialogTitle>

@@ -97,7 +97,7 @@ export default function MeetingsPage() {
                     "rounded-full px-6 font-bold transition-all",
                     filter === lvl 
                       ? "bg-accent text-slate-900 shadow-lg border-accent" 
-                      : "text-primary dark:text-white border-slate-200 dark:border-slate-700 hover:border-accent hover:text-accent"
+                      : "text-primary dark:text-white border-slate-200 dark:border-slate-700 hover:bg-accent hover:text-slate-900 hover:border-accent"
                   )}
                 >
                   {lvl === 'All' ? 'All Levels' : `${lvl} Level`}
