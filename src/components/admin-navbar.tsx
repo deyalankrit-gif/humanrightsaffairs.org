@@ -16,7 +16,8 @@ import {
   X,
   Calendar,
   Handshake,
-  MessageSquareWarning
+  MessageSquareWarning,
+  FileText
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
@@ -43,6 +44,7 @@ export function AdminNavbar() {
 
   const navLinks = [
     { name: 'Analytics', href: '/internal/analytics', icon: <LayoutDashboard className="w-4 h-4" /> },
+    { name: 'Applications', href: '/internal/applications', icon: <FileText className="w-4 h-4" /> },
     { name: 'Personnel', href: '/internal/members', icon: <Users className="w-4 h-4" /> },
     { name: 'Grievances', href: '/internal/grievances', icon: <MessageSquareWarning className="w-4 h-4" /> },
     { name: 'Meetings', href: '/internal/meetings', icon: <Handshake className="w-4 h-4" /> },

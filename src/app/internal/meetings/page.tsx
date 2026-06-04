@@ -73,8 +73,8 @@ export default function InternalMeetingsManagement() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [editMeeting, setEditMeeting] = useState<any>(null)
   
-  const [newTime, setNewTime] = useState({ hour: '10', minute: '30', period: 'AM' })
-  const [editTime, setEditTime] = useState({ hour: '10', minute: '30', period: 'AM' })
+  const [newTime, setNewTime] = useState({ hour: '10', minute: '30', period: 'A.M.' })
+  const [editTime, setEditTime] = useState({ hour: '10', minute: '30', period: 'A.M.' })
 
   const [newMeeting, setNewMeeting] = useState({
     title: '',
@@ -110,22 +110,21 @@ export default function InternalMeetingsManagement() {
 
   const { data: leadershipMembers } = useCollection(leadershipQuery);
 
-  const parse12hToState = (timeStr: string) => {
-    if (!timeStr) return { hour: '10', minute: '30', period: 'AM' };
+  const parseDottedToState = (timeStr: string) => {
+    if (!timeStr) return { hour: '10', minute: '30', period: 'A.M.' };
     const match = timeStr.match(/^(\d{1,2})\.(\d{2})\s*(A\.M\.|P\.M\.)/i);
     if (match) {
       return { 
         hour: match[1].padStart(2, '0'), 
         minute: match[2], 
-        period: match[3].replace(/\./g, '').toUpperCase() 
+        period: match[3].toUpperCase() 
       };
     }
-    return { hour: '10', minute: '30', period: 'AM' };
+    return { hour: '10', minute: '30', period: 'A.M.' };
   };
 
   const formatToDotted12h = (t: { hour: string, minute: string, period: string }) => {
-    const p = t.period === 'AM' ? 'A.M.' : 'P.M.';
-    return `${t.hour}.${t.minute} ${p}`;
+    return `${t.hour}.${t.minute} ${t.period}`;
   }
 
   const handleAdd = () => {
@@ -148,7 +147,7 @@ export default function InternalMeetingsManagement() {
       .then(() => {
         toast({ title: "Meeting Scheduled", description: "Record has been added to the registry." })
         setNewMeeting({ title: '', date: '', time: '', location: '', agenda: '', minutes: '', level: 'National', stateName: '', districtName: '', status: 'Upcoming', attendees: [] })
-        setNewTime({ hour: '10', minute: '30', period: 'AM' })
+        setNewTime({ hour: '10', minute: '30', period: 'A.M.' })
         setIsAddDialogOpen(false)
         setIsActionLoading(false)
       })
@@ -223,9 +222,9 @@ export default function InternalMeetingsManagement() {
   const states = Object.keys(INDIA_DATA).sort()
   const levels = [
     { label: "All Levels", value: "All" },
-    { label: "National Level", value: "National" },
-    { label: "State Level", value: "State" },
-    { label: "District Level", value: "District" }
+    { label: "National", value: "National" },
+    { label: "State", value: "State" },
+    { label: "District", value: "District" }
   ]
 
   const parseMeetingDate = (dateStr: string) => {
@@ -301,7 +300,7 @@ export default function InternalMeetingsManagement() {
                         </Select>
                         <Select value={newTime.period} onValueChange={(v) => setNewTime({...newTime, period: v})}>
                           <SelectTrigger className="h-12 rounded-xl px-2"><SelectValue /></SelectTrigger>
-                          <SelectContent><SelectItem value="AM">AM</SelectItem><SelectItem value="PM">PM</SelectItem></SelectContent>
+                          <SelectContent><SelectItem value="A.M.">A.M.</SelectItem><SelectItem value="P.M.">P.M.</SelectItem></SelectContent>
                         </Select>
                       </div>
                     </div>
@@ -437,7 +436,7 @@ export default function InternalMeetingsManagement() {
                     <div className="flex flex-col md:flex-row items-stretch">
                       <div className="p-8 bg-slate-50 dark:bg-slate-800 md:w-56 text-center border-r border-slate-100 dark:border-slate-700 flex flex-col items-center justify-center shrink-0">
                          <Badge variant="outline" className="border-accent text-accent text-[9px] font-bold uppercase px-3 py-1 mb-3">
-                            {meeting.level}
+                            {meeting.level} Chapter
                          </Badge>
                          <span className="text-2xl font-headline font-bold text-slate-900 dark:text-white leading-none mb-1">{meeting.date?.split(' ')[0] || '--'}</span>
                          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{meeting.date?.split(' ').slice(1).join(' ') || ''}</span>
@@ -476,7 +475,7 @@ export default function InternalMeetingsManagement() {
                             <DialogTrigger asChild>
                               <Button onClick={() => {
                                 setEditMeeting({ ...meeting, attendees: meeting.attendees || [] });
-                                setEditTime(parse12hToState(meeting.time));
+                                setEditTime(parseDottedToState(meeting.time));
                               }} variant="outline" size="icon" className="rounded-xl border-slate-200 dark:border-slate-700 hover:bg-accent hover:text-slate-900"><Edit className="w-4 h-4" /></Button>
                             </DialogTrigger>
                             <DialogContent className="max-w-md bg-white dark:bg-slate-900 rounded-[2rem] max-h-[90vh] overflow-y-auto border-none shadow-2xl">
@@ -544,7 +543,7 @@ export default function InternalMeetingsManagement() {
                                         </Select>
                                         <Select value={editTime.period} onValueChange={(v) => setEditTime({...editTime, period: v})}>
                                           <SelectTrigger className="h-12 rounded-xl px-2"><SelectValue /></SelectTrigger>
-                                          <SelectContent><SelectItem value="AM">AM</SelectItem><SelectItem value="PM">PM</SelectItem></SelectContent>
+                                          <SelectContent><SelectItem value="A.M.">A.M.</SelectItem><SelectItem value="P.M.">P.M.</SelectItem></SelectContent>
                                         </Select>
                                       </div>
                                     </div>
