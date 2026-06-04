@@ -82,7 +82,7 @@ export function Footer() {
                 </li>
                 <li className="flex gap-3">
                   <Mail className="w-5 h-5 text-accent shrink-0" />
-                  <span className="text-sm">contact@hrat-india.org</span>
+                  <span className="text-sm">humanrightsaffairstrust@gmail.com</span>
                 </li>
               </ul>
             </div>
