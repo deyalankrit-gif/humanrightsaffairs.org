@@ -91,7 +91,7 @@ export default function LeadershipPage() {
   const { data: firestoreLeaders, loading: dataLoading } = useCollection(leadersQuery);
 
   const [editLeader, setEditLeader] = useState<any>(null)
-  const [newLeader, setNewLeader] = useState({
+  const [newLeader, setNewMember] = useState({
     name: '',
     title: '',
     gender: 'male' as const,
@@ -109,7 +109,7 @@ export default function LeadershipPage() {
         if (isEdit) {
           setEditLeader({ ...editLeader, imageId: dataUri })
         } else {
-          setNewLeader({ ...newLeader, imageId: dataUri })
+          setNewMember({ ...newLeader, imageId: dataUri })
         }
       }
       reader.readAsDataURL(file)
@@ -122,7 +122,7 @@ export default function LeadershipPage() {
     try {
       await addDoc(collection(db, 'leadership'), { ...newLeader, createdAt: serverTimestamp() })
       toast({ title: "Leader Commissioned" })
-      setNewLeader({ name: '', title: '', gender: 'male', level: 'Central', parentRegion: '', imageId: 'male-avatar' })
+      setNewMember({ name: '', title: '', gender: 'male', level: 'Central', parentRegion: '', imageId: 'male-avatar' })
     } catch (e: any) {
       toast({ variant: "destructive", title: "Error", description: e.message })
     } finally {
@@ -207,10 +207,10 @@ export default function LeadershipPage() {
                       </Button>
                     </div>
                   </div>
-                  <Input value={newLeader.name} onChange={e => setNewLeader({...newLeader, name: e.target.value})} placeholder="Full Name" />
-                  <Input value={newLeader.title} onChange={e => setNewLeader({...newLeader, title: e.target.value})} placeholder="Designation" />
+                  <Input value={newLeader.name} onChange={e => setNewMember({...newLeader, name: e.target.value})} placeholder="Full Name" />
+                  <Input value={newLeader.title} onChange={e => setNewMember({...newLeader, title: e.target.value})} placeholder="Designation" />
                   <div className="grid grid-cols-2 gap-4">
-                    <Select value={newLeader.level} onValueChange={(val: any) => setNewLeader({...newLeader, level: val})}>
+                    <Select value={newLeader.level} onValueChange={(val: any) => setNewMember({...newLeader, level: val})}>
                       <SelectTrigger><SelectValue placeholder="Level" /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="Central">Central</SelectItem>
@@ -218,7 +218,7 @@ export default function LeadershipPage() {
                         <SelectItem value="District">District</SelectItem>
                       </SelectContent>
                     </Select>
-                    <Select value={newLeader.gender} onValueChange={(val: any) => setNewLeader({...newLeader, gender: val})}>
+                    <Select value={newLeader.gender} onValueChange={(val: any) => setNewMember({...newLeader, gender: val})}>
                       <SelectTrigger><SelectValue placeholder="Gender" /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="male">Male</SelectItem>
@@ -227,7 +227,7 @@ export default function LeadershipPage() {
                     </Select>
                   </div>
                   {newLeader.level !== 'Central' && (
-                    <Input value={newLeader.parentRegion} onChange={e => setNewLeader({...newLeader, parentRegion: e.target.value})} placeholder="State/District Name" />
+                    <Input value={newLeader.parentRegion} onChange={e => setNewMember({...newLeader, parentRegion: e.target.value})} placeholder="State/District Name" />
                   )}
                 </div>
                 <DialogFooter>
