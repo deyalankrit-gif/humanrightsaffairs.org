@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState } from 'react'
@@ -31,6 +30,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog"
 import { Separator } from '@/components/ui/separator'
+import { cn } from '@/lib/utils'
 
 type Meeting = {
   id: string
