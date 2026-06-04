@@ -29,7 +29,7 @@ export function IDCardShowcase() {
   ]
 
   return (
-    <section id="membership" className="py-24 bg-primary dark:bg-slate-950 text-primary-foreground overflow-hidden relative">
+    <section id="membership" className="py-24 bg-slate-950 text-white overflow-hidden relative border-y border-white/5">
       <div className="absolute top-0 right-0 w-1/3 h-full bg-accent/5 -skew-x-12"></div>
       
       <div className="container mx-auto px-4 relative z-10">
@@ -42,7 +42,7 @@ export function IDCardShowcase() {
             <h2 className="text-3xl md:text-5xl font-headline font-bold leading-tight">
               Get Your Digital <span className="text-accent">Membership Identity Card</span> <span className="inline-block animate-bounce">Now</span>
             </h2>
-            <p className="text-lg md:text-xl opacity-90 font-body">
+            <p className="text-lg md:text-xl text-slate-300 font-body">
               Join a network of thousands of human rights defenders. Our secure digital ID cards feature QR-code verification, making your organizational status verifiable anywhere, anytime.
             </p>
             
@@ -55,9 +55,9 @@ export function IDCardShowcase() {
               ].map((item, i) => (
                 <li key={i} className="flex items-center gap-3">
                   <div className="bg-secondary p-1 rounded-full">
-                    <CheckCircle2 className="w-4 h-4" />
+                    <CheckCircle2 className="w-4 h-4 text-white" />
                   </div>
-                  <span className="font-semibold text-base md:text-lg">{item}</span>
+                  <span className="font-semibold text-base md:text-lg text-white">{item}</span>
                 </li>
               ))}
             </ul>
@@ -69,7 +69,7 @@ export function IDCardShowcase() {
               
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button variant="secondary" className="bg-secondary text-secondary-foreground hover:bg-secondary/90 px-8 py-6 rounded-xl text-lg shadow-lg shadow-secondary/20 transition-all border-none w-full sm:w-auto">
+                  <Button variant="secondary" className="bg-white/10 text-white hover:bg-white/20 px-8 py-6 rounded-xl text-lg shadow-lg transition-all border border-white/10 w-full sm:w-auto">
                     View Eligibility
                   </Button>
                 </AlertDialogTrigger>

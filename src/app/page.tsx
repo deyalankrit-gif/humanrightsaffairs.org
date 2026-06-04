@@ -1,4 +1,5 @@
 
+
 import Image from 'next/image'
 import Link from 'next/link'
 import { Navbar } from '@/components/navbar'
@@ -180,7 +181,7 @@ export default function Home() {
       <section className="py-16 md:py-32 bg-slate-50/50 backdrop-blur-sm dark:bg-slate-950 relative overflow-hidden">
         <div className="absolute -top-24 -left-24 w-96 h-96 bg-accent/10 rounded-full blur-3xl animate-pulse"></div>
         <div className="container mx-auto px-4 relative z-10">
-          <div className="bg-primary rounded-[2rem] md:rounded-[4rem] p-8 md:p-24 flex flex-col items-center text-center text-primary-foreground shadow-2xl relative overflow-hidden group">
+          <div className="bg-slate-950 rounded-[2rem] md:rounded-[4rem] p-8 md:p-24 flex flex-col items-center text-center text-white shadow-2xl relative overflow-hidden group">
             
             <div className="absolute -left-12 top-1/2 -translate-y-1/2 w-44 h-60 md:w-64 md:h-80 hidden xl:block animate-float pointer-events-none z-10 opacity-30 group-hover:opacity-100 transition-opacity">
               <div className="relative w-full h-full rounded-[2rem] md:rounded-[3rem] overflow-hidden border-4 md:border-8 border-white shadow-2xl rotate-[-6deg] bg-slate-200">
@@ -213,7 +214,7 @@ export default function Home() {
                 fill 
                 className="object-cover grayscale"
               />
-              <div className="absolute inset-0 bg-primary/90 dark:bg-slate-900/90"></div>
+              <div className="absolute inset-0 bg-slate-900/90"></div>
             </div>
 
             <div className="max-w-4xl space-y-6 md:space-y-10 relative z-30 px-4 md:px-10">
@@ -238,7 +239,7 @@ export default function Home() {
               </div>
 
               <h2 className="text-3xl md:text-7xl font-headline font-bold">Support the Cause of <span className="text-accent italic">Justice</span></h2>
-              <p className="text-sm md:text-xl opacity-90 leading-relaxed max-w-2xl mx-auto font-medium">
+              <p className="text-sm md:text-xl text-slate-300 leading-relaxed max-w-2xl mx-auto font-medium">
                 Your contributions help us provide free legal aid to the marginalized and run awareness campaigns across rural India. All donations are tax-exempt under 80G.
               </p>
               
