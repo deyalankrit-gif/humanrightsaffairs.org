@@ -246,7 +246,7 @@ export default function EventsPage() {
                           <PopoverTrigger asChild>
                             <Button variant="outline" className={cn("w-full justify-start text-left font-normal h-12 rounded-xl", !newEvent.date && "text-muted-foreground")}>
                               <CalendarIcon className="mr-2 h-4 w-4" />
-                              {newEvent.date ? newMeeting.date : "Pick a date"}
+                              {newEvent.date ? newEvent.date : "Pick a date"}
                             </Button>
                           </PopoverTrigger>
                           <PopoverContent className="w-auto p-0" align="start">
@@ -440,7 +440,7 @@ export default function EventsPage() {
                                 <Button size="icon" className="bg-red-500/90 hover:bg-red-600 text-white rounded-full shadow-lg border border-white/20">
                                   <Trash2 className="w-4 h-4" />
                                 </Button>
-                              </DialogTrigger>
+                              </AlertDialogTrigger>
                               <AlertDialogContent className="rounded-[2rem] bg-white dark:bg-slate-900 border-none">
                                 <AlertDialogHeader>
                                   <AlertDialogTitle>Delete Record?</AlertDialogTitle>
