@@ -50,7 +50,8 @@ import {
   GraduationCap,
   Briefcase,
   User,
-  Gavel
+  Gavel,
+  CalendarClock
 } from 'lucide-react'
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
 import { useFirestore } from '@/firebase'
@@ -72,6 +73,7 @@ const formSchema = z.object({
   stateName: z.string().optional(),
   districtName: z.string().optional(),
   memberType: z.string().min(1, "Please select membership type"),
+  membershipDuration: z.enum(["1 Year", "2 Years", "3 Years"], { required_error: "Please select duration" }),
   hasNoCriminalRecord: z.boolean().refine(val => val === true, "Affidavit acknowledgment is required"),
 })
 
@@ -97,6 +99,7 @@ export function MembershipRegistrationDialog({ children }: { children: React.Rea
       experience: '',
       level: 'National',
       memberType: 'Regular Member',
+      membershipDuration: '1 Year',
       hasNoCriminalRecord: false,
     }
   })
@@ -160,11 +163,11 @@ export function MembershipRegistrationDialog({ children }: { children: React.Rea
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 pt-4">
-            <div className="bg-accent/5 p-6 rounded-3xl border border-accent/20 mb-4">
+            <div className="bg-accent/5 p-6 rounded-3xl border border-accent/20 mb-4 grid md:grid-cols-2 gap-6">
                <FormField control={form.control} name="memberType" render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-accent mb-2 flex items-center gap-2">
-                    <Users className="w-3 h-3" /> Preferred Membership Capacity
+                    <Users className="w-3 h-3" /> Preferred Capacity
                   </FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl><SelectTrigger className="h-12 rounded-xl border-accent/30 bg-white dark:bg-slate-900 font-bold"><SelectValue placeholder="Select Capacity" /></SelectTrigger></FormControl>
@@ -172,6 +175,23 @@ export function MembershipRegistrationDialog({ children }: { children: React.Rea
                       <SelectItem value="Executive Designation" className="font-bold">Executive Designation (Leadership)</SelectItem>
                       <SelectItem value="Regular Member" className="font-bold">Regular Member</SelectItem>
                       <SelectItem value="Volunteer" className="font-bold">Volunteer</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )} />
+
+              <FormField control={form.control} name="membershipDuration" render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-accent mb-2 flex items-center gap-2">
+                    <CalendarClock className="w-3 h-3" /> Term Duration
+                  </FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl><SelectTrigger className="h-12 rounded-xl border-accent/30 bg-white dark:bg-slate-900 font-bold"><SelectValue placeholder="Select Duration" /></SelectTrigger></FormControl>
+                    <SelectContent>
+                      <SelectItem value="1 Year" className="font-bold">1 Year Term</SelectItem>
+                      <SelectItem value="2 Years" className="font-bold">2 Years Term</SelectItem>
+                      <SelectItem value="3 Years" className="font-bold">3 Years Term</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />

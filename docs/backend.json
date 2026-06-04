@@ -55,11 +55,12 @@
         "stateName": { "type": "string" },
         "districtName": { "type": "string" },
         "memberType": { "type": "string", "enum": ["Executive Designation", "Regular Member", "Volunteer"] },
+        "membershipDuration": { "type": "string", "enum": ["1 Year", "2 Years", "3 Years"] },
         "hasNoCriminalRecord": { "type": "boolean", "description": "Affidavit declaring no past criminal records." },
         "status": { "type": "string", "enum": ["Pending", "Reviewed", "Approved", "Rejected"] },
         "createdAt": { "type": "string", "format": "date-time" }
       },
-      "required": ["name", "email", "phone", "memberType", "gender", "hasNoCriminalRecord"]
+      "required": ["name", "email", "phone", "memberType", "gender", "hasNoCriminalRecord", "membershipDuration"]
     },
     "Event": {
       "title": "Event",
