@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useEffect, useState } from 'react'
@@ -129,6 +128,15 @@ export default function MemberDetailsPage() {
   const fallback = profile.gender === 'female' ? '/dummy w.png' : '/dummy m.png'
   const displayImg = profile.imageId?.startsWith('data:') ? profile.imageId : (PlaceHolderImages.find(i => i.id === profile.imageId)?.imageUrl || fallback)
   const states = Object.keys(INDIA_DATA).sort()
+
+  const parseProfileDate = (dateStr: string) => {
+    if (!dateStr) return undefined;
+    try {
+      return new Date(dateStr);
+    } catch {
+      return undefined;
+    }
+  }
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
@@ -301,6 +309,7 @@ export default function MemberDetailsPage() {
                         <PopoverContent className="w-auto p-0" align="start">
                           <Calendar
                             mode="single"
+                            selected={parseProfileDate(editForm?.joiningDate)}
                             onSelect={(date) => setEditForm({...editForm, joiningDate: date ? format(date, "PPP") : ''})}
                             initialFocus
                           />

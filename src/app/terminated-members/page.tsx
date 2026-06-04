@@ -148,6 +148,15 @@ export default function TerminatedMembersPage() {
     m.id.toLowerCase().includes(search.toLowerCase())
   )
 
+  const parseTerminationDate = (dateStr: string) => {
+    if (!dateStr) return undefined;
+    try {
+      return new Date(dateStr);
+    } catch {
+      return undefined;
+    }
+  }
+
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
       <Navbar />
@@ -215,6 +224,7 @@ export default function TerminatedMembersPage() {
                         <PopoverContent className="w-auto p-0" align="start">
                           <Calendar
                             mode="single"
+                            selected={parseTerminationDate(newMember.terminationDate)}
                             onSelect={(date) => setNewMember({...newMember, terminationDate: date ? format(date, "PPP") : ''})}
                             initialFocus
                           />
@@ -412,7 +422,10 @@ export default function TerminatedMembersPage() {
                                         </Button>
                                       </div>
                                     </div>
-                                    <Input value={editMember.name} onChange={e => setEditMember({...editMember, name: e.target.value})} className="h-12 rounded-xl" />
+                                    <div className="space-y-2">
+                                      <Label>Full Name</Label>
+                                      <Input value={editMember.name} onChange={e => setEditMember({...editMember, name: e.target.value})} className="h-12 rounded-xl" />
+                                    </div>
                                     <div className="grid grid-cols-2 gap-4">
                                       <div className="space-y-1">
                                         <Label>Operational Level</Label>
@@ -437,6 +450,7 @@ export default function TerminatedMembersPage() {
                                           <PopoverContent className="w-auto p-0" align="start">
                                             <Calendar
                                               mode="single"
+                                              selected={parseTerminationDate(editMember.terminationDate)}
                                               onSelect={(date) => setEditMember({...editMember, terminationDate: date ? format(date, "PPP") : ''})}
                                               initialFocus
                                             />
@@ -444,8 +458,14 @@ export default function TerminatedMembersPage() {
                                         </Popover>
                                       </div>
                                     </div>
-                                    <Input value={editMember.designation} onChange={e => setEditMember({...editMember, designation: e.target.value})} placeholder="Designation" className="h-12 rounded-xl" />
-                                    <Textarea value={editMember.reason} onChange={e => setEditMember({...editMember, reason: e.target.value})} className="rounded-xl" />
+                                    <div className="space-y-2">
+                                      <Label>Designation</Label>
+                                      <Input value={editMember.designation} onChange={e => setEditMember({...editMember, designation: e.target.value})} placeholder="Designation" className="h-12 rounded-xl" />
+                                    </div>
+                                    <div className="space-y-2">
+                                      <Label>Reason</Label>
+                                      <Textarea value={editMember.reason} onChange={e => setEditMember({...editMember, reason: e.target.value})} className="rounded-xl" />
+                                    </div>
                                     <Button onClick={handleUpdate} disabled={isActionLoading} className="w-full bg-primary text-white h-12 rounded-xl">
                                       {isActionLoading ? <Loader2 className="animate-spin mr-2" /> : "Save Changes"}
                                     </Button>

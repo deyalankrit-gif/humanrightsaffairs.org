@@ -51,7 +51,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
-import { format } from "date-fns"
+import { format, parse } from "date-fns"
 import { useToast } from '@/hooks/use-toast'
 import { errorEmitter } from '@/firebase/error-emitter'
 import { FirestorePermissionError, type SecurityRuleContext } from '@/firebase/errors'
@@ -187,6 +187,15 @@ export default function InternalMeetingsManagement() {
   const states = Object.keys(INDIA_DATA).sort()
   const levels = ["All", "National", "State", "District"]
 
+  const parseMeetingDate = (dateStr: string) => {
+    if (!dateStr) return undefined;
+    try {
+      return new Date(dateStr);
+    } catch {
+      return undefined;
+    }
+  }
+
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
       <AdminNavbar />
@@ -228,6 +237,7 @@ export default function InternalMeetingsManagement() {
                         <PopoverContent className="w-auto p-0" align="start">
                           <Calendar
                             mode="single"
+                            selected={parseMeetingDate(newMeeting.date)}
                             onSelect={(date) => setNewMeeting({...newMeeting, date: date ? format(date, "PPP") : ''})}
                             initialFocus
                           />
@@ -401,6 +411,7 @@ export default function InternalMeetingsManagement() {
                                         <PopoverContent className="w-auto p-0" align="start">
                                           <Calendar
                                             mode="single"
+                                            selected={parseMeetingDate(editMeeting.date)}
                                             onSelect={(date) => setEditMeeting({...editMeeting, date: date ? format(date, "PPP") : ''})}
                                             initialFocus
                                           />

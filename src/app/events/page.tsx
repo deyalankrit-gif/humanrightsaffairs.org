@@ -184,6 +184,15 @@ export default function EventsPage() {
 
   const categories = ["All", "Campaign", "Workshop", "Convention", "Relief", "Social Projects"]
 
+  const parseEventDate = (dateStr: string) => {
+    if (!dateStr) return undefined;
+    try {
+      return new Date(dateStr);
+    } catch {
+      return undefined;
+    }
+  }
+
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
       <Navbar />
@@ -252,6 +261,7 @@ export default function EventsPage() {
                           <PopoverContent className="w-auto p-0" align="start">
                             <Calendar
                               mode="single"
+                              selected={parseEventDate(newEvent.date)}
                               onSelect={(date) => setNewEvent({...newEvent, date: date ? format(date, "PPP") : ''})}
                               initialFocus
                             />
@@ -403,6 +413,7 @@ export default function EventsPage() {
                                           <PopoverContent className="w-auto p-0" align="start">
                                             <Calendar
                                               mode="single"
+                                              selected={parseEventDate(editEvent.date)}
                                               onSelect={(date) => setEditEvent({...editEvent, date: date ? format(date, "PPP") : ''})}
                                               initialFocus
                                             />
