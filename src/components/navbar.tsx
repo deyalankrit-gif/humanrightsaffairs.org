@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useEffect } from 'react'
@@ -11,6 +10,7 @@ import { usePathname } from 'next/navigation'
 import { DonationDialog } from './donation-dialog'
 import { cn } from '@/lib/utils'
 import { useUser } from '@/firebase'
+import { ThemeToggle } from './theme-toggle'
 
 const navLinks = [
   { name: 'Home', href: '/' },
@@ -58,7 +58,7 @@ export function Navbar() {
   }, [isHome])
 
   const navColorClass = (isScrolled || !isHome) ? 'text-primary' : 'text-white'
-  const bgColorClass = (isScrolled || !isHome) ? 'bg-white/95 backdrop-blur-md shadow-lg py-3' : 'bg-transparent py-6'
+  const bgColorClass = (isScrolled || !isHome) ? 'bg-white/95 backdrop-blur-md shadow-lg py-3 dark:bg-slate-950/95' : 'bg-transparent py-6'
 
   if (!mounted) return null
 
@@ -111,6 +111,8 @@ export function Navbar() {
             )
           })}
           
+          <ThemeToggle className={navColorClass} />
+          
           {user && (
             <Link href="/internal/analytics">
               <Button 
@@ -138,6 +140,7 @@ export function Navbar() {
 
         {/* Mobile Nav */}
         <div className="md:hidden flex items-center gap-4">
+           <ThemeToggle className={navColorClass} />
            {user && (
              <Link href="/internal/analytics">
                <Button variant="ghost" size="icon" className={navColorClass}>
@@ -151,13 +154,13 @@ export function Navbar() {
                 <Menu className="w-8 h-8" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="bg-white/95 backdrop-blur-xl border-l-primary/10">
+            <SheetContent side="right" className="bg-white/95 backdrop-blur-xl border-l-primary/10 dark:bg-slate-950/95 dark:border-l-white/10">
               <SheetHeader className="text-left mb-8">
                 <SheetTitle className="flex items-center gap-2">
                    <div className="relative w-10 h-10">
                     <Image src="/HRAT%20Logo.jpeg" alt="HRAT" fill className="object-contain" />
                    </div>
-                   <span className="font-headline font-bold text-2xl text-primary">JusticeShield</span>
+                   <span className="font-headline font-bold text-2xl text-primary dark:text-white">JusticeShield</span>
                 </SheetTitle>
               </SheetHeader>
               <div className="flex flex-col gap-4">
@@ -165,7 +168,7 @@ export function Navbar() {
                   <Link 
                     key={link.name} 
                     href={link.href} 
-                    className="text-xl font-headline font-bold text-primary hover:text-accent"
+                    className="text-xl font-headline font-bold text-primary hover:text-accent dark:text-white"
                   >
                     {link.name}
                   </Link>
@@ -176,7 +179,7 @@ export function Navbar() {
                   </Link>
                 )}
                 <DonationDialog>
-                  <Button className="w-full bg-primary text-white py-6 text-lg mt-4">
+                  <Button className="w-full bg-primary text-white py-6 text-lg mt-4 dark:bg-accent dark:text-primary">
                     Donate Now
                   </Button>
                 </DonationDialog>

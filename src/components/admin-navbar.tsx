@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useEffect } from 'react'
@@ -20,6 +19,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { cn } from '@/lib/utils'
+import { ThemeToggle } from './theme-toggle'
 
 export function AdminNavbar() {
   const { user } = useUser()
@@ -48,7 +48,7 @@ export function AdminNavbar() {
   return (
     <nav className={cn(
       "fixed top-0 w-full z-50 transition-all duration-300 py-4",
-      isScrolled ? "bg-slate-900/95 backdrop-blur-md border-b border-white/10 shadow-2xl" : "bg-slate-900 border-b border-white/5"
+      isScrolled ? "bg-slate-900/95 backdrop-blur-md border-b border-white/10 shadow-2xl dark:bg-black/90" : "bg-slate-900 border-b border-white/5"
     )}>
       <div className="container mx-auto px-4 flex items-center justify-between">
         <div className="flex items-center gap-8">
@@ -87,6 +87,8 @@ export function AdminNavbar() {
             <p className="text-[8px] text-slate-500 font-bold uppercase tracking-widest">Signed in as</p>
             <p className="text-xs font-bold text-emerald-400">{user?.email}</p>
           </div>
+
+          <ThemeToggle className="text-white hover:bg-white/10" />
 
           <Link href="/">
             <Button variant="outline" className="hidden md:flex border-white/10 bg-white/5 text-white hover:bg-white/10 rounded-xl h-10 px-4 text-xs font-bold gap-2">
