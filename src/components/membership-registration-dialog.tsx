@@ -51,7 +51,8 @@ import {
   Briefcase,
   User,
   Gavel,
-  CalendarClock
+  CalendarClock,
+  AlertCircle
 } from 'lucide-react'
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
 import { useFirestore } from '@/firebase'
@@ -75,6 +76,7 @@ const formSchema = z.object({
   memberType: z.string().min(1, "Please select membership type"),
   membershipDuration: z.enum(["1 Year", "2 Years", "3 Years"], { required_error: "Please select duration" }),
   hasNoCriminalRecord: z.boolean().refine(val => val === true, "Affidavit acknowledgment is required"),
+  hasAcceptedDeclaration: z.boolean().refine(val => val === true, "Organizational declaration must be accepted"),
 })
 
 export function MembershipRegistrationDialog({ children }: { children: React.ReactNode }) {
@@ -101,6 +103,7 @@ export function MembershipRegistrationDialog({ children }: { children: React.Rea
       memberType: 'Regular Member',
       membershipDuration: '1 Year',
       hasNoCriminalRecord: false,
+      hasAcceptedDeclaration: false,
     }
   })
 
@@ -335,8 +338,12 @@ export function MembershipRegistrationDialog({ children }: { children: React.Rea
               )} />
             </div>
 
-            <div className="space-y-4">
-              <FormField
+            <div className="space-y-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+               <h4 className="text-xs font-bold uppercase tracking-[0.2em] text-primary dark:text-white flex items-center gap-2 mb-4">
+                 <ShieldCheck className="w-4 h-4 text-accent" /> Legal Affirmations
+               </h4>
+               
+               <FormField
                 control={form.control}
                 name="hasNoCriminalRecord"
                 render={({ field }) => (
@@ -349,8 +356,28 @@ export function MembershipRegistrationDialog({ children }: { children: React.Rea
                     </FormControl>
                     <div className="space-y-1 leading-none">
                       <FormLabel className="text-xs font-medium cursor-pointer text-primary dark:text-white flex items-center gap-2">
-                        <Gavel className="w-3.5 h-3.5 text-accent" />
+                        <Gavel className="w-3.5 h-3.5 text-accent shrink-0" />
                         I hereby declare and affirm that I have no past criminal record.
+                      </FormLabel>
+                    </div>
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="hasAcceptedDeclaration"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-2xl border p-4 bg-slate-50 dark:bg-slate-900 border-accent/20">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel className="text-[10px] md:text-xs font-medium cursor-pointer text-primary dark:text-white leading-relaxed">
+                        I hereby declare that I shall abide by all the rules, regulations, and policies of this organization. I understand and agree that, in the event of any misconduct, violation of organizational rules, or any untoward incident, the competent authority reserves the right to suspend or cancel my membership at any time without prior notice.
                       </FormLabel>
                     </div>
                   </FormItem>
@@ -360,9 +387,9 @@ export function MembershipRegistrationDialog({ children }: { children: React.Rea
             </div>
 
             <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex items-start gap-3">
-              <ShieldCheck className="w-6 h-6 text-accent shrink-0 mt-1" />
+              <AlertCircle className="w-6 h-6 text-accent shrink-0 mt-1" />
               <p className="text-xs text-slate-500 leading-relaxed italic">
-                By submitting this application, you agree to uphold the constitutional values of India and adhere to the conduct protocols of the Human Rights Affairs Trust.
+                By submitting this application, you agree to uphold the constitutional values of India and acknowledge that unauthorized use of organizational credentials is a punishable offense.
               </p>
             </div>
 

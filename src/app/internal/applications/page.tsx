@@ -31,7 +31,8 @@ import {
   ExternalLink,
   Info,
   Gavel,
-  CalendarClock
+  CalendarClock,
+  ClipboardCheck
 } from 'lucide-react'
 import {
   Dialog,
@@ -193,15 +194,24 @@ export default function InternalApplicationsPage() {
                          )}>
                            {a.status}
                          </Badge>
-                         {a.hasNoCriminalRecord && (
-                           <div className="mt-4 flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 px-3 py-1 rounded-full border border-emerald-100 dark:border-emerald-800">
-                             <Gavel className="w-3 h-3" />
-                             <span className="text-[8px] font-bold uppercase tracking-tighter">Affidavit Signed</span>
+                         
+                         <div className="mt-4 flex flex-col gap-2 w-full">
+                           {a.hasNoCriminalRecord && (
+                             <div className="flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 px-3 py-1 rounded-full border border-emerald-100 dark:border-emerald-800">
+                               <Gavel className="w-3 h-3 shrink-0" />
+                               <span className="text-[8px] font-bold uppercase tracking-tighter">Affidavit Signed</span>
+                             </div>
+                           )}
+                           {a.hasAcceptedDeclaration && (
+                             <div className="flex items-center gap-1.5 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 px-3 py-1 rounded-full border border-indigo-100 dark:border-indigo-800">
+                               <ClipboardCheck className="w-3 h-3 shrink-0" />
+                               <span className="text-[8px] font-bold uppercase tracking-tighter">Policy Declared</span>
+                             </div>
+                           )}
+                           <div className="flex items-center gap-1.5 bg-accent/10 text-accent px-3 py-1 rounded-full border border-accent/20">
+                              <CalendarClock className="w-3 h-3 shrink-0" />
+                              <span className="text-[8px] font-bold uppercase tracking-tighter">Term: {a.membershipDuration || '1 Year'}</span>
                            </div>
-                         )}
-                         <div className="mt-4 flex items-center gap-1.5 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 px-3 py-1 rounded-full border border-indigo-100 dark:border-indigo-800">
-                            <CalendarClock className="w-3 h-3" />
-                            <span className="text-[8px] font-bold uppercase tracking-tighter">Term: {a.membershipDuration || '1 Year'}</span>
                          </div>
                       </div>
                       
