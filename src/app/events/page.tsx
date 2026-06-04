@@ -346,10 +346,10 @@ export default function EventsPage() {
                         </div>
 
                         {isAdmin && (
-                          <div className="absolute top-4 left-4 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="absolute top-4 left-4 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
                             <Dialog>
                               <DialogTrigger asChild>
-                                <Button onClick={() => setEditEvent(event)} size="icon" className="bg-white/90 hover:bg-white text-primary rounded-full shadow-lg">
+                                <Button onClick={() => setEditEvent(event)} size="icon" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full shadow-lg border border-white/20">
                                   <Edit className="w-4 h-4" />
                                 </Button>
                               </DialogTrigger>
@@ -432,7 +432,7 @@ export default function EventsPage() {
 
                             <AlertDialog>
                               <AlertDialogTrigger asChild>
-                                <Button size="icon" className="bg-red-500/90 hover:bg-red-500 text-white rounded-full shadow-lg">
+                                <Button size="icon" className="bg-red-500/90 hover:bg-red-600 text-white rounded-full shadow-lg border border-white/20">
                                   <Trash2 className="w-4 h-4" />
                                 </Button>
                               </AlertDialogTrigger>

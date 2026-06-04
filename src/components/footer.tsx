@@ -45,13 +45,13 @@ export function Footer() {
           <div>
             <h4 className="text-lg font-headline font-bold mb-6 text-accent">Quick Links</h4>
             <ul className="space-y-4 text-primary-foreground/80">
-              <li><Link href="/#leadership" className="hover:text-white transition-colors">Chairman's Message</Link></li>
-              <li><Link href="/#knowledge" className="hover:text-white transition-colors">Rights Center</Link></li>
-              <li><Link href="/#membership" className="hover:text-white transition-colors">Be A Member</Link></li>
-              <li><Link href="/#helpline" className="hover:text-white transition-colors">Emergency Contacts</Link></li>
+              <li><Link href="/#leadership" className="hover:text-accent transition-colors font-medium">Chairman's Message</Link></li>
+              <li><Link href="/#knowledge" className="hover:text-accent transition-colors font-medium">Rights Center</Link></li>
+              <li><Link href="/#membership" className="hover:text-accent transition-colors font-medium">Be A Member</Link></li>
+              <li><Link href="/#helpline" className="hover:text-accent transition-colors font-medium">Emergency Contacts</Link></li>
               <li>
                 <DonationDialog>
-                  <button className="hover:text-white transition-colors">Donate Now</button>
+                  <button className="hover:text-accent transition-colors font-medium">Donate Now</button>
                 </DonationDialog>
               </li>
             </ul>
@@ -60,11 +60,11 @@ export function Footer() {
           <div>
             <h4 className="text-lg font-headline font-bold mb-6 text-accent">Legal Support</h4>
             <ul className="space-y-4 text-primary-foreground/80">
-              <li><Link href="#" className="hover:text-white transition-colors">Pro-Bono Services</Link></li>
-              <li><Link href="#" className="hover:text-white transition-colors">Filing an FIR</Link></li>
-              <li><Link href="#" className="hover:text-white transition-colors">RTI Assistance</Link></li>
-              <li><Link href="#" className="hover:text-white transition-colors">Bail Procedures</Link></li>
-              <li><Link href="#" className="hover:text-white transition-colors">Privacy Policy</Link></li>
+              <li><Link href="#" className="hover:text-accent transition-colors font-medium">Pro-Bono Services</Link></li>
+              <li><Link href="#" className="hover:text-accent transition-colors font-medium">Filing an FIR</Link></li>
+              <li><Link href="#" className="hover:text-accent transition-colors font-medium">RTI Assistance</Link></li>
+              <li><Link href="#" className="hover:text-accent transition-colors font-medium">Bail Procedures</Link></li>
+              <li><Link href="#" className="hover:text-accent transition-colors font-medium">Privacy Policy</Link></li>
             </ul>
           </div>
 

@@ -112,9 +112,9 @@ export default function TerminatedMembersPage() {
       })
       toast({ title: "Entry Added", description: "Termination notice has been published." })
       setNewMember({ name: '', designation: '', level: 'National', terminationDate: '', reason: '', status: 'Revoked', gender: 'male', imageId: '' })
-    } catch (e: any) {
+    } catch (e: any) (
       toast({ variant: "destructive", title: "Error", description: e.message })
-    } finally {
+    ) finally {
       setIsActionLoading(false)
     }
   }
@@ -150,7 +150,7 @@ export default function TerminatedMembersPage() {
   )
 
   return (
-    <main className="min-h-screen bg-slate-50">
+    <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
       <Navbar />
 
       <section className="pt-40 pb-20 bg-slate-900 text-white relative overflow-hidden">
@@ -172,7 +172,7 @@ export default function TerminatedMembersPage() {
                   <Plus className="w-6 h-6" /> Add Termination Entry
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-md bg-white rounded-[2rem] max-h-[90vh] overflow-y-auto">
+              <DialogContent className="max-w-md bg-white dark:bg-slate-900 rounded-[2rem] max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>New Termination Notice</DialogTitle>
                 </DialogHeader>
@@ -180,7 +180,7 @@ export default function TerminatedMembersPage() {
                   <div className="space-y-2">
                     <Label>Profile Picture</Label>
                     <div className="flex flex-col items-center gap-4 p-4 border-2 border-dashed rounded-2xl">
-                      <div className="relative w-24 h-24 bg-slate-100 rounded-2xl overflow-hidden grayscale">
+                      <div className="relative w-24 h-24 bg-slate-100 dark:bg-slate-800 rounded-2xl overflow-hidden grayscale">
                         <Image 
                           src={newMember.imageId?.startsWith('data:') ? newMember.imageId : (newMember.gender === 'female' ? '/dummy w.png' : '/dummy m.png')} 
                           alt="Preview" 
@@ -274,14 +274,14 @@ export default function TerminatedMembersPage() {
         </div>
       </section>
 
-      <section className="py-12 bg-white border-b border-slate-200 sticky top-[72px] md:top-[84px] z-30 shadow-sm">
+      <section className="py-12 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-[72px] md:top-[84px] z-30 shadow-sm transition-colors">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
             <div className="relative">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
               <Input 
                 placeholder="Search by name or Termination ID..." 
-                className="pl-12 h-14 rounded-2xl border-slate-200 focus:ring-red-500 text-lg"
+                className="pl-12 h-14 rounded-2xl border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 focus:ring-red-500 text-lg"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
@@ -298,7 +298,7 @@ export default function TerminatedMembersPage() {
             <div className="relative group">
               {/* Pulsing Animated Background Glow */}
               <div className="absolute -inset-1 bg-gradient-to-r from-red-600 via-orange-600 to-red-600 rounded-[2.5rem] blur-xl opacity-20 group-hover:opacity-40 transition duration-1000 animate-pulse"></div>
-              <Alert variant="destructive" className="relative bg-white border-4 border-red-600 rounded-[2.5rem] p-8 md:p-12 shadow-2xl">
+              <Alert variant="destructive" className="relative bg-white dark:bg-slate-900 border-4 border-red-600 rounded-[2.5rem] p-8 md:p-12 shadow-2xl">
                 <div className="flex flex-col items-center text-center space-y-6">
                   <div className="bg-red-600 text-white p-4 rounded-full shadow-lg animate-bounce">
                     <ShieldAlert className="h-10 w-10 md:h-12 md:w-12" />
@@ -307,7 +307,7 @@ export default function TerminatedMembersPage() {
                     <AlertTitle className="font-headline font-black text-2xl md:text-3xl text-red-600 uppercase tracking-[0.2em] mb-4">
                       Urgent  Public  Security  Disclaimer
                     </AlertTitle>
-                    <AlertDescription className="text-secondary font-black text-sm md:text-lg leading-relaxed max-w-5xl mx-auto">
+                    <AlertDescription className="text-secondary dark:text-emerald-400 font-black text-sm md:text-lg leading-relaxed max-w-5xl mx-auto">
                       "The individuals listed below are no longer affiliated with Justice Shield. Any attempt to use organizational logos, car sticker, official designation plate for car, ID cards, or represent themselves as member/officials is a punishable offense. If any such misuse is observed, the police authorities or the administration may immediately take any appropriate legal action."
                     </AlertDescription>
                   </div>
@@ -327,10 +327,10 @@ export default function TerminatedMembersPage() {
                     const fallback = member.gender === 'female' ? '/dummy w.png' : '/dummy m.png'
                     const displayImg = member.imageId?.startsWith('data:') ? member.imageId : (PlaceHolderImages.find(i => i.id === member.imageId)?.imageUrl || fallback)
                     return (
-                      <Card key={member.id} className="group border-none shadow-sm hover:shadow-xl transition-all duration-500 rounded-[2.5rem] overflow-hidden bg-white relative">
+                      <Card key={member.id} className="group border-none shadow-sm hover:shadow-xl transition-all duration-500 rounded-[2.5rem] overflow-hidden bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 relative">
                         <CardContent className="p-0">
                           <div className="flex flex-col md:flex-row">
-                            <div className="p-8 bg-slate-50 md:w-48 flex flex-col items-center justify-center border-r border-slate-100 text-center shrink-0">
+                            <div className="p-8 bg-slate-50 dark:bg-slate-800 md:w-48 flex flex-col items-center justify-center border-r border-slate-100 dark:border-slate-700 text-center shrink-0">
                               <div className="relative w-24 h-24 rounded-2xl overflow-hidden mb-3 grayscale opacity-70 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-700">
                                 <Image 
                                   src={displayImg} 
@@ -357,24 +357,24 @@ export default function TerminatedMembersPage() {
                                     </Badge>
                                   )}
                                 </div>
-                                <h3 className="text-3xl font-headline font-bold text-primary group-hover:text-red-600 transition-colors">
+                                <h3 className="text-3xl font-headline font-bold text-primary dark:text-white group-hover:text-red-600 transition-colors">
                                   {member.name}
                                 </h3>
                                 <p className="text-slate-500 font-bold italic">{member.designation}</p>
                               </div>
 
                               <div className="space-y-4">
-                                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                                <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-700">
                                   <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">
                                     <Info className="w-3 h-3" /> Reason for Termination
                                   </div>
-                                  <p className="text-sm text-slate-600 leading-relaxed italic">
+                                  <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed italic">
                                     "{member.reason}"
                                   </p>
                                 </div>
                                 <div className="flex items-center gap-2 text-xs font-bold text-slate-400">
                                   <CalendarIcon className="w-4 h-4" /> 
-                                  Effective Since: <span className="text-primary">{member.terminationDate}</span>
+                                  Effective Since: <span className="text-primary dark:text-accent font-bold">{member.terminationDate}</span>
                                 </div>
                               </div>
                             </div>
@@ -382,21 +382,21 @@ export default function TerminatedMembersPage() {
                         </CardContent>
 
                         {isAdmin && (
-                          <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
                             <Dialog>
                               <DialogTrigger asChild>
-                                <Button onClick={() => setEditMember(member)} size="icon" className="bg-white text-primary hover:bg-slate-50 rounded-full shadow-lg">
+                                <Button onClick={() => setEditMember(member)} size="icon" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full shadow-lg border border-white/20">
                                   <Edit className="w-4 h-4" />
                                 </Button>
                               </DialogTrigger>
-                              <DialogContent className="max-w-md bg-white rounded-[2rem] max-h-[90vh] overflow-y-auto">
+                              <DialogContent className="max-w-md bg-white dark:bg-slate-900 rounded-[2rem] max-h-[90vh] overflow-y-auto">
                                 <DialogHeader><DialogTitle>Edit Notice</DialogTitle></DialogHeader>
                                 {editMember && (
                                   <div className="space-y-4 py-4">
                                     <div className="space-y-2">
                                       <Label>Profile Picture</Label>
                                       <div className="flex flex-col items-center gap-4 p-4 border-2 border-dashed rounded-2xl">
-                                        <div className="relative w-24 h-24 bg-slate-100 rounded-2xl overflow-hidden grayscale">
+                                        <div className="relative w-24 h-24 bg-slate-100 dark:bg-slate-800 rounded-2xl overflow-hidden grayscale">
                                           <Image 
                                             src={editMember.imageId?.startsWith('data:') ? editMember.imageId : (editMember.gender === 'female' ? '/dummy w.png' : '/dummy m.png')} 
                                             alt="Preview" 
@@ -458,15 +458,15 @@ export default function TerminatedMembersPage() {
                             </Dialog>
                             <AlertDialog>
                               <AlertDialogTrigger asChild>
-                                <Button size="icon" className="bg-red-500 text-white rounded-full shadow-lg">
+                                <Button size="icon" className="bg-red-500 text-white rounded-full shadow-lg border border-white/20">
                                   <Trash2 className="w-4 h-4" />
                                 </Button>
                               </AlertDialogTrigger>
-                              <AlertDialogContent className="rounded-[2rem]">
+                              <AlertDialogContent className="rounded-[2rem] bg-white dark:bg-slate-900">
                                 <AlertDialogHeader><AlertDialogTitle>Remove Notice?</AlertDialogTitle></AlertDialogHeader>
                                 <div className="flex justify-end gap-3 mt-4">
                                   <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
-                                  <AlertDialogAction onClick={() => handleDelete(member.id)} className="bg-red-500 rounded-xl border-none">Remove</AlertDialogAction>
+                                  <AlertDialogAction onClick={() => handleDelete(member.id)} className="bg-red-500 hover:bg-red-600 rounded-xl border-none">Remove</AlertDialogAction>
                                 </div>
                               </AlertDialogContent>
                             </AlertDialog>
@@ -476,9 +476,9 @@ export default function TerminatedMembersPage() {
                     )
                   })
                 ) : (
-                  <div className="text-center py-32 bg-white rounded-[3rem] border border-dashed border-slate-200">
+                  <div className="text-center py-32 bg-white dark:bg-slate-900 rounded-[3rem] border border-dashed border-slate-200 dark:border-slate-800">
                     <UserX className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-                    <h3 className="text-2xl font-headline font-bold text-primary">No records match your search</h3>
+                    <h3 className="text-2xl font-headline font-bold text-primary dark:text-white">No records match your search</h3>
                     <p className="text-slate-500">If you are verifying an ID card, ensure the name or ID is entered correctly.</p>
                   </div>
                 )}

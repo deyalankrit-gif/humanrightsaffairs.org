@@ -51,11 +51,15 @@ function LeaderCard({ leader, variant = "default", isAdmin, onEdit, onDelete }: 
     <div className="flex flex-col items-center group relative">
       <div className={`relative ${sizeClasses[variant]} rounded-2xl overflow-hidden shadow-xl border-2 md:border-4 border-white group-hover:border-accent transition-all duration-500 bg-slate-100 dark:bg-slate-800`}>
         <Image src={img} alt={leader.name} fill className="object-cover group-hover:scale-110 transition-transform duration-700" />
-        <div className="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+        <div className="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-10">
           {isAdmin && (
             <div className="flex gap-2">
-              <Button onClick={() => onEdit?.(leader)} size="icon" className="bg-white text-primary rounded-full hover:bg-accent hover:text-white"><Edit className="w-4 h-4" /></Button>
-              <Button onClick={() => onDelete?.(leader.id)} size="icon" className="bg-red-500 text-white rounded-full"><Trash2 className="w-4 h-4" /></Button>
+              <Button onClick={() => onEdit?.(leader)} size="icon" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-full hover:bg-accent hover:text-primary transition-colors border border-white/20 shadow-xl">
+                <Edit className="w-4 h-4" />
+              </Button>
+              <Button onClick={() => onDelete?.(leader.id)} size="icon" className="bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors border border-white/20 shadow-xl">
+                <Trash2 className="w-4 h-4" />
+              </Button>
             </div>
           )}
         </div>
