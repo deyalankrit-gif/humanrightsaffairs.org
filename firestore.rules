@@ -15,6 +15,12 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
     
+    // Membership applications: Public create, Admin read/write
+    match /memberApplications/{appId} {
+      allow create: if true;
+      allow read, write: if isAdmin();
+    }
+    
     // User roles collection for granular authorization
     match /users/{userId} {
       allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());

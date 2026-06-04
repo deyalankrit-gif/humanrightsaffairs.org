@@ -6,6 +6,7 @@ import Image from 'next/image'
 import { CheckCircle2, BadgeCheck, Info, ShieldCheck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { PlaceHolderImages } from '@/lib/placeholder-images'
+import { MembershipRegistrationDialog } from './membership-registration-dialog'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -63,9 +64,11 @@ export function IDCardShowcase() {
             </ul>
 
             <div className="flex flex-wrap gap-4 pt-4">
-              <Button className="bg-accent text-primary font-bold hover:bg-accent/90 px-8 py-6 rounded-xl text-lg shadow-lg shadow-accent/20 w-full sm:w-auto">
-                Register as Member
-              </Button>
+              <MembershipRegistrationDialog>
+                <Button className="bg-accent text-primary font-bold hover:bg-accent/90 px-8 py-6 rounded-xl text-lg shadow-lg shadow-accent/20 w-full sm:w-auto">
+                  Register as Member
+                </Button>
+              </MembershipRegistrationDialog>
               
               <AlertDialog>
                 <AlertDialogTrigger asChild>

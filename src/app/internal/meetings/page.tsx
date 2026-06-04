@@ -238,7 +238,7 @@ export default function InternalMeetingsManagement() {
   }
 
   const hours = Array.from({ length: 12 }, (_, i) => (i + 1).toString().padStart(2, '0'));
-  const minutes = Array.from({ length: 12 }, (_, i) => (i * 5).toString().padStart(2, '0'));
+  const minutes = Array.from({ length: 60 }, (_, i) => (i).toString().padStart(2, '0'));
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
@@ -373,9 +373,6 @@ export default function InternalMeetingsManagement() {
                             <Label htmlFor={`new-leader-${leader.id}`} className="text-xs cursor-pointer">{leader.name} <span className="text-[10px] text-slate-400">({leader.title})</span></Label>
                           </div>
                         ))}
-                        {(!leadershipMembers || leadershipMembers.length === 0) && (
-                          <p className="text-[10px] text-slate-400 italic">No leadership members registered.</p>
-                        )}
                       </div>
                     </ScrollArea>
                   </div>

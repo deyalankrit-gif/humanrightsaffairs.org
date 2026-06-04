@@ -34,6 +34,25 @@
         "createdAt": { "type": "string", "format": "date-time" }
       }
     },
+    "MemberApplication": {
+      "title": "Member Application",
+      "description": "Registration requests from prospective members.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "phone": { "type": "string" },
+        "address": { "type": "string" },
+        "pan": { "type": "string" },
+        "aadhaar": { "type": "string" },
+        "level": { "type": "string", "enum": ["National", "State", "District"] },
+        "stateName": { "type": "string" },
+        "districtName": { "type": "string" },
+        "status": { "type": "string", "enum": ["Pending", "Reviewed", "Approved", "Rejected"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "email", "phone"]
+    },
     "Event": {
       "title": "Event",
       "description": "Organizational events and mission highlights.",
@@ -119,6 +138,7 @@
   "firestore": {
     "/donations/{donationId}": { "schema": "Donation" },
     "/memberProfiles/{profileId}": { "schema": "MemberProfile" },
+    "/memberApplications/{appId}": { "schema": "MemberApplication" },
     "/events/{eventId}": { "schema": "Event" },
     "/terminatedMembers/{memberId}": { "schema": "TerminatedMember" },
     "/leadership/{leaderId}": { "schema": "LeadershipMember" },
