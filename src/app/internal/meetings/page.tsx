@@ -24,6 +24,7 @@ import {
   Loader2, 
   Handshake,
   ShieldCheck,
+  Globe,
 } from 'lucide-react'
 import {
   Dialog,
@@ -55,6 +56,7 @@ import { useToast } from '@/hooks/use-toast'
 import { errorEmitter } from '@/firebase/error-emitter'
 import { FirestorePermissionError, type SecurityRuleContext } from '@/firebase/errors'
 import { cn } from '@/lib/utils'
+import { INDIA_DATA } from '@/lib/india-data'
 
 export default function InternalMeetingsManagement() {
   const { user, loading: authLoading } = useUser()
@@ -75,6 +77,7 @@ export default function InternalMeetingsManagement() {
     agenda: '',
     minutes: '',
     level: 'National' as const,
+    stateName: '',
     status: 'Upcoming' as const,
   })
 
@@ -98,13 +101,18 @@ export default function InternalMeetingsManagement() {
       return;
     }
 
+    if (newMeeting.level === 'State' && !newMeeting.stateName) {
+      toast({ variant: "destructive", title: "State Required", description: "Please select a state for this assembly." });
+      return;
+    }
+
     setIsActionLoading(true)
     const data = { ...newMeeting, createdAt: serverTimestamp() }
 
     addDoc(collection(db, 'meetings'), data)
       .then(() => {
         toast({ title: "Meeting Scheduled", description: "Record has been added to the registry." })
-        setNewMeeting({ title: '', date: '', time: '', location: '', agenda: '', minutes: '', level: 'National', status: 'Upcoming' })
+        setNewMeeting({ title: '', date: '', time: '', location: '', agenda: '', minutes: '', level: 'National', stateName: '', status: 'Upcoming' })
         setIsAddDialogOpen(false)
         setIsActionLoading(false)
       })
@@ -166,11 +174,13 @@ export default function InternalMeetingsManagement() {
 
   const filtered = (meetings || []).filter((m: any) => 
     m.title.toLowerCase().includes(search.toLowerCase()) || 
-    m.location.toLowerCase().includes(search.toLowerCase())
+    m.location.toLowerCase().includes(search.toLowerCase()) ||
+    m.stateName?.toLowerCase().includes(search.toLowerCase())
   )
 
   const levels = ["National", "State", "District"]
   const statuses = ["Upcoming", "Completed", "Postponed"]
+  const states = Object.keys(INDIA_DATA).sort()
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
@@ -237,7 +247,7 @@ export default function InternalMeetingsManagement() {
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label>Level</Label>
-                      <Select value={newMeeting.level} onValueChange={(val: any) => setNewMeeting({...newMeeting, level: val})}>
+                      <Select value={newMeeting.level} onValueChange={(val: any) => setNewMeeting({...newMeeting, level: val, stateName: val !== 'State' ? '' : newMeeting.stateName})}>
                         <SelectTrigger className="h-12 rounded-xl"><SelectValue /></SelectTrigger>
                         <SelectContent>
                           {levels.map(l => <SelectItem key={l} value={l}>{l}</SelectItem>)}
@@ -254,6 +264,23 @@ export default function InternalMeetingsManagement() {
                       </Select>
                     </div>
                   </div>
+
+                  {newMeeting.level === 'State' && (
+                    <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                      <Label className="flex items-center gap-2">
+                        <Globe className="w-3 h-3 text-accent" /> Select State / UT
+                      </Label>
+                      <Select value={newMeeting.stateName} onValueChange={(val) => setNewMeeting({...newMeeting, stateName: val})}>
+                        <SelectTrigger className="h-12 rounded-xl">
+                          <SelectValue placeholder="Choose State" />
+                        </SelectTrigger>
+                        <SelectContent className="max-h-60">
+                          {states.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+
                   <div className="space-y-2">
                     <Label>Venue / Link</Label>
                     <Input value={newMeeting.location} onChange={e => setNewMeeting({...newMeeting, location: e.target.value})} placeholder="Kolkata Head Office" className="h-12 rounded-xl" />
@@ -283,7 +310,7 @@ export default function InternalMeetingsManagement() {
           <div className="relative max-w-2xl">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
             <Input 
-              placeholder="Filter archives by title or location..." 
+              placeholder="Filter archives by title, location or state..." 
               className="pl-12 h-14 rounded-2xl border-slate-200 dark:border-slate-700 dark:bg-slate-800"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -307,7 +334,7 @@ export default function InternalMeetingsManagement() {
                     <div className="flex flex-col md:flex-row items-stretch">
                       <div className="p-8 bg-slate-50 dark:bg-slate-800 md:w-56 text-center border-r border-slate-100 dark:border-slate-700 flex flex-col items-center justify-center shrink-0">
                          <Badge variant="outline" className="border-accent text-accent text-[9px] font-bold uppercase px-3 py-1 mb-3">
-                            {meeting.level}
+                            {meeting.level} {meeting.stateName ? `(${meeting.stateName})` : ''}
                          </Badge>
                          <span className="text-2xl font-headline font-bold text-primary dark:text-white leading-none mb-1">{meeting.date.split(' ')[0]}</span>
                          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{meeting.date.split(' ').slice(1).join(' ')}</span>
@@ -374,6 +401,31 @@ export default function InternalMeetingsManagement() {
                                       </Select>
                                     </div>
                                   </div>
+
+                                  <div className="space-y-2">
+                                    <Label>Level</Label>
+                                    <Select value={editMeeting.level} onValueChange={(val: any) => setEditMeeting({...editMeeting, level: val, stateName: val !== 'State' ? '' : editMeeting.stateName})}>
+                                      <SelectTrigger className="h-12 rounded-xl"><SelectValue /></SelectTrigger>
+                                      <SelectContent>
+                                        {levels.map(l => <SelectItem key={l} value={l}>{l}</SelectItem>)}
+                                      </SelectContent>
+                                    </Select>
+                                  </div>
+
+                                  {editMeeting.level === 'State' && (
+                                    <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                                      <Label>State / UT</Label>
+                                      <Select value={editMeeting.stateName} onValueChange={(val) => setEditMeeting({...editMeeting, stateName: val})}>
+                                        <SelectTrigger className="h-12 rounded-xl">
+                                          <SelectValue placeholder="Choose State" />
+                                        </SelectTrigger>
+                                        <SelectContent className="max-h-60">
+                                          {states.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                                        </SelectContent>
+                                      </Select>
+                                    </div>
+                                  )}
+
                                   <div className="space-y-2">
                                     <Label>Agenda</Label>
                                     <Textarea value={editMeeting.agenda} onChange={e => setEditMeeting({...editMeeting, agenda: e.target.value})} className="min-h-[100px] rounded-xl" />
