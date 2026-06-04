@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useEffect, useState } from 'react'
@@ -382,7 +383,7 @@ export default function MemberDetailsPage() {
                       <Input 
                         value={editForm?.emergencyContact} 
                         onChange={(e) => setEditForm({...editForm, emergencyContact: e.target.value})}
-                        className="bg-white/50 border-slate-200 h-12 rounded-xl"
+                        className="bg-white/5 border-slate-200 h-12 rounded-xl"
                       />
                     ) : (
                       <p className="text-xl font-bold text-primary flex items-center gap-3">

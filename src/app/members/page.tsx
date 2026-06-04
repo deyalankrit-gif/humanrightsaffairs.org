@@ -237,7 +237,7 @@ export default function MembersPage() {
                         <input 
                           type="file" 
                           accept="image/*" 
-                          className="absolute inset-0 opacity-0 cursor-pointer"
+                          className="absolute inset-0 opacity-0 cursor-pointer" 
                           onChange={handleFileChange}
                         />
                       </Button>
