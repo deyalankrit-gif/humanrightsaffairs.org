@@ -16,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { 
   Plus, 
   Search, 
-  Calendar, 
+  Calendar as CalendarIcon, 
   Clock,
   MapPin, 
   Edit, 
@@ -24,7 +24,6 @@ import {
   Loader2, 
   Handshake,
   ShieldCheck,
-  FileText
 } from 'lucide-react'
 import {
   Dialog,
@@ -45,6 +44,13 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import { Calendar } from "@/components/ui/calendar"
+import { format } from "date-fns"
 import { useToast } from '@/hooks/use-toast'
 import { errorEmitter } from '@/firebase/error-emitter'
 import { FirestorePermissionError, type SecurityRuleContext } from '@/firebase/errors'
@@ -199,18 +205,40 @@ export default function InternalMeetingsManagement() {
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label>Date</Label>
-                      <Input value={newMeeting.date} onChange={e => setNewMeeting({...newMeeting, date: e.target.value})} placeholder="March 15, 2024" />
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button variant="outline" className={cn("w-full justify-start text-left font-normal h-12 rounded-xl", !newMeeting.date && "text-muted-foreground")}>
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {newMeeting.date ? newMeeting.date : "Pick a date"}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            onSelect={(date) => setNewMeeting({...newMeeting, date: date ? format(date, "PPP") : ''})}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
                     </div>
                     <div className="space-y-2">
                       <Label>Time</Label>
-                      <Input value={newMeeting.time} onChange={e => setNewMeeting({...newMeeting, time: e.target.value})} placeholder="10:30 AM" />
+                      <div className="relative">
+                        <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input 
+                          type="time" 
+                          className="pl-10 h-12 rounded-xl"
+                          value={newMeeting.time} 
+                          onChange={e => setNewMeeting({...newMeeting, time: e.target.value})} 
+                        />
+                      </div>
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label>Level</Label>
                       <Select value={newMeeting.level} onValueChange={(val: any) => setNewMeeting({...newMeeting, level: val})}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectTrigger className="h-12 rounded-xl"><SelectValue /></SelectTrigger>
                         <SelectContent>
                           {levels.map(l => <SelectItem key={l} value={l}>{l}</SelectItem>)}
                         </SelectContent>
@@ -219,7 +247,7 @@ export default function InternalMeetingsManagement() {
                     <div className="space-y-2">
                       <Label>Status</Label>
                       <Select value={newMeeting.status} onValueChange={(val: any) => setNewMeeting({...newMeeting, status: val})}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectTrigger className="h-12 rounded-xl"><SelectValue /></SelectTrigger>
                         <SelectContent>
                           {statuses.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
                         </SelectContent>
@@ -228,15 +256,15 @@ export default function InternalMeetingsManagement() {
                   </div>
                   <div className="space-y-2">
                     <Label>Venue / Link</Label>
-                    <Input value={newMeeting.location} onChange={e => setNewMeeting({...newMeeting, location: e.target.value})} placeholder="Kolkata Head Office" />
+                    <Input value={newMeeting.location} onChange={e => setNewMeeting({...newMeeting, location: e.target.value})} placeholder="Kolkata Head Office" className="h-12 rounded-xl" />
                   </div>
                   <div className="space-y-2">
                     <Label>Agenda</Label>
-                    <Textarea value={newMeeting.agenda} onChange={e => setNewMeeting({...newMeeting, agenda: e.target.value})} placeholder="Outline the meeting goals..." />
+                    <Textarea value={newMeeting.agenda} onChange={e => setNewMeeting({...newMeeting, agenda: e.target.value})} placeholder="Outline the meeting goals..." className="rounded-xl" />
                   </div>
                   <div className="space-y-2">
                     <Label>Minutes (Post-Meeting)</Label>
-                    <Textarea value={newMeeting.minutes} onChange={e => setNewMeeting({...newMeeting, minutes: e.target.value})} placeholder="Key resolutions and minutes..." />
+                    <Textarea value={newMeeting.minutes} onChange={e => setNewMeeting({...newMeeting, minutes: e.target.value})} placeholder="Key resolutions and minutes..." className="rounded-xl" />
                   </div>
                 </div>
                 <DialogFooter>
@@ -315,17 +343,31 @@ export default function InternalMeetingsManagement() {
                                 <div className="space-y-4 py-4">
                                   <div className="space-y-2">
                                     <Label>Title</Label>
-                                    <Input value={editMeeting.title} onChange={e => setEditMeeting({...editMeeting, title: e.target.value})} />
+                                    <Input value={editMeeting.title} onChange={e => setEditMeeting({...editMeeting, title: e.target.value})} className="h-12 rounded-xl" />
                                   </div>
                                   <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-2">
                                       <Label>Date</Label>
-                                      <Input value={editMeeting.date} onChange={e => setEditMeeting({...editMeeting, date: e.target.value})} />
+                                      <Popover>
+                                        <PopoverTrigger asChild>
+                                          <Button variant="outline" className={cn("w-full justify-start text-left font-normal h-12 rounded-xl", !editMeeting.date && "text-muted-foreground")}>
+                                            <CalendarIcon className="mr-2 h-4 w-4" />
+                                            {editMeeting.date ? editMeeting.date : "Pick a date"}
+                                          </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-auto p-0" align="start">
+                                          <Calendar
+                                            mode="single"
+                                            onSelect={(date) => setEditMeeting({...editMeeting, date: date ? format(date, "PPP") : ''})}
+                                            initialFocus
+                                          />
+                                        </PopoverContent>
+                                      </Popover>
                                     </div>
                                     <div className="space-y-2">
                                       <Label>Status</Label>
                                       <Select value={editMeeting.status} onValueChange={(val: any) => setEditMeeting({...editMeeting, status: val})}>
-                                        <SelectTrigger><SelectValue /></SelectTrigger>
+                                        <SelectTrigger className="h-12 rounded-xl"><SelectValue /></SelectTrigger>
                                         <SelectContent>
                                           {statuses.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
                                         </SelectContent>
@@ -334,11 +376,11 @@ export default function InternalMeetingsManagement() {
                                   </div>
                                   <div className="space-y-2">
                                     <Label>Agenda</Label>
-                                    <Textarea value={editMeeting.agenda} onChange={e => setEditMeeting({...editMeeting, agenda: e.target.value})} className="min-h-[100px]" />
+                                    <Textarea value={editMeeting.agenda} onChange={e => setEditMeeting({...editMeeting, agenda: e.target.value})} className="min-h-[100px] rounded-xl" />
                                   </div>
                                   <div className="space-y-2">
                                     <Label>Minutes</Label>
-                                    <Textarea value={editMeeting.minutes} onChange={e => setEditMeeting({...editMeeting, minutes: e.target.value})} className="min-h-[150px]" />
+                                    <Textarea value={editMeeting.minutes} onChange={e => setEditMeeting({...editMeeting, minutes: e.target.value})} className="min-h-[150px] rounded-xl" />
                                   </div>
                                   <Button onClick={handleUpdate} disabled={isActionLoading} className="w-full h-12 rounded-xl mt-4">
                                     {isActionLoading ? <Loader2 className="animate-spin" /> : "Commit Changes"}

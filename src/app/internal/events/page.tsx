@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useEffect, useState } from 'react'
@@ -17,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { 
   Plus, 
   Search, 
-  Calendar, 
+  Calendar as CalendarIcon, 
   MapPin, 
   Edit, 
   Trash2, 
@@ -47,10 +46,18 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import { Calendar } from "@/components/ui/calendar"
+import { format } from "date-fns"
 import { useToast } from '@/hooks/use-toast'
 import Image from 'next/image'
 import Link from 'next/link'
 import { PlaceHolderImages } from '@/lib/placeholder-images'
+import { cn } from '@/lib/utils'
 
 export default function InternalEventsManagement() {
   const { user, loading: authLoading } = useUser()
@@ -202,18 +209,47 @@ export default function InternalEventsManagement() {
                       </Button>
                     </div>
                   </div>
-                  <Input value={newEvent.title} onChange={e => setNewEvent({...newEvent, title: e.target.value})} placeholder="Event Title" />
-                  <div className="grid grid-cols-2 gap-4">
-                    <Input value={newEvent.date} onChange={e => setNewEvent({...newEvent, date: e.target.value})} placeholder="Date" />
-                    <Select value={newEvent.category} onValueChange={(val: any) => setNewEvent({...newEvent, category: val})}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        {categories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
+                  <div className="space-y-2">
+                    <Label>Event Title</Label>
+                    <Input value={newEvent.title} onChange={e => setNewEvent({...newEvent, title: e.target.value})} placeholder="Event Title" className="h-12 rounded-xl" />
                   </div>
-                  <Input value={newEvent.location} onChange={e => setNewEvent({...newEvent, location: e.target.value})} placeholder="Location" />
-                  <Textarea value={newEvent.description} onChange={e => setNewEvent({...newEvent, description: e.target.value})} placeholder="Description..." />
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Event Date</Label>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button variant="outline" className={cn("w-full justify-start text-left font-normal h-12 rounded-xl", !newEvent.date && "text-muted-foreground")}>
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {newEvent.date ? newEvent.date : "Pick a date"}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            onSelect={(date) => setNewEvent({...newEvent, date: date ? format(date, "PPP") : ''})}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Category</Label>
+                      <Select value={newEvent.category} onValueChange={(val: any) => setNewEvent({...newEvent, category: val})}>
+                        <SelectTrigger className="h-12 rounded-xl"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          {categories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Location</Label>
+                    <Input value={newEvent.location} onChange={e => setNewEvent({...newEvent, location: e.target.value})} placeholder="Location" className="h-12 rounded-xl" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Description</Label>
+                    <Textarea value={newEvent.description} onChange={e => setNewEvent({...newEvent, description: e.target.value})} placeholder="Description..." className="rounded-xl" />
+                  </div>
                 </div>
                 <DialogFooter>
                   <Button onClick={handleAddEvent} disabled={isActionLoading} className="w-full h-12 rounded-xl">
@@ -273,7 +309,7 @@ export default function InternalEventsManagement() {
                           </div>
                           <h3 className="text-2xl font-bold text-primary">{event.title}</h3>
                           <div className="flex items-center gap-2 text-xs font-bold text-slate-500">
-                            <Calendar className="w-3.5 h-3.5" /> {event.date}
+                            <CalendarIcon className="w-3.5 h-3.5" /> {event.date}
                           </div>
                         </div>
                         
@@ -294,18 +330,47 @@ export default function InternalEventsManagement() {
                               <DialogHeader><DialogTitle>Edit Event</DialogTitle></DialogHeader>
                               {editEvent && (
                                 <div className="space-y-4 py-4">
-                                  <Input value={editEvent.title} onChange={e => setEditEvent({...editEvent, title: e.target.value})} />
-                                  <div className="grid grid-cols-2 gap-4">
-                                    <Input value={editEvent.date} onChange={e => setEditEvent({...editEvent, date: e.target.value})} />
-                                    <Select value={editEvent.category} onValueChange={(val: any) => setEditEvent({...editEvent, category: val})}>
-                                      <SelectTrigger><SelectValue /></SelectTrigger>
-                                      <SelectContent>
-                                        {categories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                                      </SelectContent>
-                                    </Select>
+                                  <div className="space-y-2">
+                                    <Label>Title</Label>
+                                    <Input value={editEvent.title} onChange={e => setEditEvent({...editEvent, title: e.target.value})} className="h-12 rounded-xl" />
                                   </div>
-                                  <Input value={editEvent.location} onChange={e => setEditEvent({...editEvent, location: e.target.value})} />
-                                  <Textarea value={editEvent.description} onChange={e => setEditEvent({...editEvent, description: e.target.value})} />
+                                  <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                      <Label>Date</Label>
+                                      <Popover>
+                                        <PopoverTrigger asChild>
+                                          <Button variant="outline" className={cn("w-full justify-start text-left font-normal h-12 rounded-xl", !editEvent.date && "text-muted-foreground")}>
+                                            <CalendarIcon className="mr-2 h-4 w-4" />
+                                            {editEvent.date ? editEvent.date : "Pick a date"}
+                                          </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-auto p-0" align="start">
+                                          <Calendar
+                                            mode="single"
+                                            onSelect={(date) => setEditEvent({...editEvent, date: date ? format(date, "PPP") : ''})}
+                                            initialFocus
+                                          />
+                                        </PopoverContent>
+                                      </Popover>
+                                    </div>
+                                    <div className="space-y-2">
+                                      <Label>Category</Label>
+                                      <Select value={editEvent.category} onValueChange={(val: any) => setEditEvent({...editEvent, category: val})}>
+                                        <SelectTrigger className="h-12 rounded-xl"><SelectValue /></SelectTrigger>
+                                        <SelectContent>
+                                          {categories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                                        </SelectContent>
+                                      </Select>
+                                    </div>
+                                  </div>
+                                  <div className="space-y-2">
+                                    <Label>Location</Label>
+                                    <Input value={editEvent.location} onChange={e => setEditEvent({...editEvent, location: e.target.value})} className="h-12 rounded-xl" />
+                                  </div>
+                                  <div className="space-y-2">
+                                    <Label>Description</Label>
+                                    <Textarea value={editEvent.description} onChange={e => setEditEvent({...editEvent, description: e.target.value})} className="rounded-xl" />
+                                  </div>
                                   <Button onClick={handleUpdateEvent} disabled={isActionLoading} className="w-full h-12 rounded-xl">Save Changes</Button>
                                 </div>
                               )}

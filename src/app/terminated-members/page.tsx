@@ -5,7 +5,7 @@ import Image from 'next/image'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 import { PlaceHolderImages } from '@/lib/placeholder-images'
-import { Search, UserX, AlertTriangle, ShieldAlert, Calendar, Hash, Info, Plus, Edit, Trash2, Loader2, Upload } from 'lucide-react'
+import { Search, UserX, AlertTriangle, ShieldAlert, Calendar as CalendarIcon, Hash, Info, Plus, Edit, Trash2, Loader2, Upload } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -33,10 +33,18 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import { Calendar } from "@/components/ui/calendar"
+import { format } from "date-fns"
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useToast } from '@/hooks/use-toast'
+import { cn } from '@/lib/utils'
 
 type TerminatedMember = {
   id: string
@@ -193,17 +201,31 @@ export default function TerminatedMembersPage() {
                   </div>
                   <div className="space-y-2">
                     <Label>Full Name</Label>
-                    <Input value={newMember.name} onChange={e => setNewMember({...newMember, name: e.target.value})} placeholder="e.g. Subhashis Ganguly" />
+                    <Input value={newMember.name} onChange={e => setNewMember({...newMember, name: e.target.value})} placeholder="e.g. Subhashis Ganguly" className="h-12 rounded-xl" />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label>Termination Date</Label>
-                      <Input value={newMember.terminationDate} onChange={e => setNewMember({...newMember, terminationDate: e.target.value})} placeholder="Feb 12, 2024" />
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button variant="outline" className={cn("w-full justify-start text-left font-normal h-12 rounded-xl", !newMember.terminationDate && "text-muted-foreground")}>
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {newMember.terminationDate ? newMember.terminationDate : "Pick a date"}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            onSelect={(date) => setNewMember({...newMember, terminationDate: date ? format(date, "PPP") : ''})}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
                     </div>
                     <div className="space-y-2">
                       <Label>Operational Level</Label>
                       <Select value={newMember.level} onValueChange={(val: any) => setNewMember({...newMember, level: val})}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectTrigger className="h-12 rounded-xl"><SelectValue /></SelectTrigger>
                         <SelectContent>
                           <SelectItem value="National">National</SelectItem>
                           <SelectItem value="State">State</SelectItem>
@@ -214,13 +236,13 @@ export default function TerminatedMembersPage() {
                   </div>
                   <div className="space-y-2">
                     <Label>Designation (Last Held)</Label>
-                    <Input value={newMember.designation} onChange={e => setNewMember({...newMember, designation: e.target.value})} placeholder="e.g. District Observer" />
+                    <Input value={newMember.designation} onChange={e => setNewMember({...newMember, designation: e.target.value})} placeholder="e.g. District Observer" className="h-12 rounded-xl" />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label>Status</Label>
                       <Select value={newMember.status} onValueChange={(val: any) => setNewMember({...newMember, status: val})}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectTrigger className="h-12 rounded-xl"><SelectValue /></SelectTrigger>
                         <SelectContent>
                           <SelectItem value="Revoked">Revoked</SelectItem>
                           <SelectItem value="Cancelled">Cancelled</SelectItem>
@@ -230,7 +252,7 @@ export default function TerminatedMembersPage() {
                     <div className="space-y-2">
                       <Label>Gender</Label>
                       <Select value={newMember.gender} onValueChange={(val: any) => setNewMember({...newMember, gender: val})}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectTrigger className="h-12 rounded-xl"><SelectValue /></SelectTrigger>
                         <SelectContent>
                           <SelectItem value="male">Male</SelectItem>
                           <SelectItem value="female">Female</SelectItem>
@@ -240,7 +262,7 @@ export default function TerminatedMembersPage() {
                   </div>
                   <div className="space-y-2">
                     <Label>Reason</Label>
-                    <Textarea value={newMember.reason} onChange={e => setNewMember({...newMember, reason: e.target.value})} placeholder="Official reason for revocation..." />
+                    <Textarea value={newMember.reason} onChange={e => setNewMember({...newMember, reason: e.target.value})} placeholder="Official reason for revocation..." className="rounded-xl" />
                   </div>
                 </div>
                 <DialogFooter>
@@ -351,7 +373,7 @@ export default function TerminatedMembersPage() {
                                   </p>
                                 </div>
                                 <div className="flex items-center gap-2 text-xs font-bold text-slate-400">
-                                  <Calendar className="w-4 h-4" /> 
+                                  <CalendarIcon className="w-4 h-4" /> 
                                   Effective Since: <span className="text-primary">{member.terminationDate}</span>
                                 </div>
                               </div>
@@ -393,12 +415,12 @@ export default function TerminatedMembersPage() {
                                         </Button>
                                       </div>
                                     </div>
-                                    <Input value={editMember.name} onChange={e => setEditMember({...editMember, name: e.target.value})} />
+                                    <Input value={editMember.name} onChange={e => setEditMember({...editMember, name: e.target.value})} className="h-12 rounded-xl" />
                                     <div className="grid grid-cols-2 gap-4">
                                       <div className="space-y-1">
                                         <Label>Operational Level</Label>
                                         <Select value={editMember.level} onValueChange={(val: any) => setEditMember({...editMember, level: val})}>
-                                          <SelectTrigger><SelectValue /></SelectTrigger>
+                                          <SelectTrigger className="h-12 rounded-xl"><SelectValue /></SelectTrigger>
                                           <SelectContent>
                                             <SelectItem value="National">National</SelectItem>
                                             <SelectItem value="State">State</SelectItem>
@@ -406,10 +428,27 @@ export default function TerminatedMembersPage() {
                                           </SelectContent>
                                         </Select>
                                       </div>
-                                      <Input value={editMember.terminationDate} onChange={e => setEditMember({...editMember, terminationDate: e.target.value})} className="mt-5" />
+                                      <div className="space-y-1">
+                                        <Label>Termination Date</Label>
+                                        <Popover>
+                                          <PopoverTrigger asChild>
+                                            <Button variant="outline" className={cn("w-full justify-start text-left font-normal h-12 rounded-xl", !editMember.terminationDate && "text-muted-foreground")}>
+                                              <CalendarIcon className="mr-2 h-4 w-4" />
+                                              {editMember.terminationDate ? editMember.terminationDate : "Pick a date"}
+                                            </Button>
+                                          </PopoverTrigger>
+                                          <PopoverContent className="w-auto p-0" align="start">
+                                            <Calendar
+                                              mode="single"
+                                              onSelect={(date) => setEditMember({...editMember, terminationDate: date ? format(date, "PPP") : ''})}
+                                              initialFocus
+                                            />
+                                          </PopoverContent>
+                                        </Popover>
+                                      </div>
                                     </div>
-                                    <Input value={editMember.designation} onChange={e => setEditMember({...editMember, designation: e.target.value})} placeholder="Designation" />
-                                    <Textarea value={editMember.reason} onChange={e => setEditMember({...editMember, reason: e.target.value})} />
+                                    <Input value={editMember.designation} onChange={e => setEditMember({...editMember, designation: e.target.value})} placeholder="Designation" className="h-12 rounded-xl" />
+                                    <Textarea value={editMember.reason} onChange={e => setEditMember({...editMember, reason: e.target.value})} className="rounded-xl" />
                                     <Button onClick={handleUpdate} disabled={isActionLoading} className="w-full bg-primary text-white h-12 rounded-xl">
                                       {isActionLoading ? <Loader2 className="animate-spin mr-2" /> : "Save Changes"}
                                     </Button>

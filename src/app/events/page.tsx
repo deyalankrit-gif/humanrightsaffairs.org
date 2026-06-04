@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState } from 'react'
@@ -6,7 +5,7 @@ import Image from 'next/image'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 import { PlaceHolderImages } from '@/lib/placeholder-images'
-import { Calendar, MapPin, Search, ArrowRight, Camera, Plus, Edit, Trash2, Loader2, Upload } from 'lucide-react'
+import { Calendar as CalendarIcon, MapPin, Search, ArrowRight, Camera, Plus, Edit, Trash2, Loader2, Upload } from 'lucide-react'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -34,10 +33,18 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import { Calendar } from "@/components/ui/calendar"
+import { format } from "date-fns"
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { useToast } from '@/hooks/use-toast'
+import { cn } from '@/lib/utils'
 
 type Event = {
   id: string
@@ -230,17 +237,31 @@ export default function EventsPage() {
                     </div>
                     <div className="space-y-2">
                       <Label>Event Title</Label>
-                      <Input value={newEvent.title} onChange={e => setNewEvent({...newEvent, title: e.target.value})} placeholder="e.g. Legal Aid Camp" />
+                      <Input value={newEvent.title} onChange={e => setNewEvent({...newEvent, title: e.target.value})} placeholder="e.g. Legal Aid Camp" className="h-12 rounded-xl" />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label>Date</Label>
-                        <Input value={newEvent.date} onChange={e => setNewEvent({...newEvent, date: e.target.value})} placeholder="March 15, 2024" />
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button variant="outline" className={cn("w-full justify-start text-left font-normal h-12 rounded-xl", !newEvent.date && "text-muted-foreground")}>
+                              <CalendarIcon className="mr-2 h-4 w-4" />
+                              {newEvent.date ? newEvent.date : "Pick a date"}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                              mode="single"
+                              onSelect={(date) => setNewEvent({...newEvent, date: date ? format(date, "PPP") : ''})}
+                              initialFocus
+                            />
+                          </PopoverContent>
+                        </Popover>
                       </div>
                       <div className="space-y-2">
                         <Label>Category</Label>
                         <Select value={newEvent.category} onValueChange={(val: any) => setNewEvent({...newEvent, category: val})}>
-                          <SelectTrigger><SelectValue /></SelectTrigger>
+                          <SelectTrigger className="h-12 rounded-xl"><SelectValue /></SelectTrigger>
                           <SelectContent>
                             {categories.filter(c => c !== 'All').map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                           </SelectContent>
@@ -249,11 +270,11 @@ export default function EventsPage() {
                     </div>
                     <div className="space-y-2">
                       <Label>Location</Label>
-                      <Input value={newEvent.location} onChange={e => setNewEvent({...newEvent, location: e.target.value})} placeholder="Kolkata, WB" />
+                      <Input value={newEvent.location} onChange={e => setNewEvent({...newEvent, location: e.target.value})} placeholder="Kolkata, WB" className="h-12 rounded-xl" />
                     </div>
                     <div className="space-y-2">
                       <Label>Description</Label>
-                      <Textarea value={newEvent.description} onChange={e => setNewEvent({...newEvent, description: e.target.value})} placeholder="Brief details about the event impact..." />
+                      <Textarea value={newEvent.description} onChange={e => setNewEvent({...newEvent, description: e.target.value})} placeholder="Brief details about the event impact..." className="rounded-xl" />
                     </div>
                   </div>
                   <DialogFooter>
@@ -362,17 +383,31 @@ export default function EventsPage() {
                                     </div>
                                     <div className="space-y-2">
                                       <Label>Event Title</Label>
-                                      <Input value={editEvent.title} onChange={e => setEditEvent({...editEvent, title: e.target.value})} />
+                                      <Input value={editEvent.title} onChange={e => setEditEvent({...editEvent, title: e.target.value})} className="h-12 rounded-xl" />
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
                                       <div className="space-y-2">
                                         <Label>Date</Label>
-                                        <Input value={editEvent.date} onChange={e => setEditEvent({...editEvent, date: e.target.value})} />
+                                        <Popover>
+                                          <PopoverTrigger asChild>
+                                            <Button variant="outline" className={cn("w-full justify-start text-left font-normal h-12 rounded-xl", !editEvent.date && "text-muted-foreground")}>
+                                              <CalendarIcon className="mr-2 h-4 w-4" />
+                                              {editEvent.date ? editEvent.date : "Pick a date"}
+                                            </Button>
+                                          </PopoverTrigger>
+                                          <PopoverContent className="w-auto p-0" align="start">
+                                            <Calendar
+                                              mode="single"
+                                              onSelect={(date) => setEditEvent({...editEvent, date: date ? format(date, "PPP") : ''})}
+                                              initialFocus
+                                            />
+                                          </PopoverContent>
+                                        </Popover>
                                       </div>
                                       <div className="space-y-2">
                                         <Label>Category</Label>
                                         <Select value={editEvent.category} onValueChange={(val: any) => setEditEvent({...editEvent, category: val})}>
-                                          <SelectTrigger><SelectValue /></SelectTrigger>
+                                          <SelectTrigger className="h-12 rounded-xl"><SelectValue /></SelectTrigger>
                                           <SelectContent>
                                             {categories.filter(c => c !== 'All').map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                                           </SelectContent>
@@ -381,11 +416,11 @@ export default function EventsPage() {
                                     </div>
                                     <div className="space-y-2">
                                       <Label>Location</Label>
-                                      <Input value={editEvent.location} onChange={e => setEditEvent({...editEvent, location: e.target.value})} />
+                                      <Input value={editEvent.location} onChange={e => setEditEvent({...editEvent, location: e.target.value})} className="h-12 rounded-xl" />
                                     </div>
                                     <div className="space-y-2">
                                       <Label>Description</Label>
-                                      <Textarea value={editEvent.description} onChange={e => setEditEvent({...editEvent, description: e.target.value})} />
+                                      <Textarea value={editEvent.description} onChange={e => setEditEvent({...editEvent, description: e.target.value})} className="rounded-xl" />
                                     </div>
                                     <Button onClick={handleUpdateEvent} disabled={isActionLoading} className="w-full mt-4 h-12 rounded-xl">
                                       {isActionLoading ? <Loader2 className="animate-spin mr-2" /> : "Save Changes"}
@@ -417,7 +452,7 @@ export default function EventsPage() {
                       </div>
                       <CardHeader className="p-8 pb-0">
                         <div className="flex items-center gap-4 text-xs font-bold text-accent uppercase tracking-widest mb-3">
-                          <span className="flex items-center gap-1"><Calendar className="w-3 h-3" /> {event.date}</span>
+                          <span className="flex items-center gap-1"><CalendarIcon className="w-3 h-3" /> {event.date}</span>
                           <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> {event.location}</span>
                         </div>
                         <CardTitle className="text-2xl font-headline font-bold text-primary group-hover:text-accent transition-colors">

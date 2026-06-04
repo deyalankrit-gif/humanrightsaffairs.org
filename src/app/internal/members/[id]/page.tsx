@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useEffect, useState } from 'react'
@@ -19,7 +18,7 @@ import {
   Phone, 
   Mail, 
   MapPin, 
-  Calendar, 
+  Calendar as CalendarIcon, 
   ShieldCheck, 
   Droplets,
   Heart,
@@ -32,11 +31,19 @@ import {
   Camera,
   Upload
 } from 'lucide-react'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import { Calendar } from "@/components/ui/calendar"
+import { format } from "date-fns"
 import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'
 import Image from 'next/image'
 import { PlaceHolderImages } from '@/lib/placeholder-images'
 import { INDIA_DATA } from '@/lib/india-data'
+import { cn } from '@/lib/utils'
 
 export default function MemberDetailsPage() {
   const { user, loading: authLoading } = useUser()
@@ -194,7 +201,7 @@ export default function MemberDetailsPage() {
                     <div className="space-y-1">
                       <Label className="text-white">Operational Level</Label>
                       <Select value={editForm?.level} onValueChange={(val) => setEditForm({...editForm, level: val})}>
-                        <SelectTrigger className="bg-white/5 border-white/10 text-white">
+                        <SelectTrigger className="bg-white/5 border-white/10 text-white h-12 rounded-xl">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -209,7 +216,7 @@ export default function MemberDetailsPage() {
                       <Input 
                         value={editForm?.name} 
                         onChange={(e) => setEditForm({...editForm, name: e.target.value})}
-                        className="bg-white/5 border-white/10 text-white"
+                        className="bg-white/5 border-white/10 text-white h-12 rounded-xl"
                       />
                     </div>
                   </div>
@@ -218,7 +225,7 @@ export default function MemberDetailsPage() {
                     <Input 
                       value={editForm?.designation} 
                       onChange={(e) => setEditForm({...editForm, designation: e.target.value})}
-                      className="bg-white/5 border-white/10 text-white"
+                      className="bg-white/5 border-white/10 text-white h-12 rounded-xl"
                     />
                   </div>
                 </div>
@@ -268,7 +275,7 @@ export default function MemberDetailsPage() {
                           value={editForm?.stateName} 
                           onValueChange={(val) => setEditForm({...editForm, stateName: val, districtName: ''})}
                         >
-                          <SelectTrigger className="bg-slate-50 border-slate-100">
+                          <SelectTrigger className="bg-slate-50 border-slate-100 h-12 rounded-xl">
                             <SelectValue placeholder="Select State" />
                           </SelectTrigger>
                           <SelectContent>
@@ -283,7 +290,7 @@ export default function MemberDetailsPage() {
                           onValueChange={(val) => setEditForm({...editForm, districtName: val})}
                           disabled={!editForm?.stateName}
                         >
-                          <SelectTrigger className="bg-slate-50 border-slate-100">
+                          <SelectTrigger className="bg-slate-50 border-slate-100 h-12 rounded-xl">
                             <SelectValue placeholder="Select District" />
                           </SelectTrigger>
                           <SelectContent>
@@ -303,7 +310,7 @@ export default function MemberDetailsPage() {
                         <Input 
                           value={editForm?.email} 
                           onChange={(e) => setEditForm({...editForm, email: e.target.value})}
-                          className="bg-slate-50 border-slate-100"
+                          className="bg-slate-50 border-slate-100 h-12 rounded-xl"
                         />
                       ) : (
                         <p className="text-xl font-bold text-primary flex items-center gap-3 break-all">
@@ -317,7 +324,7 @@ export default function MemberDetailsPage() {
                         <Input 
                           value={editForm?.phone} 
                           onChange={(e) => setEditForm({...editForm, phone: e.target.value})}
-                          className="bg-slate-50 border-slate-100"
+                          className="bg-slate-50 border-slate-100 h-12 rounded-xl"
                         />
                       ) : (
                         <p className="text-xl font-bold text-primary flex items-center gap-3">
@@ -332,7 +339,7 @@ export default function MemberDetailsPage() {
                       <Input 
                         value={editForm?.address} 
                         onChange={(e) => setEditForm({...editForm, address: e.target.value})}
-                        className="bg-slate-50 border-slate-100"
+                        className="bg-slate-50 border-slate-100 h-12 rounded-xl"
                       />
                     ) : (
                       <p className="text-xl font-bold text-primary flex items-center gap-3 leading-relaxed">
@@ -354,7 +361,7 @@ export default function MemberDetailsPage() {
                     <p className="text-[10px] font-bold text-red-400 uppercase tracking-widest">Blood Type</p>
                     {isEditing ? (
                       <Select value={editForm?.bloodGroup} onValueChange={(val) => setEditForm({...editForm, bloodGroup: val})}>
-                        <SelectTrigger className="bg-white/50 border-red-100">
+                        <SelectTrigger className="bg-white/50 border-red-100 h-12 rounded-xl">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -375,7 +382,7 @@ export default function MemberDetailsPage() {
                       <Input 
                         value={editForm?.emergencyContact} 
                         onChange={(e) => setEditForm({...editForm, emergencyContact: e.target.value})}
-                        className="bg-white/50 border-slate-200"
+                        className="bg-white/50 border-slate-200 h-12 rounded-xl"
                       />
                     ) : (
                       <p className="text-xl font-bold text-primary flex items-center gap-3">
@@ -392,19 +399,28 @@ export default function MemberDetailsPage() {
                 <div className="absolute top-0 right-0 w-32 h-32 bg-accent/10 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-accent/20 transition-colors"></div>
                 <CardHeader className="p-0 mb-8">
                    <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center border border-white/10">
-                    <Calendar className="w-8 h-8 text-accent" />
+                    <CalendarIcon className="w-8 h-8 text-accent" />
                    </div>
                 </CardHeader>
                 <div className="space-y-8 relative z-10">
                   <div className="space-y-1">
                     <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Commission Date</p>
                     {isEditing ? (
-                      <Input 
-                        value={editForm?.joiningDate} 
-                        onChange={(e) => setEditForm({...editForm, joiningDate: e.target.value})}
-                        className="bg-white/5 border-white/10 text-white"
-                        placeholder="e.g. 12 Jan 2018"
-                      />
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button variant="outline" className={cn("w-full justify-start text-left font-normal bg-white/5 border-white/10 text-white h-12 rounded-xl", !editForm?.joiningDate && "text-muted-foreground")}>
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {editForm?.joiningDate ? editForm.joiningDate : "Pick a date"}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            onSelect={(date) => setEditForm({...editForm, joiningDate: date ? format(date, "PPP") : ''})}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
                     ) : (
                       <p className="text-3xl font-headline font-bold">{profile.joiningDate || 'Date Unavailable'}</p>
                     )}
@@ -413,7 +429,7 @@ export default function MemberDetailsPage() {
                     <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Operational Status</p>
                     {isEditing ? (
                       <Select value={editForm?.status} onValueChange={(val) => setEditForm({...editForm, status: val})}>
-                        <SelectTrigger className="bg-white/5 border-white/10 text-white">
+                        <SelectTrigger className="bg-white/5 border-white/10 text-white h-12 rounded-xl">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
