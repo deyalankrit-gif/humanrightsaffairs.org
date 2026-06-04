@@ -74,14 +74,17 @@ export function AdminNavbar() {
                   key={link.name} 
                   href={link.href}
                   className={cn(
-                    "flex items-center gap-2 text-sm font-bold transition-all py-2 px-4 rounded-xl border border-transparent",
+                    "flex items-center gap-2 text-sm font-bold transition-all py-2 px-4 rounded-xl relative",
                     isActive 
-                      ? "bg-accent text-primary shadow-lg shadow-accent/20 scale-105" 
+                      ? "text-accent" 
                       : "text-slate-400 hover:text-white hover:bg-white/5"
                   )}
                 >
                   {link.icon}
                   {link.name}
+                  {isActive && (
+                    <span className="absolute bottom-0 left-4 right-4 h-0.5 bg-accent rounded-full shadow-[0_0_8px_rgba(212,175,55,0.5)] animate-in fade-in slide-in-from-bottom-1 duration-300"></span>
+                  )}
                 </Link>
               )
             })}
@@ -132,9 +135,9 @@ export function AdminNavbar() {
                         key={link.name} 
                         href={link.href}
                         className={cn(
-                          "flex items-center gap-4 p-4 rounded-2xl text-lg font-bold transition-all border border-transparent",
+                          "flex items-center gap-4 p-4 rounded-2xl text-lg font-bold transition-all relative border border-transparent",
                           isActive 
-                            ? "bg-accent text-primary shadow-xl shadow-accent/20" 
+                            ? "text-accent bg-white/5" 
                             : "hover:bg-white/5 text-slate-300"
                         )}
                       >
@@ -142,6 +145,9 @@ export function AdminNavbar() {
                           {link.icon}
                         </div>
                         {link.name}
+                        {isActive && (
+                           <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-accent rounded-full animate-in fade-in slide-in-from-left-1 duration-300"></span>
+                        )}
                       </Link>
                     )
                   })}

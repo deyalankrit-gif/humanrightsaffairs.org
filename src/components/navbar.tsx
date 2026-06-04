@@ -109,6 +109,9 @@ export function Navbar() {
                 )}
               >
                 {link.name}
+                {isActive && (
+                  <span className="absolute bottom-0 left-0 w-full h-0.5 bg-accent rounded-full animate-in fade-in slide-in-from-bottom-1 duration-300"></span>
+                )}
               </Link>
             )
           })}
