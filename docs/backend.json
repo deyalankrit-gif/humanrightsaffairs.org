@@ -26,7 +26,9 @@
         "designation": { "type": "string" },
         "email": { "type": "string" },
         "phone": { "type": "string" },
-        "level": { "type": "string" },
+        "level": { "type": "string", "enum": ["National", "State", "District"] },
+        "stateName": { "type": "string" },
+        "districtName": { "type": "string" },
         "status": { "type": "string" },
         "memberId": { "type": "string" },
         "createdAt": { "type": "string", "format": "date-time" }
@@ -68,6 +70,7 @@
         "title": { "type": "string" },
         "level": { "type": "string" },
         "parentRegion": { "type": "string" },
+        "districtName": { "type": "string" },
         "gender": { "type": "string" },
         "createdAt": { "type": "string", "format": "date-time" }
       }
@@ -85,6 +88,7 @@
         "minutes": { "type": "string" },
         "level": { "type": "string", "enum": ["National", "State", "District"] },
         "stateName": { "type": "string" },
+        "districtName": { "type": "string" },
         "status": { "type": "string", "enum": ["Upcoming", "Completed", "Postponed"] },
         "createdAt": { "type": "string", "format": "date-time" }
       },

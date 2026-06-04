@@ -77,7 +77,7 @@ export default function InternalMeetingsManagement() {
     location: '',
     agenda: '',
     minutes: '',
-    level: 'National' as const,
+    level: 'National' as 'National' | 'State' | 'District',
     stateName: '',
     districtName: '',
     status: 'Upcoming' as const,
@@ -181,8 +181,6 @@ export default function InternalMeetingsManagement() {
     m.districtName?.toLowerCase().includes(search.toLowerCase())
   )
 
-  const levels = ["National", "State", "District"]
-  const statuses = ["Upcoming", "Completed", "Postponed"]
   const states = Object.keys(INDIA_DATA).sort()
 
   return (
@@ -207,9 +205,7 @@ export default function InternalMeetingsManagement() {
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-w-md bg-white dark:bg-slate-900 rounded-[2rem] max-h-[90vh] overflow-y-auto">
-                <DialogHeader>
-                  <DialogTitle>New Assembly Record</DialogTitle>
-                </DialogHeader>
+                <DialogHeader><DialogTitle>New Assembly Record</DialogTitle></DialogHeader>
                 <div className="space-y-4 py-4">
                   <div className="space-y-2">
                     <Label>Meeting Title</Label>
@@ -238,22 +234,19 @@ export default function InternalMeetingsManagement() {
                       <Label>Time</Label>
                       <div className="relative">
                         <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                        <Input 
-                          type="time" 
-                          className="pl-10 h-12 rounded-xl"
-                          value={newMeeting.time} 
-                          onChange={e => setNewMeeting({...newMeeting, time: e.target.value})} 
-                        />
+                        <Input type="time" className="pl-10 h-12 rounded-xl" value={newMeeting.time} onChange={e => setNewMeeting({...newMeeting, time: e.target.value})} />
                       </div>
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label>Level</Label>
-                      <Select value={newMeeting.level} onValueChange={(val: any) => setNewMeeting({...newMeeting, level: val, stateName: val === 'National' ? '' : newMeeting.stateName, districtName: val !== 'District' ? '' : newMeeting.districtName})}>
+                      <Select value={newMeeting.level} onValueChange={(val: any) => setNewMeeting({...newMeeting, level: val, stateName: '', districtName: ''})}>
                         <SelectTrigger className="h-12 rounded-xl"><SelectValue /></SelectTrigger>
                         <SelectContent>
-                          {levels.map(l => <SelectItem key={l} value={l}>{l}</SelectItem>)}
+                          <SelectItem value="National">National</SelectItem>
+                          <SelectItem value="State">State</SelectItem>
+                          <SelectItem value="District">District</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -262,7 +255,8 @@ export default function InternalMeetingsManagement() {
                       <Select value={newMeeting.status} onValueChange={(val: any) => setNewMeeting({...newMeeting, status: val})}>
                         <SelectTrigger className="h-12 rounded-xl"><SelectValue /></SelectTrigger>
                         <SelectContent>
-                          {statuses.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                          <SelectItem value="Upcoming">Upcoming</SelectItem>
+                          <SelectItem value="Completed">Completed</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -270,13 +264,9 @@ export default function InternalMeetingsManagement() {
 
                   {(newMeeting.level === 'State' || newMeeting.level === 'District') && (
                     <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
-                      <Label className="flex items-center gap-2">
-                        <Globe className="w-3 h-3 text-accent" /> Select State / UT
-                      </Label>
+                      <Label className="flex items-center gap-2"><Globe className="w-3 h-3 text-accent" /> Select State / UT</Label>
                       <Select value={newMeeting.stateName} onValueChange={(val) => setNewMeeting({...newMeeting, stateName: val, districtName: ''})}>
-                        <SelectTrigger className="h-12 rounded-xl">
-                          <SelectValue placeholder="Choose State" />
-                        </SelectTrigger>
+                        <SelectTrigger className="h-12 rounded-xl"><SelectValue placeholder="Choose State" /></SelectTrigger>
                         <SelectContent className="max-h-60">
                           {states.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
                         </SelectContent>
@@ -286,13 +276,9 @@ export default function InternalMeetingsManagement() {
 
                   {newMeeting.level === 'District' && newMeeting.stateName && (
                     <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
-                      <Label className="flex items-center gap-2">
-                        <MapPin className="w-3 h-3 text-accent" /> Select District
-                      </Label>
+                      <Label className="flex items-center gap-2"><MapPin className="w-3 h-3 text-accent" /> Select District</Label>
                       <Select value={newMeeting.districtName} onValueChange={(val) => setNewMeeting({...newMeeting, districtName: val})}>
-                        <SelectTrigger className="h-12 rounded-xl">
-                          <SelectValue placeholder="Choose District" />
-                        </SelectTrigger>
+                        <SelectTrigger className="h-12 rounded-xl"><SelectValue placeholder="Choose District" /></SelectTrigger>
                         <SelectContent className="max-h-60">
                           {(INDIA_DATA[newMeeting.stateName] || []).map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}
                         </SelectContent>
@@ -307,10 +293,6 @@ export default function InternalMeetingsManagement() {
                   <div className="space-y-2">
                     <Label>Agenda</Label>
                     <Textarea value={newMeeting.agenda} onChange={e => setNewMeeting({...newMeeting, agenda: e.target.value})} placeholder="Outline the meeting goals..." className="rounded-xl" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Minutes (Post-Meeting)</Label>
-                    <Textarea value={newMeeting.minutes} onChange={e => setNewMeeting({...newMeeting, minutes: e.target.value})} placeholder="Key resolutions and minutes..." className="rounded-xl" />
                   </div>
                 </div>
                 <DialogFooter>
@@ -328,12 +310,7 @@ export default function InternalMeetingsManagement() {
         <div className="container mx-auto px-4">
           <div className="relative max-w-2xl">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-            <Input 
-              placeholder="Filter archives by title, location or state..." 
-              className="pl-12 h-14 rounded-2xl border-slate-200 dark:border-slate-700 dark:bg-slate-800"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
+            <Input placeholder="Filter archives..." className="pl-12 h-14 rounded-2xl border-slate-200 dark:border-slate-700 dark:bg-slate-800" value={search} onChange={(e) => setSearch(e.target.value)} />
           </div>
         </div>
       </section>
@@ -341,10 +318,7 @@ export default function InternalMeetingsManagement() {
       <section className="py-16">
         <div className="container mx-auto px-4">
           {dataLoading ? (
-            <div className="text-center py-20">
-              <Loader2 className="w-10 h-10 animate-spin text-accent mx-auto mb-4" />
-              <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Connecting to Registry...</p>
-            </div>
+            <div className="text-center py-20"><Loader2 className="w-10 h-10 animate-spin text-accent mx-auto mb-4" /></div>
           ) : (
             <div className="grid gap-6">
               {filtered.map((meeting: any) => (
@@ -370,12 +344,7 @@ export default function InternalMeetingsManagement() {
                         </div>
                         
                         <div className="flex items-center justify-center">
-                           <Badge className={cn(
-                             "font-bold uppercase tracking-widest text-[9px] px-4 py-1",
-                             meeting.status === 'Upcoming' ? 'bg-emerald-500' : 'bg-primary text-white'
-                           )}>
-                             {meeting.status}
-                           </Badge>
+                           <Badge className={cn("font-bold uppercase tracking-widest text-[9px] px-4 py-1", meeting.status === 'Upcoming' ? 'bg-emerald-500' : 'bg-primary text-white')}>{meeting.status}</Badge>
                         </div>
 
                         <div className="flex items-center justify-end gap-3">
@@ -387,12 +356,9 @@ export default function InternalMeetingsManagement() {
                               <DialogHeader><DialogTitle>Edit Assembly Archive</DialogTitle></DialogHeader>
                               {editMeeting && (
                                 <div className="space-y-4 py-4">
-                                  <div className="space-y-2">
-                                    <Label>Title</Label>
-                                    <Input value={editMeeting.title} onChange={e => setEditMeeting({...editMeeting, title: e.target.value})} className="h-12 rounded-xl" />
-                                  </div>
+                                  <Input value={editMeeting.title} onChange={e => setEditMeeting({...editMeeting, title: e.target.value})} className="h-12 rounded-xl" />
                                   <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-2">
+                                    <div className="space-y-1">
                                       <Label>Date</Label>
                                       <Popover>
                                         <PopoverTrigger asChild>
@@ -410,23 +376,26 @@ export default function InternalMeetingsManagement() {
                                         </PopoverContent>
                                       </Popover>
                                     </div>
-                                    <div className="space-y-2">
+                                    <div className="space-y-1">
                                       <Label>Status</Label>
                                       <Select value={editMeeting.status} onValueChange={(val: any) => setEditMeeting({...editMeeting, status: val})}>
                                         <SelectTrigger className="h-12 rounded-xl"><SelectValue /></SelectTrigger>
                                         <SelectContent>
-                                          {statuses.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                                          <SelectItem value="Upcoming">Upcoming</SelectItem>
+                                          <SelectItem value="Completed">Completed</SelectItem>
                                         </SelectContent>
                                       </Select>
                                     </div>
                                   </div>
 
-                                  <div className="space-y-2">
+                                  <div className="space-y-1">
                                     <Label>Level</Label>
-                                    <Select value={editMeeting.level} onValueChange={(val: any) => setEditMeeting({...editMeeting, level: val, stateName: val === 'National' ? '' : editMeeting.stateName, districtName: val !== 'District' ? '' : editMeeting.districtName})}>
+                                    <Select value={editMeeting.level} onValueChange={(val: any) => setEditMeeting({...editMeeting, level: val, stateName: '', districtName: ''})}>
                                       <SelectTrigger className="h-12 rounded-xl"><SelectValue /></SelectTrigger>
                                       <SelectContent>
-                                        {levels.map(l => <SelectItem key={l} value={l}>{l}</SelectItem>)}
+                                        <SelectItem value="National">National</SelectItem>
+                                        <SelectItem value="State">State</SelectItem>
+                                        <SelectItem value="District">District</SelectItem>
                                       </SelectContent>
                                     </Select>
                                   </div>
@@ -435,9 +404,7 @@ export default function InternalMeetingsManagement() {
                                     <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
                                       <Label>State / UT</Label>
                                       <Select value={editMeeting.stateName} onValueChange={(val) => setEditMeeting({...editMeeting, stateName: val, districtName: ''})}>
-                                        <SelectTrigger className="h-12 rounded-xl">
-                                          <SelectValue placeholder="Choose State" />
-                                        </SelectTrigger>
+                                        <SelectTrigger className="h-12 rounded-xl"><SelectValue placeholder="Choose State" /></SelectTrigger>
                                         <SelectContent className="max-h-60">
                                           {states.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
                                         </SelectContent>
@@ -449,9 +416,7 @@ export default function InternalMeetingsManagement() {
                                     <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
                                       <Label>District</Label>
                                       <Select value={editMeeting.districtName} onValueChange={(val) => setEditMeeting({...editMeeting, districtName: val})}>
-                                        <SelectTrigger className="h-12 rounded-xl">
-                                          <SelectValue placeholder="Choose District" />
-                                        </SelectTrigger>
+                                        <SelectTrigger className="h-12 rounded-xl"><SelectValue placeholder="Choose District" /></SelectTrigger>
                                         <SelectContent className="max-h-60">
                                           {(INDIA_DATA[editMeeting.stateName] || []).map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}
                                         </SelectContent>
@@ -459,31 +424,17 @@ export default function InternalMeetingsManagement() {
                                     </div>
                                   )}
 
-                                  <div className="space-y-2">
-                                    <Label>Agenda</Label>
-                                    <Textarea value={editMeeting.agenda} onChange={e => setEditMeeting({...editMeeting, agenda: e.target.value})} className="min-h-[100px] rounded-xl" />
-                                  </div>
-                                  <div className="space-y-2">
-                                    <Label>Minutes</Label>
-                                    <Textarea value={editMeeting.minutes} onChange={e => setEditMeeting({...editMeeting, minutes: e.target.value})} className="min-h-[150px] rounded-xl" />
-                                  </div>
-                                  <Button onClick={handleUpdate} disabled={isActionLoading} className="w-full h-12 rounded-xl mt-4">
-                                    {isActionLoading ? <Loader2 className="animate-spin" /> : "Commit Changes"}
-                                  </Button>
+                                  <Textarea value={editMeeting.agenda} onChange={e => setEditMeeting({...editMeeting, agenda: e.target.value})} className="rounded-xl" />
+                                  <Textarea value={editMeeting.minutes} onChange={e => setEditMeeting({...editMeeting, minutes: e.target.value})} placeholder="Minutes (Post-Meeting)..." className="rounded-xl" />
+                                  <Button onClick={handleUpdate} disabled={isActionLoading} className="w-full h-12 rounded-xl mt-4">Commit Changes</Button>
                                 </div>
                               )}
                             </DialogContent>
                           </Dialog>
-
                           <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button variant="ghost" size="icon" className="rounded-xl text-slate-400 hover:text-red-500"><Trash2 className="w-4 h-4" /></Button>
-                            </AlertDialogTrigger>
+                            <AlertDialogTrigger asChild><Button variant="ghost" size="icon" className="rounded-xl text-slate-400 hover:text-red-500"><Trash2 className="w-4 h-4" /></Button></AlertDialogTrigger>
                             <AlertDialogContent className="rounded-[2rem]">
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>Delete Assembly Record?</AlertDialogTitle>
-                                <AlertDialogDescription>This will permanently remove the agenda and minutes from public archives.</AlertDialogDescription>
-                              </AlertDialogHeader>
+                              <AlertDialogHeader><AlertDialogTitle>Delete Assembly Record?</AlertDialogTitle></AlertDialogHeader>
                               <AlertDialogFooter>
                                 <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
                                 <AlertDialogAction onClick={() => handleDelete(meeting.id)} className="bg-red-500 hover:bg-red-600 rounded-xl border-none">Confirm Deletion</AlertDialogAction>
@@ -496,12 +447,6 @@ export default function InternalMeetingsManagement() {
                   </CardContent>
                 </Card>
               ))}
-              {filtered.length === 0 && (
-                <div className="text-center py-32 bg-white dark:bg-slate-900 rounded-[3rem] border border-dashed border-slate-200 dark:border-slate-800">
-                   <Handshake className="w-12 h-12 text-slate-200 mx-auto mb-4" />
-                   <p className="text-slate-400 font-bold uppercase tracking-widest">No matching assembly records in secure database.</p>
-                </div>
-              )}
             </div>
           )}
         </div>

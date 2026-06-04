@@ -41,7 +41,6 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogFooter,
-  DialogDescription,
 } from "@/components/ui/dialog"
 import {
   AlertDialog,
@@ -234,12 +233,7 @@ export default function MembersPage() {
                       </div>
                       <Button variant="outline" className="w-full relative h-12 rounded-xl">
                         <Upload className="w-4 h-4 mr-2" /> Upload Photo
-                        <input 
-                          type="file" 
-                          accept="image/*" 
-                          className="absolute inset-0 opacity-0 cursor-pointer" 
-                          onChange={handleFileChange}
-                        />
+                        <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={handleFileChange} />
                       </Button>
                     </div>
                   </div>
@@ -254,7 +248,7 @@ export default function MembersPage() {
                     </div>
                     <div className="space-y-2">
                       <Label>Operational Level</Label>
-                      <Select value={newMember.level} onValueChange={(val) => setNewMember({...newMember, level: val as any})}>
+                      <Select value={newMember.level} onValueChange={(val) => setNewMember({...newMember, level: val as any, stateName: '', districtName: ''})}>
                         <SelectTrigger><SelectValue placeholder="Select Level" /></SelectTrigger>
                         <SelectContent>
                           <SelectItem value="National">National</SelectItem>
@@ -270,20 +264,16 @@ export default function MembersPage() {
                         <Label>State Chapter</Label>
                         <Select value={newMember.stateName} onValueChange={(val) => setNewMember({...newMember, stateName: val, districtName: ''})}>
                           <SelectTrigger><SelectValue placeholder="Select State" /></SelectTrigger>
-                          <SelectContent>
+                          <SelectContent className="max-h-60">
                             {states.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
                           </SelectContent>
                         </Select>
                       </div>
                       <div className="space-y-2">
                         <Label>District</Label>
-                        <Select 
-                          value={newMember.districtName} 
-                          onValueChange={(val) => setNewMember({...newMember, districtName: val})}
-                          disabled={!newMember.stateName}
-                        >
+                        <Select value={newMember.districtName} onValueChange={(val) => setNewMember({...newMember, districtName: val})} disabled={!newMember.stateName}>
                           <SelectTrigger><SelectValue placeholder="Select District" /></SelectTrigger>
-                          <SelectContent>
+                          <SelectContent className="max-h-60">
                             {(newMember.stateName ? INDIA_DATA[newMember.stateName] : []).map(d => (
                               <SelectItem key={d} value={d}>{d}</SelectItem>
                             ))}
@@ -381,10 +371,7 @@ export default function MembersPage() {
       <section className="py-20">
         <div className="container mx-auto px-4">
           {membersLoading ? (
-            <div className="text-center py-20">
-              <Loader2 className="w-10 h-10 animate-spin text-accent mx-auto mb-4" />
-              <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Fetching Live Directory...</p>
-            </div>
+            <div className="text-center py-20"><Loader2 className="w-10 h-10 animate-spin text-accent mx-auto mb-4" /><p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Fetching Live Directory...</p></div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {filteredMembers.length > 0 ? (
@@ -396,27 +383,7 @@ export default function MembersPage() {
                       <CardHeader className="p-0">
                         <div className="relative aspect-square overflow-hidden bg-slate-100">
                           <Image src={displayImg} alt={member.name} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
-                          <div className="absolute top-4 right-4">
-                            <Badge className="bg-primary/80 backdrop-blur-md text-white font-bold border-none">{member.level}</Badge>
-                          </div>
-                          {isAdmin && (
-                            <div className="absolute top-4 left-4 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <Link href={`/internal/members/${member.id}`}><Button size="icon" className="bg-white/90 hover:bg-white text-primary rounded-full shadow-lg"><Edit className="w-4 h-4" /></Button></Link>
-                              <AlertDialog>
-                                <AlertDialogTrigger asChild><Button size="icon" className="bg-red-500/90 hover:bg-red-500 text-white rounded-full shadow-lg"><Trash2 className="w-4 h-4" /></Button></AlertDialogTrigger>
-                                <AlertDialogContent className="rounded-[2rem]">
-                                  <AlertDialogHeader>
-                                    <AlertDialogTitle className="flex items-center gap-2"><AlertTriangle className="text-red-500 w-5 h-5" /> Confirm Deletion</AlertDialogTitle>
-                                    <AlertDialogDescription>Are you sure you want to remove <strong>{member.name}</strong>? This cannot be undone.</AlertDialogDescription>
-                                  </AlertDialogHeader>
-                                  <div className="flex justify-end gap-3 mt-4">
-                                    <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
-                                    <AlertDialogAction onClick={() => handleDelete(member.id)} className="bg-red-500 hover:bg-red-600 rounded-xl border-none">Delete Record</AlertDialogAction>
-                                  </div>
-                                </AlertDialogContent>
-                              </AlertDialog>
-                            </div>
-                          )}
+                          <div className="absolute top-4 right-4"><Badge className="bg-primary/80 backdrop-blur-md text-white font-bold border-none">{member.level}</Badge></div>
                         </div>
                       </CardHeader>
                       <CardContent className="p-6 space-y-4">
@@ -430,11 +397,9 @@ export default function MembersPage() {
                         <div className="space-y-2 pt-2 border-t border-slate-100">
                           <div className="flex items-center gap-2 text-xs text-slate-500">
                             <MapPin className="w-3 h-3 text-slate-400" />
-                            <span className="truncate">
-                              {member.districtName ? `${member.districtName}, ` : ''}{member.stateName || 'All India'}
-                            </span>
+                            <span className="truncate">{member.districtName ? `${member.districtName}, ` : ''}{member.stateName || 'All India'}</span>
                           </div>
-                          <div className="flex items-center gap-2 text-xs text-slate-500"><Briefcase className="w-3 h-3 text-slate-400" /><span>ID: {member.memberId || 'N/A'}</span></div>
+                          <div className="flex items-center gap-2 text-xs text-slate-500"><Briefcase className="w-3 h-3 text-slate-400" /><span>ID: {member.memberId || member.id.slice(-6).toUpperCase()}</span></div>
                         </div>
                       </CardContent>
                     </Card>
@@ -444,7 +409,6 @@ export default function MembersPage() {
                 <div className="col-span-full py-32 text-center">
                   <User className="w-16 h-16 text-slate-200 mx-auto mb-4" />
                   <h3 className="text-2xl font-headline font-bold text-primary">No members found</h3>
-                  <p className="text-slate-500">The directory is empty or no matches were found.</p>
                 </div>
               )}
             </div>
