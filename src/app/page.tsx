@@ -1,5 +1,4 @@
 
-
 import Image from 'next/image'
 import Link from 'next/link'
 import { Navbar } from '@/components/navbar'
@@ -10,9 +9,10 @@ import { EmergencyHelpline } from '@/components/emergency-helpline'
 import { IDCardShowcase } from '@/components/id-card-sample'
 import { AIChat } from '@/components/ai-chat'
 import { DocSearch } from '@/components/doc-search'
+import { MemberGrievances } from '@/components/member-grievances'
 import { Footer } from '@/components/footer'
 import { Button } from '@/components/ui/button'
-import { Shield, Scale, Users, HeartHandshake, ArrowRight, Gavel, CheckCircle2 } from 'lucide-react'
+import { Shield, Scale, Users, HeartHandshake, ArrowRight, Gavel, CheckCircle2, MessageSquareText } from 'lucide-react'
 import { DonationDialog } from '@/components/donation-dialog'
 import { Typewriter } from '@/components/typewriter'
 import { PlaceHolderImages } from '@/lib/placeholder-images'
@@ -177,6 +177,22 @@ export default function Home() {
       <EmergencyHelpline />
 
       <IDCardShowcase />
+
+      <section id="grievances" className="py-24 md:py-32 bg-slate-50 dark:bg-slate-950 relative overflow-hidden">
+        <div className="container mx-auto px-4">
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <div className="inline-flex items-center gap-2 bg-accent/20 text-accent px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest border border-accent/30 mb-6">
+              <MessageSquareText className="w-4 h-4" />
+              <span>Institutional Oversight</span>
+            </div>
+            <h2 className="text-4xl md:text-6xl font-headline font-bold text-primary dark:text-white mb-6">File a Formal <span className="text-accent italic">Grievance</span></h2>
+            <p className="text-slate-500 dark:text-slate-400 text-lg">
+              Submit your concerns directly to our governance cell. Your submission is protected by strict privacy protocols and will be reviewed by the central administration.
+            </p>
+          </div>
+          <MemberGrievances />
+        </div>
+      </section>
 
       <section className="py-16 md:py-32 bg-slate-50/50 backdrop-blur-sm dark:bg-slate-950 relative overflow-hidden">
         <div className="absolute -top-24 -left-24 w-96 h-96 bg-accent/10 rounded-full blur-3xl animate-pulse"></div>

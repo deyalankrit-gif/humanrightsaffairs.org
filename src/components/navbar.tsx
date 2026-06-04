@@ -20,6 +20,7 @@ const navLinks = [
   { name: 'Leadership', href: '/leadership' },
   { name: 'Membership Dir', href: '/members' },
   { name: 'Terminated List', href: '/terminated-members' },
+  { name: 'Grievance Cell', href: '/#grievances' },
   { name: 'Rights Center', href: '/#knowledge' },
   { name: 'Helpline', href: '/#helpline' },
 ]
@@ -38,7 +39,7 @@ export function Navbar() {
       setIsScrolled(window.scrollY > 20)
       
       if (isHome) {
-        const sections = ['knowledge', 'helpline', 'membership']
+        const sections = ['knowledge', 'helpline', 'membership', 'grievances']
         let currentSection = ''
         for (const section of sections) {
           const el = document.getElementById(section)

@@ -51,5 +51,11 @@ service cloud.firestore {
       allow read: if true;
       allow write: if isAdmin();
     }
+
+    // Member Grievances: Public create only, Admin full control
+    match /grievances/{grievanceId} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
   }
 }

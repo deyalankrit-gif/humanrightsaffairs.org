@@ -89,6 +89,23 @@
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["title", "date", "level"]
+    },
+    "Grievance": {
+      "title": "Member Grievance",
+      "description": "Complaints and grievances submitted by members.",
+      "type": "object",
+      "properties": {
+        "token": { "type": "string" },
+        "memberId": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "phone": { "type": "string" },
+        "subject": { "type": "string" },
+        "description": { "type": "string" },
+        "status": { "type": "string", "enum": ["Pending", "Reviewed", "Resolved"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "email", "description"]
     }
   },
   "auth": {
@@ -100,6 +117,7 @@
     "/events/{eventId}": { "schema": "Event" },
     "/terminatedMembers/{memberId}": { "schema": "TerminatedMember" },
     "/leadership/{leaderId}": { "schema": "LeadershipMember" },
-    "/meetings/{meetingId}": { "schema": "GeneralMeeting" }
+    "/meetings/{meetingId}": { "schema": "GeneralMeeting" },
+    "/grievances/{grievanceId}": { "schema": "Grievance" }
   }
 }
