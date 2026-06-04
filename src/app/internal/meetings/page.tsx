@@ -97,12 +97,13 @@ export default function InternalMeetingsManagement() {
 
   const formatTo12Hour = (time24: string) => {
     if (!time24) return '';
-    if (time24.includes('AM') || time24.includes('PM')) return time24;
+    // If it already matches the custom punctuated format, return it
+    if (time24.includes('A.M.') || time24.includes('P.M.')) return time24;
     try {
       const [hours, minutes] = time24.split(':').map(Number);
-      const period = hours >= 12 ? 'PM' : 'AM';
+      const period = hours >= 12 ? 'P.M.' : 'A.M.';
       const hours12 = hours % 12 || 12;
-      return `${hours12}:${minutes.toString().padStart(2, '0')} ${period}`;
+      return `${hours12}.${minutes.toString().padStart(2, '0')} ${period}`;
     } catch {
       return time24;
     }
