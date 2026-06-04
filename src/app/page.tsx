@@ -78,7 +78,7 @@ export default function Home() {
             className="object-cover brightness-[0.15] scale-105"
             priority
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-primary/60 via-primary/40 to-primary/80"></div>
+          <div className="absolute inset-0 bg-gradient-to-b from-primary/60 via-primary/40 to-primary/80 dark:from-slate-950/80 dark:via-slate-950/60 dark:to-slate-950/90"></div>
         </div>
 
         <div className="container mx-auto px-4 relative z-10 text-white text-center">
@@ -156,12 +156,12 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="search" className="py-20 md:py-32 bg-white/50 backdrop-blur-sm relative overflow-hidden">
+      <section id="search" className="py-20 md:py-32 bg-white/50 backdrop-blur-sm dark:bg-slate-900/50 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-80 h-80 bg-accent/5 rounded-full blur-[120px]"></div>
         <div className="container mx-auto px-4 relative z-10">
           <div className="text-center mb-12 md:mb-20">
             <h2 className="text-3xl md:text-6xl font-headline font-bold text-primary mb-6">AI-Enhanced <span className="text-accent">Rights</span> Explorer</h2>
-            <p className="text-slate-500 max-w-3xl mx-auto text-sm md:text-xl">Instantly navigate complex legal frameworks. Our AI highlights exactly what you need to know about your constitutional protections.</p>
+            <p className="text-muted-foreground max-w-3xl mx-auto text-sm md:text-xl">Instantly navigate complex legal frameworks. Our AI highlights exactly what you need to know about your constitutional protections.</p>
           </div>
           <DocSearch />
         </div>
@@ -177,12 +177,11 @@ export default function Home() {
 
       <IDCardShowcase />
 
-      <section className="py-16 md:py-32 bg-slate-50/50 backdrop-blur-sm relative overflow-hidden">
+      <section className="py-16 md:py-32 bg-slate-50/50 backdrop-blur-sm dark:bg-slate-950 relative overflow-hidden">
         <div className="absolute -top-24 -left-24 w-96 h-96 bg-accent/10 rounded-full blur-3xl animate-pulse"></div>
         <div className="container mx-auto px-4 relative z-10">
-          <div className="bg-primary rounded-[2rem] md:rounded-[4rem] p-8 md:p-24 flex flex-col items-center text-center text-white shadow-2xl relative overflow-hidden group">
+          <div className="bg-primary rounded-[2rem] md:rounded-[4rem] p-8 md:p-24 flex flex-col items-center text-center text-primary-foreground shadow-2xl relative overflow-hidden group">
             
-            {/* 2D Animated Illustrations on Sides - Refined positioning to avoid obscuring text */}
             <div className="absolute -left-12 top-1/2 -translate-y-1/2 w-44 h-60 md:w-64 md:h-80 hidden xl:block animate-float pointer-events-none z-10 opacity-30 group-hover:opacity-100 transition-opacity">
               <div className="relative w-full h-full rounded-[2rem] md:rounded-[3rem] overflow-hidden border-4 md:border-8 border-white shadow-2xl rotate-[-6deg] bg-slate-200">
                 <Image 
@@ -207,7 +206,6 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Background Image Overlay */}
             <div className="absolute inset-0 z-0 opacity-10 pointer-events-none">
               <Image 
                 src={donationImg1?.imageUrl || "/female.jpeg"} 
@@ -215,11 +213,10 @@ export default function Home() {
                 fill 
                 className="object-cover grayscale"
               />
-              <div className="absolute inset-0 bg-primary/90"></div>
+              <div className="absolute inset-0 bg-primary/90 dark:bg-slate-900/90"></div>
             </div>
 
             <div className="max-w-4xl space-y-6 md:space-y-10 relative z-30 px-4 md:px-10">
-              {/* Pictures flanking the Scale icon - Refined for better spacing */}
               <div className="flex items-center justify-center gap-4 md:gap-16 animate-float">
                 <div className="relative w-14 h-16 md:w-28 md:h-36 rounded-2xl md:rounded-[2rem] overflow-hidden border-2 md:border-4 border-white/20 rotate-[-8deg] shadow-2xl hidden sm:block shrink-0">
                   <Image 
@@ -241,7 +238,7 @@ export default function Home() {
               </div>
 
               <h2 className="text-3xl md:text-7xl font-headline font-bold">Support the Cause of <span className="text-accent italic">Justice</span></h2>
-              <p className="text-sm md:text-xl text-indigo-100 leading-relaxed max-w-2xl mx-auto font-medium">
+              <p className="text-sm md:text-xl opacity-90 leading-relaxed max-w-2xl mx-auto font-medium">
                 Your contributions help us provide free legal aid to the marginalized and run awareness campaigns across rural India. All donations are tax-exempt under 80G.
               </p>
               

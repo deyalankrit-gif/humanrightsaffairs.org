@@ -29,7 +29,7 @@ export function IDCardShowcase() {
   ]
 
   return (
-    <section id="membership" className="py-24 bg-primary text-white overflow-hidden relative">
+    <section id="membership" className="py-24 bg-primary dark:bg-slate-950 text-primary-foreground overflow-hidden relative">
       <div className="absolute top-0 right-0 w-1/3 h-full bg-accent/5 -skew-x-12"></div>
       
       <div className="container mx-auto px-4 relative z-10">
@@ -42,7 +42,7 @@ export function IDCardShowcase() {
             <h2 className="text-3xl md:text-5xl font-headline font-bold leading-tight">
               Get Your Digital <span className="text-accent">Membership Identity Card</span> <span className="inline-block animate-bounce">Now</span>
             </h2>
-            <p className="text-lg md:text-xl text-indigo-100 font-body">
+            <p className="text-lg md:text-xl opacity-90 font-body">
               Join a network of thousands of human rights defenders. Our secure digital ID cards feature QR-code verification, making your organizational status verifiable anywhere, anytime.
             </p>
             
@@ -69,17 +69,17 @@ export function IDCardShowcase() {
               
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button className="bg-secondary text-secondary-foreground hover:bg-secondary/90 px-8 py-6 rounded-xl text-lg shadow-lg shadow-secondary/20 transition-all border-none w-full sm:w-auto">
+                  <Button variant="secondary" className="bg-secondary text-secondary-foreground hover:bg-secondary/90 px-8 py-6 rounded-xl text-lg shadow-lg shadow-secondary/20 transition-all border-none w-full sm:w-auto">
                     View Eligibility
                   </Button>
                 </AlertDialogTrigger>
-                <AlertDialogContent className="bg-white text-primary rounded-[2rem] border-none shadow-2xl max-w-lg w-[95vw]">
+                <AlertDialogContent className="bg-white dark:bg-slate-900 text-primary dark:text-foreground rounded-[2rem] border-none shadow-2xl max-w-lg w-[95vw]">
                   <AlertDialogHeader>
                     <div className="w-12 h-12 bg-accent/10 rounded-2xl flex items-center justify-center mb-4">
                       <Info className="w-6 h-6 text-accent" />
                     </div>
                     <AlertDialogTitle className="text-xl md:text-2xl font-headline font-bold">Membership Eligibility</AlertDialogTitle>
-                    <AlertDialogDescription className="text-slate-600 text-sm md:text-base">
+                    <AlertDialogDescription className="text-muted-foreground text-sm md:text-base">
                       To maintain the integrity of our human rights network, all members must meet the following criteria:
                     </AlertDialogDescription>
                   </AlertDialogHeader>
@@ -89,13 +89,13 @@ export function IDCardShowcase() {
                         <div className="mt-1 shrink-0"><CheckCircle2 className="w-4 h-4 text-emerald-500" /></div>
                         <div>
                           <p className="font-bold text-sm">{c.title}</p>
-                          <p className="text-xs text-slate-500">{c.detail}</p>
+                          <p className="text-xs text-muted-foreground">{c.detail}</p>
                         </div>
                       </div>
                     ))}
                   </div>
                   <AlertDialogFooter>
-                    <AlertDialogAction className="bg-primary text-white rounded-xl px-8 font-bold w-full sm:w-auto">
+                    <AlertDialogAction className="bg-primary text-primary-foreground dark:bg-slate-100 dark:text-primary rounded-xl px-8 font-bold w-full sm:w-auto">
                       Understood
                     </AlertDialogAction>
                   </AlertDialogFooter>
@@ -123,7 +123,7 @@ export function IDCardShowcase() {
               </div>
             </div>
 
-            <div className="bg-accent text-primary px-4 py-1.5 rounded-full shadow-2xl border-2 border-primary animate-bounce flex items-center gap-2 mt-4">
+            <div className="bg-accent text-primary px-4 py-1.5 rounded-full shadow-2xl border-2 border-primary dark:border-slate-800 animate-bounce flex items-center gap-2 mt-4">
                <ShieldCheck className="w-4 h-4" />
                <p className="text-[10px] md:text-xs font-bold uppercase tracking-widest leading-none">Sample Official Identity Card</p>
             </div>
