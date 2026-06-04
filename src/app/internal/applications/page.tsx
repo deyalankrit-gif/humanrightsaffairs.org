@@ -29,7 +29,8 @@ import {
   GraduationCap,
   Briefcase,
   ExternalLink,
-  Info
+  Info,
+  Gavel
 } from 'lucide-react'
 import {
   Dialog,
@@ -191,6 +192,12 @@ export default function InternalApplicationsPage() {
                          )}>
                            {a.status}
                          </Badge>
+                         {a.hasNoCriminalRecord && (
+                           <div className="mt-4 flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 px-3 py-1 rounded-full border border-emerald-100 dark:border-emerald-800">
+                             <Gavel className="w-3 h-3" />
+                             <span className="text-[8px] font-bold uppercase tracking-tighter">Affidavit Signed</span>
+                           </div>
+                         )}
                       </div>
                       
                       <div className="flex-1 p-8 grid lg:grid-cols-4 gap-8 items-start">

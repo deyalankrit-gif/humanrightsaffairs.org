@@ -136,7 +136,7 @@ export function AdminNavbar() {
                     return (
                       <Link 
                         key={link.name} 
-                        href={link.href}
+                        href={link.href} 
                         className={cn(
                           "flex items-center gap-4 p-4 rounded-2xl text-lg font-bold transition-all relative border border-transparent",
                           isActive 

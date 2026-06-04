@@ -148,15 +148,21 @@ export function Navbar() {
                 </SheetTitle>
               </SheetHeader>
               <div className="flex flex-col gap-4">
-                {navLinks.map((link) => (
-                  <Link 
-                    key={link.name} 
-                    href={link.href} 
-                    className="text-xl font-headline font-bold text-primary hover:text-accent dark:text-white"
-                  >
-                    {link.name}
-                  </Link>
-                ))}
+                {navLinks.map((link) => {
+                  const isActive = pathname === link.href
+                  return (
+                    <Link 
+                      key={link.name} 
+                      href={link.href} 
+                      className={cn(
+                        "text-xl font-headline font-bold text-primary hover:text-accent dark:text-white",
+                        isActive && "text-accent"
+                      )}
+                    >
+                      {link.name}
+                    </Link>
+                  )
+                })}
                 <DonationDialog>
                   <Button className="w-full bg-primary text-white py-6 text-lg mt-4 dark:bg-accent dark:text-primary">
                     Donate Now

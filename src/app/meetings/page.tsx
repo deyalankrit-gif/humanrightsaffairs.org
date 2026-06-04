@@ -62,8 +62,8 @@ export default function MeetingsPage() {
 
   const formatToCustom12h = (timeStr: string) => {
     if (!timeStr) return '';
-    // Expected format from DB: "HH.mm AM/PM" or "HH:mm"
-    if (timeStr.includes('.')) return timeStr; // Already formatted
+    // Expected format from DB: "HH.mm A.M./P.M."
+    if (timeStr.includes('.')) return timeStr;
     const match = timeStr.match(/^(\d{1,2}):(\d{2})$/);
     if (match) {
       let h = parseInt(match[1]);
@@ -277,13 +277,6 @@ export default function MeetingsPage() {
                                 </div>
                               </div>
                             )}
-
-                            {!meeting.minutes && meeting.status === 'Upcoming' && (
-                              <div className="bg-accent/5 p-6 rounded-3xl border border-accent/20 text-center space-y-2">
-                                <p className="text-sm font-bold text-accent">Minutes pending meeting completion</p>
-                                <p className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Post-meeting resolutions will be archived here.</p>
-                              </div>
-                            )}
                           </div>
                         </DialogContent>
                       </Dialog>
@@ -296,7 +289,6 @@ export default function MeetingsPage() {
                     <Handshake className="w-10 h-10" />
                   </div>
                   <h3 className="text-2xl font-headline font-bold text-primary dark:text-white">No meetings found</h3>
-                  <p className="text-slate-500 dark:text-slate-400">Try adjusting your filters or check back later for updates.</p>
                 </div>
               )}
             </div>

@@ -34,6 +34,7 @@ import {
   SelectTrigger, 
   SelectValue 
 } from '@/components/ui/select'
+import { Checkbox } from '@/components/ui/checkbox'
 import { 
   ShieldCheck, 
   UserPlus, 
@@ -48,7 +49,8 @@ import {
   Users,
   GraduationCap,
   Briefcase,
-  User
+  User,
+  Gavel
 } from 'lucide-react'
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
 import { useFirestore } from '@/firebase'
@@ -70,6 +72,7 @@ const formSchema = z.object({
   stateName: z.string().optional(),
   districtName: z.string().optional(),
   memberType: z.string().min(1, "Please select membership type"),
+  hasNoCriminalRecord: z.boolean().refine(val => val === true, "Affidavit acknowledgment is required"),
 })
 
 export function MembershipRegistrationDialog({ children }: { children: React.ReactNode }) {
@@ -94,6 +97,7 @@ export function MembershipRegistrationDialog({ children }: { children: React.Rea
       experience: '',
       level: 'National',
       memberType: 'Regular Member',
+      hasNoCriminalRecord: false,
     }
   })
 
@@ -309,6 +313,30 @@ export function MembershipRegistrationDialog({ children }: { children: React.Rea
                   <FormMessage />
                 </FormItem>
               )} />
+            </div>
+
+            <div className="space-y-4">
+              <FormField
+                control={form.control}
+                name="hasNoCriminalRecord"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-2xl border p-4 bg-slate-50 dark:bg-slate-900 border-accent/20">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel className="text-xs font-medium cursor-pointer text-primary dark:text-white flex items-center gap-2">
+                        <Gavel className="w-3.5 h-3.5 text-accent" />
+                        I hereby declare and affirm that I have no past criminal record.
+                      </FormLabel>
+                    </div>
+                  </FormItem>
+                )}
+              />
+              <FormMessage />
             </div>
 
             <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex items-start gap-3">
