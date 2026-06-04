@@ -185,12 +185,13 @@ export default function InternalMeetingsManagement() {
   })
 
   const states = Object.keys(INDIA_DATA).sort()
-  const levels = ["All", "National", "State", "District"]
+  const levels = ["All", "National Level", "State Level", "District Level"]
 
-  const parseMeetingDate = (dateStr: string) => {
+  const parseDateString = (dateStr: string) => {
     if (!dateStr) return undefined;
     try {
-      return new Date(dateStr);
+      const d = new Date(dateStr);
+      return isNaN(d.getTime()) ? undefined : d;
     } catch {
       return undefined;
     }
@@ -237,7 +238,7 @@ export default function InternalMeetingsManagement() {
                         <PopoverContent className="w-auto p-0" align="start">
                           <Calendar
                             mode="single"
-                            selected={parseMeetingDate(newMeeting.date)}
+                            selected={parseDateString(newMeeting.date)}
                             onSelect={(date) => setNewMeeting({...newMeeting, date: date ? format(date, "PPP") : ''})}
                             initialFocus
                           />
@@ -324,21 +325,24 @@ export default function InternalMeetingsManagement() {
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row gap-6 items-center justify-between">
             <div className="flex flex-wrap gap-2">
-              {levels.map((lvl) => (
-                <Button
-                  key={lvl}
-                  variant={levelFilter === lvl ? "default" : "outline"}
-                  onClick={() => setLevelFilter(lvl)}
-                  className={cn(
-                    "rounded-full px-6 font-bold transition-all",
-                    levelFilter === lvl 
-                      ? "bg-accent text-slate-900 shadow-lg border-accent" 
-                      : "text-primary dark:text-white border-slate-200 dark:border-slate-700 hover:bg-accent hover:text-slate-900 hover:border-accent"
-                  )}
-                >
-                  {lvl === 'All' ? 'All Levels' : `${lvl} Level`}
-                </Button>
-              ))}
+              {levels.map((lvl) => {
+                const levelVal = lvl === 'All Levels' ? 'All' : lvl.split(' ')[0];
+                return (
+                  <Button
+                    key={lvl}
+                    variant={levelFilter === levelVal ? "default" : "outline"}
+                    onClick={() => setLevelFilter(levelVal)}
+                    className={cn(
+                      "rounded-full px-6 font-bold transition-all",
+                      levelFilter === levelVal 
+                        ? "bg-accent text-slate-900 shadow-lg border-accent" 
+                        : "text-slate-900 dark:text-slate-100 border-slate-200 dark:border-slate-700 hover:bg-accent hover:text-slate-900 hover:border-accent"
+                    )}
+                  >
+                    {lvl}
+                  </Button>
+                )
+              })}
             </div>
             <div className="relative w-full md:w-80">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
@@ -362,13 +366,13 @@ export default function InternalMeetingsManagement() {
                          <Badge variant="outline" className="border-accent text-accent text-[9px] font-bold uppercase px-3 py-1 mb-3">
                             {meeting.level} {meeting.stateName ? `(${meeting.districtName || meeting.stateName})` : ''}
                          </Badge>
-                         <span className="text-2xl font-headline font-bold text-primary dark:text-white leading-none mb-1">{meeting.date.split(' ')[0]}</span>
+                         <span className="text-2xl font-headline font-bold text-slate-900 dark:text-white leading-none mb-1">{meeting.date.split(' ')[0]}</span>
                          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{meeting.date.split(' ').slice(1).join(' ')}</span>
                       </div>
                       
                       <div className="flex-1 p-8 grid lg:grid-cols-4 gap-8 items-center">
                         <div className="lg:col-span-2 space-y-1">
-                          <h3 className="text-2xl font-bold text-primary dark:text-white">{meeting.title}</h3>
+                          <h3 className="text-2xl font-bold text-slate-900 dark:text-white">{meeting.title}</h3>
                           <div className="flex items-center gap-3 text-xs font-bold text-slate-500">
                             <Clock className="w-3.5 h-3.5 text-accent" /> {meeting.time}
                             <div className="w-1 h-1 rounded-full bg-slate-300"></div>
@@ -379,7 +383,7 @@ export default function InternalMeetingsManagement() {
                         <div className="flex items-center justify-center">
                            <Badge className={cn(
                              "font-bold uppercase tracking-widest text-[9px] px-4 py-1",
-                             meeting.status === 'Upcoming' ? 'bg-emerald-500 text-white' : 'bg-primary text-primary-foreground'
+                             meeting.status === 'Upcoming' ? 'bg-emerald-500 text-white' : 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
                            )}>
                              {meeting.status}
                            </Badge>
@@ -411,7 +415,7 @@ export default function InternalMeetingsManagement() {
                                         <PopoverContent className="w-auto p-0" align="start">
                                           <Calendar
                                             mode="single"
-                                            selected={parseMeetingDate(editMeeting.date)}
+                                            selected={parseDateString(editMeeting.date)}
                                             onSelect={(date) => setEditMeeting({...editMeeting, date: date ? format(date, "PPP") : ''})}
                                             initialFocus
                                           />
@@ -490,7 +494,7 @@ export default function InternalMeetingsManagement() {
                               <AlertDialogDescription>This action is irreversible and will remove the meeting from public archive.</AlertDialogDescription>
                               <AlertDialogFooter>
                                 <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => handleDelete(meeting.id)} className="bg-red-500 hover:bg-red-600 rounded-xl border-none">Confirm Deletion</AlertDialogAction>
+                                <AlertDialogAction onClick={() => handleDelete(meeting.id)} className="bg-red-500 hover:bg-red-600 rounded-xl border-none text-white">Confirm Deletion</AlertDialogAction>
                               </AlertDialogFooter>
                             </AlertDialogContent>
                           </AlertDialog>

@@ -166,10 +166,11 @@ export default function InternalEventsManagement() {
 
   const categories = ["Campaign", "Workshop", "Convention", "Relief", "Social Projects"]
 
-  const parseEventDate = (dateStr: string) => {
+  const parseDateString = (dateStr: string) => {
     if (!dateStr) return undefined;
     try {
-      return new Date(dateStr);
+      const d = new Date(dateStr);
+      return isNaN(d.getTime()) ? undefined : d;
     } catch {
       return undefined;
     }
@@ -235,7 +236,7 @@ export default function InternalEventsManagement() {
                         <PopoverContent className="w-auto p-0" align="start">
                           <Calendar
                             mode="single"
-                            selected={parseEventDate(newEvent.date)}
+                            selected={parseDateString(newEvent.date)}
                             onSelect={(date) => setNewEvent({...newEvent, date: date ? format(date, "PPP") : ''})}
                             initialFocus
                           />
@@ -317,7 +318,7 @@ export default function InternalEventsManagement() {
                                <MapPin className="w-3 h-3" /> {event.location}
                              </div>
                           </div>
-                          <h3 className="text-2xl font-bold text-primary dark:text-white">{event.title}</h3>
+                          <h3 className="text-2xl font-bold text-slate-900 dark:text-white">{event.title}</h3>
                           <div className="flex items-center gap-2 text-xs font-bold text-slate-500">
                             <CalendarIcon className="w-3.5 h-3.5" /> {event.date}
                           </div>
@@ -336,7 +337,7 @@ export default function InternalEventsManagement() {
                             <DialogTrigger asChild>
                               <Button onClick={() => setEditEvent(event)} variant="outline" size="icon" className="rounded-xl border-slate-200 dark:border-slate-700 hover:bg-accent/10 hover:text-accent"><Edit className="w-4 h-4" /></Button>
                             </DialogTrigger>
-                            <DialogContent className="max-w-md bg-white dark:bg-slate-900 rounded-[2rem]">
+                            <DialogContent className="max-w-md bg-white dark:bg-slate-900 rounded-[2rem] max-h-[90vh] overflow-y-auto">
                               <DialogHeader><DialogTitle>Edit Event</DialogTitle></DialogHeader>
                               {editEvent && (
                                 <div className="space-y-4 py-4">
@@ -357,7 +358,7 @@ export default function InternalEventsManagement() {
                                         <PopoverContent className="w-auto p-0" align="start">
                                           <Calendar
                                             mode="single"
-                                            selected={parseEventDate(editEvent.date)}
+                                            selected={parseDateString(editEvent.date)}
                                             onSelect={(date) => setEditEvent({...editEvent, date: date ? format(date, "PPP") : ''})}
                                             initialFocus
                                           />
@@ -392,11 +393,11 @@ export default function InternalEventsManagement() {
                             <AlertDialogTrigger asChild>
                               <Button variant="destructive" size="icon" className="rounded-xl"><Trash2 className="w-4 h-4" /></Button>
                             </AlertDialogTrigger>
-                            <AlertDialogContent className="rounded-[2rem] bg-white dark:bg-slate-900 border-none">
+                            <AlertDialogContent className="rounded-[2rem] bg-white dark:bg-slate-900 border-none shadow-2xl">
                               <AlertDialogHeader><AlertDialogTitle>Confirm Deletion</AlertDialogTitle></AlertDialogHeader>
                               <AlertDialogFooter>
                                 <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => handleDeleteEvent(event.id)} className="bg-red-500 hover:bg-red-600 rounded-xl border-none">Delete</AlertDialogAction>
+                                <AlertDialogAction onClick={() => handleDeleteEvent(event.id)} className="bg-red-500 hover:bg-red-600 rounded-xl border-none text-white font-bold">Delete</AlertDialogAction>
                               </AlertDialogFooter>
                             </AlertDialogContent>
                           </AlertDialog>
