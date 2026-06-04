@@ -31,7 +31,7 @@ export function ChairmanMessage() {
           <div className="space-y-8">
             <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-1.5 rounded-full text-sm font-bold">
               <Quote className="w-4 h-4 fill-primary" />
-              <span>Chairman's Vision 2024</span>
+              <span>Chairman's Vision 2026</span>
             </div>
             <h2 className="text-4xl md:text-5xl font-headline font-bold text-primary leading-tight">
               A World Where Justice Is A <span className="text-accent italic">Fundamental Promise</span>, Not A Privilege.
