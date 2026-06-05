@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useEffect, useState } from 'react'
@@ -23,7 +24,8 @@ import {
   Loader2, 
   ShieldCheck,
   Globe,
-  Users
+  Users,
+  FileText
 } from 'lucide-react'
 import {
   Dialog,
@@ -33,8 +35,20 @@ import {
   DialogTrigger,
   DialogFooter,
 } from "@/components/ui/dialog"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
+import { INDIA_DATA } from '@/lib/india-data'
 
 export default function InternalMeetingsManagement() {
   const { user, loading: authLoading } = useUser()
@@ -46,6 +60,20 @@ export default function InternalMeetingsManagement() {
   const [levelFilter, setLevelFilter] = useState('All')
   const [isActionLoading, setIsActionLoading] = useState(false)
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
+  const [editMeeting, setEditMeeting] = useState<any>(null)
+
+  const [newMeeting, setNewMeeting] = useState({
+    title: '',
+    date: '',
+    time: '',
+    location: '',
+    agenda: '',
+    minutes: '',
+    level: 'National' as 'National' | 'State' | 'District',
+    stateName: '',
+    districtName: '',
+    status: 'Upcoming' as 'Upcoming' | 'Completed' | 'Postponed'
+  })
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -60,15 +88,72 @@ export default function InternalMeetingsManagement() {
 
   const { data: meetings, loading: dataLoading } = useCollection(meetingsQuery);
 
+  const handleAddMeeting = async () => {
+    if (!db) return
+    if (!newMeeting.title || !newMeeting.date || !newMeeting.location) {
+      toast({ variant: "destructive", title: "Validation Error", description: "Title, date, and location are required." })
+      return
+    }
+
+    setIsActionLoading(true)
+    try {
+      await addDoc(collection(db, 'meetings'), {
+        ...newMeeting,
+        createdAt: serverTimestamp()
+      })
+      toast({ title: "Assembly Scheduled", description: "The record has been published to the registry." })
+      setNewMeeting({
+        title: '', date: '', time: '', location: '', agenda: '', minutes: '',
+        level: 'National', stateName: '', districtName: '', status: 'Upcoming'
+      })
+      setIsAddDialogOpen(false)
+    } catch (e: any) {
+      toast({ variant: "destructive", title: "System Error", description: e.message })
+    } finally {
+      setIsActionLoading(false)
+    }
+  }
+
+  const handleDeleteMeeting = async (id: string) => {
+    if (!db) return
+    setIsActionLoading(true)
+    try {
+      await deleteDoc(doc(db, 'meetings', id))
+      toast({ title: "Record Removed" })
+    } catch (e: any) {
+      toast({ variant: "destructive", title: "Delete Failed" })
+    } finally {
+      setIsActionLoading(false)
+    }
+  }
+
+  const handleUpdateMeeting = async () => {
+    if (!db || !editMeeting) return
+    setIsActionLoading(true)
+    try {
+      const { id, ...data } = editMeeting
+      await updateDoc(doc(db, 'meetings', id), data)
+      toast({ title: "Record Updated" })
+      setEditMeeting(null)
+    } catch (e: any) {
+      toast({ variant: "destructive", title: "Update Failed" })
+    } finally {
+      setIsActionLoading(false)
+    }
+  }
+
   if (authLoading || !user) {
     return <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950"><Loader2 className="w-10 h-10 animate-spin text-accent" /></div>
   }
 
   const filtered = (meetings || []).filter((m: any) => {
-    const matchesSearch = (m.title?.toLowerCase() || '').includes(search.toLowerCase());
+    const matchesSearch = (m.title?.toLowerCase() || '').includes(search.toLowerCase()) || 
+                          (m.location?.toLowerCase() || '').includes(search.toLowerCase());
     const matchesLevel = levelFilter === 'All' || m.level === levelFilter;
     return matchesSearch && matchesLevel;
   })
+
+  const states = Object.keys(INDIA_DATA).sort()
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
@@ -87,8 +172,68 @@ export default function InternalMeetingsManagement() {
               <DialogTrigger asChild>
                 <Button size="sm" className="bg-accent text-primary font-bold rounded-xl h-11 px-6 shadow-lg"><Plus className="w-4 h-4 mr-2" /> Schedule Assembly</Button>
               </DialogTrigger>
-              <DialogContent className="max-w-md rounded-3xl"><DialogHeader><DialogTitle>New Assembly</DialogTitle></DialogHeader>
-                 <Button className="w-full h-11 rounded-xl mt-4">Publish Record</Button>
+              <DialogContent className="max-w-xl rounded-3xl max-h-[90vh] overflow-y-auto">
+                 <DialogHeader><DialogTitle>New Assembly</DialogTitle></DialogHeader>
+                 <div className="space-y-4 py-2">
+                    <div className="space-y-1">
+                      <Label className="text-[10px] font-bold uppercase text-slate-400">Title</Label>
+                      <Input value={newMeeting.title} onChange={e => setNewMeeting({...newMeeting, title: e.target.value})} placeholder="e.g. Annual General Body Meeting" />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                       <div className="space-y-1">
+                          <Label className="text-[10px] font-bold uppercase text-slate-400">Date</Label>
+                          <Input value={newMeeting.date} onChange={e => setNewMeeting({...newMeeting, date: e.target.value})} placeholder="Jan 15, 2026" />
+                       </div>
+                       <div className="space-y-1">
+                          <Label className="text-[10px] font-bold uppercase text-slate-400">Time</Label>
+                          <Input value={newMeeting.time} onChange={e => setNewMeeting({...newMeeting, time: e.target.value})} placeholder="10:00 AM" />
+                       </div>
+                    </div>
+                    <div className="space-y-1">
+                       <Label className="text-[10px] font-bold uppercase text-slate-400">Level</Label>
+                       <Select value={newMeeting.level} onValueChange={(val: any) => setNewMeeting({...newMeeting, level: val, stateName: '', districtName: ''})}>
+                         <SelectTrigger><SelectValue /></SelectTrigger>
+                         <SelectContent>
+                           <SelectItem value="National">National</SelectItem>
+                           <SelectItem value="State">State</SelectItem>
+                           <SelectItem value="District">District</SelectItem>
+                         </SelectContent>
+                       </Select>
+                    </div>
+                    {(newMeeting.level === 'State' || newMeeting.level === 'District') && (
+                      <div className="grid grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-1">
+                        <div className="space-y-1">
+                           <Label className="text-[10px] font-bold uppercase text-slate-400">State</Label>
+                           <Select value={newMeeting.stateName} onValueChange={(val) => setNewMeeting({...newMeeting, stateName: val, districtName: ''})}>
+                             <SelectTrigger><SelectValue placeholder="Choose State" /></SelectTrigger>
+                             <SelectContent className="max-h-60">{states.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+                           </Select>
+                        </div>
+                        {newMeeting.level === 'District' && (
+                          <div className="space-y-1">
+                             <Label className="text-[10px] font-bold uppercase text-slate-400">District</Label>
+                             <Select value={newMeeting.districtName} onValueChange={(val) => setNewMeeting({...newMeeting, districtName: val})} disabled={!newMeeting.stateName}>
+                               <SelectTrigger><SelectValue placeholder="Choose District" /></SelectTrigger>
+                               <SelectContent className="max-h-60">{(INDIA_DATA[newMeeting.stateName] || []).map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
+                             </Select>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    <div className="space-y-1">
+                       <Label className="text-[10px] font-bold uppercase text-slate-400">Location</Label>
+                       <Input value={newMeeting.location} onChange={e => setNewMeeting({...newMeeting, location: e.target.value})} placeholder="Venue Details" />
+                    </div>
+                    <div className="space-y-1">
+                       <Label className="text-[10px] font-bold uppercase text-slate-400">Agenda</Label>
+                       <Textarea value={newMeeting.agenda} onChange={e => setNewMeeting({...newMeeting, agenda: e.target.value})} placeholder="Outline the discussion points..." />
+                    </div>
+                 </div>
+                 <DialogFooter>
+                   <Button onClick={handleAddMeeting} disabled={isActionLoading} className="w-full h-11 rounded-xl bg-accent text-primary font-bold">
+                     {isActionLoading ? <Loader2 className="animate-spin mr-2" /> : "Publish Record"}
+                   </Button>
+                 </DialogFooter>
               </DialogContent>
             </Dialog>
           </div>
@@ -98,14 +243,14 @@ export default function InternalMeetingsManagement() {
       <section className="py-6 border-b bg-white dark:bg-slate-900 sticky top-10 z-30 shadow-sm transition-colors">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-            <div className="flex flex-wrap gap-1.5 p-1 bg-slate-100 rounded-lg">
+            <div className="flex flex-wrap gap-1.5 p-1 bg-slate-100 dark:bg-slate-800 rounded-lg">
               {["All", "National", "State", "District"].map((lvl) => (
                 <Button key={lvl} variant={levelFilter === lvl ? "default" : "ghost"} onClick={() => setLevelFilter(lvl)} className={cn("h-7 rounded-md px-4 text-[10px] font-bold uppercase", levelFilter === lvl ? "bg-accent text-primary" : "text-slate-500")}>{lvl}</Button>
               ))}
             </div>
             <div className="relative w-full max-w-xs">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
-              <Input placeholder="Filter archives..." className="pl-8 h-9 rounded-lg border-slate-100 text-xs" value={search} onChange={(e) => setSearch(e.target.value)} />
+              <Input placeholder="Filter archives..." className="pl-8 h-9 rounded-lg border-slate-100 dark:border-slate-800 text-xs" value={search} onChange={(e) => setSearch(e.target.value)} />
             </div>
           </div>
         </div>
@@ -118,25 +263,86 @@ export default function InternalMeetingsManagement() {
           ) : (
             <div className="grid gap-4">
               {filtered.map((meeting: any) => (
-                <Card key={meeting.id} className="border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900 rounded-2xl border border-slate-100">
+                <Card key={meeting.id} className="border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800">
                   <CardContent className="p-0">
                     <div className="flex flex-col md:flex-row items-stretch">
-                      <div className="p-5 bg-slate-50 dark:bg-slate-800 md:w-44 text-center border-r border-slate-100 flex flex-col items-center justify-center shrink-0">
+                      <div className="p-5 bg-slate-50 dark:bg-slate-800 md:w-44 text-center border-r border-slate-100 dark:border-slate-700 flex flex-col items-center justify-center shrink-0">
                          <Badge variant="outline" className="border-accent text-accent text-[8px] font-bold uppercase px-2 py-0 mb-2">{meeting.level}</Badge>
-                         <span className="text-xl font-headline font-bold leading-none mb-1">{meeting.date?.split(' ')[0] || '--'}</span>
+                         <span className="text-xl font-headline font-bold leading-none mb-1 text-primary dark:text-white">{meeting.date?.split(' ')[0] || '--'}</span>
                          <span className="text-[8px] font-bold text-slate-400 uppercase">{meeting.date?.split(' ').slice(1).join(' ') || ''}</span>
+                         <Badge className={cn("mt-2 text-[8px] px-2 py-0", meeting.status === 'Completed' ? 'bg-emerald-500' : 'bg-accent')}>
+                           {meeting.status}
+                         </Badge>
                       </div>
                       <div className="flex-1 p-5 grid lg:grid-cols-4 gap-6 items-center">
                         <div className="lg:col-span-2 space-y-1">
-                          <h3 className="text-lg font-bold text-slate-900 leading-tight">{meeting.title}</h3>
+                          <h3 className="text-lg font-bold text-slate-900 dark:text-white leading-tight">{meeting.title}</h3>
                           <div className="flex flex-wrap gap-3 text-[10px] font-bold text-slate-500">
                             <span className="flex items-center gap-1"><Clock className="w-2.5 h-2.5 text-accent" /> {meeting.time}</span>
                             <span className="flex items-center gap-1"><MapPin className="w-2.5 h-2.5 text-accent" /> {meeting.location}</span>
+                            {meeting.stateName && <span className="flex items-center gap-1"><Globe className="w-2.5 h-2.5 text-accent" /> {meeting.stateName}</span>}
                           </div>
                         </div>
                         <div className="flex items-center justify-end gap-2">
-                           <Button size="sm" variant="outline" className="h-8 rounded-lg text-[10px] font-bold px-3">Minutes</Button>
-                           <Button size="sm" variant="ghost" className="h-8 w-8 text-slate-300"><Trash2 className="w-3.5 h-3.5" /></Button>
+                           <Dialog open={editMeeting?.id === meeting.id} onOpenChange={(open) => !open && setEditMeeting(null)}>
+                             <DialogTrigger asChild>
+                               <Button size="sm" variant="outline" onClick={() => setEditMeeting(meeting)} className="h-8 rounded-lg text-[10px] font-bold px-3">
+                                 <FileText className="w-3 h-3 mr-1" /> Minutes
+                               </Button>
+                             </DialogTrigger>
+                             <DialogContent className="max-w-xl rounded-3xl max-h-[90vh] overflow-y-auto">
+                                <DialogHeader><DialogTitle>Update Meeting Record</DialogTitle></DialogHeader>
+                                {editMeeting && (
+                                  <div className="space-y-4 py-2">
+                                     <div className="space-y-1">
+                                       <Label className="text-[10px] font-bold uppercase text-slate-400">Meeting Status</Label>
+                                       <Select value={editMeeting.status} onValueChange={(val: any) => setEditMeeting({...editMeeting, status: val})}>
+                                         <SelectTrigger><SelectValue /></SelectTrigger>
+                                         <SelectContent>
+                                           <SelectItem value="Upcoming">Upcoming</SelectItem>
+                                           <SelectItem value="Completed">Completed</SelectItem>
+                                           <SelectItem value="Postponed">Postponed</SelectItem>
+                                         </SelectContent>
+                                       </Select>
+                                     </div>
+                                     <div className="space-y-1">
+                                       <Label className="text-[10px] font-bold uppercase text-slate-400">Official Minutes & Resolutions</Label>
+                                       <Textarea 
+                                         value={editMeeting.minutes} 
+                                         onChange={e => setEditMeeting({...editMeeting, minutes: e.target.value})} 
+                                         placeholder="Record the official outcomes..." 
+                                         className="min-h-[150px]"
+                                       />
+                                     </div>
+                                     <div className="space-y-1">
+                                       <Label className="text-[10px] font-bold uppercase text-slate-400">Agenda (Review)</Label>
+                                       <Textarea value={editMeeting.agenda} onChange={e => setEditMeeting({...editMeeting, agenda: e.target.value})} />
+                                     </div>
+                                  </div>
+                                )}
+                                <DialogFooter>
+                                  <Button onClick={handleUpdateMeeting} disabled={isActionLoading} className="w-full h-11 rounded-xl bg-primary text-white font-bold">
+                                    {isActionLoading ? <Loader2 className="animate-spin mr-2" /> : "Commit Changes"}
+                                  </Button>
+                                </DialogFooter>
+                             </DialogContent>
+                           </Dialog>
+
+                           <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button size="sm" variant="ghost" className="h-8 w-8 text-slate-300 hover:text-red-500"><Trash2 className="w-3.5 h-3.5" /></Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent className="rounded-3xl">
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Delete Assembly Record?</AlertDialogTitle>
+                                  <AlertDialogDescription>This action will permanently remove the meeting and its associated minutes from the registry.</AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+                                  <AlertDialogAction onClick={() => handleDeleteMeeting(meeting.id)} className="bg-red-500 hover:bg-red-600 rounded-xl">Confirm Delete</AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                           </AlertDialog>
                         </div>
                       </div>
                     </div>
