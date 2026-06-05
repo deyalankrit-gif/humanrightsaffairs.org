@@ -7,18 +7,41 @@ import {
   Loader2, 
   Monitor, 
   RefreshCw,
-  Info
+  Info,
+  Home,
+  Handshake,
+  Calendar,
+  Users,
+  UserCheck,
+  UserX,
+  MessageSquareWarning,
+  Scale,
+  Phone
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
+
+const publicLinks = [
+  { name: 'Home', href: '/', icon: Home },
+  { name: 'Meetings', href: '/meetings', icon: Handshake },
+  { name: 'Events', href: '/events', icon: Calendar },
+  { name: 'Leadership', href: '/leadership', icon: Users },
+  { name: 'Personnel', href: '/members', icon: UserCheck },
+  { name: 'Revocations', href: '/terminated-members', icon: UserX },
+  { name: 'Grievance', href: '/#grievances', icon: MessageSquareWarning },
+  { name: 'Rights', href: '/#knowledge', icon: Scale },
+  { name: 'Helpline', href: '/#helpline', icon: Phone },
+]
 
 /**
  * PublicViewPage provides an internal viewer for the public-facing site.
- * Adjusted to fit within the Sidebar-based administrative layout.
+ * Features a horizontally scrollable navigation header with a visible scrollbar.
  */
 export default function PublicViewPage() {
   const { user, loading: authLoading } = useUser()
   const router = useRouter()
   const [iframeKey, setIframeKey] = useState(0)
+  const [currentUrl, setCurrentUrl] = useState('/')
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -38,41 +61,67 @@ export default function PublicViewPage() {
     setIframeKey(prev => prev + 1)
   }
 
+  const navigateMirror = (href: string) => {
+    setCurrentUrl(href)
+    setIframeKey(prev => prev + 1)
+  }
+
   return (
     <main className="flex flex-col h-[calc(100vh-64px)] bg-slate-100 dark:bg-slate-900 overflow-hidden">
-      {/* Mirror Controls */}
-      <div className="bg-white dark:bg-slate-950 border-b flex items-center justify-between px-6 py-2 shrink-0">
-        <div className="flex items-center gap-3">
-          <div className="p-1.5 bg-accent/10 rounded-lg">
-            <Monitor className="w-4 h-4 text-accent" />
+      {/* Mirror Header with Scrollbar */}
+      <div className="bg-white dark:bg-slate-950 border-b flex flex-col shrink-0">
+        <div className="flex items-center justify-between px-6 py-2 border-b border-slate-100 dark:border-slate-800">
+          <div className="flex items-center gap-3">
+            <div className="p-1.5 bg-accent/10 rounded-lg">
+              <Monitor className="w-4 h-4 text-accent" />
+            </div>
+            <div className="flex flex-col">
+              <h1 className="text-[10px] font-bold text-primary dark:text-white leading-none uppercase tracking-widest">Public Site Mirror</h1>
+              <p className="text-[8px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">Live Preview Mode</p>
+            </div>
           </div>
-          <div className="flex flex-col">
-            <h1 className="text-[10px] font-bold text-primary dark:text-white leading-none uppercase tracking-widest">Public Site Mirror</h1>
-            <p className="text-[8px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">Live Preview Root</p>
+
+          <div className="flex items-center gap-4">
+            <div className="hidden md:flex items-center gap-2 text-[9px] font-bold text-slate-400 uppercase">
+              <Info className="w-3 h-3" />
+              Internal Session Preserved
+            </div>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleRefresh}
+              className="h-8 rounded-lg font-bold text-[9px] uppercase tracking-wider gap-2 shadow-sm"
+            >
+              <RefreshCw className="w-3 h-3" /> Reload Mirror
+            </Button>
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
-          <div className="hidden md:flex items-center gap-2 text-[9px] font-bold text-slate-400 uppercase">
-            <Info className="w-3 h-3" />
-            Navigating within the iframe preserves internal session
-          </div>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={handleRefresh}
-            className="h-8 rounded-lg font-bold text-[9px] uppercase tracking-wider gap-2 shadow-sm"
-          >
-            <RefreshCw className="w-3 h-3" /> Reload Mirror
-          </Button>
-        </div>
+        {/* Scrollable Navigation Area with Visible Scrollbar */}
+        <nav className="flex items-center overflow-x-auto admin-scrollbar px-4 py-2 gap-2 bg-slate-50/50 dark:bg-slate-900/50 scroll-smooth">
+          {publicLinks.map((link) => (
+            <button
+              key={link.name}
+              onClick={() => navigateMirror(link.href)}
+              className={cn(
+                "whitespace-nowrap flex items-center gap-2 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all border shrink-0",
+                currentUrl === link.href
+                  ? "bg-accent text-primary border-accent shadow-sm"
+                  : "bg-white dark:bg-slate-800 text-slate-500 border-slate-100 dark:border-slate-700 hover:border-accent hover:text-accent"
+              )}
+            >
+              <link.icon className="w-3 h-3" />
+              {link.name}
+            </button>
+          ))}
+        </nav>
       </div>
 
       {/* Full-bleed Iframe Viewer */}
       <div className="flex-1 relative bg-white">
         <iframe 
           key={iframeKey}
-          src="/" 
+          src={currentUrl} 
           className="absolute inset-0 w-full h-full border-none"
           title="Public Site Preview"
         />
