@@ -29,32 +29,36 @@ export function PortalSwitcher() {
 
   return (
     <div className="fixed bottom-6 left-6 z-[100] flex flex-col gap-3 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-[280px]">
-      {/* Session Information Card - Background is 99% transparent, but text is high-contrast */}
-      <div className="bg-white/[0.01] dark:bg-slate-900/[0.01] backdrop-blur-3xl border border-slate-300/30 dark:border-white/20 p-5 rounded-[2rem] shadow-2xl space-y-4">
+      {/* Session Information Card - Background is 99% transparent, text and icons are extreme contrast */}
+      <div className="bg-white/[0.01] dark:bg-slate-900/[0.01] backdrop-blur-3xl border border-slate-400/40 dark:border-white/30 p-5 rounded-[2.5rem] shadow-2xl space-y-4">
         <div className="flex items-center gap-3">
-          <div className="bg-emerald-500/10 p-2.5 rounded-2xl border border-emerald-500/20">
-            <UserCircle className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+          <div className="bg-emerald-500/20 p-2.5 rounded-2xl border border-emerald-500/40 shadow-sm">
+            <UserCircle className="w-6 h-6 text-emerald-700 dark:text-emerald-400" />
           </div>
           <div className="flex flex-col overflow-hidden">
-            <p className="text-[9px] font-black text-primary dark:text-accent uppercase tracking-[0.2em] mb-0.5">Log In Information</p>
-            <p className="text-[12px] font-bold text-slate-900 dark:text-white truncate max-w-[180px]">{user?.email}</p>
+            <p className="text-[10px] font-black text-slate-950 dark:text-accent uppercase tracking-[0.2em] mb-0.5">
+              Log In Information
+            </p>
+            <p className="text-[13px] font-black text-slate-950 dark:text-white truncate max-w-[180px]">
+              {user?.email}
+            </p>
           </div>
         </div>
 
-        <div className="h-px bg-slate-200 dark:bg-white/10 w-full"></div>
+        <div className="h-px bg-slate-300 dark:bg-white/20 w-full"></div>
 
         <div className="flex flex-col gap-2">
           <Link href={isAdminPortal ? "/" : "/internal/analytics"} className="w-full">
             <Button 
               variant="ghost"
               className={cn(
-                "w-full h-11 justify-start gap-3 rounded-xl font-black text-xs transition-all border border-transparent hover:border-accent/20",
+                "w-full h-12 justify-start gap-3 rounded-2xl font-black text-[13px] transition-all border border-transparent shadow-sm",
                 isAdminPortal 
-                  ? "text-slate-900 dark:text-white hover:bg-black/5 dark:hover:bg-white/5" 
-                  : "text-accent bg-accent/5 hover:bg-accent/10 border-accent/10"
+                  ? "text-slate-950 dark:text-white bg-slate-950/5 hover:bg-slate-950/10 dark:bg-white/5 dark:hover:bg-white/10" 
+                  : "text-accent bg-accent/5 hover:bg-accent/10 border-accent/20"
               )}
             >
-              {isAdminPortal ? <ExternalLink className="w-4 h-4" /> : <LayoutDashboard className="w-4 h-4" />}
+              {isAdminPortal ? <ExternalLink className="w-5 h-5 stroke-[3px]" /> : <LayoutDashboard className="w-5 h-5 stroke-[3px]" />}
               {isAdminPortal ? "Go to Public Site" : "Admin Dashboard"}
             </Button>
           </Link>
@@ -62,10 +66,12 @@ export function PortalSwitcher() {
           <Button 
             onClick={handleSignOut}
             variant="ghost"
-            className="w-full h-11 justify-start gap-3 rounded-xl font-black text-xs text-red-600 dark:text-red-400 hover:text-red-700 hover:bg-red-500/10 border border-transparent hover:border-red-500/20"
+            className="w-full h-12 justify-start gap-3 rounded-2xl font-black text-[13px] text-red-600 dark:text-red-400 bg-red-600/5 hover:bg-red-600/10 border border-red-600/20 shadow-sm transition-all"
           >
-            <LogOut className="w-4 h-4" />
-            <span className="uppercase tracking-widest">Secure Sign Out</span>
+            <LogOut className="w-5 h-5 stroke-[3px]" />
+            <span className="uppercase tracking-widest">
+              Secure Sign Out
+            </span>
           </Button>
         </div>
       </div>
