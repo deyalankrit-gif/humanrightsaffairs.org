@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useEffect, useState } from 'react'
@@ -140,7 +141,7 @@ export default function MemberDetailsPage() {
           </div>
           
           <div className="flex flex-col md:flex-row items-center gap-6">
-            <div className="w-24 h-24 bg-white/5 rounded-2xl flex items-center justify-center border-2 border-white/10 shadow-xl relative group overflow-hidden shrink-0">
+            <div className="w-8 h-8 bg-white/5 rounded-lg flex items-center justify-center border-2 border-white/10 shadow-xl relative group overflow-hidden shrink-0">
               <Image src={displayImg} alt={profile.name} fill className="object-cover" />
             </div>
             
