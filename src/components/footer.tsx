@@ -26,6 +26,20 @@ export function Footer() {
             <p className="text-primary-foreground/80 text-sm leading-relaxed">
               Human Rights Affairs Trust (Justice Shield) is a Central Government Registered Human Rights Organization in India <span className="font-bold text-accent">(Reg. No. WB/2025/0762605)</span>. Dedicated to constitutional literacy & legal aid & Social Justice.
             </p>
+            
+            {/* Donation Photo integrated into footer column */}
+            <DonationDialog>
+              <button className="block w-40 h-28 relative group cursor-pointer overflow-hidden rounded-xl bg-transparent border-none p-0 outline-none transition-transform hover:scale-105 active:scale-95">
+                <Image 
+                  src="/donate.jpeg" 
+                  alt="Donate to HRAT" 
+                  fill 
+                  className="object-contain"
+                />
+                <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              </button>
+            </DonationDialog>
+
             <div className="flex gap-4">
               <a href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-accent transition-colors">
                 <Facebook className="w-5 h-5" />
@@ -51,7 +65,7 @@ export function Footer() {
               <li><Link href="/#helpline" className="hover:text-accent transition-colors font-medium">Emergency Contacts</Link></li>
               <li>
                 <DonationDialog>
-                  <button className="hover:text-accent transition-colors font-medium">Donate Now</button>
+                  <button className="hover:text-accent transition-colors font-medium text-left">Donate Now</button>
                 </DonationDialog>
               </li>
             </ul>
