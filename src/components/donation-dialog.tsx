@@ -64,7 +64,10 @@ const formSchema = z.object({
   amount: z.string().min(1, "Amount is required"),
   currency: z.string().default("INR"),
   paymentMethod: z.string().min(1, "Please select a payment method"),
-  paymentDetails: z.string().optional()
+  paymentDetails: z.string().optional(),
+  chequeNumber: z.string().optional(),
+  bankName: z.string().optional(),
+  branchName: z.string().optional()
 })
 
 type Step = 'details' | 'qr' | 'success'
@@ -223,7 +226,7 @@ export function DonationDialog({ children, defaultAmount, initialStep = 'details
                   {photo ? (
                     <Image src={photo} alt="Preview" fill className="object-cover" />
                   ) : (
-                    <Camera className="w-8 h-8 text-slate-400 group-hover:text-accent transition-colors" />
+                    <Camera className="w-8 h-8 text-slate-300 group-hover:text-accent transition-colors" />
                   )}
                   <input 
                     type="file" 
@@ -296,43 +299,71 @@ export function DonationDialog({ children, defaultAmount, initialStep = 'details
                 )} />
               </div>
 
-              <div className="grid md:grid-cols-2 gap-4 pt-4 border-t border-slate-100">
-                <FormField control={form.control} name="paymentMethod" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-xs font-bold uppercase tracking-wider text-accent flex items-center gap-2">
-                      <CreditCard className="w-4 h-4" /> Payment Channel *
-                    </FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger className="h-11 rounded-xl border-accent/20 bg-accent/5 font-bold">
-                          <SelectValue placeholder="Select Method" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="UPI QR Code" className="font-bold">Instant UPI QR Code</SelectItem>
-                        <SelectItem value="Bank Transfer" className="font-bold">Direct Bank Transfer</SelectItem>
-                        <SelectItem value="Cheque" className="font-bold">Cheque Payment</SelectItem>
-                        <SelectItem value="Cash" className="font-bold">Cash Contribution</SelectItem>
-                        <SelectItem value="Credit/Debit Card" className="font-bold">Online Card Payment</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )} />
+              <div className="space-y-4 pt-4 border-t border-slate-100">
+                <div className="grid md:grid-cols-2 gap-4">
+                  <FormField control={form.control} name="paymentMethod" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs font-bold uppercase tracking-wider text-accent flex items-center gap-2">
+                        <CreditCard className="w-4 h-4" /> Payment Channel *
+                      </FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger className="h-11 rounded-xl border-accent/20 bg-accent/5 font-bold">
+                            <SelectValue placeholder="Select Method" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="UPI QR Code" className="font-bold">Instant UPI QR Code</SelectItem>
+                          <SelectItem value="Bank Transfer" className="font-bold">Direct Bank Transfer</SelectItem>
+                          <SelectItem value="Cheque" className="font-bold">Cheque Payment</SelectItem>
+                          <SelectItem value="Cash" className="font-bold">Cash Contribution</SelectItem>
+                          <SelectItem value="Credit/Debit Card" className="font-bold">Online Card Payment</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
 
-                <FormField control={form.control} name="paymentDetails" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                      {selectedMethod === 'Cheque' ? 'Cheque & Bank Details' : 
-                       selectedMethod === 'Cash' ? 'Voucher / Ref Number' : 
-                       'Transaction Reference'}
-                    </FormLabel>
-                    <FormControl>
-                      <Input placeholder="Optional: Trans ID or Ref" className="h-11 rounded-xl" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )} />
+                  {selectedMethod !== 'Cheque' && (
+                    <FormField control={form.control} name="paymentDetails" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                          {selectedMethod === 'Cash' ? 'Voucher / Ref Number' : 'Transaction Reference'}
+                        </FormLabel>
+                        <FormControl>
+                          <Input placeholder="Optional: Trans ID or Ref" className="h-11 rounded-xl" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
+                  )}
+                </div>
+
+                {selectedMethod === 'Cheque' && (
+                  <div className="grid md:grid-cols-3 gap-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                    <FormField control={form.control} name="chequeNumber" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-[10px] font-bold uppercase text-slate-400">Cheque No.</FormLabel>
+                        <FormControl><Input placeholder="000123" className="h-11 rounded-xl" {...field} /></FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
+                    <FormField control={form.control} name="bankName" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-[10px] font-bold uppercase text-slate-400">Bank Name</FormLabel>
+                        <FormControl><Input placeholder="SBI" className="h-11 rounded-xl" {...field} /></FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
+                    <FormField control={form.control} name="branchName" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-[10px] font-bold uppercase text-slate-400">Branch Name</FormLabel>
+                        <FormControl><Input placeholder="Kolkata Main" className="h-11 rounded-xl" {...field} /></FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
+                  </div>
+                )}
               </div>
 
               <Button type="submit" className="w-full bg-accent text-primary font-bold py-7 text-xl rounded-2xl hover:bg-accent/90 shadow-xl shadow-accent/20 transition-all hover:-translate-y-1" disabled={loading}>
@@ -414,7 +445,15 @@ export function DonationDialog({ children, defaultAmount, initialStep = 'details
                   <div className="bg-slate-50 p-4 rounded-xl">
                      <h6 className="font-bold text-slate-400 uppercase text-[9px] tracking-widest mb-1">Payment Trail</h6>
                      <p className="text-xs font-bold text-slate-700 uppercase">{donationData?.paymentMethod}</p>
-                     <p className="text-[10px] font-mono text-slate-500">{donationData?.paymentDetails || 'N/A'}</p>
+                     {donationData?.paymentMethod === 'Cheque' ? (
+                       <div className="text-[10px] text-slate-500 leading-tight mt-1">
+                          <p>Chq No: {donationData.chequeNumber}</p>
+                          <p>Bank: {donationData.bankName}</p>
+                          <p>Branch: {donationData.branchName}</p>
+                       </div>
+                     ) : (
+                       <p className="text-[10px] font-mono text-slate-500">{donationData?.paymentDetails || 'N/A'}</p>
+                     )}
                   </div>
                 </div>
                 <div className="text-right space-y-4">
