@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useEffect, useState } from 'react'
@@ -239,7 +238,6 @@ export default function InternalMembersDirectory() {
                 </DialogHeader>
                 
                 <div className="space-y-6 py-4">
-                  {/* Sync Tool */}
                   <div className="bg-primary/5 dark:bg-white/5 p-5 rounded-2xl border-2 border-dashed border-primary/20 dark:border-white/10">
                      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3 flex items-center gap-2">
                        <RefreshCw className="w-3 h-3 text-accent" /> Sync from Approved Apps
@@ -263,7 +261,6 @@ export default function InternalMembersDirectory() {
                           )}
                         </SelectContent>
                      </Select>
-                     <p className="text-[8px] text-slate-400 mt-2 italic">Synchronizing will automatically fill verified credentials from the application record.</p>
                   </div>
 
                   <div className={cn("space-y-4 transition-all duration-700", syncFlash && "scale-[1.02] opacity-50")}>
@@ -294,7 +291,7 @@ export default function InternalMembersDirectory() {
 
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label className="text-[10px] uppercase font-bold text-slate-400">Membership ID (Manual/Auto)</Label>
+                        <Label className="text-[10px] uppercase font-bold text-slate-400">Membership ID</Label>
                         <div className="flex gap-2">
                           <Input 
                             placeholder="e.g. M1024" 
@@ -307,7 +304,6 @@ export default function InternalMembersDirectory() {
                             variant="outline" 
                             onClick={handleGenerateId}
                             className="h-11 w-11 p-0 rounded-xl border-accent/20 hover:bg-accent/10 hover:text-accent shrink-0"
-                            title="Auto-Generate ID"
                           >
                             <Sparkles className="w-4 h-4" />
                           </Button>
@@ -346,16 +342,6 @@ export default function InternalMembersDirectory() {
                             />
                           </PopoverContent>
                         </Popover>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label className="text-[10px] uppercase font-bold text-slate-400">Profession</Label>
-                      <Input 
-                        placeholder="e.g. Advocate, Teacher" 
-                        value={newMember.profession} 
-                        onChange={(e) => setNewMember({...newMember, profession: e.target.value})}
-                        className="bg-slate-50 dark:bg-slate-800 border-none h-11"
-                      />
                     </div>
 
                     {(newMember.level === 'State' || newMember.level === 'District') && (
@@ -530,21 +516,27 @@ export default function InternalMembersDirectory() {
                                 Full Profile <ArrowRight className="w-3.5 h-3.5 group-hover/btn:translate-x-1 transition-transform" />
                               </Button>
                             </Link>
-                            <Button variant="outline" className="w-full rounded-xl h-10 px-4 font-bold border-accent text-accent hover:bg-accent hover:text-primary transition-all flex gap-2 text-xs">
-                              <IdCard className="w-3.5 h-3.5" /> ID Card
-                            </Button>
-                            <Button variant="outline" className="w-full rounded-xl h-10 px-4 font-bold border-indigo-500 text-indigo-600 hover:bg-indigo-500 hover:text-white transition-all flex gap-2 text-xs">
-                              <FileText className="w-3.5 h-3.5" /> Appointment
-                            </Button>
-                            <Button variant="outline" className="w-full rounded-xl h-10 px-4 font-bold border-emerald-500 text-emerald-600 hover:bg-emerald-500 hover:text-white transition-all flex gap-2 text-xs">
-                              <Award className="w-3.5 h-3.5" /> Certificate
-                            </Button>
+                            <Link href={`/internal/members/${member.id}/id-card`}>
+                              <Button variant="outline" className="w-full rounded-xl h-10 px-4 font-bold border-accent text-accent hover:bg-accent hover:text-primary transition-all flex gap-2 text-xs">
+                                <IdCard className="w-3.5 h-3.5" /> ID Card
+                              </Button>
+                            </Link>
+                            <Link href={`/internal/members/${member.id}/appointment`}>
+                              <Button variant="outline" className="w-full rounded-xl h-10 px-4 font-bold border-indigo-500 text-indigo-600 hover:bg-indigo-500 hover:text-white transition-all flex gap-2 text-xs">
+                                <FileText className="w-3.5 h-3.5" /> Appointment
+                              </Link>
+                            </Link>
+                            <Link href={`/internal/members/${member.id}/certificate`}>
+                              <Button variant="outline" className="w-full rounded-xl h-10 px-4 font-bold border-emerald-500 text-emerald-600 hover:bg-emerald-500 hover:text-white transition-all flex gap-2 text-xs">
+                                <Award className="w-3.5 h-3.5" /> Certificate
+                              </Button>
+                            </Link>
                           </div>
                         </div>
+                      </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
               ))}
             </div>
           )}

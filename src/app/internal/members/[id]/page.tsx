@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useEffect, useState } from 'react'
@@ -421,15 +420,21 @@ export default function MemberDetailsPage() {
                   </CardTitle>
                 </CardHeader>
                 <div className="grid gap-3">
-                  <Button variant="outline" className="w-full justify-start rounded-xl h-12 border-accent text-accent hover:bg-accent hover:text-primary font-bold gap-3">
-                    <IdCard className="w-5 h-5" /> Generate Identity Card
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start rounded-xl h-12 border-indigo-500 text-indigo-600 hover:bg-indigo-500 hover:text-white font-bold gap-3">
-                    <FileText className="w-5 h-5" /> Appointment Letter
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start rounded-xl h-12 border-emerald-500 text-emerald-600 hover:bg-emerald-500 hover:text-white font-bold gap-3">
-                    <Award className="w-5 h-5" /> Issue Certificate
-                  </Button>
+                  <Link href={`/internal/members/${memberId}/id-card`}>
+                    <Button variant="outline" className="w-full justify-start rounded-xl h-12 border-accent text-accent hover:bg-accent hover:text-primary font-bold gap-3">
+                      <IdCard className="w-5 h-5" /> Generate Identity Card
+                    </Button>
+                  </Link>
+                  <Link href={`/internal/members/${memberId}/appointment`}>
+                    <Button variant="outline" className="w-full justify-start rounded-xl h-12 border-indigo-500 text-indigo-600 hover:bg-indigo-500 hover:text-white font-bold gap-3">
+                      <FileText className="w-5 h-5" /> Appointment Letter
+                    </Button>
+                  </Link>
+                  <Link href={`/internal/members/${memberId}/certificate`}>
+                    <Button variant="outline" className="w-full justify-start rounded-xl h-12 border-emerald-500 text-emerald-600 hover:bg-emerald-500 hover:text-white font-bold gap-3">
+                      <Award className="w-5 h-5" /> Issue Certificate
+                    </Button>
+                  </Link>
                 </div>
               </Card>
 
