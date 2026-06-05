@@ -1,4 +1,3 @@
-
 {
   "entities": {
     "Donation": {
@@ -34,6 +33,20 @@
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["title", "category", "amount", "date", "payee", "status"]
+    },
+    "AccountState": {
+      "title": "Account State",
+      "description": "Summary of current organizational liquid assets.",
+      "type": "object",
+      "properties": {
+        "cashInHand": { "type": "number" },
+        "cashAtBank": { "type": "number" },
+        "totalBalance": { "type": "number" },
+        "lastUpdated": { "type": "string", "format": "date-time" },
+        "updatedBy": { "type": "string" },
+        "reconciliationNote": { "type": "string" }
+      },
+      "required": ["cashInHand", "cashAtBank"]
     },
     "MemberProfile": {
       "title": "Member Profile",
@@ -205,6 +218,7 @@
   "firestore": {
     "/donations/{donationId}": { "schema": "Donation" },
     "/expenses/{expenseId}": { "schema": "Expense" },
+    "/accounts/{accountId}": { "schema": "AccountState" },
     "/memberProfiles/{profileId}": { "schema": "MemberProfile" },
     "/memberApplications/{appId}": { "schema": "MemberApplication" },
     "/events/{eventId}": { "schema": "Event" },

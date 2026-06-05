@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -31,7 +32,8 @@ import {
   RefreshCw,
   Package,
   Truck,
-  HeartHandshake
+  HeartHandshake,
+  Wallet
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useUser } from "@/firebase"
@@ -52,6 +54,7 @@ const publicLinks = [
 
 const adminLinks = [
   { name: 'Analytics', href: '/internal/analytics', icon: LayoutDashboard },
+  { name: 'Accounts', href: '/internal/accounts', icon: Wallet },
   { name: 'Expenses', href: '/internal/expenses', icon: TrendingDown },
   { name: 'Applications', href: '/internal/applications', icon: FileText },
   { name: 'Personnel', href: '/internal/members', icon: Users },

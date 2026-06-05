@@ -38,6 +38,11 @@ service cloud.firestore {
       allow read, write: if isAdmin();
     }
 
+    // Account balances: Admin only
+    match /accounts/{accountId} {
+      allow read, write: if isAdmin();
+    }
+
     // Organizational Events: Public read, Admin write
     match /events/{eventId} {
       allow read: if true;
