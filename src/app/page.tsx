@@ -82,7 +82,7 @@ export default function Home() {
 
         {/* Prominent Logo in Top Left of Hero (Visible on Desktop) */}
         <div className="absolute top-8 left-8 z-20 hidden xl:flex items-center gap-4 animate-in fade-in slide-in-from-left-4 duration-1000">
-          <div className="relative w-20 h-20 bg-white rounded-3xl p-2 shadow-2xl border border-white/20">
+          <div className="relative w-20 h-20">
             <Image src="/HRAT%20Logo.jpeg" alt="HRAT Logo" fill className="object-contain" />
           </div>
           <div className="flex flex-col text-white">
