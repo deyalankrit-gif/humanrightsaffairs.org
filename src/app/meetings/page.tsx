@@ -60,6 +60,9 @@ export default function MeetingsPage() {
 
   const formatTo12h = (timeStr: string) => {
     if (!timeStr) return '';
+    // If it's already in 12h format (contains AM/PM), return as is
+    if (timeStr.includes('AM') || timeStr.includes('PM')) return timeStr;
+    
     const match = timeStr.match(/^(\d{1,2}):(\d{2})$/);
     if (match) {
       let h = parseInt(match[1]);

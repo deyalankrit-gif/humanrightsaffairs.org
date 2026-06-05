@@ -96,6 +96,7 @@ export default function InternalMeetingsManagement() {
 
   const formatTo12h = (timeStr: string) => {
     if (!timeStr) return '';
+    if (timeStr.includes('AM') || timeStr.includes('PM')) return timeStr;
     const match = timeStr.match(/^(\d{1,2}):(\d{2})$/);
     if (match) {
       let h = parseInt(match[1]);
@@ -106,6 +107,18 @@ export default function InternalMeetingsManagement() {
       return `${h.toString().padStart(2, '0')}:${m} ${ampm}`;
     }
     return timeStr;
+  }
+
+  const convertTo24h = (timeStr: string) => {
+    if (!timeStr) return '';
+    if (!timeStr.includes('AM') && !timeStr.includes('PM')) return timeStr;
+    const [time, ampm] = timeStr.split(' ');
+    const parts = time.split(':');
+    let hours = parseInt(parts[0], 10);
+    const minutes = parts[1];
+    if (ampm === 'PM' && hours < 12) hours += 12;
+    if (ampm === 'AM' && hours === 12) hours = 0;
+    return `${hours.toString().padStart(2, '0')}:${minutes}`;
   }
 
   const handleAddMeeting = async () => {
@@ -119,6 +132,7 @@ export default function InternalMeetingsManagement() {
     try {
       await addDoc(collection(db, 'meetings'), {
         ...newMeeting,
+        time: formatTo12h(newMeeting.time), // Store as 12h
         createdAt: serverTimestamp()
       })
       toast({ title: "Assembly Scheduled", description: "The record has been published to the registry." })
@@ -152,7 +166,10 @@ export default function InternalMeetingsManagement() {
     setIsActionLoading(true)
     try {
       const { id, ...data } = editMeeting
-      await updateDoc(doc(db, 'meetings', id), data)
+      await updateDoc(doc(db, 'meetings', id), {
+        ...data,
+        time: formatTo12h(data.time) // Ensure 12h on update
+      })
       toast({ title: "Record Updated" })
       setEditMeeting(null)
     } catch (e: any) {
@@ -237,8 +254,8 @@ export default function InternalMeetingsManagement() {
                             <Input 
                               type="time" 
                               className="pl-10 h-10 rounded-lg"
-                              value={newMeeting.time} 
-                              onChange={e => setNewMeeting({...newMeeting, time: e.target.value})} 
+                              value={convertTo24h(newMeeting.time)} 
+                              onChange={e => setNewMeeting({...newMeeting, time: formatTo12h(e.target.value)})} 
                             />
                           </div>
                        </div>
@@ -386,8 +403,8 @@ export default function InternalMeetingsManagement() {
                                             <Input 
                                               type="time" 
                                               className="pl-10 h-10 rounded-lg"
-                                              value={editMeeting.time} 
-                                              onChange={e => setEditMeeting({...editMeeting, time: e.target.value})} 
+                                              value={convertTo24h(editMeeting.time)} 
+                                              onChange={e => setEditMeeting({...editMeeting, time: formatTo12h(e.target.value)})} 
                                             />
                                           </div>
                                        </div>
@@ -408,7 +425,7 @@ export default function InternalMeetingsManagement() {
                                   </div>
                                 )}
                                 <DialogFooter>
-                                  <Button onClick={handleUpdateMeeting} disabled={isActionLoading} className="w-full h-11 rounded-xl bg-primary text-white font-bold">
+                                  <Button onClick={handleUpdateMeeting} disabled={isActionLoading} className="w-full h-11 rounded-xl bg-primary text-white font-bold hover:bg-primary/90">
                                     {isActionLoading ? <Loader2 className="animate-spin mr-2" /> : "Commit Changes"}
                                   </Button>
                                 </DialogFooter>
