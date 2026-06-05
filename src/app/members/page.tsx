@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useEffect } from 'react'
@@ -136,7 +135,7 @@ export default function MembersPage() {
         ...newMember,
         createdAt: serverTimestamp(),
       })
-      toast({ title: "Success", description: "New personnel record established." })
+      toast({ title: "Success", description: "New member record established." })
       setIsAdding(false)
       setNewMember({ name: '', designation: '', email: '', phone: '', level: 'National', status: 'Active', memberId: '', stateName: '', districtName: '', gender: 'male', imageId: '' })
     } catch (error: any) {
@@ -172,14 +171,14 @@ export default function MembersPage() {
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
-      <section className="pt-40 pb-20 bg-primary text-primary-foreground relative overflow-hidden">
+      <section className="pt-28 md:pt-40 pb-20 bg-primary text-primary-foreground relative overflow-hidden">
         <div className="absolute top-0 right-0 w-1/2 h-full bg-accent/5 -skew-x-12"></div>
         <div className="container mx-auto px-4 relative z-10 text-center">
           <div className="inline-flex items-center gap-2 bg-accent/20 text-accent px-4 py-1.5 rounded-full text-sm font-bold border border-accent/30 mb-6">
             <Users className="w-4 h-4" />
-            <span>Official Membership Records</span>
+            <span>Official Member Records</span>
           </div>
-          <h1 className="text-5xl md:text-7xl font-headline font-bold mb-6 text-primary-foreground">Verified <span className="text-accent italic">Personnel</span></h1>
+          <h1 className="text-5xl md:text-7xl font-headline font-bold mb-6 text-primary-foreground">Verified <span className="text-accent italic">Members</span></h1>
           <p className="text-xl opacity-80 max-w-2xl mx-auto text-lg mb-8 text-primary-foreground">
             A dynamic ledger of our dedicated human rights defenders, updated in real-time by the central administration.
           </p>
@@ -193,7 +192,7 @@ export default function MembersPage() {
               </DialogTrigger>
               <DialogContent className="max-w-md bg-white dark:bg-slate-900 rounded-[2rem] border-none shadow-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                  <DialogTitle className="text-2xl font-headline font-bold text-primary dark:text-white">New Personnel Record</DialogTitle>
+                  <DialogTitle className="text-2xl font-headline font-bold text-primary dark:text-white">New Member Record</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4 py-4">
                   <div className="space-y-2">
@@ -307,7 +306,7 @@ export default function MembersPage() {
         </div>
       </section>
 
-      <section className="py-12 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-[56px] md:top-[64px] z-30 shadow-sm transition-colors">
+      <section className="py-12 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-[48px] md:top-[56px] z-30 shadow-sm transition-colors">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row gap-6 items-center justify-between">
             <div className="flex flex-wrap items-center gap-2">
@@ -321,7 +320,7 @@ export default function MembersPage() {
                       "rounded-full px-6 font-bold transition-all border-slate-200 dark:border-slate-700",
                       levelFilter === level && !selectedState
                         ? "bg-accent text-slate-900 shadow-lg border-accent" 
-                        : "text-primary dark:text-white hover:bg-accent hover:text-slate-900 hover:border-accent"
+                        : "text-primary dark:text-slate-300 hover:bg-accent hover:text-slate-900 hover:border-accent"
                     )}
                   >
                     {level === 'All' ? 'All Levels' : `${level} Level`}

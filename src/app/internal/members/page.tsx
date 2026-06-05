@@ -131,9 +131,9 @@ export default function InternalMembersDirectory() {
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="space-y-1">
               <div className="inline-flex items-center gap-2 bg-red-500/20 text-red-400 px-3 py-1 rounded-full text-[9px] font-bold border border-red-500/30 uppercase tracking-[0.2em]">
-                <Lock className="w-2.5 h-2.5" /> Personnel Directory
+                <Lock className="w-2.5 h-2.5" /> Members Directory
               </div>
-              <h1 className="text-3xl md:text-4xl font-headline font-bold">Secure <span className="text-accent italic">Membership</span></h1>
+              <h1 className="text-3xl md:text-4xl font-headline font-bold">Secure <span className="text-accent italic">Members</span></h1>
               <p className="text-slate-400 text-[11px] max-w-xl">Internal dashboard for managing operational contact protocols.</p>
             </div>
             

@@ -86,7 +86,7 @@ export default function MembershipRenewalsPage() {
                 <RefreshCw className="w-2.5 h-2.5" /> Term Governance
               </div>
               <h1 className="text-3xl md:text-4xl font-headline font-bold">Membership <span className="text-accent italic">Renewals</span></h1>
-              <p className="text-slate-400 text-[11px]">Monitoring personnel term expiration with 30-day alerts.</p>
+              <p className="text-slate-400 text-[11px]">Monitoring member term expiration with 30-day alerts.</p>
             </div>
             <div className="bg-white/5 px-6 py-3 rounded-2xl border border-white/10 text-center"><p className="text-[10px] font-bold text-accent uppercase">30-Day Pro-Active Alert Baseline</p></div>
           </div>
@@ -97,7 +97,7 @@ export default function MembershipRenewalsPage() {
         <div className="container mx-auto px-4">
           <div className="relative max-w-lg mx-auto">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <Input placeholder="Search personnel..." className="pl-9 h-10 rounded-xl border-slate-200 text-xs" value={search} onChange={(e) => setSearch(e.target.value)} />
+            <Input placeholder="Search members..." className="pl-9 h-10 rounded-xl border-slate-200 text-xs" value={search} onChange={(e) => setSearch(e.target.value)} />
           </div>
         </div>
       </section>
@@ -105,7 +105,7 @@ export default function MembershipRenewalsPage() {
       <section className="py-8">
         <div className="container mx-auto px-4">
           {dataLoading ? (
-            <div className="text-center py-20"><Loader2 className="w-8 h-8 animate-spin text-accent mx-auto" /></div>
+            <div className="text-center py-20"><Loader2 className="w-10 h-10 animate-spin text-accent mx-auto" /></div>
           ) : (
             <div className="grid gap-4 max-w-4xl mx-auto">
               {renewalData.map((member) => (

@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useEffect, useState } from 'react'
@@ -24,7 +23,7 @@ const publicLinks = [
   { name: 'Meetings', href: '/meetings', icon: Handshake },
   { name: 'Events', href: '/events', icon: Calendar },
   { name: 'Leadership', href: '/leadership', icon: Users },
-  { name: 'Personnel', href: '/members', icon: UserCheck },
+  { name: 'Members', href: '/members', icon: UserCheck },
   { name: 'Revocations', href: '/terminated-members', icon: UserX },
   { name: 'Grievance', href: '/#grievances', icon: MessageSquareWarning },
   { name: 'Rights', href: '/#knowledge', icon: Scale },
@@ -48,18 +47,18 @@ export function Navbar() {
   if (isIframe) return null
 
   return (
-    <header className="flex h-14 md:h-16 shrink-0 items-center border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 md:px-8 sticky top-0 z-50 transition-all duration-300">
+    <header className="flex h-12 md:h-14 shrink-0 items-center border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 md:px-8 sticky top-0 z-50 transition-all duration-300">
       <Link href="/" className="flex items-center gap-3 mr-8 shrink-0 group">
-        <div className="relative w-10 h-10 transition-transform group-hover:scale-110">
+        <div className="relative w-8 h-8 md:w-10 md:h-10 transition-transform group-hover:scale-110">
           <Image src="/HRAT%20Logo.jpeg" alt="HRAT Logo" fill className="object-contain" />
         </div>
         <div className="flex flex-col">
-          <span className="font-headline font-bold text-lg md:text-xl leading-none">HRAT</span>
-          <span className="text-[10px] font-bold text-accent uppercase tracking-widest">JusticeShield</span>
+          <span className="font-headline font-bold text-base md:text-lg leading-none">HRAT</span>
+          <span className="text-[9px] font-bold text-accent uppercase tracking-widest">JusticeShield</span>
         </div>
       </Link>
 
-      <nav className="flex-1 flex items-center overflow-x-auto no-scrollbar gap-2 md:gap-4 px-2">
+      <nav className="flex-1 flex items-center overflow-x-auto no-scrollbar gap-1 md:gap-2 px-2">
         {publicLinks.map((link) => {
           const isActive = pathname === link.href || (link.href !== '/' && pathname.startsWith(link.href))
           return (
@@ -67,13 +66,13 @@ export function Navbar() {
               key={link.name} 
               href={link.href}
               className={cn(
-                "whitespace-nowrap flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-bold transition-all",
+                "whitespace-nowrap flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[13px] font-bold transition-all",
                 isActive 
                   ? "bg-accent/10 text-accent" 
                   : "text-muted-foreground hover:text-primary hover:bg-muted"
               )}
             >
-              <link.icon className={cn("w-4 h-4", isActive ? "text-accent" : "text-muted-foreground")} />
+              <link.icon className={cn("w-3.5 h-3.5", isActive ? "text-accent" : "text-muted-foreground")} />
               <span>{link.name}</span>
             </Link>
           )

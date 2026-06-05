@@ -152,7 +152,7 @@ export default function InternalApplicationsPage() {
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="space-y-1">
               <div className="inline-flex items-center gap-2 bg-accent/20 text-accent px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-[0.2em] border border-accent/30">
-                <ShieldCheck className="w-2.5 h-2.5" /> Personnel Vetting
+                <ShieldCheck className="w-2.5 h-2.5" /> Member Vetting
               </div>
               <h1 className="text-3xl md:text-4xl font-headline font-bold">New <span className="text-accent italic">Applications</span></h1>
               <p className="text-slate-400 text-[11px]">Review and commission prospective members and volunteers.</p>
