@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -37,7 +38,8 @@ import {
   Wallet,
   LogOut,
   ExternalLink,
-  UserCircle
+  UserCircle,
+  Monitor
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -67,6 +69,7 @@ const adminLinks = [
   { name: 'Grievances', href: '/internal/grievances', icon: MessageSquareWarning },
   { name: 'Meetings', href: '/internal/meetings', icon: Handshake },
   { name: 'Events', href: '/internal/events', icon: Calendar },
+  { name: 'Public Site View', href: '/internal/public-view', icon: Monitor },
 ]
 
 export function AppSidebar() {
@@ -148,8 +151,8 @@ export function AppSidebar() {
                   asChild
                   className="w-full justify-start h-9 gap-2 font-bold text-[10px] uppercase tracking-wider rounded-lg hover:bg-accent/10 hover:text-accent"
                 >
-                  <Link href="/">
-                    <ExternalLink className="w-3.5 h-3.5" /> Public Site
+                  <Link href="/internal/public-view">
+                    <Monitor className="w-3.5 h-3.5" /> Public Site Mirror
                   </Link>
                 </Button>
                 <Button 
