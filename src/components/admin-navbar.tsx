@@ -57,9 +57,9 @@ export function AdminNavbar() {
       "fixed top-0 w-full z-50 transition-all duration-300 py-4",
       isScrolled ? "bg-slate-900/95 backdrop-blur-md border-b border-white/10 shadow-2xl" : "bg-slate-900 border-b border-white/5"
     )}>
-      <div className="container mx-auto px-4 flex items-center justify-between">
-        <div className="flex items-center gap-8">
-          <Link href="/internal/analytics" className="flex items-center gap-3 group">
+      <div className="container mx-auto px-6 flex items-center justify-between">
+        <div className="flex items-center gap-4 lg:gap-8">
+          <Link href="/internal/analytics" className="flex items-center gap-3 group shrink-0">
             <div className="relative w-10 h-10 bg-white rounded-xl p-1.5 shadow-lg group-hover:scale-110 transition-transform">
               <Image src="/HRAT%20Logo.jpeg" alt="HRAT" fill className="object-contain p-1" />
             </div>
@@ -70,7 +70,7 @@ export function AdminNavbar() {
           </Link>
 
           {/* Desktop Links */}
-          <div className="hidden md:flex items-center gap-1 lg:gap-2">
+          <div className="hidden xl:flex items-center gap-1">
             {navLinks.map((link) => {
               const isActive = pathname === link.href
               return (
@@ -78,16 +78,16 @@ export function AdminNavbar() {
                   key={link.name} 
                   href={link.href}
                   className={cn(
-                    "flex items-center gap-2 text-[11px] lg:text-sm font-bold transition-all py-2 px-3 lg:px-4 rounded-xl relative",
+                    "flex items-center gap-2 text-[11px] lg:text-xs font-bold transition-all py-2 px-3 rounded-xl relative",
                     isActive 
-                      ? "text-accent" 
+                      ? "text-accent bg-white/5" 
                       : "text-slate-400 hover:text-white hover:bg-white/5"
                   )}
                 >
                   {link.icon}
                   {link.name}
                   {isActive && (
-                    <span className="absolute bottom-0 left-4 right-4 h-0.5 bg-accent rounded-full shadow-[0_0_8px_rgba(212,175,55,0.5)] animate-in fade-in slide-in-from-bottom-1 duration-300"></span>
+                    <span className="absolute bottom-0 left-4 right-4 h-0.5 bg-accent rounded-full shadow-[0_0_8px_rgba(212,175,55,0.5)]"></span>
                   )}
                 </Link>
               )
@@ -95,27 +95,29 @@ export function AdminNavbar() {
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
-          <div className="hidden lg:flex flex-col items-end mr-2">
+        <div className="flex items-center gap-3 lg:gap-6">
+          <div className="hidden lg:flex flex-col items-end">
             <p className="text-[8px] text-slate-500 font-bold uppercase tracking-widest">Personnel Clearance</p>
-            <p className="text-xs font-bold text-emerald-400">{user?.email}</p>
+            <p className="text-[11px] font-bold text-emerald-400">{user?.email}</p>
           </div>
 
-          <ThemeToggle className="text-white hover:bg-white/10" />
+          <div className="flex items-center gap-2">
+            <ThemeToggle className="text-white hover:bg-white/10" />
 
-          <Button 
-            onClick={handleLogout}
-            variant="ghost" 
-            className="hidden md:flex text-red-400 hover:text-red-300 hover:bg-red-400/10 rounded-xl h-10 px-4 text-xs font-bold gap-2"
-          >
-            <LogOut className="w-3.5 h-3.5" />
-            Sign Out
-          </Button>
+            <Button 
+              onClick={handleLogout}
+              variant="ghost" 
+              className="hidden md:flex text-red-400 hover:text-red-300 hover:bg-red-400/10 rounded-xl h-10 px-4 text-xs font-bold gap-2 border border-red-500/20"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              Sign Out
+            </Button>
+          </div>
 
           {/* Mobile Menu */}
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden text-white">
+              <Button variant="ghost" size="icon" className="xl:hidden text-white">
                 <Menu className="w-6 h-6" />
               </Button>
             </SheetTrigger>
@@ -150,7 +152,7 @@ export function AdminNavbar() {
                         </div>
                         {link.name}
                         {isActive && (
-                           <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-accent rounded-full animate-in fade-in slide-in-from-left-1 duration-300"></span>
+                           <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-accent rounded-full"></span>
                         )}
                       </Link>
                     )

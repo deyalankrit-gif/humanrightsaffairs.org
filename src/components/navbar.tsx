@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useEffect } from 'react'
@@ -18,10 +17,10 @@ const navLinks = [
   { name: 'Meetings', href: '/meetings' },
   { name: 'Events', href: '/events' },
   { name: 'Leadership', href: '/leadership' },
-  { name: 'Membership Dir', href: '/members' },
-  { name: 'Terminated List', href: '/terminated-members' },
-  { name: 'Grievance Cell', href: '/#grievances' },
-  { name: 'Rights Center', href: '/#knowledge' },
+  { name: 'Personnel', href: '/members' },
+  { name: 'Revocations', href: '/terminated-members' },
+  { name: 'Grievance', href: '/#grievances' },
+  { name: 'Rights', href: '/#knowledge' },
   { name: 'Helpline', href: '/#helpline' },
 ]
 
@@ -70,8 +69,8 @@ export function Navbar() {
       "fixed top-0 w-full z-50 transition-all duration-500",
       bgColorClass
     )}>
-      <div className="container mx-auto px-4 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2 group">
+      <div className="container mx-auto px-6 flex items-center justify-between">
+        <Link href="/" className="flex items-center gap-2 group shrink-0">
           <div className="relative">
             <div className="relative w-12 h-12 transition-transform duration-500 group-hover:scale-110">
               <Image 
@@ -93,40 +92,44 @@ export function Navbar() {
         </Link>
 
         {/* Desktop Nav */}
-        <div className="hidden lg:flex items-center gap-6">
-          {navLinks.map((link) => {
-            const isPageActive = pathname === link.href
-            const isHashActive = isHome && activeHash && link.href === `/${activeHash}`
-            const isActive = isPageActive || isHashActive || (link.href === '/' && isHome && !activeHash)
+        <div className="hidden lg:flex items-center gap-2 xl:gap-6">
+          <div className="flex items-center gap-1 xl:gap-4">
+            {navLinks.map((link) => {
+              const isPageActive = pathname === link.href
+              const isHashActive = isHome && activeHash && link.href === `/${activeHash}`
+              const isActive = isPageActive || isHashActive || (link.href === '/' && isHome && !activeHash)
 
-            return (
-              <Link 
-                key={link.name} 
-                href={link.href} 
-                className={cn(
-                  "text-xs font-bold tracking-wide transition-all duration-500 relative group py-2",
-                  navColorClass,
-                  isActive ? "text-accent" : "hover:text-accent/80"
-                )}
-              >
-                {link.name}
-                {isActive && (
-                  <span className="absolute bottom-0 left-0 w-full h-0.5 bg-accent rounded-full animate-in fade-in slide-in-from-bottom-1 duration-300"></span>
-                )}
-              </Link>
-            )
-          })}
+              return (
+                <Link 
+                  key={link.name} 
+                  href={link.href} 
+                  className={cn(
+                    "text-[10px] xl:text-xs font-bold tracking-wide transition-all duration-500 relative group py-2 px-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5",
+                    navColorClass,
+                    isActive ? "text-accent" : "hover:text-accent/80"
+                  )}
+                >
+                  {link.name}
+                  {isActive && (
+                    <span className="absolute bottom-0 left-2 right-2 h-0.5 bg-accent rounded-full"></span>
+                  )}
+                </Link>
+              )
+            })}
+          </div>
           
-          <ThemeToggle className={navColorClass} />
+          <div className="flex items-center gap-4 border-l border-black/10 dark:border-white/10 pl-4">
+            <ThemeToggle className={navColorClass} />
 
-          <DonationDialog>
-            <Button 
-              variant="default" 
-              className="bg-accent text-primary hover:bg-accent/90 rounded-full px-6 font-bold shadow-lg shadow-accent/20 transition-transform active:scale-95 text-xs h-9"
-            >
-              Donate
-            </Button>
-          </DonationDialog>
+            <DonationDialog>
+              <Button 
+                variant="default" 
+                className="bg-accent text-primary hover:bg-accent/90 rounded-full px-6 font-bold shadow-lg shadow-accent/20 transition-transform active:scale-95 text-xs h-9"
+              >
+                Donate
+              </Button>
+            </DonationDialog>
+          </div>
         </div>
 
         {/* Mobile Nav */}
