@@ -44,7 +44,6 @@ import {
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
-  AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
@@ -193,6 +192,14 @@ export default function InventoryManagementPage() {
   }
 
   const categories = ["Stationery", "Relief Kits", "Advocacy Manuals", "Electronics", "Furniture", "Medical Supplies", "Other"]
+
+  // Safe numeric conversion for UI display
+  const numericAdjustment = Number(adjustmentAmount) || 0;
+  const projectedBalance = adjustingItem 
+    ? (adjustingItem.type === 'Inflow' 
+        ? (adjustingItem.item.currentStock + numericAdjustment) 
+        : (adjustingItem.item.currentStock - numericAdjustment))
+    : 0;
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
@@ -451,15 +458,13 @@ export default function InventoryManagementPage() {
              
              <div className="bg-primary/5 p-4 rounded-2xl border border-primary/10 flex justify-between items-center">
                 <span className="text-xs font-bold text-slate-500 uppercase">Current Inventory</span>
-                <span className="text-lg font-bold">{adjustingItem?.item.currentStock}</span>
+                <span className="text-lg font-bold">{adjustingItem?.item.currentStock || 0}</span>
              </div>
              
              <div className={cn("p-4 rounded-2xl border flex justify-between items-center", adjustingItem?.type === 'Inflow' ? "bg-emerald-50 border-emerald-100" : "bg-red-50 border-red-100")}>
                 <span className={cn("text-xs font-bold uppercase", adjustingItem?.type === 'Inflow' ? "text-emerald-700" : "text-red-700")}>Projected Balance</span>
                 <span className={cn("text-lg font-bold", adjustingItem?.type === 'Inflow' ? "text-emerald-700" : "text-red-700")}>
-                  {adjustingItem?.type === 'Inflow' 
-                    ? (adjustingItem?.item.currentStock + Number(adjustmentAmount)) 
-                    : (adjustingItem?.item.currentStock - Number(adjustmentAmount))}
+                  {projectedBalance}
                 </span>
              </div>
            </div>
