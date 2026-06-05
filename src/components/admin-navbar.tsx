@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useEffect } from 'react'
@@ -12,7 +13,8 @@ import {
   Handshake,
   MessageSquareWarning,
   FileText,
-  RefreshCw
+  RefreshCw,
+  Package
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
@@ -36,6 +38,7 @@ export function AdminNavbar() {
     { name: 'Applications', href: '/internal/applications', icon: <FileText className="w-4 h-4" /> },
     { name: 'Personnel', href: '/internal/members', icon: <Users className="w-4 h-4" /> },
     { name: 'Renewals', href: '/internal/renewals', icon: <RefreshCw className="w-4 h-4" /> },
+    { name: 'Inventory', href: '/internal/inventory', icon: <Package className="w-4 h-4" /> },
     { name: 'Grievances', href: '/internal/grievances', icon: <MessageSquareWarning className="w-4 h-4" /> },
     { name: 'Meetings', href: '/internal/meetings', icon: <Handshake className="w-4 h-4" /> },
     { name: 'Events', href: '/internal/events', icon: <Calendar className="w-4 h-4" /> },

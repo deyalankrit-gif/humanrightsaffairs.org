@@ -1,3 +1,4 @@
+
 {
   "entities": {
     "Donation": {
@@ -144,6 +145,23 @@
         "status": { "type": "string", "enum": ["Pending", "Reviewed", "Resolved"] },
         "createdAt": { "type": "string", "format": "date-time" }
       }
+    },
+    "InventoryItem": {
+      "title": "Inventory Item",
+      "description": "Organizational materials and supplies tracking.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "category": { "type": "string" },
+        "unit": { "type": "string" },
+        "currentStock": { "type": "number" },
+        "totalInflow": { "type": "number" },
+        "totalOutflow": { "type": "number" },
+        "lowStockThreshold": { "type": "number" },
+        "lastUpdated": { "type": "string", "format": "date-time" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "category", "unit", "currentStock"]
     }
   },
   "auth": {
@@ -157,6 +175,7 @@
     "/terminatedMembers/{memberId}": { "schema": "TerminatedMember" },
     "/leadership/{leaderId}": { "schema": "LeadershipMember" },
     "/meetings/{meetingId}": { "schema": "GeneralMeeting" },
-    "/grievances/{grievanceId}": { "schema": "Grievance" }
+    "/grievances/{grievanceId}": { "schema": "Grievance" },
+    "/inventory/{itemId}": { "schema": "InventoryItem" }
   }
 }

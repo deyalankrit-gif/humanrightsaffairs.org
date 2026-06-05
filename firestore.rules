@@ -63,5 +63,10 @@ service cloud.firestore {
       allow create: if true;
       allow read, update, delete: if isAdmin();
     }
+
+    // Material Inventory: Admin only
+    match /inventory/{itemId} {
+      allow read, write: if isAdmin();
+    }
   }
 }
