@@ -40,22 +40,6 @@ export function Footer() {
                   <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                 </button>
               </DonationDialog>
-
-              {/* Donate Instantly System */}
-              <div className="space-y-3">
-                <p className="text-[10px] font-bold text-accent uppercase tracking-[0.2em] animate-pulse">Donate Instantly</p>
-                <div className="flex flex-wrap gap-2">
-                  <DonationDialog defaultAmount="100" initialStep="qr">
-                    <button className="px-3 py-1.5 border border-white/20 rounded-full text-[10px] font-bold hover:bg-accent hover:text-primary transition-all active:scale-95 bg-white/5 backdrop-blur-sm">₹100</button>
-                  </DonationDialog>
-                  <DonationDialog defaultAmount="500" initialStep="qr">
-                    <button className="px-3 py-1.5 border border-white/20 rounded-full text-[10px] font-bold hover:bg-accent hover:text-primary transition-all active:scale-95 bg-white/5 backdrop-blur-sm">₹500</button>
-                  </DonationDialog>
-                  <DonationDialog defaultAmount="1000" initialStep="qr">
-                    <button className="px-3 py-1.5 border border-white/20 rounded-full text-[10px] font-bold hover:bg-accent hover:text-primary transition-all active:scale-95 bg-white/5 backdrop-blur-sm">₹1,000</button>
-                  </DonationDialog>
-                </div>
-              </div>
             </div>
 
             <div className="flex gap-4">
