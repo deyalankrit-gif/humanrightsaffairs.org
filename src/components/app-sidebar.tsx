@@ -1,12 +1,9 @@
-
 "use client"
 
 import * as React from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { usePathname, useRouter } from "next/navigation"
-import { signOut } from "firebase/auth"
-import { useAuth, useUser } from "@/firebase"
+import { usePathname } from "next/navigation"
 import {
   Sidebar,
   SidebarContent,
@@ -36,9 +33,6 @@ import {
   Truck,
   HeartHandshake,
   Wallet,
-  LogOut,
-  ExternalLink,
-  UserCircle,
   Monitor
 } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -74,19 +68,8 @@ const adminLinks = [
 
 export function AppSidebar() {
   const pathname = usePathname()
-  const router = useRouter()
-  const auth = useAuth()
-  const { user } = useUser()
-  
   const isAdminPortal = pathname.startsWith('/internal')
   const links = isAdminPortal ? adminLinks : publicLinks
-
-  const handleSignOut = async () => {
-    if (auth) {
-      await signOut(auth)
-      router.push('/internal/login')
-    }
-  }
 
   return (
     <Sidebar collapsible="icon" className="border-r bg-sidebar">
@@ -134,40 +117,6 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="border-t p-4 space-y-4">
-        {isAdminPortal && user && (
-          <div className="group-data-[collapsible=icon]:hidden space-y-4">
-            <div className="bg-muted/50 p-3 rounded-2xl border border-sidebar-border">
-              <div className="flex items-center gap-3 mb-3">
-                <UserCircle className="w-5 h-5 text-accent" />
-                <div className="flex flex-col min-w-0">
-                  <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest leading-none">Session Official</span>
-                  <span className="text-xs font-bold truncate text-sidebar-foreground">{user.email}</span>
-                </div>
-              </div>
-              <div className="grid gap-2">
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  asChild
-                  className="w-full justify-start h-9 gap-2 font-bold text-[10px] uppercase tracking-wider rounded-lg hover:bg-accent/10 hover:text-accent"
-                >
-                  <Link href="/internal/public-view">
-                    <Monitor className="w-3.5 h-3.5" /> Public Site Mirror
-                  </Link>
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={handleSignOut}
-                  className="w-full justify-start h-9 gap-2 font-bold text-[10px] uppercase tracking-wider rounded-lg text-red-600 hover:bg-red-50 hover:text-red-700"
-                >
-                  <LogOut className="w-3.5 h-3.5" /> Sign Out
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
-
         {!isAdminPortal && (
           <div className="group-data-[collapsible=icon]:hidden">
             <DonationDialog>
