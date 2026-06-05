@@ -51,14 +51,14 @@ export default function IDCardGenerator() {
   const handleDownload = () => {
     toast({
       title: "Generating PDF",
-      description: "Please select 'Save as PDF' in the print destination menu to download the ID Card.",
+      description: "Please select 'Save as PDF' from the printer destination to download your digital ID card.",
     })
     setTimeout(() => window.print(), 500)
   }
 
   return (
-    <main className="min-h-screen bg-slate-100 p-8 print:p-0 print:bg-white">
-      <div className="max-w-4xl mx-auto flex flex-col gap-8">
+    <main className="min-h-screen bg-slate-100 p-8 print:p-0 print:bg-white flex flex-col items-center">
+      <div className="w-full max-w-4xl flex flex-col gap-8">
         
         <div className="flex items-center justify-between print:hidden">
           <Button variant="ghost" onClick={() => router.back()} className="gap-2 font-bold uppercase text-xs tracking-widest">
@@ -68,14 +68,14 @@ export default function IDCardGenerator() {
             <Button onClick={handleDownload} variant="outline" className="border-primary text-primary font-bold h-12 rounded-xl gap-2">
               <Download className="w-4 h-4" /> Download PDF
             </Button>
-            <Button onClick={handlePrint} className="bg-primary text-white font-bold h-12 rounded-xl gap-2">
+            <Button onClick={handlePrint} className="bg-primary text-white font-bold h-12 rounded-xl gap-2 shadow-xl shadow-primary/20">
               <Printer className="w-4 h-4" /> Print ID Card
             </Button>
           </div>
         </div>
 
         {/* Horizontal ID Card Layout */}
-        <div className="w-full flex justify-center">
+        <div className="w-full flex justify-center print:mt-20">
           <div className="relative w-[500px] h-[320px] bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-200 print:shadow-none print:border-slate-300">
             {/* Header */}
             <div className="h-24 bg-primary text-white p-6 flex items-center gap-4 border-b-4 border-accent">
@@ -144,18 +144,18 @@ export default function IDCardGenerator() {
           </div>
         </div>
 
-        <div className="bg-white p-8 rounded-3xl border border-slate-200 print:hidden text-center max-w-lg mx-auto shadow-sm">
+        <div className="bg-white p-8 rounded-3xl border border-slate-200 print:hidden text-center max-w-lg mx-auto shadow-sm mt-8">
            <ShieldCheck className="w-12 h-12 text-accent mx-auto mb-4" />
-           <h3 className="font-headline font-bold text-xl mb-2">Printing Guidelines</h3>
+           <h3 className="font-headline font-bold text-xl mb-2">Ready to Print</h3>
            <p className="text-slate-500 text-sm mb-6 leading-relaxed">
-             For the best results, use high-quality PVC or glossy card stock. Set your printer scale to 100% and enable "Background Graphics" in the print settings. To save as a file, select "Save as PDF" as the printer destination.
+             Click the <strong>Print ID Card</strong> button to send this document directly to your default printer. For best quality, use glossy card stock.
            </p>
            <div className="flex flex-col gap-2">
              <div className="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase justify-center">
-               <BadgeCheck className="w-4 h-4 text-emerald-500" /> Tamper-Evident Design
+               <BadgeCheck className="w-4 h-4 text-emerald-500" /> Auto-detects default printer
              </div>
              <div className="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase justify-center">
-               <BadgeCheck className="w-4 h-4 text-emerald-500" /> Official Identification Layout
+               <BadgeCheck className="w-4 h-4 text-emerald-500" /> High-fidelity digital output
              </div>
            </div>
         </div>

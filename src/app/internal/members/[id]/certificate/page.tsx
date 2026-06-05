@@ -6,7 +6,7 @@ import Image from 'next/image'
 import { useDoc, useFirestore, useUser, useMemoFirebase } from '@/firebase'
 import { doc } from 'firebase/firestore'
 import { Button } from '@/components/ui/button'
-import { Printer, ArrowLeft, Award, ShieldCheck, BadgeCheck, CheckCircle2, Download } from 'lucide-react'
+import { Printer, ArrowLeft, Award, BadgeCheck, CheckCircle2, Download } from 'lucide-react'
 import { Loader2 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 
@@ -47,7 +47,7 @@ export default function MembershipCertificateGenerator() {
   const handleDownload = () => {
     toast({
       title: "Downloading Certificate",
-      description: "Select 'Save as PDF' from the printer options to download your file.",
+      description: "Select 'Save as PDF' from the printer options to download your verified certificate.",
     })
     setTimeout(() => window.print(), 500)
   }

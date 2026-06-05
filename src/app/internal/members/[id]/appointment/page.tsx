@@ -6,8 +6,8 @@ import Image from 'next/image'
 import { useDoc, useFirestore, useUser, useMemoFirebase } from '@/firebase'
 import { doc } from 'firebase/firestore'
 import { Button } from '@/components/ui/button'
-import { Printer, ArrowLeft, Download, ShieldCheck, Mail, Phone, MapPin, Globe } from 'lucide-react'
-import { Loader2 } from 'lucide-react'
+import { Printer, ArrowLeft, Download, Mail, MapPin, Globe } from 'lucide-react'
+import { Loader2, ShieldCheck } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 
 export default function AppointmentLetterGenerator() {
@@ -46,7 +46,7 @@ export default function AppointmentLetterGenerator() {
 
   const handleDownload = () => {
     toast({
-      title: "Preparing Document",
+      title: "Preparing PDF",
       description: "Please select 'Save as PDF' from the destination dropdown to download the letter.",
     })
     setTimeout(() => window.print(), 500)
@@ -59,8 +59,8 @@ export default function AppointmentLetterGenerator() {
   })
 
   return (
-    <main className="min-h-screen bg-slate-50 p-8 print:p-0 print:bg-white font-serif">
-      <div className="max-w-4xl mx-auto flex flex-col gap-8">
+    <main className="min-h-screen bg-slate-50 p-8 print:p-0 print:bg-white font-serif flex flex-col items-center">
+      <div className="max-w-4xl w-full flex flex-col gap-8">
         
         <div className="flex items-center justify-between print:hidden">
           <Button variant="ghost" onClick={() => router.back()} className="gap-2 font-sans font-bold uppercase text-xs tracking-widest">
@@ -70,7 +70,7 @@ export default function AppointmentLetterGenerator() {
             <Button onClick={handleDownload} variant="outline" className="border-indigo-600 text-indigo-600 font-sans font-bold h-12 rounded-xl gap-2">
               <Download className="w-4 h-4" /> Download PDF
             </Button>
-            <Button onClick={handlePrint} className="bg-indigo-600 text-white font-sans font-bold h-12 rounded-xl gap-2">
+            <Button onClick={handlePrint} className="bg-indigo-600 text-white font-sans font-bold h-12 rounded-xl gap-2 shadow-xl shadow-indigo-600/20">
               <Printer className="w-4 h-4" /> Print Letter
             </Button>
           </div>
@@ -85,8 +85,8 @@ export default function AppointmentLetterGenerator() {
                    <Image src="/HRAT%20Logo.jpeg" alt="HRAT" fill className="object-contain" />
                 </div>
                 <div>
-                  <h1 className="text-3xl font-bold text-primary tracking-tight">Human Rights Affairs Trust</h1>
-                  <p className="text-xs font-bold text-accent uppercase tracking-[0.3em] mt-1">Justice Shield • Registered with Government of India</p>
+                  <h1 className="text-3xl font-bold text-primary tracking-tight font-sans">Human Rights Affairs Trust</h1>
+                  <p className="text-xs font-bold text-accent uppercase tracking-[0.3em] mt-1 font-sans">Justice Shield • Registered with Government of India</p>
                 </div>
              </div>
              <div className="text-right text-[10px] space-y-1 font-sans text-slate-500 font-bold uppercase tracking-wider">
@@ -105,13 +105,13 @@ export default function AppointmentLetterGenerator() {
 
              <div className="space-y-1">
                 <p className="font-bold">To,</p>
-                <p className="text-xl font-bold text-primary">{member.name}</p>
+                <p className="text-xl font-bold text-primary font-sans">{member.name}</p>
                 <p className="text-sm font-medium">{member.profession}</p>
                 <p className="text-sm text-slate-500">{member.districtName ? `${member.districtName}, ` : ''}{member.stateName || 'India'}</p>
              </div>
 
              <div className="space-y-4">
-                <h2 className="text-xl font-bold border-b border-slate-200 pb-2 text-primary">Sub: Letter of Appointment for the position of {member.designation}</h2>
+                <h2 className="text-xl font-bold border-b border-slate-200 pb-2 text-primary font-sans">Sub: Letter of Appointment for the position of {member.designation}</h2>
                 
                 <p className="text-justify">Dear {member.name},</p>
                 
@@ -144,7 +144,7 @@ export default function AppointmentLetterGenerator() {
                 
                 <div className="space-y-1 text-right">
                    <div className="h-10 border-b-2 border-slate-300 w-48 ml-auto mb-2"></div>
-                   <p className="font-bold text-primary">Central Chairman</p>
+                   <p className="font-bold text-primary font-sans">Central Chairman</p>
                    <p className="text-[10px] text-slate-500 font-bold uppercase font-sans">Human Rights Affairs Trust (INDIA)</p>
                 </div>
              </div>
