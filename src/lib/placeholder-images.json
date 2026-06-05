@@ -99,7 +99,7 @@
     {
       "id": "donation-footer-image",
       "description": "Donation call to action image for footer",
-      "imageUrl": "https://picsum.photos/seed/donation/400/300",
+      "imageUrl": "/donate.jpeg",
       "imageHint": "donation charity"
     }
   ]
