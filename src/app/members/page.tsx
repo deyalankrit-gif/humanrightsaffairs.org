@@ -154,12 +154,14 @@ export default function MembersPage() {
       m.memberId?.toLowerCase().includes(search.toLowerCase());
     
     let matchesLevel = levelFilter === "All" || m.level === levelFilter;
-    if (levelFilter === "State" && selectedState) {
-      matchesLevel = (m.level === "State" || m.level === "District") && m.stateName === selectedState;
+    
+    if (selectedState) {
+      matchesLevel = m.stateName === selectedState;
       if (selectedDistrict) {
         matchesLevel = matchesLevel && m.districtName === selectedDistrict;
       }
     }
+    
     return matchesSearch && matchesLevel;
   })
 
@@ -310,55 +312,71 @@ export default function MembersPage() {
       <section className="py-12 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-[72px] md:top-[84px] z-30 shadow-sm transition-colors">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row gap-6 items-center justify-between">
-            <div className="flex flex-wrap justify-center gap-2">
-              {["All", "National", "State", "District"].map((level) => (
-                <Button 
-                  key={level} 
-                  variant={levelFilter === level && !selectedState ? "default" : "outline"} 
-                  onClick={() => handleLevelClick(level)} 
-                  className={cn(
-                    "rounded-full px-6 font-bold transition-all",
-                    levelFilter === level && !selectedState
-                      ? "bg-accent text-slate-900 shadow-lg border-accent" 
-                      : "text-primary dark:text-white border-slate-200 dark:border-slate-700 hover:bg-accent hover:text-slate-900 hover:border-accent"
-                  )}
-                >
-                  {level === 'All' ? 'All Levels' : `${level} Level`}
-                </Button>
-              ))}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant={selectedState ? "default" : "outline"} className={cn(
-                    "rounded-full px-6 font-bold flex items-center gap-2",
-                    selectedState ? "bg-accent text-slate-900" : "text-primary dark:text-white border-slate-200 dark:border-slate-700 hover:border-accent hover:text-accent"
-                  )}>{selectedState || "Filter by State"} <ChevronDown className="w-4 h-4 opacity-50" /></Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="max-h-80 overflow-y-auto w-56">
-                  {states.map((state) => (
-                    <DropdownMenuItem key={state} onClick={() => handleStateSelect(state)}>{state}</DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="flex flex-wrap justify-center gap-2">
+                {["All", "National", "State", "District"].map((level) => (
+                  <Button 
+                    key={level} 
+                    variant={levelFilter === level && !selectedState ? "default" : "outline"} 
+                    onClick={() => handleLevelClick(level)} 
+                    className={cn(
+                      "rounded-full px-6 font-bold transition-all border-slate-200 dark:border-slate-700",
+                      levelFilter === level && !selectedState
+                        ? "bg-accent text-slate-900 shadow-lg border-accent" 
+                        : "text-primary dark:text-white hover:bg-accent hover:text-slate-900 hover:border-accent"
+                    )}
+                  >
+                    {level === 'All' ? 'All Levels' : `${level} Level`}
+                  </Button>
+                ))}
+              </div>
 
-              {selectedState && (
+              <div className="h-8 w-px bg-slate-200 dark:bg-slate-800 mx-2 hidden lg:block"></div>
+
+              <div className="flex flex-wrap gap-2">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant={selectedDistrict ? "default" : "outline"} className={cn(
-                      "rounded-full px-6 font-bold flex items-center gap-2 animate-in fade-in slide-in-from-left-2",
-                      selectedDistrict ? "bg-accent text-slate-900" : "text-primary dark:text-white border-slate-200 dark:border-slate-700 hover:border-accent hover:text-accent"
-                    )}>{selectedDistrict || "Select District"} <ChevronDown className="w-4 h-4 opacity-50" /></Button>
+                    <Button variant={selectedState ? "default" : "outline"} className={cn(
+                      "rounded-full px-6 font-bold flex items-center gap-2 transition-all",
+                      selectedState ? "bg-accent text-slate-900" : "text-primary dark:text-white border-slate-200 dark:border-slate-700 hover:border-accent hover:text-accent"
+                    )}>
+                      {selectedState || "Filter by State"} <ChevronDown className="w-4 h-4 opacity-50" />
+                    </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="max-h-80 overflow-y-auto w-56">
-                    {districts.map((district) => (
-                      <DropdownMenuItem key={district} onClick={() => handleDistrictSelect(district)}>{district}</DropdownMenuItem>
+                    {states.map((state) => (
+                      <DropdownMenuItem key={state} onClick={() => handleStateSelect(state)} className="font-bold">{state}</DropdownMenuItem>
                     ))}
                   </DropdownMenuContent>
                 </DropdownMenu>
-              )}
+
+                {selectedState && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant={selectedDistrict ? "default" : "outline"} className={cn(
+                        "rounded-full px-6 font-bold flex items-center gap-2 animate-in fade-in slide-in-from-left-2 transition-all",
+                        selectedDistrict ? "bg-accent text-slate-900" : "text-primary dark:text-white border-slate-200 dark:border-slate-700 hover:border-accent hover:text-accent"
+                      )}>
+                        {selectedDistrict || "Select District"} <ChevronDown className="w-4 h-4 opacity-50" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="max-h-80 overflow-y-auto w-56">
+                      {districts.map((district) => (
+                        <DropdownMenuItem key={district} onClick={() => handleDistrictSelect(district)} className="font-bold">{district}</DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
+              </div>
             </div>
-            <div className="relative w-full md:w-96">
+            <div className="relative w-full md:w-80">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-              <Input placeholder="Search by name, ID or role..." className="pl-12 h-14 rounded-2xl border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800" value={search} onChange={(e) => setSearch(e.target.value)} />
+              <Input 
+                placeholder="Search by name, ID or role..." 
+                className="pl-12 h-14 rounded-2xl border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800" 
+                value={search} 
+                onChange={(e) => setSearch(e.target.value)} 
+              />
             </div>
           </div>
         </div>
@@ -405,6 +423,7 @@ export default function MembersPage() {
                 <div className="col-span-full py-32 text-center">
                   <User className="w-16 h-16 text-slate-200 dark:text-slate-800 mx-auto mb-4" />
                   <h3 className="text-2xl font-headline font-bold text-primary dark:text-white">No members found</h3>
+                  <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-2">Adjust your filters to broaden your search.</p>
                 </div>
               )}
             </div>

@@ -28,7 +28,8 @@ import {
   Sparkles,
   IdCard,
   FileText,
-  Award
+  Award,
+  ChevronDown
 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { 
@@ -45,6 +46,12 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar'
 import { format, parse } from 'date-fns'
 import { useToast } from '@/hooks/use-toast'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import Link from 'next/link'
 import { INDIA_DATA } from '@/lib/india-data'
 import { cn } from '@/lib/utils'
@@ -54,8 +61,11 @@ export default function InternalMembersDirectory() {
   const router = useRouter()
   const db = useFirestore()
   const { toast } = useToast()
+  
   const [search, setSearch] = useState('')
   const [levelFilter, setLevelFilter] = useState('All')
+  const [selectedState, setSelectedState] = useState<string | null>(null)
+  const [selectedDistrict, setSelectedDistrict] = useState<string | null>(null)
   const [isAdding, setIsAdding] = useState(false)
   const [syncFlash, setSyncFlash] = useState(false)
   
@@ -173,6 +183,22 @@ export default function InternalMembersDirectory() {
     }
   }
 
+  const handleLevelClick = (level: string) => {
+    setLevelFilter(level)
+    setSelectedState(null)
+    setSelectedDistrict(null)
+  }
+
+  const handleStateSelect = (state: string) => {
+    setLevelFilter("State")
+    setSelectedState(state)
+    setSelectedDistrict(null)
+  }
+
+  const handleDistrictSelect = (district: string) => {
+    setSelectedDistrict(district)
+  }
+
   if (authLoading || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
@@ -189,16 +215,24 @@ export default function InternalMembersDirectory() {
       (m.id || '').toLowerCase().includes(search.toLowerCase()) ||
       (m.memberId || '').toLowerCase().includes(search.toLowerCase());
     
-    const matchesLevel = levelFilter === 'All' || m.level === levelFilter;
+    let matchesLevel = levelFilter === 'All' || m.level === levelFilter;
+    
+    if (selectedState) {
+      matchesLevel = m.stateName === selectedState;
+      if (selectedDistrict) {
+        matchesLevel = matchesLevel && m.districtName === selectedDistrict;
+      }
+    }
+
     return matchesSearch && matchesLevel;
   })
 
   const states = Object.keys(INDIA_DATA).sort()
   const levels = [
     { label: "All Levels", value: "All" },
-    { label: "National Level", value: "National" },
-    { label: "State Level", value: "State" },
-    { label: "District Level", value: "District" }
+    { label: "National", value: "National" },
+    { label: "State", value: "State" },
+    { label: "District", value: "District" }
   ]
 
   const parseCommissionDate = (dateStr: string) => {
@@ -441,24 +475,65 @@ export default function InternalMembersDirectory() {
       <section className="py-12 border-b bg-white dark:bg-slate-900 transition-colors sticky top-[72px] md:top-[84px] z-30 shadow-sm">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row gap-6 items-center justify-between">
-            <div className="flex flex-wrap gap-2">
-              {levels.map((lvl) => (
-                <Button
-                  key={lvl.value}
-                  variant={levelFilter === lvl.value ? "default" : "outline"}
-                  onClick={() => setLevelFilter(lvl.value)}
-                  className={cn(
-                    "rounded-full px-6 font-bold transition-all border-slate-200 dark:border-slate-700",
-                    levelFilter === lvl.value 
-                      ? "bg-accent text-slate-900 shadow-lg border-accent" 
-                      : "text-primary dark:text-white hover:bg-accent hover:text-slate-900 hover:border-accent"
-                  )}
-                >
-                  {lvl.label}
-                </Button>
-              ))}
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="flex flex-wrap gap-2">
+                {levels.map((lvl) => (
+                  <Button
+                    key={lvl.value}
+                    variant={levelFilter === lvl.value && !selectedState ? "default" : "outline"}
+                    onClick={() => handleLevelClick(lvl.value)}
+                    className={cn(
+                      "rounded-full px-6 font-bold transition-all border-slate-200 dark:border-slate-700",
+                      levelFilter === lvl.value && !selectedState
+                        ? "bg-accent text-slate-900 shadow-lg border-accent" 
+                        : "text-primary dark:text-white hover:bg-accent hover:text-slate-900 hover:border-accent"
+                    )}
+                  >
+                    {lvl.label}
+                  </Button>
+                ))}
+              </div>
+
+              <div className="h-8 w-px bg-slate-200 dark:bg-slate-800 mx-2 hidden lg:block"></div>
+
+              <div className="flex flex-wrap gap-2">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant={selectedState ? "default" : "outline"} className={cn(
+                      "rounded-full px-6 font-bold flex items-center gap-2",
+                      selectedState ? "bg-accent text-slate-900" : "text-primary dark:text-white border-slate-200 dark:border-slate-700 hover:border-accent hover:text-accent"
+                    )}>
+                      {selectedState || "Filter by State"} <ChevronDown className="w-4 h-4 opacity-50" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="max-h-80 overflow-y-auto w-56">
+                    {states.map((state) => (
+                      <DropdownMenuItem key={state} onClick={() => handleStateSelect(state)} className="font-bold">{state}</DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                {selectedState && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant={selectedDistrict ? "default" : "outline"} className={cn(
+                        "rounded-full px-6 font-bold flex items-center gap-2 animate-in fade-in slide-in-from-left-2 transition-all",
+                        selectedDistrict ? "bg-accent text-slate-900" : "text-primary dark:text-white border-slate-200 dark:border-slate-700 hover:border-accent hover:text-accent"
+                      )}>
+                        {selectedDistrict || "Select District"} <ChevronDown className="w-4 h-4 opacity-50" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="max-h-80 overflow-y-auto w-56">
+                      {(INDIA_DATA[selectedState] || []).map((district) => (
+                        <DropdownMenuItem key={district} onClick={() => handleDistrictSelect(district)} className="font-bold">{district}</DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
+              </div>
             </div>
-            <div className="relative w-full md:w-96">
+
+            <div className="relative w-full md:w-80">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
               <Input 
                 placeholder="Search Secure Database..." 
@@ -558,6 +633,16 @@ export default function InternalMembersDirectory() {
                   </CardContent>
                 </Card>
               ))}
+              
+              {filtered.length === 0 && (
+                <div className="text-center py-32 bg-white dark:bg-slate-900 rounded-[3rem] border-4 border-dashed border-slate-100 dark:border-slate-800">
+                   <div className="w-24 h-24 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <User className="w-12 h-12 text-slate-200 dark:text-slate-700" />
+                   </div>
+                   <h3 className="text-2xl font-headline font-bold text-primary dark:text-white mb-2">No matching personnel records</h3>
+                   <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Try adjusting your filters or operational level search.</p>
+                </div>
+              )}
             </div>
           )}
         </div>
