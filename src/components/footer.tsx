@@ -27,8 +27,8 @@ export function Footer() {
               Human Rights Affairs Trust (Justice Shield) is a Central Government Registered Human Rights Organization in India <span className="font-bold text-accent">(Reg. No. WB/2025/0762605)</span>. Dedicated to constitutional literacy & legal aid & Social Justice.
             </p>
             
-            {/* Donation Photo integrated into footer column */}
-            <DonationDialog>
+            {/* Donation Photo integrated into footer column - Opens SBI QR Code directly */}
+            <DonationDialog initialStep="qr">
               <button className="block w-40 h-28 relative group cursor-pointer overflow-hidden rounded-xl bg-transparent border-none p-0 outline-none transition-transform hover:scale-105 active:scale-95">
                 <Image 
                   src="/donate.jpeg" 
