@@ -259,7 +259,7 @@ export default function InventoryManagementPage() {
         </div>
       </section>
 
-      <section className="py-12 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-[64px] md:top-[64px] z-30 shadow-sm transition-colors">
+      <section className="py-12 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-12 z-30 shadow-sm transition-colors">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center justify-between gap-8">
             <div className="flex items-center gap-6">
@@ -399,7 +399,7 @@ export default function InventoryManagementPage() {
                                  <AlertDialogHeader><AlertDialogTitle>Delete Supply Entry?</AlertDialogTitle><AlertDialogDescription>This will remove all historical inflow/outflow data for this material. Action is irreversible.</AlertDialogDescription></AlertDialogHeader>
                                  <AlertDialogFooter>
                                    <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
-                                   <AlertDialogAction onClick={() => handleDeleteItem(item.id)} className="bg-red-500 hover:bg-red-600 rounded-xl border-none">Confirm Delete</AlertDialogAction>
+                                   <AlertDialogAction onClick={() => handleDeleteItem(item.id)} className="bg-red-500 hover:bg-red-600 rounded-xl border-none text-white font-bold">Confirm Delete</AlertDialogAction>
                                  </AlertDialogFooter>
                                </AlertDialogContent>
                              </AlertDialog>

@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useEffect, useState } from 'react'
@@ -176,7 +175,7 @@ export default function InternalApplicationsPage() {
         </div>
       </section>
 
-      <section className="py-10 border-b bg-white dark:bg-slate-900 sticky top-[64px] md:top-[64px] z-30 shadow-sm transition-colors">
+      <section className="py-10 border-b bg-white dark:bg-slate-900 sticky top-12 z-30 shadow-sm transition-colors">
         <div className="container mx-auto px-4">
           <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
             <div className="flex flex-wrap items-center gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700">

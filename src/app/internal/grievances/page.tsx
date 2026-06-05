@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useEffect, useState } from 'react'
@@ -125,7 +124,7 @@ export default function InternalGrievancesPage() {
         </div>
       </section>
 
-      <section className="py-12 border-b bg-white dark:bg-slate-900 sticky top-[64px] md:top-[64px] z-30 shadow-sm">
+      <section className="py-12 border-b bg-white dark:bg-slate-900 sticky top-12 z-30 shadow-sm">
         <div className="container mx-auto px-4">
           <div className="relative max-w-2xl">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />

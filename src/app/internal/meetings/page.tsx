@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useEffect, useState } from 'react'
@@ -170,6 +169,7 @@ export default function InternalMeetingsManagement() {
         const permissionError = new FirestorePermissionError({
           path: docRef.path,
           operation: 'delete',
+          requestResourceData: null,
         } satisfies SecurityRuleContext);
         errorEmitter.emit('permission-error', permissionError);
       })
@@ -393,7 +393,7 @@ export default function InternalMeetingsManagement() {
         </div>
       </section>
 
-      <section className="py-12 border-b bg-white dark:bg-slate-900 transition-colors sticky top-[64px] md:top-[64px] z-30 shadow-sm">
+      <section className="py-12 border-b bg-white dark:bg-slate-900 transition-colors sticky top-12 z-30 shadow-sm">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row gap-6 items-center justify-between">
             <div className="flex flex-wrap gap-2">

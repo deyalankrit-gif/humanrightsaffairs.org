@@ -469,7 +469,7 @@ export default function InternalMembersDirectory() {
         </div>
       </section>
 
-      <section className="py-12 border-b bg-white dark:bg-slate-900 transition-colors sticky top-[64px] md:top-[64px] z-30 shadow-sm">
+      <section className="py-12 border-b bg-white dark:bg-slate-900 transition-colors sticky top-12 z-30 shadow-sm">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row gap-6 items-center justify-between">
             <div className="flex flex-wrap items-center gap-2">
@@ -614,12 +614,12 @@ export default function InternalMembersDirectory() {
                               </Button>
                             </Link>
                             <Link href={`/internal/members/${member.id}/appointment`}>
-                              <Button variant="outline" className="w-full rounded-xl h-10 px-4 font-bold border-indigo-500 text-indigo-600 hover:bg-indigo-500 hover:text-white transition-all flex gap-2 text-xs">
+                              <Button variant="outline" className="w-full rounded-xl h-10 px-4 font-bold border-indigo-500 text-indigo-600 hover:bg-indigo-50 hover:text-white transition-all flex gap-2 text-xs">
                                 <FileText className="w-3.5 h-3.5" /> Appointment
                               </Button>
                             </Link>
                             <Link href={`/internal/members/${member.id}/certificate`}>
-                              <Button variant="outline" className="w-full rounded-xl h-10 px-4 font-bold border-emerald-500 text-emerald-600 hover:bg-emerald-500 hover:text-white transition-all flex gap-2 text-xs">
+                              <Button variant="outline" className="w-full rounded-xl h-10 px-4 font-bold border-emerald-500 text-emerald-600 hover:bg-emerald-50 hover:text-white transition-all flex gap-2 text-xs">
                                 <Award className="w-3.5 h-3.5" /> Certificate
                               </Button>
                             </Link>
