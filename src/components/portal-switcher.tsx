@@ -63,7 +63,9 @@ export function PortalSwitcher() {
               variant="ghost"
               className={cn(
                 "w-full h-12 justify-start gap-3 rounded-2xl font-black text-[13px] transition-all border border-transparent shadow-sm",
-                "text-slate-950 dark:text-white bg-slate-950/5 hover:bg-slate-950/20 dark:bg-white/5 dark:hover:bg-white/20"
+                isAdminPortal 
+                  ? "text-slate-950 bg-yellow-100 hover:bg-yellow-200 border-yellow-200/50" 
+                  : "text-slate-950 dark:text-white bg-slate-950/5 hover:bg-slate-950/20 dark:bg-white/5 dark:hover:bg-white/20"
               )}
             >
               {isAdminPortal ? <ExternalLink className="w-5 h-5 stroke-[3px]" /> : <LayoutDashboard className="w-5 h-5 stroke-[3px]" />}
