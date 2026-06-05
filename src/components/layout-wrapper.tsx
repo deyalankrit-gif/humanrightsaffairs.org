@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -40,13 +41,15 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex flex-col min-h-screen relative">
-      <Navbar />
-      
-      <div className="flex-1">
-        {children}
+    <>
+      <div className="flex flex-col min-h-screen relative">
+        <Navbar />
+        
+        <div className="flex-1">
+          {children}
+        </div>
       </div>
       <AdminQuickAccess />
-    </div>
+    </>
   );
 }
