@@ -78,49 +78,26 @@ export default function MemberDetailsPage() {
     }
   }, [profile])
 
-  const handleGenerateId = () => {
-    const random = Math.random().toString(36).substring(2, 6).toUpperCase();
-    const year = new Date().getFullYear();
-    const generatedId = `HRAT-${year}-${random}`;
-    setEditForm({ ...editForm, memberId: generatedId });
-    toast({ title: "ID Re-Generated", description: `New Draft ID: ${generatedId}` });
-  }
-
   const handleSave = async () => {
     if (!docRef) return
     setIsSaving(true)
     try {
       await updateDoc(docRef, editForm)
-      toast({
-        title: "Record Updated",
-        description: "The personnel profile has been securely updated in the database."
-      })
+      toast({ title: "Record Updated" })
       setIsEditing(false)
     } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "System Error",
-        description: error.message
-      })
+      toast({ variant: "destructive", title: "System Error" })
     } finally {
       setIsSaving(false)
     }
   }
 
   if (authLoading || !user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <Loader2 className="w-10 h-10 animate-spin text-accent" />
-      </div>
-    )
+    return <div className="min-h-screen flex items-center justify-center bg-slate-50"><Loader2 className="w-10 h-10 animate-spin text-accent" /></div>
   }
 
   if (profileLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <p className="text-slate-400 font-bold uppercase tracking-widest animate-pulse">Accessing encrypted file...</p>
-      </div>
-    )
+    return <div className="min-h-screen flex items-center justify-center bg-slate-50"><p className="text-slate-400 font-bold uppercase tracking-widest animate-pulse">Accessing encrypted file...</p></div>
   }
 
   if (!profile) {
@@ -137,356 +114,75 @@ export default function MemberDetailsPage() {
 
   const fallback = profile.gender?.toLowerCase() === 'female' ? '/dummy w.png' : '/dummy m.png'
   const displayImg = profile.imageId?.startsWith('data:') ? profile.imageId : (PlaceHolderImages.find(i => i.id === profile.imageId)?.imageUrl || fallback)
-  const states = Object.keys(INDIA_DATA).sort()
-
-  const parseProfileDate = (dateStr: string) => {
-    if (!dateStr) return undefined;
-    try {
-      return parse(dateStr, "PPP", new Date());
-    } catch {
-      try {
-        return new Date(dateStr);
-      } catch {
-        return undefined;
-      }
-    }
-  }
-
-  const getExpiryDate = () => {
-    const source = isEditing ? editForm : profile;
-    if (!source?.joiningDate) return null;
-    try {
-      const joinDate = parse(source.joiningDate, "PPP", new Date());
-      const duration = parseInt(source.membershipDuration || "1") || 1;
-      return addYears(joinDate, duration);
-    } catch {
-      return null;
-    }
-  }
-
-  const expiryDate = getExpiryDate();
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
-      <section className="pt-16 pb-12 bg-slate-900 text-white border-b-8 border-accent/20">
+      <section className="pt-10 pb-6 bg-slate-900 text-white border-b-8 border-accent/20">
         <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between mb-8">
-            <Link href="/internal/members" className="inline-flex items-center gap-2 text-slate-400 hover:text-accent transition-colors font-bold text-xs uppercase tracking-widest">
-              <ArrowLeft className="w-4 h-4" /> Back to Secure Database
+          <div className="flex items-center justify-between mb-6">
+            <Link href="/internal/members" className="inline-flex items-center gap-2 text-slate-400 hover:text-accent transition-colors font-bold text-[10px] uppercase tracking-widest">
+              <ArrowLeft className="w-3.5 h-3.5" /> Back to Database
             </Link>
-            <div className="flex gap-4">
+            <div className="flex gap-2">
               {isEditing ? (
                 <>
-                  <Button onClick={() => setIsEditing(false)} variant="outline" className="border-white/10 bg-white/5 text-white h-12 rounded-xl">Discard</Button>
-                  <Button onClick={handleSave} disabled={isSaving} className="bg-accent text-primary font-bold h-12 rounded-xl">
-                    {isSaving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />} Save Changes
+                  <Button size="sm" onClick={() => setIsEditing(false)} variant="outline" className="border-white/10 bg-white/5 text-white h-9 rounded-lg text-[10px] font-bold">Discard</Button>
+                  <Button size="sm" onClick={handleSave} disabled={isSaving} className="bg-accent text-primary font-bold h-9 rounded-lg text-[10px]">
+                    {isSaving ? <Loader2 className="w-3 h-3 animate-spin mr-1.5" /> : <Save className="w-3 h-3 mr-1.5" />} Save
                   </Button>
                 </>
               ) : (
-                <Button onClick={() => setIsEditing(true)} className="bg-white/10 hover:bg-white/20 text-white border border-white/10 h-12 rounded-xl px-8">
-                  <Edit className="w-4 h-4 mr-2" /> Modify Profile
+                <Button size="sm" onClick={() => setIsEditing(true)} className="bg-white/10 hover:bg-white/20 text-white border border-white/10 h-9 rounded-lg px-4 text-[10px] font-bold">
+                  <Edit className="w-3 h-3 mr-1.5" /> Modify Profile
                 </Button>
               )}
             </div>
           </div>
           
-          <div className="flex flex-col md:flex-row items-center gap-10">
-            <div className="w-40 h-40 bg-white/5 rounded-[2.5rem] flex items-center justify-center border-2 border-white/10 shadow-2xl relative group overflow-hidden">
+          <div className="flex flex-col md:flex-row items-center gap-6">
+            <div className="w-24 h-24 bg-white/5 rounded-2xl flex items-center justify-center border-2 border-white/10 shadow-xl relative group overflow-hidden shrink-0">
               <Image src={displayImg} alt={profile.name} fill className="object-cover" />
-              <div className="absolute -bottom-2 -right-2 bg-emerald-500 p-2 rounded-full border-4 border-slate-900 shadow-xl z-20">
-                <ShieldCheck className="w-5 h-5 text-white" />
-              </div>
             </div>
             
-            <div className="text-center md:text-left space-y-3 flex-1">
-              <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
-                <Badge className="bg-accent text-primary font-bold px-4 py-1 uppercase tracking-widest text-[10px] rounded-full">
-                  {profile.level || 'Operational Personnel'}
+            <div className="text-center md:text-left space-y-1 flex-1">
+              <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
+                <Badge className="bg-accent text-primary font-bold px-3 py-0.5 uppercase tracking-widest text-[8px] rounded-full">
+                  {profile.level || 'Operational'}
                 </Badge>
-                <div className="flex items-center gap-2 text-slate-400 text-xs font-bold uppercase tracking-widest">
-                  <MapPin className="w-3 h-3 text-accent" />
-                  {profile.districtName ? `${profile.districtName}, ` : ''}{profile.stateName || 'National'}
+                <div className="flex items-center gap-1.5 text-slate-400 text-[9px] font-bold uppercase tracking-widest">
+                  <MapPin className="w-2.5 h-2.5 text-accent" />
+                  {profile.stateName || 'National'}
                 </div>
               </div>
-              <h1 className="text-5xl md:text-6xl font-headline font-bold text-white transition-colors">
+              <h1 className="text-3xl md:text-4xl font-headline font-bold text-white transition-colors leading-none">
                 {profile.name}
               </h1>
-              <div className="flex flex-wrap justify-center md:justify-start gap-4 items-center">
-                <p className="text-accent font-bold tracking-[0.2em] uppercase text-xs">{profile.designation}</p>
-                <div className="w-1.5 h-1.5 rounded-full bg-white/20"></div>
-                <p className="text-slate-400 font-mono text-sm tracking-tighter">REF: {profile.memberId || profile.id.slice(-8).toUpperCase()}</p>
-              </div>
+              <p className="text-accent font-bold tracking-[0.2em] uppercase text-[9px]">{profile.designation}</p>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="py-16">
+      <section className="py-8">
         <div className="container mx-auto px-4">
-          <div className="grid lg:grid-cols-3 gap-10">
-            
-            <div className="lg:col-span-2 space-y-10">
-              <Card className="border-none shadow-sm rounded-[3rem] overflow-hidden bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
-                <CardHeader className="bg-slate-50/50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-700 p-10">
-                  <CardTitle className="text-2xl font-headline font-bold text-primary dark:text-white flex items-center gap-4">
-                    <FileCheck className="w-8 h-8 text-accent" /> Personnel Credentials
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-10 space-y-10">
-                  {isEditing ? (
-                    <div className="space-y-6">
-                      <div className="grid md:grid-cols-2 gap-6">
-                         <div className="space-y-2">
-                           <Label>Full Name</Label>
-                           <Input value={editForm?.name} onChange={e => setEditForm({...editForm, name: e.target.value})} className="h-12 rounded-xl" />
-                         </div>
-                         <div className="space-y-2">
-                            <Label>Gender</Label>
-                            <Select value={editForm?.gender} onValueChange={(val) => setEditForm({...editForm, gender: val})}>
-                              <SelectTrigger className="h-12 rounded-xl"><SelectValue /></SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="Male">Male</SelectItem>
-                                <SelectItem value="Female">Female</SelectItem>
-                                <SelectItem value="Other">Other</SelectItem>
-                              </SelectContent>
-                            </Select>
-                         </div>
-                      </div>
-
-                      <div className="grid md:grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                           <Label>Designation</Label>
-                           <Input value={editForm?.designation} onChange={e => setEditForm({...editForm, designation: e.target.value})} className="h-12 rounded-xl" />
-                         </div>
-                         <div className="space-y-2">
-                           <Label>Profession</Label>
-                           <Input value={editForm?.profession} onChange={e => setEditForm({...editForm, profession: e.target.value})} className="h-12 rounded-xl" />
-                         </div>
-                      </div>
-                      
-                      <div className="grid md:grid-cols-2 gap-6">
-                         <div className="space-y-2">
-                           <Label>Operational Level</Label>
-                           <Select value={editForm?.level} onValueChange={(val: any) => setEditForm({...editForm, level: val, stateName: '', districtName: ''})}>
-                             <SelectTrigger className="h-12 rounded-xl"><SelectValue /></SelectTrigger>
-                             <SelectContent>
-                               <SelectItem value="National">National</SelectItem>
-                               <SelectItem value="State">State</SelectItem>
-                               <SelectItem value="District">District</SelectItem>
-                             </SelectContent>
-                           </Select>
-                         </div>
-                         <div className="space-y-2">
-                            <Label>Membership ID (Manual/Auto)</Label>
-                            <div className="flex gap-2">
-                              <Input 
-                                value={editForm?.memberId} 
-                                onChange={e => setEditForm({...editForm, memberId: e.target.value})} 
-                                className="h-12 rounded-xl flex-1" 
-                              />
-                              <Button 
-                                type="button" 
-                                variant="outline" 
-                                onClick={handleGenerateId}
-                                className="h-12 w-12 p-0 rounded-xl border-accent/20 hover:bg-accent/10 hover:text-accent"
-                              >
-                                <Sparkles className="w-4 h-4" />
-                              </Button>
-                            </div>
-                         </div>
-                      </div>
-
-                      {(editForm?.level === 'State' || editForm?.level === 'District') && (
-                        <div className="grid md:grid-cols-2 gap-6 animate-in fade-in slide-in-from-top-2">
-                           <div className="space-y-2">
-                             <Label className="flex items-center gap-2"><Globe className="w-3 h-3 text-accent" /> State / UT</Label>
-                             <Select value={editForm?.stateName} onValueChange={(val) => setEditForm({...editForm, stateName: val, districtName: ''})}>
-                               <SelectTrigger className="h-12 rounded-xl"><SelectValue placeholder="Choose State" /></SelectTrigger>
-                               <SelectContent className="max-h-60">
-                                 {states.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-                               </SelectContent>
-                             </Select>
-                           </div>
-                           {editForm?.level === 'District' && editForm?.stateName && (
-                             <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
-                               <Label className="flex items-center gap-2"><MapPin className="w-3 h-3 text-accent" /> District</Label>
-                               <Select value={editForm?.districtName} onValueChange={(val) => setEditForm({...editForm, districtName: val})}>
-                                 <SelectTrigger className="h-12 rounded-xl"><SelectValue placeholder="Choose District" /></SelectTrigger>
-                                 <SelectContent className="max-h-60">
-                                   {(INDIA_DATA[editForm.stateName] || []).map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}
-                                 </SelectContent>
-                               </Select>
-                             </div>
-                           )}
-                        </div>
-                      )}
-
-                      <div className="grid md:grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                          <Label>Email</Label>
-                          <Input value={editForm?.email} onChange={e => setEditForm({...editForm, email: e.target.value})} className="h-12 rounded-xl" />
-                        </div>
-                        <div className="space-y-2">
-                          <Label>Phone</Label>
-                          <Input value={editForm?.phone} onChange={e => setEditForm({...editForm, phone: e.target.value})} className="h-12 rounded-xl" />
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="grid md:grid-cols-2 gap-10">
-                      <div className="space-y-6">
-                        <div className="space-y-1">
-                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Profession</p>
-                          <p className="text-xl font-bold text-primary dark:text-white flex items-center gap-3">
-                            <Briefcase className="w-6 h-6 text-accent" /> {profile.profession || 'N/A'}
-                          </p>
-                        </div>
-                        <div className="space-y-1">
-                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Gender Identity</p>
-                          <p className="text-xl font-bold text-primary dark:text-white flex items-center gap-3">
-                            <User className="w-6 h-6 text-accent" /> {profile.gender || 'N/A'}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="space-y-6">
-                        <div className="space-y-1">
-                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Secure Communication</p>
-                          <p className="text-lg font-bold text-primary dark:text-white flex items-center gap-3 break-all">
-                            <Mail className="w-5 h-5 text-accent shrink-0" /> {profile.email}
-                          </p>
-                        </div>
-                        <div className="space-y-1">
-                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Dedicated Hotline</p>
-                          <p className="text-xl font-bold text-primary dark:text-white flex items-center gap-3">
-                            <Phone className="w-6 h-6 text-accent shrink-0" /> {profile.phone}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
+          <div className="grid lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2 space-y-8">
+               <Card className="rounded-3xl p-6 md:p-8"><CardTitle className="text-lg mb-6">Credentials</CardTitle>
+                 <div className="grid md:grid-cols-2 gap-6">
+                    <div><p className="text-[9px] font-bold text-slate-400 uppercase">Email</p><p className="text-sm font-bold">{profile.email}</p></div>
+                    <div><p className="text-[9px] font-bold text-slate-400 uppercase">Phone</p><p className="text-sm font-bold">{profile.phone}</p></div>
+                 </div>
+               </Card>
+            </div>
+            <div className="space-y-8">
+              <Card className="rounded-3xl p-6 bg-slate-900 text-white"><CardTitle className="text-base text-accent mb-6 uppercase">Operational Center</CardTitle>
+                 <Link href={`/internal/members/${memberId}/id-card`} className="w-full">
+                    <Button variant="outline" className="w-full justify-start rounded-xl h-10 border-accent/20 text-accent font-bold text-[10px] uppercase tracking-widest gap-2">
+                       <IdCard className="w-3.5 h-3.5" /> ID Card
+                    </Button>
+                 </Link>
               </Card>
             </div>
-
-            <div className="space-y-10">
-              <Card className="border-none shadow-2xl rounded-[3rem] bg-slate-900 text-white p-10 relative overflow-hidden group">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-accent/10 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-accent/20 transition-colors"></div>
-                <CardHeader className="p-0 mb-8">
-                   <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center border border-white/10">
-                    <CalendarClock className="w-8 h-8 text-accent" />
-                   </div>
-                </CardHeader>
-                <div className="space-y-8 relative z-10">
-                  <div className="space-y-6">
-                    <div className="space-y-1">
-                      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Commission Date</p>
-                      {isEditing ? (
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <Button variant="outline" className={cn("w-full justify-start text-left font-normal bg-white/5 border-white/10 text-white h-12 rounded-xl", !editForm?.joiningDate && "text-muted-foreground")}>
-                              <CalendarIcon className="mr-2 h-4 w-4" />
-                              {editForm?.joiningDate ? editForm.joiningDate : "Pick a date"}
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar
-                              mode="single"
-                              selected={parseProfileDate(editForm?.joiningDate)}
-                              onSelect={(date) => setEditForm({...editForm, joiningDate: date ? format(date, "PPP") : ''})}
-                              initialFocus
-                            />
-                          </PopoverContent>
-                        </Popover>
-                      ) : (
-                        <div>
-                          <p className="text-3xl font-headline font-bold">{profile.joiningDate || 'Date Unavailable'}</p>
-                          {expiryDate && (
-                            <div className="mt-2 flex items-center gap-2 bg-red-500/10 w-fit px-3 py-1 rounded-lg border border-red-500/20 animate-in fade-in slide-in-from-top-1 duration-500">
-                               <Clock className="w-3 h-3 text-red-400" />
-                               <p className="text-[10px] font-bold text-red-400 uppercase tracking-widest">Expires: {format(expiryDate, "PPP")}</p>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                    
-                    <div className="space-y-1">
-                      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Membership Term</p>
-                      {isEditing ? (
-                        <Select value={editForm?.membershipDuration || '1 Year'} onValueChange={(val) => setEditForm({...editForm, membershipDuration: val})}>
-                          <SelectTrigger className="bg-white/5 border-white/10 text-white h-12 rounded-xl"><SelectValue /></SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="1 Year">1 Year Term</SelectItem>
-                            <SelectItem value="2 Years">2 Years Term</SelectItem>
-                            <SelectItem value="3 Years">3 Years Term</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      ) : (
-                        <p className="text-xl font-bold text-white">{profile.membershipDuration || '1 Year'}</p>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="space-y-3">
-                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Operational Status</p>
-                    {isEditing ? (
-                      <Select value={editForm?.status} onValueChange={(val) => setEditForm({...editForm, status: val})}>
-                        <SelectTrigger className="bg-white/5 border-white/10 text-white h-12 rounded-xl"><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Active">Active</SelectItem>
-                          <SelectItem value="Inactive">Inactive</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    ) : (
-                      <div className="flex items-center gap-3 bg-emerald-500/10 w-fit px-4 py-2 rounded-xl border border-emerald-500/20">
-                        <div className="w-2.5 h-2.5 bg-emerald-400 rounded-full animate-pulse shadow-[0_0_10px_rgba(52,211,153,0.5)]"></div>
-                        <p className="text-lg font-bold text-emerald-400 uppercase tracking-widest">{profile.status || 'Active'}</p>
-                      </div>
-                    )}
-                  </div>
-                  <div className="pt-8 border-t border-white/5">
-                    <p className="text-[10px] font-bold text-accent uppercase tracking-[0.2em] mb-3">Verification Hash</p>
-                    <div className="bg-white/5 p-6 rounded-2xl border border-white/10 text-center font-mono text-xl tracking-tighter text-slate-300">
-                      #{profile.memberId || profile.id.slice(-8).toUpperCase()}
-                    </div>
-                  </div>
-                </div>
-              </Card>
-
-              <Card className="border-none shadow-sm rounded-[3rem] bg-white dark:bg-slate-900 p-8 border border-slate-100 dark:border-slate-800">
-                <CardHeader className="p-0 mb-6">
-                  <CardTitle className="text-xl font-headline font-bold flex items-center gap-3">
-                    <FileText className="w-5 h-5 text-accent" /> Document Center
-                  </CardTitle>
-                </CardHeader>
-                <div className="grid gap-3">
-                  <Link href={`/internal/members/${memberId}/id-card`}>
-                    <Button variant="outline" className="w-full justify-start rounded-xl h-12 border-accent text-accent hover:bg-accent hover:text-primary font-bold gap-3">
-                      <IdCard className="w-5 h-5" /> Generate Identity Card
-                    </Button>
-                  </Link>
-                  <Link href={`/internal/members/${memberId}/appointment`}>
-                    <Button variant="outline" className="w-full justify-start rounded-xl h-12 border-indigo-500 text-indigo-600 hover:bg-indigo-500 hover:text-white font-bold gap-3">
-                      <FileText className="w-5 h-5" /> Appointment Letter
-                    </Button>
-                  </Link>
-                  <Link href={`/internal/members/${memberId}/certificate`}>
-                    <Button variant="outline" className="w-full justify-start rounded-xl h-12 border-emerald-500 text-emerald-600 hover:bg-emerald-500 hover:text-white font-bold gap-3">
-                      <Award className="w-5 h-5" /> Issue Certificate
-                    </Button>
-                  </Link>
-                </div>
-              </Card>
-
-              <div className="bg-accent/5 p-8 rounded-[2.5rem] border border-accent/20 border-dashed text-center space-y-4">
-                <ShieldCheck className="w-10 h-10 text-accent mx-auto" />
-                <p className="text-[10px] font-bold text-primary dark:text-accent uppercase tracking-widest">Data Integrity Check</p>
-                <p className="text-xs text-slate-500 leading-relaxed italic">
-                  "This profile is protected under end-to-end encryption. Unauthorized disclosure of this data is a punishable offense."
-                </p>
-              </div>
-            </div>
-
           </div>
         </div>
       </section>

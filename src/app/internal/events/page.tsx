@@ -163,239 +163,102 @@ export default function InternalEventsManagement() {
 
   const categories = ["Campaign", "Workshop", "Convention", "Relief", "Social Projects"]
 
-  const parseDateString = (dateStr: string) => {
-    if (!dateStr) return undefined;
-    try {
-      const d = new Date(dateStr);
-      return isNaN(d.getTime()) ? undefined : d;
-    } catch {
-      return undefined;
-    }
-  }
-
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
-      <section className="pt-32 pb-12 bg-slate-900 text-white border-b-8 border-accent/20">
+      <section className="pt-16 pb-8 bg-slate-900 text-white border-b-8 border-accent/20">
         <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="space-y-2 text-center md:text-left">
-              <div className="inline-flex items-center gap-2 bg-accent/20 text-accent px-4 py-1 rounded-full text-[10px] font-bold uppercase tracking-[0.2em] border border-accent/30">
-                <ShieldCheck className="w-3 h-3" /> Event Governance
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="space-y-1 text-center md:text-left">
+              <div className="inline-flex items-center gap-2 bg-accent/20 text-accent px-3 py-1 rounded-full text-[9px] font-bold uppercase border border-accent/30">
+                <ShieldCheck className="w-2.5 h-2.5" /> Event Governance
               </div>
-              <h1 className="text-4xl md:text-5xl font-headline font-bold">Mission <span className="text-accent italic">Logistics</span></h1>
-              <p className="text-slate-400">Manage organizational highlights and public campaign galleries.</p>
+              <h1 className="text-3xl md:text-4xl font-headline font-bold">Mission <span className="text-accent italic">Logistics</span></h1>
+              <p className="text-slate-400 text-[11px]">Manage organizational highlights and public campaign galleries.</p>
             </div>
             
             <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
               <DialogTrigger asChild>
-                <Button className="bg-accent text-primary font-bold rounded-2xl h-14 px-8 flex gap-2 hover:bg-accent/90 shadow-xl shadow-accent/20">
-                  <Plus className="w-5 h-5" /> Publish New Event
+                <Button size="sm" className="bg-accent text-primary font-bold rounded-xl h-11 px-6 flex gap-2 shadow-lg">
+                  <Plus className="w-4 h-4" /> Publish New Event
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-md bg-white dark:bg-slate-900 rounded-[2rem] max-h-[90vh] overflow-y-auto">
-                <DialogHeader>
-                  <DialogTitle>New Event Record</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4 py-4">
-                  <div className="space-y-2">
-                    <Label>Cover Image</Label>
-                    <div className="flex flex-col items-center gap-4 p-4 border-2 border-dashed rounded-2xl">
-                      <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800">
-                        <Image 
-                          src={newEvent.imageId.startsWith('data:') ? newEvent.imageId : (PlaceHolderImages.find(i => i.id === newEvent.imageId)?.imageUrl || '')} 
-                          alt="Preview" 
-                          fill 
-                          className="object-cover"
-                        />
+              <DialogContent className="max-w-md rounded-3xl overflow-y-auto max-h-[90vh]">
+                <DialogHeader><DialogTitle>New Event Record</DialogTitle></DialogHeader>
+                <div className="space-y-4 py-2">
+                  <div className="space-y-1">
+                    <Label className="text-[10px] uppercase font-bold">Cover Image</Label>
+                    <div className="flex flex-col items-center gap-3 p-3 border-2 border-dashed rounded-xl">
+                      <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-slate-100">
+                        <Image src={newEvent.imageId.startsWith('data:') ? newEvent.imageId : (PlaceHolderImages.find(i => i.id === newEvent.imageId)?.imageUrl || '')} alt="Preview" fill className="object-cover" />
                       </div>
-                      <Button variant="outline" className="w-full relative h-12 rounded-xl">
-                        <Upload className="w-4 h-4 mr-2" /> Select Image
+                      <Button variant="outline" size="sm" className="w-full relative h-9 rounded-lg">
+                        <Upload className="w-3.5 h-3.5 mr-2" /> Select Image
                         <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => handleFileChange(e, false)} />
                       </Button>
                     </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label>Event Title</Label>
-                    <Input value={newEvent.title} onChange={e => setNewEvent({...newEvent, title: e.target.value})} placeholder="Event Title" className="h-12 rounded-xl" />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>Event Date</Label>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button variant="outline" className={cn("w-full justify-start text-left font-normal h-12 rounded-xl", !newEvent.date && "text-muted-foreground")}>
-                            <CalendarIcon className="mr-2 h-4 w-4" />
-                            {newEvent.date ? newEvent.date : "Pick a date"}
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            mode="single"
-                            selected={parseDateString(newEvent.date)}
-                            onSelect={(date) => setNewEvent({...newEvent, date: date ? format(date, "PPP") : ''})}
-                            initialFocus
-                          />
-                        </PopoverContent>
-                      </Popover>
+                  <div className="space-y-1"><Label className="text-[10px] uppercase font-bold">Title</Label><Input value={newEvent.title} onChange={e => setNewEvent({...newEvent, title: e.target.value})} className="h-10 rounded-lg text-sm" /></div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                       <Label className="text-[10px] uppercase font-bold">Date</Label>
+                       <Input type="text" placeholder="Jan 1, 2025" value={newEvent.date} onChange={e => setNewEvent({...newEvent, date: e.target.value})} className="h-10 rounded-lg text-sm" />
                     </div>
-                    <div className="space-y-2">
-                      <Label>Category</Label>
+                    <div className="space-y-1">
+                      <Label className="text-[10px] uppercase font-bold">Category</Label>
                       <Select value={newEvent.category} onValueChange={(val: any) => setNewEvent({...newEvent, category: val})}>
-                        <SelectTrigger className="h-12 rounded-xl"><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          {categories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                        </SelectContent>
+                        <SelectTrigger className="h-10 rounded-lg text-xs"><SelectValue /></SelectTrigger>
+                        <SelectContent>{categories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
                       </Select>
                     </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label>Location</Label>
-                    <Input value={newEvent.location} onChange={e => setNewEvent({...newEvent, location: e.target.value})} placeholder="Location" className="h-12 rounded-xl" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Description</Label>
-                    <Textarea value={newEvent.description} onChange={e => setNewEvent({...newEvent, description: e.target.value})} placeholder="Description..." className="rounded-xl" />
-                  </div>
                 </div>
-                <DialogFooter>
-                  <Button onClick={handleAddEvent} disabled={isActionLoading} className="w-full h-12 rounded-xl">
-                    {isActionLoading ? <Loader2 className="animate-spin" /> : "Publish Event"}
-                  </Button>
-                </DialogFooter>
+                <DialogFooter><Button onClick={handleAddEvent} className="w-full h-11 rounded-xl">Publish Event</Button></DialogFooter>
               </DialogContent>
             </Dialog>
           </div>
         </div>
       </section>
 
-      <section className="py-12 border-b bg-white dark:bg-slate-900 sticky top-12 z-30 shadow-sm">
+      <section className="py-6 border-b bg-white dark:bg-slate-900 sticky top-10 z-30 shadow-sm">
         <div className="container mx-auto px-4">
-          <div className="relative max-w-2xl">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-            <Input 
-              placeholder="Filter by event title or location..." 
-              className="pl-12 h-14 rounded-2xl border-slate-200 dark:border-slate-800 focus:ring-accent"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
+          <div className="relative max-w-lg">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Input placeholder="Filter by title or location..." className="pl-9 h-11 rounded-xl border-slate-200 text-sm" value={search} onChange={(e) => setSearch(e.target.value)} />
           </div>
         </div>
       </section>
 
-      <section className="py-16">
+      <section className="py-8">
         <div className="container mx-auto px-4">
           {eventsLoading ? (
-            <div className="text-center py-20">
-              <Loader2 className="w-10 h-10 animate-spin text-accent mx-auto mb-4" />
-              <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Accessing Database...</p>
-            </div>
+            <div className="text-center py-20"><Loader2 className="w-8 h-8 animate-spin text-accent mx-auto" /></div>
           ) : (
-            <div className="grid gap-6">
+            <div className="grid gap-4">
               {filtered.map((event: any) => (
-                <Card key={event.id} className="group hover:shadow-2xl transition-all duration-500 border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-100 dark:border-slate-800">
+                <Card key={event.id} className="border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900 rounded-2xl border border-slate-100">
                   <CardContent className="p-0">
                     <div className="flex flex-col md:flex-row items-stretch">
-                      <div className="relative w-full md:w-64 aspect-video md:aspect-auto overflow-hidden">
-                        <Image 
-                          src={event.imageId?.startsWith('data:') ? event.imageId : (PlaceHolderImages.find(i => i.id === event.imageId)?.imageUrl || 'https://picsum.photos/seed/event/800/600')} 
-                          alt={event.title} 
-                          fill 
-                          className="object-cover"
-                        />
+                      <div className="relative w-full md:w-48 aspect-video md:aspect-auto overflow-hidden shrink-0">
+                        <Image src={event.imageId?.startsWith('data:') ? event.imageId : (PlaceHolderImages.find(i => i.id === event.imageId)?.imageUrl || 'https://picsum.photos/seed/event/800/600')} alt={event.title} fill className="object-cover" />
                       </div>
-                      <div className="flex-1 p-8 grid lg:grid-cols-3 gap-8 items-center">
+                      <div className="flex-1 p-5 grid lg:grid-cols-3 gap-6 items-center">
                         <div className="space-y-1">
-                          <div className="flex items-center gap-2 mb-1">
-                             <Badge variant="outline" className="border-accent text-accent text-[9px] font-bold uppercase px-2 py-0">
-                                {event.category}
-                             </Badge>
-                             <div className="flex items-center gap-1 text-[9px] text-slate-400 font-bold uppercase">
-                               <MapPin className="w-3 h-3" /> {event.location}
-                             </div>
+                          <div className="flex items-center gap-2 mb-0.5">
+                             <Badge variant="outline" className="border-accent text-accent text-[8px] font-bold uppercase px-1.5 py-0">{event.category}</Badge>
+                             <div className="flex items-center gap-1 text-[8px] text-slate-400 font-bold uppercase"><MapPin className="w-2.5 h-2.5" /> {event.location}</div>
                           </div>
-                          <h3 className="text-2xl font-bold text-slate-900 dark:text-white">{event.title}</h3>
-                          <div className="flex items-center gap-2 text-xs font-bold text-slate-500">
-                            <CalendarIcon className="w-3.5 h-3.5" /> {event.date}
-                          </div>
+                          <h3 className="text-lg font-bold text-slate-900 dark:text-white leading-tight">{event.title}</h3>
+                          <div className="text-[10px] font-bold text-slate-500">{event.date}</div>
                         </div>
-                        
-                        <div className="text-sm text-slate-500 dark:text-slate-400 line-clamp-3">
-                          {event.description}
-                        </div>
-
-                        <div className="flex items-center justify-end gap-3">
-                          <Link href="/events" target="_blank">
-                            <Button variant="ghost" size="icon" className="rounded-xl hover:bg-accent/10 hover:text-accent"><ExternalLink className="w-4 h-4" /></Button>
-                          </Link>
-                          
+                        <div className="text-xs text-slate-500 line-clamp-2 italic">"{event.description}"</div>
+                        <div className="flex items-center justify-end gap-2">
                           <Dialog>
-                            <DialogTrigger asChild>
-                              <Button onClick={() => setEditEvent(event)} variant="outline" size="icon" className="rounded-xl border-slate-200 dark:border-slate-700 hover:bg-accent/10 hover:text-accent"><Edit className="w-4 h-4" /></Button>
-                            </DialogTrigger>
-                            <DialogContent className="max-w-md bg-white dark:bg-slate-900 rounded-[2rem] max-h-[90vh] overflow-y-auto">
-                              <DialogHeader><DialogTitle>Edit Event</DialogTitle></DialogHeader>
-                              {editEvent && (
-                                <div className="space-y-4 py-4">
-                                  <div className="space-y-2">
-                                    <Label>Title</Label>
-                                    <Input value={editEvent.title} onChange={e => setEditEvent({...editEvent, title: e.target.value})} className="h-12 rounded-xl" />
-                                  </div>
-                                  <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                      <Label>Date</Label>
-                                      <Popover>
-                                        <PopoverTrigger asChild>
-                                          <Button variant="outline" className={cn("w-full justify-start text-left font-normal h-12 rounded-xl", !editEvent.date && "text-muted-foreground")}>
-                                            <CalendarIcon className="mr-2 h-4 w-4" />
-                                            {editEvent.date ? editEvent.date : "Pick a date"}
-                                          </Button>
-                                        </PopoverTrigger>
-                                        <PopoverContent className="w-auto p-0" align="start">
-                                          <Calendar
-                                            mode="single"
-                                            selected={parseDateString(editEvent.date)}
-                                            onSelect={(date) => setEditEvent({...editEvent, date: date ? format(date, "PPP") : ''})}
-                                            initialFocus
-                                          />
-                                        </PopoverContent>
-                                      </Popover>
-                                    </div>
-                                    <div className="space-y-2">
-                                      <Label>Category</Label>
-                                      <Select value={editEvent.category} onValueChange={(val: any) => setEditEvent({...editEvent, category: val})}>
-                                        <SelectTrigger className="h-12 rounded-xl"><SelectValue /></SelectTrigger>
-                                        <SelectContent>
-                                          {categories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                                        </SelectContent>
-                                      </Select>
-                                    </div>
-                                  </div>
-                                  <div className="space-y-2">
-                                    <Label>Location</Label>
-                                    <Input value={editEvent.location} onChange={e => setEditEvent({...editEvent, location: e.target.value})} className="h-12 rounded-xl" />
-                                  </div>
-                                  <div className="space-y-2">
-                                    <Label>Description</Label>
-                                    <Textarea value={editEvent.description} onChange={e => setEditEvent({...editEvent, description: e.target.value})} className="rounded-xl" />
-                                  </div>
-                                  <Button onClick={handleUpdateEvent} disabled={isActionLoading} className="w-full h-12 rounded-xl">Save Changes</Button>
-                                </div>
-                              )}
+                            <DialogTrigger asChild><Button variant="outline" size="icon" className="h-8 w-8 rounded-lg border-slate-200"><Edit className="w-3.5 h-3.5" /></Button></DialogTrigger>
+                            <DialogContent className="max-w-md rounded-3xl"><DialogHeader><DialogTitle>Edit Event</DialogTitle></DialogHeader>
+                              <Button onClick={handleUpdateEvent} className="w-full h-11 rounded-xl">Save Changes</Button>
                             </DialogContent>
                           </Dialog>
-
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button variant="destructive" size="icon" className="rounded-xl"><Trash2 className="w-4 h-4" /></Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent className="rounded-[2rem] bg-white dark:bg-slate-900 border-none shadow-2xl">
-                              <AlertDialogHeader><AlertDialogTitle>Confirm Deletion</AlertDialogTitle></AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => handleDeleteEvent(event.id)} className="bg-red-500 hover:bg-red-600 rounded-xl border-none text-white font-bold">Delete</AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
+                          <Button variant="destructive" size="icon" onClick={() => handleDeleteEvent(event.id)} className="h-8 w-8 rounded-lg"><Trash2 className="w-3.5 h-3.5" /></Button>
                         </div>
                       </div>
                     </div>

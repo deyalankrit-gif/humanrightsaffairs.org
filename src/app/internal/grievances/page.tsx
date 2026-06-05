@@ -96,27 +96,27 @@ export default function InternalGrievancesPage() {
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
-      <section className="pt-32 pb-12 bg-slate-900 text-white border-b-8 border-accent/20">
+      <section className="pt-16 pb-8 bg-slate-900 text-white border-b-8 border-accent/20">
         <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="space-y-2">
-              <div className="inline-flex items-center gap-2 bg-accent/20 text-accent px-4 py-1 rounded-full text-[10px] font-bold uppercase tracking-[0.2em] border border-accent/30">
-                <ShieldCheck className="w-3 h-3" /> Grievance Oversight
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="space-y-1">
+              <div className="inline-flex items-center gap-2 bg-accent/20 text-accent px-3 py-1 rounded-full text-[9px] font-bold uppercase border border-accent/30">
+                <ShieldCheck className="w-2.5 h-2.5" /> Grievance Oversight
               </div>
-              <h1 className="text-4xl md:text-5xl font-headline font-bold">Member <span className="text-accent italic">Complaints</span></h1>
-              <p className="text-slate-400">Review and resolve institutional grievances submitted by HRAT personnel.</p>
+              <h1 className="text-3xl md:text-4xl font-headline font-bold">Member <span className="text-accent italic">Complaints</span></h1>
+              <p className="text-slate-400 text-[11px]">Review institutional grievances submitted by HRAT personnel.</p>
             </div>
             
-            <div className="flex gap-4">
-               <div className="bg-white/5 p-4 rounded-2xl border border-white/10 flex items-center gap-4">
-                 <div className="text-right">
-                   <p className="text-[10px] text-slate-500 font-bold uppercase">Pending</p>
-                   <p className="text-xl font-bold text-accent">{(grievances || []).filter((g: any) => g.status === 'Pending').length}</p>
+            <div className="flex gap-2">
+               <div className="bg-white/5 px-4 py-2 rounded-xl border border-white/10 flex items-center gap-3">
+                 <div className="text-center">
+                   <p className="text-[8px] text-slate-500 font-bold uppercase">Pending</p>
+                   <p className="text-lg font-bold text-accent">{(grievances || []).filter((g: any) => g.status === 'Pending').length}</p>
                  </div>
-                 <div className="w-px h-8 bg-white/10"></div>
-                 <div className="text-right">
-                   <p className="text-[10px] text-slate-500 font-bold uppercase">Resolved</p>
-                   <p className="text-xl font-bold text-emerald-400">{(grievances || []).filter((g: any) => g.status === 'Resolved').length}</p>
+                 <div className="w-px h-6 bg-white/10"></div>
+                 <div className="text-center">
+                   <p className="text-[8px] text-slate-500 font-bold uppercase">Done</p>
+                   <p className="text-lg font-bold text-emerald-400">{(grievances || []).filter((g: any) => g.status === 'Resolved').length}</p>
                  </div>
                </div>
             </div>
@@ -124,113 +124,50 @@ export default function InternalGrievancesPage() {
         </div>
       </section>
 
-      <section className="py-12 border-b bg-white dark:bg-slate-900 sticky top-12 z-30 shadow-sm">
+      <section className="py-6 border-b bg-white dark:bg-slate-900 sticky top-10 z-30 shadow-sm">
         <div className="container mx-auto px-4">
-          <div className="relative max-w-2xl">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-            <Input 
-              placeholder="Search by token, name, or subject..." 
-              className="pl-12 h-14 rounded-2xl border-slate-200 dark:border-slate-800"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
+          <div className="relative max-w-lg">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Input placeholder="Search tokens or subjects..." className="pl-9 h-11 rounded-xl border-slate-200 text-sm" value={search} onChange={(e) => setSearch(e.target.value)} />
           </div>
         </div>
       </section>
 
-      <section className="py-16">
+      <section className="py-8">
         <div className="container mx-auto px-4">
           {dataLoading ? (
-            <div className="text-center py-20">
-              <Loader2 className="w-10 h-10 animate-spin text-accent mx-auto mb-4" />
-              <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Accessing Secure Vault...</p>
-            </div>
+            <div className="text-center py-20"><Loader2 className="w-8 h-8 animate-spin text-accent mx-auto" /></div>
           ) : (
-            <div className="grid gap-6">
+            <div className="grid gap-4">
               {filtered.map((g: any) => (
-                <Card key={g.id} className="group hover:shadow-2xl transition-all duration-500 border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-100 dark:border-slate-800">
+                <Card key={g.id} className="border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900 rounded-2xl border border-slate-100">
                   <CardContent className="p-0">
                     <div className="flex flex-col md:flex-row items-stretch">
-                      <div className="p-8 bg-slate-50 dark:bg-slate-800 md:w-64 text-center border-r border-slate-100 dark:border-slate-700 flex flex-col items-center justify-center shrink-0">
-                         <Hash className="w-6 h-6 text-accent mb-2" />
-                         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Token ID</span>
-                         <span className="text-2xl font-headline font-bold text-primary dark:text-white tracking-tighter mb-4">{g.token}</span>
-                         <Badge className={cn(
-                           "font-bold uppercase tracking-widest text-[9px] px-4 py-1",
-                           g.status === 'Pending' ? 'bg-amber-500' : 
-                           g.status === 'Resolved' ? 'bg-emerald-500' : 'bg-primary'
-                         )}>
+                      <div className="p-5 bg-slate-50 dark:bg-slate-800 md:w-44 text-center border-r border-slate-100 flex flex-col items-center justify-center shrink-0">
+                         <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">TOKEN</span>
+                         <span className="text-xl font-headline font-bold text-primary dark:text-white tracking-tighter mb-2">{g.token}</span>
+                         <Badge className={cn("text-[8px] font-bold px-2 py-0.5 rounded-full uppercase", g.status === 'Pending' ? 'bg-amber-500' : 'bg-emerald-500')}>
                            {g.status}
                          </Badge>
                       </div>
-                      
-                      <div className="flex-1 p-8 grid lg:grid-cols-4 gap-8 items-start">
-                        <div className="lg:col-span-3 space-y-6">
-                          <div className="space-y-1">
-                            <h3 className="text-2xl font-bold text-primary dark:text-white">{g.subject}</h3>
-                            <div className="flex flex-wrap gap-4 text-xs font-bold text-slate-500">
-                               <span className="flex items-center gap-1.5"><User className="w-3.5 h-3.5 text-accent" /> {g.name}</span>
-                               <span className="flex items-center gap-1.5"><Mail className="w-3.5 h-3.5 text-accent" /> {g.email}</span>
-                               <span className="flex items-center gap-1.5"><Phone className="w-3.5 h-3.5 text-accent" /> {g.phone}</span>
-                               {g.memberId && <span className="flex items-center gap-1.5"><Hash className="w-3.5 h-3.5 text-accent" /> ID: {g.memberId}</span>}
-                            </div>
-                          </div>
-                          
-                          <div className="bg-slate-50 dark:bg-slate-950 p-6 rounded-3xl border border-slate-100 dark:border-slate-800">
-                            <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-400 italic">
-                              "{g.description}"
-                            </p>
+                      <div className="flex-1 p-5 grid lg:grid-cols-4 gap-6 items-center">
+                        <div className="lg:col-span-3 space-y-1">
+                          <h3 className="text-lg font-bold text-primary leading-tight">{g.subject}</h3>
+                          <div className="flex flex-wrap gap-3 text-[10px] font-bold text-slate-500">
+                               <span className="flex items-center gap-1"><User className="w-2.5 h-2.5 text-accent" /> {g.name}</span>
+                               <span className="flex items-center gap-1"><Mail className="w-2.5 h-2.5 text-accent" /> {g.email}</span>
+                               <span className="flex items-center gap-1"><Clock className="w-2.5 h-2.5 text-accent" /> {g.createdAt?.toDate ? g.createdAt.toDate().toLocaleDateString() : 'Just now'}</span>
                           </div>
                         </div>
-
-                        <div className="flex flex-col items-end gap-3">
-                          <div className="flex items-center gap-1 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">
-                             <Clock className="w-3 h-3" /> Submitted: {g.createdAt?.toDate ? g.createdAt.toDate().toLocaleDateString() : 'Just now'}
-                          </div>
-
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="outline" className="rounded-xl w-full font-bold gap-2">
-                                Update Status <MoreVertical className="w-4 h-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-48 rounded-xl">
-                              <DropdownMenuItem onClick={() => handleUpdateStatus(g.id, 'Pending')} className="font-bold">Mark as Pending</DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => handleUpdateStatus(g.id, 'Reviewed')} className="font-bold">Mark as Reviewed</DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => handleUpdateStatus(g.id, 'Resolved')} className="font-bold text-emerald-600">Mark as Resolved</DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button variant="ghost" className="rounded-xl w-full text-slate-400 hover:text-red-500 font-bold gap-2">
-                                <Trash2 className="w-4 h-4" /> Delete Record
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent className="rounded-[2rem]">
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>Permanently Delete Grievance?</AlertDialogTitle>
-                                <AlertDialogDescription>This will remove the formal complaint from the archive. This action is irreversible.</AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => handleDelete(g.id)} className="bg-red-500 hover:bg-red-600 rounded-xl border-none">Delete Forever</AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
+                        <div className="flex justify-end gap-2">
+                          <Button size="sm" variant="outline" className="h-8 rounded-lg text-[10px] px-3 font-bold" onClick={() => handleUpdateStatus(g.id, 'Resolved')}>Resolve</Button>
+                          <Button size="sm" variant="ghost" onClick={() => handleDelete(g.id)} className="h-8 w-8 text-slate-300 hover:text-red-500"><Trash2 className="w-3.5 h-3.5" /></Button>
                         </div>
                       </div>
                     </div>
                   </CardContent>
                 </Card>
               ))}
-              
-              {filtered.length === 0 && (
-                <div className="text-center py-32 bg-white dark:bg-slate-900 rounded-[3rem] border border-dashed border-slate-200 dark:border-slate-800">
-                   <MessageSquareWarning className="w-12 h-12 text-slate-200 dark:text-slate-800 mx-auto mb-4" />
-                   <p className="text-slate-400 font-bold uppercase tracking-widest">No matching grievances in the secure vault.</p>
-                </div>
-              )}
             </div>
           )}
         </div>

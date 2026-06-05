@@ -35,7 +35,6 @@ const publicLinks = [
 
 /**
  * PublicViewPage provides an internal viewer for the public-facing site.
- * Features a horizontally scrollable navigation header with a visible scrollbar.
  */
 export default function PublicViewPage() {
   const { user, loading: authLoading } = useUser()
@@ -67,30 +66,30 @@ export default function PublicViewPage() {
   }
 
   return (
-    <main className="flex flex-col h-[calc(100vh-48px)] bg-slate-100 dark:bg-slate-900 overflow-hidden">
+    <main className="flex flex-col h-[calc(100vh-40px)] bg-slate-100 dark:bg-slate-900 overflow-hidden">
       {/* Mirror Header with Scrollbar */}
       <div className="bg-white dark:bg-slate-950 border-b flex flex-col shrink-0">
-        <div className="flex items-center justify-between px-6 py-2 border-b border-slate-100 dark:border-slate-800">
+        <div className="flex items-center justify-between px-6 py-1.5 border-b border-slate-100 dark:border-slate-800">
           <div className="flex items-center gap-3">
-            <div className="p-1.5 bg-accent/10 rounded-lg">
-              <Monitor className="w-4 h-4 text-accent" />
+            <div className="p-1 bg-accent/10 rounded-lg">
+              <Monitor className="w-3.5 h-3.5 text-accent" />
             </div>
             <div className="flex flex-col">
-              <h1 className="text-[10px] font-bold text-primary dark:text-white leading-none uppercase tracking-widest">Public Site Mirror</h1>
-              <p className="text-[8px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">Live Preview Mode</p>
+              <h1 className="text-[9px] font-bold text-primary dark:text-white leading-none uppercase tracking-widest">Public Site Mirror</h1>
+              <p className="text-[7px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">Live Preview Mode</p>
             </div>
           </div>
 
           <div className="flex items-center gap-4">
-            <div className="hidden md:flex items-center gap-2 text-[9px] font-bold text-slate-400 uppercase">
-              <Info className="w-3 h-3" />
+            <div className="hidden md:flex items-center gap-2 text-[8px] font-bold text-slate-400 uppercase">
+              <Info className="w-2.5 h-2.5" />
               Internal Session Preserved
             </div>
             <Button 
               variant="outline" 
               size="sm" 
               onClick={handleRefresh}
-              className="h-8 rounded-lg font-bold text-[9px] uppercase tracking-wider gap-2 shadow-sm"
+              className="h-7 rounded-lg font-bold text-[8px] uppercase tracking-wider gap-2 shadow-sm px-3"
             >
               <RefreshCw className="w-3 h-3" /> Reload Mirror
             </Button>
@@ -98,13 +97,13 @@ export default function PublicViewPage() {
         </div>
 
         {/* Scrollable Navigation Area with Visible Scrollbar */}
-        <nav className="flex items-center overflow-x-auto admin-scrollbar px-4 py-2 gap-2 bg-slate-50/50 dark:bg-slate-900/50 scroll-smooth">
+        <nav className="flex items-center overflow-x-auto admin-scrollbar px-4 py-1.5 gap-1.5 bg-slate-50/50 dark:bg-slate-900/50 scroll-smooth">
           {publicLinks.map((link) => (
             <button
               key={link.name}
               onClick={() => navigateMirror(link.href)}
               className={cn(
-                "whitespace-nowrap flex items-center gap-2 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all border shrink-0",
+                "whitespace-nowrap flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[9px] font-bold uppercase tracking-wider transition-all border shrink-0",
                 currentUrl === link.href
                   ? "bg-accent text-primary border-accent shadow-sm"
                   : "bg-white dark:bg-slate-800 text-slate-500 border-slate-100 dark:border-slate-700 hover:border-accent hover:text-accent"

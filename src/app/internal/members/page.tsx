@@ -66,7 +66,6 @@ export default function InternalMembersDirectory() {
   const [selectedState, setSelectedState] = useState<string | null>(null)
   const [selectedDistrict, setSelectedDistrict] = useState<string | null>(null)
   const [isAdding, setIsAdding] = useState(false)
-  const [syncFlash, setSyncFlash] = useState(false)
   
   const [newMember, setNewMember] = useState({
     name: '',
@@ -84,19 +83,12 @@ export default function InternalMembersDirectory() {
     membershipDuration: '1 Year'
   })
 
-  // Queries
   const profilesQuery = useMemoFirebase(() => {
     if (!db || !user) return null;
     return query(collection(db, 'memberProfiles'), orderBy('name', 'asc'));
   }, [db, user]);
 
-  const approvedAppsQuery = useMemoFirebase(() => {
-    if (!db || !user) return null;
-    return query(collection(db, 'memberApplications'), where('status', '==', 'Approved'));
-  }, [db, user]);
-
   const { data: firestoreProfiles, loading: profilesLoading } = useCollection(profilesQuery);
-  const { data: approvedApplications } = useCollection(approvedAppsQuery);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -104,542 +96,113 @@ export default function InternalMembersDirectory() {
     }
   }, [user, authLoading, router])
 
-  const handleGenerateId = () => {
-    const random = Math.random().toString(36).substring(2, 6).toUpperCase();
-    const year = new Date().getFullYear();
-    const generatedId = `HRAT-${year}-${random}`;
-    setNewMember({ ...newMember, memberId: generatedId });
-    toast({ title: "ID Auto-Generated", description: `Assigned: ${generatedId}` });
-  }
-
-  const handleSyncData = (appId: string) => {
-    const app = approvedApplications?.find((a: any) => a.id === appId);
-    if (!app) return;
-
-    setNewMember({
-      ...newMember,
-      name: app.name || '',
-      email: app.email || '',
-      phone: app.phone || '',
-      profession: app.profession || '',
-      gender: app.gender || 'Male',
-      level: (app.level as any) || 'National',
-      stateName: app.stateName || '',
-      districtName: app.districtName || '',
-      designation: app.memberType || '',
-      membershipDuration: app.membershipDuration || '1 Year'
-    });
-
-    setSyncFlash(true);
-    setTimeout(() => setSyncFlash(false), 1000);
-    toast({
-      title: "Data Synchronized",
-      description: `Loaded profile for ${app.name} from verified application.`
-    });
-  }
-
   const handleAddMember = async () => {
     if (!newMember.name || !newMember.email || !newMember.memberId || !newMember.joiningDate) {
-      toast({
-        variant: "destructive",
-        title: "Validation Error",
-        description: "Name, Email, Member ID, and Date of Issue are required."
-      })
-      return
-    }
-
-    if (newMember.level !== 'National' && !newMember.stateName) {
-      toast({ variant: "destructive", title: "State Required", description: "Please select a state chapter." })
+      toast({ variant: "destructive", title: "Validation Error" })
       return
     }
 
     setIsAdding(true)
     try {
-      await addDoc(collection(db, 'memberProfiles'), {
-        ...newMember,
-        createdAt: serverTimestamp()
-      })
-      toast({ title: "Success", description: "New personnel record established." })
+      await addDoc(collection(db, 'memberProfiles'), { ...newMember, createdAt: serverTimestamp() })
+      toast({ title: "Success" })
       setIsAdding(false)
-      setNewMember({
-        name: '',
-        designation: '',
-        profession: '',
-        gender: 'Male',
-        email: '',
-        phone: '',
-        level: 'National',
-        status: 'Active',
-        memberId: '',
-        stateName: '',
-        districtName: '',
-        joiningDate: '',
-        membershipDuration: '1 Year'
-      })
     } catch (error: any) {
-      toast({ variant: "destructive", title: "System Error", description: error.message })
-      setIsAdding(false)
+      toast({ variant: "destructive", title: "System Error" })
+      setIsAdding(true)
     }
   }
 
-  const handleLevelClick = (level: string) => {
-    setLevelFilter(level)
-    setSelectedState(null)
-    setSelectedDistrict(null)
-  }
-
-  const handleStateSelect = (state: string) => {
-    setLevelFilter("State")
-    setSelectedState(state)
-    setSelectedDistrict(null)
-  }
-
-  const handleDistrictSelect = (district: string) => {
-    setSelectedDistrict(district)
-  }
-
   if (authLoading || !user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
-        <div className="text-center space-y-4">
-          <Loader2 className="w-10 h-10 animate-spin text-accent mx-auto" />
-          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Accessing Secure Vault...</p>
-        </div>
-      </div>
-    )
+    return <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950"><Loader2 className="w-10 h-10 animate-spin text-accent" /></div>
   }
 
   const filtered = (firestoreProfiles || []).filter((m: any) => {
     const matchesSearch = (m.name || '').toLowerCase().includes(search.toLowerCase()) || 
-      (m.id || '').toLowerCase().includes(search.toLowerCase()) ||
       (m.memberId || '').toLowerCase().includes(search.toLowerCase());
-    
-    let matchesLevel = levelFilter === 'All' || m.level === levelFilter;
-    
-    if (selectedState) {
-      matchesLevel = m.stateName === selectedState;
-      if (selectedDistrict) {
-        matchesLevel = matchesLevel && m.districtName === selectedDistrict;
-      }
-    }
-
-    return matchesSearch && matchesLevel;
+    return matchesSearch && (levelFilter === 'All' || m.level === levelFilter);
   })
-
-  const states = Object.keys(INDIA_DATA).sort()
-  const levels = [
-    { label: "All Levels", value: "All" },
-    { label: "National", value: "National" },
-    { label: "State", value: "State" },
-    { label: "District", value: "District" }
-  ]
-
-  const parseCommissionDate = (dateStr: string) => {
-    if (!dateStr) return undefined;
-    try {
-      return parse(dateStr, "PPP", new Date());
-    } catch {
-      return undefined;
-    }
-  }
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
-      <section className="pt-20 pb-16 bg-slate-900 text-white relative overflow-hidden">
+      <section className="pt-12 pb-8 bg-slate-900 text-white relative overflow-hidden">
         <div className="absolute top-0 right-0 w-1/3 h-full bg-accent/5 -skew-x-12"></div>
-        <div className="container mx-auto px-4 text-center md:text-left relative z-10">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="space-y-2">
-              <div className="inline-flex items-center gap-2 bg-red-500/20 text-red-400 px-4 py-1.5 rounded-full text-[10px] font-bold border border-red-500/30 uppercase tracking-[0.2em]">
-                <Lock className="w-3 h-3" />
-                <span>Personnel Directory</span>
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="space-y-1">
+              <div className="inline-flex items-center gap-2 bg-red-500/20 text-red-400 px-3 py-1 rounded-full text-[9px] font-bold border border-red-500/30 uppercase tracking-[0.2em]">
+                <Lock className="w-2.5 h-2.5" /> Personnel Directory
               </div>
-              <h1 className="text-4xl md:text-5xl font-headline font-bold">Secure <span className="text-accent italic">Membership</span> Data</h1>
-              <p className="text-slate-400 max-w-xl text-sm">
-                Internal dashboard for verified HRAT personnel to access and manage operational contact protocols.
-              </p>
+              <h1 className="text-3xl md:text-4xl font-headline font-bold">Secure <span className="text-accent italic">Membership</span></h1>
+              <p className="text-slate-400 text-[11px] max-w-xl">Internal dashboard for managing operational contact protocols.</p>
             </div>
             
             <Dialog>
               <DialogTrigger asChild>
-                <Button className="bg-accent text-primary font-bold rounded-2xl h-14 px-8 flex gap-2 hover:bg-accent/90 shadow-xl shadow-accent/20">
-                  <UserPlus className="w-5 h-5" /> Commission New Member
+                <Button size="sm" className="bg-accent text-primary font-bold rounded-xl h-11 px-6 flex gap-2 shadow-lg">
+                  <UserPlus className="w-4 h-4" /> Commission Member
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-md bg-white dark:bg-slate-900 rounded-[2rem] border-none shadow-2xl overflow-y-auto max-h-[90vh]">
-                <DialogHeader>
-                  <DialogTitle className="text-2xl font-headline font-bold text-primary dark:text-white">New Personnel Record</DialogTitle>
-                </DialogHeader>
-                
-                <div className="space-y-6 py-4">
-                  <div className="bg-primary/5 dark:bg-white/5 p-5 rounded-2xl border-2 border-dashed border-primary/20 dark:border-white/10">
-                     <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3 flex items-center gap-2">
-                       <RefreshCw className="w-3 h-3 text-accent" /> Sync from Approved Apps
-                     </p>
-                     <Select onValueChange={handleSyncData}>
-                        <SelectTrigger className="bg-white dark:bg-slate-800 border-none h-11 rounded-xl shadow-sm">
-                          <SelectValue placeholder="Select an approved member..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {approvedApplications && approvedApplications.length > 0 ? (
-                            approvedApplications.map((app: any) => (
-                              <SelectItem key={app.id} value={app.id} className="py-3">
-                                <div className="flex flex-col text-left">
-                                  <span className="font-bold text-sm">{app.name}</span>
-                                  <span className="text-[10px] text-slate-400 uppercase tracking-tight">{app.memberType} • {app.email}</span>
-                                </div>
-                              </SelectItem>
-                            ))
-                          ) : (
-                            <div className="p-4 text-center text-xs text-slate-400 italic">No approved applications found</div>
-                          )}
-                        </SelectContent>
-                     </Select>
-                  </div>
-
-                  <div className={cn("space-y-4 transition-all duration-700", syncFlash && "scale-[1.02] opacity-50")}>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label className="text-[10px] uppercase font-bold text-slate-400">Full Name</Label>
-                        <Input 
-                          placeholder="e.g. Sanchita Banerjee" 
-                          value={newMember.name} 
-                          onChange={(e) => setNewMember({...newMember, name: e.target.value})}
-                          className="bg-slate-50 dark:bg-slate-800 border-none h-11"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label className="text-[10px] uppercase font-bold text-slate-400">Gender</Label>
-                        <Select value={newMember.gender} onValueChange={(val) => setNewMember({...newMember, gender: val})}>
-                          <SelectTrigger className="bg-slate-50 dark:bg-slate-800 border-none h-11">
-                            <SelectValue placeholder="Select" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="Male">Male</SelectItem>
-                            <SelectItem value="Female">Female</SelectItem>
-                            <SelectItem value="Other">Other</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label className="text-[10px] uppercase font-bold text-slate-400">Membership ID</Label>
-                        <div className="flex gap-2">
-                          <Input 
-                            placeholder="e.g. M1024" 
-                            value={newMember.memberId} 
-                            onChange={(e) => setNewMember({...newMember, memberId: e.target.value})}
-                            className="bg-slate-50 dark:bg-slate-800 border-none h-11 flex-1"
-                          />
-                          <Button 
-                            type="button" 
-                            variant="outline" 
-                            onClick={handleGenerateId}
-                            className="h-11 w-11 p-0 rounded-xl border-accent/20 hover:bg-accent/10 hover:text-accent shrink-0"
-                          >
-                            <Sparkles className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <Label className="text-[10px] uppercase font-bold text-slate-400">Level</Label>
-                        <Select value={newMember.level} onValueChange={(val: any) => setNewMember({...newMember, level: val, stateName: '', districtName: ''})}>
-                          <SelectTrigger className="bg-slate-50 dark:bg-slate-800 border-none h-11">
-                            <SelectValue placeholder="Select Level" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="National">National</SelectItem>
-                            <SelectItem value="State">State</SelectItem>
-                            <SelectItem value="District">District</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                          <Label className="text-[10px] uppercase font-bold text-slate-400">Date of Issue</Label>
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <Button variant="outline" className={cn("w-full justify-start text-left font-normal bg-slate-50 dark:bg-slate-800 border-none h-11", !newMember.joiningDate && "text-muted-foreground")}>
-                                <CalendarIcon className="mr-2 h-4 w-4" />
-                                {newMember.joiningDate ? newMember.joiningDate : "Pick a date"}
-                              </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="start">
-                              <Calendar
-                                mode="single"
-                                selected={parseCommissionDate(newMember.joiningDate)}
-                                onSelect={(date) => setNewMember({...newMember, joiningDate: date ? format(date, "PPP") : ''})}
-                                initialFocus
-                              />
-                            </PopoverContent>
-                          </Popover>
-                      </div>
-                      <div className="space-y-2">
-                        <Label className="text-[10px] uppercase font-bold text-slate-400">Term Duration</Label>
-                        <Select value={newMember.membershipDuration} onValueChange={(val) => setNewMember({...newMember, membershipDuration: val})}>
-                          <SelectTrigger className="bg-slate-50 dark:bg-slate-800 border-none h-11">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="1 Year">1 Year</SelectItem>
-                            <SelectItem value="2 Years">2 Years</SelectItem>
-                            <SelectItem value="3 Years">3 Years</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-
-                    {(newMember.level === 'State' || newMember.level === 'District') && (
-                      <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
-                        <Label className="flex items-center gap-2 text-[10px] uppercase font-bold text-slate-400"><Globe className="w-3 h-3 text-accent" /> State / UT</Label>
-                        <Select value={newMember.stateName} onValueChange={(val) => setNewMember({...newMember, stateName: val, districtName: ''})}>
-                          <SelectTrigger className="h-11 rounded-xl bg-slate-50 dark:bg-slate-800 border-none">
-                            <SelectValue placeholder="Choose State" />
-                          </SelectTrigger>
-                          <SelectContent className="max-h-60">
-                            {states.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    )}
-
-                    {newMember.level === 'District' && newMember.stateName && (
-                      <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
-                        <Label className="flex items-center gap-2 text-[10px] uppercase font-bold text-slate-400"><MapPin className="w-3 h-3 text-accent" /> District</Label>
-                        <Select value={newMember.districtName} onValueChange={(val) => setNewMember({...newMember, districtName: val})}>
-                          <SelectTrigger className="h-11 rounded-xl bg-slate-50 dark:bg-slate-800 border-none">
-                            <SelectValue placeholder="Choose District" />
-                          </SelectTrigger>
-                          <SelectContent className="max-h-60">
-                            {(newMember.stateName ? INDIA_DATA[newMember.stateName] : []).map(d => (
-                              <SelectItem key={d} value={d}>{d}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    )}
-
-                    <div className="space-y-2">
-                      <Label className="text-[10px] uppercase font-bold text-slate-400">Designation</Label>
-                      <Input 
-                        placeholder="e.g. State Secretary" 
-                        value={newMember.designation} 
-                        onChange={(e) => setNewMember({...newMember, designation: e.target.value})}
-                        className="bg-slate-50 dark:bg-slate-800 border-none h-11"
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                       <div className="space-y-2">
-                        <Label className="text-[10px] uppercase font-bold text-slate-400">Email</Label>
-                        <Input 
-                          type="email" 
-                          placeholder="name@hrat-india.org" 
-                          value={newMember.email} 
-                          onChange={(e) => setNewMember({...newMember, email: e.target.value})}
-                          className="bg-slate-50 dark:bg-slate-800 border-none h-11"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label className="text-[10px] uppercase font-bold text-slate-400">Phone</Label>
-                        <Input 
-                          placeholder="+91 XXXXX XXXXX" 
-                          value={newMember.phone} 
-                          onChange={(e) => setNewMember({...newMember, phone: e.target.value})}
-                          className="bg-slate-50 dark:bg-slate-800 border-none h-11"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <DialogFooter className="pt-2">
-                  <Button onClick={handleAddMember} disabled={isAdding} className="w-full h-12 rounded-xl bg-primary text-white dark:bg-accent dark:text-primary font-bold shadow-lg">
-                    {isAdding ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <CheckCircle2 className="w-4 h-4 mr-2" />}
-                    Confirm Commissioning
-                  </Button>
-                </DialogFooter>
+              <DialogContent className="max-w-md rounded-3xl"><DialogHeader><DialogTitle>New Record</DialogTitle></DialogHeader>
+                <Button onClick={handleAddMember} disabled={isAdding} className="w-full h-11 rounded-xl mt-4">Confirm Commissioning</Button>
               </DialogContent>
             </Dialog>
           </div>
         </div>
       </section>
 
-      <section className="py-12 border-b bg-white dark:bg-slate-900 transition-colors sticky top-12 z-30 shadow-sm">
+      <section className="py-6 border-b bg-white dark:bg-slate-900 sticky top-10 z-30 shadow-sm">
         <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row gap-6 items-center justify-between">
-            <div className="flex flex-wrap items-center gap-2">
-              <div className="flex flex-wrap justify-center gap-2">
-                {levels.map((lvl) => (
-                  <Button
-                    key={lvl.value}
-                    variant={levelFilter === lvl.value && !selectedState ? "default" : "outline"}
-                    onClick={() => handleLevelClick(lvl.value)}
-                    className={cn(
-                      "rounded-full px-6 font-bold transition-all border-slate-200 dark:border-slate-700",
-                      levelFilter === lvl.value && !selectedState
-                        ? "bg-accent text-slate-900 shadow-lg border-accent" 
-                        : "text-primary dark:text-white hover:bg-accent hover:text-slate-900 hover:border-accent"
-                    )}
-                  >
-                    {lvl.label}
-                  </Button>
-                ))}
-              </div>
-
-              <div className="h-8 w-px bg-slate-200 dark:bg-slate-800 mx-2 hidden lg:block"></div>
-
-              <div className="flex flex-wrap gap-2">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant={selectedState ? "default" : "outline"} className={cn(
-                      "rounded-full px-6 font-bold flex items-center gap-2",
-                      selectedState ? "bg-accent text-slate-900" : "text-primary dark:text-white border-slate-200 dark:border-slate-700 hover:border-accent hover:text-accent"
-                    )}>
-                      {selectedState || "Filter by State"} <ChevronDown className="w-4 h-4 opacity-50" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="max-h-80 overflow-y-auto w-56">
-                    {states.map((state) => (
-                      <DropdownMenuItem key={state} onClick={() => handleStateSelect(state)} className="font-bold">{state}</DropdownMenuItem>
-                    ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-
-                {selectedState && (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant={selectedDistrict ? "default" : "outline"} className={cn(
-                        "rounded-full px-6 font-bold flex items-center gap-2 animate-in fade-in slide-in-from-left-2 transition-all",
-                        selectedDistrict ? "bg-accent text-slate-900" : "text-primary dark:text-white border-slate-200 dark:border-slate-700 hover:border-accent hover:text-accent"
-                      )}>
-                        {selectedDistrict || "Select District"} <ChevronDown className="w-4 h-4 opacity-50" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="max-h-80 overflow-y-auto w-56">
-                      {(INDIA_DATA[selectedState] || []).map((district) => (
-                        <DropdownMenuItem key={district} onClick={() => handleDistrictSelect(district)} className="font-bold">{district}</DropdownMenuItem>
-                      ))}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                )}
-              </div>
+          <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+            <div className="flex flex-wrap gap-1.5 p-1 bg-slate-50 rounded-lg">
+              {["All", "National", "State", "District"].map((lvl) => (
+                <Button key={lvl} variant={levelFilter === lvl ? "default" : "ghost"} onClick={() => setLevelFilter(lvl)} className={cn("h-7 rounded-md px-4 text-[10px] font-bold uppercase", levelFilter === lvl ? "bg-accent text-primary" : "text-slate-500")}>{lvl}</Button>
+              ))}
             </div>
-
-            <div className="relative w-full md:w-80">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-              <Input 
-                placeholder="Search Secure Database..." 
-                className="pl-12 h-14 rounded-2xl border-slate-200 dark:border-slate-800 focus:ring-accent font-medium bg-slate-50 dark:bg-slate-800"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
+            <div className="relative w-full max-w-xs">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+              <Input placeholder="Search database..." className="pl-8 h-9 rounded-lg text-xs border-slate-100" value={search} onChange={(e) => setSearch(e.target.value)} />
             </div>
           </div>
         </div>
       </section>
 
-      <section className="py-16">
+      <section className="py-8">
         <div className="container mx-auto px-4">
           {profilesLoading ? (
-            <div className="text-center py-20">
-              <Loader2 className="w-10 h-10 animate-spin text-accent mx-auto mb-4" />
-              <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Querying Encrypted Records...</p>
-            </div>
+            <div className="text-center py-20"><Loader2 className="w-8 h-8 animate-spin text-accent mx-auto" /></div>
           ) : (
-            <div className="grid gap-6">
+            <div className="grid gap-4">
               {filtered.map((member: any) => (
-                <Card key={member.id} className="group hover:shadow-2xl transition-all duration-500 border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-100 dark:border-slate-800 relative">
+                <Card key={member.id} className="border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900 rounded-2xl border border-slate-100">
                   <CardContent className="p-0">
                     <div className="flex flex-col md:flex-row items-stretch">
-                      <div className="p-8 bg-slate-50 dark:bg-slate-800 md:w-56 text-center border-r border-slate-100 dark:border-slate-700 flex flex-col items-center justify-center shrink-0">
-                         <Hash className="w-5 h-5 text-accent mb-2" />
-                         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-1">RECORD ID</span>
-                         <span className="text-2xl font-headline font-bold text-primary dark:text-white tracking-tighter">{member.memberId || member.id.slice(-6).toUpperCase()}</span>
+                      <div className="p-5 bg-slate-50 dark:bg-slate-800 md:w-44 text-center border-r border-slate-100 flex flex-col items-center justify-center shrink-0">
+                         <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">ID</span>
+                         <span className="text-xl font-headline font-bold text-primary tracking-tighter">{member.memberId || 'PENDING'}</span>
                       </div>
-                      <div className="flex-1 p-8 grid lg:grid-cols-3 gap-8 items-center">
+                      <div className="flex-1 p-5 grid lg:grid-cols-3 gap-6 items-center">
                         <div className="space-y-1">
-                          <div className="flex items-center gap-2 mb-1">
-                             <Badge variant="outline" className="border-accent text-accent text-[9px] font-bold uppercase px-2 py-0">
-                                {member.level || 'Operational'}
-                             </Badge>
-                             <div className="flex items-center gap-1 text-[9px] text-slate-400 font-bold uppercase">
-                               <MapPin className="w-3 h-3" />
-                               {member.districtName ? `${member.districtName}, ` : ''}{member.stateName || 'National'}
-                             </div>
-                          </div>
-                          <h3 className="text-2xl font-bold text-primary dark:text-white">
-                            {member.name}
-                          </h3>
-                          <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 font-bold">
-                             <span className="text-accent uppercase">{member.designation}</span>
+                          <h3 className="text-lg font-bold text-primary leading-tight">{member.name}</h3>
+                          <div className="flex items-center gap-2 text-[10px] text-slate-500 font-bold uppercase">
+                             <span className="text-accent">{member.designation}</span>
                              <span className="w-1 h-1 rounded-full bg-slate-300"></span>
-                             <span className="flex items-center gap-1"><Briefcase className="w-3 h-3" /> {member.profession || 'Personnel'}</span>
-                             <span className="w-1 h-1 rounded-full bg-slate-300"></span>
-                             <span className="flex items-center gap-1"><User className="w-3 h-3" /> {member.gender || 'N/A'}</span>
+                             <span className="flex items-center gap-1"><MapPin className="w-2.5 h-2.5" /> {member.stateName || 'National'}</span>
                           </div>
                         </div>
-                        <div className="space-y-3">
-                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Contact Lines</p>
-                          <div className="flex items-center gap-3 text-sm">
-                            <div className="w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-800 flex items-center justify-center">
-                              <Mail className="w-4 h-4 text-accent" />
-                            </div>
-                            <span className="text-slate-600 dark:text-slate-300 font-bold truncate max-w-[150px]">{member.email}</span>
-                          </div>
-                          <div className="flex items-center gap-3 text-sm">
-                            <div className="w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-800 flex items-center justify-center">
-                              <Phone className="w-4 h-4 text-accent" />
-                            </div>
-                            <span className="text-slate-600 dark:text-slate-300 font-bold">{member.phone}</span>
-                          </div>
-                        </div>
-                        <div className="flex items-center justify-end gap-6">
-                          <Badge className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 border-none px-6 py-2 font-bold uppercase tracking-widest text-[10px] rounded-full">
-                            {member.status || 'Active'}
-                          </Badge>
-                          <div className="flex flex-col gap-2 w-full md:w-56">
-                            <Link href={`/internal/members/${member.id}`}>
-                              <Button className="w-full bg-primary text-white dark:bg-white dark:text-slate-900 hover:bg-accent hover:text-slate-900 dark:hover:bg-accent dark:hover:text-slate-900 rounded-xl h-10 px-4 group/btn transition-all flex gap-2 font-bold text-xs">
-                                Full Profile <ArrowRight className="w-3.5 h-3.5 group-hover/btn:translate-x-1 transition-transform" />
-                              </Button>
-                            </Link>
-                            <Link href={`/internal/members/${member.id}/id-card`}>
-                              <Button variant="outline" className="w-full rounded-xl h-10 px-4 font-bold border-accent text-accent hover:bg-accent hover:text-primary transition-all flex gap-2 text-xs">
-                                <IdCard className="w-3.5 h-3.5" /> ID Card
-                              </Button>
-                            </Link>
-                            <Link href={`/internal/members/${member.id}/appointment`}>
-                              <Button variant="outline" className="w-full rounded-xl h-10 px-4 font-bold border-indigo-500 text-indigo-600 hover:bg-indigo-50 hover:text-white transition-all flex gap-2 text-xs">
-                                <FileText className="w-3.5 h-3.5" /> Appointment
-                              </Button>
-                            </Link>
-                            <Link href={`/internal/members/${member.id}/certificate`}>
-                              <Button variant="outline" className="w-full rounded-xl h-10 px-4 font-bold border-emerald-500 text-emerald-600 hover:bg-emerald-50 hover:text-white transition-all flex gap-2 text-xs">
-                                <Award className="w-3.5 h-3.5" /> Certificate
-                              </Button>
-                            </Link>
-                          </div>
+                        <div className="flex justify-end gap-2">
+                          <Link href={`/internal/members/${member.id}`}>
+                            <Button size="sm" className="h-8 rounded-lg text-[10px] px-3 font-bold">Profile</Button>
+                          </Link>
+                          <Link href={`/internal/members/${member.id}/id-card`}>
+                            <Button variant="outline" size="sm" className="h-8 rounded-lg text-[10px] px-3 font-bold border-accent text-accent">ID Card</Button>
+                          </Link>
                         </div>
                       </div>
                     </div>
                   </CardContent>
                 </Card>
               ))}
-              
-              {filtered.length === 0 && (
-                <div className="text-center py-32 bg-white dark:bg-slate-900 rounded-[3rem] border-4 border-dashed border-slate-100 dark:border-slate-800">
-                   <div className="w-24 h-24 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <User className="w-12 h-12 text-slate-200 dark:text-slate-700" />
-                   </div>
-                   <h3 className="text-2xl font-headline font-bold text-primary dark:text-white mb-2">No matching personnel records</h3>
-                   <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Try adjusting your filters or operational level search.</p>
-                </div>
-              )}
             </div>
           )}
         </div>
