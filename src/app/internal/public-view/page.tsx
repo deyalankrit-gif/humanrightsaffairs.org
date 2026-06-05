@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button'
 
 /**
  * PublicViewPage provides an internal viewer for the public-facing site.
- * Page-specific headers removed for a consolidated administrative UI.
+ * Adjusted to fit within the Sidebar-based administrative layout.
  */
 export default function PublicViewPage() {
   const { user, loading: authLoading } = useUser()
@@ -40,30 +40,30 @@ export default function PublicViewPage() {
 
   return (
     <main className="flex flex-col h-[calc(100vh-64px)] bg-slate-100 dark:bg-slate-900 overflow-hidden">
-      {/* Integrated Preview Controls Strip */}
-      <div className="bg-white dark:bg-slate-950 border-b flex items-center justify-between px-6 py-2 transition-colors">
+      {/* Mirror Controls */}
+      <div className="bg-white dark:bg-slate-950 border-b flex items-center justify-between px-6 py-2 shrink-0">
         <div className="flex items-center gap-3">
           <div className="p-1.5 bg-accent/10 rounded-lg">
             <Monitor className="w-4 h-4 text-accent" />
           </div>
           <div className="flex flex-col">
-            <h1 className="text-[10px] font-bold text-primary dark:text-white leading-none uppercase tracking-widest">Live Site Mirror</h1>
-            <p className="text-[8px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">Previewing content from root</p>
+            <h1 className="text-[10px] font-bold text-primary dark:text-white leading-none uppercase tracking-widest">Public Site Mirror</h1>
+            <p className="text-[8px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">Live Preview Root</p>
           </div>
         </div>
 
         <div className="flex items-center gap-4">
           <div className="hidden md:flex items-center gap-2 text-[9px] font-bold text-slate-400 uppercase">
             <Info className="w-3 h-3" />
-            Navigate preview using links inside the mirror
+            Navigating within the iframe preserves internal session
           </div>
           <Button 
             variant="outline" 
             size="sm" 
             onClick={handleRefresh}
-            className="h-9 rounded-xl font-bold text-[10px] uppercase tracking-wider gap-2 border-slate-200 dark:border-slate-800 shadow-sm transition-all active:scale-95"
+            className="h-8 rounded-lg font-bold text-[9px] uppercase tracking-wider gap-2 shadow-sm"
           >
-            <RefreshCw className="w-3 h-3" /> Refresh Preview
+            <RefreshCw className="w-3 h-3" /> Reload Mirror
           </Button>
         </div>
       </div>
