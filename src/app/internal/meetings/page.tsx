@@ -71,7 +71,7 @@ export default function InternalMeetingsManagement() {
   const [newMeeting, setNewMeeting] = useState({
     title: '',
     date: '',
-    time: '',
+    time: '09:00 AM',
     location: '',
     agenda: '',
     minutes: '',
@@ -94,36 +94,17 @@ export default function InternalMeetingsManagement() {
 
   const { data: meetings, loading: dataLoading } = useCollection(meetingsQuery);
 
-  const formatTo12h = (timeStr: string) => {
-    if (!timeStr) return '';
-    // If it's already in 12h format (contains AM/PM), return as is
-    if (timeStr.includes('AM') || timeStr.includes('PM')) return timeStr;
-    
-    const match = timeStr.match(/^(\d{1,2}):(\d{2})$/);
-    if (match) {
-      let h = parseInt(match[1]);
-      const m = match[2];
-      const ampm = h >= 12 ? 'PM' : 'AM';
-      h = h % 12;
-      h = h ? h : 12;
-      return `${h.toString().padStart(2, '0')}:${m} ${ampm}`;
-    }
-    return timeStr;
-  }
+  const hours = Array.from({ length: 12 }, (_, i) => (i + 1).toString().padStart(2, '0'))
+  const minutes = Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0'))
 
-  const convertTo24h = (timeStr: string) => {
-    if (!timeStr) return '';
-    if (!timeStr.includes('AM') && !timeStr.includes('PM')) return timeStr;
-    
-    const [time, ampm] = timeStr.split(' ');
-    const parts = time.split(':');
-    let hours = parseInt(parts[0], 10);
-    const minutes = parts[1];
-    
-    if (ampm === 'PM' && hours < 12) hours += 12;
-    if (ampm === 'AM' && hours === 12) hours = 0;
-    
-    return `${hours.toString().padStart(2, '0')}:${minutes}`;
+  const splitTime = (timeStr: string) => {
+    const parts = timeStr.split(' ');
+    const timeParts = parts[0]?.split(':') || ['09', '00'];
+    return {
+      hour: timeParts[0],
+      minute: timeParts[1],
+      period: parts[1] || 'AM'
+    }
   }
 
   const handleAddMeeting = async () => {
@@ -137,12 +118,11 @@ export default function InternalMeetingsManagement() {
     try {
       await addDoc(collection(db, 'meetings'), {
         ...newMeeting,
-        time: formatTo12h(newMeeting.time), // Store as 12h AM/PM
         createdAt: serverTimestamp()
       })
       toast({ title: "Assembly Scheduled", description: "The record has been published to the registry." })
       setNewMeeting({
-        title: '', date: '', time: '', location: '', agenda: '', minutes: '',
+        title: '', date: '', time: '09:00 AM', location: '', agenda: '', minutes: '',
         level: 'National', stateName: '', districtName: '', status: 'Upcoming'
       })
       setIsAddDialogOpen(false)
@@ -171,10 +151,7 @@ export default function InternalMeetingsManagement() {
     setIsActionLoading(true)
     try {
       const { id, ...data } = editMeeting
-      await updateDoc(doc(db, 'meetings', id), {
-        ...data,
-        time: formatTo12h(data.time) // Ensure AM/PM format on update
-      })
+      await updateDoc(doc(db, 'meetings', id), data)
       toast({ title: "Record Updated" })
       setEditMeeting(null)
     } catch (e: any) {
@@ -205,6 +182,35 @@ export default function InternalMeetingsManagement() {
   })
 
   const states = Object.keys(INDIA_DATA).sort()
+
+  const TimeSelector = ({ value, onChange }: { value: string, onChange: (val: string) => void }) => {
+    const { hour, minute, period } = splitTime(value)
+    
+    return (
+      <div className="flex items-center gap-2">
+        <Select value={hour} onValueChange={(h) => onChange(`${h}:${minute} ${period}`)}>
+          <SelectTrigger className="w-[70px] h-10 rounded-lg"><SelectValue /></SelectTrigger>
+          <SelectContent className="max-h-60">
+            {hours.map(h => <SelectItem key={h} value={h}>{h}</SelectItem>)}
+          </SelectContent>
+        </Select>
+        <span className="font-bold">:</span>
+        <Select value={minute} onValueChange={(m) => onChange(`${hour}:${m} ${period}`)}>
+          <SelectTrigger className="w-[70px] h-10 rounded-lg"><SelectValue /></SelectTrigger>
+          <SelectContent className="max-h-60">
+            {minutes.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}
+          </SelectContent>
+        </Select>
+        <Select value={period} onValueChange={(p) => onChange(`${hour}:${minute} ${p}`)}>
+          <SelectTrigger className="w-[80px] h-10 rounded-lg"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="AM">AM</SelectItem>
+            <SelectItem value="PM">PM</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+    )
+  }
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
@@ -254,16 +260,11 @@ export default function InternalMeetingsManagement() {
                        </div>
                        <div className="space-y-1">
                           <Label className="text-[10px] font-bold uppercase text-slate-400">Time (AM / PM System)</Label>
-                          <div className="relative">
-                            <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                            <Input 
-                              type="time" 
-                              className="pl-10 h-10 rounded-lg"
-                              value={convertTo24h(newMeeting.time)} 
-                              onChange={e => setNewMeeting({...newMeeting, time: formatTo12h(e.target.value)})} 
-                            />
-                          </div>
-                          <p className="text-[8px] text-slate-400 font-bold uppercase mt-1">Select time using the AM/PM clock picker</p>
+                          <TimeSelector 
+                            value={newMeeting.time} 
+                            onChange={(val) => setNewMeeting({...newMeeting, time: val})} 
+                          />
+                          <p className="text-[8px] text-slate-400 font-bold uppercase mt-1">Select hour (1-12), minute and period</p>
                        </div>
                     </div>
                     <div className="space-y-1">
@@ -355,7 +356,7 @@ export default function InternalMeetingsManagement() {
                         <div className="lg:col-span-2 space-y-1">
                           <h3 className="text-lg font-bold text-slate-900 dark:text-white leading-tight group-hover:text-accent transition-colors">{meeting.title}</h3>
                           <div className="flex flex-wrap gap-3 text-[10px] font-bold text-slate-500">
-                            <span className="flex items-center gap-1"><Clock className="w-2.5 h-2.5 text-accent" /> {formatTo12h(meeting.time)}</span>
+                            <span className="flex items-center gap-1"><Clock className="w-2.5 h-2.5 text-accent" /> {meeting.time}</span>
                             <span className="flex items-center gap-1"><MapPin className="w-2.5 h-2.5 text-accent" /> {meeting.location}</span>
                             {meeting.stateName && <span className="flex items-center gap-1"><Globe className="w-2.5 h-2.5 text-accent" /> {meeting.stateName}</span>}
                           </div>
@@ -404,16 +405,10 @@ export default function InternalMeetingsManagement() {
                                        </div>
                                        <div className="space-y-1">
                                           <Label className="text-[10px] font-bold uppercase text-slate-400">Time (AM / PM System)</Label>
-                                          <div className="relative">
-                                            <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                                            <Input 
-                                              type="time" 
-                                              className="pl-10 h-10 rounded-lg"
-                                              value={convertTo24h(editMeeting.time)} 
-                                              onChange={e => setEditMeeting({...editMeeting, time: formatTo12h(e.target.value)})} 
-                                            />
-                                          </div>
-                                          <p className="text-[8px] text-slate-400 font-bold uppercase mt-1">Select HH:MM AM/PM</p>
+                                          <TimeSelector 
+                                            value={editMeeting.time} 
+                                            onChange={(val) => setEditMeeting({...editMeeting, time: val})} 
+                                          />
                                        </div>
                                     </div>
                                      <div className="space-y-1">
