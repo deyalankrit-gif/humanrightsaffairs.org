@@ -31,13 +31,11 @@ import {
   RefreshCw,
   Package,
   Truck,
-  LogOut,
   HeartHandshake
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { ThemeToggle } from "./theme-toggle"
-import { useUser, useAuth } from "@/firebase"
-import { signOut } from "firebase/auth"
+import { useUser } from "@/firebase"
 import { Button } from "@/components/ui/button"
 import { DonationDialog } from "./donation-dialog"
 
@@ -69,14 +67,9 @@ const adminLinks = [
 export function AppSidebar() {
   const pathname = usePathname()
   const { user } = useUser()
-  const auth = useAuth()
   
   const isAdminPortal = pathname.startsWith('/internal')
   const links = isAdminPortal ? adminLinks : publicLinks
-
-  const handleSignOut = async () => {
-    if (auth) await signOut(auth)
-  }
 
   return (
     <Sidebar collapsible="icon" className="border-r bg-sidebar">
@@ -136,26 +129,7 @@ export function AppSidebar() {
 
         <div className="flex items-center justify-between px-2">
           <ThemeToggle />
-          {user && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleSignOut}
-              className="text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-xl"
-              title="Sign Out"
-            >
-              <LogOut className="w-5 h-5" />
-            </Button>
-          )}
         </div>
-
-        {user && (
-          <div className="px-2 group-data-[collapsible=icon]:hidden">
-            <p className="text-[10px] text-muted-foreground font-bold uppercase truncate">
-              {user.email}
-            </p>
-          </div>
-        )}
       </SidebarFooter>
     </Sidebar>
   )

@@ -4,9 +4,9 @@ import { FirebaseClientProvider } from '@/firebase';
 import { FirebaseErrorListener } from '@/components/FirebaseErrorListener';
 import { Toaster } from '@/components/ui/toaster';
 import { ThemeProvider } from '@/components/theme-provider';
-import { PortalSwitcher } from '@/components/portal-switcher';
 import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/app-sidebar';
+import { HeaderActions } from '@/components/header-actions';
 import Image from 'next/image';
 
 export const metadata: Metadata = {
@@ -48,9 +48,9 @@ export default function RootLayout({
                       <span className="text-[8px] font-bold text-accent uppercase tracking-widest">JusticeShield</span>
                     </div>
                   </div>
+                  <HeaderActions />
                 </header>
                 <FirebaseErrorListener />
-                <PortalSwitcher />
                 {children}
                 <Toaster />
               </SidebarInset>
