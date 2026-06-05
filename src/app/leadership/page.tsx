@@ -5,7 +5,7 @@ import React, { useState } from 'react'
 import Image from 'next/image'
 import { Footer } from '@/components/footer'
 import { PlaceHolderImages } from '@/lib/placeholder-images'
-import { Shield, Award, Plus, Edit, Trash2, Loader2, Upload, Globe, MapPin } from 'lucide-react'
+import { Shield, Award, Plus, Edit, Trash2, Loader2, Upload, Globe, MapPin, ChevronRight } from 'lucide-react'
 import { useCollection, useFirestore, useMemoFirebase, useUser } from '@/firebase'
 import { collection, query, orderBy, addDoc, deleteDoc, doc, updateDoc, serverTimestamp } from 'firebase/firestore'
 import { Button } from '@/components/ui/button'
@@ -67,7 +67,7 @@ function LeaderCard({ leader, variant = "default", isAdmin, onEdit, onDelete }: 
       <div className="mt-4 text-center px-2">
         <h4 className={`font-headline font-bold text-primary dark:text-white ${variant === 'large' || isChairman ? 'text-lg md:text-xl lg:text-2xl' : 'text-sm md:text-base'}`}>{leader.name}</h4>
         <p className={`text-accent font-bold uppercase tracking-widest ${variant === 'large' || leader.title.includes("Founder") ? 'text-[10px] md:text-xs' : 'text-[8px] md:text-[10px]'}`}>{leader.title}</p>
-        {leader.parentRegion && <p className="text-[8px] text-slate-400 font-bold uppercase tracking-tighter mt-1">{leader.districtName ? `${leader.districtName}, ` : ''}{leader.parentRegion}</p>}
+        {leader.level === 'District' && leader.districtName && <p className="text-[8px] text-slate-400 font-bold uppercase tracking-tighter mt-1">{leader.districtName}</p>}
       </div>
     </div>
   )
@@ -151,9 +151,15 @@ export default function LeadershipPage() {
 
   const leaders = (firestoreLeaders || []) as Leader[]
   const centralTeam = leaders.filter(l => l.level === 'Central')
+  
+  const regionsWithLeadership = Array.from(new Set([
+    ...leaders.filter(l => l.level === 'State').map(l => l.parentRegion),
+    ...leaders.filter(l => l.level === 'District').map(l => l.parentRegion)
+  ])).filter(Boolean) as string[]
+  
+  regionsWithLeadership.sort()
+
   const states = Object.keys(INDIA_DATA).sort()
-  const stateChapters = Array.from(new Set(leaders.filter(l => l.level === 'State').map(l => l.parentRegion))).filter(Boolean) as string[]
-  const districtRegions = Array.from(new Set(leaders.filter(l => l.level === 'District').map(l => l.parentRegion))).filter(Boolean) as string[]
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
@@ -215,7 +221,7 @@ export default function LeadershipPage() {
                     </div>
                   )}
                 </div>
-                <DialogFooter><Button onClick={handleAdd} disabled={isActionLoading} className="w-full h-12 rounded-xl">Publish Profile</Button></DialogFooter>
+                <DialogFooter><Button onClick={handleAdd} disabled={isActionLoading} className="w-full h-12 rounded-xl bg-accent text-primary font-bold">Publish Profile</Button></DialogFooter>
               </DialogContent>
             </Dialog>
           )}
@@ -228,22 +234,96 @@ export default function LeadershipPage() {
             <div className="text-center py-20"><Loader2 className="w-10 h-10 animate-spin text-accent mx-auto mb-4" /></div>
           ) : (
             <>
-              <div className="flex flex-col items-center mb-24">
-                <div className="flex items-center gap-2 text-primary dark:text-white font-bold uppercase tracking-[0.2em] mb-12"><Award className="w-6 h-6 text-accent" /><span>Central Governance</span></div>
+              {/* Central Governance Section */}
+              <div className="flex flex-col items-center mb-32">
+                <div className="flex items-center gap-2 text-primary dark:text-white font-bold uppercase tracking-[0.2em] mb-12">
+                  <Award className="w-6 h-6 text-accent" />
+                  <span>Central Governance</span>
+                </div>
                 <div className="flex flex-wrap justify-center gap-12">
-                  {centralTeam.map((leader, i) => <LeaderCard key={leader.id} leader={leader} variant={i === 0 ? "large" : "default"} isAdmin={isAdmin} onEdit={setEditLeader} onDelete={handleDelete} />)}
+                  {centralTeam.map((leader, i) => (
+                    <LeaderCard 
+                      key={leader.id} 
+                      leader={leader} 
+                      variant={i === 0 ? "large" : "default"} 
+                      isAdmin={isAdmin} 
+                      onEdit={setEditLeader} 
+                      onDelete={handleDelete} 
+                    />
+                  ))}
                 </div>
               </div>
 
-              <div className="space-y-24">
-                <div className="flex items-center justify-center gap-2 text-primary dark:text-white font-bold uppercase tracking-[0.2em] mb-12"><Shield className="w-6 h-6 text-emerald-500" /><span>Regional Chapters</span></div>
-                <div className="grid md:grid-cols-2 gap-12 max-w-6xl mx-auto">
-                  {stateChapters.map((region) => (
-                    <div key={region} className="bg-white dark:bg-slate-900 p-12 rounded-[3rem] shadow-sm border border-slate-100 dark:border-slate-800 flex flex-col items-center">
-                      <div className="bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 px-6 py-2 rounded-full font-bold text-sm mb-12">{region}</div>
-                      <div className="flex flex-wrap justify-center gap-8">{leaders.filter(l => l.level === 'State' && l.parentRegion === region).map(leader => <LeaderCard key={leader.id} leader={leader} isAdmin={isAdmin} onEdit={setEditLeader} onDelete={handleDelete} />)}</div>
-                    </div>
-                  ))}
+              {/* Regional & District Chapters Section */}
+              <div className="space-y-32">
+                <div className="flex items-center justify-center gap-2 text-primary dark:text-white font-bold uppercase tracking-[0.2em] mb-12">
+                  <Shield className="w-6 h-6 text-emerald-500" />
+                  <span>Regional Chapters</span>
+                </div>
+                
+                <div className="space-y-24">
+                  {regionsWithLeadership.map((region) => {
+                    const stateLeaders = leaders.filter(l => l.level === 'State' && l.parentRegion === region);
+                    const districtLeaders = leaders.filter(l => l.level === 'District' && l.parentRegion === region);
+                    const uniqueDistricts = Array.from(new Set(districtLeaders.map(l => l.districtName))).filter(Boolean) as string[];
+                    uniqueDistricts.sort();
+
+                    return (
+                      <div key={region} className="bg-white dark:bg-slate-900 p-8 md:p-16 rounded-[4rem] shadow-sm border border-slate-100 dark:border-slate-800">
+                        {/* State Title & State Leaders */}
+                        <div className="flex flex-col items-center mb-16">
+                          <div className="bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 px-8 py-2 rounded-full font-bold text-lg mb-12 shadow-sm border border-emerald-100 dark:border-emerald-800">
+                            {region} State Chapter
+                          </div>
+                          
+                          <div className="flex flex-wrap justify-center gap-10">
+                            {stateLeaders.map(leader => (
+                              <LeaderCard 
+                                key={leader.id} 
+                                leader={leader} 
+                                isAdmin={isAdmin} 
+                                onEdit={setEditLeader} 
+                                onDelete={handleDelete} 
+                              />
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* District Sub-Chapters */}
+                        {uniqueDistricts.length > 0 && (
+                          <div className="space-y-12 mt-16 pt-16 border-t border-slate-100 dark:border-slate-800">
+                             <div className="text-center">
+                                <h5 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em] flex items-center justify-center gap-2">
+                                   District Level Committees <ChevronRight className="w-3 h-3 text-accent" />
+                                </h5>
+                             </div>
+                             <div className="grid md:grid-cols-2 gap-12">
+                                {uniqueDistricts.map(dist => (
+                                  <div key={dist} className="bg-slate-50 dark:bg-slate-950/50 p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 flex flex-col items-center transition-all hover:shadow-lg hover:-translate-y-1">
+                                     <div className="flex items-center gap-2 mb-8 text-primary dark:text-accent font-bold uppercase text-[10px] tracking-widest bg-white dark:bg-slate-900 px-4 py-1.5 rounded-full shadow-sm border border-slate-100 dark:border-slate-800">
+                                        <MapPin className="w-3 h-3 text-accent" />
+                                        {dist} District
+                                     </div>
+                                     <div className="flex flex-wrap justify-center gap-6">
+                                        {districtLeaders.filter(dl => dl.districtName === dist).map(dl => (
+                                          <LeaderCard 
+                                            key={dl.id} 
+                                            leader={dl} 
+                                            variant="small" 
+                                            isAdmin={isAdmin} 
+                                            onEdit={setEditLeader} 
+                                            onDelete={handleDelete} 
+                                          />
+                                        ))}
+                                     </div>
+                                  </div>
+                                ))}
+                             </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             </>
@@ -251,6 +331,7 @@ export default function LeadershipPage() {
         </div>
       </section>
 
+      {/* Edit Dialog */}
       <Dialog open={!!editLeader} onOpenChange={(open) => !open && setEditLeader(null)}>
         <DialogContent className="bg-white dark:bg-slate-900 rounded-[2rem] border-none shadow-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader><DialogTitle>Edit Leader Profile</DialogTitle></DialogHeader>
