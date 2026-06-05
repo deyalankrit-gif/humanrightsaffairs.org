@@ -1,6 +1,7 @@
+
 "use client"
 
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
@@ -32,6 +33,19 @@ const publicLinks = [
 
 export function Navbar() {
   const pathname = usePathname()
+  const [isIframe, setIsIframe] = useState(false)
+
+  useEffect(() => {
+    // Detect if the component is being rendered inside an iframe
+    // (e.g., the Public Site Mirror in the admin portal)
+    if (typeof window !== 'undefined') {
+      setIsIframe(window.self !== window.top)
+    }
+  }, [])
+
+  // Do not render the public navbar if viewed within a mirror/iframe
+  // to prevent double headers in the admin portal.
+  if (isIframe) return null
 
   return (
     <header className="flex h-16 md:h-20 shrink-0 items-center border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 md:px-8 sticky top-0 z-50 transition-all duration-300">
