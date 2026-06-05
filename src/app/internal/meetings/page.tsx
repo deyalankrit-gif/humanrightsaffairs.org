@@ -45,6 +45,13 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import { Calendar } from "@/components/ui/calendar"
+import { format, parse } from "date-fns"
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
 import { INDIA_DATA } from '@/lib/india-data'
@@ -141,6 +148,15 @@ export default function InternalMeetingsManagement() {
     }
   }
 
+  const parseMeetingDate = (dateStr: string) => {
+    if (!dateStr) return undefined;
+    try {
+      return parse(dateStr, "PPP", new Date());
+    } catch {
+      return undefined;
+    }
+  }
+
   if (authLoading || !user) {
     return <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950"><Loader2 className="w-10 h-10 animate-spin text-accent" /></div>
   }
@@ -183,11 +199,34 @@ export default function InternalMeetingsManagement() {
                     <div className="grid grid-cols-2 gap-4">
                        <div className="space-y-1">
                           <Label className="text-[10px] font-bold uppercase text-slate-400">Date</Label>
-                          <Input value={newMeeting.date} onChange={e => setNewMeeting({...newMeeting, date: e.target.value})} placeholder="Jan 15, 2026" />
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button variant="outline" className={cn("w-full justify-start text-left font-normal h-10 rounded-lg", !newMeeting.date && "text-muted-foreground")}>
+                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                {newMeeting.date ? newMeeting.date : "Pick a date"}
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                              <Calendar
+                                mode="single"
+                                selected={parseMeetingDate(newMeeting.date)}
+                                onSelect={(date) => setNewMeeting({...newMeeting, date: date ? format(date, "PPP") : ''})}
+                                initialFocus
+                              />
+                            </PopoverContent>
+                          </Popover>
                        </div>
                        <div className="space-y-1">
                           <Label className="text-[10px] font-bold uppercase text-slate-400">Time</Label>
-                          <Input value={newMeeting.time} onChange={e => setNewMeeting({...newMeeting, time: e.target.value})} placeholder="10:00 AM" />
+                          <div className="relative">
+                            <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                            <Input 
+                              type="time" 
+                              className="pl-10 h-10 rounded-lg"
+                              value={newMeeting.time} 
+                              onChange={e => setNewMeeting({...newMeeting, time: e.target.value})} 
+                            />
+                          </div>
                        </div>
                     </div>
                     <div className="space-y-1">
@@ -306,6 +345,39 @@ export default function InternalMeetingsManagement() {
                                          </SelectContent>
                                        </Select>
                                      </div>
+                                     <div className="grid grid-cols-2 gap-4">
+                                       <div className="space-y-1">
+                                          <Label className="text-[10px] font-bold uppercase text-slate-400">Date</Label>
+                                          <Popover>
+                                            <PopoverTrigger asChild>
+                                              <Button variant="outline" className={cn("w-full justify-start text-left font-normal h-10 rounded-lg", !editMeeting.date && "text-muted-foreground")}>
+                                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                                {editMeeting.date ? editMeeting.date : "Pick a date"}
+                                              </Button>
+                                            </PopoverTrigger>
+                                            <PopoverContent className="w-auto p-0" align="start">
+                                              <Calendar
+                                                mode="single"
+                                                selected={parseMeetingDate(editMeeting.date)}
+                                                onSelect={(date) => setEditMeeting({...editMeeting, date: date ? format(date, "PPP") : ''})}
+                                                initialFocus
+                                              />
+                                            </PopoverContent>
+                                          </Popover>
+                                       </div>
+                                       <div className="space-y-1">
+                                          <Label className="text-[10px] font-bold uppercase text-slate-400">Time</Label>
+                                          <div className="relative">
+                                            <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                                            <Input 
+                                              type="time" 
+                                              className="pl-10 h-10 rounded-lg"
+                                              value={editMeeting.time} 
+                                              onChange={e => setEditMeeting({...editMeeting, time: e.target.value})} 
+                                            />
+                                          </div>
+                                       </div>
+                                    </div>
                                      <div className="space-y-1">
                                        <Label className="text-[10px] font-bold uppercase text-slate-400">Official Minutes & Resolutions</Label>
                                        <Textarea 

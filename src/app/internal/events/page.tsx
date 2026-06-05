@@ -20,7 +20,6 @@ import {
   Edit, 
   Trash2, 
   Loader2, 
-  ExternalLink,
   ShieldCheck,
   Upload
 } from 'lucide-react'
@@ -49,10 +48,9 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
-import { format } from "date-fns"
+import { format, parse } from "date-fns"
 import { useToast } from '@/hooks/use-toast'
 import Image from 'next/image'
-import Link from 'next/link'
 import { PlaceHolderImages } from '@/lib/placeholder-images'
 import { cn } from '@/lib/utils'
 
@@ -148,6 +146,15 @@ export default function InternalEventsManagement() {
       .catch(() => setIsActionLoading(false))
   }
 
+  const parseEventDate = (dateStr: string) => {
+    if (!dateStr) return undefined;
+    try {
+      return parse(dateStr, "PPP", new Date());
+    } catch {
+      return undefined;
+    }
+  }
+
   if (authLoading || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
@@ -201,7 +208,22 @@ export default function InternalEventsManagement() {
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-1">
                        <Label className="text-[10px] uppercase font-bold">Date</Label>
-                       <Input type="text" placeholder="Jan 1, 2025" value={newEvent.date} onChange={e => setNewEvent({...newEvent, date: e.target.value})} className="h-10 rounded-lg text-sm" />
+                       <Popover>
+                        <PopoverTrigger asChild>
+                          <Button variant="outline" className={cn("w-full justify-start text-left font-normal h-10 rounded-lg text-sm", !newEvent.date && "text-muted-foreground")}>
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {newEvent.date ? newEvent.date : "Pick a date"}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={parseEventDate(newEvent.date)}
+                            onSelect={(date) => setNewEvent({...newEvent, date: date ? format(date, "PPP") : ''})}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
                     </div>
                     <div className="space-y-1">
                       <Label className="text-[10px] uppercase font-bold">Category</Label>
@@ -211,6 +233,8 @@ export default function InternalEventsManagement() {
                       </Select>
                     </div>
                   </div>
+                  <div className="space-y-1"><Label className="text-[10px] uppercase font-bold">Location</Label><Input value={newEvent.location} onChange={e => setNewEvent({...newEvent, location: e.target.value})} placeholder="e.g. Kolkata, WB" className="h-10 rounded-lg text-sm" /></div>
+                  <div className="space-y-1"><Label className="text-[10px] uppercase font-bold">Description</Label><Textarea value={newEvent.description} onChange={e => setNewEvent({...newEvent, description: e.target.value})} placeholder="Brief details about the event impact..." className="rounded-lg text-sm" /></div>
                 </div>
                 <DialogFooter><Button onClick={handleAddEvent} className="w-full h-11 rounded-xl">Publish Event</Button></DialogFooter>
               </DialogContent>
@@ -253,9 +277,57 @@ export default function InternalEventsManagement() {
                         <div className="text-xs text-slate-500 line-clamp-2 italic">"{event.description}"</div>
                         <div className="flex items-center justify-end gap-2">
                           <Dialog>
-                            <DialogTrigger asChild><Button variant="outline" size="icon" className="h-8 w-8 rounded-lg border-slate-200"><Edit className="w-3.5 h-3.5" /></Button></DialogTrigger>
-                            <DialogContent className="max-w-md rounded-3xl"><DialogHeader><DialogTitle>Edit Event</DialogTitle></DialogHeader>
-                              <Button onClick={handleUpdateEvent} className="w-full h-11 rounded-xl">Save Changes</Button>
+                            <DialogTrigger asChild><Button onClick={() => setEditEvent(event)} variant="outline" size="icon" className="h-8 w-8 rounded-lg border-slate-200"><Edit className="w-3.5 h-3.5" /></Button></DialogTrigger>
+                            <DialogContent className="max-w-md rounded-3xl overflow-y-auto max-h-[90vh]">
+                              <DialogHeader><DialogTitle>Edit Event</DialogTitle></DialogHeader>
+                              {editEvent && (
+                                <div className="space-y-4 py-2">
+                                  <div className="space-y-1">
+                                    <Label className="text-[10px] uppercase font-bold">Cover Image</Label>
+                                    <div className="flex flex-col items-center gap-3 p-3 border-2 border-dashed rounded-xl">
+                                      <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-slate-100">
+                                        <Image src={editEvent.imageId?.startsWith('data:') ? editEvent.imageId : (PlaceHolderImages.find(i => i.id === editEvent.imageId)?.imageUrl || '')} alt="Preview" fill className="object-cover" />
+                                      </div>
+                                      <Button variant="outline" size="sm" className="w-full relative h-9 rounded-lg">
+                                        <Upload className="w-3.5 h-3.5 mr-2" /> Change Image
+                                        <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => handleFileChange(e, true)} />
+                                      </Button>
+                                    </div>
+                                  </div>
+                                  <div className="space-y-1"><Label className="text-[10px] uppercase font-bold">Title</Label><Input value={editEvent.title} onChange={e => setEditEvent({...editEvent, title: e.target.value})} className="h-10 rounded-lg text-sm" /></div>
+                                  <div className="grid grid-cols-2 gap-3">
+                                    <div className="space-y-1">
+                                       <Label className="text-[10px] uppercase font-bold">Date</Label>
+                                       <Popover>
+                                        <PopoverTrigger asChild>
+                                          <Button variant="outline" className={cn("w-full justify-start text-left font-normal h-10 rounded-lg text-sm", !editEvent.date && "text-muted-foreground")}>
+                                            <CalendarIcon className="mr-2 h-4 w-4" />
+                                            {editEvent.date ? editEvent.date : "Pick a date"}
+                                          </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-auto p-0" align="start">
+                                          <Calendar
+                                            mode="single"
+                                            selected={parseEventDate(editEvent.date)}
+                                            onSelect={(date) => setEditEvent({...editEvent, date: date ? format(date, "PPP") : ''})}
+                                            initialFocus
+                                          />
+                                        </PopoverContent>
+                                      </Popover>
+                                    </div>
+                                    <div className="space-y-1">
+                                      <Label className="text-[10px] uppercase font-bold">Category</Label>
+                                      <Select value={editEvent.category} onValueChange={(val: any) => setEditEvent({...editEvent, category: val})}>
+                                        <SelectTrigger className="h-10 rounded-lg text-xs"><SelectValue /></SelectTrigger>
+                                        <SelectContent>{categories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+                                      </Select>
+                                    </div>
+                                  </div>
+                                  <div className="space-y-1"><Label className="text-[10px] uppercase font-bold">Location</Label><Input value={editEvent.location} onChange={e => setEditEvent({...editEvent, location: e.target.value})} className="h-10 rounded-lg text-sm" /></div>
+                                  <div className="space-y-1"><Label className="text-[10px] uppercase font-bold">Description</Label><Textarea value={editEvent.description} onChange={e => setEditEvent({...editEvent, description: e.target.value})} className="rounded-lg text-sm" /></div>
+                                </div>
+                              )}
+                              <Button onClick={handleUpdateEvent} disabled={isActionLoading} className="w-full h-11 rounded-xl">Save Changes</Button>
                             </DialogContent>
                           </Dialog>
                           <Button variant="destructive" size="icon" onClick={() => handleDeleteEvent(event.id)} className="h-8 w-8 rounded-lg"><Trash2 className="w-3.5 h-3.5" /></Button>
