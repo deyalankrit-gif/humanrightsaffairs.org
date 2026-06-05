@@ -32,7 +32,10 @@ import {
   Camera,
   Globe,
   Briefcase,
-  Sparkles
+  Sparkles,
+  IdCard,
+  FileText,
+  Award
 } from 'lucide-react'
 import {
   Popover,
@@ -408,6 +411,25 @@ export default function MemberDetailsPage() {
                       #{profile.memberId || profile.id.slice(-8).toUpperCase()}
                     </div>
                   </div>
+                </div>
+              </Card>
+
+              <Card className="border-none shadow-sm rounded-[3rem] bg-white dark:bg-slate-900 p-8 border border-slate-100 dark:border-slate-800">
+                <CardHeader className="p-0 mb-6">
+                  <CardTitle className="text-xl font-headline font-bold flex items-center gap-3">
+                    <FileText className="w-5 h-5 text-accent" /> Document Center
+                  </CardTitle>
+                </CardHeader>
+                <div className="grid gap-3">
+                  <Button variant="outline" className="w-full justify-start rounded-xl h-12 border-accent text-accent hover:bg-accent hover:text-primary font-bold gap-3">
+                    <IdCard className="w-5 h-5" /> Generate Identity Card
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start rounded-xl h-12 border-indigo-500 text-indigo-600 hover:bg-indigo-500 hover:text-white font-bold gap-3">
+                    <FileText className="w-5 h-5" /> Appointment Letter
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start rounded-xl h-12 border-emerald-500 text-emerald-600 hover:bg-emerald-500 hover:text-white font-bold gap-3">
+                    <Award className="w-5 h-5" /> Issue Certificate
+                  </Button>
                 </div>
               </Card>
 

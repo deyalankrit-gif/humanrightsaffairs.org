@@ -29,7 +29,9 @@ import {
   CheckCircle2,
   Calendar as CalendarIcon,
   Sparkles,
-  IdCard
+  IdCard,
+  FileText,
+  Award
 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { 
@@ -524,28 +526,31 @@ export default function InternalMembersDirectory() {
                           <Badge className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 border-none px-6 py-2 font-bold uppercase tracking-widest text-[10px] rounded-full">
                             {member.status || 'Active'}
                           </Badge>
-                          <div className="flex flex-col gap-2">
+                          <div className="flex flex-col gap-2 w-full md:w-56">
                             <Link href={`/internal/members/${member.id}`}>
-                              <Button className="w-full bg-primary text-white dark:bg-white dark:text-slate-900 hover:bg-accent hover:text-slate-900 dark:hover:bg-accent dark:hover:text-slate-900 rounded-2xl h-12 px-8 group/btn transition-all flex gap-2 font-bold">
-                                Full Profile <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+                              <Button className="w-full bg-primary text-white dark:bg-white dark:text-slate-900 hover:bg-accent hover:text-slate-900 dark:hover:bg-accent dark:hover:text-slate-900 rounded-xl h-10 px-4 group/btn transition-all flex gap-2 font-bold text-xs">
+                                Full Profile <ArrowRight className="w-3.5 h-3.5 group-hover/btn:translate-x-1 transition-transform" />
                               </Button>
                             </Link>
-                            <Button variant="outline" className="w-full rounded-2xl h-12 px-8 font-bold border-accent text-accent hover:bg-accent hover:text-primary transition-all flex gap-2">
-                              <IdCard className="w-4 h-4" /> Create Identity Card
+                            <Button variant="outline" className="w-full rounded-xl h-10 px-4 font-bold border-accent text-accent hover:bg-accent hover:text-primary transition-all flex gap-2 text-xs">
+                              <IdCard className="w-3.5 h-3.5" /> ID Card
+                            </Button>
+                            <Button variant="outline" className="w-full rounded-xl h-10 px-4 font-bold border-indigo-500 text-indigo-600 hover:bg-indigo-500 hover:text-white transition-all flex gap-2 text-xs">
+                              <FileText className="w-3.5 h-3.5" /> Appointment
+                            </Button>
+                            <Button variant="outline" className="w-full rounded-xl h-10 px-4 font-bold border-emerald-500 text-emerald-600 hover:bg-emerald-500 hover:text-white transition-all flex gap-2 text-xs">
+                              <Award className="w-3.5 h-3.5" /> Certificate
                             </Button>
                           </div>
                         </div>
-                      </div>
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
-
-      <Footer />
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
     </main>
   )
 }
