@@ -307,7 +307,7 @@ export default function MembersPage() {
         </div>
       </section>
 
-      <section className="py-8 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-[48px] md:top-[56px] z-30 shadow-sm transition-colors">
+      <section className="py-6 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-[48px] md:top-[56px] z-30 shadow-sm transition-colors">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
             <div className="flex flex-wrap items-center gap-2">
@@ -318,7 +318,7 @@ export default function MembersPage() {
                     variant={levelFilter === level && !selectedState ? "default" : "outline"} 
                     onClick={() => handleLevelClick(level)} 
                     className={cn(
-                      "rounded-full px-4 h-9 text-[11px] font-bold transition-all border-slate-200 dark:border-slate-700",
+                      "rounded-full px-4 h-8 text-[10px] font-bold transition-all border-slate-200 dark:border-slate-700",
                       levelFilter === level && !selectedState
                         ? "bg-accent text-slate-900 shadow-sm border-accent" 
                         : "text-primary dark:text-slate-300 hover:bg-accent hover:text-slate-900 hover:border-accent"
@@ -335,7 +335,7 @@ export default function MembersPage() {
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant={selectedState ? "default" : "outline"} className={cn(
-                      "rounded-full px-4 h-9 text-[11px] font-bold flex items-center gap-2 transition-all",
+                      "rounded-full px-4 h-8 text-[10px] font-bold flex items-center gap-2 transition-all",
                       selectedState ? "bg-accent text-slate-900" : "text-primary dark:text-white border-slate-200 dark:border-slate-700 hover:border-accent hover:text-accent"
                     )}>
                       {selectedState || "Filter by State"} <ChevronDown className="w-3 h-3 opacity-50" />
@@ -352,7 +352,7 @@ export default function MembersPage() {
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant={selectedDistrict ? "default" : "outline"} className={cn(
-                        "rounded-full px-4 h-9 text-[11px] font-bold flex items-center gap-2 animate-in fade-in slide-in-from-left-2 transition-all",
+                        "rounded-full px-4 h-8 text-[10px] font-bold flex items-center gap-2 animate-in fade-in slide-in-from-left-2 transition-all",
                         selectedDistrict ? "bg-accent text-slate-900" : "text-primary dark:text-white border-slate-200 dark:border-slate-700 hover:border-accent hover:text-accent"
                       )}>
                         {selectedDistrict || "Select District"} <ChevronDown className="w-3 h-3 opacity-50" />
@@ -371,7 +371,7 @@ export default function MembersPage() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <Input 
                 placeholder="Search records..." 
-                className="pl-9 h-9 rounded-full border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-xs" 
+                className="pl-9 h-8 rounded-full border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-[10px]" 
                 value={search} 
                 onChange={(e) => setSearch(e.target.value)} 
               />
@@ -385,38 +385,38 @@ export default function MembersPage() {
           {membersLoading ? (
             <div className="text-center py-20"><Loader2 className="w-10 h-10 animate-spin text-accent mx-auto mb-4" /><p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Fetching Live Directory...</p></div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6">
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-3">
               {filteredMembers.length > 0 ? (
                 filteredMembers.map((member) => {
                   const fallback = member.gender === 'female' ? '/dummy w.png' : '/dummy m.png'
                   const displayImg = member.imageId?.startsWith('data:') ? member.imageId : (PlaceHolderImages.find(i => i.id === member.imageId)?.imageUrl || fallback)
                   return (
-                    <Card key={member.id} className="group border-none shadow-sm hover:shadow-xl transition-all duration-500 rounded-[1.5rem] overflow-hidden bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 relative">
+                    <Card key={member.id} className="group border-none shadow-sm hover:shadow-xl transition-all duration-500 rounded-2xl overflow-hidden bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 relative">
                       <CardHeader className="p-0">
                         <div className="relative aspect-square overflow-hidden bg-slate-100 dark:bg-slate-800">
                           <Image src={displayImg} alt={member.name} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
-                          <div className="absolute top-2 right-2">
-                            <Badge className="bg-primary/80 backdrop-blur-md text-white font-bold border-none text-[8px] px-1.5 py-0">
+                          <div className="absolute top-1 right-1">
+                            <Badge className="bg-primary/80 backdrop-blur-md text-white font-bold border-none text-[6px] px-1 py-0 leading-none h-auto">
                               {member.level}
                             </Badge>
                           </div>
                         </div>
                       </CardHeader>
-                      <CardContent className="p-3 md:p-4 space-y-2">
-                        <div className="flex items-start gap-1.5">
-                           <BadgeCheck className="w-3.5 h-3.5 text-accent shrink-0 mt-0.5" />
+                      <CardContent className="p-2 space-y-1">
+                        <div className="flex items-start gap-1">
+                           <BadgeCheck className="w-2.5 h-2.5 text-accent shrink-0 mt-0.5" />
                            <div className="min-w-0">
-                             <h3 className="font-headline font-bold text-xs md:text-sm text-primary dark:text-white leading-tight truncate">{member.name}</h3>
-                             <p className="text-[9px] md:text-[10px] font-bold text-accent uppercase tracking-widest truncate mt-0.5">{member.designation}</p>
+                             <h3 className="font-headline font-bold text-[10px] text-primary dark:text-white leading-tight truncate">{member.name}</h3>
+                             <p className="text-[8px] font-bold text-accent uppercase tracking-widest truncate">{member.designation}</p>
                            </div>
                         </div>
-                        <div className="space-y-1 pt-1.5 border-t border-slate-100 dark:border-slate-800">
-                          <div className="flex items-center gap-1.5 text-[9px] text-muted-foreground">
-                            <MapPin className="w-2.5 h-2.5 text-slate-400 shrink-0" />
+                        <div className="space-y-0.5 pt-1 border-t border-slate-100 dark:border-slate-800">
+                          <div className="flex items-center gap-1 text-[8px] text-muted-foreground">
+                            <MapPin className="w-2 h-2 text-slate-400 shrink-0" />
                             <span className="truncate">{member.districtName ? `${member.districtName}, ` : ''}{member.stateName || 'National'}</span>
                           </div>
-                          <div className="flex items-center gap-1.5 text-[9px] text-muted-foreground">
-                            <Briefcase className="w-2.5 h-2.5 text-slate-400 shrink-0" />
+                          <div className="flex items-center gap-1 text-[8px] text-muted-foreground">
+                            <Briefcase className="w-2 h-2 text-slate-400 shrink-0" />
                             <span className="truncate">ID: {member.memberId || 'N/A'}</span>
                           </div>
                         </div>
