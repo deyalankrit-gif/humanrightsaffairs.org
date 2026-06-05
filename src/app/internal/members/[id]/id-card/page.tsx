@@ -9,12 +9,14 @@ import { Button } from '@/components/ui/button'
 import { Printer, ArrowLeft, Download, ShieldCheck, Hash, MapPin, BadgeCheck, Calendar as CalendarIcon } from 'lucide-react'
 import { Loader2 } from 'lucide-react'
 import { PlaceHolderImages } from '@/lib/placeholder-images'
+import { useToast } from '@/hooks/use-toast'
 
 export default function IDCardGenerator() {
   const { id } = useParams()
   const { user, loading: authLoading } = useUser()
   const db = useFirestore()
   const router = useRouter()
+  const { toast } = useToast()
 
   const docRef = useMemoFirebase(() => {
     if (!db || !id || !user) return null;
@@ -46,6 +48,14 @@ export default function IDCardGenerator() {
     window.print()
   }
 
+  const handleDownload = () => {
+    toast({
+      title: "Generating PDF",
+      description: "Please select 'Save as PDF' in the print destination menu to download the ID Card.",
+    })
+    setTimeout(() => window.print(), 500)
+  }
+
   return (
     <main className="min-h-screen bg-slate-100 p-8 print:p-0 print:bg-white">
       <div className="max-w-4xl mx-auto flex flex-col gap-8">
@@ -55,6 +65,9 @@ export default function IDCardGenerator() {
             <ArrowLeft className="w-4 h-4" /> Back to Profile
           </Button>
           <div className="flex gap-4">
+            <Button onClick={handleDownload} variant="outline" className="border-primary text-primary font-bold h-12 rounded-xl gap-2">
+              <Download className="w-4 h-4" /> Download PDF
+            </Button>
             <Button onClick={handlePrint} className="bg-primary text-white font-bold h-12 rounded-xl gap-2">
               <Printer className="w-4 h-4" /> Print ID Card
             </Button>
@@ -135,7 +148,7 @@ export default function IDCardGenerator() {
            <ShieldCheck className="w-12 h-12 text-accent mx-auto mb-4" />
            <h3 className="font-headline font-bold text-xl mb-2">Printing Guidelines</h3>
            <p className="text-slate-500 text-sm mb-6 leading-relaxed">
-             For the best results, use high-quality PVC or glossy card stock. Set your printer scale to 100% and enable "Background Graphics" in the print settings.
+             For the best results, use high-quality PVC or glossy card stock. Set your printer scale to 100% and enable "Background Graphics" in the print settings. To save as a file, select "Save as PDF" as the printer destination.
            </p>
            <div className="flex flex-col gap-2">
              <div className="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase justify-center">

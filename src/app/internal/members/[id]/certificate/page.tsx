@@ -6,14 +6,16 @@ import Image from 'next/image'
 import { useDoc, useFirestore, useUser, useMemoFirebase } from '@/firebase'
 import { doc } from 'firebase/firestore'
 import { Button } from '@/components/ui/button'
-import { Printer, ArrowLeft, Award, ShieldCheck, BadgeCheck, CheckCircle2 } from 'lucide-react'
+import { Printer, ArrowLeft, Award, ShieldCheck, BadgeCheck, CheckCircle2, Download } from 'lucide-react'
 import { Loader2 } from 'lucide-react'
+import { useToast } from '@/hooks/use-toast'
 
 export default function MembershipCertificateGenerator() {
   const { id } = useParams()
   const { user, loading: authLoading } = useUser()
   const db = useFirestore()
   const router = useRouter()
+  const { toast } = useToast()
 
   const docRef = useMemoFirebase(() => {
     if (!db || !id || !user) return null;
@@ -42,6 +44,14 @@ export default function MembershipCertificateGenerator() {
     window.print()
   }
 
+  const handleDownload = () => {
+    toast({
+      title: "Downloading Certificate",
+      description: "Select 'Save as PDF' from the printer options to download your file.",
+    })
+    setTimeout(() => window.print(), 500)
+  }
+
   return (
     <main className="min-h-screen bg-slate-200 p-8 md:p-16 print:p-0 print:bg-white flex flex-col items-center">
       
@@ -49,9 +59,14 @@ export default function MembershipCertificateGenerator() {
         <Button variant="ghost" onClick={() => router.back()} className="gap-2 font-bold uppercase text-xs tracking-widest bg-white/50 backdrop-blur-md">
           <ArrowLeft className="w-4 h-4" /> Back to Profile
         </Button>
-        <Button onClick={handlePrint} className="bg-emerald-600 text-white font-bold h-12 rounded-xl gap-2 shadow-lg shadow-emerald-600/20">
-          <Printer className="w-4 h-4" /> Print Official Certificate
-        </Button>
+        <div className="flex gap-4">
+          <Button onClick={handleDownload} variant="outline" className="border-emerald-600 text-emerald-600 font-bold h-12 rounded-xl gap-2 bg-white/50">
+            <Download className="w-4 h-4" /> Download PDF
+          </Button>
+          <Button onClick={handlePrint} className="bg-emerald-600 text-white font-bold h-12 rounded-xl gap-2 shadow-lg shadow-emerald-600/20">
+            <Printer className="w-4 h-4" /> Print Certificate
+          </Button>
+        </div>
       </div>
 
       {/* Certificate Frame */}

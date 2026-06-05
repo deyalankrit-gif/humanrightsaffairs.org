@@ -8,12 +8,14 @@ import { doc } from 'firebase/firestore'
 import { Button } from '@/components/ui/button'
 import { Printer, ArrowLeft, Download, ShieldCheck, Mail, Phone, MapPin, Globe } from 'lucide-react'
 import { Loader2 } from 'lucide-react'
+import { useToast } from '@/hooks/use-toast'
 
 export default function AppointmentLetterGenerator() {
   const { id } = useParams()
   const { user, loading: authLoading } = useUser()
   const db = useFirestore()
   const router = useRouter()
+  const { toast } = useToast()
 
   const docRef = useMemoFirebase(() => {
     if (!db || !id || !user) return null;
@@ -42,6 +44,14 @@ export default function AppointmentLetterGenerator() {
     window.print()
   }
 
+  const handleDownload = () => {
+    toast({
+      title: "Preparing Document",
+      description: "Please select 'Save as PDF' from the destination dropdown to download the letter.",
+    })
+    setTimeout(() => window.print(), 500)
+  }
+
   const today = new Date().toLocaleDateString('en-IN', {
     day: 'numeric',
     month: 'long',
@@ -56,9 +66,14 @@ export default function AppointmentLetterGenerator() {
           <Button variant="ghost" onClick={() => router.back()} className="gap-2 font-sans font-bold uppercase text-xs tracking-widest">
             <ArrowLeft className="w-4 h-4" /> Back to Profile
           </Button>
-          <Button onClick={handlePrint} className="bg-indigo-600 text-white font-sans font-bold h-12 rounded-xl gap-2">
-            <Printer className="w-4 h-4" /> Print Appointment Letter
-          </Button>
+          <div className="flex gap-4">
+            <Button onClick={handleDownload} variant="outline" className="border-indigo-600 text-indigo-600 font-sans font-bold h-12 rounded-xl gap-2">
+              <Download className="w-4 h-4" /> Download PDF
+            </Button>
+            <Button onClick={handlePrint} className="bg-indigo-600 text-white font-sans font-bold h-12 rounded-xl gap-2">
+              <Printer className="w-4 h-4" /> Print Letter
+            </Button>
+          </div>
         </div>
 
         {/* Letter Layout */}
