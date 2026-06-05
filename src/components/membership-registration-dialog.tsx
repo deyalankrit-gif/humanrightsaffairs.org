@@ -144,14 +144,17 @@ export function MembershipRegistrationDialog({ children }: { children: React.Rea
     return (
       <Dialog open={open} onOpenChange={(val) => { setOpen(val); if(!val) setIsSuccess(false); }}>
         <DialogContent className="max-w-md rounded-[2.5rem] border-none shadow-2xl text-center p-12">
-          <div className="flex flex-col items-center gap-6">
+          <DialogHeader className="items-center">
+            <DialogTitle className="text-3xl font-headline font-bold text-primary">Registration Received</DialogTitle>
+            <DialogDescription className="text-slate-500">
+              Your application has been logged in the National registry.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col items-center gap-6 mt-4">
             <div className="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center animate-bounce">
               <CheckCircle2 className="w-12 h-12" />
             </div>
-            <div className="space-y-2">
-              <h2 className="text-3xl font-headline font-bold text-primary">Registration Received</h2>
-              <p className="text-slate-500">Your application has been logged in the National registry. Our regional coordinator will contact you for verification.</p>
-            </div>
+            <p className="text-slate-500">Our regional coordinator will contact you for verification.</p>
             <Button onClick={() => setOpen(false)} className="w-full h-12 rounded-xl bg-primary text-white font-bold">Return to Site</Button>
           </div>
         </DialogContent>
