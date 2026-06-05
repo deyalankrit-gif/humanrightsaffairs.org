@@ -24,7 +24,7 @@ const publicLinks = [
   { name: 'Events', href: '/events', icon: Calendar },
   { name: 'Leadership', href: '/leadership', icon: Users },
   { name: 'Members', href: '/members', icon: UserCheck },
-  { name: 'Revocations', href: '/terminated-members', icon: UserX },
+  { name: 'Terminated', href: '/terminated-members', icon: UserX },
   { name: 'Grievance', href: '/#grievances', icon: MessageSquareWarning },
   { name: 'Rights', href: '/#knowledge', icon: Scale },
   { name: 'Helpline', href: '/#helpline', icon: Phone },
