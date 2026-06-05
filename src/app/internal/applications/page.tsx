@@ -287,35 +287,41 @@ export default function InternalApplicationsPage() {
                           )}
                         </div>
 
-                        <div className="flex flex-col items-end gap-3">
+                        <div className="flex flex-col items-end gap-2">
                           {a.status === 'Pending' && (
-                            <>
+                            <div className="w-full space-y-2">
                               <Button onClick={() => setActionDialog({ open: true, type: 'Approve', applicationId: a.id, reason: '' })} className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold h-12 rounded-xl gap-2 shadow-lg shadow-emerald-500/10">
                                 <Check className="w-4 h-4" /> Approve
                               </Button>
-                              <Button onClick={() => setActionDialog({ open: true, type: 'Reject', applicationId: a.id, reason: '' })} variant="outline" className="w-full text-red-500 border-red-100 hover:bg-red-50 font-bold h-12 rounded-xl gap-2">
-                                <X className="w-4 h-4" /> Reject
-                              </Button>
-                            </>
+                              <div className="space-y-1">
+                                <Button onClick={() => setActionDialog({ open: true, type: 'Reject', applicationId: a.id, reason: '' })} variant="outline" className="w-full text-red-500 border-red-100 hover:bg-red-50 font-bold h-12 rounded-xl gap-2">
+                                  <X className="w-4 h-4" /> Reject
+                                </Button>
+                                <p className="text-[9px] text-slate-400 text-center font-medium">Rejecting will log the decision and archive the record as unsuccessful.</p>
+                              </div>
+                            </div>
                           )}
 
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button variant="ghost" className="rounded-xl w-full text-slate-400 hover:text-red-500 font-bold gap-2">
-                                <Trash2 className="w-4 h-4" /> Delete Entry
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent className="rounded-[2rem]">
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>Purge Application Record?</AlertDialogTitle>
-                                <AlertDialogDescription>This will remove the personnel request from the secure archive. This action is recorded.</AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => handleDelete(a.id)} className="bg-red-500 hover:bg-red-600 rounded-xl border-none text-white font-bold">Delete Forever</AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
+                          <div className="w-full space-y-1 mt-2">
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button variant="ghost" className="rounded-xl w-full text-slate-400 hover:text-red-500 font-bold gap-2">
+                                  <Trash2 className="w-4 h-4" /> Delete Entry
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent className="rounded-[2rem]">
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Purge Application Record?</AlertDialogTitle>
+                                  <AlertDialogDescription>This will remove the personnel request from the secure archive. This action is recorded.</AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+                                  <AlertDialogAction onClick={() => handleDelete(a.id)} className="bg-red-500 hover:bg-red-600 rounded-xl border-none text-white font-bold">Delete Forever</AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                            <p className="text-[9px] text-slate-400 text-center font-medium">Deleting will permanently purge the record from the secure database.</p>
+                          </div>
                         </div>
                       </div>
                     </div>
