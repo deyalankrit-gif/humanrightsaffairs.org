@@ -19,7 +19,7 @@
     },
     "Expense": {
       "title": "Expense",
-      "description": "Organizational expenditure records.",
+      "description": "Organizational expenditure records with dynamic payment documentation.",
       "type": "object",
       "properties": {
         "title": { "type": "string" },
@@ -31,9 +31,16 @@
         "paymentMethod": { "type": "string", "enum": ["Cash", "Bank Transfer", "UPI", "Cheque"] },
         "status": { "type": "string", "enum": ["Paid", "Pending"] },
         "referenceNumber": { "type": "string" },
-        "createdAt": { "type": "string", "format": "date-time" }
+        "voucherNumber": { "type": "string" },
+        "bankTransferDetails": { "type": "string" },
+        "upiTransactionId": { "type": "string" },
+        "chequeNumber": { "type": "string" },
+        "bankName": { "type": "string" },
+        "branchName": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
       },
-      "required": ["title", "category", "amount", "date", "payee", "status"]
+      "required": ["title", "category", "amount", "date", "payee", "status", "paymentMethod"]
     },
     "AccountState": {
       "title": "Account State",
