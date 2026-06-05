@@ -35,7 +35,8 @@ import {
   IdCard,
   FileText,
   Award,
-  CalendarClock
+  CalendarClock,
+  Clock
 } from 'lucide-react'
 import {
   Popover,
@@ -43,7 +44,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
-import { format } from "date-fns"
+import { format, parse, addYears } from "date-fns"
 import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -146,11 +147,31 @@ export default function MemberDetailsPage() {
   const parseProfileDate = (dateStr: string) => {
     if (!dateStr) return undefined;
     try {
-      return new Date(dateStr);
+      // Standard format stored in DB is format(date, "PPP")
+      return parse(dateStr, "PPP", new Date());
     } catch {
-      return undefined;
+      try {
+        return new Date(dateStr);
+      } catch {
+        return undefined;
+      }
     }
   }
+
+  // Calculate Expiry Date for display
+  const getExpiryDate = () => {
+    const source = isEditing ? editForm : profile;
+    if (!source?.joiningDate) return null;
+    try {
+      const joinDate = parse(source.joiningDate, "PPP", new Date());
+      const duration = parseInt(source.membershipDuration || "1") || 1;
+      return addYears(joinDate, duration);
+    } catch {
+      return null;
+    }
+  }
+
+  const expiryDate = getExpiryDate();
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
@@ -386,7 +407,15 @@ export default function MemberDetailsPage() {
                           </PopoverContent>
                         </Popover>
                       ) : (
-                        <p className="text-3xl font-headline font-bold">{profile.joiningDate || 'Date Unavailable'}</p>
+                        <div>
+                          <p className="text-3xl font-headline font-bold">{profile.joiningDate || 'Date Unavailable'}</p>
+                          {expiryDate && (
+                            <div className="mt-2 flex items-center gap-2 bg-red-500/10 w-fit px-3 py-1 rounded-lg border border-red-500/20 animate-in fade-in slide-in-from-top-1 duration-500">
+                               <Clock className="w-3 h-3 text-red-400" />
+                               <p className="text-[10px] font-bold text-red-400 uppercase tracking-widest">Expires: {format(expiryDate, "PPP")}</p>
+                            </div>
+                          )}
+                        </div>
                       )}
                     </div>
                     
