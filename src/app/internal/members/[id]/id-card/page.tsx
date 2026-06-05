@@ -6,7 +6,7 @@ import Image from 'next/image'
 import { useDoc, useFirestore, useUser, useMemoFirebase } from '@/firebase'
 import { doc } from 'firebase/firestore'
 import { Button } from '@/components/ui/button'
-import { Printer, ArrowLeft, Download, ShieldCheck, Hash, MapPin, BadgeCheck } from 'lucide-react'
+import { Printer, ArrowLeft, Download, ShieldCheck, Hash, MapPin, BadgeCheck, Calendar as CalendarIcon } from 'lucide-react'
 import { Loader2 } from 'lucide-react'
 import { PlaceHolderImages } from '@/lib/placeholder-images'
 
