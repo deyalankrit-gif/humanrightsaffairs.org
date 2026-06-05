@@ -96,7 +96,9 @@ export default function InternalMeetingsManagement() {
 
   const formatTo12h = (timeStr: string) => {
     if (!timeStr) return '';
+    // If it's already in 12h format (contains AM/PM), return as is
     if (timeStr.includes('AM') || timeStr.includes('PM')) return timeStr;
+    
     const match = timeStr.match(/^(\d{1,2}):(\d{2})$/);
     if (match) {
       let h = parseInt(match[1]);
@@ -112,12 +114,15 @@ export default function InternalMeetingsManagement() {
   const convertTo24h = (timeStr: string) => {
     if (!timeStr) return '';
     if (!timeStr.includes('AM') && !timeStr.includes('PM')) return timeStr;
+    
     const [time, ampm] = timeStr.split(' ');
     const parts = time.split(':');
     let hours = parseInt(parts[0], 10);
     const minutes = parts[1];
+    
     if (ampm === 'PM' && hours < 12) hours += 12;
     if (ampm === 'AM' && hours === 12) hours = 0;
+    
     return `${hours.toString().padStart(2, '0')}:${minutes}`;
   }
 
@@ -132,7 +137,7 @@ export default function InternalMeetingsManagement() {
     try {
       await addDoc(collection(db, 'meetings'), {
         ...newMeeting,
-        time: formatTo12h(newMeeting.time), // Store as 12h
+        time: formatTo12h(newMeeting.time), // Store as 12h AM/PM
         createdAt: serverTimestamp()
       })
       toast({ title: "Assembly Scheduled", description: "The record has been published to the registry." })
@@ -168,7 +173,7 @@ export default function InternalMeetingsManagement() {
       const { id, ...data } = editMeeting
       await updateDoc(doc(db, 'meetings', id), {
         ...data,
-        time: formatTo12h(data.time) // Ensure 12h on update
+        time: formatTo12h(data.time) // Ensure AM/PM format on update
       })
       toast({ title: "Record Updated" })
       setEditMeeting(null)
@@ -248,7 +253,7 @@ export default function InternalMeetingsManagement() {
                           </Popover>
                        </div>
                        <div className="space-y-1">
-                          <Label className="text-[10px] font-bold uppercase text-slate-400">Time (12h format)</Label>
+                          <Label className="text-[10px] font-bold uppercase text-slate-400">Time (AM / PM System)</Label>
                           <div className="relative">
                             <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                             <Input 
@@ -258,6 +263,7 @@ export default function InternalMeetingsManagement() {
                               onChange={e => setNewMeeting({...newMeeting, time: formatTo12h(e.target.value)})} 
                             />
                           </div>
+                          <p className="text-[8px] text-slate-400 font-bold uppercase mt-1">Select time using the AM/PM clock picker</p>
                        </div>
                     </div>
                     <div className="space-y-1">
@@ -301,7 +307,7 @@ export default function InternalMeetingsManagement() {
                     </div>
                  </div>
                  <DialogFooter>
-                   <Button onClick={handleAddMeeting} disabled={isActionLoading} className="w-full h-11 rounded-xl bg-accent text-primary font-bold hover:bg-accent/90">
+                   <Button onClick={handleAddMeeting} disabled={isActionLoading} className="w-full h-11 rounded-xl bg-accent text-primary font-bold hover:bg-accent/90 shadow-lg">
                      {isActionLoading ? <Loader2 className="animate-spin mr-2" /> : "Publish Record"}
                    </Button>
                  </DialogFooter>
@@ -316,7 +322,7 @@ export default function InternalMeetingsManagement() {
           <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
             <div className="flex flex-wrap gap-1.5 p-1 bg-slate-100 dark:bg-slate-800 rounded-lg">
               {["All", "National", "State", "District"].map((lvl) => (
-                <Button key={lvl} variant={levelFilter === lvl ? "default" : "ghost"} onClick={() => setLevelFilter(lvl)} className={cn("h-7 rounded-md px-4 text-[10px] font-bold uppercase", levelFilter === lvl ? "bg-accent text-primary" : "text-slate-500")}>{lvl}</Button>
+                <Button key={lvl} variant={levelFilter === lvl ? "default" : "ghost"} onClick={() => setLevelFilter(lvl)} className={cn("h-7 rounded-md px-4 text-[10px] font-bold uppercase", levelFilter === lvl ? "bg-accent text-primary shadow-sm" : "text-slate-500")}>{lvl}</Button>
               ))}
             </div>
             <div className="relative w-full max-w-xs">
@@ -334,20 +340,20 @@ export default function InternalMeetingsManagement() {
           ) : (
             <div className="grid gap-4">
               {filtered.map((meeting: any) => (
-                <Card key={meeting.id} className="border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800">
+                <Card key={meeting.id} className="border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 group hover:border-accent/30 transition-all">
                   <CardContent className="p-0">
                     <div className="flex flex-col md:flex-row items-stretch">
                       <div className="p-5 bg-slate-50 dark:bg-slate-800 md:w-44 text-center border-r border-slate-100 dark:border-slate-700 flex flex-col items-center justify-center shrink-0">
                          <Badge variant="outline" className="border-accent text-accent text-[8px] font-bold uppercase px-2 py-0 mb-2">{meeting.level}</Badge>
                          <span className="text-xl font-headline font-bold leading-none mb-1 text-primary dark:text-white">{meeting.date?.split(' ')[0] || '--'}</span>
                          <span className="text-[8px] font-bold text-slate-400 uppercase">{meeting.date?.split(' ').slice(1).join(' ') || ''}</span>
-                         <Badge className={cn("mt-2 text-[8px] px-2 py-0", meeting.status === 'Completed' ? 'bg-emerald-500 text-white' : 'bg-accent text-primary')}>
+                         <Badge className={cn("mt-2 text-[8px] px-2 py-0 font-bold", meeting.status === 'Completed' ? 'bg-emerald-500 text-white' : 'bg-accent text-primary')}>
                            {meeting.status}
                          </Badge>
                       </div>
                       <div className="flex-1 p-5 grid lg:grid-cols-4 gap-6 items-center">
                         <div className="lg:col-span-2 space-y-1">
-                          <h3 className="text-lg font-bold text-slate-900 dark:text-white leading-tight">{meeting.title}</h3>
+                          <h3 className="text-lg font-bold text-slate-900 dark:text-white leading-tight group-hover:text-accent transition-colors">{meeting.title}</h3>
                           <div className="flex flex-wrap gap-3 text-[10px] font-bold text-slate-500">
                             <span className="flex items-center gap-1"><Clock className="w-2.5 h-2.5 text-accent" /> {formatTo12h(meeting.time)}</span>
                             <span className="flex items-center gap-1"><MapPin className="w-2.5 h-2.5 text-accent" /> {meeting.location}</span>
@@ -357,7 +363,7 @@ export default function InternalMeetingsManagement() {
                         <div className="flex items-center justify-end gap-2">
                            <Dialog open={editMeeting?.id === meeting.id} onOpenChange={(open) => !open && setEditMeeting(null)}>
                              <DialogTrigger asChild>
-                               <Button size="sm" variant="outline" onClick={() => setEditMeeting(meeting)} className="h-8 rounded-lg text-[10px] font-bold px-3">
+                               <Button size="sm" variant="outline" onClick={() => setEditMeeting(meeting)} className="h-8 rounded-lg text-[10px] font-bold px-3 hover:bg-accent/10 hover:text-accent border-slate-200">
                                  <FileText className="w-3 h-3 mr-1" /> Minutes
                                </Button>
                              </DialogTrigger>
@@ -397,7 +403,7 @@ export default function InternalMeetingsManagement() {
                                           </Popover>
                                        </div>
                                        <div className="space-y-1">
-                                          <Label className="text-[10px] font-bold uppercase text-slate-400">Time (12h format)</Label>
+                                          <Label className="text-[10px] font-bold uppercase text-slate-400">Time (AM / PM System)</Label>
                                           <div className="relative">
                                             <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                                             <Input 
@@ -407,6 +413,7 @@ export default function InternalMeetingsManagement() {
                                               onChange={e => setEditMeeting({...editMeeting, time: formatTo12h(e.target.value)})} 
                                             />
                                           </div>
+                                          <p className="text-[8px] text-slate-400 font-bold uppercase mt-1">Select HH:MM AM/PM</p>
                                        </div>
                                     </div>
                                      <div className="space-y-1">
@@ -415,12 +422,12 @@ export default function InternalMeetingsManagement() {
                                          value={editMeeting.minutes} 
                                          onChange={e => setEditMeeting({...editMeeting, minutes: e.target.value})} 
                                          placeholder="Record the official outcomes..." 
-                                         className="min-h-[150px]"
+                                         className="min-h-[150px] rounded-xl"
                                        />
                                      </div>
                                      <div className="space-y-1">
                                        <Label className="text-[10px] font-bold uppercase text-slate-400">Agenda (Review)</Label>
-                                       <Textarea value={editMeeting.agenda} onChange={e => setEditMeeting({...editMeeting, agenda: e.target.value})} />
+                                       <Textarea value={editMeeting.agenda} onChange={e => setEditMeeting({...editMeeting, agenda: e.target.value})} className="rounded-xl" />
                                      </div>
                                   </div>
                                 )}
@@ -434,7 +441,9 @@ export default function InternalMeetingsManagement() {
 
                            <AlertDialog>
                               <AlertDialogTrigger asChild>
-                                <Button size="sm" variant="ghost" className="h-8 w-8 text-slate-300 hover:text-red-500"><Trash2 className="w-3.5 h-3.5" /></Button>
+                                <Button size="sm" variant="ghost" className="h-8 w-8 text-slate-300 hover:text-red-500 rounded-lg transition-colors">
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </Button>
                               </AlertDialogTrigger>
                               <AlertDialogContent className="rounded-3xl border-none shadow-2xl bg-white dark:bg-slate-900">
                                 <AlertDialogHeader>
