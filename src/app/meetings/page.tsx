@@ -108,7 +108,7 @@ export default function MeetingsPage() {
         </div>
       </section>
 
-      <section className="py-12 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-[64px] md:top-[80px] z-30 shadow-sm transition-colors">
+      <section className="py-12 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-[56px] md:top-[64px] z-30 shadow-sm transition-colors">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row gap-6 items-center justify-between">
             <div className="flex flex-wrap gap-2">

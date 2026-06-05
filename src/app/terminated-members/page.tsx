@@ -234,9 +234,9 @@ export default function TerminatedMembersPage() {
                       <Select value={newMember.level} onValueChange={(val: any) => setNewMember({...newMember, level: val})}>
                         <SelectTrigger className="h-12 rounded-xl"><SelectValue /></SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="National">National</SelectItem>
-                          <SelectItem value="State">State</SelectItem>
-                          <SelectItem value="District">District</SelectItem>
+                          <SelectItem value="National">National Level</SelectItem>
+                          <SelectItem value="State">State Level</SelectItem>
+                          <SelectItem value="District">District Level</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -281,7 +281,7 @@ export default function TerminatedMembersPage() {
         </div>
       </section>
 
-      <section className="py-12 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-[64px] md:top-[80px] z-30 shadow-sm transition-colors">
+      <section className="py-12 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-[56px] md:top-[64px] z-30 shadow-sm transition-colors">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
             <div className="relative">
@@ -432,9 +432,9 @@ export default function TerminatedMembersPage() {
                                         <Select value={editMember.level} onValueChange={(val: any) => setEditMember({...editMember, level: val})}>
                                           <SelectTrigger className="h-12 rounded-xl"><SelectValue /></SelectTrigger>
                                           <SelectContent>
-                                            <SelectItem value="National">National</SelectItem>
-                                            <SelectItem value="State">State</SelectItem>
-                                            <SelectItem value="District">District</SelectItem>
+                                            <SelectItem value="National">National Level</SelectItem>
+                                            <SelectItem value="State">State Level</SelectItem>
+                                            <SelectItem value="District">District Level</SelectItem>
                                           </SelectContent>
                                         </Select>
                                       </div>

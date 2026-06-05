@@ -48,7 +48,7 @@ export function Navbar() {
   if (isIframe) return null
 
   return (
-    <header className="flex h-16 md:h-20 shrink-0 items-center border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 md:px-8 sticky top-0 z-50 transition-all duration-300">
+    <header className="flex h-14 md:h-16 shrink-0 items-center border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 md:px-8 sticky top-0 z-50 transition-all duration-300">
       <Link href="/" className="flex items-center gap-3 mr-8 shrink-0 group">
         <div className="relative w-10 h-10 transition-transform group-hover:scale-110">
           <Image src="/HRAT%20Logo.jpeg" alt="HRAT Logo" fill className="object-contain" />
