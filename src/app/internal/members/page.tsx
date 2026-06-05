@@ -13,14 +13,12 @@ import { Badge } from '@/components/ui/badge'
 import { 
   Search, 
   Lock, 
-  ShieldCheck,
   Hash,
   Mail,
   Phone,
   ArrowRight,
   Loader2,
   UserPlus,
-  Plus,
   MapPin,
   Globe,
   User,
@@ -547,10 +545,13 @@ export default function InternalMembersDirectory() {
                   </div>
                 </CardContent>
               </Card>
-            ))}
-          </div>
-        )}
-      </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      <Footer />
     </main>
   )
 }
