@@ -28,7 +28,8 @@ import {
   RefreshCw,
   CheckCircle2,
   Calendar as CalendarIcon,
-  Sparkles
+  Sparkles,
+  IdCard
 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { 
@@ -519,15 +520,20 @@ export default function InternalMembersDirectory() {
                             <span className="text-slate-600 dark:text-slate-300 font-bold">{member.phone}</span>
                           </div>
                         </div>
-                        <div className="flex items-center justify-end gap-4">
+                        <div className="flex items-center justify-end gap-6">
                           <Badge className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 border-none px-6 py-2 font-bold uppercase tracking-widest text-[10px] rounded-full">
                             {member.status || 'Active'}
                           </Badge>
-                          <Link href={`/internal/members/${member.id}`}>
-                            <Button className="bg-primary text-white dark:bg-white dark:text-slate-900 hover:bg-accent hover:text-slate-900 dark:hover:bg-accent dark:hover:text-slate-900 rounded-2xl h-12 px-6 group/btn transition-all flex gap-2 font-bold">
-                              Full Profile <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+                          <div className="flex flex-col gap-2">
+                            <Link href={`/internal/members/${member.id}`}>
+                              <Button className="w-full bg-primary text-white dark:bg-white dark:text-slate-900 hover:bg-accent hover:text-slate-900 dark:hover:bg-accent dark:hover:text-slate-900 rounded-2xl h-12 px-8 group/btn transition-all flex gap-2 font-bold">
+                                Full Profile <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+                              </Button>
+                            </Link>
+                            <Button variant="outline" className="w-full rounded-2xl h-12 px-8 font-bold border-accent text-accent hover:bg-accent hover:text-primary transition-all flex gap-2">
+                              <IdCard className="w-4 h-4" /> Create Identity Card
                             </Button>
-                          </Link>
+                          </div>
                         </div>
                       </div>
                     </div>
