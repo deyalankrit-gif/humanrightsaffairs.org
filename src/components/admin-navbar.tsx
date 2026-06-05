@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useEffect } from 'react'
@@ -88,11 +87,6 @@ export function AdminNavbar() {
         </div>
 
         <div className="flex items-center gap-3 lg:gap-6">
-          <div className="hidden lg:flex flex-col items-end">
-            <p className="text-[8px] text-slate-500 font-bold uppercase tracking-widest">Personnel Clearance</p>
-            <p className="text-[11px] font-bold text-emerald-400">{user?.email}</p>
-          </div>
-
           <div className="flex items-center gap-2">
             <ThemeToggle className="text-white hover:bg-white/10" />
             
