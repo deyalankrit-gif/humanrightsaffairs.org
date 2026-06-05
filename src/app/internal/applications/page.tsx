@@ -32,7 +32,9 @@ import {
   Info,
   Gavel,
   CalendarClock,
-  ClipboardCheck
+  ClipboardCheck,
+  Hash,
+  Camera
 } from 'lucide-react'
 import {
   Dialog,
@@ -55,6 +57,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
+import Image from 'next/image'
 
 export default function InternalApplicationsPage() {
   const { user, loading: authLoading } = useUser()
@@ -120,7 +123,8 @@ export default function InternalApplicationsPage() {
   const filtered = (applications || []).filter((a: any) => 
     a.name?.toLowerCase().includes(search.toLowerCase()) || 
     a.email?.toLowerCase().includes(search.toLowerCase()) ||
-    a.phone?.toLowerCase().includes(search.toLowerCase())
+    a.phone?.toLowerCase().includes(search.toLowerCase()) ||
+    a.referenceId?.toLowerCase().includes(search.toLowerCase())
   )
 
   return (
@@ -160,7 +164,7 @@ export default function InternalApplicationsPage() {
           <div className="relative max-w-2xl">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
             <Input 
-              placeholder="Filter by applicant name, email or phone..." 
+              placeholder="Filter by name, email, phone or Reference ID..." 
               className="pl-12 h-14 rounded-2xl border-slate-200 dark:border-slate-800"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -183,10 +187,17 @@ export default function InternalApplicationsPage() {
                   <CardContent className="p-0">
                     <div className="flex flex-col md:flex-row items-stretch">
                       <div className="p-8 bg-slate-50 dark:bg-slate-800 md:w-64 text-center border-r border-slate-100 dark:border-slate-700 flex flex-col items-center justify-center shrink-0">
-                         <div className="w-16 h-16 bg-white dark:bg-slate-900 rounded-full flex items-center justify-center border-2 border-slate-200 dark:border-slate-700 mb-4 text-primary dark:text-white font-bold text-xl">
-                            {a.name?.charAt(0)}
+                         <div className="relative w-24 h-24 rounded-full overflow-hidden border-4 border-white dark:border-slate-900 shadow-xl mb-4 bg-slate-200 dark:bg-slate-700 flex items-center justify-center">
+                            {a.photoDataUri ? (
+                              <Image src={a.photoDataUri} alt={a.name} fill className="object-cover" />
+                            ) : (
+                              <Camera className="w-8 h-8 text-slate-400" />
+                            )}
                          </div>
-                         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Status</span>
+                         <div className="mb-4">
+                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 flex items-center justify-center gap-1"><Hash className="w-3 h-3" /> Reference ID</p>
+                            <p className="font-bold text-lg tracking-tighter text-primary dark:text-white leading-none">{a.referenceId || 'N/A'}</p>
+                         </div>
                          <Badge className={cn(
                            "font-bold uppercase tracking-widest text-[9px] px-4 py-1",
                            a.status === 'Pending' ? 'bg-amber-500' : 

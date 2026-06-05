@@ -41,6 +41,8 @@
       "description": "Registration requests from prospective members.",
       "type": "object",
       "properties": {
+        "referenceId": { "type": "string", "description": "Unique generated tracking ID for the application." },
+        "photoDataUri": { "type": "string", "description": "Applicant's profile picture as a data URI." },
         "name": { "type": "string" },
         "email": { "type": "string", "format": "email" },
         "phone": { "type": "string" },
@@ -61,7 +63,7 @@
         "status": { "type": "string", "enum": ["Pending", "Reviewed", "Approved", "Rejected"] },
         "createdAt": { "type": "string", "format": "date-time" }
       },
-      "required": ["name", "email", "phone", "memberType", "gender", "hasNoCriminalRecord", "hasAcceptedDeclaration", "membershipDuration"]
+      "required": ["name", "email", "phone", "memberType", "gender", "hasNoCriminalRecord", "hasAcceptedDeclaration", "membershipDuration", "referenceId"]
     },
     "Event": {
       "title": "Event",

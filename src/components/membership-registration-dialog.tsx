@@ -52,7 +52,9 @@ import {
   User,
   Gavel,
   CalendarClock,
-  AlertCircle
+  AlertCircle,
+  Camera,
+  Hash
 } from 'lucide-react'
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
 import { useFirestore } from '@/firebase'
@@ -87,6 +89,8 @@ export function MembershipRegistrationDialog({ children }: { children: React.Rea
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
+  const [photo, setPhoto] = useState<string | null>(null)
+  const [refId, setRefId] = useState<string | null>(null)
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -113,20 +117,34 @@ export function MembershipRegistrationDialog({ children }: { children: React.Rea
   const selectedState = form.watch('stateName')
   const states = Object.keys(INDIA_DATA).sort()
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      const reader = new FileReader()
+      reader.onloadend = () => setPhoto(reader.result as string)
+      reader.readAsDataURL(file)
+    }
+  }
+
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     if (!db) return
     setLoading(true)
 
+    const generatedRefId = `REF-HRAT-${Math.random().toString(36).substr(2, 5).toUpperCase()}`
+    
     const applicationData = {
       ...values,
+      photoDataUri: photo,
+      referenceId: generatedRefId,
       status: 'Pending',
       createdAt: serverTimestamp()
     }
 
     addDoc(collection(db, "memberApplications"), applicationData)
       .then(() => {
+        setRefId(generatedRefId)
         setIsSuccess(true)
-        toast({ title: "Application Submitted", description: "Your registration is under review." })
+        toast({ title: "Application Submitted", description: `Reference ID: ${generatedRefId}` })
         setLoading(false)
       })
       .catch(async (error) => {
@@ -142,7 +160,7 @@ export function MembershipRegistrationDialog({ children }: { children: React.Rea
 
   if (isSuccess) {
     return (
-      <Dialog open={open} onOpenChange={(val) => { setOpen(val); if(!val) setIsSuccess(false); }}>
+      <Dialog open={open} onOpenChange={(val) => { setOpen(val); if(!val) { setIsSuccess(false); setPhoto(null); setRefId(null); } }}>
         <DialogContent className="max-w-md rounded-[2.5rem] border-none shadow-2xl text-center p-12">
           <DialogHeader className="items-center">
             <DialogTitle className="text-3xl font-headline font-bold text-primary">Registration Received</DialogTitle>
@@ -154,7 +172,16 @@ export function MembershipRegistrationDialog({ children }: { children: React.Rea
             <div className="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center animate-bounce">
               <CheckCircle2 className="w-12 h-12" />
             </div>
-            <p className="text-slate-500">Our regional coordinator will contact you for verification.</p>
+            
+            <div className="w-full bg-slate-50 p-6 rounded-2xl border-2 border-dashed border-slate-200">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Your Application Reference</p>
+              <div className="flex items-center justify-center gap-2">
+                <Hash className="w-4 h-4 text-accent" />
+                <span className="text-2xl font-headline font-bold text-primary tracking-tight">{refId}</span>
+              </div>
+            </div>
+
+            <p className="text-slate-500 text-sm">Please save this reference number. Our regional coordinator will contact you for verification.</p>
             <Button onClick={() => setOpen(false)} className="w-full h-12 rounded-xl bg-primary text-white font-bold">Return to Site</Button>
           </div>
         </DialogContent>
@@ -163,7 +190,7 @@ export function MembershipRegistrationDialog({ children }: { children: React.Rea
   }
 
   return (
-    <Dialog open={open} onOpenChange={(val) => { setOpen(val); if(!val) form.reset(); }}>
+    <Dialog open={open} onOpenChange={(val) => { setOpen(val); if(!val) { form.reset(); setPhoto(null); } }}>
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto rounded-[2.5rem] border-none shadow-2xl">
         <DialogHeader>
@@ -177,6 +204,23 @@ export function MembershipRegistrationDialog({ children }: { children: React.Rea
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 pt-4">
+            <div className="flex flex-col items-center gap-4 mb-8">
+              <div className="relative w-32 h-32 rounded-full bg-slate-50 border-2 border-dashed border-slate-200 flex items-center justify-center overflow-hidden group cursor-pointer hover:border-accent transition-colors shadow-inner">
+                {photo ? (
+                  <Image src={photo} alt="Preview" fill className="object-cover" />
+                ) : (
+                  <Camera className="w-10 h-10 text-slate-300 group-hover:text-accent transition-colors" />
+                )}
+                <input 
+                  type="file" 
+                  accept="image/*" 
+                  className="absolute inset-0 opacity-0 cursor-pointer" 
+                  onChange={handleFileChange}
+                />
+              </div>
+              <Label className="text-[10px] text-slate-400 uppercase font-bold tracking-[0.2em]">Upload Profile Photo *</Label>
+            </div>
+
             <div className="bg-accent/5 p-6 rounded-3xl border border-accent/20 mb-4 grid grid-cols-1 md:grid-cols-2 gap-6">
                <FormField control={form.control} name="memberType" render={({ field }) => (
                 <FormItem>
@@ -310,13 +354,7 @@ export function MembershipRegistrationDialog({ children }: { children: React.Rea
                     <GraduationCap className="w-3 h-3 text-accent" /> Educational Qualifications *
                   </FormLabel>
                   <FormControl>
-                    <Input 
-                      placeholder="e.g. B.A. LLB" 
-                      className="h-11 rounded-xl" 
-                      {...field} 
-                      value={field.value || ''}
-                      onChange={(e) => field.onChange(e.target.value)}
-                    />
+                    <Input placeholder="e.g. B.A. LLB" className="h-11 rounded-xl" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -327,13 +365,7 @@ export function MembershipRegistrationDialog({ children }: { children: React.Rea
                     <Briefcase className="w-3 h-3 text-accent" /> Professional Experience *
                   </FormLabel>
                   <FormControl>
-                    <Input 
-                      placeholder="e.g. 5 Years in Human Rights" 
-                      className="h-11 rounded-xl" 
-                      {...field} 
-                      value={field.value || ''}
-                      onChange={(e) => field.onChange(e.target.value)}
-                    />
+                    <Input placeholder="e.g. 5 Years in Human Rights" className="h-11 rounded-xl" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
