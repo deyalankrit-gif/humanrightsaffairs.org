@@ -33,6 +33,7 @@
         "districtName": { "type": "string" },
         "status": { "type": "string" },
         "memberId": { "type": "string" },
+        "joiningDate": { "type": "string", "description": "Membership Date of Issue" },
         "createdAt": { "type": "string", "format": "date-time" }
       }
     },

@@ -26,7 +26,8 @@ import {
   User,
   Briefcase,
   RefreshCw,
-  CheckCircle2
+  CheckCircle2,
+  Calendar as CalendarIcon
 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { 
@@ -39,6 +40,9 @@ import {
 } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Calendar } from '@/components/ui/calendar'
+import { format, parse } from 'date-fns'
 import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'
 import { INDIA_DATA } from '@/lib/india-data'
@@ -65,7 +69,8 @@ export default function InternalMembersDirectory() {
     status: 'Active',
     memberId: '',
     stateName: '',
-    districtName: ''
+    districtName: '',
+    joiningDate: ''
   })
 
   // Queries
@@ -114,11 +119,11 @@ export default function InternalMembersDirectory() {
   }
 
   const handleAddMember = async () => {
-    if (!newMember.name || !newMember.email || !newMember.memberId) {
+    if (!newMember.name || !newMember.email || !newMember.memberId || !newMember.joiningDate) {
       toast({
         variant: "destructive",
         title: "Validation Error",
-        description: "Name, Email, and Member ID are required."
+        description: "Name, Email, Member ID, and Date of Issue are required."
       })
       return
     }
@@ -147,7 +152,8 @@ export default function InternalMembersDirectory() {
         status: 'Active',
         memberId: '',
         stateName: '',
-        districtName: ''
+        districtName: '',
+        joiningDate: ''
       })
     } catch (error: any) {
       toast({ variant: "destructive", title: "System Error", description: error.message })
@@ -182,6 +188,15 @@ export default function InternalMembersDirectory() {
     { label: "State Level", value: "State" },
     { label: "District Level", value: "District" }
   ]
+
+  const parseCommissionDate = (dateStr: string) => {
+    if (!dateStr) return undefined;
+    try {
+      return parse(dateStr, "PPP", new Date());
+    } catch {
+      return undefined;
+    }
+  }
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
@@ -290,6 +305,26 @@ export default function InternalMembersDirectory() {
                           </SelectContent>
                         </Select>
                       </div>
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label className="text-[10px] uppercase font-bold text-slate-400">Membership Date of Issue</Label>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button variant="outline" className={cn("w-full justify-start text-left font-normal bg-slate-50 dark:bg-slate-800 border-none h-11", !newMember.joiningDate && "text-muted-foreground")}>
+                              <CalendarIcon className="mr-2 h-4 w-4" />
+                              {newMember.joiningDate ? newMember.joiningDate : "Pick a date"}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                              mode="single"
+                              selected={parseCommissionDate(newMember.joiningDate)}
+                              onSelect={(date) => setNewMember({...newMember, joiningDate: date ? format(date, "PPP") : ''})}
+                              initialFocus
+                            />
+                          </PopoverContent>
+                        </Popover>
                     </div>
 
                     <div className="space-y-2">
