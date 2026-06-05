@@ -4,7 +4,7 @@
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useUser, useCollection, useFirestore, useMemoFirebase } from '@/firebase'
-import { collection, query, orderBy, addDoc, serverTimestamp } from 'firebase/firestore'
+import { collection, query, orderBy, addDoc, serverTimestamp, where } from 'firebase/firestore'
 import { AdminNavbar } from '@/components/admin-navbar'
 import { Footer } from '@/components/footer'
 import { Card, CardContent } from '@/components/ui/card'
@@ -24,7 +24,9 @@ import {
   MapPin,
   Globe,
   User,
-  Briefcase
+  Briefcase,
+  RefreshCw,
+  CheckCircle2
 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { 
@@ -50,6 +52,7 @@ export default function InternalMembersDirectory() {
   const [search, setSearch] = useState('')
   const [levelFilter, setLevelFilter] = useState('All')
   const [isAdding, setIsAdding] = useState(false)
+  const [syncFlash, setSyncFlash] = useState(false)
   
   const [newMember, setNewMember] = useState({
     name: '',
@@ -65,18 +68,50 @@ export default function InternalMembersDirectory() {
     districtName: ''
   })
 
+  // Queries
   const profilesQuery = useMemoFirebase(() => {
     if (!db || !user) return null;
     return query(collection(db, 'memberProfiles'), orderBy('name', 'asc'));
   }, [db, user]);
 
+  const approvedAppsQuery = useMemoFirebase(() => {
+    if (!db || !user) return null;
+    return query(collection(db, 'memberApplications'), where('status', '==', 'Approved'));
+  }, [db, user]);
+
   const { data: firestoreProfiles, loading: profilesLoading } = useCollection(profilesQuery);
+  const { data: approvedApplications } = useCollection(approvedAppsQuery);
 
   useEffect(() => {
     if (!authLoading && !user) {
       router.push('/internal/login')
     }
   }, [user, authLoading, router])
+
+  const handleSyncData = (appId: string) => {
+    const app = approvedApplications?.find((a: any) => a.id === appId);
+    if (!app) return;
+
+    setNewMember({
+      ...newMember,
+      name: app.name || '',
+      email: app.email || '',
+      phone: app.phone || '',
+      profession: app.profession || '',
+      gender: app.gender || 'Male',
+      level: (app.level as any) || 'National',
+      stateName: app.stateName || '',
+      districtName: app.districtName || '',
+      designation: app.memberType || '',
+    });
+
+    setSyncFlash(true);
+    setTimeout(() => setSyncFlash(false), 1000);
+    toast({
+      title: "Data Synchronized",
+      description: `Loaded profile for ${app.name} from verified application.`
+    });
+  }
 
   const handleAddMember = async () => {
     if (!newMember.name || !newMember.email || !newMember.memberId) {
@@ -123,7 +158,10 @@ export default function InternalMembersDirectory() {
   if (authLoading || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
-        <Loader2 className="w-10 h-10 animate-spin text-accent" />
+        <div className="text-center space-y-4">
+          <Loader2 className="w-10 h-10 animate-spin text-accent mx-auto" />
+          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Accessing Secure Vault...</p>
+        </div>
       </div>
     )
   }
@@ -149,8 +187,9 @@ export default function InternalMembersDirectory() {
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
       <AdminNavbar />
 
-      <section className="pt-32 pb-16 bg-slate-900 text-white relative">
-        <div className="container mx-auto px-4 text-center md:text-left">
+      <section className="pt-32 pb-16 bg-slate-900 text-white relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-1/3 h-full bg-accent/5 -skew-x-12"></div>
+        <div className="container mx-auto px-4 text-center md:text-left relative z-10">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="space-y-2">
               <div className="inline-flex items-center gap-2 bg-red-500/20 text-red-400 px-4 py-1.5 rounded-full text-[10px] font-bold border border-red-500/30 uppercase tracking-[0.2em]">
@@ -173,127 +212,161 @@ export default function InternalMembersDirectory() {
                 <DialogHeader>
                   <DialogTitle className="text-2xl font-headline font-bold text-primary dark:text-white">New Personnel Record</DialogTitle>
                 </DialogHeader>
-                <div className="space-y-4 py-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>Full Name</Label>
-                      <Input 
-                        placeholder="e.g. Sanchita Banerjee" 
-                        value={newMember.name} 
-                        onChange={(e) => setNewMember({...newMember, name: e.target.value})}
-                        className="bg-slate-50 dark:bg-slate-800"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Gender</Label>
-                      <Select value={newMember.gender} onValueChange={(val) => setNewMember({...newMember, gender: val})}>
-                        <SelectTrigger className="bg-slate-50 dark:bg-slate-800">
-                          <SelectValue placeholder="Select" />
+                
+                <div className="space-y-6 py-4">
+                  {/* Sync Tool */}
+                  <div className="bg-primary/5 dark:bg-white/5 p-5 rounded-2xl border-2 border-dashed border-primary/20 dark:border-white/10">
+                     <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3 flex items-center gap-2">
+                       <RefreshCw className="w-3 h-3 text-accent" /> Sync from Approved Apps
+                     </p>
+                     <Select onValueChange={handleSyncData}>
+                        <SelectTrigger className="bg-white dark:bg-slate-800 border-none h-11 rounded-xl shadow-sm">
+                          <SelectValue placeholder="Select an approved member..." />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="Male">Male</SelectItem>
-                          <SelectItem value="Female">Female</SelectItem>
-                          <SelectItem value="Other">Other</SelectItem>
+                          {approvedApplications && approvedApplications.length > 0 ? (
+                            approvedApplications.map((app: any) => (
+                              <SelectItem key={app.id} value={app.id} className="py-3">
+                                <div className="flex flex-col text-left">
+                                  <span className="font-bold text-sm">{app.name}</span>
+                                  <span className="text-[10px] text-slate-400 uppercase tracking-tight">{app.memberType} • {app.email}</span>
+                                </div>
+                              </SelectItem>
+                            ))
+                          ) : (
+                            <div className="p-4 text-center text-xs text-slate-400 italic">No approved applications found</div>
+                          )}
                         </SelectContent>
-                      </Select>
-                    </div>
+                     </Select>
+                     <p className="text-[8px] text-slate-400 mt-2 italic">Synchronizing will automatically fill verified credentials from the application record.</p>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className={cn("space-y-4 transition-all duration-700", syncFlash && "scale-[1.02] opacity-50")}>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label className="text-[10px] uppercase font-bold text-slate-400">Full Name</Label>
+                        <Input 
+                          placeholder="e.g. Sanchita Banerjee" 
+                          value={newMember.name} 
+                          onChange={(e) => setNewMember({...newMember, name: e.target.value})}
+                          className="bg-slate-50 dark:bg-slate-800 border-none h-11"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-[10px] uppercase font-bold text-slate-400">Gender</Label>
+                        <Select value={newMember.gender} onValueChange={(val) => setNewMember({...newMember, gender: val})}>
+                          <SelectTrigger className="bg-slate-50 dark:bg-slate-800 border-none h-11">
+                            <SelectValue placeholder="Select" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Male">Male</SelectItem>
+                            <SelectItem value="Female">Female</SelectItem>
+                            <SelectItem value="Other">Other</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label className="text-[10px] uppercase font-bold text-slate-400">Member ID</Label>
+                        <Input 
+                          placeholder="e.g. M1024" 
+                          value={newMember.memberId} 
+                          onChange={(e) => setNewMember({...newMember, memberId: e.target.value})}
+                          className="bg-slate-50 dark:bg-slate-800 border-none h-11"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-[10px] uppercase font-bold text-slate-400">Level</Label>
+                        <Select value={newMember.level} onValueChange={(val: any) => setNewMember({...newMember, level: val, stateName: '', districtName: ''})}>
+                          <SelectTrigger className="bg-slate-50 dark:bg-slate-800 border-none h-11">
+                            <SelectValue placeholder="Select Level" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="National">National</SelectItem>
+                            <SelectItem value="State">State</SelectItem>
+                            <SelectItem value="District">District</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
                     <div className="space-y-2">
-                      <Label>Member ID</Label>
+                      <Label className="text-[10px] uppercase font-bold text-slate-400">Profession</Label>
                       <Input 
-                        placeholder="e.g. M1024" 
-                        value={newMember.memberId} 
-                        onChange={(e) => setNewMember({...newMember, memberId: e.target.value})}
-                        className="bg-slate-50 dark:bg-slate-800"
+                        placeholder="e.g. Advocate, Teacher" 
+                        value={newMember.profession} 
+                        onChange={(e) => setNewMember({...newMember, profession: e.target.value})}
+                        className="bg-slate-50 dark:bg-slate-800 border-none h-11"
                       />
                     </div>
+
+                    {(newMember.level === 'State' || newMember.level === 'District') && (
+                      <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                        <Label className="flex items-center gap-2 text-[10px] uppercase font-bold text-slate-400"><Globe className="w-3 h-3 text-accent" /> State / UT</Label>
+                        <Select value={newMember.stateName} onValueChange={(val) => setNewMember({...newMember, stateName: val, districtName: ''})}>
+                          <SelectTrigger className="h-11 rounded-xl bg-slate-50 dark:bg-slate-800 border-none">
+                            <SelectValue placeholder="Choose State" />
+                          </SelectTrigger>
+                          <SelectContent className="max-h-60">
+                            {states.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
+
+                    {newMember.level === 'District' && newMember.stateName && (
+                      <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                        <Label className="flex items-center gap-2 text-[10px] uppercase font-bold text-slate-400"><MapPin className="w-3 h-3 text-accent" /> District</Label>
+                        <Select value={newMember.districtName} onValueChange={(val) => setNewMember({...newMember, districtName: val})}>
+                          <SelectTrigger className="h-11 rounded-xl bg-slate-50 dark:bg-slate-800 border-none">
+                            <SelectValue placeholder="Choose District" />
+                          </SelectTrigger>
+                          <SelectContent className="max-h-60">
+                            {(INDIA_DATA[newMember.stateName] || []).map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
+
                     <div className="space-y-2">
-                      <Label>Operational Level</Label>
-                      <Select value={newMember.level} onValueChange={(val: any) => setNewMember({...newMember, level: val, stateName: '', districtName: ''})}>
-                        <SelectTrigger className="bg-slate-50 dark:bg-slate-800">
-                          <SelectValue placeholder="Select Level" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="National">National</SelectItem>
-                          <SelectItem value="State">State</SelectItem>
-                          <SelectItem value="District">District</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <Label className="text-[10px] uppercase font-bold text-slate-400">Designation</Label>
+                      <Input 
+                        placeholder="e.g. State Secretary" 
+                        value={newMember.designation} 
+                        onChange={(e) => setNewMember({...newMember, designation: e.target.value})}
+                        className="bg-slate-50 dark:bg-slate-800 border-none h-11"
+                      />
                     </div>
-                  </div>
 
-                  <div className="space-y-2">
-                    <Label>Profession</Label>
-                    <Input 
-                      placeholder="e.g. Advocate, Teacher" 
-                      value={newMember.profession} 
-                      onChange={(e) => setNewMember({...newMember, profession: e.target.value})}
-                      className="bg-slate-50 dark:bg-slate-800"
-                    />
-                  </div>
-
-                  {(newMember.level === 'State' || newMember.level === 'District') && (
-                    <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
-                      <Label className="flex items-center gap-2"><Globe className="w-3 h-3 text-accent" /> Select State / UT</Label>
-                      <Select value={newMember.stateName} onValueChange={(val) => setNewMember({...newMember, stateName: val, districtName: ''})}>
-                        <SelectTrigger className="h-11 rounded-xl bg-slate-50 dark:bg-slate-800">
-                          <SelectValue placeholder="Choose State" />
-                        </SelectTrigger>
-                        <SelectContent className="max-h-60">
-                          {states.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
+                    <div className="grid grid-cols-2 gap-4">
+                       <div className="space-y-2">
+                        <Label className="text-[10px] uppercase font-bold text-slate-400">Email</Label>
+                        <Input 
+                          type="email" 
+                          placeholder="name@hrat-india.org" 
+                          value={newMember.email} 
+                          onChange={(e) => setNewMember({...newMember, email: e.target.value})}
+                          className="bg-slate-50 dark:bg-slate-800 border-none h-11"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-[10px] uppercase font-bold text-slate-400">Phone</Label>
+                        <Input 
+                          placeholder="+91 XXXXX XXXXX" 
+                          value={newMember.phone} 
+                          onChange={(e) => setNewMember({...newMember, phone: e.target.value})}
+                          className="bg-slate-50 dark:bg-slate-800 border-none h-11"
+                        />
+                      </div>
                     </div>
-                  )}
-
-                  {newMember.level === 'District' && newMember.stateName && (
-                    <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
-                      <Label className="flex items-center gap-2"><MapPin className="w-3 h-3 text-accent" /> Select District</Label>
-                      <Select value={newMember.districtName} onValueChange={(val) => setNewMember({...newMember, districtName: val})}>
-                        <SelectTrigger className="h-11 rounded-xl bg-slate-50 dark:bg-slate-800">
-                          <SelectValue placeholder="Choose District" />
-                        </SelectTrigger>
-                        <SelectContent className="max-h-60">
-                          {(INDIA_DATA[newMember.stateName] || []).map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  )}
-
-                  <div className="space-y-2">
-                    <Label>Designation</Label>
-                    <Input 
-                      placeholder="e.g. State Secretary" 
-                      value={newMember.designation} 
-                      onChange={(e) => setNewMember({...newMember, designation: e.target.value})}
-                      className="bg-slate-50 dark:bg-slate-800"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Official Email</Label>
-                    <Input 
-                      type="email" 
-                      placeholder="name@hrat-india.org" 
-                      value={newMember.email} 
-                      onChange={(e) => setNewMember({...newMember, email: e.target.value})}
-                      className="bg-slate-50 dark:bg-slate-800"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Contact Phone</Label>
-                    <Input 
-                      placeholder="+91 XXXXX XXXXX" 
-                      value={newMember.phone} 
-                      onChange={(e) => setNewMember({...newMember, phone: e.target.value})}
-                      className="bg-slate-50 dark:bg-slate-800"
-                    />
                   </div>
                 </div>
-                <DialogFooter>
-                  <Button onClick={handleAddMember} disabled={isAdding} className="w-full h-12 rounded-xl bg-primary text-white dark:bg-accent dark:text-primary font-bold">
-                    {isAdding ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Plus className="w-4 h-4 mr-2" />}
+
+                <DialogFooter className="pt-2">
+                  <Button onClick={handleAddMember} disabled={isAdding} className="w-full h-12 rounded-xl bg-primary text-white dark:bg-accent dark:text-primary font-bold shadow-lg">
+                    {isAdding ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <CheckCircle2 className="w-4 h-4 mr-2" />}
                     Confirm Commissioning
                   </Button>
                 </DialogFooter>
