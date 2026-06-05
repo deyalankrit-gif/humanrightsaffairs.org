@@ -20,15 +20,11 @@ import {
   MapPin, 
   Calendar as CalendarIcon, 
   ShieldCheck, 
-  Droplets,
-  Heart,
   FileCheck,
   Loader2,
   AlertCircle,
   Edit,
   Save,
-  X,
-  Camera,
   Globe,
   Briefcase,
   Sparkles,
@@ -147,7 +143,6 @@ export default function MemberDetailsPage() {
   const parseProfileDate = (dateStr: string) => {
     if (!dateStr) return undefined;
     try {
-      // Standard format stored in DB is format(date, "PPP")
       return parse(dateStr, "PPP", new Date());
     } catch {
       try {
@@ -158,7 +153,6 @@ export default function MemberDetailsPage() {
     }
   }
 
-  // Calculate Expiry Date for display
   const getExpiryDate = () => {
     const source = isEditing ? editForm : profile;
     if (!source?.joiningDate) return null;
@@ -306,7 +300,7 @@ export default function MemberDetailsPage() {
                       </div>
 
                       {(editForm?.level === 'State' || editForm?.level === 'District') && (
-                        <div className="grid md:grid-cols-2 gap-6">
+                        <div className="grid md:grid-cols-2 gap-6 animate-in fade-in slide-in-from-top-2">
                            <div className="space-y-2">
                              <Label className="flex items-center gap-2"><Globe className="w-3 h-3 text-accent" /> State / UT</Label>
                              <Select value={editForm?.stateName} onValueChange={(val) => setEditForm({...editForm, stateName: val, districtName: ''})}>
@@ -317,7 +311,7 @@ export default function MemberDetailsPage() {
                              </Select>
                            </div>
                            {editForm?.level === 'District' && editForm?.stateName && (
-                             <div className="space-y-2">
+                             <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
                                <Label className="flex items-center gap-2"><MapPin className="w-3 h-3 text-accent" /> District</Label>
                                <Select value={editForm?.districtName} onValueChange={(val) => setEditForm({...editForm, districtName: val})}>
                                  <SelectTrigger className="h-12 rounded-xl"><SelectValue placeholder="Choose District" /></SelectTrigger>

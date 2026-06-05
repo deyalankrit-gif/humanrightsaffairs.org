@@ -15,9 +15,6 @@ import {
   ChevronDown, 
   Loader2, 
   Plus, 
-  Edit, 
-  Trash2, 
-  AlertTriangle,
   Upload,
   Globe
 } from 'lucide-react'
@@ -26,7 +23,7 @@ import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { useCollection, useFirestore, useMemoFirebase, useUser } from '@/firebase'
-import { collection, query, orderBy, deleteDoc, doc, addDoc, serverTimestamp } from 'firebase/firestore'
+import { collection, query, orderBy, addDoc, serverTimestamp } from 'firebase/firestore'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -41,21 +38,9 @@ import {
   DialogTrigger,
   DialogFooter,
 } from "@/components/ui/dialog"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useToast } from '@/hooks/use-toast'
-import Link from 'next/link'
 import { INDIA_DATA } from '@/lib/india-data'
 import { cn } from '@/lib/utils'
 
@@ -139,15 +124,6 @@ export default function MembersPage() {
     setSelectedDistrict(district)
   }
 
-  const handleDelete = async (id: string) => {
-    try {
-      await deleteDoc(doc(db, 'memberProfiles', id))
-      toast({ title: "Record Deleted", description: "The personnel profile has been removed." })
-    } catch (error: any) {
-      toast({ variant: "destructive", title: "Deletion Failed", description: error.message })
-    }
-  }
-
   const handleAddMember = async () => {
     if (!newMember.name || !newMember.email || !newMember.memberId) {
       toast({ variant: "destructive", title: "Validation Error", description: "Name, Email, and Member ID are required." })
@@ -179,7 +155,7 @@ export default function MembersPage() {
     
     let matchesLevel = levelFilter === "All" || m.level === levelFilter;
     if (levelFilter === "State" && selectedState) {
-      matchesLevel = m.level === "State" && m.stateName === selectedState;
+      matchesLevel = (m.level === "State" || m.level === "District") && m.stateName === selectedState;
       if (selectedDistrict) {
         matchesLevel = matchesLevel && m.districtName === selectedDistrict;
       }
@@ -259,9 +235,9 @@ export default function MembersPage() {
                     </div>
                   </div>
                   {(newMember.level === 'State' || newMember.level === 'District') && (
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-4 pt-2 animate-in fade-in slide-in-from-top-2">
                       <div className="space-y-2">
-                        <Label>State Chapter</Label>
+                        <Label className="flex items-center gap-2"><Globe className="w-3 h-3 text-accent" /> State Chapter</Label>
                         <Select value={newMember.stateName} onValueChange={(val) => setNewMember({...newMember, stateName: val, districtName: ''})}>
                           <SelectTrigger><SelectValue placeholder="Select State" /></SelectTrigger>
                           <SelectContent className="max-h-60">
@@ -269,17 +245,19 @@ export default function MembersPage() {
                           </SelectContent>
                         </Select>
                       </div>
-                      <div className="space-y-2">
-                        <Label>District</Label>
-                        <Select value={newMember.districtName} onValueChange={(val) => setNewMember({...newMember, districtName: val})} disabled={!newMember.stateName}>
-                          <SelectTrigger><SelectValue placeholder="Select District" /></SelectTrigger>
-                          <SelectContent className="max-h-60">
-                            {(newMember.stateName ? INDIA_DATA[newMember.stateName] : []).map(d => (
-                              <SelectItem key={d} value={d}>{d}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
+                      {newMember.level === 'District' && newMember.stateName && (
+                        <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
+                          <Label className="flex items-center gap-2"><MapPin className="w-3 h-3 text-accent" /> District</Label>
+                          <Select value={newMember.districtName} onValueChange={(val) => setNewMember({...newMember, districtName: val})}>
+                            <SelectTrigger><SelectValue placeholder="Select District" /></SelectTrigger>
+                            <SelectContent className="max-h-60">
+                              {(INDIA_DATA[newMember.stateName] || []).map(d => (
+                                <SelectItem key={d} value={d}>{d}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      )}
                     </div>
                   )}
                   <div className="space-y-2">
@@ -319,7 +297,7 @@ export default function MembersPage() {
                 </div>
                 <DialogFooter>
                   <Button onClick={handleAddMember} disabled={isAdding} className="w-full h-12 rounded-xl bg-primary text-primary-foreground font-bold">
-                    {isAdding ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Plus className="w-4 h-4 mr-2" />}
+                    {isAdding ? <Loader2 className="animate-spin mr-2" /> : <Plus className="w-4 h-4 mr-2" />}
                     Confirm Commissioning
                   </Button>
                 </DialogFooter>
@@ -336,11 +314,11 @@ export default function MembersPage() {
               {["All", "National", "State", "District"].map((level) => (
                 <Button 
                   key={level} 
-                  variant={levelFilter === level ? "default" : "outline"} 
+                  variant={levelFilter === level && !selectedState ? "default" : "outline"} 
                   onClick={() => handleLevelClick(level)} 
                   className={cn(
                     "rounded-full px-6 font-bold transition-all",
-                    levelFilter === level 
+                    levelFilter === level && !selectedState
                       ? "bg-accent text-slate-900 shadow-lg border-accent" 
                       : "text-primary dark:text-white border-slate-200 dark:border-slate-700 hover:bg-accent hover:text-slate-900 hover:border-accent"
                   )}
@@ -366,9 +344,9 @@ export default function MembersPage() {
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant={selectedDistrict ? "default" : "outline"} className={cn(
-                      "rounded-full px-6 font-bold flex items-center gap-2",
+                      "rounded-full px-6 font-bold flex items-center gap-2 animate-in fade-in slide-in-from-left-2",
                       selectedDistrict ? "bg-accent text-slate-900" : "text-primary dark:text-white border-slate-200 dark:border-slate-700 hover:border-accent hover:text-accent"
-                    )}>{selectedDistrict || "Filter by District"} <ChevronDown className="w-4 h-4 opacity-50" /></Button>
+                    )}>{selectedDistrict || "Select District"} <ChevronDown className="w-4 h-4 opacity-50" /></Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="max-h-80 overflow-y-auto w-56">
                     {districts.map((district) => (
