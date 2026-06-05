@@ -82,7 +82,8 @@ export default function ExpensesManagementPage() {
     upiTransactionId: '',
     chequeNumber: '',
     bankName: '',
-    branchName: ''
+    branchName: '',
+    cardReference: ''
   })
 
   useEffect(() => {
@@ -115,7 +116,7 @@ export default function ExpensesManagementPage() {
         date: format(new Date(), 'yyyy-MM-dd'), payee: '', 
         description: '', paymentMethod: 'Bank Transfer', status: 'Paid', referenceNumber: '',
         voucherNumber: '', bankTransferDetails: '', upiTransactionId: '',
-        chequeNumber: '', bankName: '', branchName: ''
+        chequeNumber: '', bankName: '', branchName: '', cardReference: ''
       })
       setIsAddDialogOpen(false)
     } catch (e: any) {
@@ -158,7 +159,7 @@ export default function ExpensesManagementPage() {
   }
 
   const expenseCategories = ["Salaries", "Rent", "Utility", "Legal Fees", "Logistics", "Printing", "Travel", "Relief Aid", "Other"]
-  const paymentMethods = ["Cash", "Bank Transfer", "UPI", "Cheque"]
+  const paymentMethods = ["Cash", "Bank Transfer", "UPI", "Cheque", "Credit/Debit Card"]
 
   const filtered = (expenses || []).filter((e: any) => {
     const matchesSearch = e.title?.toLowerCase().includes(search.toLowerCase()) || 
@@ -166,7 +167,8 @@ export default function ExpensesManagementPage() {
                           e.referenceNumber?.toLowerCase().includes(search.toLowerCase()) ||
                           e.voucherNumber?.toLowerCase().includes(search.toLowerCase()) ||
                           e.upiTransactionId?.toLowerCase().includes(search.toLowerCase()) ||
-                          e.chequeNumber?.toLowerCase().includes(search.toLowerCase());
+                          e.chequeNumber?.toLowerCase().includes(search.toLowerCase()) ||
+                          e.cardReference?.toLowerCase().includes(search.toLowerCase());
     const matchesStatus = statusFilter === 'All' || e.status === statusFilter;
     const matchesCategory = categoryFilter === 'All' || e.category === categoryFilter;
     return matchesSearch && matchesStatus && matchesCategory;
@@ -235,7 +237,7 @@ export default function ExpensesManagementPage() {
                     <div className="space-y-4 pt-4 border-t border-slate-100">
                       <div className="space-y-2">
                         <Label className="flex items-center gap-2"><CreditCard className="w-4 h-4 text-red-500" /> Payment Method</Label>
-                        <Select value={newExpense.paymentMethod} onValueChange={v => setNewExpense({...newExpense, paymentMethod: v, voucherNumber: '', bankTransferDetails: '', upiTransactionId: '', chequeNumber: '', bankName: '', branchName: ''})}>
+                        <Select value={newExpense.paymentMethod} onValueChange={v => setNewExpense({...newExpense, paymentMethod: v, voucherNumber: '', bankTransferDetails: '', upiTransactionId: '', chequeNumber: '', bankName: '', branchName: '', cardReference: ''})}>
                           <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
                           <SelectContent>{paymentMethods.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}</SelectContent>
                         </Select>
@@ -269,13 +271,20 @@ export default function ExpensesManagementPage() {
                           <div className="space-y-2"><Label>Branch</Label><Input value={newExpense.branchName} onChange={e => setNewExpense({...newExpense, branchName: e.target.value})} placeholder="Kolkata" className="h-11 rounded-xl" /></div>
                         </div>
                       )}
+
+                      {newExpense.paymentMethod === 'Credit/Debit Card' && (
+                        <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                          <Label>Card Transaction Ref</Label>
+                          <Input value={newExpense.cardReference} onChange={e => setNewExpense({...newExpense, cardReference: e.target.value})} placeholder="e.g. Auth Code or Trans ID" className="h-11 rounded-xl" />
+                        </div>
+                      )}
                     </div>
 
                     <div className="space-y-2"><Label>Purpose / Description</Label><Textarea value={newExpense.description} onChange={e => setNewExpense({...newExpense, description: e.target.value})} placeholder="Detailed purpose of expenditure..." className="rounded-xl min-h-[80px]" /></div>
                   </div>
                   <DialogFooter>
                     <Button onClick={handleAddExpense} disabled={isActionLoading} className="w-full h-14 rounded-2xl bg-red-500 text-white font-bold text-lg hover:bg-red-600">
-                      {isActionLoading ? <Loader2 className="animate-spin" /> : "Commit Expense to Ledger"}
+                      {isActionLoading ? <Loader2 className="animate-spin mr-2" /> : "Commit Expense to Ledger"}
                     </Button>
                   </DialogFooter>
                 </DialogContent>
@@ -371,6 +380,7 @@ export default function ExpensesManagementPage() {
                                 {expense.paymentMethod === 'UPI' && <Smartphone className="w-3 h-3 text-red-500" />}
                                 {expense.paymentMethod === 'Cheque' && <CreditCard className="w-3 h-3 text-red-500" />}
                                 {expense.paymentMethod === 'Bank Transfer' && <Hash className="w-3 h-3 text-red-500" />}
+                                {expense.paymentMethod === 'Credit/Debit Card' && <CreditCard className="w-3 h-3 text-red-500" />}
                                 {expense.paymentMethod} Reference
                               </p>
                               <p className="font-mono text-xs font-bold text-primary dark:text-white uppercase">
@@ -378,6 +388,7 @@ export default function ExpensesManagementPage() {
                                 {expense.paymentMethod === 'UPI' && (expense.upiTransactionId || 'N/A')}
                                 {expense.paymentMethod === 'Cheque' && `${expense.chequeNumber || 'N/A'} @ ${expense.bankName || 'N/A'}`}
                                 {expense.paymentMethod === 'Bank Transfer' && (expense.bankTransferDetails || 'N/A')}
+                                {expense.paymentMethod === 'Credit/Debit Card' && (expense.cardReference || 'N/A')}
                               </p>
                               <p className="text-[8px] font-bold text-slate-400 uppercase mt-2">Audit Hash: {expense.id.slice(-8).toUpperCase()}</p>
                            </div>
@@ -411,7 +422,7 @@ export default function ExpensesManagementPage() {
                                       <div className="space-y-4 pt-4 border-t border-slate-100">
                                         <div className="space-y-2">
                                           <Label>Payment Method</Label>
-                                          <Select value={editExpense.paymentMethod} onValueChange={v => setEditExpense({...editExpense, paymentMethod: v})}>
+                                          <Select value={editExpense.paymentMethod} onValueChange={v => setEditExpense({...editExpense, paymentMethod: v, voucherNumber: '', bankTransferDetails: '', upiTransactionId: '', chequeNumber: '', bankName: '', branchName: '', cardReference: ''})}>
                                             <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
                                             <SelectContent>{paymentMethods.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}</SelectContent>
                                           </Select>
@@ -443,6 +454,13 @@ export default function ExpensesManagementPage() {
                                             <div className="space-y-2"><Label>Cheque No.</Label><Input value={editExpense.chequeNumber || ''} onChange={e => setEditExpense({...editExpense, chequeNumber: e.target.value})} className="h-11 rounded-xl" /></div>
                                             <div className="space-y-2"><Label>Bank</Label><Input value={editExpense.bankName || ''} onChange={e => setEditExpense({...editExpense, bankName: e.target.value})} className="h-11 rounded-xl" /></div>
                                             <div className="space-y-2"><Label>Branch</Label><Input value={editExpense.branchName || ''} onChange={e => setEditExpense({...editExpense, branchName: e.target.value})} className="h-11 rounded-xl" /></div>
+                                          </div>
+                                        )}
+
+                                        {editExpense.paymentMethod === 'Credit/Debit Card' && (
+                                          <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                                            <Label>Card Transaction Ref</Label>
+                                            <Input value={editExpense.cardReference || ''} onChange={e => setEditExpense({...editExpense, cardReference: e.target.value})} placeholder="e.g. Auth Code or Trans ID" className="h-11 rounded-xl" />
                                           </div>
                                         )}
                                       </div>

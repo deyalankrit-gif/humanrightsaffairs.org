@@ -28,7 +28,7 @@
         "date": { "type": "string", "format": "date" },
         "payee": { "type": "string" },
         "description": { "type": "string" },
-        "paymentMethod": { "type": "string", "enum": ["Cash", "Bank Transfer", "UPI", "Cheque"] },
+        "paymentMethod": { "type": "string", "enum": ["Cash", "Bank Transfer", "UPI", "Cheque", "Credit/Debit Card"] },
         "status": { "type": "string", "enum": ["Paid", "Pending"] },
         "referenceNumber": { "type": "string" },
         "voucherNumber": { "type": "string" },
@@ -37,6 +37,7 @@
         "chequeNumber": { "type": "string" },
         "bankName": { "type": "string" },
         "branchName": { "type": "string" },
+        "cardReference": { "type": "string", "description": "Transaction reference for Card payments." },
         "createdAt": { "type": "string", "format": "date-time" },
         "updatedAt": { "type": "string", "format": "date-time" }
       },
