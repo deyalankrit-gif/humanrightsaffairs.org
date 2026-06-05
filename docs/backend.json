@@ -162,6 +162,23 @@
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["name", "category", "unit", "currentStock"]
+    },
+    "Vendor": {
+      "title": "Vendor",
+      "description": "Information about external service providers and suppliers.",
+      "type": "object",
+      "properties": {
+        "companyName": { "type": "string" },
+        "vendorType": { "type": "string", "enum": ["Legal", "Logistics", "Printing", "IT Services", "Media", "Travel", "Stationery", "Other"] },
+        "contactPerson": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "phone": { "type": "string" },
+        "address": { "type": "string" },
+        "gstin": { "type": "string", "description": "GST Identification Number" },
+        "status": { "type": "string", "enum": ["Active", "Inactive"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["companyName", "vendorType", "contactPerson", "email", "phone"]
     }
   },
   "auth": {
@@ -176,6 +193,7 @@
     "/leadership/{leaderId}": { "schema": "LeadershipMember" },
     "/meetings/{meetingId}": { "schema": "GeneralMeeting" },
     "/grievances/{grievanceId}": { "schema": "Grievance" },
-    "/inventory/{itemId}": { "schema": "InventoryItem" }
+    "/inventory/{itemId}": { "schema": "InventoryItem" },
+    "/vendors/{vendorId}": { "schema": "Vendor" }
   }
 }

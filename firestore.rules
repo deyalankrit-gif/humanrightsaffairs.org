@@ -68,5 +68,10 @@ service cloud.firestore {
     match /inventory/{itemId} {
       allow read, write: if isAdmin();
     }
+
+    // Vendor Management: Admin only
+    match /vendors/{vendorId} {
+      allow read, write: if isAdmin();
+    }
   }
 }
