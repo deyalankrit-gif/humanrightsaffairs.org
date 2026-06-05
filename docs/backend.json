@@ -60,8 +60,10 @@
         "membershipDuration": { "type": "string", "enum": ["1 Year", "2 Years", "3 Years"] },
         "hasNoCriminalRecord": { "type": "boolean", "description": "Affidavit declaring no past criminal records." },
         "hasAcceptedDeclaration": { "type": "boolean", "description": "Agreement to organizational rules and suspension policy." },
-        "status": { "type": "string", "enum": ["Pending", "Reviewed", "Approved", "Rejected"] },
-        "createdAt": { "type": "string", "format": "date-time" }
+        "status": { "type": "string", "enum": ["Pending", "Reviewed", "Approved", "Rejected", "Archived"] },
+        "statusUpdateReason": { "type": "string", "description": "Reason for the current status (approval, rejection, or archival)." },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
       },
       "required": ["name", "email", "phone", "memberType", "gender", "hasNoCriminalRecord", "hasAcceptedDeclaration", "membershipDuration", "referenceId"]
     },

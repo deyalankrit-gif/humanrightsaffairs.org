@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { Switch } from '@/components/ui/switch'
 import { 
   Search, 
   ShieldCheck, 
@@ -28,13 +29,13 @@ import {
   X,
   GraduationCap,
   Briefcase,
-  ExternalLink,
   Info,
   Gavel,
   CalendarClock,
   ClipboardCheck,
   Hash,
-  Camera
+  Camera,
+  Archive
 } from 'lucide-react'
 import {
   Dialog,
@@ -65,9 +66,10 @@ export default function InternalApplicationsPage() {
   const db = useFirestore()
   const { toast } = useToast()
   const [search, setSearch] = useState('')
+  const [showArchived, setShowArchived] = useState(false)
   const [isActionLoading, setIsActionLoading] = useState(false)
   
-  const [actionDialog, setActionDialog] = useState<{ open: boolean, type: 'Approve' | 'Reject', applicationId: string, reason: string }>({
+  const [actionDialog, setActionDialog] = useState<{ open: boolean, type: 'Approve' | 'Reject' | 'Archive', applicationId: string, reason: string }>({
     open: false,
     type: 'Approve',
     applicationId: '',
@@ -87,17 +89,14 @@ export default function InternalApplicationsPage() {
 
   const { data: applications, loading: dataLoading } = useCollection(applicationsQuery);
 
-  const handleDelete = (id: string) => {
-    if (!db) return
-    deleteDoc(doc(db, 'memberApplications', id))
-      .then(() => toast({ title: "Application Record Purged" }))
-  }
-
   const handleUpdateStatus = () => {
     if (!db || !actionDialog.applicationId) return
     setIsActionLoading(true)
     
-    const newStatus = actionDialog.type === 'Approve' ? 'Approved' : 'Rejected'
+    let newStatus = 'Pending'
+    if (actionDialog.type === 'Approve') newStatus = 'Approved'
+    else if (actionDialog.type === 'Reject') newStatus = 'Rejected'
+    else if (actionDialog.type === 'Archive') newStatus = 'Archived'
     
     updateDoc(doc(db, 'memberApplications', actionDialog.applicationId), { 
       status: newStatus,
@@ -105,7 +104,12 @@ export default function InternalApplicationsPage() {
       updatedAt: new Date().toISOString()
     })
       .then(() => {
-        toast({ title: `Application ${newStatus}`, description: `Decision logged: ${actionDialog.reason}` })
+        toast({ 
+          title: `Application ${newStatus}`, 
+          description: actionDialog.type === 'Archive' 
+            ? "Record moved to secure archival storage." 
+            : `Decision logged: ${actionDialog.reason}` 
+        })
         setActionDialog({ open: false, type: 'Approve', applicationId: '', reason: '' })
         setIsActionLoading(false)
       })
@@ -120,12 +124,15 @@ export default function InternalApplicationsPage() {
     )
   }
 
-  const filtered = (applications || []).filter((a: any) => 
-    a.name?.toLowerCase().includes(search.toLowerCase()) || 
-    a.email?.toLowerCase().includes(search.toLowerCase()) ||
-    a.phone?.toLowerCase().includes(search.toLowerCase()) ||
-    a.referenceId?.toLowerCase().includes(search.toLowerCase())
-  )
+  const filtered = (applications || []).filter((a: any) => {
+    const matchesSearch = a.name?.toLowerCase().includes(search.toLowerCase()) || 
+      a.email?.toLowerCase().includes(search.toLowerCase()) ||
+      a.phone?.toLowerCase().includes(search.toLowerCase()) ||
+      a.referenceId?.toLowerCase().includes(search.toLowerCase());
+    
+    if (showArchived) return matchesSearch && a.status === 'Archived';
+    return matchesSearch && a.status !== 'Archived';
+  })
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
@@ -151,7 +158,7 @@ export default function InternalApplicationsPage() {
                  <div className="w-px h-8 bg-white/10"></div>
                  <div className="text-right">
                    <p className="text-[10px] text-slate-500 font-bold uppercase">Processed</p>
-                   <p className="text-xl font-bold text-emerald-400">{(applications || []).filter((a: any) => a.status !== 'Pending').length}</p>
+                   <p className="text-xl font-bold text-emerald-400">{(applications || []).filter((a: any) => a.status !== 'Pending' && a.status !== 'Archived').length}</p>
                  </div>
                </div>
             </div>
@@ -159,16 +166,27 @@ export default function InternalApplicationsPage() {
         </div>
       </section>
 
-      <section className="py-12 border-b bg-white dark:bg-slate-900 sticky top-[72px] md:top-[84px] z-30 shadow-sm">
+      <section className="py-12 border-b bg-white dark:bg-slate-900 sticky top-[72px] md:top-[84px] z-30 shadow-sm transition-colors">
         <div className="container mx-auto px-4">
-          <div className="relative max-w-2xl">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-            <Input 
-              placeholder="Filter by name, email, phone or Reference ID..." 
-              className="pl-12 h-14 rounded-2xl border-slate-200 dark:border-slate-800"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="relative w-full max-w-2xl">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+              <Input 
+                placeholder="Filter by name, email, phone or Reference ID..." 
+                className="pl-12 h-14 rounded-2xl border-slate-200 dark:border-slate-800"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
+            
+            <div className="flex items-center gap-3 bg-slate-50 dark:bg-slate-800 p-3 rounded-2xl border border-slate-100 dark:border-slate-700">
+               <Label htmlFor="archive-toggle" className="text-xs font-bold uppercase tracking-widest text-slate-500 cursor-pointer">Show Archived Records</Label>
+               <Switch 
+                id="archive-toggle" 
+                checked={showArchived} 
+                onCheckedChange={setShowArchived} 
+               />
+            </div>
           </div>
         </div>
       </section>
@@ -201,7 +219,8 @@ export default function InternalApplicationsPage() {
                          <Badge className={cn(
                            "font-bold uppercase tracking-widest text-[9px] px-4 py-1",
                            a.status === 'Pending' ? 'bg-amber-500' : 
-                           a.status === 'Approved' ? 'bg-emerald-500' : 'bg-red-500'
+                           a.status === 'Approved' ? 'bg-emerald-500' : 
+                           a.status === 'Archived' ? 'bg-slate-400' : 'bg-red-500'
                          )}>
                            {a.status}
                          </Badge>
@@ -276,7 +295,8 @@ export default function InternalApplicationsPage() {
                           {a.statusUpdateReason && (
                             <div className={cn(
                               "p-4 rounded-2xl border flex gap-3 items-start",
-                              a.status === 'Approved' ? "bg-emerald-50/50 border-emerald-100 text-emerald-800" : "bg-red-50/50 border-red-100 text-red-800"
+                              a.status === 'Approved' ? "bg-emerald-50/50 border-emerald-100 text-emerald-800" : 
+                              a.status === 'Archived' ? "bg-slate-50 border-slate-200 text-slate-600" : "bg-red-50/50 border-red-100 text-red-800"
                             )}>
                               <Info className="w-4 h-4 shrink-0 mt-0.5" />
                               <div>
@@ -306,21 +326,35 @@ export default function InternalApplicationsPage() {
                             <AlertDialog>
                               <AlertDialogTrigger asChild>
                                 <Button variant="ghost" className="rounded-xl w-full text-slate-400 hover:text-red-500 font-bold gap-2">
-                                  <Trash2 className="w-4 h-4" /> Delete Entry
+                                  <Archive className="w-4 h-4" /> Delete Entry
                                 </Button>
                               </AlertDialogTrigger>
                               <AlertDialogContent className="rounded-[2rem]">
                                 <AlertDialogHeader>
-                                  <AlertDialogTitle>Purge Application Record?</AlertDialogTitle>
-                                  <AlertDialogDescription>This will remove the personnel request from the secure archive. This action is recorded.</AlertDialogDescription>
+                                  <AlertDialogTitle>Archive Application Record?</AlertDialogTitle>
+                                  <AlertDialogDescription>This will remove the personnel request from the active registry. A brief archival record will be preserved for organizational integrity.</AlertDialogDescription>
                                 </AlertDialogHeader>
+                                <div className="py-4">
+                                  <Label className="text-[10px] font-bold uppercase text-slate-400 mb-2 block">Reason for Archival / Deletion</Label>
+                                  <Textarea 
+                                    placeholder="e.g. Duplicate submission, spam, or request for removal."
+                                    className="rounded-xl"
+                                    onChange={(e) => setActionDialog(prev => ({ ...prev, type: 'Archive', applicationId: a.id, reason: e.target.value }))}
+                                  />
+                                </div>
                                 <AlertDialogFooter>
                                   <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
-                                  <AlertDialogAction onClick={() => handleDelete(a.id)} className="bg-red-500 hover:bg-red-600 rounded-xl border-none text-white font-bold">Delete Forever</AlertDialogAction>
+                                  <AlertDialogAction 
+                                    onClick={handleUpdateStatus} 
+                                    className="bg-red-500 hover:bg-red-600 rounded-xl border-none text-white font-bold"
+                                    disabled={!actionDialog.reason.trim()}
+                                  >
+                                    Archive Record
+                                  </AlertDialogAction>
                                 </AlertDialogFooter>
                               </AlertDialogContent>
                             </AlertDialog>
-                            <p className="text-[9px] text-slate-400 text-center font-medium">Deleting will permanently purge the record from the secure database.</p>
+                            <p className="text-[9px] text-slate-400 text-center font-medium">Deleting will remove the record from the active list, but a brief archival record remains.</p>
                           </div>
                         </div>
                       </div>
@@ -332,7 +366,7 @@ export default function InternalApplicationsPage() {
               {filtered.length === 0 && (
                 <div className="text-center py-32 bg-white dark:bg-slate-900 rounded-[3rem] border border-dashed border-slate-200 dark:border-slate-800">
                    <FileText className="w-12 h-12 text-slate-200 dark:text-slate-800 mx-auto mb-4" />
-                   <p className="text-slate-400 font-bold uppercase tracking-widest">No matching applications in the database.</p>
+                   <p className="text-slate-400 font-bold uppercase tracking-widest">No matching {showArchived ? 'archived' : 'active'} applications found.</p>
                 </div>
               )}
             </div>
@@ -340,7 +374,7 @@ export default function InternalApplicationsPage() {
         </div>
       </section>
 
-      <Dialog open={actionDialog.open} onOpenChange={(open) => !open && setActionDialog({ ...actionDialog, open })}>
+      <Dialog open={actionDialog.open && actionDialog.type !== 'Archive'} onOpenChange={(open) => !open && setActionDialog({ ...actionDialog, open })}>
         <DialogContent className="rounded-[2.5rem] border-none shadow-2xl max-w-md">
            <DialogHeader>
              <DialogTitle className={cn("text-2xl font-headline font-bold", actionDialog.type === 'Approve' ? "text-emerald-600" : "text-red-600")}>
