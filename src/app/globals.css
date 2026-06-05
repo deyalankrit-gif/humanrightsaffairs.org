@@ -110,4 +110,23 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
+
+  /* Admin Header Scrollbar Styles */
+  .admin-scrollbar::-webkit-scrollbar {
+    height: 4px;
+  }
+  .admin-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .admin-scrollbar::-webkit-scrollbar-thumb {
+    background: hsl(var(--accent));
+    border-radius: 10px;
+  }
+  .admin-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--accent) / 0.8);
+  }
+  .admin-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--accent)) transparent;
+  }
 }

@@ -22,8 +22,7 @@ import {
   Calendar,
   MessageSquareWarning,
   Monitor,
-  Users,
-  ShieldCheck
+  Users
 } from "lucide-react";
 
 const adminLinks = [
@@ -72,8 +71,8 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
             </Link>
           </div>
 
-          {/* Scrollable Nav Area */}
-          <nav className="flex-1 flex items-center overflow-x-auto no-scrollbar h-full px-2 gap-1 scroll-smooth">
+          {/* Scrollable Nav Area with Visible Scrollbar */}
+          <nav className="flex-1 flex items-center overflow-x-auto admin-scrollbar h-full px-2 gap-1 scroll-smooth">
             {adminLinks.map((link) => {
               const isActive = pathname === link.href || (link.href !== '/internal/analytics' && pathname.startsWith(link.href))
               return (
