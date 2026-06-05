@@ -16,8 +16,8 @@ import {
   RefreshCw,
   Package,
   Truck,
-  IndianRupee,
-  CreditCard
+  CreditCard,
+  TrendingDown
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
@@ -38,7 +38,7 @@ export function AdminNavbar() {
 
   const navLinks = [
     { name: 'Analytics', href: '/internal/analytics', icon: <LayoutDashboard className="w-4 h-4" /> },
-    { name: 'Payments', href: '/internal/payments', icon: <CreditCard className="w-4 h-4" /> },
+    { name: 'Expenses', href: '/internal/expenses', icon: <TrendingDown className="w-4 h-4" /> },
     { name: 'Applications', href: '/internal/applications', icon: <FileText className="w-4 h-4" /> },
     { name: 'Personnel', href: '/internal/members', icon: <Users className="w-4 h-4" /> },
     { name: 'Renewals', href: '/internal/renewals', icon: <RefreshCw className="w-4 h-4" /> },

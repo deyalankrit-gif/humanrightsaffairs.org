@@ -17,6 +17,24 @@
         "createdAt": { "type": "string", "format": "date-time" }
       }
     },
+    "Expense": {
+      "title": "Expense",
+      "description": "Organizational expenditure records.",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "category": { "type": "string", "enum": ["Salaries", "Rent", "Utility", "Legal Fees", "Logistics", "Printing", "Travel", "Relief Aid", "Other"] },
+        "amount": { "type": "number" },
+        "date": { "type": "string", "format": "date" },
+        "payee": { "type": "string" },
+        "description": { "type": "string" },
+        "paymentMethod": { "type": "string", "enum": ["Cash", "Bank Transfer", "UPI", "Cheque"] },
+        "status": { "type": "string", "enum": ["Paid", "Pending"] },
+        "referenceNumber": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "category", "amount", "date", "payee", "status"]
+    },
     "MemberProfile": {
       "title": "Member Profile",
       "description": "Detailed profile information for verified members.",
@@ -186,6 +204,7 @@
   },
   "firestore": {
     "/donations/{donationId}": { "schema": "Donation" },
+    "/expenses/{expenseId}": { "schema": "Expense" },
     "/memberProfiles/{profileId}": { "schema": "MemberProfile" },
     "/memberApplications/{appId}": { "schema": "MemberApplication" },
     "/events/{eventId}": { "schema": "Event" },

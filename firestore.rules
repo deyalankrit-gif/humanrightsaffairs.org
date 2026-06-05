@@ -28,10 +28,14 @@ service cloud.firestore {
     }
     
     // Anyone can submit a donation for processing
-    // But viewing donation records/history/analytics is restricted to the designated Admin
     match /donations/{donationId} {
       allow create: if true;
       allow read: if isAdmin();
+    }
+
+    // Expenses management: Admin only
+    match /expenses/{expenseId} {
+      allow read, write: if isAdmin();
     }
 
     // Organizational Events: Public read, Admin write
