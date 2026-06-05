@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from 'react';
@@ -7,7 +6,6 @@ import { AppSidebar } from '@/components/app-sidebar';
 import { Navbar } from '@/components/navbar';
 import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
 import { HeaderActions } from '@/components/header-actions';
-import { AdminQuickAccess } from '@/components/admin-quick-access';
 import Image from 'next/image';
 
 export function LayoutWrapper({ children }: { children: React.ReactNode }) {
@@ -41,15 +39,12 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <>
-      <div className="flex flex-col min-h-screen relative">
-        <Navbar />
-        
-        <div className="flex-1">
-          {children}
-        </div>
+    <div className="flex flex-col min-h-screen relative">
+      <Navbar />
+      
+      <div className="flex-1">
+        {children}
       </div>
-      <AdminQuickAccess />
-    </>
+    </div>
   );
 }

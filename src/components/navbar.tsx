@@ -1,12 +1,9 @@
-
 "use client"
 
 import React from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { usePathname, useRouter } from 'next/navigation'
-import { signOut } from 'firebase/auth'
-import { useAuth, useUser } from '@/firebase'
+import { usePathname } from 'next/navigation'
 import { 
   Home, 
   Handshake, 
@@ -16,10 +13,7 @@ import {
   UserX, 
   MessageSquareWarning, 
   Scale, 
-  Phone,
-  LayoutDashboard,
-  LogOut,
-  UserCircle
+  Phone
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { HeaderActions } from './header-actions'
@@ -38,16 +32,6 @@ const publicLinks = [
 
 export function Navbar() {
   const pathname = usePathname()
-  const router = useRouter()
-  const auth = useAuth()
-  const { user } = useUser()
-
-  const handleSignOut = async () => {
-    if (auth) {
-      await signOut(auth)
-      router.push('/internal/login')
-    }
-  }
 
   return (
     <header className="flex h-16 md:h-20 shrink-0 items-center border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 md:px-8 sticky top-0 z-50 transition-all duration-300">
@@ -80,36 +64,6 @@ export function Navbar() {
             </Link>
           )
         })}
-
-        {user && (
-          <div className="flex items-center gap-3 border-l border-border pl-4 ml-2 shrink-0">
-            <div className="hidden xl:flex items-center gap-3 bg-muted/30 px-3 py-1.5 rounded-xl border border-border">
-              <UserCircle className="w-4 h-4 text-accent" />
-              <div className="flex flex-col min-w-0">
-                <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest leading-none">Session Official</span>
-                <span className="text-[10px] font-bold truncate max-w-[120px]">{user.email}</span>
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-1">
-              <Link 
-                href="/internal/analytics"
-                className="whitespace-nowrap flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-bold text-indigo-600 hover:bg-indigo-50"
-              >
-                <LayoutDashboard className="w-4 h-4" />
-                <span className="hidden sm:inline">Admin Portal</span>
-                <span className="sm:hidden text-xs">Admin</span>
-              </Link>
-              <button 
-                onClick={handleSignOut}
-                className="whitespace-nowrap flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-bold text-red-600 hover:bg-red-50"
-              >
-                <LogOut className="w-4 h-4" />
-                <span>Sign Out</span>
-              </button>
-            </div>
-          </div>
-        )}
       </nav>
 
       <div className="ml-4 flex items-center gap-2 shrink-0">
