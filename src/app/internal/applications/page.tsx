@@ -37,7 +37,8 @@ import {
   Camera,
   Archive,
   History,
-  Filter
+  Filter,
+  MessageCircle
 } from 'lucide-react'
 import {
   Dialog,
@@ -137,7 +138,7 @@ export default function InternalApplicationsPage() {
       a.phone?.toLowerCase().includes(search.toLowerCase()) ||
       a.referenceId?.toLowerCase().includes(search.toLowerCase());
     
-    if (activeFilter === 'All') return matchesSearch && a.status !== 'Archived';
+    if (activeFilter === 'All') return matchesSearch;
     return matchesSearch && a.status === activeFilter;
   })
 
@@ -330,6 +331,25 @@ export default function InternalApplicationsPage() {
                                   <Clock className="w-2.5 h-2.5" /> Logged on {a.updatedAt ? new Date(a.updatedAt).toLocaleDateString() : 'N/A'}
                                 </p>
                               </div>
+                            </div>
+                          )}
+
+                          {a.status === 'Approved' && (
+                            <div className="pt-6 border-t border-slate-100 dark:border-slate-800 animate-in fade-in slide-in-from-top-4 duration-500">
+                               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                                 <ShieldCheck className="w-3 h-3 text-emerald-500" /> Establish Communication
+                               </p>
+                               <div className="flex flex-wrap gap-3">
+                                  <Button asChild variant="outline" className="rounded-xl gap-2 border-emerald-100 text-emerald-600 hover:bg-emerald-50 dark:border-emerald-900/30 dark:hover:bg-emerald-900/10 h-10 px-4 font-bold text-xs">
+                                    <a href={`tel:${a.phone}`}><Phone className="w-3.5 h-3.5" /> Call Now</a>
+                                  </Button>
+                                  <Button asChild variant="outline" className="rounded-xl gap-2 border-emerald-100 text-emerald-600 hover:bg-emerald-50 dark:border-emerald-900/30 dark:hover:bg-emerald-900/10 h-10 px-4 font-bold text-xs">
+                                    <a href={`https://wa.me/91${a.phone.replace(/\D/g, '')}`} target="_blank"><MessageCircle className="w-3.5 h-3.5" /> WhatsApp</a>
+                                  </Button>
+                                  <Button asChild variant="outline" className="rounded-xl gap-2 border-indigo-100 text-indigo-600 hover:bg-indigo-50 dark:border-indigo-900/30 dark:hover:bg-indigo-900/10 h-10 px-4 font-bold text-xs">
+                                    <a href={`mailto:${a.email}`}><Mail className="w-3.5 h-3.5" /> Send Email</a>
+                                  </Button>
+                               </div>
                             </div>
                           )}
                         </div>
