@@ -179,7 +179,7 @@ export default function MembersPage() {
             <Users className="w-4 h-4" />
             <span>Official Member Records</span>
           </div>
-          <h1 className="text-5xl md:text-7xl font-headline font-bold mb-6 text-primary-foreground">Verified <span className="text-accent italic">Members</span></h1>
+          <h1 className="text-5xl md:text-7xl font-headline font-bold mb-6 text-primary-foreground">Verified <span className="text-accent italic">Active Members</span></h1>
           <p className="text-xl opacity-80 max-w-2xl mx-auto text-lg mb-8 text-primary-foreground">
             A dynamic ledger of our dedicated human rights defenders, updated in real-time by the central administration.
           </p>
@@ -391,10 +391,13 @@ export default function MembersPage() {
                   const fallback = member.gender === 'female' ? '/dummy w.png' : '/dummy m.png'
                   const displayImg = member.imageId?.startsWith('data:') ? member.imageId : (PlaceHolderImages.find(i => i.id === member.imageId)?.imageUrl || fallback)
                   return (
-                    <Card key={member.id} className="group border-none shadow-sm hover:shadow-xl transition-all duration-500 rounded-2xl overflow-hidden bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 relative">
+                    <Card 
+                      key={member.id} 
+                      className="group border-none shadow-sm hover:shadow-2xl transition-all duration-300 rounded-2xl overflow-visible bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 relative hover:scale-125 hover:z-50 cursor-pointer"
+                    >
                       <CardHeader className="p-0">
-                        <div className="relative aspect-square overflow-hidden bg-slate-100 dark:bg-slate-800">
-                          <Image src={displayImg} alt={member.name} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
+                        <div className="relative aspect-square overflow-hidden bg-slate-100 dark:bg-slate-800 rounded-t-2xl">
+                          <Image src={displayImg} alt={member.name} fill className="object-cover transition-transform duration-500" />
                           <div className="absolute top-1 right-1">
                             <Badge className="bg-primary/80 backdrop-blur-md text-white font-bold border-none text-[6px] px-1 py-0 leading-none h-auto">
                               {member.level}
