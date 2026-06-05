@@ -4,7 +4,6 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useUser, useCollection, useFirestore, useMemoFirebase } from '@/firebase'
 import { collection, query, orderBy } from 'firebase/firestore'
-import { AdminNavbar } from '@/components/admin-navbar'
 import { Footer } from '@/components/footer'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -98,9 +97,7 @@ export default function MembershipRenewalsPage() {
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
-      <AdminNavbar />
-
-      <section className="pt-32 pb-12 bg-slate-900 text-white border-b-8 border-accent/20 relative overflow-hidden">
+      <section className="pt-20 pb-12 bg-slate-900 text-white border-b-8 border-accent/20 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-1/3 h-full bg-accent/5 -skew-x-12"></div>
         <div className="container mx-auto px-4 relative z-10">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
@@ -120,7 +117,7 @@ export default function MembershipRenewalsPage() {
         </div>
       </section>
 
-      <section className="py-10 border-b bg-white dark:bg-slate-900 sticky top-[72px] md:top-[84px] z-30 shadow-sm transition-colors">
+      <section className="py-10 border-b bg-white dark:bg-slate-900 sticky top-[64px] md:top-[64px] z-30 shadow-sm transition-colors">
         <div className="container mx-auto px-4">
           <div className="relative max-w-2xl mx-auto">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />

@@ -4,7 +4,6 @@ import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useUser, useCollection, useFirestore, useMemoFirebase } from '@/firebase'
 import { collection, query, orderBy, addDoc, serverTimestamp, where } from 'firebase/firestore'
-import { AdminNavbar } from '@/components/admin-navbar'
 import { Footer } from '@/components/footer'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -246,9 +245,7 @@ export default function InternalMembersDirectory() {
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
-      <AdminNavbar />
-
-      <section className="pt-32 pb-16 bg-slate-900 text-white relative overflow-hidden">
+      <section className="pt-20 pb-16 bg-slate-900 text-white relative overflow-hidden">
         <div className="absolute top-0 right-0 w-1/3 h-full bg-accent/5 -skew-x-12"></div>
         <div className="container mx-auto px-4 text-center md:text-left relative z-10">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
@@ -472,11 +469,11 @@ export default function InternalMembersDirectory() {
         </div>
       </section>
 
-      <section className="py-12 border-b bg-white dark:bg-slate-900 transition-colors sticky top-[72px] md:top-[84px] z-30 shadow-sm">
+      <section className="py-12 border-b bg-white dark:bg-slate-900 transition-colors sticky top-[64px] md:top-[64px] z-30 shadow-sm">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row gap-6 items-center justify-between">
             <div className="flex flex-wrap items-center gap-2">
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap justify-center gap-2">
                 {levels.map((lvl) => (
                   <Button
                     key={lvl.value}

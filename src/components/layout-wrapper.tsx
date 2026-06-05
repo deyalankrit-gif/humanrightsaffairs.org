@@ -44,9 +44,9 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
     <div className="flex flex-col min-h-screen relative">
       <Navbar />
       
-      {/* Floating Donate Badge */}
+      {/* Floating Donate Badge - 100% Transparent Background */}
       <DonationDialog>
-        <button className="fixed top-24 right-4 md:right-8 z-[100] cursor-pointer hover:scale-110 active:scale-95 transition-all duration-300 group outline-none ring-offset-background rounded-2xl">
+        <button className="fixed top-24 right-4 md:right-8 z-[100] cursor-pointer hover:scale-110 active:scale-95 transition-all duration-300 group outline-none bg-transparent border-none p-0 shadow-none appearance-none">
           <div className="relative w-24 h-16 md:w-40 md:h-28 overflow-hidden bg-transparent">
             <Image 
               src="/donate.jpeg" 

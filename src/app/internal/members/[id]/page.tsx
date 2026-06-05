@@ -4,7 +4,6 @@ import React, { useEffect, useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase'
 import { doc, updateDoc } from 'firebase/firestore'
-import { AdminNavbar } from '@/components/admin-navbar'
 import { Footer } from '@/components/footer'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -169,9 +168,7 @@ export default function MemberDetailsPage() {
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
-      <AdminNavbar />
-
-      <section className="pt-32 pb-12 bg-slate-900 text-white border-b-8 border-accent/20">
+      <section className="pt-16 pb-12 bg-slate-900 text-white border-b-8 border-accent/20">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between mb-8">
             <Link href="/internal/members" className="inline-flex items-center gap-2 text-slate-400 hover:text-accent transition-colors font-bold text-xs uppercase tracking-widest">
