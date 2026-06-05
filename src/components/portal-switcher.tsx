@@ -41,15 +41,16 @@ export function PortalSwitcher() {
     <div className="fixed bottom-6 left-6 z-[100] flex flex-col gap-3 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-[280px]">
       {/* Session Information Card - Background is 99% transparent, text and icons are extreme contrast */}
       <div className="bg-white/[0.01] dark:bg-slate-950/[0.01] backdrop-blur-3xl border border-slate-950/40 dark:border-white/40 p-5 rounded-[2.5rem] shadow-2xl space-y-4">
-        <div className="flex items-center gap-3">
-          <div className="bg-slate-950/10 dark:bg-white/10 p-2.5 rounded-2xl border border-slate-950/20 dark:border-white/20 shadow-sm">
-            <UserCircle className="w-6 h-6 text-slate-950 dark:text-white stroke-[2.5px]" />
+        {/* User Info Section with Light Green Background */}
+        <div className="flex items-center gap-3 bg-green-100 dark:bg-green-900/30 p-3 rounded-2xl border border-green-200 dark:border-green-800 shadow-sm">
+          <div className="bg-slate-950/10 dark:bg-white/10 p-2 rounded-xl">
+            <UserCircle className="w-5 h-5 text-slate-950 dark:text-white stroke-[2.5px]" />
           </div>
           <div className="flex flex-col overflow-hidden">
-            <p className="text-[10px] font-black text-slate-950 dark:text-white uppercase tracking-[0.2em] mb-0.5 opacity-70">
+            <p className="text-[9px] font-black text-slate-950 dark:text-white uppercase tracking-[0.2em] mb-0.5 opacity-70">
               Log In Information
             </p>
-            <p className="text-[13px] font-black text-slate-950 dark:text-white truncate max-w-[180px]">
+            <p className="text-[12px] font-black text-slate-950 dark:text-white truncate max-w-[170px]">
               {user?.email}
             </p>
           </div>
