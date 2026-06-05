@@ -27,18 +27,36 @@ export function Footer() {
               Human Rights Affairs Trust (Justice Shield) is a Central Government Registered Human Rights Organization in India <span className="font-bold text-accent">(Reg. No. WB/2025/0762605)</span>. Dedicated to constitutional literacy & legal aid & Social Justice.
             </p>
             
-            {/* Donation Photo integrated into footer column - Opens SBI QR Code directly */}
-            <DonationDialog initialStep="qr">
-              <button className="block w-40 h-28 relative group cursor-pointer overflow-hidden rounded-xl bg-transparent border-none p-0 outline-none transition-transform hover:scale-105 active:scale-95">
-                <Image 
-                  src="/donate.jpeg" 
-                  alt="Donate to HRAT" 
-                  fill 
-                  className="object-contain"
-                />
-                <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-              </button>
-            </DonationDialog>
+            <div className="space-y-4">
+              {/* Donation Photo integrated into footer column - Opens SBI QR Code directly */}
+              <DonationDialog initialStep="qr">
+                <button className="block w-40 h-28 relative group cursor-pointer overflow-hidden rounded-xl bg-transparent border-none p-0 outline-none transition-transform hover:scale-105 active:scale-95">
+                  <Image 
+                    src="/donate.jpeg" 
+                    alt="Donate to HRAT" 
+                    fill 
+                    className="object-contain"
+                  />
+                  <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                </button>
+              </DonationDialog>
+
+              {/* Donate Instantly System */}
+              <div className="space-y-3">
+                <p className="text-[10px] font-bold text-accent uppercase tracking-[0.2em] animate-pulse">Donate Instantly</p>
+                <div className="flex flex-wrap gap-2">
+                  <DonationDialog defaultAmount="100" initialStep="qr">
+                    <button className="px-3 py-1.5 border border-white/20 rounded-full text-[10px] font-bold hover:bg-accent hover:text-primary transition-all active:scale-95 bg-white/5 backdrop-blur-sm">₹100</button>
+                  </DonationDialog>
+                  <DonationDialog defaultAmount="500" initialStep="qr">
+                    <button className="px-3 py-1.5 border border-white/20 rounded-full text-[10px] font-bold hover:bg-accent hover:text-primary transition-all active:scale-95 bg-white/5 backdrop-blur-sm">₹500</button>
+                  </DonationDialog>
+                  <DonationDialog defaultAmount="1000" initialStep="qr">
+                    <button className="px-3 py-1.5 border border-white/20 rounded-full text-[10px] font-bold hover:bg-accent hover:text-primary transition-all active:scale-95 bg-white/5 backdrop-blur-sm">₹1,000</button>
+                  </DonationDialog>
+                </div>
+              </div>
+            </div>
 
             <div className="flex gap-4">
               <a href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-accent transition-colors">
