@@ -1,3 +1,4 @@
+
 {
   "entities": {
     "Donation": {
@@ -201,6 +202,7 @@
       "properties": {
         "companyName": { "type": "string" },
         "vendorType": { "type": "string", "enum": ["Legal", "Logistics", "Printing", "IT Services", "Media", "Travel", "Stationery", "Other"] },
+        "particularFunction": { "type": "string", "description": "The specific service or role provided by the vendor." },
         "contactPerson": { "type": "string" },
         "email": { "type": "string", "format": "email" },
         "phone": { "type": "string" },

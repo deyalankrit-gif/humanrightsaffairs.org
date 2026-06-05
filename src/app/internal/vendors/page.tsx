@@ -27,7 +27,8 @@ import {
   Phone, 
   MapPin, 
   CheckCircle2, 
-  XCircle
+  XCircle,
+  Briefcase
 } from 'lucide-react'
 import {
   Dialog,
@@ -57,6 +58,7 @@ type Vendor = {
   id: string
   companyName: string
   vendorType: VendorType
+  particularFunction: string
   contactPerson: string
   email: string
   phone: string
@@ -81,6 +83,7 @@ export default function InternalVendorsPage() {
   const [newVendor, setNewVendor] = useState<Partial<Vendor>>({
     companyName: '',
     vendorType: 'Printing',
+    particularFunction: '',
     contactPerson: '',
     email: '',
     phone: '',
@@ -118,7 +121,7 @@ export default function InternalVendorsPage() {
     addDoc(collection(db, 'vendors'), data)
       .then(() => {
         toast({ title: "Vendor Registered", description: `${newVendor.companyName} has been added to the registry.` })
-        setNewVendor({ companyName: '', vendorType: 'Printing', contactPerson: '', email: '', phone: '', address: '', gstin: '', status: 'Active' })
+        setNewVendor({ companyName: '', vendorType: 'Printing', particularFunction: '', contactPerson: '', email: '', phone: '', address: '', gstin: '', status: 'Active' })
         setIsAddDialogOpen(false)
       })
       .finally(() => setIsActionLoading(false))
@@ -149,6 +152,7 @@ export default function InternalVendorsPage() {
   const filtered = (vendors as Vendor[] || []).filter(v => {
     const matchesSearch = v.companyName?.toLowerCase().includes(search.toLowerCase()) || 
                           v.contactPerson?.toLowerCase().includes(search.toLowerCase()) ||
+                          (v.particularFunction || '').toLowerCase().includes(search.toLowerCase()) ||
                           v.gstin?.toLowerCase().includes(search.toLowerCase());
     const matchesType = typeFilter === 'All' || v.vendorType === typeFilter;
     return matchesSearch && matchesType;
@@ -192,6 +196,11 @@ export default function InternalVendorsPage() {
                     </div>
                   </div>
 
+                  <div className="space-y-2">
+                    <Label>Particular Function / Specialization</Label>
+                    <Input value={newVendor.particularFunction} onChange={e => setNewVendor({...newVendor, particularFunction: e.target.value})} placeholder="e.g. Bulk ID Card Printing, National Courier Service..." className="h-12 rounded-xl" />
+                  </div>
+
                   <div className="grid md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label>Contact Person</Label>
@@ -199,7 +208,7 @@ export default function InternalVendorsPage() {
                     </div>
                     <div className="space-y-2">
                       <Label>GSTIN (Optional)</Label>
-                      <Input value={newVendor.gstin} onChange={e => setNewMember({...newVendor, gstin: e.target.value})} placeholder="15-digit GST Number" className="h-12 rounded-xl uppercase font-mono" />
+                      <Input value={newVendor.gstin} onChange={e => setNewVendor({...newVendor, gstin: e.target.value})} placeholder="15-digit GST Number" className="h-12 rounded-xl uppercase font-mono" />
                     </div>
                   </div>
 
@@ -252,7 +261,7 @@ export default function InternalVendorsPage() {
             <div className="relative w-full max-w-md">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
               <Input 
-                placeholder="Search by company, person, or GST..." 
+                placeholder="Search by company, function or GST..." 
                 className="pl-12 h-14 rounded-2xl border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -295,6 +304,12 @@ export default function InternalVendorsPage() {
                                <span className="flex items-center gap-1.5"><Mail className="w-3.5 h-3.5 text-accent" /> {vendor.email}</span>
                                <span className="flex items-center gap-1.5"><Phone className="w-3.5 h-3.5 text-accent" /> {vendor.phone}</span>
                              </div>
+                             {vendor.particularFunction && (
+                               <div className="flex items-center gap-2 mt-3 p-3 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-100 dark:border-slate-800 w-fit">
+                                 <Briefcase className="w-4 h-4 text-accent" />
+                                 <span className="text-xs font-bold text-primary dark:text-slate-300 uppercase tracking-tight">{vendor.particularFunction}</span>
+                               </div>
+                             )}
                           </div>
 
                           <div className="grid md:grid-cols-2 gap-4">
@@ -339,6 +354,10 @@ export default function InternalVendorsPage() {
                                             <SelectContent>{vendorTypes.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
                                           </Select>
                                         </div>
+                                      </div>
+                                      <div className="space-y-2">
+                                        <Label>Particular Function</Label>
+                                        <Input value={editVendor.particularFunction} onChange={e => setEditVendor({...editVendor, particularFunction: e.target.value})} className="h-12 rounded-xl" />
                                       </div>
                                       <div className="grid md:grid-cols-2 gap-4">
                                         <div className="space-y-2"><Label>Contact Person</Label><Input value={editVendor.contactPerson} onChange={e => setEditVendor({...editVendor, contactPerson: e.target.value})} className="h-12 rounded-xl" /></div>
