@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useEffect, useState } from 'react'
@@ -170,7 +169,9 @@ export default function InternalMeetingsManagement() {
             
             <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
               <DialogTrigger asChild>
-                <Button size="sm" className="bg-accent text-primary font-bold rounded-xl h-11 px-6 shadow-lg"><Plus className="w-4 h-4 mr-2" /> Schedule Assembly</Button>
+                <Button size="sm" className="bg-accent text-primary font-bold rounded-xl h-11 px-6 shadow-lg hover:bg-accent/90">
+                  <Plus className="w-4 h-4 mr-2" /> Schedule Assembly
+                </Button>
               </DialogTrigger>
               <DialogContent className="max-w-xl rounded-3xl max-h-[90vh] overflow-y-auto">
                  <DialogHeader><DialogTitle>New Assembly</DialogTitle></DialogHeader>
@@ -230,7 +231,7 @@ export default function InternalMeetingsManagement() {
                     </div>
                  </div>
                  <DialogFooter>
-                   <Button onClick={handleAddMeeting} disabled={isActionLoading} className="w-full h-11 rounded-xl bg-accent text-primary font-bold">
+                   <Button onClick={handleAddMeeting} disabled={isActionLoading} className="w-full h-11 rounded-xl bg-accent text-primary font-bold hover:bg-accent/90">
                      {isActionLoading ? <Loader2 className="animate-spin mr-2" /> : "Publish Record"}
                    </Button>
                  </DialogFooter>
