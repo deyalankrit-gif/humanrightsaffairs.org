@@ -5,7 +5,6 @@ import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useUser, useCollection, useFirestore, useMemoFirebase } from '@/firebase'
 import { collection, query, orderBy, addDoc, deleteDoc, doc, updateDoc, serverTimestamp } from 'firebase/firestore'
-import { AdminNavbar } from '@/components/admin-navbar'
 import { Footer } from '@/components/footer'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -27,9 +26,7 @@ import {
   Mail, 
   Phone, 
   MapPin, 
-  Hash,
-  Filter,
-  CheckCircle2,
+  CheckCircle2, 
   XCircle
 } from 'lucide-react'
 import {
@@ -161,8 +158,6 @@ export default function InternalVendorsPage() {
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
-      <AdminNavbar />
-
       <section className="pt-32 pb-12 bg-slate-900 text-white border-b-8 border-accent/20">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
@@ -204,7 +199,7 @@ export default function InternalVendorsPage() {
                     </div>
                     <div className="space-y-2">
                       <Label>GSTIN (Optional)</Label>
-                      <Input value={newVendor.gstin} onChange={e => setNewVendor({...newVendor, gstin: e.target.value})} placeholder="15-digit GST Number" className="h-12 rounded-xl uppercase font-mono" />
+                      <Input value={newVendor.gstin} onChange={e => setNewMember({...newVendor, gstin: e.target.value})} placeholder="15-digit GST Number" className="h-12 rounded-xl uppercase font-mono" />
                     </div>
                   </div>
 
@@ -235,7 +230,7 @@ export default function InternalVendorsPage() {
         </div>
       </section>
 
-      <section className="py-12 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-[72px] md:top-[84px] z-30 shadow-sm transition-colors">
+      <section className="py-12 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-[64px] md:top-[64px] z-30 shadow-sm transition-colors">
         <div className="container mx-auto px-4">
           <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
             <div className="flex flex-wrap items-center gap-2">
@@ -375,8 +370,10 @@ export default function InternalVendorsPage() {
                                 </AlertDialogTrigger>
                                 <AlertDialogContent className="rounded-[2rem]">
                                   <AlertDialogHeader>
-                                    <AlertDialogTitle>Deregister Vendor?</AlertDialogTitle>
-                                    <AlertDialogDescription>This will permanently remove <strong>{vendor.companyName}</strong> from the organizational registry. Action is irreversible.</AlertDialogDescription>
+                                    <div className="text-left">
+                                      <AlertDialogTitle>Deregister Vendor?</AlertDialogTitle>
+                                      <AlertDialogDescription>This will permanently remove <strong>{vendor.companyName}</strong> from the organizational registry. Action is irreversible.</AlertDialogDescription>
+                                    </div>
                                   </AlertDialogHeader>
                                   <AlertDialogFooter>
                                     <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
@@ -398,7 +395,7 @@ export default function InternalVendorsPage() {
                     <Truck className="w-12 h-12 text-slate-200 dark:text-slate-700" />
                    </div>
                    <h3 className="text-2xl font-headline font-bold text-primary dark:text-white">No matching vendors</h3>
-                   <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-2">Adjust your filters or register a new external provider.</p>
+                   <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-2">Adjust your search or register a new external provider.</p>
                 </div>
               )}
             </div>

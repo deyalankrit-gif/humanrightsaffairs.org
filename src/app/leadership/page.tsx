@@ -1,8 +1,8 @@
+
 "use client"
 
 import React, { useState } from 'react'
 import Image from 'next/image'
-import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 import { PlaceHolderImages } from '@/lib/placeholder-images'
 import { Shield, Award, Plus, Edit, Trash2, Loader2, Upload, Globe, MapPin } from 'lucide-react'
@@ -157,8 +157,6 @@ export default function LeadershipPage() {
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
-      <Navbar />
-      
       <section className="pt-32 md:pt-40 pb-16 md:pb-20 bg-primary text-primary-foreground relative overflow-hidden">
         <div className="absolute top-0 right-0 w-1/2 h-full bg-accent/5 -skew-x-12"></div>
         <div className="container mx-auto px-4 text-center relative z-10">

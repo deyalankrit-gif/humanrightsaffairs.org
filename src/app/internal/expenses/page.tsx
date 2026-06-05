@@ -5,7 +5,6 @@ import React, { useMemo, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useUser, useCollection, useFirestore, useMemoFirebase } from '@/firebase'
 import { collection, query, orderBy, deleteDoc, doc, updateDoc, addDoc, serverTimestamp } from 'firebase/firestore'
-import { AdminNavbar } from '@/components/admin-navbar'
 import { Footer } from '@/components/footer'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -20,15 +19,10 @@ import {
   Edit, 
   Trash2, 
   Loader2, 
-  ShieldCheck, 
   IndianRupee, 
   User, 
   Calendar, 
   Hash,
-  Filter,
-  CheckCircle2,
-  Clock,
-  FileText,
   FilterX,
   TrendingDown,
   Receipt
@@ -167,8 +161,6 @@ export default function ExpensesManagementPage() {
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
-      <AdminNavbar />
-
       <section className="pt-32 pb-12 bg-slate-900 text-white border-b-8 border-red-500/20 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-1/3 h-full bg-red-500/5 -skew-x-12"></div>
         <div className="container mx-auto px-4 relative z-10">
@@ -248,7 +240,7 @@ export default function ExpensesManagementPage() {
         </div>
       </section>
 
-      <section className="py-12 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-[72px] md:top-[84px] z-30 shadow-sm">
+      <section className="py-12 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-[64px] md:top-[64px] z-30 shadow-sm">
         <div className="container mx-auto px-4">
           <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
             <div className="flex flex-wrap items-center gap-4">

@@ -31,7 +31,9 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
             </div>
             <HeaderActions />
           </header>
-          {children}
+          <div className="flex-1">
+            {children}
+          </div>
         </SidebarInset>
       </SidebarProvider>
     );

@@ -1,8 +1,8 @@
+
 "use client"
 
 import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
-import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 import { PlaceHolderImages } from '@/lib/placeholder-images'
 import { 
@@ -172,8 +172,6 @@ export default function MembersPage() {
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
-      <Navbar />
-
       <section className="pt-40 pb-20 bg-primary text-primary-foreground relative overflow-hidden">
         <div className="absolute top-0 right-0 w-1/2 h-full bg-accent/5 -skew-x-12"></div>
         <div className="container mx-auto px-4 relative z-10 text-center">
@@ -309,7 +307,7 @@ export default function MembersPage() {
         </div>
       </section>
 
-      <section className="py-12 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-[72px] md:top-[84px] z-30 shadow-sm transition-colors">
+      <section className="py-12 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-[64px] md:top-[80px] z-30 shadow-sm transition-colors">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row gap-6 items-center justify-between">
             <div className="flex flex-wrap items-center gap-2">

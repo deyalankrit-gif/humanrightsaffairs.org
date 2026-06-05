@@ -1,10 +1,10 @@
+
 "use client"
 
 import React, { useMemo, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useUser, useCollection, useFirestore, useMemoFirebase } from '@/firebase'
 import { collection, query, orderBy, deleteDoc, doc } from 'firebase/firestore'
-import { AdminNavbar } from '@/components/admin-navbar'
 import { Footer } from '@/components/footer'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -115,8 +115,6 @@ export default function DonationAnalyticsPage() {
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
-      <AdminNavbar />
-
       <section className="pt-32 pb-12 bg-primary text-primary-foreground border-b-8 border-accent/20">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">

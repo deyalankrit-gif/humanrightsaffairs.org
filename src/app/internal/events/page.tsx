@@ -1,10 +1,10 @@
+
 "use client"
 
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useUser, useCollection, useFirestore, useMemoFirebase } from '@/firebase'
 import { collection, query, orderBy, addDoc, deleteDoc, doc, updateDoc, serverTimestamp } from 'firebase/firestore'
-import { AdminNavbar } from '@/components/admin-navbar'
 import { Footer } from '@/components/footer'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -21,7 +21,6 @@ import {
   Edit, 
   Trash2, 
   Loader2, 
-  Camera, 
   ExternalLink,
   ShieldCheck,
   Upload
@@ -33,7 +32,6 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogFooter,
-  DialogDescription,
 } from "@/components/ui/dialog"
 import {
   AlertDialog,
@@ -178,8 +176,6 @@ export default function InternalEventsManagement() {
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
-      <AdminNavbar />
-
       <section className="pt-32 pb-12 bg-slate-900 text-white border-b-8 border-accent/20">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
@@ -273,7 +269,7 @@ export default function InternalEventsManagement() {
         </div>
       </section>
 
-      <section className="py-12 border-b bg-white dark:bg-slate-900 sticky top-[72px] md:top-[84px] z-30 shadow-sm">
+      <section className="py-12 border-b bg-white dark:bg-slate-900 sticky top-[64px] md:top-[64px] z-30 shadow-sm">
         <div className="container mx-auto px-4">
           <div className="relative max-w-2xl">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />

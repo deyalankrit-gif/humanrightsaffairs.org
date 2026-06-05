@@ -1,7 +1,6 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { Navbar } from '@/components/navbar'
 import { ChairmanMessage } from '@/components/chairman-message'
 import { StateChairpersonMessage } from '@/components/state-chairperson-message'
 import { KnowledgeCenter } from '@/components/knowledge-center'
@@ -68,7 +67,6 @@ export default function Home() {
   return (
     <main className="min-h-screen relative overflow-x-hidden">
       <BackgroundDecor />
-      <Navbar />
       
       <section className="relative min-h-screen flex flex-col items-center pt-28 md:pt-36 pb-20">
         <div className="absolute inset-0 z-0">

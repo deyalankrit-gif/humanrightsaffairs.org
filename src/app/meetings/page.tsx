@@ -2,7 +2,6 @@
 "use client"
 
 import React, { useState } from 'react'
-import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 import { 
   Calendar, 
@@ -93,8 +92,6 @@ export default function MeetingsPage() {
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
-      <Navbar />
-
       <section className="pt-40 pb-20 bg-primary text-primary-foreground relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-full opacity-5 pointer-events-none">
           <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-accent rounded-full blur-[100px]"></div>
@@ -111,7 +108,7 @@ export default function MeetingsPage() {
         </div>
       </section>
 
-      <section className="py-12 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-[72px] md:top-[84px] z-30 shadow-sm transition-colors">
+      <section className="py-12 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-[64px] md:top-[80px] z-30 shadow-sm transition-colors">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row gap-6 items-center justify-between">
             <div className="flex flex-wrap gap-2">

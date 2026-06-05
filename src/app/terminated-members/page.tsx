@@ -3,7 +3,6 @@
 
 import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
-import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 import { PlaceHolderImages } from '@/lib/placeholder-images'
 import { Search, UserX, AlertTriangle, ShieldAlert, Calendar as CalendarIcon, Hash, Info, Plus, Edit, Trash2, Loader2, Upload } from 'lucide-react'
@@ -160,8 +159,6 @@ export default function TerminatedMembersPage() {
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
-      <Navbar />
-
       <section className="pt-40 pb-20 bg-slate-900 text-white relative overflow-hidden">
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10"></div>
         <div className="container mx-auto px-4 relative z-10 text-center">
@@ -284,7 +281,7 @@ export default function TerminatedMembersPage() {
         </div>
       </section>
 
-      <section className="py-12 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-[72px] md:top-[84px] z-30 shadow-sm transition-colors">
+      <section className="py-12 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-[64px] md:top-[80px] z-30 shadow-sm transition-colors">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
             <div className="relative">
@@ -398,7 +395,9 @@ export default function TerminatedMembersPage() {
                                 </Button>
                               </DialogTrigger>
                               <DialogContent className="max-w-md bg-white dark:bg-slate-900 rounded-[2rem] max-h-[90vh] overflow-y-auto">
-                                <DialogHeader><DialogTitle>Edit Notice</DialogTitle></DialogHeader>
+                                <DialogHeader>
+                                  <DialogTitle>Edit Notice</DialogTitle>
+                                </DialogHeader>
                                 {editMember && (
                                   <div className="space-y-4 py-4">
                                     <div className="space-y-2">
