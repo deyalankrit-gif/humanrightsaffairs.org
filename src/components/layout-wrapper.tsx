@@ -46,16 +46,15 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
       
       {/* Floating Donate Badge */}
       <DonationDialog>
-        <button className="fixed top-24 right-4 md:right-8 z-[100] cursor-pointer hover:scale-110 active:scale-95 transition-all duration-300 group outline-none ring-offset-background focus:ring-2 focus:ring-accent rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.3)]">
-          <div className="relative w-24 h-16 md:w-40 md:h-28 border-2 border-white/30 rounded-2xl overflow-hidden bg-black">
+        <button className="fixed top-24 right-4 md:right-8 z-[100] cursor-pointer hover:scale-110 active:scale-95 transition-all duration-300 group outline-none ring-offset-background rounded-2xl">
+          <div className="relative w-24 h-16 md:w-40 md:h-28 overflow-hidden bg-transparent">
             <Image 
               src="/donate.jpeg" 
               alt="Donate Online" 
               fill 
-              className="object-cover group-hover:brightness-110"
+              className="object-contain group-hover:brightness-110 transition-all"
               priority
             />
-            <div className="absolute inset-0 bg-gradient-to-tr from-accent/10 via-transparent to-white/5 pointer-events-none"></div>
           </div>
           {/* Pulsing indicator */}
           <div className="absolute -top-1 -right-1 flex h-4 w-4">
