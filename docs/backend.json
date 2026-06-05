@@ -12,6 +12,7 @@
         "pan": { "type": "string" },
         "aadhaar": { "type": "string" },
         "paymentMethod": { "type": "string" },
+        "paymentDetails": { "type": "string", "description": "Transaction reference, ID, or cheque details." },
         "transactionId": { "type": "string" },
         "status": { "type": "string" },
         "createdAt": { "type": "string", "format": "date-time" }

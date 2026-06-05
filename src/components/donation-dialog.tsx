@@ -27,6 +27,13 @@ import {
   FormMessage 
 } from '@/components/ui/form'
 import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from '@/components/ui/select'
+import { 
   CreditCard, 
   Download, 
   Printer, 
@@ -37,7 +44,8 @@ import {
   Globe,
   QrCode,
   ArrowRight,
-  ShieldCheck
+  ShieldCheck,
+  Hash
 } from 'lucide-react'
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore'
 import { useFirestore } from '@/firebase'
@@ -54,10 +62,12 @@ const formSchema = z.object({
   pan: z.string().length(10, "PAN must be 10 characters"),
   aadhaar: z.string().length(12, "Aadhaar must be 12 digits"),
   amount: z.string().min(1, "Amount is required"),
-  currency: z.string().default("INR")
+  currency: z.string().default("INR"),
+  paymentMethod: z.string().min(1, "Please select a payment method"),
+  paymentDetails: z.string().optional()
 })
 
-type Step = 'details' | 'payment' | 'qr' | 'success'
+type Step = 'details' | 'qr' | 'success'
 
 export function DonationDialog({ children, defaultAmount, initialStep = 'details' }: { children: React.ReactNode, defaultAmount?: string, initialStep?: Step }) {
   const db = useFirestore()
@@ -74,64 +84,51 @@ export function DonationDialog({ children, defaultAmount, initialStep = 'details
     resolver: zodResolver(formSchema),
     defaultValues: {
       currency: "INR",
-      amount: defaultAmount || ""
+      amount: defaultAmount || "",
+      paymentMethod: "UPI QR Code"
     }
   })
+
+  const selectedMethod = form.watch('paymentMethod')
 
   useEffect(() => {
     if (open) {
       setStep(initialStep)
       if (defaultAmount) {
         form.setValue('amount', defaultAmount)
-        // For instant QR mode, initialize donationData with amount so QR shows it
-        if (initialStep === 'qr') {
-          setDonationData({ amount: defaultAmount })
-        }
       }
     }
   }, [open, defaultAmount, initialStep, form])
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setLoading(true)
+    const transactionId = donationData?.transactionId || `TXN-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
+    
     const data = {
       ...values,
       photo,
-      transactionId: donationData?.transactionId || `TXN-${Math.random().toString(36).substr(2, 9).toUpperCase()}`,
+      transactionId,
       timestamp: new Date().toLocaleString()
     }
     setDonationData(data)
-    
-    // If they came from QR step, go straight to success
-    if (step === 'details' && donationData?.paymentMethod === 'UPI QR Code') {
-       handlePayment('UPI QR Code', data)
+
+    if (values.paymentMethod === 'UPI QR Code') {
+      setStep('qr')
+      setLoading(false)
     } else {
-      setTimeout(() => {
-        setStep('payment')
-        setLoading(false)
-      }, 1000)
+      handleFinalSubmission(data)
     }
   }
 
-  const handlePayment = async (method: string, dataOverride?: any) => {
-    if (method === 'QR') {
-      setStep('qr')
-      return
-    }
-
+  const handleFinalSubmission = async (data: any) => {
     setLoading(true)
-    const activeData = dataOverride || donationData
-    const donationId = activeData.transactionId || `TXN-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
-    
     const finalData = {
-      ...activeData,
-      transactionId: donationId,
-      paymentMethod: method,
+      ...data,
       status: 'completed',
-      createdAt: serverTimestamp(),
-      timestamp: activeData.timestamp || new Date().toLocaleString()
+      createdAt: serverTimestamp()
     }
     
-    const docRef = doc(db, "donations", donationId)
+    const docRef = doc(db, "donations", data.transactionId)
     
     setDoc(docRef, finalData)
       .then(() => {
@@ -149,21 +146,6 @@ export function DonationDialog({ children, defaultAmount, initialStep = 'details
         errorEmitter.emit('permission-error', permissionError);
         setLoading(false)
       });
-  }
-
-  const confirmQrPayment = () => {
-    if (!donationData?.name) {
-      // If no details provided yet (Instant Mode), go to details step to get info for 80G receipt
-      setStep('details')
-      toast({
-        title: "Payment Received?",
-        description: "Please provide your details to generate your official 80G Tax Receipt.",
-      })
-      // Ensure we track that they chose QR
-      setDonationData(prev => ({ ...prev, paymentMethod: 'UPI QR Code' }))
-      return
-    }
-    handlePayment('UPI QR Code')
   }
 
   const handlePrint = () => {
@@ -206,7 +188,8 @@ export function DonationDialog({ children, defaultAmount, initialStep = 'details
         setStep('details')
         form.reset({
           currency: "INR",
-          amount: defaultAmount || ""
+          amount: defaultAmount || "",
+          paymentMethod: "UPI QR Code"
         })
         setPhoto(null)
         setDonationData(null)
@@ -218,8 +201,7 @@ export function DonationDialog({ children, defaultAmount, initialStep = 'details
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto rounded-[2rem] border-none shadow-2xl">
         <DialogHeader>
           <DialogTitle className="text-3xl font-headline font-bold text-primary flex items-center gap-3">
-            {step === 'details' && (donationData?.paymentMethod === 'UPI QR Code' ? "Receipt Generation" : "Donor Information")}
-            {step === 'payment' && "Payment Selection"}
+            {step === 'details' && "Donor Information"}
             {step === 'qr' && "Scan to Donate"}
             {step === 'success' && "Donation Successful"}
             <div className="relative w-10 h-10 shrink-0">
@@ -227,9 +209,8 @@ export function DonationDialog({ children, defaultAmount, initialStep = 'details
             </div>
           </DialogTitle>
           <DialogDescription className="text-base">
-            {step === 'details' && "Please provide your details for tax-exemption receipts (80G)."}
-            {step === 'payment' && "Choose your preferred secure payment method."}
-            {step === 'qr' && `Please scan to donate ₹${donationData?.amount || defaultAmount} via UPI.`}
+            {step === 'details' && "Specify your contribution details and preferred payment method."}
+            {step === 'qr' && `Please scan to donate ₹${donationData?.amount} via UPI.`}
             {step === 'success' && "Thank you for your contribution to human rights."}
           </DialogDescription>
         </DialogHeader>
@@ -251,38 +232,38 @@ export function DonationDialog({ children, defaultAmount, initialStep = 'details
                     onChange={handleFileChange}
                   />
                 </div>
-                <Label className="text-[10px] text-slate-500 uppercase font-bold tracking-[0.2em]">Upload Profile Photo</Label>
+                <Label className="text-[10px] text-slate-500 uppercase font-bold tracking-[0.2em]">Upload Profile Photo (Optional)</Label>
               </div>
 
               <div className="grid md:grid-cols-2 gap-4">
                 <FormField control={form.control} name="name" render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-xs font-bold uppercase tracking-wider text-slate-500">Full Name</FormLabel>
-                    <FormControl><Input placeholder="Jayanta Kumar Paul" className="h-12 rounded-xl" {...field} /></FormControl>
+                    <FormLabel className="text-xs font-bold uppercase tracking-wider text-slate-400">Full Legal Name *</FormLabel>
+                    <FormControl><Input placeholder="Jayanta Kumar Paul" className="h-11 rounded-xl" {...field} /></FormControl>
                     <FormMessage />
                   </FormItem>
                 )} />
                 <FormField control={form.control} name="email" render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-xs font-bold uppercase tracking-wider text-slate-500">Email Address</FormLabel>
-                    <FormControl><Input placeholder="jayanta@example.com" className="h-12 rounded-xl" {...field} /></FormControl>
+                    <FormLabel className="text-xs font-bold uppercase tracking-wider text-slate-400">Email Address *</FormLabel>
+                    <FormControl><Input placeholder="jayanta@example.com" className="h-11 rounded-xl" {...field} /></FormControl>
                     <FormMessage />
                   </FormItem>
                 )} />
                 <FormField control={form.control} name="phone" render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-xs font-bold uppercase tracking-wider text-slate-500">Phone Number</FormLabel>
-                    <FormControl><Input placeholder="+91 9876543210" className="h-12 rounded-xl" {...field} /></FormControl>
+                    <FormLabel className="text-xs font-bold uppercase tracking-wider text-slate-400">Phone Number *</FormLabel>
+                    <FormControl><Input placeholder="+91 9876543210" className="h-11 rounded-xl" {...field} /></FormControl>
                     <FormMessage />
                   </FormItem>
                 )} />
                 <FormField control={form.control} name="amount" render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-xs font-bold uppercase tracking-wider text-slate-500">Donation Amount</FormLabel>
+                    <FormLabel className="text-xs font-bold uppercase tracking-wider text-slate-400">Donation Amount (₹) *</FormLabel>
                     <FormControl>
                       <div className="relative">
                         <IndianRupee className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                        <Input className="pl-9 h-12 rounded-xl text-lg font-bold" placeholder="5000" type="number" {...field} />
+                        <Input className="pl-9 h-11 rounded-xl text-lg font-bold" placeholder="5000" type="number" {...field} />
                       </div>
                     </FormControl>
                     <FormMessage />
@@ -292,8 +273,8 @@ export function DonationDialog({ children, defaultAmount, initialStep = 'details
 
               <FormField control={form.control} name="address" render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-xs font-bold uppercase tracking-wider text-slate-500">Full Residential Address</FormLabel>
-                  <FormControl><Textarea placeholder="Enter your full address for 80G receipt generation..." className="rounded-xl min-h-[100px]" {...field} /></FormControl>
+                  <FormLabel className="text-xs font-bold uppercase tracking-wider text-slate-400">Full Residential Address *</FormLabel>
+                  <FormControl><Textarea placeholder="Required for 80G receipt..." className="rounded-xl min-h-[80px]" {...field} /></FormControl>
                   <FormMessage />
                 </FormItem>
               )} />
@@ -301,93 +282,64 @@ export function DonationDialog({ children, defaultAmount, initialStep = 'details
               <div className="grid md:grid-cols-2 gap-4">
                 <FormField control={form.control} name="pan" render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-xs font-bold uppercase tracking-wider text-slate-500">PAN Card Number (Required for 80G)</FormLabel>
-                    <FormControl><Input placeholder="ABCDE1234F" className="uppercase h-12 rounded-xl font-mono" {...field} /></FormControl>
+                    <FormLabel className="text-xs font-bold uppercase tracking-wider text-slate-400">PAN Card (Required for 80G) *</FormLabel>
+                    <FormControl><Input placeholder="ABCDE1234F" className="uppercase h-11 rounded-xl font-mono" {...field} /></FormControl>
                     <FormMessage />
                   </FormItem>
                 )} />
                 <FormField control={form.control} name="aadhaar" render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-xs font-bold uppercase tracking-wider text-slate-500">Aadhaar Card Number</FormLabel>
-                    <FormControl><Input placeholder="1234 5678 9012" className="h-12 rounded-xl font-mono" {...field} /></FormControl>
+                    <FormLabel className="text-xs font-bold uppercase tracking-wider text-slate-400">Aadhaar Card (12 Digits) *</FormLabel>
+                    <FormControl><Input placeholder="1234 5678 9012" className="h-11 rounded-xl font-mono" {...field} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-4 pt-4 border-t border-slate-100">
+                <FormField control={form.control} name="paymentMethod" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-xs font-bold uppercase tracking-wider text-accent flex items-center gap-2">
+                      <CreditCard className="w-4 h-4" /> Payment Channel *
+                    </FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger className="h-11 rounded-xl border-accent/20 bg-accent/5 font-bold">
+                          <SelectValue placeholder="Select Method" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="UPI QR Code" className="font-bold">Instant UPI QR Code</SelectItem>
+                        <SelectItem value="Bank Transfer" className="font-bold">Direct Bank Transfer</SelectItem>
+                        <SelectItem value="Cheque" className="font-bold">Cheque Payment</SelectItem>
+                        <SelectItem value="Cash" className="font-bold">Cash Contribution</SelectItem>
+                        <SelectItem value="Credit/Debit Card" className="font-bold">Online Card Payment</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+
+                <FormField control={form.control} name="paymentDetails" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                      {selectedMethod === 'Cheque' ? 'Cheque & Bank Details' : 
+                       selectedMethod === 'Cash' ? 'Voucher / Ref Number' : 
+                       'Transaction Reference'}
+                    </FormLabel>
+                    <FormControl>
+                      <Input placeholder="Optional: Trans ID or Ref" className="h-11 rounded-xl" {...field} />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )} />
               </div>
 
               <Button type="submit" className="w-full bg-accent text-primary font-bold py-7 text-xl rounded-2xl hover:bg-accent/90 shadow-xl shadow-accent/20 transition-all hover:-translate-y-1" disabled={loading}>
-                {loading ? <Loader2 className="animate-spin mr-2" /> : <>Generate My Official Receipt <ArrowRight className="ml-2 w-6 h-6" /></>}
+                {loading ? <Loader2 className="animate-spin mr-2" /> : <>Process Contribution <ArrowRight className="ml-2 w-6 h-6" /></>}
               </Button>
             </form>
           </Form>
-        )}
-
-        {step === 'payment' && (
-          <div className="space-y-6 py-6">
-            <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100 flex items-center justify-between mb-8 shadow-inner">
-              <div>
-                <p className="text-[10px] text-slate-400 uppercase font-bold tracking-widest mb-1">Payable Amount</p>
-                <p className="text-3xl font-bold text-primary">₹{donationData?.amount}</p>
-              </div>
-              <div className="text-right">
-                <p className="text-[10px] text-slate-400 uppercase font-bold tracking-widest mb-1">Donor Identity</p>
-                <p className="font-bold text-lg text-primary">{donationData?.name}</p>
-              </div>
-            </div>
-
-            <div className="grid gap-4">
-              <div 
-                className="border-2 rounded-2xl p-6 bg-white shadow-sm hover:border-accent hover:bg-accent/5 transition-all cursor-pointer group relative overflow-hidden" 
-                onClick={() => handlePayment('QR')}
-              >
-                <div className="absolute top-0 right-0 bg-emerald-500 text-white text-[9px] font-bold px-3 py-1 rounded-bl-xl uppercase tracking-widest">Recommended</div>
-                <div className="flex items-center gap-5">
-                  <div className="bg-emerald-50 p-4 rounded-xl group-hover:bg-emerald-100 transition-colors">
-                    <QrCode className="w-8 h-8 text-emerald-600" />
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="font-bold text-xl text-primary">Instant UPI Scan & Pay</h4>
-                    <p className="text-sm text-slate-500">Scan our official SBI QR code via GPay, PhonePe, or Paytm.</p>
-                  </div>
-                  <ArrowRight className="w-6 h-6 text-slate-300 group-hover:text-accent group-hover:translate-x-1 transition-all" />
-                </div>
-              </div>
-
-              <div 
-                className="border rounded-2xl p-6 bg-white shadow-sm hover:border-accent hover:bg-accent/5 transition-all cursor-pointer group" 
-                onClick={() => handlePayment('UPI/NetBanking')}
-              >
-                <div className="flex items-center gap-5">
-                  <div className="bg-blue-50 p-4 rounded-xl group-hover:bg-blue-100 transition-colors">
-                    <IndianRupee className="w-8 h-8 text-blue-600" />
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="font-bold text-xl text-primary">Net Banking / Cards</h4>
-                    <p className="text-sm text-slate-500">Direct bank transfer or Debit/Credit card (Indian Banks).</p>
-                  </div>
-                  <ArrowRight className="w-6 h-6 text-slate-300 group-hover:text-accent group-hover:translate-x-1 transition-all" />
-                </div>
-              </div>
-
-              <div 
-                className="border rounded-2xl p-6 bg-white shadow-sm hover:border-accent hover:bg-accent/5 transition-all cursor-pointer group" 
-                onClick={() => handlePayment('International Card')}
-              >
-                <div className="flex items-center gap-5">
-                  <div className="bg-indigo-50 p-4 rounded-xl group-hover:bg-indigo-100 transition-colors">
-                    <Globe className="w-8 h-8 text-indigo-600" />
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="font-bold text-xl text-primary">International Transfer</h4>
-                    <p className="text-sm text-slate-500">PayPal and foreign currency cards (Visa/Master/Amex).</p>
-                  </div>
-                  <ArrowRight className="w-6 h-6 text-slate-300 group-hover:text-accent group-hover:translate-x-1 transition-all" />
-                </div>
-              </div>
-            </div>
-
-            <Button variant="ghost" className="w-full mt-4 text-slate-400 hover:text-primary" onClick={() => setStep('details')}>Back to Donor Details</Button>
-          </div>
         )}
 
         {step === 'qr' && (
@@ -406,20 +358,20 @@ export function DonationDialog({ children, defaultAmount, initialStep = 'details
                 <div className="bg-emerald-50 p-4 rounded-2xl border border-emerald-100 flex items-start gap-3">
                   <ShieldCheck className="w-6 h-6 text-emerald-600 shrink-0 mt-1" />
                   <div>
-                    <p className="font-bold text-emerald-900 leading-tight">Verified Secure Payment</p>
-                    <p className="text-xs text-emerald-700">Scan this QR to pay directly to <strong>Human Rights Affairs Trust</strong>. Once the payment is complete, click the button below to generate your receipt.</p>
+                    <p className="font-bold text-emerald-900 leading-tight">Secure UPI Gateway</p>
+                    <p className="text-xs text-emerald-700">Please scan and pay ₹<strong>{donationData?.amount}</strong>. Once complete, click the button below to finalize your authenticated receipt.</p>
                   </div>
                 </div>
                 
                 <Button 
-                  onClick={confirmQrPayment}
+                  onClick={() => handleFinalSubmission(donationData)}
                   disabled={loading}
                   className="w-full bg-primary text-white font-bold py-7 text-xl rounded-2xl hover:bg-primary/90 shadow-xl shadow-primary/20"
                 >
-                  {loading ? <Loader2 className="animate-spin mr-2" /> : "I Have Completed the Payment"}
+                  {loading ? <Loader2 className="animate-spin mr-2" /> : "Verify & Generate Receipt"}
                 </Button>
                 
-                <Button variant="ghost" className="w-full text-slate-400" onClick={() => setStep('payment')}>Select Different Method</Button>
+                <Button variant="ghost" className="w-full text-slate-400" onClick={() => setStep('details')}>Back to Details</Button>
              </div>
           </div>
         )}
@@ -430,8 +382,8 @@ export function DonationDialog({ children, defaultAmount, initialStep = 'details
               <div className="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mb-4 animate-bounce">
                 <CheckCircle2 className="w-12 h-12" />
               </div>
-              <h3 className="text-3xl font-headline font-bold text-primary">Contribution Verified!</h3>
-              <p className="text-slate-500">Transaction ID: <span className="font-mono text-accent font-bold tracking-tighter">{donationData?.transactionId}</span></p>
+              <h3 className="text-3xl font-headline font-bold text-primary">Mission Supported!</h3>
+              <p className="text-slate-500">Receipt Reference: <span className="font-mono text-accent font-bold tracking-tighter">{donationData?.transactionId}</span></p>
             </div>
 
             <div ref={invoiceRef} className="border-2 border-slate-100 rounded-[2.5rem] p-8 md:p-10 bg-white shadow-2xl space-y-8 relative overflow-hidden">
@@ -458,16 +410,16 @@ export function DonationDialog({ children, defaultAmount, initialStep = 'details
                     <h6 className="font-bold text-slate-400 uppercase text-[9px] tracking-widest mb-2">Donor Credentials</h6>
                     <p className="font-bold text-lg text-primary">{donationData?.name}</p>
                     <p className="text-slate-500 font-medium">{donationData?.email}</p>
-                    <p className="text-slate-500 font-medium">{donationData?.phone}</p>
                   </div>
-                  <div>
-                     <h6 className="font-bold text-slate-400 uppercase text-[9px] tracking-widest mb-2">Residential Address</h6>
-                     <p className="text-slate-500 leading-relaxed text-xs">{donationData?.address}</p>
+                  <div className="bg-slate-50 p-4 rounded-xl">
+                     <h6 className="font-bold text-slate-400 uppercase text-[9px] tracking-widest mb-1">Payment Trail</h6>
+                     <p className="text-xs font-bold text-slate-700 uppercase">{donationData?.paymentMethod}</p>
+                     <p className="text-[10px] font-mono text-slate-500">{donationData?.paymentDetails || 'N/A'}</p>
                   </div>
                 </div>
                 <div className="text-right space-y-4">
                   <div>
-                    <h6 className="font-bold text-slate-400 uppercase text-[9px] tracking-widest mb-2">Government IDs</h6>
+                    <h6 className="font-bold text-slate-400 uppercase text-[9px] tracking-widest mb-2">Verification IDs</h6>
                     <p className="text-slate-500 font-bold">PAN: <span className="text-primary font-mono">{donationData?.pan?.toUpperCase()}</span></p>
                     <p className="text-slate-500 font-bold">Aadhaar: <span className="text-primary font-mono">**** **** {donationData?.aadhaar?.slice(-4)}</span></p>
                   </div>
@@ -487,18 +439,18 @@ export function DonationDialog({ children, defaultAmount, initialStep = 'details
                 <div className="text-right relative z-10">
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Timestamp</p>
                   <p className="font-bold text-sm text-white">{donationData?.timestamp}</p>
-                  <p className="text-[10px] text-emerald-400 font-bold mt-1 uppercase tracking-tighter">Status: Verified</p>
+                  <p className="text-[10px] text-emerald-400 font-bold mt-1 uppercase tracking-tighter">Authenticated</p>
                 </div>
               </div>
 
               <div className="footer border-t pt-8 text-center space-y-2">
                 <p className="text-[9px] text-slate-400 leading-relaxed">
                   This is a digitally authenticated tax receipt issued by the Human Rights Affairs Trust. <br />
-                  Central Govt Reg No: HR-123-ABC-2024 | NITI Aayog Unique ID: WB/2024/038XXXX
+                  Reg No: WB/2025/0762605 | NITI Aayog Verified
                 </p>
-                <div className="flex justify-center gap-4 pt-2">
-                   <div className="w-12 h-12 bg-slate-50 rounded-lg flex items-center justify-center p-2 grayscale opacity-50">
-                      <Image src="/HRAT%20Logo.jpeg" alt="seal" width={40} height={40} className="object-contain" />
+                <div className="flex justify-center pt-2">
+                   <div className="w-12 h-12 relative grayscale opacity-40">
+                      <Image src="/HRAT%20Logo.jpeg" alt="seal" fill className="object-contain" />
                    </div>
                 </div>
               </div>
@@ -506,14 +458,14 @@ export function DonationDialog({ children, defaultAmount, initialStep = 'details
 
             <div className="flex gap-4">
               <Button className="flex-1 gap-2 bg-primary text-white py-8 rounded-2xl hover:bg-primary/90 text-lg shadow-xl shadow-primary/20" onClick={handlePrint}>
-                <Printer className="w-6 h-6" /> Print Official Receipt
+                <Printer className="w-6 h-6" /> Print Receipt
               </Button>
               <Button variant="outline" className="flex-1 gap-2 border-slate-200 py-8 rounded-2xl text-lg hover:bg-slate-50" onClick={handleDownload}>
-                <Download className="w-6 h-6" /> Download PDF
+                <Download className="w-6 h-6" /> Save as PDF
               </Button>
             </div>
             
-            <Button variant="ghost" className="w-full text-slate-400 uppercase tracking-[0.2em] font-bold text-[10px]" onClick={() => setOpen(false)}>Close Portal</Button>
+            <Button variant="ghost" className="w-full text-slate-400 uppercase tracking-[0.2em] font-bold text-[10px]" onClick={() => setOpen(false)}>Return to Mission Portal</Button>
           </div>
         )}
       </DialogContent>
