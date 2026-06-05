@@ -34,7 +34,6 @@ import {
   HeartHandshake
 } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { ThemeToggle } from "./theme-toggle"
 import { useUser } from "@/firebase"
 import { Button } from "@/components/ui/button"
 import { DonationDialog } from "./donation-dialog"
@@ -116,7 +115,7 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="border-t p-4 space-y-4">
+      <SidebarFooter className="border-t p-4">
         {!isAdminPortal && (
           <div className="group-data-[collapsible=icon]:hidden">
             <DonationDialog>
@@ -126,10 +125,6 @@ export function AppSidebar() {
             </DonationDialog>
           </div>
         )}
-
-        <div className="flex items-center justify-between px-2">
-          <ThemeToggle />
-        </div>
       </SidebarFooter>
     </Sidebar>
   )
