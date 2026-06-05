@@ -27,7 +27,8 @@ import {
   Briefcase,
   RefreshCw,
   CheckCircle2,
-  Calendar as CalendarIcon
+  Calendar as CalendarIcon,
+  Sparkles
 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { 
@@ -92,6 +93,14 @@ export default function InternalMembersDirectory() {
       router.push('/internal/login')
     }
   }, [user, authLoading, router])
+
+  const handleGenerateId = () => {
+    const random = Math.random().toString(36).substring(2, 6).toUpperCase();
+    const year = new Date().getFullYear();
+    const generatedId = `HRAT-${year}-${random}`;
+    setNewMember({ ...newMember, memberId: generatedId });
+    toast({ title: "ID Auto-Generated", description: `Assigned: ${generatedId}` });
+  }
 
   const handleSyncData = (appId: string) => {
     const app = approvedApplications?.find((a: any) => a.id === appId);
@@ -284,13 +293,24 @@ export default function InternalMembersDirectory() {
 
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label className="text-[10px] uppercase font-bold text-slate-400">Member ID</Label>
-                        <Input 
-                          placeholder="e.g. M1024" 
-                          value={newMember.memberId} 
-                          onChange={(e) => setNewMember({...newMember, memberId: e.target.value})}
-                          className="bg-slate-50 dark:bg-slate-800 border-none h-11"
-                        />
+                        <Label className="text-[10px] uppercase font-bold text-slate-400">Membership ID (Manual/Auto)</Label>
+                        <div className="flex gap-2">
+                          <Input 
+                            placeholder="e.g. M1024" 
+                            value={newMember.memberId} 
+                            onChange={(e) => setNewMember({...newMember, memberId: e.target.value})}
+                            className="bg-slate-50 dark:bg-slate-800 border-none h-11 flex-1"
+                          />
+                          <Button 
+                            type="button" 
+                            variant="outline" 
+                            onClick={handleGenerateId}
+                            className="h-11 w-11 p-0 rounded-xl border-accent/20 hover:bg-accent/10 hover:text-accent shrink-0"
+                            title="Auto-Generate ID"
+                          >
+                            <Sparkles className="w-4 h-4" />
+                          </Button>
+                        </div>
                       </div>
                       <div className="space-y-2">
                         <Label className="text-[10px] uppercase font-bold text-slate-400">Level</Label>

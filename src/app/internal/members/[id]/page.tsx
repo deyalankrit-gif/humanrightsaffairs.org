@@ -31,7 +31,8 @@ import {
   X,
   Camera,
   Globe,
-  Briefcase
+  Briefcase,
+  Sparkles
 } from 'lucide-react'
 import {
   Popover,
@@ -77,6 +78,14 @@ export default function MemberDetailsPage() {
       setEditForm(profile)
     }
   }, [profile])
+
+  const handleGenerateId = () => {
+    const random = Math.random().toString(36).substring(2, 6).toUpperCase();
+    const year = new Date().getFullYear();
+    const generatedId = `HRAT-${year}-${random}`;
+    setEditForm({ ...editForm, memberId: generatedId });
+    toast({ title: "ID Re-Generated", description: `New Draft ID: ${generatedId}` });
+  }
 
   const handleSave = async () => {
     if (!docRef) return
@@ -240,7 +249,7 @@ export default function MemberDetailsPage() {
                          </div>
                       </div>
                       
-                      <div className="grid md:grid-cols-3 gap-6">
+                      <div className="grid md:grid-cols-2 gap-6">
                          <div className="space-y-2">
                            <Label>Operational Level</Label>
                            <Select value={editForm?.level} onValueChange={(val: any) => setEditForm({...editForm, level: val, stateName: '', districtName: ''})}>
@@ -252,7 +261,28 @@ export default function MemberDetailsPage() {
                              </SelectContent>
                            </Select>
                          </div>
-                         {(editForm?.level === 'State' || editForm?.level === 'District') && (
+                         <div className="space-y-2">
+                            <Label>Membership ID (Manual/Auto)</Label>
+                            <div className="flex gap-2">
+                              <Input 
+                                value={editForm?.memberId} 
+                                onChange={e => setEditForm({...editForm, memberId: e.target.value})} 
+                                className="h-12 rounded-xl flex-1" 
+                              />
+                              <Button 
+                                type="button" 
+                                variant="outline" 
+                                onClick={handleGenerateId}
+                                className="h-12 w-12 p-0 rounded-xl border-accent/20 hover:bg-accent/10 hover:text-accent"
+                              >
+                                <Sparkles className="w-4 h-4" />
+                              </Button>
+                            </div>
+                         </div>
+                      </div>
+
+                      {(editForm?.level === 'State' || editForm?.level === 'District') && (
+                        <div className="grid md:grid-cols-2 gap-6">
                            <div className="space-y-2">
                              <Label className="flex items-center gap-2"><Globe className="w-3 h-3 text-accent" /> State / UT</Label>
                              <Select value={editForm?.stateName} onValueChange={(val) => setEditForm({...editForm, stateName: val, districtName: ''})}>
@@ -262,19 +292,19 @@ export default function MemberDetailsPage() {
                                </SelectContent>
                              </Select>
                            </div>
-                         )}
-                         {editForm?.level === 'District' && editForm?.stateName && (
-                           <div className="space-y-2">
-                             <Label className="flex items-center gap-2"><MapPin className="w-3 h-3 text-accent" /> District</Label>
-                             <Select value={editForm?.districtName} onValueChange={(val) => setEditForm({...editForm, districtName: val})}>
-                               <SelectTrigger className="h-12 rounded-xl"><SelectValue placeholder="Choose District" /></SelectTrigger>
-                               <SelectContent className="max-h-60">
-                                 {(INDIA_DATA[editForm.stateName] || []).map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}
-                               </SelectContent>
-                             </Select>
-                           </div>
-                         )}
-                      </div>
+                           {editForm?.level === 'District' && editForm?.stateName && (
+                             <div className="space-y-2">
+                               <Label className="flex items-center gap-2"><MapPin className="w-3 h-3 text-accent" /> District</Label>
+                               <Select value={editForm?.districtName} onValueChange={(val) => setEditForm({...editForm, districtName: val})}>
+                                 <SelectTrigger className="h-12 rounded-xl"><SelectValue placeholder="Choose District" /></SelectTrigger>
+                                 <SelectContent className="max-h-60">
+                                   {(INDIA_DATA[editForm.stateName] || []).map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}
+                                 </SelectContent>
+                               </Select>
+                             </div>
+                           )}
+                        </div>
+                      )}
 
                       <div className="grid md:grid-cols-2 gap-6">
                         <div className="space-y-2">
