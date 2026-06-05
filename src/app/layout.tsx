@@ -5,6 +5,9 @@ import { FirebaseErrorListener } from '@/components/FirebaseErrorListener';
 import { Toaster } from '@/components/ui/toaster';
 import { ThemeProvider } from '@/components/theme-provider';
 import { PortalSwitcher } from '@/components/portal-switcher';
+import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
+import { AppSidebar } from '@/components/app-sidebar';
+import Image from 'next/image';
 
 export const metadata: Metadata = {
   title: 'Human Rights Affairs Trust (JusticeShield)',
@@ -31,10 +34,27 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <FirebaseClientProvider>
-            <FirebaseErrorListener />
-            <PortalSwitcher />
-            {children}
-            <Toaster />
+            <SidebarProvider>
+              <AppSidebar />
+              <SidebarInset>
+                <header className="flex h-16 shrink-0 items-center gap-2 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 sticky top-0 z-50 transition-all duration-300">
+                  <SidebarTrigger className="-ml-1" />
+                  <div className="flex items-center gap-2">
+                    <div className="relative w-8 h-8">
+                      <Image src="/HRAT%20Logo.jpeg" alt="HRAT Logo" fill className="object-contain" />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-xs font-bold leading-none">HRAT</span>
+                      <span className="text-[8px] font-bold text-accent uppercase tracking-widest">JusticeShield</span>
+                    </div>
+                  </div>
+                </header>
+                <FirebaseErrorListener />
+                <PortalSwitcher />
+                {children}
+                <Toaster />
+              </SidebarInset>
+            </SidebarProvider>
           </FirebaseClientProvider>
         </ThemeProvider>
       </body>
