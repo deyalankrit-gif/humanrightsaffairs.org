@@ -28,7 +28,8 @@ import {
   Sparkles,
   IdCard,
   FileText,
-  Award
+  Award,
+  CalendarClock
 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { 
@@ -71,7 +72,8 @@ export default function InternalMembersDirectory() {
     memberId: '',
     stateName: '',
     districtName: '',
-    joiningDate: ''
+    joiningDate: '',
+    membershipDuration: '1 Year'
   })
 
   // Queries
@@ -117,6 +119,7 @@ export default function InternalMembersDirectory() {
       stateName: app.stateName || '',
       districtName: app.districtName || '',
       designation: app.memberType || '',
+      membershipDuration: app.membershipDuration || '1 Year'
     });
 
     setSyncFlash(true);
@@ -162,7 +165,8 @@ export default function InternalMembersDirectory() {
         memberId: '',
         stateName: '',
         districtName: '',
-        joiningDate: ''
+        joiningDate: '',
+        membershipDuration: '1 Year'
       })
     } catch (error: any) {
       toast({ variant: "destructive", title: "System Error", description: error.message })
@@ -324,24 +328,39 @@ export default function InternalMembersDirectory() {
                       </div>
                     </div>
 
-                    <div className="space-y-2">
-                        <Label className="text-[10px] uppercase font-bold text-slate-400">Membership Date of Issue</Label>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <Button variant="outline" className={cn("w-full justify-start text-left font-normal bg-slate-50 dark:bg-slate-800 border-none h-11", !newMember.joiningDate && "text-muted-foreground")}>
-                              <CalendarIcon className="mr-2 h-4 w-4" />
-                              {newMember.joiningDate ? newMember.joiningDate : "Pick a date"}
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar
-                              mode="single"
-                              selected={parseCommissionDate(newMember.joiningDate)}
-                              onSelect={(date) => setNewMember({...newMember, joiningDate: date ? format(date, "PPP") : ''})}
-                              initialFocus
-                            />
-                          </PopoverContent>
-                        </Popover>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                          <Label className="text-[10px] uppercase font-bold text-slate-400">Date of Issue</Label>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button variant="outline" className={cn("w-full justify-start text-left font-normal bg-slate-50 dark:bg-slate-800 border-none h-11", !newMember.joiningDate && "text-muted-foreground")}>
+                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                {newMember.joiningDate ? newMember.joiningDate : "Pick a date"}
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                              <Calendar
+                                mode="single"
+                                selected={parseCommissionDate(newMember.joiningDate)}
+                                onSelect={(date) => setNewMember({...newMember, joiningDate: date ? format(date, "PPP") : ''})}
+                                initialFocus
+                              />
+                            </PopoverContent>
+                          </Popover>
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-[10px] uppercase font-bold text-slate-400">Term Duration</Label>
+                        <Select value={newMember.membershipDuration} onValueChange={(val) => setNewMember({...newMember, membershipDuration: val})}>
+                          <SelectTrigger className="bg-slate-50 dark:bg-slate-800 border-none h-11">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="1 Year">1 Year</SelectItem>
+                            <SelectItem value="2 Years">2 Years</SelectItem>
+                            <SelectItem value="3 Years">3 Years</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
 
                     {(newMember.level === 'State' || newMember.level === 'District') && (

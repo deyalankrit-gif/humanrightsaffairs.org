@@ -34,7 +34,8 @@ import {
   Sparkles,
   IdCard,
   FileText,
-  Award
+  Award,
+  CalendarClock
 } from 'lucide-react'
 import {
   Popover,
@@ -360,33 +361,52 @@ export default function MemberDetailsPage() {
                 <div className="absolute top-0 right-0 w-32 h-32 bg-accent/10 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-accent/20 transition-colors"></div>
                 <CardHeader className="p-0 mb-8">
                    <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center border border-white/10">
-                    <CalendarIcon className="w-8 h-8 text-accent" />
+                    <CalendarClock className="w-8 h-8 text-accent" />
                    </div>
                 </CardHeader>
                 <div className="space-y-8 relative z-10">
-                  <div className="space-y-1">
-                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Commission Date</p>
-                    {isEditing ? (
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button variant="outline" className={cn("w-full justify-start text-left font-normal bg-white/5 border-white/10 text-white h-12 rounded-xl", !editForm?.joiningDate && "text-muted-foreground")}>
-                            <CalendarIcon className="mr-2 h-4 w-4" />
-                            {editForm?.joiningDate ? editForm.joiningDate : "Pick a date"}
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            mode="single"
-                            selected={parseProfileDate(editForm?.joiningDate)}
-                            onSelect={(date) => setEditForm({...editForm, joiningDate: date ? format(date, "PPP") : ''})}
-                            initialFocus
-                          />
-                        </PopoverContent>
-                      </Popover>
-                    ) : (
-                      <p className="text-3xl font-headline font-bold">{profile.joiningDate || 'Date Unavailable'}</p>
-                    )}
+                  <div className="space-y-6">
+                    <div className="space-y-1">
+                      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Commission Date</p>
+                      {isEditing ? (
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button variant="outline" className={cn("w-full justify-start text-left font-normal bg-white/5 border-white/10 text-white h-12 rounded-xl", !editForm?.joiningDate && "text-muted-foreground")}>
+                              <CalendarIcon className="mr-2 h-4 w-4" />
+                              {editForm?.joiningDate ? editForm.joiningDate : "Pick a date"}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                              mode="single"
+                              selected={parseProfileDate(editForm?.joiningDate)}
+                              onSelect={(date) => setEditForm({...editForm, joiningDate: date ? format(date, "PPP") : ''})}
+                              initialFocus
+                            />
+                          </PopoverContent>
+                        </Popover>
+                      ) : (
+                        <p className="text-3xl font-headline font-bold">{profile.joiningDate || 'Date Unavailable'}</p>
+                      )}
+                    </div>
+                    
+                    <div className="space-y-1">
+                      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Membership Term</p>
+                      {isEditing ? (
+                        <Select value={editForm?.membershipDuration || '1 Year'} onValueChange={(val) => setEditForm({...editForm, membershipDuration: val})}>
+                          <SelectTrigger className="bg-white/5 border-white/10 text-white h-12 rounded-xl"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="1 Year">1 Year Term</SelectItem>
+                            <SelectItem value="2 Years">2 Years Term</SelectItem>
+                            <SelectItem value="3 Years">3 Years Term</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <p className="text-xl font-bold text-white">{profile.membershipDuration || '1 Year'}</p>
+                      )}
+                    </div>
                   </div>
+
                   <div className="space-y-3">
                     <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Operational Status</p>
                     {isEditing ? (

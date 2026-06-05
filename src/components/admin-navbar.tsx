@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useEffect } from 'react'
@@ -17,7 +16,8 @@ import {
   Calendar,
   Handshake,
   MessageSquareWarning,
-  FileText
+  FileText,
+  RefreshCw
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
@@ -46,6 +46,7 @@ export function AdminNavbar() {
     { name: 'Analytics', href: '/internal/analytics', icon: <LayoutDashboard className="w-4 h-4" /> },
     { name: 'Applications', href: '/internal/applications', icon: <FileText className="w-4 h-4" /> },
     { name: 'Personnel', href: '/internal/members', icon: <Users className="w-4 h-4" /> },
+    { name: 'Renewals', href: '/internal/renewals', icon: <RefreshCw className="w-4 h-4" /> },
     { name: 'Grievances', href: '/internal/grievances', icon: <MessageSquareWarning className="w-4 h-4" /> },
     { name: 'Meetings', href: '/internal/meetings', icon: <Handshake className="w-4 h-4" /> },
     { name: 'Events', href: '/internal/events', icon: <Calendar className="w-4 h-4" /> },
@@ -69,7 +70,7 @@ export function AdminNavbar() {
           </Link>
 
           {/* Desktop Links */}
-          <div className="hidden md:flex items-center gap-2 lg:gap-4">
+          <div className="hidden md:flex items-center gap-1 lg:gap-2">
             {navLinks.map((link) => {
               const isActive = pathname === link.href
               return (
@@ -77,7 +78,7 @@ export function AdminNavbar() {
                   key={link.name} 
                   href={link.href}
                   className={cn(
-                    "flex items-center gap-2 text-sm font-bold transition-all py-2 px-4 rounded-xl relative",
+                    "flex items-center gap-2 text-[11px] lg:text-sm font-bold transition-all py-2 px-3 lg:px-4 rounded-xl relative",
                     isActive 
                       ? "text-accent" 
                       : "text-slate-400 hover:text-white hover:bg-white/5"
@@ -125,7 +126,7 @@ export function AdminNavbar() {
                   <p className="text-accent text-[10px] font-bold uppercase tracking-widest">Administrative Access</p>
                 </SheetHeader>
                 
-                <div className="flex-1 p-6 space-y-4">
+                <div className="flex-1 p-6 space-y-4 overflow-y-auto">
                   <div className="p-4 bg-white/5 rounded-2xl border border-white/10 mb-6">
                     <p className="text-[10px] text-slate-500 font-bold uppercase mb-1">Authenticated Personnel</p>
                     <p className="text-xs font-bold text-emerald-400 truncate">{user?.email}</p>
