@@ -366,7 +366,9 @@ export default function InternalMembersDirectory() {
                             <SelectValue placeholder="Choose District" />
                           </SelectTrigger>
                           <SelectContent className="max-h-60">
-                            {(INDIA_DATA[newMember.stateName] || []).map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}
+                            {(newMember.stateName ? INDIA_DATA[newMember.stateName] : []).map(d => (
+                              <SelectItem key={d} value={d}>{d}</SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
                       </div>
@@ -524,7 +526,7 @@ export default function InternalMembersDirectory() {
                             <Link href={`/internal/members/${member.id}/appointment`}>
                               <Button variant="outline" className="w-full rounded-xl h-10 px-4 font-bold border-indigo-500 text-indigo-600 hover:bg-indigo-500 hover:text-white transition-all flex gap-2 text-xs">
                                 <FileText className="w-3.5 h-3.5" /> Appointment
-                              </Link>
+                              </Button>
                             </Link>
                             <Link href={`/internal/members/${member.id}/certificate`}>
                               <Button variant="outline" className="w-full rounded-xl h-10 px-4 font-bold border-emerald-500 text-emerald-600 hover:bg-emerald-500 hover:text-white transition-all flex gap-2 text-xs">
