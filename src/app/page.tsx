@@ -80,6 +80,17 @@ export default function Home() {
           <div className="absolute inset-0 bg-gradient-to-b from-primary/60 via-primary/40 to-primary/80 dark:from-slate-950/80 dark:via-slate-950/60 dark:to-slate-950/90"></div>
         </div>
 
+        {/* Prominent Logo in Top Left of Hero (Visible on Desktop) */}
+        <div className="absolute top-8 left-8 z-20 hidden xl:flex items-center gap-4 animate-in fade-in slide-in-from-left-4 duration-1000">
+          <div className="relative w-20 h-20 bg-white rounded-3xl p-2 shadow-2xl border border-white/20">
+            <Image src="/HRAT%20Logo.jpeg" alt="HRAT Logo" fill className="object-contain" />
+          </div>
+          <div className="flex flex-col text-white">
+            <span className="font-headline font-bold text-3xl leading-none tracking-tight">HRAT</span>
+            <span className="text-[10px] font-bold text-accent uppercase tracking-[0.3em]">JusticeShield</span>
+          </div>
+        </div>
+
         <div className="container mx-auto px-4 relative z-10 text-white text-center">
           <div className="max-w-full space-y-4 md:space-y-6 flex flex-col items-center">
             
