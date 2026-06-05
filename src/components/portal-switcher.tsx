@@ -2,14 +2,17 @@
 
 import React from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { useUser } from '@/firebase'
+import { useRouter, usePathname } from 'next/navigation'
+import { useUser, useAuth } from '@/firebase'
+import { signOut } from 'firebase/auth'
 import { Button } from '@/components/ui/button'
-import { LayoutDashboard, ExternalLink, ShieldCheck } from 'lucide-react'
+import { LayoutDashboard, ExternalLink, LogOut, ShieldCheck } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 export function PortalSwitcher() {
   const { user } = useUser()
+  const auth = useAuth()
+  const router = useRouter()
   const pathname = usePathname()
   
   if (!user) return null
@@ -19,8 +22,13 @@ export function PortalSwitcher() {
 
   if (isLoginPage) return null
 
+  const handleSignOut = async () => {
+    await signOut(auth)
+    router.push('/internal/login')
+  }
+
   return (
-    <div className="fixed bottom-6 left-6 z-[100] animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="fixed bottom-6 left-6 z-[100] flex flex-col gap-3 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <Link href={isAdminPortal ? "/" : "/internal/analytics"}>
         <Button 
           className={cn(
@@ -40,6 +48,15 @@ export function PortalSwitcher() {
           <div className="ml-2 w-2 h-2 rounded-full bg-emerald-500 animate-pulse hidden md:block"></div>
         </Button>
       </Link>
+
+      <Button 
+        onClick={handleSignOut}
+        variant="outline"
+        className="h-12 px-6 rounded-xl shadow-lg flex items-center gap-3 font-bold text-xs transition-all hover:bg-red-500 hover:text-white border-red-500/20 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md text-red-500 group"
+      >
+        <LogOut className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+        <span className="uppercase tracking-widest">Secure Sign Out</span>
+      </Button>
     </div>
   )
 }

@@ -3,16 +3,11 @@
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { useRouter, usePathname } from 'next/navigation'
-import { signOut } from 'firebase/auth'
-import { useAuth, useUser } from '@/firebase'
+import { usePathname } from 'next/navigation'
 import { 
   LayoutDashboard, 
   Users, 
-  LogOut, 
-  ShieldCheck, 
   Menu,
-  X,
   Calendar,
   Handshake,
   MessageSquareWarning,
@@ -23,11 +18,10 @@ import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { cn } from '@/lib/utils'
 import { ThemeToggle } from './theme-toggle'
+import { useUser } from '@/firebase'
 
 export function AdminNavbar() {
   const { user } = useUser()
-  const auth = useAuth()
-  const router = useRouter()
   const pathname = usePathname()
   const [isScrolled, setIsScrolled] = useState(false)
 
@@ -36,11 +30,6 @@ export function AdminNavbar() {
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
-
-  const handleLogout = async () => {
-    await signOut(auth)
-    router.push('/internal/login')
-  }
 
   const navLinks = [
     { name: 'Analytics', href: '/internal/analytics', icon: <LayoutDashboard className="w-4 h-4" /> },
@@ -103,74 +92,55 @@ export function AdminNavbar() {
 
           <div className="flex items-center gap-2">
             <ThemeToggle className="text-white hover:bg-white/10" />
+            
+            {/* Mobile Menu Trigger */}
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="xl:hidden text-white">
+                  <Menu className="w-6 h-6" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="bg-slate-900 border-l-white/10 text-white p-0">
+                <div className="flex flex-col h-full">
+                  <SheetHeader className="p-6 border-b border-white/5 text-left">
+                    <SheetTitle className="text-white font-headline text-2xl">Control Center</SheetTitle>
+                    <p className="text-accent text-[10px] font-bold uppercase tracking-widest">Administrative Access</p>
+                  </SheetHeader>
+                  
+                  <div className="flex-1 p-6 space-y-4 overflow-y-auto">
+                    <div className="p-4 bg-white/5 rounded-2xl border border-white/10 mb-6">
+                      <p className="text-[10px] text-slate-500 font-bold uppercase mb-1">Authenticated Personnel</p>
+                      <p className="text-xs font-bold text-emerald-400 truncate">{user?.email}</p>
+                    </div>
 
-            <Button 
-              onClick={handleLogout}
-              variant="ghost" 
-              className="hidden md:flex text-red-400 hover:text-red-300 hover:bg-red-400/10 rounded-xl h-10 px-4 text-xs font-bold gap-2 border border-red-500/20"
-            >
-              <LogOut className="w-3.5 h-3.5" />
-              Sign Out
-            </Button>
-          </div>
-
-          {/* Mobile Menu */}
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="xl:hidden text-white">
-                <Menu className="w-6 h-6" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="bg-slate-900 border-l-white/10 text-white p-0">
-              <div className="flex flex-col h-full">
-                <SheetHeader className="p-6 border-b border-white/5 text-left">
-                  <SheetTitle className="text-white font-headline text-2xl">Control Center</SheetTitle>
-                  <p className="text-accent text-[10px] font-bold uppercase tracking-widest">Administrative Access</p>
-                </SheetHeader>
-                
-                <div className="flex-1 p-6 space-y-4 overflow-y-auto">
-                  <div className="p-4 bg-white/5 rounded-2xl border border-white/10 mb-6">
-                    <p className="text-[10px] text-slate-500 font-bold uppercase mb-1">Authenticated Personnel</p>
-                    <p className="text-xs font-bold text-emerald-400 truncate">{user?.email}</p>
+                    {navLinks.map((link) => {
+                      const isActive = pathname === link.href
+                      return (
+                        <Link 
+                          key={link.name} 
+                          href={link.href} 
+                          className={cn(
+                            "flex items-center gap-4 p-4 rounded-2xl text-lg font-bold transition-all relative border border-transparent",
+                            isActive 
+                              ? "text-accent bg-white/5" 
+                              : "hover:bg-white/5 text-slate-300"
+                          )}
+                        >
+                          <div className={cn("p-2 rounded-lg", isActive ? "bg-primary/10" : "bg-white/5")}>
+                            {link.icon}
+                          </div>
+                          {link.name}
+                          {isActive && (
+                             <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-accent rounded-full"></span>
+                          )}
+                        </Link>
+                      )
+                    })}
                   </div>
-
-                  {navLinks.map((link) => {
-                    const isActive = pathname === link.href
-                    return (
-                      <Link 
-                        key={link.name} 
-                        href={link.href} 
-                        className={cn(
-                          "flex items-center gap-4 p-4 rounded-2xl text-lg font-bold transition-all relative border border-transparent",
-                          isActive 
-                            ? "text-accent bg-white/5" 
-                            : "hover:bg-white/5 text-slate-300"
-                        )}
-                      >
-                        <div className={cn("p-2 rounded-lg", isActive ? "bg-primary/10" : "bg-white/5")}>
-                          {link.icon}
-                        </div>
-                        {link.name}
-                        {isActive && (
-                           <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-accent rounded-full"></span>
-                        )}
-                      </Link>
-                    )
-                  })}
                 </div>
-
-                <div className="p-6 border-t border-white/5 space-y-3">
-                  <Button 
-                    onClick={handleLogout}
-                    className="w-full bg-red-500/10 hover:bg-red-500/20 text-red-500 font-bold h-14 rounded-2xl gap-3"
-                  >
-                    <LogOut className="w-5 h-5" />
-                    Secure Sign Out
-                  </Button>
-                </div>
-              </div>
-            </SheetContent>
-          </Sheet>
+              </SheetContent>
+            </Sheet>
+          </div>
         </div>
       </div>
     </nav>
