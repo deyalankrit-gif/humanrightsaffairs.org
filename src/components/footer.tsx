@@ -1,9 +1,13 @@
+
 import Image from 'next/image'
 import { Mail, Phone, MapPin, Facebook, Twitter, Instagram, Youtube } from 'lucide-react'
 import Link from 'next/link'
 import { DonationDialog } from './donation-dialog'
+import { PlaceHolderImages } from '@/lib/placeholder-images'
 
 export function Footer() {
+  const donationFooterImg = PlaceHolderImages.find(img => img.id === 'donation-footer-image');
+
   return (
     <footer className="bg-primary text-primary-foreground pt-20 pb-10">
       <div className="container mx-auto px-4">
@@ -32,10 +36,11 @@ export function Footer() {
               <DonationDialog initialStep="qr">
                 <button className="block w-40 h-28 relative group cursor-pointer overflow-hidden rounded-xl bg-transparent border-none p-0 outline-none transition-transform hover:scale-105 active:scale-95">
                   <Image 
-                    src="/donate.jpeg" 
+                    src={donationFooterImg?.imageUrl || "https://picsum.photos/seed/donation/400/300"} 
                     alt="Donate to HRAT" 
                     fill 
                     className="object-contain"
+                    data-ai-hint={donationFooterImg?.imageHint || "donation support"}
                   />
                   <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                 </button>

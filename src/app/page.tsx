@@ -68,7 +68,7 @@ export default function Home() {
     <main className="min-h-screen relative overflow-x-hidden">
       <BackgroundDecor />
       
-      <section className="relative min-h-screen flex flex-col items-center pt-28 md:pt-36 pb-20">
+      <section className="relative min-h-screen flex flex-col items-center pt-20 md:pt-28 pb-20">
         <div className="absolute inset-0 z-0">
           <Image 
             src="/Human%20R2.jpeg" 
@@ -80,19 +80,19 @@ export default function Home() {
           <div className="absolute inset-0 bg-gradient-to-b from-primary/60 via-primary/40 to-primary/80 dark:from-slate-950/80 dark:via-slate-950/60 dark:to-slate-950/90"></div>
         </div>
 
-        {/* Prominent Logo in Top Left of Hero (Visible on Desktop) */}
+        {/* Transparent Logo in Top Left of Hero */}
         <div className="absolute top-8 left-8 z-20 hidden xl:flex items-center gap-4 animate-in fade-in slide-in-from-left-4 duration-1000">
-          <div className="relative w-20 h-20">
+          <div className="relative w-16 h-16">
             <Image src="/HRAT%20Logo.jpeg" alt="HRAT Logo" fill className="object-contain" />
           </div>
           <div className="flex flex-col text-white">
-            <span className="font-headline font-bold text-3xl leading-none tracking-tight">HRAT</span>
-            <span className="text-[10px] font-bold text-accent uppercase tracking-[0.3em]">JusticeShield</span>
+            <span className="font-headline font-bold text-2xl leading-none tracking-tight">HRAT</span>
+            <span className="text-[9px] font-bold text-accent uppercase tracking-[0.3em]">JusticeShield</span>
           </div>
         </div>
 
         <div className="container mx-auto px-4 relative z-10 text-white text-center">
-          <div className="max-w-full space-y-4 md:space-y-6 flex flex-col items-center">
+          <div className="max-w-full space-y-4 md:space-y-6 flex flex-col items-center -mt-8 md:-mt-12">
             
             <div className="flex flex-col items-center gap-4">
               <IndianFlag />
