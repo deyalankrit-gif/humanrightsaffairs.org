@@ -6,7 +6,7 @@ import { useRouter, usePathname } from 'next/navigation'
 import { useUser, useAuth } from '@/firebase'
 import { signOut } from 'firebase/auth'
 import { Button } from '@/components/ui/button'
-import { LayoutDashboard, ExternalLink, LogOut, ShieldCheck, UserCircle } from 'lucide-react'
+import { LayoutDashboard, ExternalLink, LogOut, UserCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 export function PortalSwitcher() {
@@ -29,8 +29,8 @@ export function PortalSwitcher() {
 
   return (
     <div className="fixed bottom-6 left-6 z-[100] flex flex-col gap-3 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-[280px]">
-      {/* Session Information Card - Background is now 90% transparent (10% opacity) */}
-      <div className="bg-slate-900/10 backdrop-blur-2xl border border-slate-200/20 dark:border-white/10 p-4 rounded-2xl shadow-2xl space-y-3">
+      {/* Session Information Card - Background is now 99% transparent (1% opacity) */}
+      <div className="bg-slate-900/[0.01] backdrop-blur-2xl border border-slate-200/20 dark:border-white/10 p-4 rounded-2xl shadow-2xl space-y-3">
         <div className="flex items-center gap-3">
           <div className="bg-emerald-500/20 p-2 rounded-xl border border-emerald-500/20">
             <UserCircle className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
