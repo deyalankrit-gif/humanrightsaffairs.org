@@ -366,7 +366,7 @@ export function DonationDialog({ children, defaultAmount, initialStep = 'details
                 )}
               </div>
 
-              <Button type="submit" className="w-full bg-accent text-primary-foreground font-bold py-7 text-xl rounded-2xl hover:bg-secondary shadow-xl shadow-accent/20 transition-all hover:-translate-y-1" disabled={loading}>
+              <Button type="submit" className="w-full bg-accent text-white font-bold py-7 text-xl rounded-2xl hover:bg-secondary hover:text-white shadow-xl shadow-accent/20 transition-all hover:-translate-y-1" disabled={loading}>
                 {loading ? <Loader2 className="animate-spin mr-2" /> : <>Process Contribution <ArrowRight className="ml-2 w-6 h-6" /></>}
               </Button>
             </form>
@@ -397,7 +397,7 @@ export function DonationDialog({ children, defaultAmount, initialStep = 'details
                 <Button 
                   onClick={() => handleFinalSubmission(donationData)}
                   disabled={loading}
-                  className="w-full bg-primary text-primary-foreground font-bold py-7 text-xl rounded-2xl hover:bg-secondary shadow-xl shadow-primary/20"
+                  className="w-full bg-primary text-white font-bold py-7 text-xl rounded-2xl hover:bg-secondary hover:text-white shadow-xl shadow-primary/20"
                 >
                   {loading ? <Loader2 className="animate-spin mr-2" /> : "Verify & Generate Receipt"}
                 </Button>
@@ -496,7 +496,7 @@ export function DonationDialog({ children, defaultAmount, initialStep = 'details
             </div>
 
             <div className="flex gap-4">
-              <Button className="flex-1 gap-2 bg-primary text-primary-foreground py-8 rounded-2xl hover:bg-secondary text-lg shadow-xl shadow-primary/20" onClick={handlePrint}>
+              <Button className="flex-1 gap-2 bg-primary text-white py-8 rounded-2xl hover:bg-secondary hover:text-white text-lg shadow-xl shadow-primary/20" onClick={handlePrint}>
                 <Printer className="w-6 h-6" /> Print Receipt
               </Button>
               <Button variant="outline" className="flex-1 gap-2 border-slate-200 py-8 rounded-2xl text-lg hover:bg-slate-50" onClick={handleDownload}>

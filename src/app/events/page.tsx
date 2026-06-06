@@ -208,16 +208,16 @@ export default function EventsPage() {
         <div className="absolute top-0 right-0 w-1/2 h-full bg-accent/10 -skew-x-12"></div>
         <div className="container mx-auto px-4 relative z-10 text-center">
           <div className="max-w-3xl mx-auto">
-            <Badge className="bg-accent text-primary font-bold mb-6 px-4 py-1 border-none">Mission Impact</Badge>
+            <Badge className="bg-accent text-white font-bold mb-6 px-4 py-1 border-none">Mission Impact</Badge>
             <h1 className="text-5xl md:text-7xl font-headline font-bold mb-6">Our <span className="text-accent italic">Event</span> Gallery</h1>
-            <p className="text-xl opacity-80 leading-relaxed mb-8">
+            <p className="text-xl opacity-80 leading-relaxed mb-8 text-primary-foreground">
               Witness the journey of JusticeShield as we traverse the length and breadth of India to protect, educate, and empower.
             </p>
 
             {isAdmin && (
               <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button className="bg-accent text-primary-foreground font-bold rounded-2xl h-14 px-10 flex gap-2 hover:bg-secondary shadow-2xl shadow-accent/20 mx-auto">
+                  <Button className="bg-accent text-white font-bold rounded-2xl h-14 px-10 flex gap-2 hover:bg-secondary hover:text-white shadow-2xl shadow-accent/20 mx-auto">
                     <Plus className="w-6 h-6" /> Create New Event Entry
                   </Button>
                 </DialogTrigger>
@@ -295,7 +295,7 @@ export default function EventsPage() {
                     </div>
                   </div>
                   <DialogFooter>
-                    <Button onClick={handleAddEvent} disabled={isActionLoading} className="w-full h-12 rounded-xl bg-accent text-primary-foreground font-bold hover:bg-secondary">
+                    <Button onClick={handleAddEvent} disabled={isActionLoading} className="w-full h-12 rounded-xl bg-accent text-white font-bold hover:bg-secondary hover:text-white">
                       {isActionLoading ? <Loader2 className="animate-spin" /> : "Publish Event"}
                     </Button>
                   </DialogFooter>
@@ -318,7 +318,7 @@ export default function EventsPage() {
                   className={cn(
                     "rounded-full px-6 font-bold transition-all border-slate-200 dark:border-slate-700",
                     filter === cat 
-                      ? "bg-accent text-slate-900 shadow-lg border-accent" 
+                      ? "bg-accent text-slate-900 shadow-lg border-accent hover:bg-secondary hover:text-white" 
                       : "text-primary dark:text-slate-300 hover:bg-secondary hover:text-white hover:border-secondary"
                   )}
                 >
@@ -445,7 +445,7 @@ export default function EventsPage() {
                                       <Label>Description</Label>
                                       <Textarea value={editEvent.description} onChange={e => setEditEvent({...editEvent, description: e.target.value})} className="rounded-xl" />
                                     </div>
-                                    <Button onClick={handleUpdateEvent} disabled={isActionLoading} className="w-full mt-4 h-12 rounded-xl bg-accent text-primary-foreground font-bold hover:bg-secondary">
+                                    <Button onClick={handleUpdateEvent} disabled={isActionLoading} className="w-full mt-4 h-12 rounded-xl bg-accent text-white font-bold hover:bg-secondary hover:text-white">
                                       {isActionLoading ? <Loader2 className="animate-spin mr-2" /> : "Save Changes"}
                                     </Button>
                                   </div>

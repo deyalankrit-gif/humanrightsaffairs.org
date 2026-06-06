@@ -181,7 +181,7 @@ export default function LeadershipPage() {
           
           {isAdmin && (
             <Dialog>
-              <DialogTrigger asChild><Button className="bg-accent text-primary-foreground font-bold rounded-2xl h-14 px-8 flex gap-2 hover:bg-secondary shadow-xl shadow-accent/20 mx-auto"><Plus className="w-5 h-5" /> Commission Leadership Member</Button></DialogTrigger>
+              <DialogTrigger asChild><Button className="bg-accent text-white font-bold rounded-2xl h-14 px-8 flex gap-2 hover:bg-secondary hover:text-white shadow-xl shadow-accent/20 mx-auto"><Plus className="w-5 h-5" /> Commission Leadership Member</Button></DialogTrigger>
               <DialogContent className="bg-white dark:bg-slate-900 rounded-[2rem] border-none shadow-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader><DialogTitle>New Leader Profile</DialogTitle></DialogHeader>
                 <div className="space-y-4 py-4">
@@ -229,7 +229,7 @@ export default function LeadershipPage() {
                     </div>
                   )}
                 </div>
-                <DialogFooter><Button onClick={handleAdd} disabled={isActionLoading} className="w-full h-12 rounded-xl bg-accent text-primary-foreground font-bold hover:bg-secondary">Publish Profile</Button></DialogFooter>
+                <DialogFooter><Button onClick={handleAdd} disabled={isActionLoading} className="w-full h-12 rounded-xl bg-accent text-white font-bold hover:bg-secondary hover:text-white">Publish Profile</Button></DialogFooter>
               </DialogContent>
             </Dialog>
           )}
@@ -244,7 +244,7 @@ export default function LeadershipPage() {
             <>
               {/* Central Council Section */}
               <div className="flex flex-col items-center mb-32">
-                <div className="flex items-center gap-3 text-primary dark:text-white font-black uppercase tracking-[0.25em] mb-12">
+                <div className="flex items-center gap-3 text-primary dark:text-white font-black uppercase tracking-[0.25em] mb-12 text-center">
                   <Award className="w-8 h-8 text-accent md:w-10 md:h-10" />
                   <span className="text-xl md:text-3xl lg:text-4xl">Central Council</span>
                 </div>
@@ -416,7 +416,7 @@ export default function LeadershipPage() {
                   </Select>
                 </div>
               )}
-              <Button onClick={handleUpdate} disabled={isActionLoading} className="w-full h-12 rounded-xl mt-4 bg-accent text-primary-foreground hover:bg-secondary">Save Changes</Button>
+              <Button onClick={handleUpdate} disabled={isActionLoading} className="w-full h-12 rounded-xl mt-4 bg-accent text-white hover:bg-secondary hover:text-white">Save Changes</Button>
             </div>
           )}
         </DialogContent>

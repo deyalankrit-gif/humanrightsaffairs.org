@@ -292,7 +292,7 @@ export default function MembersPage() {
           {isAdmin && (
             <Dialog>
               <DialogTrigger asChild>
-                <Button className="bg-accent text-primary-foreground font-bold rounded-2xl h-14 px-10 flex gap-2 hover:bg-secondary shadow-2xl shadow-accent/20 mx-auto transform hover:scale-105 transition-all">
+                <Button className="bg-accent text-white font-bold rounded-2xl h-14 px-10 flex gap-2 hover:bg-secondary hover:text-white shadow-2xl shadow-accent/20 mx-auto transform hover:scale-105 transition-all">
                   <Plus className="w-6 h-6" /> Live Editor: Commission New Membership
                 </Button>
               </DialogTrigger>
@@ -411,7 +411,7 @@ export default function MembersPage() {
                         <Label>Issue Date *</Label>
                         <Popover>
                           <PopoverTrigger asChild>
-                            <Button variant="outline" className={cn("w-full justify-start text-left font-normal h-10 rounded-xl", !newMember.joiningDate && "text-muted-foreground")}>
+                            <Button variant="outline" className={cn("w-full justify-start text-left font-normal h-10 rounded-lg", !newMember.joiningDate && "text-muted-foreground")}>
                               <CalendarIcon className="mr-2 h-4 w-4" />
                               {newMember.joiningDate ? newMember.joiningDate : "Pick a date"}
                             </Button>
@@ -477,7 +477,7 @@ export default function MembersPage() {
                   </div>
                 </div>
                 <DialogFooter>
-                  <Button onClick={handleAddMember} disabled={isAdding} className="w-full h-12 rounded-xl bg-primary text-primary-foreground font-bold hover:bg-secondary">
+                  <Button onClick={handleAddMember} disabled={isAdding} className="w-full h-12 rounded-xl bg-primary text-white font-bold hover:bg-secondary hover:text-white">
                     {isAdding ? <Loader2 className="animate-spin mr-2" /> : <Plus className="w-4 h-4 mr-2" />}
                     Confirm Commissioning
                   </Button>
@@ -501,7 +501,7 @@ export default function MembersPage() {
                     className={cn(
                       "rounded-full px-4 h-8 text-[10px] font-bold transition-all border-slate-200 dark:border-slate-700",
                       levelFilter === level && !selectedState
-                        ? "bg-accent text-slate-900 shadow-sm border-accent" 
+                        ? "bg-accent text-slate-900 shadow-sm border-accent hover:bg-secondary hover:text-white" 
                         : "text-primary dark:text-slate-300 hover:bg-secondary hover:text-white hover:border-secondary"
                     )}
                   >
@@ -517,7 +517,7 @@ export default function MembersPage() {
                   <DropdownMenuTrigger asChild>
                     <Button variant={selectedState ? "default" : "outline"} className={cn(
                       "rounded-full px-4 h-8 text-[10px] font-bold flex items-center gap-2 transition-all",
-                      selectedState ? "bg-accent text-slate-900" : "text-primary dark:text-white border-slate-200 dark:border-slate-700 hover:bg-secondary hover:text-white hover:border-secondary"
+                      selectedState ? "bg-accent text-slate-900 hover:bg-secondary hover:text-white" : "text-primary dark:text-white border-slate-200 dark:border-slate-700 hover:bg-secondary hover:text-white hover:border-secondary"
                     )}>
                       {selectedState || "Filter by State"} <ChevronDown className="w-3 h-3 opacity-50" />
                     </Button>
@@ -534,7 +534,7 @@ export default function MembersPage() {
                     <DropdownMenuTrigger asChild>
                       <Button variant={selectedDistrict ? "default" : "outline"} className={cn(
                         "rounded-full px-4 h-8 text-[10px] font-bold flex items-center gap-2 animate-in fade-in slide-in-from-left-2 transition-all",
-                        selectedDistrict ? "bg-accent text-slate-900" : "text-primary dark:text-white border-slate-200 dark:border-slate-700 hover:bg-secondary hover:text-white hover:border-secondary"
+                        selectedDistrict ? "bg-accent text-slate-900 hover:bg-secondary hover:text-white" : "text-primary dark:text-white border-slate-200 dark:border-slate-700 hover:bg-secondary hover:text-white hover:border-secondary"
                       )}>
                         {selectedDistrict || "Select District"} <ChevronDown className="w-3 h-3 opacity-50" />
                       </Button>

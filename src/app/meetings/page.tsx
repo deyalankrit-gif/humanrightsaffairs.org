@@ -317,7 +317,7 @@ export default function MeetingsPage() {
         </div>
         <div className="container mx-auto px-4 relative z-10 text-center">
           <div className="max-w-3xl mx-auto space-y-6">
-            <Badge className="bg-accent text-primary font-bold px-4 py-1.5 uppercase tracking-widest text-xs border-none">Organizational Assemblies</Badge>
+            <Badge className="bg-accent text-white font-bold px-4 py-1.5 uppercase tracking-widest text-xs border-none">Organizational Assemblies</Badge>
             <h1 className="text-5xl md:text-7xl font-headline font-bold mb-6 text-primary-foreground">General <span className="text-accent italic">Meetings</span></h1>
             <p className="text-xl opacity-80 leading-relaxed max-w-2xl mx-auto text-lg mb-8 text-primary-foreground">
               A transparent record of our democratic decision-making processes, assemblies, and strategic planning sessions.
@@ -326,7 +326,7 @@ export default function MeetingsPage() {
             {isAdmin && (
               <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button className="bg-accent text-primary-foreground font-bold rounded-2xl h-14 px-10 flex gap-2 hover:bg-secondary shadow-2xl shadow-accent/20 mx-auto transform hover:scale-105 transition-all">
+                  <Button className="bg-accent text-white font-bold rounded-2xl h-14 px-10 flex gap-2 hover:bg-secondary hover:text-white shadow-2xl shadow-accent/20 mx-auto transform hover:scale-105 transition-all">
                     <Plus className="w-6 h-6" /> Live Editor: Publish New Event
                   </Button>
                 </DialogTrigger>
@@ -455,7 +455,7 @@ export default function MeetingsPage() {
                     </div>
                   </div>
                   <DialogFooter>
-                    <Button onClick={handleAddMeeting} disabled={isActionLoading} className="w-full bg-accent text-primary-foreground font-bold h-12 rounded-xl text-lg shadow-xl shadow-accent/20 hover:bg-secondary">
+                    <Button onClick={handleAddMeeting} disabled={isActionLoading} className="w-full bg-accent text-white font-bold h-12 rounded-xl text-lg shadow-xl shadow-accent/20 hover:bg-secondary hover:text-white">
                       {isActionLoading ? <Loader2 className="animate-spin" /> : "Publish to Archive"}
                     </Button>
                   </DialogFooter>
@@ -478,7 +478,7 @@ export default function MeetingsPage() {
                   className={cn(
                     "rounded-full px-6 font-bold transition-all border-slate-200 dark:border-slate-700",
                     filter === lvl.value 
-                      ? "bg-accent text-slate-900 shadow-lg border-accent" 
+                      ? "bg-accent text-slate-900 shadow-lg border-accent hover:bg-secondary hover:text-white" 
                       : "text-primary dark:text-slate-300 hover:bg-secondary hover:text-white hover:border-secondary"
                   )}
                 >
@@ -634,7 +634,7 @@ export default function MeetingsPage() {
                               </div>
                             )}
                             <DialogFooter>
-                              <Button onClick={handleUpdateMeeting} disabled={isActionLoading} className="w-full bg-primary text-primary-foreground h-12 rounded-xl font-bold hover:bg-secondary">Save Changes</Button>
+                              <Button onClick={handleUpdateMeeting} disabled={isActionLoading} className="w-full bg-primary text-white h-12 rounded-xl font-bold hover:bg-secondary hover:text-white">Save Changes</Button>
                             </DialogFooter>
                           </DialogContent>
                         </Dialog>
@@ -650,7 +650,7 @@ export default function MeetingsPage() {
                             <AlertDialogDescription>Permanently remove this assembly record from the public archives?</AlertDialogDescription>
                             <AlertDialogFooter>
                               <AlertDialogCancel className="rounded-xl">Keep Record</AlertDialogCancel>
-                              <AlertDialogAction onClick={() => handleDeleteMeeting(meeting.id)} className="bg-red-500 hover:bg-red-600 rounded-xl border-none">Purge</AlertDialogAction>
+                              <AlertDialogAction onClick={() => handleDeleteMeeting(meeting.id)} className="bg-red-500 hover:bg-red-600 rounded-xl border-none text-white font-bold">Purge</AlertDialogAction>
                             </AlertDialogFooter>
                           </AlertDialogContent>
                         </AlertDialog>
@@ -840,7 +840,7 @@ export default function MeetingsPage() {
                    </div>
                 </div>
                 <div className="absolute top-4 left-6">
-                   <Badge className="bg-accent text-primary-foreground font-bold uppercase text-[9px] px-3 py-1 rounded-full border-none shadow-lg">
+                   <Badge className="bg-accent text-white font-bold uppercase text-[9px] px-3 py-1 rounded-full border-none shadow-lg">
                       {selectedLeaderProfile.level === 'Central' ? 'Central Council' : `${selectedLeaderProfile.level} Council`}
                    </Badge>
                 </div>

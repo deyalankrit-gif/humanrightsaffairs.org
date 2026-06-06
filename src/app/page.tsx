@@ -87,7 +87,7 @@ export default function Home() {
           </div>
           <div className="flex flex-col text-white">
             <span className="font-headline font-bold text-2xl leading-none tracking-tight">HRAT</span>
-            <span className="text-[9px] font-bold text-accent uppercase tracking-[0.3em]">JusticeShield</span>
+            <span className="text-[10px] font-bold text-accent uppercase tracking-[0.3em]">JusticeShield</span>
           </div>
         </div>
 
@@ -131,7 +131,7 @@ export default function Home() {
             
             <div className="flex flex-wrap gap-4 md:gap-6 pt-8 justify-center">
               <DonationDialog>
-                <Button size="lg" className="bg-accent text-primary-foreground font-bold hover:bg-secondary px-6 py-5 md:px-10 md:py-7 rounded-xl text-sm md:text-lg shadow-xl shadow-accent/20 transition-all hover:-translate-y-1">
+                <Button size="lg" className="bg-accent text-white font-bold hover:bg-secondary hover:text-white px-6 py-5 md:px-10 md:py-7 rounded-xl text-sm md:text-lg shadow-xl shadow-accent/20 transition-all hover:-translate-y-1">
                   Get Free Legal Aid <ArrowRight className="ml-2 w-4 h-4 md:w-5 md:h-5" />
                 </Button>
               </DonationDialog>
@@ -275,17 +275,17 @@ export default function Home() {
                   </div>
                   <div className="flex flex-wrap justify-center gap-3 md:gap-4">
                     <DonationDialog defaultAmount="100" initialStep="qr">
-                      <Button variant="outline" className="border-accent/30 text-white hover:bg-secondary hover:text-primary-foreground rounded-full px-6 md:px-8 font-bold h-10 md:h-12 transition-all hover:scale-105 active:scale-95 bg-white/5 backdrop-blur-sm">
+                      <Button variant="outline" className="border-accent/30 text-white hover:bg-secondary hover:text-white rounded-full px-6 md:px-8 font-bold h-10 md:h-12 transition-all hover:scale-105 active:scale-95 bg-white/5 backdrop-blur-sm">
                         ₹100
                       </Button>
                     </DonationDialog>
                     <DonationDialog defaultAmount="500" initialStep="qr">
-                      <Button variant="outline" className="border-accent/30 text-white hover:bg-secondary hover:text-primary-foreground rounded-full px-6 md:px-8 font-bold h-10 md:h-12 transition-all hover:scale-105 active:scale-95 bg-white/5 backdrop-blur-sm">
+                      <Button variant="outline" className="border-accent/30 text-white hover:bg-secondary hover:text-white rounded-full px-6 md:px-8 font-bold h-10 md:h-12 transition-all hover:scale-105 active:scale-95 bg-white/5 backdrop-blur-sm">
                         ₹500
                       </Button>
                     </DonationDialog>
                     <DonationDialog defaultAmount="1000" initialStep="qr">
-                      <Button variant="outline" className="border-accent/30 text-white hover:bg-secondary hover:text-primary-foreground rounded-full px-6 md:px-8 font-bold h-10 md:h-12 transition-all hover:scale-105 active:scale-95 bg-white/5 backdrop-blur-sm">
+                      <Button variant="outline" className="border-accent/30 text-white hover:bg-secondary hover:text-white rounded-full px-6 md:px-8 font-bold h-10 md:h-12 transition-all hover:scale-105 active:scale-95 bg-white/5 backdrop-blur-sm">
                         ₹1,000
                       </Button>
                     </DonationDialog>
@@ -294,7 +294,7 @@ export default function Home() {
 
                 <div className="flex flex-col md:flex-row gap-4 md:gap-8 justify-center items-center">
                   <DonationDialog>
-                    <Button className="bg-accent text-primary-foreground font-bold hover:bg-secondary hover:scale-105 active:scale-95 transition-all px-8 py-5 md:px-14 md:py-8 rounded-xl text-base md:text-2xl shadow-xl shadow-accent/20">
+                    <Button className="bg-accent text-white font-bold hover:bg-secondary hover:text-white hover:scale-105 active:scale-95 transition-all px-8 py-5 md:px-14 md:py-8 rounded-xl text-base md:text-2xl shadow-xl shadow-accent/20">
                       Donate Securely Now
                     </Button>
                   </DonationDialog>

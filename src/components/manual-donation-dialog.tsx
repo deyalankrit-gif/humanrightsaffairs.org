@@ -270,7 +270,7 @@ export function ManualDonationDialog({ children }: { children: React.ReactNode }
               )} />
             </div>
 
-            <Button type="submit" className="w-full h-14 rounded-2xl mt-4 font-bold text-lg bg-accent text-primary hover:bg-accent/90 shadow-xl shadow-accent/10" disabled={loading}>
+            <Button type="submit" className="w-full h-14 rounded-2xl mt-4 font-bold text-lg bg-accent text-white hover:bg-secondary hover:text-white shadow-xl shadow-accent/10" disabled={loading}>
               {loading ? <Loader2 className="animate-spin mr-2" /> : "Record Official Contribution"}
             </Button>
           </form>
