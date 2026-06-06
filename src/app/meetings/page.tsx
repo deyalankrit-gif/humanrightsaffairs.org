@@ -257,7 +257,7 @@ export default function MeetingsPage() {
           <div className="max-w-3xl mx-auto space-y-6">
             <Badge className="bg-accent text-primary font-bold px-4 py-1.5 uppercase tracking-widest text-xs border-none">Organizational Assemblies</Badge>
             <h1 className="text-5xl md:text-7xl font-headline font-bold mb-6 text-primary-foreground">General <span className="text-accent italic">Meetings</span></h1>
-            <p className="text-xl opacity-80 leading-relaxed max-w-2xl mx-auto text-primary-foreground">
+            <p className="text-xl opacity-80 leading-relaxed max-w-2xl mx-auto text-lg mb-8 text-primary-foreground">
               A transparent record of our democratic decision-making processes, assemblies, and strategic planning sessions.
             </p>
 
@@ -331,7 +331,7 @@ export default function MeetingsPage() {
                     </div>
 
                     {(newMeeting.level === 'State' || newMeeting.level === 'District') && (
-                      <div className="grid grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-1">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-1">
                         <div className="space-y-1">
                           <Label className="text-[10px] uppercase font-bold text-slate-400">State</Label>
                           <Select value={newMeeting.stateName} onValueChange={(val) => setNewMeeting({...newMeeting, stateName: val, districtName: ''})}>
@@ -339,10 +339,10 @@ export default function MeetingsPage() {
                             <SelectContent className="max-h-60">{states.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
                           </Select>
                         </div>
-                        {newMeeting.level === 'District' && (
-                          <div className="space-y-1">
+                        {newMeeting.level === 'District' && newMeeting.stateName && (
+                          <div className="space-y-1 animate-in fade-in slide-in-from-left-2">
                             <Label className="text-[10px] uppercase font-bold text-slate-400">District</Label>
-                            <Select value={newMeeting.districtName} onValueChange={(val) => setNewMeeting({...newMeeting, districtName: val})} disabled={!newMeeting.stateName}>
+                            <Select value={newMeeting.districtName} onValueChange={(val) => setNewMeeting({...newMeeting, districtName: val})}>
                               <SelectTrigger className="rounded-xl h-11"><SelectValue placeholder="Select District" /></SelectTrigger>
                               <SelectContent className="max-h-60">{(INDIA_DATA[newMeeting.stateName] || []).map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
                             </Select>

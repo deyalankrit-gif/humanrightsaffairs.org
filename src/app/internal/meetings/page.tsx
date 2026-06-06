@@ -278,7 +278,7 @@ export default function InternalMeetingsManagement() {
                   <Plus className="w-4 h-4 mr-2" /> Schedule Assembly
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-xl rounded-3xl max-h-[90vh] overflow-y-auto border-none shadow-2xl">
+              <DialogContent className="max-w-xl rounded-[2rem] max-h-[90vh] overflow-y-auto border-none shadow-2xl">
                  <DialogHeader><DialogTitle>New Assembly</DialogTitle></DialogHeader>
                  <div className="space-y-4 py-2">
                     <div className="space-y-1">
@@ -325,7 +325,7 @@ export default function InternalMeetingsManagement() {
                        </Select>
                     </div>
                     {(newMeeting.level === 'State' || newMeeting.level === 'District') && (
-                      <div className="grid grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-1">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-1">
                         <div className="space-y-1">
                            <Label className="text-[10px] font-bold uppercase text-slate-400">State</Label>
                            <Select value={newMeeting.stateName} onValueChange={(val) => setNewMeeting({...newMeeting, stateName: val, districtName: ''})}>
@@ -333,10 +333,10 @@ export default function InternalMeetingsManagement() {
                              <SelectContent className="max-h-60">{states.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
                            </Select>
                         </div>
-                        {newMeeting.level === 'District' && (
-                          <div className="space-y-1">
+                        {newMeeting.level === 'District' && newMeeting.stateName && (
+                          <div className="space-y-1 animate-in fade-in slide-in-from-left-2">
                              <Label className="text-[10px] font-bold uppercase text-slate-400">District</Label>
-                             <Select value={newMeeting.districtName} onValueChange={(val) => setNewMeeting({...newMeeting, districtName: val})} disabled={!newMeeting.stateName}>
+                             <Select value={newMeeting.districtName} onValueChange={(val) => setNewMeeting({...newMeeting, districtName: val})}>
                                <SelectTrigger><SelectValue placeholder="Choose District" /></SelectTrigger>
                                <SelectContent className="max-h-60">{(INDIA_DATA[newMeeting.stateName] || []).map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
                              </Select>
@@ -447,7 +447,7 @@ export default function InternalMeetingsManagement() {
                                  <FileText className="w-3 h-3 mr-1" /> Minutes
                                </Button>
                              </DialogTrigger>
-                             <DialogContent className="max-w-xl rounded-3xl max-h-[90vh] overflow-y-auto border-none shadow-2xl">
+                             <DialogContent className="max-w-xl rounded-[2rem] max-h-[90vh] overflow-y-auto border-none shadow-2xl">
                                 <DialogHeader><DialogTitle>Update Meeting Record</DialogTitle></DialogHeader>
                                 {editMeeting && (
                                   <div className="space-y-4 py-2">
@@ -490,6 +490,27 @@ export default function InternalMeetingsManagement() {
                                           />
                                        </div>
                                     </div>
+
+                                    {(editMeeting.level === 'State' || editMeeting.level === 'District') && (
+                                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-1">
+                                        <div className="space-y-1">
+                                          <Label className="text-[10px] font-bold uppercase text-slate-400">State</Label>
+                                          <Select value={editMeeting.stateName} onValueChange={(val) => setEditMeeting({...editMeeting, stateName: val, districtName: ''})}>
+                                            <SelectTrigger><SelectValue placeholder="Choose State" /></SelectTrigger>
+                                            <SelectContent className="max-h-60">{states.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+                                          </Select>
+                                        </div>
+                                        {editMeeting.level === 'District' && editMeeting.stateName && (
+                                          <div className="space-y-1 animate-in fade-in slide-in-from-left-2">
+                                            <Label className="text-[10px] font-bold uppercase text-slate-400">District</Label>
+                                            <Select value={editMeeting.districtName} onValueChange={(val) => setEditMeeting({...editMeeting, districtName: val})}>
+                                              <SelectTrigger><SelectValue placeholder="Choose District" /></SelectTrigger>
+                                              <SelectContent className="max-h-60">{(INDIA_DATA[editMeeting.stateName] || []).map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
+                                            </Select>
+                                          </div>
+                                        )}
+                                      </div>
+                                    )}
 
                                     {/* Edit Attendees - Rank Sorted Selection */}
                                     <div className="space-y-2">
