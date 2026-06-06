@@ -1,6 +1,7 @@
+
 "use client"
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { Footer } from '@/components/footer'
 import { PlaceHolderImages } from '@/lib/placeholder-images'
@@ -86,6 +87,8 @@ export default function LeadershipPage() {
 
   const { data: firestoreLeaders, loading: dataLoading } = useCollection(leadersQuery);
 
+  const [activeState, setActiveState] = useState<string | null>(null)
+  const [activeDistrict, setActiveDistrict] = useState<string | null>(null)
   const [editLeader, setEditLeader] = useState<any>(null)
   const [newLeader, setNewMember] = useState({
     name: '',
@@ -96,6 +99,22 @@ export default function LeadershipPage() {
     districtName: '',
     imageId: ''
   })
+
+  const leaders = (firestoreLeaders || []) as Leader[]
+  
+  const regionsWithLeadership = Array.from(new Set([
+    ...leaders.filter(l => l.level === 'State').map(l => l.parentRegion),
+    ...leaders.filter(l => l.level === 'District').map(l => l.parentRegion)
+  ])).filter(Boolean) as string[]
+  
+  regionsWithLeadership.sort()
+
+  // Initialize activeState
+  useEffect(() => {
+    if (!activeState && regionsWithLeadership.length > 0) {
+      setActiveState(regionsWithLeadership[0])
+    }
+  }, [regionsWithLeadership, activeState])
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, isEdit: boolean) => {
     const file = e.target.files?.[0]
@@ -148,16 +167,7 @@ export default function LeadershipPage() {
     }
   }
 
-  const leaders = (firestoreLeaders || []) as Leader[]
   const centralTeam = leaders.filter(l => l.level === 'Central')
-  
-  const regionsWithLeadership = Array.from(new Set([
-    ...leaders.filter(l => l.level === 'State').map(l => l.parentRegion),
-    ...leaders.filter(l => l.level === 'District').map(l => l.parentRegion)
-  ])).filter(Boolean) as string[]
-  
-  regionsWithLeadership.sort()
-
   const states = Object.keys(INDIA_DATA).sort()
 
   return (
@@ -255,75 +265,104 @@ export default function LeadershipPage() {
 
               {/* Regional & District Chapters Section */}
               <div className="space-y-32">
-                <div className="flex items-center justify-center gap-2 text-primary dark:text-white font-bold uppercase tracking-[0.2em] mb-12">
-                  <Shield className="w-6 h-6 text-emerald-500" />
-                  <span>Regional Chapters</span>
+                <div className="flex flex-col items-center gap-8 mb-12">
+                  <div className="flex items-center justify-center gap-4">
+                    <div className="flex items-center gap-2 text-primary dark:text-white font-bold uppercase tracking-[0.2em]">
+                      <Shield className="w-6 h-6 text-emerald-500" />
+                      <span>Regional Chapters</span>
+                    </div>
+                    {regionsWithLeadership.length > 0 && (
+                      <Select value={activeState || ''} onValueChange={(val) => { setActiveState(val); setActiveDistrict(null); }}>
+                        <SelectTrigger className="w-[180px] md:w-[220px] h-10 rounded-full bg-white dark:bg-slate-900 border-emerald-100 shadow-sm font-bold text-xs">
+                          <SelectValue placeholder="Select State/UT" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {regionsWithLeadership.map(r => <SelectItem key={r} value={r} className="font-bold text-xs">{r}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  </div>
                 </div>
                 
-                <div className="space-y-24">
-                  {regionsWithLeadership.map((region) => {
-                    const stateLeaders = leaders.filter(l => l.level === 'State' && l.parentRegion === region);
-                    const districtLeaders = leaders.filter(l => l.level === 'District' && l.parentRegion === region);
-                    const uniqueDistricts = Array.from(new Set(districtLeaders.map(l => l.districtName))).filter(Boolean) as string[];
-                    uniqueDistricts.sort();
-
-                    return (
-                      <div key={region} className="bg-white dark:bg-slate-900 p-8 md:p-16 rounded-[4rem] shadow-sm border border-slate-100 dark:border-slate-800">
-                        {/* State Title & State Leaders */}
-                        <div className="flex flex-col items-center mb-16">
-                          <div className="bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 px-8 py-2 rounded-full font-bold text-lg mb-12 shadow-sm border border-emerald-100 dark:border-emerald-800">
-                            {region} State Chapter
-                          </div>
-                          
-                          <div className="flex flex-wrap justify-center gap-10">
-                            {stateLeaders.map(leader => (
-                              <LeaderCard 
-                                key={leader.id} 
-                                leader={leader} 
-                                isAdmin={isAdmin} 
-                                onEdit={setEditLeader} 
-                                onDelete={handleDelete} 
-                              />
-                            ))}
-                          </div>
+                <div className="space-y-24 min-h-[400px]">
+                  {activeState && (
+                    <div className="bg-white dark:bg-slate-900 p-8 md:p-16 rounded-[4rem] shadow-sm border border-slate-100 dark:border-slate-800 animate-in fade-in zoom-in-95 duration-500">
+                      {/* State Title & State Leaders */}
+                      <div className="flex flex-col items-center mb-16">
+                        <div className="bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 px-8 py-2 rounded-full font-bold text-lg mb-12 shadow-sm border border-emerald-100 dark:border-emerald-800 uppercase tracking-widest">
+                          {activeState} Chapter
                         </div>
+                        
+                        <div className="flex flex-wrap justify-center gap-10">
+                          {leaders.filter(l => l.level === 'State' && l.parentRegion === activeState).map(leader => (
+                            <LeaderCard 
+                              key={leader.id} 
+                              leader={leader} 
+                              isAdmin={isAdmin} 
+                              onEdit={setEditLeader} 
+                              onDelete={handleDelete} 
+                            />
+                          ))}
+                        </div>
+                      </div>
 
-                        {/* District Level Committees */}
-                        {uniqueDistricts.length > 0 && (
+                      {/* District Level Committees */}
+                      {(() => {
+                        const districtLeaders = leaders.filter(l => l.level === 'District' && l.parentRegion === activeState);
+                        const uniqueDistricts = Array.from(new Set(districtLeaders.map(l => l.districtName))).filter(Boolean) as string[];
+                        uniqueDistricts.sort();
+                        
+                        if (uniqueDistricts.length === 0) return null;
+
+                        // Auto-select first district if none selected
+                        if (!activeDistrict || !uniqueDistricts.includes(activeDistrict)) {
+                          setActiveDistrict(uniqueDistricts[0]);
+                        }
+
+                        return (
                           <div className="space-y-12 mt-20 pt-20 border-t border-slate-100 dark:border-slate-800">
-                             <div className="text-center max-w-2xl mx-auto space-y-4">
-                                <div className="inline-flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-bold uppercase text-[10px] tracking-[0.3em]">
-                                   <Users className="w-4 h-4" />
-                                   District Level Committees
+                             <div className="flex flex-col items-center gap-6">
+                                <div className="flex items-center gap-4">
+                                  <div className="inline-flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-bold uppercase text-[10px] tracking-[0.3em]">
+                                     <Users className="w-4 h-4" />
+                                     District Level Committee
+                                  </div>
+                                  <Select value={activeDistrict || ''} onValueChange={setActiveDistrict}>
+                                    <SelectTrigger className="w-[180px] h-8 rounded-full bg-slate-50 dark:bg-slate-950 border-indigo-100 text-[10px] font-bold shadow-inner">
+                                      <SelectValue placeholder="Select District" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      {uniqueDistricts.map(d => <SelectItem key={d} value={d} className="text-[10px] font-bold">{d}</SelectItem>)}
+                                    </SelectContent>
+                                  </Select>
                                 </div>
                              </div>
-                             <div className="grid md:grid-cols-2 gap-12">
-                                {uniqueDistricts.map(dist => (
-                                  <div key={dist} className="bg-slate-50 dark:bg-slate-950/50 p-8 md:p-12 rounded-[3rem] border border-slate-100 dark:border-slate-800 flex flex-col items-center transition-all hover:shadow-2xl hover:bg-white dark:hover:bg-slate-900 group/district">
-                                     <div className="flex items-center gap-2 mb-10 text-primary dark:text-accent font-bold uppercase text-[11px] tracking-[0.2em] bg-white dark:bg-slate-900 px-6 py-2 rounded-full shadow-md border border-slate-100 dark:border-slate-800 group-hover/district:scale-110 transition-transform">
-                                        <MapPin className="w-3.5 h-3.5 text-accent" />
-                                        {dist} District Cell
-                                     </div>
-                                     <div className="flex flex-wrap justify-center gap-8">
-                                        {districtLeaders.filter(dl => dl.districtName === dist).map(dl => (
-                                          <LeaderCard 
-                                            key={dl.id} 
-                                            leader={dl} 
-                                            variant="small" 
-                                            isAdmin={isAdmin} 
-                                            onEdit={setEditLeader} 
-                                            onDelete={handleDelete} 
-                                          />
-                                        ))}
-                                     </div>
+
+                             {activeDistrict && (
+                               <div className="bg-slate-50 dark:bg-slate-950/50 p-8 md:p-12 rounded-[3rem] border border-slate-100 dark:border-slate-800 flex flex-col items-center transition-all hover:shadow-2xl hover:bg-white dark:hover:bg-slate-900 group/district animate-in slide-in-from-bottom-4 duration-500">
+                                  <div className="flex items-center gap-2 mb-10 text-primary dark:text-accent font-bold uppercase text-[11px] tracking-[0.2em] bg-white dark:bg-slate-900 px-6 py-2 rounded-full shadow-md border border-slate-100 dark:border-slate-800 group-hover/district:scale-110 transition-transform">
+                                     <MapPin className="w-3.5 h-3.5 text-accent" />
+                                     {activeDistrict} Cell
                                   </div>
-                                ))}
-                             </div>
+                                  <div className="flex flex-wrap justify-center gap-8">
+                                     {districtLeaders.filter(dl => dl.districtName === activeDistrict).map(dl => (
+                                       <LeaderCard 
+                                         key={dl.id} 
+                                         leader={dl} 
+                                         variant="small" 
+                                         isAdmin={isAdmin} 
+                                         onEdit={setEditLeader} 
+                                         onDelete={handleDelete} 
+                                       />
+                                     ))}
+                                  </div>
+                               </div>
+                             )}
                           </div>
-                        )}
-                      </div>
-                    );
-                  })}
+                        );
+                      })()}
+                    </div>
+                  )}
                 </div>
               </div>
             </>
