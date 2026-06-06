@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState } from 'react'
@@ -179,7 +178,7 @@ export default function LeadershipPage() {
                 <div className="space-y-4 py-4">
                   <div className="flex flex-col items-center gap-4 p-4 border-2 border-dashed rounded-2xl">
                     <div className="relative w-32 h-40 bg-slate-100 dark:bg-slate-800 rounded-xl overflow-hidden border">
-                      <Image src={newLeader.imageId?.startsWith('data:') ? newLeader.imageId : (newLeader.gender === 'female' ? '/dummy w.png' : '/dummy m.png')} alt="Preview" fill className="object-cover" />
+                      <Image src={newLeader.imageId?.startsWith('data:') ? newLeader.imageId : (newLeader.gender === 'male' ? '/dummy m.png' : '/dummy w.png')} alt="Preview" fill className="object-cover" />
                     </div>
                     <Button variant="outline" className="w-full relative h-12 rounded-xl">
                       <Upload className="w-4 h-4 mr-2" /> Upload Photo
@@ -297,10 +296,6 @@ export default function LeadershipPage() {
                                    <Users className="w-4 h-4" />
                                    District Level Committees
                                 </div>
-                                <h5 className="text-2xl md:text-3xl font-headline font-bold text-primary dark:text-white">Grassroots Vanguard</h5>
-                                <p className="text-sm md:text-base text-slate-500 dark:text-slate-400 leading-relaxed italic">
-                                  "Our District Committees form the vital local bridge between constitutional rights and citizen action, providing immediate intervention and legal oversight at the roots of our society."
-                                </p>
                              </div>
                              <div className="grid md:grid-cols-2 gap-12">
                                 {uniqueDistricts.map(dist => (
@@ -344,7 +339,7 @@ export default function LeadershipPage() {
             <div className="space-y-4 py-4">
               <div className="flex flex-col items-center gap-4 p-4 border-2 border-dashed rounded-2xl">
                 <div className="relative w-32 h-40 bg-slate-100 dark:bg-slate-800 rounded-xl overflow-hidden border">
-                  <Image src={editLeader.imageId?.startsWith('data:') ? editLeader.imageId : (editLeader.gender === 'female' ? '/dummy w.png' : '/dummy m.png')} alt="Preview" fill className="object-cover" />
+                  <Image src={editLeader.imageId?.startsWith('data:') ? editLeader.imageId : (editLeader.gender === 'male' ? '/dummy m.png' : '/dummy w.png')} alt="Preview" fill className="object-cover" />
                 </div>
                 <Button variant="outline" className="w-full relative h-12 rounded-xl"><Upload className="w-4 h-4 mr-2" /> Change Photo<input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => handleFileChange(e, true)} /></Button>
               </div>
