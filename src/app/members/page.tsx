@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useEffect } from 'react'
@@ -19,7 +18,8 @@ import {
   Globe,
   Calendar as CalendarIcon,
   Heart,
-  Home
+  Home,
+  Sparkles
 } from 'lucide-react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -134,6 +134,19 @@ export default function MembersPage() {
     }
   }, [newMember.joiningDate, newMember.membershipDuration]);
 
+  const generateMemberId = () => {
+    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const numbers = '0123456789';
+    let result = '';
+    for (let i = 0; i < 6; i++) {
+      result += letters.charAt(Math.floor(Math.random() * letters.length));
+    }
+    for (let i = 0; i < 4; i++) {
+      result += numbers.charAt(Math.floor(Math.random() * numbers.length));
+    }
+    return result;
+  }
+
   const membersQuery = useMemoFirebase(() => {
     if (!db) return null;
     return query(collection(db, 'memberProfiles'), orderBy('name', 'asc'));
@@ -176,6 +189,17 @@ export default function MembersPage() {
         variant: "destructive", 
         title: "Validation Error", 
         description: "Name, Email, Member ID, and Membership Issue Date are required." 
+      })
+      return
+    }
+
+    // Pattern Validation: 6 letters + 4 digits
+    const idPattern = /^[A-Z]{6}[0-9]{4}$/;
+    if (!idPattern.test(newMember.memberId)) {
+      toast({ 
+        variant: "destructive", 
+        title: "Invalid Member ID", 
+        description: "ID must be 10 characters: 6 uppercase letters followed by 4 digits (e.g. ABCDEF1234)." 
       })
       return
     }
@@ -347,7 +371,26 @@ export default function MembersPage() {
                     <div className="grid grid-cols-1 gap-4">
                       <div className="space-y-2">
                         <Label>Member ID *</Label>
-                        <Input placeholder="M-XXXX" value={newMember.memberId} onChange={e => setNewMember({...newMember, memberId: e.target.value})} />
+                        <div className="flex gap-2">
+                          <Input 
+                            placeholder="ABCDEF1234" 
+                            value={newMember.memberId} 
+                            onChange={e => setNewMember({...newMember, memberId: e.target.value.toUpperCase()})} 
+                            className="h-11 rounded-xl font-mono"
+                            maxLength={10}
+                          />
+                          <Button 
+                            type="button" 
+                            variant="outline" 
+                            size="icon" 
+                            className="h-11 w-11 shrink-0 rounded-xl border-dashed hover:bg-accent/10"
+                            onClick={() => setNewMember({...newMember, memberId: generateMemberId()})}
+                            title="Auto-Generate ID"
+                          >
+                            <Sparkles className="w-4 h-4 text-accent" />
+                          </Button>
+                        </div>
+                        <p className="text-[9px] text-slate-400 font-bold uppercase">Format: 6 Letters + 4 Digits</p>
                       </div>
                     </div>
                     

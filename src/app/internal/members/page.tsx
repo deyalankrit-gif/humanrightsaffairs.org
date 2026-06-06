@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useEffect, useState } from 'react'
@@ -118,9 +117,33 @@ export default function InternalMembersDirectory() {
     }
   }, [newMember.joiningDate, newMember.membershipDuration]);
 
+  const generateMemberId = () => {
+    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const numbers = '0123456789';
+    let result = '';
+    for (let i = 0; i < 6; i++) {
+      result += letters.charAt(Math.floor(Math.random() * letters.length));
+    }
+    for (let i = 0; i < 4; i++) {
+      result += numbers.charAt(Math.floor(Math.random() * numbers.length));
+    }
+    return result;
+  }
+
   const handleAddMember = async () => {
     if (!newMember.name || !newMember.email || !newMember.memberId || !newMember.joiningDate) {
       toast({ variant: "destructive", title: "Validation Error", description: "Name, Email, Member ID, and Issue Date are required." })
+      return
+    }
+
+    // Pattern Validation: 6 letters + 4 digits
+    const idPattern = /^[A-Z]{6}[0-9]{4}$/;
+    if (!idPattern.test(newMember.memberId)) {
+      toast({ 
+        variant: "destructive", 
+        title: "Invalid Member ID", 
+        description: "ID must be 10 characters: 6 uppercase letters followed by 4 digits (e.g. ABCDEF1234)." 
+      })
       return
     }
 
@@ -187,9 +210,33 @@ export default function InternalMembersDirectory() {
                 <DialogHeader><DialogTitle>Personnel Commissioning</DialogTitle></DialogHeader>
                 <div className="space-y-6 py-4">
                    {/* Personal & ID Section */}
-                   <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">Full Name *</Label><Input value={newMember.name} onChange={e => setNewMember({...newMember, name: e.target.value})} /></div>
-                      <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">Member ID *</Label><Input value={newMember.memberId} onChange={e => setNewMember({...newMember, memberId: e.target.value})} /></div>
+                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                        <Label className="text-[10px] uppercase font-bold text-slate-400">Full Name *</Label>
+                        <Input placeholder="Full Legal Name" value={newMember.name} onChange={e => setNewMember({...newMember, name: e.target.value})} className="h-11 rounded-xl" />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-[10px] uppercase font-bold text-slate-400">Member ID *</Label>
+                        <div className="flex gap-2">
+                          <Input 
+                            placeholder="ABCDEF1234" 
+                            value={newMember.memberId} 
+                            onChange={e => setNewMember({...newMember, memberId: e.target.value.toUpperCase()})} 
+                            className="h-11 rounded-xl font-mono"
+                            maxLength={10}
+                          />
+                          <Button 
+                            type="button" 
+                            variant="outline" 
+                            size="icon" 
+                            className="h-11 w-11 shrink-0 rounded-xl border-dashed hover:bg-accent/10"
+                            onClick={() => setNewMember({...newMember, memberId: generateMemberId()})}
+                            title="Auto-Generate ID"
+                          >
+                            <Sparkles className="w-4 h-4 text-accent" />
+                          </Button>
+                        </div>
+                      </div>
                    </div>
 
                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50 dark:bg-slate-900 p-6 rounded-2xl border border-slate-100 dark:border-slate-800">
