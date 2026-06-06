@@ -33,7 +33,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { useCollection, useFirestore, useMemoFirebase, useUser } from '@/firebase'
-import { collection, query, orderBy, addDoc, serverTimestamp } from 'firebase/firestore'
+import { collection, query, orderBy, addDoc, deleteDoc, doc, updateDoc, serverTimestamp } from 'firebase/firestore'
 import {
   Dialog,
   DialogContent,
@@ -621,6 +621,10 @@ export default function MeetingsPage() {
       {/* Leader Brief Profile Dialog */}
       <Dialog open={!!selectedLeaderProfile} onOpenChange={(open) => !open && setSelectedLeaderProfile(null)}>
         <DialogContent className="max-w-md rounded-[2.5rem] p-0 overflow-hidden border-none shadow-2xl bg-white dark:bg-slate-950">
+          <DialogHeader className="sr-only">
+            <DialogTitle>Official Personnel Profile</DialogTitle>
+            <DialogDescription>Credentials and organizational background of the selected leader.</DialogDescription>
+          </DialogHeader>
           {selectedLeaderProfile && (
             <div className="flex flex-col">
               <div className="relative w-full h-48 bg-primary">
