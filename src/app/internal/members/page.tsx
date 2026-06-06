@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useEffect, useState } from 'react'
@@ -80,6 +81,7 @@ export default function InternalMembersDirectory() {
     stateName: '',
     districtName: '',
     joiningDate: '',
+    expiryDate: '',
     membershipDuration: '1 Year'
   })
 
@@ -98,18 +100,33 @@ export default function InternalMembersDirectory() {
 
   const handleAddMember = async () => {
     if (!newMember.name || !newMember.email || !newMember.memberId || !newMember.joiningDate) {
-      toast({ variant: "destructive", title: "Validation Error" })
+      toast({ variant: "destructive", title: "Validation Error", description: "Name, Email, Member ID, and Issue Date are required." })
       return
     }
 
     setIsAdding(true)
     try {
       await addDoc(collection(db, 'memberProfiles'), { ...newMember, createdAt: serverTimestamp() })
-      toast({ title: "Success" })
+      toast({ title: "Success", description: "Member record established." })
       setIsAdding(false)
+      setNewMember({
+        name: '', designation: '', profession: '', gender: 'Male',
+        email: '', phone: '', level: 'National', status: 'Active',
+        memberId: '', stateName: '', districtName: '', joiningDate: '', expiryDate: '',
+        membershipDuration: '1 Year'
+      })
     } catch (error: any) {
       toast({ variant: "destructive", title: "System Error" })
-      setIsAdding(true)
+      setIsAdding(false)
+    }
+  }
+
+  const parseMemberDate = (dateStr: string) => {
+    if (!dateStr) return undefined;
+    try {
+      return parse(dateStr, "PPP", new Date());
+    } catch {
+      return undefined;
     }
   }
 
@@ -122,6 +139,8 @@ export default function InternalMembersDirectory() {
       (m.memberId || '').toLowerCase().includes(search.toLowerCase());
     return matchesSearch && (levelFilter === 'All' || m.level === levelFilter);
   })
+
+  const states = Object.keys(INDIA_DATA).sort()
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
@@ -143,8 +162,79 @@ export default function InternalMembersDirectory() {
                   <UserPlus className="w-4 h-4" /> Commission Member
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-md rounded-3xl"><DialogHeader><DialogTitle>New Record</DialogTitle></DialogHeader>
-                <Button onClick={handleAddMember} disabled={isAdding} className="w-full h-11 rounded-xl mt-4">Confirm Commissioning</Button>
+              <DialogContent className="max-w-2xl rounded-3xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader><DialogTitle>Personnel Commissioning</DialogTitle></DialogHeader>
+                <div className="space-y-4 py-4">
+                   <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">Full Name</Label><Input value={newMember.name} onChange={e => setNewMember({...newMember, name: e.target.value})} /></div>
+                      <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">Member ID</Label><Input value={newMember.memberId} onChange={e => setNewMember({...newMember, memberId: e.target.value})} /></div>
+                   </div>
+                   <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                        <Label className="text-[10px] uppercase font-bold text-slate-400">Issue Date</Label>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button variant="outline" className={cn("w-full justify-start text-left font-normal h-10 rounded-lg", !newMember.joiningDate && "text-muted-foreground")}>
+                              <CalendarIcon className="mr-2 h-4 w-4" />
+                              {newMember.joiningDate ? newMember.joiningDate : "Pick a date"}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar mode="single" selected={parseMemberDate(newMember.joiningDate)} onSelect={(date) => setNewMember({...newMember, joiningDate: date ? format(date, "PPP") : ''})} initialFocus />
+                          </PopoverContent>
+                        </Popover>
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-[10px] uppercase font-bold text-slate-400">Expiry Date</Label>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button variant="outline" className={cn("w-full justify-start text-left font-normal h-10 rounded-lg", !newMember.expiryDate && "text-muted-foreground")}>
+                              <CalendarIcon className="mr-2 h-4 w-4" />
+                              {newMember.expiryDate ? newMember.expiryDate : "Pick a date"}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar mode="single" selected={parseMemberDate(newMember.expiryDate)} onSelect={(date) => setNewMember({...newMember, expiryDate: date ? format(date, "PPP") : ''})} initialFocus />
+                          </PopoverContent>
+                        </Popover>
+                      </div>
+                   </div>
+                   <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">Email</Label><Input type="email" value={newMember.email} onChange={e => setNewMember({...newMember, email: e.target.value})} /></div>
+                      <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">Phone</Label><Input value={newMember.phone} onChange={e => setNewMember({...newMember, phone: e.target.value})} /></div>
+                   </div>
+                   <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                        <Label className="text-[10px] uppercase font-bold text-slate-400">Operational Level</Label>
+                        <Select value={newMember.level} onValueChange={(val: any) => setNewMember({...newMember, level: val, stateName: '', districtName: ''})}>
+                          <SelectTrigger><SelectValue /></SelectTrigger>
+                          <SelectContent><SelectItem value="National">National</SelectItem><SelectItem value="State">State</SelectItem><SelectItem value="District">District</SelectItem></SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">Designation</Label><Input value={newMember.designation} onChange={e => setNewMember({...newMember, designation: e.target.value})} /></div>
+                   </div>
+                   {(newMember.level === 'State' || newMember.level === 'District') && (
+                     <div className="grid grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-1">
+                        <div className="space-y-1">
+                           <Label className="text-[10px] uppercase font-bold text-slate-400">State</Label>
+                           <Select value={newMember.stateName} onValueChange={val => setNewMember({...newMember, stateName: val, districtName: ''})}>
+                             <SelectTrigger><SelectValue placeholder="Choose State" /></SelectTrigger>
+                             <SelectContent className="max-h-60">{states.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+                           </Select>
+                        </div>
+                        {newMember.level === 'District' && (
+                           <div className="space-y-1">
+                              <Label className="text-[10px] uppercase font-bold text-slate-400">District</Label>
+                              <Select value={newMember.districtName} onValueChange={val => setNewMember({...newMember, districtName: val})} disabled={!newMember.stateName}>
+                                <SelectTrigger><SelectValue placeholder="Choose District" /></SelectTrigger>
+                                <SelectContent className="max-h-60">{(newMember.stateName ? INDIA_DATA[newMember.stateName] : []).map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
+                              </Select>
+                           </div>
+                        )}
+                     </div>
+                   )}
+                </div>
+                <DialogFooter><Button onClick={handleAddMember} disabled={isAdding} className="w-full h-11 rounded-xl bg-accent text-primary font-bold">Establish Official Record</Button></DialogFooter>
               </DialogContent>
             </Dialog>
           </div>

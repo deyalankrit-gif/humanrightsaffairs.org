@@ -93,6 +93,15 @@ export default function MemberDetailsPage() {
     }
   }
 
+  const parseMemberDate = (dateStr: string) => {
+    if (!dateStr) return undefined;
+    try {
+      return parse(dateStr, "PPP", new Date());
+    } catch {
+      return undefined;
+    }
+  }
+
   if (authLoading || !user) {
     return <div className="min-h-screen flex items-center justify-center bg-slate-50"><Loader2 className="w-10 h-10 animate-spin text-accent" /></div>
   }
@@ -141,7 +150,7 @@ export default function MemberDetailsPage() {
           </div>
           
           <div className="flex flex-col md:flex-row items-center gap-6">
-            <div className="w-8 h-8 bg-white/5 rounded-lg flex items-center justify-center border-2 border-white/10 shadow-xl relative group overflow-hidden shrink-0">
+            <div className="w-24 h-24 bg-white/5 rounded-lg flex items-center justify-center border-2 border-white/10 shadow-xl relative group overflow-hidden shrink-0">
               <Image src={displayImg} alt={profile.name} fill className="object-cover" />
             </div>
             
@@ -168,10 +177,64 @@ export default function MemberDetailsPage() {
         <div className="container mx-auto px-4">
           <div className="grid lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-8">
-               <Card className="rounded-3xl p-6 md:p-8"><CardTitle className="text-lg mb-6">Credentials</CardTitle>
-                 <div className="grid md:grid-cols-2 gap-6">
-                    <div><p className="text-[9px] font-bold text-slate-400 uppercase">Email</p><p className="text-sm font-bold">{profile.email}</p></div>
-                    <div><p className="text-[9px] font-bold text-slate-400 uppercase">Phone</p><p className="text-sm font-bold">{profile.phone}</p></div>
+               <Card className="rounded-3xl p-6 md:p-8">
+                 <CardTitle className="text-lg mb-6">Credential Details</CardTitle>
+                 <div className="space-y-6">
+                   {isEditing ? (
+                     <div className="space-y-4">
+                       <div className="grid md:grid-cols-2 gap-4">
+                         <div className="space-y-1">
+                           <Label className="text-[10px] uppercase font-bold text-slate-400">Full Name</Label>
+                           <Input value={editForm.name} onChange={e => setEditForm({...editForm, name: e.target.value})} />
+                         </div>
+                         <div className="space-y-1">
+                           <Label className="text-[10px] uppercase font-bold text-slate-400">Designation</Label>
+                           <Input value={editForm.designation} onChange={e => setEditForm({...editForm, designation: e.target.value})} />
+                         </div>
+                       </div>
+                       <div className="grid md:grid-cols-2 gap-4">
+                         <div className="space-y-1">
+                           <Label className="text-[10px] uppercase font-bold text-slate-400">Issue Date</Label>
+                           <Popover>
+                             <PopoverTrigger asChild>
+                               <Button variant="outline" className={cn("w-full justify-start text-left font-normal h-10 rounded-lg", !editForm.joiningDate && "text-muted-foreground")}>
+                                 <CalendarIcon className="mr-2 h-4 w-4" />
+                                 {editForm.joiningDate ? editForm.joiningDate : "Pick a date"}
+                               </Button>
+                             </PopoverTrigger>
+                             <PopoverContent className="w-auto p-0" align="start">
+                               <Calendar mode="single" selected={parseMemberDate(editForm.joiningDate)} onSelect={(date) => setEditForm({...editForm, joiningDate: date ? format(date, "PPP") : ''})} initialFocus />
+                             </PopoverContent>
+                           </Popover>
+                         </div>
+                         <div className="space-y-1">
+                           <Label className="text-[10px] uppercase font-bold text-slate-400">Expiry Date</Label>
+                           <Popover>
+                             <PopoverTrigger asChild>
+                               <Button variant="outline" className={cn("w-full justify-start text-left font-normal h-10 rounded-lg", !editForm.expiryDate && "text-muted-foreground")}>
+                                 <CalendarIcon className="mr-2 h-4 w-4" />
+                                 {editForm.expiryDate ? editForm.expiryDate : "Pick a date"}
+                               </Button>
+                             </PopoverTrigger>
+                             <PopoverContent className="w-auto p-0" align="start">
+                               <Calendar mode="single" selected={parseMemberDate(editForm.expiryDate)} onSelect={(date) => setEditForm({...editForm, expiryDate: date ? format(date, "PPP") : ''})} initialFocus />
+                             </PopoverContent>
+                           </Popover>
+                         </div>
+                       </div>
+                       <div className="grid md:grid-cols-2 gap-4">
+                          <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">Email</Label><Input value={editForm.email} onChange={e => setEditForm({...editForm, email: e.target.value})} /></div>
+                          <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">Phone</Label><Input value={editForm.phone} onChange={e => setEditForm({...editForm, phone: e.target.value})} /></div>
+                       </div>
+                     </div>
+                   ) : (
+                     <div className="grid md:grid-cols-2 gap-6">
+                        <div><p className="text-[9px] font-bold text-slate-400 uppercase">Email</p><p className="text-sm font-bold">{profile.email}</p></div>
+                        <div><p className="text-[9px] font-bold text-slate-400 uppercase">Phone</p><p className="text-sm font-bold">{profile.phone}</p></div>
+                        <div><p className="text-[9px] font-bold text-slate-400 uppercase">Issue Date</p><p className="text-sm font-bold">{profile.joiningDate || 'N/A'}</p></div>
+                        <div><p className="text-[9px] font-bold text-slate-400 uppercase text-red-500">Expiry Date</p><p className="text-sm font-bold text-red-600">{profile.expiryDate || 'N/A'}</p></div>
+                     </div>
+                   )}
                  </div>
                </Card>
             </div>

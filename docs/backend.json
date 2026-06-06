@@ -78,6 +78,7 @@
         "status": { "type": "string" },
         "memberId": { "type": "string" },
         "joiningDate": { "type": "string", "description": "Membership Date of Issue" },
+        "expiryDate": { "type": "string", "description": "Membership Date of Expiry" },
         "membershipDuration": { "type": "string", "enum": ["1 Year", "2 Years", "3 Years"] },
         "createdAt": { "type": "string", "format": "date-time" }
       }
