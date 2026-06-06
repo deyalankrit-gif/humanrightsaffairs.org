@@ -12,6 +12,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Checkbox } from '@/components/ui/checkbox'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import { 
   Plus, 
   Search, 
@@ -67,6 +69,7 @@ export default function InternalMeetingsManagement() {
   const [isActionLoading, setIsActionLoading] = useState(false)
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [editMeeting, setEditMeeting] = useState<any>(null)
+  const [selectedAttendees, setSelectedAttendees] = useState<string[]>([])
 
   const [newMeeting, setNewMeeting] = useState({
     title: '',
@@ -92,7 +95,13 @@ export default function InternalMeetingsManagement() {
     return query(collection(db, 'meetings'), orderBy('createdAt', 'desc'));
   }, [db, user]);
 
+  const leadersQuery = useMemoFirebase(() => {
+    if (!db || !user) return null;
+    return query(collection(db, 'leadership'), orderBy('name', 'asc'));
+  }, [db, user]);
+
   const { data: meetings, loading: dataLoading } = useCollection(meetingsQuery);
+  const { data: leaders } = useCollection(leadersQuery);
 
   const hours = Array.from({ length: 12 }, (_, i) => (i + 1).toString().padStart(2, '0'))
   const minutes = Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0'))
@@ -107,6 +116,22 @@ export default function InternalMeetingsManagement() {
     }
   }
 
+  const toggleAttendee = (name: string, isEdit: boolean = false) => {
+    if (isEdit) {
+      setEditMeeting((prev: any) => {
+        const attendees = prev.attendees || [];
+        const newAttendees = attendees.includes(name) 
+          ? attendees.filter((a: string) => a !== name) 
+          : [...attendees, name];
+        return { ...prev, attendees: newAttendees };
+      });
+    } else {
+      setSelectedAttendees(prev => 
+        prev.includes(name) ? prev.filter(a => a !== name) : [...prev, name]
+      );
+    }
+  }
+
   const handleAddMeeting = async () => {
     if (!db) return
     if (!newMeeting.title || !newMeeting.date || !newMeeting.location) {
@@ -118,6 +143,7 @@ export default function InternalMeetingsManagement() {
     try {
       await addDoc(collection(db, 'meetings'), {
         ...newMeeting,
+        attendees: selectedAttendees,
         createdAt: serverTimestamp()
       })
       toast({ title: "Assembly Scheduled", description: "The record has been published to the registry." })
@@ -125,6 +151,7 @@ export default function InternalMeetingsManagement() {
         title: '', date: '', time: '09:00 AM', location: '', agenda: '', minutes: '',
         level: 'National', stateName: '', districtName: '', status: 'Upcoming'
       })
+      setSelectedAttendees([])
       setIsAddDialogOpen(false)
     } catch (e: any) {
       toast({ variant: "destructive", title: "System Error", description: e.message })
@@ -302,6 +329,39 @@ export default function InternalMeetingsManagement() {
                        <Label className="text-[10px] font-bold uppercase text-slate-400">Location</Label>
                        <Input value={newMeeting.location} onChange={e => setNewMeeting({...newMeeting, location: e.target.value})} placeholder="Venue Details" />
                     </div>
+
+                    {/* Attendance Selection */}
+                    <div className="space-y-2">
+                       <Label className="text-[10px] font-bold uppercase text-slate-400 flex items-center gap-2">
+                         <Users className="w-3 h-3 text-accent" /> Official Presence (Leadership Tree)
+                       </Label>
+                       <div className="border border-slate-100 dark:border-slate-800 rounded-2xl bg-slate-50/50 dark:bg-slate-900/50 p-4">
+                          <ScrollArea className="h-40">
+                             <div className="grid grid-cols-1 gap-2 pr-4">
+                                {leaders && leaders.map((leader: any) => (
+                                  <div key={leader.id} className="flex items-center space-x-2 bg-white dark:bg-slate-800 p-2 rounded-lg border border-slate-100 dark:border-slate-700 hover:border-accent transition-colors">
+                                    <Checkbox 
+                                      id={`leader-${leader.id}`} 
+                                      checked={selectedAttendees.includes(leader.name)}
+                                      onCheckedChange={() => toggleAttendee(leader.name)}
+                                      className="border-accent"
+                                    />
+                                    <label htmlFor={`leader-${leader.id}`} className="text-xs font-bold text-slate-700 dark:text-slate-300 cursor-pointer flex-1">
+                                      {leader.name} <span className="text-[8px] text-slate-400 uppercase ml-2">— {leader.title}</span>
+                                    </label>
+                                  </div>
+                                ))}
+                                {(!leaders || leaders.length === 0) && (
+                                  <p className="text-[10px] text-slate-400 text-center py-8">No leadership records available.</p>
+                                )}
+                             </div>
+                          </ScrollArea>
+                          <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800">
+                             <p className="text-[9px] font-bold text-accent uppercase tracking-widest">Tagged: {selectedAttendees.length} Officials</p>
+                          </div>
+                       </div>
+                    </div>
+
                     <div className="space-y-1">
                        <Label className="text-[10px] font-bold uppercase text-slate-400">Agenda</Label>
                        <Textarea value={newMeeting.agenda} onChange={e => setNewMeeting({...newMeeting, agenda: e.target.value})} placeholder="Outline the discussion points..." />
@@ -411,6 +471,36 @@ export default function InternalMeetingsManagement() {
                                           />
                                        </div>
                                     </div>
+
+                                    {/* Edit Attendees */}
+                                    <div className="space-y-2">
+                                       <Label className="text-[10px] font-bold uppercase text-slate-400 flex items-center gap-2">
+                                         <Users className="w-3 h-3 text-accent" /> Modify Official Presence
+                                       </Label>
+                                       <div className="border border-slate-100 dark:border-slate-800 rounded-2xl bg-slate-50 dark:bg-slate-900 p-4">
+                                          <ScrollArea className="h-40">
+                                             <div className="grid grid-cols-1 gap-2 pr-4">
+                                                {leaders && leaders.map((leader: any) => (
+                                                  <div key={leader.id} className="flex items-center space-x-2 bg-white dark:bg-slate-800 p-2 rounded-lg border border-slate-100 dark:border-slate-700">
+                                                    <Checkbox 
+                                                      id={`edit-leader-${leader.id}`} 
+                                                      checked={(editMeeting.attendees || []).includes(leader.name)}
+                                                      onCheckedChange={() => toggleAttendee(leader.name, true)}
+                                                      className="border-accent"
+                                                    />
+                                                    <label htmlFor={`edit-leader-${leader.id}`} className="text-xs font-bold text-slate-700 dark:text-slate-300 cursor-pointer flex-1">
+                                                      {leader.name} <span className="text-[8px] text-slate-400 uppercase ml-2">— {leader.title}</span>
+                                                    </label>
+                                                  </div>
+                                                ))}
+                                             </div>
+                                          </ScrollArea>
+                                          <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800">
+                                             <p className="text-[9px] font-bold text-accent uppercase tracking-widest">Tagged: {(editMeeting.attendees || []).length} Officials</p>
+                                          </div>
+                                       </div>
+                                    </div>
+
                                      <div className="space-y-1">
                                        <Label className="text-[10px] font-bold uppercase text-slate-400">Official Minutes & Resolutions</Label>
                                        <Textarea 

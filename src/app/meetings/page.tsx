@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useEffect } from 'react'
@@ -17,7 +16,8 @@ import {
   UserCheck,
   Plus,
   Calendar as CalendarIcon,
-  Sparkles
+  Sparkles,
+  Check
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -26,6 +26,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Checkbox } from '@/components/ui/checkbox'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import { useCollection, useFirestore, useMemoFirebase, useUser } from '@/firebase'
 import { collection, query, orderBy, addDoc, serverTimestamp } from 'firebase/firestore'
 import {
@@ -69,6 +71,8 @@ export default function MeetingsPage() {
   const [isMirror, setIsMirror] = useState(false)
   const [isActionLoading, setIsActionLoading] = useState(false)
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
+  const [selectedAttendees, setSelectedAttendees] = useState<string[]>([])
+  
   const db = useFirestore()
   const { user } = useUser()
   const { toast } = useToast()
@@ -98,7 +102,13 @@ export default function MeetingsPage() {
     return query(collection(db, 'meetings'), orderBy('createdAt', 'desc'));
   }, [db]);
 
+  const leadersQuery = useMemoFirebase(() => {
+    if (!db) return null;
+    return query(collection(db, 'leadership'), orderBy('name', 'asc'));
+  }, [db]);
+
   const { data: meetings, loading: dataLoading } = useCollection(meetingsQuery);
+  const { data: leaders } = useCollection(leadersQuery);
 
   const formatTo12h = (timeStr: string) => {
     if (!timeStr) return '';
@@ -126,6 +136,7 @@ export default function MeetingsPage() {
     try {
       await addDoc(collection(db, 'meetings'), {
         ...newMeeting,
+        attendees: selectedAttendees,
         createdAt: serverTimestamp()
       })
       toast({ title: "Assembly Scheduled", description: "The meeting record has been established." })
@@ -133,12 +144,19 @@ export default function MeetingsPage() {
         title: '', date: '', time: '09:00 AM', location: '', agenda: '',
         level: 'National', stateName: '', districtName: '', status: 'Upcoming'
       })
+      setSelectedAttendees([])
       setIsAddDialogOpen(false)
     } catch (e: any) {
       toast({ variant: "destructive", title: "Error", description: e.message })
     } finally {
       setIsActionLoading(false)
     }
+  }
+
+  const toggleAttendee = (name: string) => {
+    setSelectedAttendees(prev => 
+      prev.includes(name) ? prev.filter(a => a !== name) : [...prev, name]
+    )
   }
 
   const splitTime = (timeStr: string) => {
@@ -316,6 +334,38 @@ export default function MeetingsPage() {
                     <div className="space-y-1">
                       <Label className="text-[10px] uppercase font-bold text-slate-400">Location (Venue)</Label>
                       <Input value={newMeeting.location} onChange={e => setNewMeeting({...newMeeting, location: e.target.value})} placeholder="Full address or Venue name" className="rounded-xl h-11" />
+                    </div>
+
+                    {/* Attendance Selection */}
+                    <div className="space-y-2">
+                       <Label className="text-[10px] uppercase font-bold text-slate-400 flex items-center gap-2">
+                         <Users className="w-3 h-3 text-accent" /> Select Attendees from Leadership Tree
+                       </Label>
+                       <div className="border border-slate-100 dark:border-slate-800 rounded-2xl bg-slate-50/50 dark:bg-slate-900/50 p-4">
+                          <ScrollArea className="h-40">
+                             <div className="grid grid-cols-1 gap-2 pr-4">
+                                {leaders && leaders.map((leader: any) => (
+                                  <div key={leader.id} className="flex items-center space-x-2 bg-white dark:bg-slate-800 p-2 rounded-lg border border-slate-100 dark:border-slate-700 hover:border-accent transition-colors">
+                                    <Checkbox 
+                                      id={`leader-${leader.id}`} 
+                                      checked={selectedAttendees.includes(leader.name)}
+                                      onCheckedChange={() => toggleAttendee(leader.name)}
+                                      className="border-accent"
+                                    />
+                                    <label htmlFor={`leader-${leader.id}`} className="text-xs font-bold text-slate-700 dark:text-slate-300 cursor-pointer flex-1">
+                                      {leader.name} <span className="text-[8px] text-slate-400 uppercase ml-2">— {leader.title} ({leader.level})</span>
+                                    </label>
+                                  </div>
+                                ))}
+                                {(!leaders || leaders.length === 0) && (
+                                  <p className="text-[10px] text-slate-400 text-center py-8">No leadership records available for selection.</p>
+                                )}
+                             </div>
+                          </ScrollArea>
+                          <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800">
+                             <p className="text-[9px] font-bold text-accent uppercase tracking-widest">Selected: {selectedAttendees.length} Leaders</p>
+                          </div>
+                       </div>
                     </div>
 
                     <div className="space-y-1">
