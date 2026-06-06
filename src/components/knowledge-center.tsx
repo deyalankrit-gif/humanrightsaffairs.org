@@ -140,6 +140,9 @@ export function KnowledgeCenter() {
 
       <Dialog open={!!selectedGuide} onOpenChange={(open) => !open && setSelectedGuide(null)}>
         <DialogContent className="max-w-2xl rounded-[2.5rem] p-0 overflow-hidden border-none shadow-2xl relative bg-white dark:bg-slate-950">
+          <DialogHeader className="sr-only">
+            <DialogTitle>{selectedGuide?.title || 'Details'}</DialogTitle>
+          </DialogHeader>
           {selectedGuide && (
             <div className="flex flex-col max-h-[90vh]">
               <div className="absolute right-6 top-6 z-50">
@@ -155,12 +158,12 @@ export function KnowledgeCenter() {
                   <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl w-fit shadow-sm mb-6">
                     {React.cloneElement(selectedGuide.icon as React.ReactElement, { className: "w-10 h-10" })}
                   </div>
-                  <DialogTitle className="text-3xl md:text-4xl font-headline font-bold text-primary dark:text-white mb-2 pr-12 leading-tight">
+                  <h2 className="text-3xl md:text-4xl font-headline font-bold text-primary dark:text-white mb-2 pr-12 leading-tight">
                     {selectedGuide.title}
-                  </DialogTitle>
-                  <DialogDescription className="text-lg text-slate-600 dark:text-slate-300 font-medium leading-relaxed">
+                  </h2>
+                  <p className="text-lg text-slate-600 dark:text-slate-300 font-medium leading-relaxed">
                     {selectedGuide.desc}
-                  </DialogDescription>
+                  </p>
                 </div>
               </div>
 

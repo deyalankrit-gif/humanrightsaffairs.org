@@ -124,8 +124,6 @@ export function AppSidebar() {
                 }
               }
 
-              const isPublicView = link.name === 'Public Site View'
-              
               return (
                 <SidebarMenuItem key={link.name}>
                   <SidebarMenuButton
@@ -136,8 +134,7 @@ export function AppSidebar() {
                       "h-11 rounded-xl transition-all px-4",
                       isActive 
                         ? "bg-accent text-white font-bold hover:bg-secondary hover:text-white shadow-md" 
-                        : "hover:bg-secondary/10 hover:text-secondary",
-                      isPublicView && "text-emerald-600 dark:text-emerald-400 font-black hover:bg-emerald-50 dark:hover:bg-emerald-950/30"
+                        : "hover:bg-secondary/10 hover:text-secondary"
                     )}
                   >
                     <Link 
@@ -150,7 +147,7 @@ export function AppSidebar() {
                     >
                       <link.icon className={cn(
                         "w-5 h-5", 
-                        isActive ? "text-white" : (isPublicView ? "text-emerald-500" : "text-muted-foreground")
+                        isActive ? "text-white" : "text-muted-foreground"
                       )} />
                       <span className="group-data-[collapsible=icon]:hidden">{link.name}</span>
                     </Link>

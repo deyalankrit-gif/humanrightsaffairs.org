@@ -45,7 +45,7 @@ export function Navbar() {
       }
       
       window.addEventListener('hashchange', handleHashChange)
-      handleHashChange() // Initial check
+      handleHashChange()
 
       return () => window.removeEventListener('hashchange', handleHashChange)
     }
