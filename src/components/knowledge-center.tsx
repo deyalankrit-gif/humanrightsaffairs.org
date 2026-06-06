@@ -1,8 +1,7 @@
-
 "use client"
 
 import React, { useState } from 'react'
-import { BookOpen, Scale, FileText, UserCheck, ShieldCheck, Download, ExternalLink, Globe, CheckCircle2 } from 'lucide-react'
+import { BookOpen, Scale, FileText, UserCheck, ShieldCheck, Download, ExternalLink, Globe, CheckCircle2, X } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
@@ -11,6 +10,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogClose,
 } from "@/components/ui/dialog"
 
 const guides = [
@@ -151,16 +151,24 @@ export function KnowledgeCenter() {
 
       <Dialog open={!!selectedGuide} onOpenChange={(open) => !open && setSelectedGuide(null)}>
         {selectedGuide && (
-          <DialogContent className="max-w-2xl rounded-[2.5rem] p-0 overflow-hidden border-none shadow-2xl">
+          <DialogContent className="max-w-2xl rounded-[2.5rem] p-0 overflow-y-auto max-h-[90vh] border-none shadow-2xl relative">
+            <div className="absolute right-6 top-6 z-50">
+              <DialogClose asChild>
+                <Button variant="ghost" size="icon" className="rounded-full bg-white/20 hover:bg-white/40 backdrop-blur-md text-primary h-10 w-10 border border-white/20 shadow-lg">
+                  <X className="w-6 h-6" />
+                </Button>
+              </DialogClose>
+            </div>
+
             <div className={`p-8 md:p-12 ${selectedGuide.color} relative`}>
               <DialogHeader className="relative z-10 text-left">
                 <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl w-fit shadow-sm mb-6">
                   {React.cloneElement(selectedGuide.icon as React.ReactElement, { className: "w-10 h-10" })}
                 </div>
-                <DialogTitle className="text-3xl md:text-4xl font-headline font-bold text-primary dark:text-white mb-2">
+                <DialogTitle className="text-3xl md:text-4xl font-headline font-bold text-primary dark:text-white mb-2 pr-12 leading-tight">
                   {selectedGuide.title}
                 </DialogTitle>
-                <DialogDescription className="text-lg text-slate-600 dark:text-slate-300 font-medium">
+                <DialogDescription className="text-lg text-slate-600 dark:text-slate-300 font-medium leading-relaxed">
                   {selectedGuide.desc}
                 </DialogDescription>
               </DialogHeader>
@@ -188,7 +196,7 @@ export function KnowledgeCenter() {
               <div className="flex flex-col sm:flex-row gap-4 pt-4">
                 <Button 
                   onClick={handleAccessRepository}
-                  className="flex-1 bg-primary text-primary-foreground dark:bg-slate-100 dark:text-primary font-bold py-6 rounded-xl hover:bg-primary/90 text-lg shadow-xl shadow-primary/10"
+                  className="flex-1 bg-primary text-primary-foreground dark:bg-slate-100 dark:text-primary font-bold py-6 rounded-xl hover:bg-secondary hover:text-white text-lg shadow-xl shadow-primary/10"
                 >
                   Access Full Repository
                 </Button>
