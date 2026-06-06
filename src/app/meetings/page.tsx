@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useEffect } from 'react'
@@ -21,7 +22,8 @@ import {
   Award,
   Edit,
   Trash2,
-  CircleCheck
+  CircleCheck,
+  X
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -42,6 +44,7 @@ import {
   DialogTrigger,
   DialogDescription,
   DialogFooter,
+  DialogClose,
 } from "@/components/ui/dialog"
 import {
   AlertDialog,
@@ -627,7 +630,7 @@ export default function MeetingsPage() {
                               </div>
                             )}
                             <DialogFooter>
-                              <Button onClick={handleUpdateMeeting} disabled={isActionLoading} className="w-full bg-primary text-white h-12 rounded-xl font-bold hover:bg-secondary transition-all">Save Official Changes</Button>
+                              <Button onClick={handleUpdateMeeting} disabled={isActionLoading} className="w-full bg-primary text-white h-12 rounded-xl font-bold hover:bg-secondary hover:text-white transition-all">Save Official Changes</Button>
                             </DialogFooter>
                           </DialogContent>
                         </Dialog>
@@ -713,84 +716,89 @@ export default function MeetingsPage() {
                           </Button>
                         </DialogTrigger>
                         <DialogContent className="max-w-2xl rounded-[2.5rem] bg-white dark:bg-slate-950 max-h-[90vh] overflow-y-auto border-none shadow-2xl">
-                          <DialogHeader className="sr-only">
-                            <DialogTitle>{meeting.title} - Minutes</DialogTitle>
-                            <DialogDescription>Full assembly breakdown including agenda, official presence, and finalized organizational minutes.</DialogDescription>
-                          </DialogHeader>
-                          
-                          <div className="header-visible mb-6">
-                            <h2 className="text-3xl font-headline font-bold text-primary dark:text-white">{meeting.title}</h2>
-                            <p className="font-bold text-accent uppercase tracking-widest text-xs">
-                              {meeting.level === 'National' ? 'Central Council' : meeting.level} Assembly Breakdown
-                            </p>
-                          </div>
-                          
-                          <div className="py-6 space-y-8">
-                            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                               <div className="bg-slate-50 dark:bg-slate-900 p-4 rounded-2xl border border-slate-100 dark:border-slate-800">
-                                  <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Date</p>
-                                  <p className="font-bold text-sm text-foreground">{meeting.date}</p>
-                               </div>
-                               <div className="bg-slate-50 dark:bg-slate-900 p-4 rounded-2xl border border-slate-100 dark:border-slate-800">
-                                  <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Time</p>
-                                  <p className="font-bold text-sm text-foreground">{formatTo12h(meeting.time)}</p>
-                               </div>
-                               <div className="bg-slate-50 dark:bg-slate-900 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 col-span-2 md:col-span-1">
-                                  <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Scope</p>
-                                  <p className="font-bold text-sm text-foreground uppercase">{meeting.districtName ? `${meeting.districtName}, ` : ''}{meeting.stateName || 'Central Council'}</p>
-                               </div>
+                          <div className="flex flex-col">
+                            <div className="absolute right-6 top-6 z-50">
+                              <DialogClose asChild>
+                                <Button variant="ghost" size="icon" className="rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-primary h-10 w-10 border border-slate-200 dark:border-slate-700 shadow-lg">
+                                  <X className="w-6 h-6" />
+                                </Button>
+                              </DialogClose>
                             </div>
 
-                            {meeting.attendees && meeting.attendees.length > 0 && (
-                              <div className="space-y-4">
-                                <h4 className="font-headline font-bold text-xl flex items-center gap-2 text-foreground">
-                                  <CircleCheck className="w-5 h-5 text-accent" /> Leadership Presence
-                                </h4>
-                                <div className="flex flex-wrap gap-2">
-                                  {meeting.attendees.map((attendee, idx) => {
-                                    const leaderData = leaders.find(l => l.name === attendee);
-                                    return (
-                                      <Badge 
-                                        key={idx} 
-                                        variant="secondary" 
-                                        onClick={() => leaderData && setSelectedLeaderProfile(leaderData)}
-                                        className={cn(
-                                          "bg-accent/10 text-accent border-accent/20 px-4 py-1 rounded-full font-bold transition-all",
-                                          leaderData ? "cursor-pointer hover:bg-secondary hover:text-white hover:scale-105 shadow-sm" : "opacity-70"
-                                        )}
-                                      >
-                                        {attendee}
-                                      </Badge>
-                                    );
-                                  })}
+                            <DialogHeader className="mb-6">
+                              <DialogTitle className="text-3xl font-headline font-bold text-primary dark:text-white">{meeting.title}</DialogTitle>
+                              <DialogDescription className="font-bold text-accent uppercase tracking-widest text-xs">
+                                {meeting.level === 'National' ? 'Central Council' : meeting.level} Assembly Breakdown
+                              </DialogDescription>
+                            </DialogHeader>
+                            
+                            <div className="py-2 space-y-8">
+                              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                <div className="bg-slate-50 dark:bg-slate-900 p-4 rounded-2xl border border-slate-100 dark:border-slate-800">
+                                    <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Date</p>
+                                    <p className="font-bold text-sm text-foreground">{meeting.date}</p>
                                 </div>
-                                <p className="text-[9px] text-slate-400 font-bold uppercase italic tracking-tighter">Click on an official to view their verified credentials.</p>
+                                <div className="bg-slate-50 dark:bg-slate-900 p-4 rounded-2xl border border-slate-100 dark:border-slate-800">
+                                    <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Time</p>
+                                    <p className="font-bold text-sm text-foreground">{formatTo12h(meeting.time)}</p>
+                                </div>
+                                <div className="bg-slate-50 dark:bg-slate-900 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 col-span-2 md:col-span-1">
+                                    <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Scope</p>
+                                    <p className="font-bold text-sm text-foreground uppercase">{meeting.districtName ? `${meeting.districtName}, ` : ''}{meeting.stateName || 'Central Council'}</p>
+                                </div>
                               </div>
-                            )}
 
-                            <div className="space-y-4">
-                               <h4 className="font-headline font-bold text-xl flex items-center gap-2 text-foreground">
-                                 <FileText className="w-5 h-5 text-accent" /> Meeting Agenda
-                               </h4>
-                               <div className="p-6 bg-slate-50 dark:bg-slate-900 rounded-[2rem] border border-slate-100 dark:border-slate-800">
-                                 <p className="text-sm leading-relaxed text-muted-foreground whitespace-pre-line font-medium">
-                                   {meeting.agenda}
-                                 </p>
-                               </div>
-                            </div>
+                              {meeting.attendees && meeting.attendees.length > 0 && (
+                                <div className="space-y-4">
+                                  <h4 className="font-headline font-bold text-xl flex items-center gap-2 text-foreground">
+                                    <CircleCheck className="w-5 h-5 text-accent" /> Leadership Presence
+                                  </h4>
+                                  <div className="flex flex-wrap gap-2">
+                                    {meeting.attendees.map((attendee, idx) => {
+                                      const leaderData = leaders.find(l => l.name === attendee);
+                                      return (
+                                        <Badge 
+                                          key={idx} 
+                                          variant="secondary" 
+                                          onClick={() => leaderData && setSelectedLeaderProfile(leaderData)}
+                                          className={cn(
+                                            "bg-accent/10 text-accent border-accent/20 px-4 py-1 rounded-full font-bold transition-all",
+                                            leaderData ? "cursor-pointer hover:bg-secondary hover:text-white hover:scale-105 shadow-sm" : "opacity-70"
+                                          )}
+                                        >
+                                          {attendee}
+                                        </Badge>
+                                      );
+                                    })}
+                                  </div>
+                                  <p className="text-[9px] text-slate-400 font-bold uppercase italic tracking-tighter">Click on an official to view their verified credentials.</p>
+                                </div>
+                              )}
 
-                            {meeting.minutes && (
                               <div className="space-y-4">
                                 <h4 className="font-headline font-bold text-xl flex items-center gap-2 text-foreground">
-                                  <Users className="w-5 h-5 text-secondary" /> Official Minutes & Resolutions
+                                  <FileText className="w-5 h-5 text-accent" /> Meeting Agenda
                                 </h4>
-                                <div className="p-6 bg-emerald-50/30 dark:bg-emerald-900/10 rounded-[2rem] border border-emerald-100 dark:border-emerald-900/30">
-                                  <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-300 whitespace-pre-line font-bold italic">
-                                    {meeting.minutes}
+                                <div className="p-6 bg-slate-50 dark:bg-slate-900 rounded-[2rem] border border-slate-100 dark:border-slate-800">
+                                  <p className="text-sm leading-relaxed text-muted-foreground whitespace-pre-line font-medium">
+                                    {meeting.agenda}
                                   </p>
                                 </div>
                               </div>
-                            )}
+
+                              {meeting.minutes && (
+                                <div className="space-y-4">
+                                  <h4 className="font-headline font-bold text-xl flex items-center gap-2 text-foreground">
+                                    <Users className="w-5 h-5 text-secondary" /> Official Minutes & Resolutions
+                                  </h4>
+                                  <div className="p-6 bg-emerald-50/30 dark:bg-emerald-900/10 rounded-[2rem] border border-emerald-100 dark:border-emerald-900/30">
+                                    <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-300 whitespace-pre-line font-bold italic">
+                                      {meeting.minutes}
+                                    </p>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
                           </div>
                         </DialogContent>
                       </Dialog>

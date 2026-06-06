@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -80,23 +81,9 @@ export function AppSidebar() {
       window.addEventListener('hashchange', handleHashChange)
       handleHashChange()
 
-      const handleLinkClick = (e: MouseEvent) => {
-        const target = e.target as HTMLElement;
-        const link = target.closest('a');
-        if (link && link.hash) {
-          setActiveHash(link.hash.replace('#', ''));
-        } else if (link && link.pathname !== pathname) {
-          setActiveHash('');
-        }
-      }
-      window.addEventListener('click', handleLinkClick)
-
-      return () => {
-        window.removeEventListener('hashchange', handleHashChange)
-        window.removeEventListener('click', handleLinkClick)
-      }
+      return () => window.removeEventListener('hashchange', handleHashChange)
     }
-  }, [pathname])
+  }, [])
 
   return (
     <Sidebar collapsible="icon" className="border-r bg-sidebar">
@@ -153,7 +140,14 @@ export function AppSidebar() {
                       isPublicView && "text-emerald-600 dark:text-emerald-400 font-black hover:bg-emerald-50 dark:hover:bg-emerald-950/30"
                     )}
                   >
-                    <Link href={link.href} className="flex items-center gap-3">
+                    <Link 
+                      href={link.href}
+                      onClick={() => {
+                        if (link.href.includes('#')) setActiveHash(link.href.split('#')[1])
+                        else if (!isAdminPortal) setActiveHash('')
+                      }}
+                      className="flex items-center gap-3"
+                    >
                       <link.icon className={cn(
                         "w-5 h-5", 
                         isActive ? "text-white" : (isPublicView ? "text-emerald-500" : "text-muted-foreground")
@@ -172,7 +166,7 @@ export function AppSidebar() {
         {!isAdminPortal && (
           <div className="group-data-[collapsible=icon]:hidden">
             <DonationDialog>
-              <Button className="w-full bg-accent text-white font-bold rounded-xl gap-2 h-11 hover:bg-secondary transition-all">
+              <Button className="w-full bg-accent text-white font-bold rounded-xl gap-2 h-11 hover:bg-secondary hover:text-white transition-all">
                 <HeartHandshake className="w-4 h-4" /> Support Cause
               </Button>
             </DonationDialog>

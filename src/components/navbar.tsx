@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useEffect, useState } from 'react'
@@ -46,23 +47,9 @@ export function Navbar() {
       window.addEventListener('hashchange', handleHashChange)
       handleHashChange() // Initial check
 
-      const handleLinkClick = (e: MouseEvent) => {
-        const target = e.target as HTMLElement;
-        const link = target.closest('a');
-        if (link && link.hash) {
-          setActiveHash(link.hash.replace('#', ''));
-        } else if (link && link.pathname !== pathname) {
-          setActiveHash('');
-        }
-      }
-      window.addEventListener('click', handleLinkClick)
-
-      return () => {
-        window.removeEventListener('hashchange', handleHashChange)
-        window.removeEventListener('click', handleLinkClick)
-      }
+      return () => window.removeEventListener('hashchange', handleHashChange)
     }
-  }, [pathname])
+  }, [])
 
   if (isIframe) return null
 
@@ -99,6 +86,10 @@ export function Navbar() {
             <Link 
               key={link.name} 
               href={link.href}
+              onClick={() => {
+                if (isHashLink) setActiveHash(linkHash)
+                else setActiveHash('')
+              }}
               className={cn(
                 "whitespace-nowrap flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[13px] font-bold transition-all",
                 isActive 

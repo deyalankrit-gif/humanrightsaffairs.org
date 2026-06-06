@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState } from 'react'
@@ -69,27 +70,18 @@ const guides = [
 export function KnowledgeCenter() {
   const [selectedGuide, setSelectedGuide] = useState<typeof guides[0] | null>(null)
 
-  const scrollToSearch = () => {
-    setSelectedGuide(null);
-    const element = document.getElementById('search');
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
-  }
-
   const handleAccessRepository = () => {
-    if (selectedGuide?.id === 'constitution') {
+    if (!selectedGuide) return;
+    if (selectedGuide.id === 'constitution') {
       window.open('https://www.indiacode.nic.in/bitstream/123456789/19150/1/constitution_of_india.pdf', '_blank');
-    } else if (selectedGuide?.id === 'womens-rights') {
+    } else if (selectedGuide.id === 'womens-rights') {
       window.open('https://clpr.org.in/wp-content/uploads/2024/12/Womens-Book_Accessible.pdf', '_blank');
-    } else if (selectedGuide?.id === 'labor-laws') {
+    } else if (selectedGuide.id === 'labor-laws') {
       window.open('https://ncib.in/pdf/ncib_pdf/Labour%20Act.pdf', '_blank');
-    } else if (selectedGuide?.id === 'rti') {
+    } else if (selectedGuide.id === 'rti') {
       window.open('https://cic.gov.in/sites/default/files/RTI-Act_English.pdf', '_blank');
-    } else if (selectedGuide?.id === 'manuals') {
-      window.open('https://bprd.nic.in/uploads/pdf/BNS%20Book_After%20Correction.pdf', '_blank');
     } else {
-      scrollToSearch();
+      window.open('https://bprd.nic.in/uploads/pdf/BNS%20Book_After%20Correction.pdf', '_blank');
     }
   }
 
@@ -107,10 +99,10 @@ export function KnowledgeCenter() {
           </div>
           <Button 
             variant="outline" 
-            onClick={scrollToSearch}
+            asChild
             className="border-primary text-primary hover:bg-secondary hover:text-white dark:border-slate-700 dark:text-slate-300 w-full md:w-auto font-bold"
           >
-            View All Documentation
+            <a href="#search">View All Documentation</a>
           </Button>
         </div>
 
@@ -139,7 +131,7 @@ export function KnowledgeCenter() {
                   Read More <ExternalLink className="w-3 h-3 md:w-4 md:h-4" />
                 </Button>
                 {guide.id === 'manuals' && (
-                  <Button size="sm" onClick={() => window.open('https://bprd.nic.in/uploads/pdf/BNS%20Book_After%20Correction.pdf', '_blank')} className="bg-primary text-white ml-auto text-xs h-8 md:h-9 hover:bg-secondary">
+                  <Button size="sm" onClick={() => window.open('https://bprd.nic.in/uploads/pdf/BNS%20Book_After%20Correction.pdf', '_blank')} className="bg-primary text-white ml-auto text-xs h-8 md:h-9 hover:bg-secondary hover:text-white">
                     <Download className="w-3 h-3 md:w-4 md:h-4 mr-2" /> Download
                   </Button>
                 )}
@@ -152,7 +144,7 @@ export function KnowledgeCenter() {
       <Dialog open={!!selectedGuide} onOpenChange={(open) => !open && setSelectedGuide(null)}>
         <DialogContent className="max-w-2xl rounded-[2.5rem] p-0 overflow-y-auto max-h-[90vh] border-none shadow-2xl relative bg-white dark:bg-slate-950">
           {selectedGuide && (
-            <>
+            <div className="flex flex-col">
               <div className="absolute right-6 top-6 z-50">
                 <DialogClose asChild>
                   <Button variant="ghost" size="icon" className="rounded-full bg-white/20 hover:bg-white/40 backdrop-blur-md text-primary h-10 w-10 border border-white/20 shadow-lg">
@@ -161,21 +153,19 @@ export function KnowledgeCenter() {
                 </DialogClose>
               </div>
 
-              <DialogHeader className="p-0">
-                <div className={`p-8 md:p-12 ${selectedGuide.color} relative`}>
-                  <div className="relative z-10 text-left">
-                    <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl w-fit shadow-sm mb-6">
-                      {React.cloneElement(selectedGuide.icon as React.ReactElement, { className: "w-10 h-10" })}
-                    </div>
-                    <DialogTitle className="text-3xl md:text-4xl font-headline font-bold text-primary dark:text-white mb-2 pr-12 leading-tight">
-                      {selectedGuide.title}
-                    </DialogTitle>
-                    <DialogDescription className="text-lg text-slate-600 dark:text-slate-300 font-medium leading-relaxed">
-                      {selectedGuide.desc}
-                    </DialogDescription>
+              <div className={`p-8 md:p-12 ${selectedGuide.color} relative`}>
+                <div className="relative z-10 text-left">
+                  <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl w-fit shadow-sm mb-6">
+                    {React.cloneElement(selectedGuide.icon as React.ReactElement, { className: "w-10 h-10" })}
                   </div>
+                  <DialogTitle className="text-3xl md:text-4xl font-headline font-bold text-primary dark:text-white mb-2 pr-12 leading-tight">
+                    {selectedGuide.title}
+                  </DialogTitle>
+                  <DialogDescription className="text-lg text-slate-600 dark:text-slate-300 font-medium leading-relaxed">
+                    {selectedGuide.desc}
+                  </DialogDescription>
                 </div>
-              </DialogHeader>
+              </div>
 
               <div className="p-8 md:p-12 space-y-8">
                 <div className="space-y-4">
@@ -200,13 +190,13 @@ export function KnowledgeCenter() {
                 <div className="flex flex-col sm:flex-row gap-4 pt-4">
                   <Button 
                     onClick={handleAccessRepository}
-                    className="flex-1 bg-primary text-white font-bold py-6 rounded-xl hover:bg-secondary transition-all text-lg shadow-xl shadow-primary/10"
+                    className="flex-1 bg-primary text-white font-bold py-6 rounded-xl hover:bg-secondary hover:text-white transition-all text-lg shadow-xl shadow-primary/10"
                   >
                     Access Full Repository
                   </Button>
                 </div>
               </div>
-            </>
+            </div>
           )}
         </DialogContent>
       </Dialog>

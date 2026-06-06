@@ -13,70 +13,16 @@
       "imageHint": "moumita saha portrait"
     },
     {
-      "id": "male-avatar",
-      "description": "Official Generic Male Personnel Avatar",
-      "imageUrl": "https://picsum.photos/seed/man/400/400",
-      "imageHint": "professional man avatar"
-    },
-    {
-      "id": "female-avatar",
-      "description": "Official Generic Female Personnel Avatar",
-      "imageUrl": "https://picsum.photos/seed/woman/400/400",
-      "imageHint": "professional woman avatar"
+      "id": "id-card-sample",
+      "description": "Sample Member Identity Card for JusticeShield",
+      "imageUrl": "/sample i card.jpeg",
+      "imageHint": "identification card"
     },
     {
       "id": "hero-human-rights",
       "description": "Cinematic black and white image related to human rights",
-      "imageUrl": "https://picsum.photos/seed/justice-bw/1920/1080",
+      "imageUrl": "/Human R2.jpeg",
       "imageHint": "human rights"
-    },
-    {
-      "id": "id-card-sample",
-      "description": "Sample Member Identity Card for JusticeShield",
-      "imageUrl": "https://picsum.photos/seed/idcard/1000/600",
-      "imageHint": "identification card"
-    },
-    {
-      "id": "legal-library",
-      "description": "Books and gavel symbolizing legal knowledge",
-      "imageUrl": "https://picsum.photos/seed/legal/800/600",
-      "imageHint": "legal books"
-    },
-    {
-      "id": "event-legal-aid",
-      "description": "Free legal aid camp in rural India",
-      "imageUrl": "https://picsum.photos/seed/legalaid/800/600",
-      "imageHint": "legal aid"
-    },
-    {
-      "id": "event-rally",
-      "description": "Human rights awareness rally",
-      "imageUrl": "https://picsum.photos/seed/rally/800/600",
-      "imageHint": "rally"
-    },
-    {
-      "id": "event-convention",
-      "description": "National Human Rights Convention",
-      "imageUrl": "https://picsum.photos/seed/convention/800/600",
-      "imageHint": "conference"
-    },
-    {
-      "id": "event-workshop",
-      "description": "Constitutional rights workshop for students",
-      "imageUrl": "https://picsum.photos/seed/workshop/800/600",
-      "imageHint": "workshop"
-    },
-    {
-      "id": "niti-logo",
-      "description": "Official Niti Aayog Emblem",
-      "imageUrl": "https://picsum.photos/seed/niti-aayog/400/200",
-      "imageHint": "logo"
-    },
-    {
-      "id": "ai-bot-avatar",
-      "description": "AI Advocate Bot Avatar",
-      "imageUrl": "https://picsum.photos/seed/ai-bot/400/400",
-      "imageHint": "advocate avatar"
     },
     {
       "id": "donation-qr",
@@ -85,28 +31,22 @@
       "imageHint": "qr code"
     },
     {
-      "id": "donation-bg-1",
-      "description": "Inspirational female portrait for donation section",
-      "imageUrl": "https://picsum.photos/seed/support-1/800/1000",
-      "imageHint": "portrait"
-    },
-    {
-      "id": "donation-bg-2",
-      "description": "Inspirational child portrait for donation section",
-      "imageUrl": "https://picsum.photos/seed/support-2/800/1000",
-      "imageHint": "child"
+      "id": "niti-logo",
+      "description": "Official Niti Aayog Emblem",
+      "imageUrl": "/niti2.png",
+      "imageHint": "logo"
     },
     {
       "id": "donation-footer-image",
       "description": "Donation call to action image for footer",
-      "imageUrl": "https://picsum.photos/seed/donation/400/300",
+      "imageUrl": "/donate.jpeg",
       "imageHint": "charity"
     },
     {
-      "id": "donation-action-image",
-      "description": "Direct donation prompt image",
-      "imageUrl": "https://picsum.photos/seed/charity-support/600/400",
-      "imageHint": "donation support"
+      "id": "ai-bot-avatar",
+      "description": "AI Advocate Bot Avatar",
+      "imageUrl": "https://picsum.photos/seed/ai-bot/400/400",
+      "imageHint": "advocate avatar"
     }
   ]
 }
