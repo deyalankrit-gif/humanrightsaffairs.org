@@ -306,7 +306,7 @@ export default function MeetingsPage() {
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
-      <section className="pt-40 pb-20 bg-primary text-primary-foreground relative overflow-hidden">
+      <section className="pt-40 pb-20 bg-primary text-white relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-full opacity-5 pointer-events-none">
           <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-accent rounded-full blur-[100px]"></div>
           <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-secondary rounded-full blur-[100px]"></div>
@@ -314,16 +314,16 @@ export default function MeetingsPage() {
         <div className="container mx-auto px-4 relative z-10 text-center">
           <div className="max-w-3xl mx-auto space-y-6">
             <Badge className="bg-accent text-white font-bold px-4 py-1.5 uppercase tracking-widest text-xs border-none">Assembly Archives</Badge>
-            <h1 className="text-5xl md:text-7xl font-headline font-bold mb-6 text-primary-foreground">General <span className="text-accent italic">Meetings</span></h1>
-            <p className="text-xl opacity-80 leading-relaxed max-w-2xl mx-auto text-lg mb-8 text-primary-foreground">
-              Official records of our democratic decision-making processes, Strategic planning, and induction assemblies.
+            <h1 className="text-5xl md:text-7xl font-headline font-bold mb-6">General <span className="text-accent italic">Meetings</span></h1>
+            <p className="text-xl opacity-80 leading-relaxed max-w-2xl mx-auto text-lg mb-8">
+              Official records of our democratic decision-making processes, strategic planning, and induction assemblies.
             </p>
 
             {isAdmin && (
               <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                 <DialogTrigger asChild>
                   <Button className="bg-accent text-white font-bold rounded-2xl h-14 px-10 flex gap-2 hover:bg-secondary hover:text-white shadow-2xl shadow-accent/20 mx-auto transform hover:scale-105 transition-all">
-                    <Plus className="w-6 h-6" /> Live Mirror Editor: Schedule New
+                    <Plus className="w-6 h-6" /> Schedule New Assembly
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="max-w-xl bg-white dark:bg-slate-900 rounded-[2.5rem] border-none shadow-2xl max-h-[90vh] overflow-y-auto">
@@ -448,7 +448,7 @@ export default function MeetingsPage() {
                     </div>
                   </div>
                   <DialogFooter>
-                    <Button onClick={handleAddMeeting} disabled={isActionLoading} className="w-full bg-accent text-white font-bold h-12 rounded-xl text-lg shadow-xl shadow-accent/20 hover:bg-secondary hover:text-white transition-all">
+                    <Button onClick={handleAddMeeting} disabled={isActionLoading} className="w-full bg-accent text-white font-bold h-12 rounded-xl text-lg shadow-xl shadow-accent/20 hover:bg-secondary transition-all">
                       {isActionLoading ? <Loader2 className="animate-spin" /> : "Publish Official Record"}
                     </Button>
                   </DialogFooter>
@@ -627,7 +627,7 @@ export default function MeetingsPage() {
                               </div>
                             )}
                             <DialogFooter>
-                              <Button onClick={handleUpdateMeeting} disabled={isActionLoading} className="w-full bg-primary text-white h-12 rounded-xl font-bold hover:bg-secondary hover:text-white transition-all">Save Official Changes</Button>
+                              <Button onClick={handleUpdateMeeting} disabled={isActionLoading} className="w-full bg-primary text-white h-12 rounded-xl font-bold hover:bg-secondary transition-all">Save Official Changes</Button>
                             </DialogFooter>
                           </DialogContent>
                         </Dialog>

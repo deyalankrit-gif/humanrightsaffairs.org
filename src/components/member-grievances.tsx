@@ -87,7 +87,7 @@ export function MemberGrievances() {
             </div>
             <div className="space-y-2">
               <h2 className="text-3xl font-headline font-bold text-primary dark:text-white">Grievance Registered</h2>
-              <p className="text-slate-600 dark:text-slate-400 font-medium">Your complaint has been submitted to the National Grievance Cell.</p>
+              <p className="text-slate-600 dark:text-slate-400 font-medium">Your complaint has been submitted to the Central Council Grievance Cell.</p>
             </div>
             
             <div className="w-full bg-white dark:bg-slate-900 p-8 rounded-3xl border-2 border-dashed border-emerald-200 dark:border-emerald-900 shadow-inner">
@@ -127,7 +127,7 @@ export function MemberGrievances() {
                 <ShieldAlert className="w-8 h-8 text-accent" />
               </div>
               <div className="space-y-4">
-                <h3 className="text-3xl font-headline font-bold text-white">Central <span className="text-accent italic">Grievance</span> Cell</h3>
+                <h3 className="text-3xl font-headline font-bold text-white">Central <span className="text-accent italic">Council</span> Grievance Cell</h3>
                 <p className="text-slate-300 text-sm leading-relaxed">
                   We are committed to maintaining the highest ethical standards. Use this portal to report organizational misconduct, member violations, or personal grievances.
                 </p>
@@ -177,7 +177,7 @@ export function MemberGrievances() {
                   <FormField control={form.control} name="memberId" render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-[10px] font-bold uppercase text-slate-400">Member ID (Optional)</FormLabel>
-                      <FormControl><Input placeholder="M-1234" className="rounded-xl h-11" {...field} /></FormControl>
+                      <FormControl><Input placeholder="ABCDEF1234" className="rounded-xl h-11" {...field} /></FormControl>
                       <FormMessage />
                     </FormItem>
                   )} />
@@ -202,7 +202,7 @@ export function MemberGrievances() {
                 <Button 
                   type="submit" 
                   disabled={isSubmitting}
-                  className="w-full h-14 rounded-2xl bg-primary text-white font-bold text-lg hover:bg-secondary hover:text-white transition-all active:scale-95 flex gap-2"
+                  className="w-full h-14 rounded-2xl bg-primary text-white font-bold text-lg hover:bg-secondary transition-all flex gap-2"
                 >
                   {isSubmitting ? <Loader2 className="animate-spin" /> : <>Submit Formal Grievance <ArrowRight className="w-5 h-5" /></>}
                 </Button>

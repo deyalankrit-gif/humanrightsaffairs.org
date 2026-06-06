@@ -50,7 +50,6 @@ export function Navbar() {
         const target = e.target as HTMLElement;
         const link = target.closest('a');
         if (link && link.hash) {
-          // Force immediate update on click for better UX
           setActiveHash(link.hash.replace('#', ''));
         } else if (link && link.pathname !== pathname) {
           setActiveHash('');
@@ -90,7 +89,6 @@ export function Navbar() {
             isActive = (pathname === linkPath) && activeHash === linkHash
           } else {
             if (link.href === '/') {
-              // Exact match for home to avoid sticking selection on all pages
               isActive = pathname === '/' && activeHash === ''
             } else {
               isActive = pathname === link.href
