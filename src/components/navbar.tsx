@@ -66,13 +66,13 @@ export function Navbar() {
               key={link.name} 
               href={link.href}
               className={cn(
-                "whitespace-nowrap flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[13px] font-bold transition-all",
+                "whitespace-nowrap flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[13px] font-bold transition-all",
                 isActive 
-                  ? "bg-accent/10 text-accent" 
+                  ? "bg-accent text-white shadow-sm" 
                   : "text-muted-foreground hover:text-primary hover:bg-muted"
               )}
             >
-              <link.icon className={cn("w-3.5 h-3.5", isActive ? "text-accent" : "text-muted-foreground")} />
+              <link.icon className={cn("w-3.5 h-3.5", isActive ? "text-white" : "text-muted-foreground")} />
               <span>{link.name}</span>
             </Link>
           )

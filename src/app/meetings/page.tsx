@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useEffect } from 'react'
@@ -455,7 +454,7 @@ export default function MeetingsPage() {
                     </div>
                   </div>
                   <DialogFooter>
-                    <Button onClick={handleAddMeeting} disabled={isActionLoading} className="w-full bg-accent text-white font-bold h-12 rounded-xl text-lg shadow-xl shadow-accent/20 hover:bg-secondary hover:text-white">
+                    <Button onClick={handleAddMeeting} disabled={isActionLoading} className="w-full bg-accent text-white font-bold h-12 rounded-xl text-lg shadow-xl shadow-accent/20 hover:bg-secondary hover:text-white transition-all">
                       {isActionLoading ? <Loader2 className="animate-spin" /> : "Publish to Archive"}
                     </Button>
                   </DialogFooter>
@@ -478,7 +477,7 @@ export default function MeetingsPage() {
                   className={cn(
                     "rounded-full px-6 font-bold transition-all border-slate-200 dark:border-slate-700",
                     filter === lvl.value 
-                      ? "bg-accent text-slate-900 shadow-lg border-accent hover:bg-secondary hover:text-white" 
+                      ? "bg-accent text-white shadow-lg border-accent hover:bg-secondary hover:text-white" 
                       : "text-primary dark:text-slate-300 hover:bg-secondary hover:text-white hover:border-secondary"
                   )}
                 >
@@ -715,7 +714,7 @@ export default function MeetingsPage() {
                     <CardFooter className="p-8 pt-0 mt-auto">
                       <Dialog>
                         <DialogTrigger asChild>
-                          <Button className="w-full bg-slate-900 text-white dark:bg-white dark:text-slate-900 font-bold h-12 rounded-xl group/btn hover:bg-secondary hover:text-white transition-colors shadow-lg">
+                          <Button className="w-full bg-slate-900 text-white dark:bg-white dark:text-slate-900 font-bold h-12 rounded-xl group/btn hover:bg-secondary hover:text-white transition-all shadow-lg">
                             View Details & Minutes <ExternalLink className="ml-2 w-4 h-4 group-hover/btn:scale-110 transition-transform" />
                           </Button>
                         </DialogTrigger>

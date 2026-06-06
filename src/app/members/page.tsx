@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useEffect } from 'react'
@@ -477,7 +476,7 @@ export default function MembersPage() {
                   </div>
                 </div>
                 <DialogFooter>
-                  <Button onClick={handleAddMember} disabled={isAdding} className="w-full h-12 rounded-xl bg-primary text-white font-bold hover:bg-secondary hover:text-white">
+                  <Button onClick={handleAddMember} disabled={isAdding} className="w-full h-12 rounded-xl bg-primary text-white font-bold hover:bg-secondary hover:text-white transition-all">
                     {isAdding ? <Loader2 className="animate-spin mr-2" /> : <Plus className="w-4 h-4 mr-2" />}
                     Confirm Commissioning
                   </Button>
@@ -501,7 +500,7 @@ export default function MembersPage() {
                     className={cn(
                       "rounded-full px-4 h-8 text-[10px] font-bold transition-all border-slate-200 dark:border-slate-700",
                       levelFilter === level && !selectedState
-                        ? "bg-accent text-slate-900 shadow-sm border-accent hover:bg-secondary hover:text-white" 
+                        ? "bg-accent text-white shadow-sm border-accent hover:bg-secondary hover:text-white" 
                         : "text-primary dark:text-slate-300 hover:bg-secondary hover:text-white hover:border-secondary"
                     )}
                   >
@@ -517,7 +516,7 @@ export default function MembersPage() {
                   <DropdownMenuTrigger asChild>
                     <Button variant={selectedState ? "default" : "outline"} className={cn(
                       "rounded-full px-4 h-8 text-[10px] font-bold flex items-center gap-2 transition-all",
-                      selectedState ? "bg-accent text-slate-900 hover:bg-secondary hover:text-white" : "text-primary dark:text-white border-slate-200 dark:border-slate-700 hover:bg-secondary hover:text-white hover:border-secondary"
+                      selectedState ? "bg-accent text-white hover:bg-secondary hover:text-white" : "text-primary dark:text-white border-slate-200 dark:border-slate-700 hover:bg-secondary hover:text-white hover:border-secondary"
                     )}>
                       {selectedState || "Filter by State"} <ChevronDown className="w-3 h-3 opacity-50" />
                     </Button>
@@ -534,7 +533,7 @@ export default function MembersPage() {
                     <DropdownMenuTrigger asChild>
                       <Button variant={selectedDistrict ? "default" : "outline"} className={cn(
                         "rounded-full px-4 h-8 text-[10px] font-bold flex items-center gap-2 animate-in fade-in slide-in-from-left-2 transition-all",
-                        selectedDistrict ? "bg-accent text-slate-900 hover:bg-secondary hover:text-white" : "text-primary dark:text-white border-slate-200 dark:border-slate-700 hover:bg-secondary hover:text-white hover:border-secondary"
+                        selectedDistrict ? "bg-accent text-white hover:bg-secondary hover:text-white" : "text-primary dark:text-white border-slate-200 dark:border-slate-700 hover:bg-secondary hover:text-white hover:border-secondary"
                       )}>
                         {selectedDistrict || "Select District"} <ChevronDown className="w-3 h-3 opacity-50" />
                       </Button>

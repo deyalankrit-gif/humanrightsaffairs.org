@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useEffect } from 'react'
@@ -217,7 +216,7 @@ export default function EventsPage() {
             {isAdmin && (
               <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button className="bg-accent text-white font-bold rounded-2xl h-14 px-10 flex gap-2 hover:bg-secondary hover:text-white shadow-2xl shadow-accent/20 mx-auto">
+                  <Button className="bg-accent text-white font-bold rounded-2xl h-14 px-10 flex gap-2 hover:bg-secondary hover:text-white shadow-2xl shadow-accent/20 mx-auto transform hover:scale-105 transition-all">
                     <Plus className="w-6 h-6" /> Create New Event Entry
                   </Button>
                 </DialogTrigger>
@@ -295,7 +294,7 @@ export default function EventsPage() {
                     </div>
                   </div>
                   <DialogFooter>
-                    <Button onClick={handleAddEvent} disabled={isActionLoading} className="w-full h-12 rounded-xl bg-accent text-white font-bold hover:bg-secondary hover:text-white">
+                    <Button onClick={handleAddEvent} disabled={isActionLoading} className="w-full h-12 rounded-xl bg-accent text-white font-bold hover:bg-secondary hover:text-white transition-all">
                       {isActionLoading ? <Loader2 className="animate-spin" /> : "Publish Event"}
                     </Button>
                   </DialogFooter>
@@ -318,7 +317,7 @@ export default function EventsPage() {
                   className={cn(
                     "rounded-full px-6 font-bold transition-all border-slate-200 dark:border-slate-700",
                     filter === cat 
-                      ? "bg-accent text-slate-900 shadow-lg border-accent hover:bg-secondary hover:text-white" 
+                      ? "bg-accent text-white shadow-lg border-accent hover:bg-secondary hover:text-white" 
                       : "text-primary dark:text-slate-300 hover:bg-secondary hover:text-white hover:border-secondary"
                   )}
                 >
@@ -445,7 +444,7 @@ export default function EventsPage() {
                                       <Label>Description</Label>
                                       <Textarea value={editEvent.description} onChange={e => setEditEvent({...editEvent, description: e.target.value})} className="rounded-xl" />
                                     </div>
-                                    <Button onClick={handleUpdateEvent} disabled={isActionLoading} className="w-full mt-4 h-12 rounded-xl bg-accent text-white font-bold hover:bg-secondary hover:text-white">
+                                    <Button onClick={handleUpdateEvent} disabled={isActionLoading} className="w-full mt-4 h-12 rounded-xl bg-accent text-white font-bold hover:bg-secondary hover:text-white transition-all">
                                       {isActionLoading ? <Loader2 className="animate-spin mr-2" /> : "Save Changes"}
                                     </Button>
                                   </div>
@@ -465,8 +464,8 @@ export default function EventsPage() {
                                   <AlertDialogDescription>This will permanently remove this event from the public gallery.</AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <div className="flex justify-end gap-3 mt-4">
+                                  <AlertDialogAction onClick={() => handleDeleteEvent(event.id)} className="bg-red-500 hover:bg-red-600 rounded-xl border-none text-white font-bold transition-all">Delete</AlertDialogAction>
                                   <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
-                                  <AlertDialogAction onClick={() => handleDeleteEvent(event.id)} className="bg-red-500 hover:bg-red-600 rounded-xl border-none text-white font-bold">Delete</AlertDialogAction>
                                 </div>
                               </AlertDialogContent>
                             </AlertDialog>
