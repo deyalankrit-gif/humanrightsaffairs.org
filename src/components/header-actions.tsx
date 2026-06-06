@@ -40,12 +40,12 @@ export function HeaderActions() {
             </div>
           </div>
 
-          {/* Public Mirror Link */}
+          {/* Public Mirror Link - Highlighted Green & Bold */}
           <Button 
             variant="ghost" 
             size="sm" 
             asChild
-            className="h-7 px-2 gap-1.5 font-bold text-[8px] uppercase tracking-wider rounded-md hover:bg-accent/10 hover:text-accent transition-all hidden md:flex"
+            className="h-7 px-2 gap-1.5 font-black text-[8px] uppercase tracking-widest rounded-md text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950 transition-all hidden md:flex border border-emerald-100 dark:border-emerald-900"
           >
             <Link href="/internal/public-view">
               <Monitor className="w-3 h-3" /> Public Mirror

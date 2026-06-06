@@ -93,6 +93,8 @@ export function AppSidebar() {
           <SidebarMenu>
             {links.map((link) => {
               const isActive = pathname === link.href || (link.href !== '/' && pathname.startsWith(link.href))
+              const isPublicView = link.name === 'Public Site View'
+              
               return (
                 <SidebarMenuItem key={link.name}>
                   <SidebarMenuButton
@@ -101,11 +103,15 @@ export function AppSidebar() {
                     tooltip={link.name}
                     className={cn(
                       "h-11 rounded-xl transition-all px-4",
-                      isActive ? "bg-accent/10 text-accent font-bold" : "hover:bg-accent/5"
+                      isActive ? "bg-accent/10 text-accent font-bold" : "hover:bg-accent/5",
+                      isPublicView && "text-emerald-600 dark:text-emerald-400 font-black hover:bg-emerald-50 dark:hover:bg-emerald-950/30"
                     )}
                   >
                     <Link href={link.href} className="flex items-center gap-3">
-                      <link.icon className={cn("w-5 h-5", isActive ? "text-accent" : "text-muted-foreground")} />
+                      <link.icon className={cn(
+                        "w-5 h-5", 
+                        isActive ? "text-accent" : (isPublicView ? "text-emerald-500" : "text-muted-foreground")
+                      )} />
                       <span className="group-data-[collapsible=icon]:hidden">{link.name}</span>
                     </Link>
                   </SidebarMenuButton>

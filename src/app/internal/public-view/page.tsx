@@ -71,11 +71,11 @@ export default function PublicViewPage() {
       <div className="bg-white dark:bg-slate-950 border-b flex flex-col shrink-0">
         <div className="flex items-center justify-between px-6 py-1.5 border-b border-slate-100 dark:border-slate-800">
           <div className="flex items-center gap-3">
-            <div className="p-1 bg-accent/10 rounded-lg">
-              <Monitor className="w-3.5 h-3.5 text-accent" />
+            <div className="p-1 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg">
+              <Monitor className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
             </div>
             <div className="flex flex-col">
-              <h1 className="text-[9px] font-bold text-primary dark:text-white leading-none uppercase tracking-widest">Public Site Mirror</h1>
+              <h1 className="text-[9px] font-black text-emerald-600 dark:text-emerald-400 leading-none uppercase tracking-widest">Public Site Mirror</h1>
               <p className="text-[7px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">Live Preview Mode</p>
             </div>
           </div>
