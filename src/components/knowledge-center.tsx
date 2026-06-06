@@ -19,7 +19,7 @@ const guides = [
     id: "constitution",
     title: "Constitution of India",
     desc: "A complete guide to Fundamental Rights & Duties.",
-    details: "The Constitution of India is the supreme law of India. It imparts constitutional supremacy and was adopted by its people with a declaration in its preamble. It is the framework that defines fundamental political code, structure, procedures, powers, and duties of government institutions.",
+    overview: "The Constitution of India is the supreme law of India. It imparts constitutional supremacy and was adopted by its people with a declaration in its preamble. It is the framework that defines fundamental political code, structure, procedures, powers, and duties of government institutions.",
     features: ["Fundamental Rights (Articles 12-35)", "Directive Principles of State Policy", "Fundamental Duties of Citizens", "Independence of the Judiciary"],
     icon: <ShieldCheck className="w-8 h-8 text-indigo-500" />,
     color: "bg-indigo-50 dark:bg-indigo-950/40",
@@ -29,7 +29,7 @@ const guides = [
     id: "womens-rights",
     title: "Women's Rights",
     desc: "Legal protection against harassment & discrimination.",
-    details: "Comprehensive legal frameworks protect women in India from domestic violence, workplace harassment, and ensure equal pay. Understanding these rights is crucial for empowerment and safety.",
+    overview: "Comprehensive legal frameworks protect women in India from domestic violence, workplace harassment, and ensure equal pay. Understanding these rights is crucial for empowerment and safety.",
     features: ["Domestic Violence Act, 2005", "POSH Act, 2013", "Maternity Benefit Rights", "Right to Equal Pay"],
     icon: <UserCheck className="w-8 h-8 text-pink-500" />,
     color: "bg-pink-50 dark:bg-pink-950/40",
@@ -39,7 +39,7 @@ const guides = [
     id: "labor-laws",
     title: "Labor Laws",
     desc: "Knowing your rights in the Indian workplace.",
-    details: "Indian labor laws ensure fair treatment of employees, covering minimum wages, safe working conditions, and social security benefits like PF and Gratuity.",
+    overview: "Indian labor laws ensure fair treatment of employees, covering minimum wages, safe working conditions, and social security benefits like PF and Gratuity.",
     features: ["Minimum Wages Compliance", "Industrial Disputes Rights", "Social Security Benefits", "Workplace Safety Norms"],
     icon: <Scale className="w-8 h-8 text-amber-500" />,
     color: "bg-amber-50 dark:bg-amber-950/40",
@@ -49,7 +49,7 @@ const guides = [
     id: "rti",
     title: "Right to Info (RTI)",
     desc: "How to file an RTI and track your request.",
-    details: "The RTI Act is a landmark legislation that allows citizens to question the government and its departments, promoting transparency and combating corruption.",
+    overview: "The RTI Act is a landmark legislation that allows citizens to question the government and its departments, promoting transparency and combating corruption.",
     features: ["Filing Procedure Guide", "Drafting Applications", "Appellate Authority Info", "Tracking Status Guidelines"],
     icon: <FileText className="w-8 h-8 text-emerald-500" />,
     color: "bg-emerald-50 dark:bg-emerald-950/40",
@@ -59,7 +59,7 @@ const guides = [
     id: "manuals",
     title: "Manuals (PDF)",
     desc: "Download legal manuals in Hindi, English & Bengali.",
-    details: "Access our simplified legal manuals designed for the common citizen. These manuals break down complex legal jargon into understandable regional languages.",
+    overview: "Access our simplified legal manuals designed for the common citizen. These manuals break down complex legal jargon into understandable regional languages.",
     features: ["Hindi Language Editions", "Bengali Language Editions", "English Quick-Start Guides", "Interactive Case Studies"],
     icon: <BookOpen className="w-8 h-8 text-sky-500" />,
     color: "bg-sky-50 dark:bg-sky-950/40",
@@ -72,17 +72,14 @@ export function KnowledgeCenter() {
 
   const handleAccessRepository = () => {
     if (!selectedGuide) return;
-    if (selectedGuide.id === 'constitution') {
-      window.open('https://www.indiacode.nic.in/bitstream/123456789/19150/1/constitution_of_india.pdf', '_blank');
-    } else if (selectedGuide.id === 'womens-rights') {
-      window.open('https://clpr.org.in/wp-content/uploads/2024/12/Womens-Book_Accessible.pdf', '_blank');
-    } else if (selectedGuide.id === 'labor-laws') {
-      window.open('https://ncib.in/pdf/ncib_pdf/Labour%20Act.pdf', '_blank');
-    } else if (selectedGuide.id === 'rti') {
-      window.open('https://cic.gov.in/sites/default/files/RTI-Act_English.pdf', '_blank');
-    } else {
-      window.open('https://bprd.nic.in/uploads/pdf/BNS%20Book_After%20Correction.pdf', '_blank');
-    }
+    let url = 'https://bprd.nic.in/uploads/pdf/BNS%20Book_After%20Correction.pdf';
+    
+    if (selectedGuide.id === 'constitution') url = 'https://www.indiacode.nic.in/bitstream/123456789/19150/1/constitution_of_india.pdf';
+    else if (selectedGuide.id === 'womens-rights') url = 'https://clpr.org.in/wp-content/uploads/2024/12/Womens-Book_Accessible.pdf';
+    else if (selectedGuide.id === 'labor-laws') url = 'https://ncib.in/pdf/ncib_pdf/Labour%20Act.pdf';
+    else if (selectedGuide.id === 'rti') url = 'https://cic.gov.in/sites/default/files/RTI-Act_English.pdf';
+    
+    window.open(url, '_blank');
   }
 
   return (
@@ -142,9 +139,9 @@ export function KnowledgeCenter() {
       </div>
 
       <Dialog open={!!selectedGuide} onOpenChange={(open) => !open && setSelectedGuide(null)}>
-        <DialogContent className="max-w-2xl rounded-[2.5rem] p-0 overflow-y-auto max-h-[90vh] border-none shadow-2xl relative bg-white dark:bg-slate-950">
+        <DialogContent className="max-w-2xl rounded-[2.5rem] p-0 overflow-hidden border-none shadow-2xl relative bg-white dark:bg-slate-950">
           {selectedGuide && (
-            <div className="flex flex-col">
+            <div className="flex flex-col max-h-[90vh]">
               <div className="absolute right-6 top-6 z-50">
                 <DialogClose asChild>
                   <Button variant="ghost" size="icon" className="rounded-full bg-white/20 hover:bg-white/40 backdrop-blur-md text-primary h-10 w-10 border border-white/20 shadow-lg">
@@ -153,7 +150,7 @@ export function KnowledgeCenter() {
                 </DialogClose>
               </div>
 
-              <div className={`p-8 md:p-12 ${selectedGuide.color} relative`}>
+              <div className={`p-8 md:p-12 ${selectedGuide.color} relative shrink-0`}>
                 <div className="relative z-10 text-left">
                   <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl w-fit shadow-sm mb-6">
                     {React.cloneElement(selectedGuide.icon as React.ReactElement, { className: "w-10 h-10" })}
@@ -167,11 +164,11 @@ export function KnowledgeCenter() {
                 </div>
               </div>
 
-              <div className="p-8 md:p-12 space-y-8">
+              <div className="p-8 md:p-12 space-y-8 overflow-y-auto">
                 <div className="space-y-4">
                   <h4 className="text-xs font-bold uppercase tracking-widest text-accent">Overview</h4>
                   <p className="text-muted-foreground leading-relaxed text-base md:text-lg">
-                    {selectedGuide.details}
+                    {selectedGuide.overview}
                   </p>
                 </div>
                 
