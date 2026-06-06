@@ -1,18 +1,17 @@
-
 "use client"
 
 import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { useFirestore } from '@/firebase'
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
-import { MessageSquareText, ShieldAlert, CheckCircle2, Loader2, ClipboardCheck, ArrowRight, Hash } from 'lucide-react'
+import { MessageSquareText, ShieldAlert, CheckCircle2, Loader2, ArrowRight, Hash } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { errorEmitter } from '@/firebase/error-emitter'
 import { FirestorePermissionError, type SecurityRuleContext } from '@/firebase/errors'
@@ -128,7 +127,7 @@ export function MemberGrievances() {
                 <ShieldAlert className="w-8 h-8 text-accent" />
               </div>
               <div className="space-y-4">
-                <h3 className="text-3xl font-headline font-bold">National <span className="text-accent italic">Grievance</span> Cell</h3>
+                <h3 className="text-3xl font-headline font-bold text-white">National <span className="text-accent italic">Grievance</span> Cell</h3>
                 <p className="text-slate-300 text-sm leading-relaxed">
                   We are committed to maintaining the highest ethical standards. Use this portal to report organizational misconduct, member violations, or personal grievances.
                 </p>
@@ -203,7 +202,7 @@ export function MemberGrievances() {
                 <Button 
                   type="submit" 
                   disabled={isSubmitting}
-                  className="w-full h-14 rounded-2xl bg-primary text-primary-foreground font-bold text-lg hover:bg-primary/90 shadow-xl shadow-primary/20 transition-all active:scale-95 flex gap-2"
+                  className="w-full h-14 rounded-2xl bg-primary text-white font-bold text-lg hover:bg-secondary transition-all active:scale-95 flex gap-2"
                 >
                   {isSubmitting ? <Loader2 className="animate-spin" /> : <>Submit Formal Grievance <ArrowRight className="w-5 h-5" /></>}
                 </Button>

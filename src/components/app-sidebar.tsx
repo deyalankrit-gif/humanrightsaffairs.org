@@ -116,7 +116,7 @@ export function AppSidebar() {
                 } else if (link.href === '/') {
                   isActive = pathname === '/' && activeHash === ''
                 } else {
-                  isActive = pathname === link.href || pathname.startsWith(link.href)
+                  isActive = pathname === link.href
                 }
               }
 

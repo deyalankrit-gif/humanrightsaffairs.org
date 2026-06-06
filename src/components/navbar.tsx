@@ -40,19 +40,15 @@ export function Navbar() {
       setIsIframe(window.self !== window.top)
       
       const handleHashChange = () => {
-        // Normalize hash by removing the '#' prefix
         setActiveHash(window.location.hash.replace('#', ''))
       }
       
       window.addEventListener('hashchange', handleHashChange)
-      // Sync on mount and pathname change
       handleHashChange()
-      
       return () => window.removeEventListener('hashchange', handleHashChange)
     }
   }, [pathname])
 
-  // Do not render the public navbar if viewed within a mirror/iframe
   if (isIframe) return null
 
   return (
@@ -78,7 +74,8 @@ export function Navbar() {
           } else if (link.href === '/') {
             isActive = pathname === '/' && activeHash === ''
           } else {
-            isActive = pathname === link.href || pathname.startsWith(link.href)
+            // Strict exact match for page links to prevent Home link being stuck
+            isActive = pathname === link.href
           }
 
           return (
