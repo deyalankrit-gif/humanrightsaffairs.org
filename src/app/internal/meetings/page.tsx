@@ -103,7 +103,6 @@ export default function InternalMeetingsManagement() {
   const { data: meetings, loading: dataLoading } = useCollection(meetingsQuery);
   const { data: leaders } = useCollection(leadersQuery);
 
-  // Sorting leaders by organizational rank: Central > State > District, then priority titles
   const sortedLeaders = React.useMemo(() => {
     if (!leaders) return [];
     return [...leaders].sort((a: any, b: any) => {
@@ -113,7 +112,6 @@ export default function InternalMeetingsManagement() {
       
       if (rankA !== rankB) return rankB - rankA;
       
-      // Title priority sort (Chairman/Founder first)
       const isHighA = (a.title || '').includes('Chairman') || (a.title || '').includes('Founder');
       const isHighB = (b.title || '').includes('Chairman') || (b.title || '').includes('Founder');
       if (isHighA && !isHighB) return -1;
@@ -124,7 +122,7 @@ export default function InternalMeetingsManagement() {
   }, [leaders]);
 
   const hours = Array.from({ length: 12 }, (_, i) => (i + 1).toString().padStart(2, '0'))
-  const minutes = Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0'))
+  const minutesArr = Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0'))
 
   const splitTime = (timeStr: string) => {
     const parts = timeStr.split(' ');
@@ -245,7 +243,7 @@ export default function InternalMeetingsManagement() {
         <Select value={minute} onValueChange={(m) => onChange(`${hour}:${m} ${period}`)}>
           <SelectTrigger className="w-[70px] h-10 rounded-lg"><SelectValue /></SelectTrigger>
           <SelectContent className="max-h-60">
-            {minutes.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}
+            {minutesArr.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}
           </SelectContent>
         </Select>
         <Select value={period} onValueChange={(p) => onChange(`${hour}:${minute} ${p}`)}>
@@ -325,7 +323,7 @@ export default function InternalMeetingsManagement() {
                        </Select>
                     </div>
                     {(newMeeting.level === 'State' || newMeeting.level === 'District') && (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-1">
+                      <div className="space-y-4 animate-in fade-in slide-in-from-top-1">
                         <div className="space-y-1">
                            <Label className="text-[10px] font-bold uppercase text-slate-400">State</Label>
                            <Select value={newMeeting.stateName} onValueChange={(val) => setNewMeeting({...newMeeting, stateName: val, districtName: ''})}>
@@ -333,8 +331,8 @@ export default function InternalMeetingsManagement() {
                              <SelectContent className="max-h-60">{states.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
                            </Select>
                         </div>
-                        {newMeeting.level === 'District' && newMeeting.stateName && (
-                          <div className="space-y-1 animate-in fade-in slide-in-from-left-2">
+                        {newMeeting.stateName && newMeeting.level === 'District' && (
+                          <div className="space-y-1 animate-in fade-in slide-in-from-top-1">
                              <Label className="text-[10px] font-bold uppercase text-slate-400">District</Label>
                              <Select value={newMeeting.districtName} onValueChange={(val) => setNewMeeting({...newMeeting, districtName: val})}>
                                <SelectTrigger><SelectValue placeholder="Choose District" /></SelectTrigger>
@@ -349,7 +347,6 @@ export default function InternalMeetingsManagement() {
                        <Input value={newMeeting.location} onChange={e => setNewMeeting({...newMeeting, location: e.target.value})} placeholder="Venue Details" />
                     </div>
 
-                    {/* Attendance Selection - Rank Sorted */}
                     <div className="space-y-2">
                        <Label className="text-[10px] font-bold uppercase text-slate-400 flex items-center gap-2">
                          <Users className="w-3 h-3 text-accent" /> Official Presence (Rank Sorted Selection)
@@ -492,7 +489,7 @@ export default function InternalMeetingsManagement() {
                                     </div>
 
                                     {(editMeeting.level === 'State' || editMeeting.level === 'District') && (
-                                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-1">
+                                      <div className="space-y-4 animate-in fade-in slide-in-from-top-1">
                                         <div className="space-y-1">
                                           <Label className="text-[10px] font-bold uppercase text-slate-400">State</Label>
                                           <Select value={editMeeting.stateName} onValueChange={(val) => setEditMeeting({...editMeeting, stateName: val, districtName: ''})}>
@@ -500,8 +497,8 @@ export default function InternalMeetingsManagement() {
                                             <SelectContent className="max-h-60">{states.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
                                           </Select>
                                         </div>
-                                        {editMeeting.level === 'District' && editMeeting.stateName && (
-                                          <div className="space-y-1 animate-in fade-in slide-in-from-left-2">
+                                        {editMeeting.stateName && editMeeting.level === 'District' && (
+                                          <div className="space-y-1 animate-in fade-in slide-in-from-top-1">
                                             <Label className="text-[10px] font-bold uppercase text-slate-400">District</Label>
                                             <Select value={editMeeting.districtName} onValueChange={(val) => setEditMeeting({...editMeeting, districtName: val})}>
                                               <SelectTrigger><SelectValue placeholder="Choose District" /></SelectTrigger>
@@ -512,7 +509,6 @@ export default function InternalMeetingsManagement() {
                                       </div>
                                     )}
 
-                                    {/* Edit Attendees - Rank Sorted Selection */}
                                     <div className="space-y-2">
                                        <Label className="text-[10px] font-bold uppercase text-slate-400 flex items-center gap-2">
                                          <Users className="w-3 h-3 text-accent" /> Modify Official Presence

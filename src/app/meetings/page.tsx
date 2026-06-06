@@ -110,7 +110,6 @@ export default function MeetingsPage() {
   const { data: meetings, loading: dataLoading } = useCollection(meetingsQuery);
   const { data: leaders } = useCollection(leadersQuery);
 
-  // Sorting leaders by Rank: Central > State > District, then Chairman/Founder priority
   const sortedLeaders = React.useMemo(() => {
     if (!leaders) return [];
     return [...leaders].sort((a: any, b: any) => {
@@ -120,7 +119,6 @@ export default function MeetingsPage() {
       
       if (rankA !== rankB) return rankB - rankA;
       
-      // Secondary sort by executive title
       const isHighA = (a.title || '').includes('Chairman') || (a.title || '').includes('Founder');
       const isHighB = (b.title || '').includes('Chairman') || (b.title || '').includes('Founder');
       if (isHighA && !isHighB) return -1;
@@ -331,7 +329,7 @@ export default function MeetingsPage() {
                     </div>
 
                     {(newMeeting.level === 'State' || newMeeting.level === 'District') && (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-1">
+                      <div className="space-y-4 animate-in fade-in slide-in-from-top-1">
                         <div className="space-y-1">
                           <Label className="text-[10px] uppercase font-bold text-slate-400">State</Label>
                           <Select value={newMeeting.stateName} onValueChange={(val) => setNewMeeting({...newMeeting, stateName: val, districtName: ''})}>
@@ -339,8 +337,8 @@ export default function MeetingsPage() {
                             <SelectContent className="max-h-60">{states.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
                           </Select>
                         </div>
-                        {newMeeting.level === 'District' && newMeeting.stateName && (
-                          <div className="space-y-1 animate-in fade-in slide-in-from-left-2">
+                        {newMeeting.stateName && newMeeting.level === 'District' && (
+                          <div className="space-y-1 animate-in fade-in slide-in-from-top-1">
                             <Label className="text-[10px] uppercase font-bold text-slate-400">District</Label>
                             <Select value={newMeeting.districtName} onValueChange={(val) => setNewMeeting({...newMeeting, districtName: val})}>
                               <SelectTrigger className="rounded-xl h-11"><SelectValue placeholder="Select District" /></SelectTrigger>
@@ -356,7 +354,6 @@ export default function MeetingsPage() {
                       <Input value={newMeeting.location} onChange={e => setNewMeeting({...newMeeting, location: e.target.value})} placeholder="Full address or Venue name" className="rounded-xl h-11" />
                     </div>
 
-                    {/* Attendance Selection - Sorted by Rank */}
                     <div className="space-y-2">
                        <Label className="text-[10px] uppercase font-bold text-slate-400 flex items-center gap-2">
                          <Users className="w-3 h-3 text-accent" /> Select Attendees (Rank Sorted)
