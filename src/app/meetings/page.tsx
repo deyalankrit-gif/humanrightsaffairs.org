@@ -14,11 +14,9 @@ import {
   Info,
   ExternalLink,
   Globe,
-  UserCheck,
   Plus,
   Calendar as CalendarIcon,
   Sparkles,
-  Check,
   ShieldCheck,
   Award,
   Edit,
@@ -44,7 +42,6 @@ import {
   DialogTrigger,
   DialogDescription,
   DialogFooter,
-  DialogClose,
 } from "@/components/ui/dialog"
 import {
   AlertDialog,
@@ -264,7 +261,7 @@ export default function MeetingsPage() {
             {hoursArr.map(h => <SelectItem key={h} value={h}>{h}</SelectItem>)}
           </SelectContent>
         </Select>
-        <span className="font-bold text-slate-400 text-white">:</span>
+        <span className="font-bold text-slate-400">:</span>
         <Select value={minute} onValueChange={(m) => onChange(`${hour}:${m} ${period}`)}>
           <SelectTrigger className="w-full h-10 rounded-lg"><SelectValue /></SelectTrigger>
           <SelectContent className="max-h-60">
@@ -401,7 +398,7 @@ export default function MeetingsPage() {
                             <SelectContent className="max-h-60">{states.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
                           </Select>
                         </div>
-                        {newMeeting.stateName && newMeeting.level === 'District' && (
+                        {newMeeting.stateName && (newMeeting.level === 'District') && (
                           <div className="space-y-1 animate-in fade-in slide-in-from-top-1">
                             <Label className="text-[10px] uppercase font-bold text-accent">Select District *</Label>
                             <Select value={newMeeting.districtName} onValueChange={(val) => setNewMeeting({...newMeeting, districtName: val})}>
@@ -585,7 +582,7 @@ export default function MeetingsPage() {
                                         <SelectContent className="max-h-60">{states.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
                                       </Select>
                                     </div>
-                                    {editMeeting.stateName && editMeeting.level === 'District' && (
+                                    {editMeeting.stateName && (editMeeting.level === 'District') && (
                                       <div className="space-y-1">
                                         <Label className="text-[10px] uppercase font-bold text-accent">Chapter District *</Label>
                                         <Select value={editMeeting.districtName} onValueChange={(val) => setEditMeeting({...editMeeting, districtName: val})}>

@@ -79,7 +79,22 @@ export function AppSidebar() {
       }
       window.addEventListener('hashchange', handleHashChange)
       handleHashChange()
-      return () => window.removeEventListener('hashchange', handleHashChange)
+
+      const handleLinkClick = (e: MouseEvent) => {
+        const target = e.target as HTMLElement;
+        const link = target.closest('a');
+        if (link && link.hash) {
+          setActiveHash(link.hash.replace('#', ''));
+        } else if (link && link.pathname !== pathname) {
+          setActiveHash('');
+        }
+      }
+      window.addEventListener('click', handleLinkClick)
+
+      return () => {
+        window.removeEventListener('hashchange', handleHashChange)
+        window.removeEventListener('click', handleLinkClick)
+      }
     }
   }, [pathname])
 
@@ -132,7 +147,9 @@ export function AppSidebar() {
                     tooltip={link.name}
                     className={cn(
                       "h-11 rounded-xl transition-all px-4",
-                      isActive ? "bg-accent text-white font-bold hover:bg-secondary hover:text-white" : "hover:bg-secondary/10 hover:text-secondary",
+                      isActive 
+                        ? "bg-accent text-white font-bold hover:bg-secondary hover:text-white" 
+                        : "hover:bg-secondary/10 hover:text-secondary",
                       isPublicView && "text-emerald-600 dark:text-emerald-400 font-black hover:bg-emerald-50 dark:hover:bg-emerald-950/30"
                     )}
                   >

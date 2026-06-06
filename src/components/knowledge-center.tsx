@@ -108,16 +108,16 @@ export function KnowledgeCenter() {
           <Button 
             variant="outline" 
             onClick={scrollToSearch}
-            className="border-primary text-primary hover:bg-primary hover:text-white dark:border-slate-700 dark:text-slate-300 w-full md:w-auto font-bold"
+            className="border-primary text-primary hover:bg-secondary hover:text-white dark:border-slate-700 dark:text-slate-300 w-full md:w-auto font-bold"
           >
             View All Documentation
           </Button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 auto-rows-auto md:auto-rows-[250px]">
-          {guides.map((guide, idx) => (
+          {guides.map((guide) => (
             <Card 
-              key={idx} 
+              key={guide.id} 
               className={`p-6 md:p-8 border-none flex flex-col justify-between group overflow-hidden relative shadow-sm hover:shadow-xl transition-all duration-500 ${guide.color} ${guide.size === 'lg' ? 'md:col-span-2' : ''}`}
             >
               <div className="absolute -right-4 -bottom-4 opacity-5 group-hover:scale-125 transition-transform duration-700 hidden md:block">
@@ -134,7 +134,7 @@ export function KnowledgeCenter() {
                 <Button 
                   variant="ghost" 
                   onClick={() => setSelectedGuide(guide)}
-                  className="text-primary dark:text-white hover:text-accent dark:hover:text-accent font-bold px-0 flex items-center gap-1 text-xs md:text-sm"
+                  className="text-primary dark:text-white hover:text-white hover:bg-secondary font-bold px-4 rounded-lg flex items-center gap-1 text-xs md:text-sm transition-all"
                 >
                   Read More <ExternalLink className="w-3 h-3 md:w-4 md:h-4" />
                 </Button>
@@ -151,6 +151,11 @@ export function KnowledgeCenter() {
 
       <Dialog open={!!selectedGuide} onOpenChange={(open) => !open && setSelectedGuide(null)}>
         <DialogContent className="max-w-2xl rounded-[2.5rem] p-0 overflow-y-auto max-h-[90vh] border-none shadow-2xl relative bg-white dark:bg-slate-950">
+          <DialogHeader className="sr-only">
+            <DialogTitle>Rights Documentation Detail</DialogTitle>
+            <DialogDescription>In-depth legal guidance and jurisdictional framework for the selected human rights category.</DialogDescription>
+          </DialogHeader>
+
           {selectedGuide && (
             <>
               <div className="absolute right-6 top-6 z-50">
@@ -162,17 +167,17 @@ export function KnowledgeCenter() {
               </div>
 
               <div className={`p-8 md:p-12 ${selectedGuide.color} relative`}>
-                <DialogHeader className="relative z-10 text-left">
+                <div className="relative z-10 text-left">
                   <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl w-fit shadow-sm mb-6">
                     {React.cloneElement(selectedGuide.icon as React.ReactElement, { className: "w-10 h-10" })}
                   </div>
-                  <DialogTitle className="text-3xl md:text-4xl font-headline font-bold text-primary dark:text-white mb-2 pr-12 leading-tight">
+                  <h3 className="text-3xl md:text-4xl font-headline font-bold text-primary dark:text-white mb-2 pr-12 leading-tight">
                     {selectedGuide.title}
-                  </DialogTitle>
-                  <DialogDescription className="text-lg text-slate-600 dark:text-slate-300 font-medium leading-relaxed">
+                  </h3>
+                  <p className="text-lg text-slate-600 dark:text-slate-300 font-medium leading-relaxed">
                     {selectedGuide.desc}
-                  </DialogDescription>
-                </DialogHeader>
+                  </p>
+                </div>
               </div>
               <div className="p-8 md:p-12 space-y-8">
                 <div className="space-y-4">
@@ -202,7 +207,7 @@ export function KnowledgeCenter() {
                     Access Full Repository
                   </Button>
                   {selectedGuide.id === 'manuals' && (
-                    <Button variant="outline" onClick={() => window.open('https://bprd.nic.in/uploads/pdf/BNS%20Book_After%20Correction.pdf', '_blank')} className="flex-1 border-primary text-primary dark:border-slate-700 dark:text-white font-bold py-6 rounded-xl hover:bg-slate-50 text-lg hover:text-primary">
+                    <Button variant="outline" onClick={() => window.open('https://bprd.nic.in/uploads/pdf/BNS%20Book_After%20Correction.pdf', '_blank')} className="flex-1 border-primary text-primary dark:border-slate-700 dark:text-white font-bold py-6 rounded-xl hover:bg-slate-50 text-lg">
                       <Download className="w-5 h-5 mr-2" /> Download PDFs
                     </Button>
                   )}
