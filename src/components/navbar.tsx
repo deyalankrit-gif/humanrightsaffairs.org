@@ -90,6 +90,7 @@ export function Navbar() {
             isActive = (pathname === linkPath) && activeHash === linkHash
           } else {
             if (link.href === '/') {
+              // Exact match for home to avoid sticking orange on all pages
               isActive = pathname === '/' && activeHash === ''
             } else {
               isActive = pathname === link.href

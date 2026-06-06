@@ -81,7 +81,7 @@
     {
       "id": "donation-qr",
       "description": "Official UPI QR Code for Human Rights Affairs Trust",
-      "imageUrl": "https://picsum.photos/seed/qr/600/800",
+      "imageUrl": "/HRAT QR CODE.jpeg",
       "imageHint": "qr code"
     },
     {
