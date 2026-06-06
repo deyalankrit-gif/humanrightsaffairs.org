@@ -1,7 +1,7 @@
 
 "use client"
 
-import React from 'react'
+import React, { useState } from 'react'
 import Image from 'next/image'
 import { CheckCircle2, BadgeCheck, Info, ShieldCheck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -65,7 +65,7 @@ export function IDCardShowcase() {
 
             <div className="flex flex-wrap gap-4 pt-4">
               <MembershipRegistrationDialog>
-                <Button className="bg-accent text-primary font-bold hover:bg-accent/90 px-8 py-6 rounded-xl text-lg shadow-lg shadow-accent/20 w-full sm:w-auto">
+                <Button className="bg-accent text-primary-foreground font-bold hover:bg-secondary px-8 py-6 rounded-xl text-lg shadow-lg shadow-accent/20 w-full sm:w-auto">
                   Register as Member
                 </Button>
               </MembershipRegistrationDialog>
@@ -98,7 +98,7 @@ export function IDCardShowcase() {
                     ))}
                   </div>
                   <AlertDialogFooter>
-                    <AlertDialogAction className="bg-primary text-primary-foreground dark:bg-slate-100 dark:text-primary rounded-xl px-8 font-bold w-full sm:w-auto">
+                    <AlertDialogAction className="bg-primary text-primary-foreground dark:bg-slate-100 dark:text-primary rounded-xl px-8 font-bold w-full sm:w-auto hover:bg-secondary">
                       Understood
                     </AlertDialogAction>
                   </AlertDialogFooter>
@@ -126,7 +126,7 @@ export function IDCardShowcase() {
               </div>
             </div>
 
-            <div className="bg-accent text-primary px-4 py-1.5 rounded-full shadow-2xl border-2 border-primary dark:border-slate-800 animate-bounce flex items-center gap-2 mt-4">
+            <div className="bg-accent text-primary-foreground px-4 py-1.5 rounded-full shadow-2xl border-2 border-primary dark:border-slate-800 animate-bounce flex items-center gap-2 mt-4">
                <ShieldCheck className="w-4 h-4" />
                <p className="text-[10px] md:text-xs font-bold uppercase tracking-widest leading-none">Sample Official Identity Card</p>
             </div>

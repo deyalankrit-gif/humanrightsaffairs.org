@@ -390,7 +390,7 @@ export default function TerminatedMembersPage() {
                           <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
                             <Dialog>
                               <DialogTrigger asChild>
-                                <Button onClick={() => setEditMember(member)} size="icon" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full shadow-lg border border-white/20">
+                                <Button onClick={() => setEditMember(member)} size="icon" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white hover:bg-secondary hover:text-white rounded-full shadow-lg border border-white/20">
                                   <Edit className="w-4 h-4" />
                                 </Button>
                               </DialogTrigger>
@@ -466,7 +466,7 @@ export default function TerminatedMembersPage() {
                                       <Label>Reason</Label>
                                       <Textarea value={editMember.reason} onChange={e => setEditMember({...editMember, reason: e.target.value})} className="rounded-xl" />
                                     </div>
-                                    <Button onClick={handleUpdate} disabled={isActionLoading} className="w-full bg-primary text-primary-foreground h-12 rounded-xl">
+                                    <Button onClick={handleUpdate} disabled={isActionLoading} className="w-full bg-primary text-primary-foreground h-12 rounded-xl hover:bg-secondary">
                                       {isActionLoading ? <Loader2 className="animate-spin mr-2" /> : "Save Changes"}
                                     </Button>
                                   </div>

@@ -326,7 +326,7 @@ export default function MeetingsPage() {
             {isAdmin && (
               <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button className="bg-accent text-primary font-bold rounded-2xl h-14 px-10 flex gap-2 hover:bg-accent/90 shadow-2xl shadow-accent/20 mx-auto transform hover:scale-105 transition-all">
+                  <Button className="bg-accent text-primary-foreground font-bold rounded-2xl h-14 px-10 flex gap-2 hover:bg-secondary shadow-2xl shadow-accent/20 mx-auto transform hover:scale-105 transition-all">
                     <Plus className="w-6 h-6" /> Live Editor: Publish New Event
                   </Button>
                 </DialogTrigger>
@@ -426,7 +426,7 @@ export default function MeetingsPage() {
                           <ScrollArea className="h-40">
                              <div className="grid grid-cols-1 gap-2 pr-4">
                                 {sortedLeaders.map((leader: any) => (
-                                  <div key={leader.id} className="flex items-center space-x-2 bg-white dark:bg-slate-800 p-2 rounded-lg border border-slate-100 dark:border-slate-700 hover:border-accent transition-colors">
+                                  <div key={leader.id} className="flex items-center space-x-2 bg-white dark:bg-slate-800 p-2 rounded-lg border border-slate-100 dark:border-slate-700 hover:border-secondary transition-colors">
                                     <Checkbox 
                                       id={`leader-${leader.id}`} 
                                       checked={selectedAttendees.includes(leader.name)}
@@ -455,7 +455,7 @@ export default function MeetingsPage() {
                     </div>
                   </div>
                   <DialogFooter>
-                    <Button onClick={handleAddMeeting} disabled={isActionLoading} className="w-full bg-accent text-primary font-bold h-12 rounded-xl text-lg shadow-xl shadow-accent/20">
+                    <Button onClick={handleAddMeeting} disabled={isActionLoading} className="w-full bg-accent text-primary-foreground font-bold h-12 rounded-xl text-lg shadow-xl shadow-accent/20 hover:bg-secondary">
                       {isActionLoading ? <Loader2 className="animate-spin" /> : "Publish to Archive"}
                     </Button>
                   </DialogFooter>
@@ -479,7 +479,7 @@ export default function MeetingsPage() {
                     "rounded-full px-6 font-bold transition-all border-slate-200 dark:border-slate-700",
                     filter === lvl.value 
                       ? "bg-accent text-slate-900 shadow-lg border-accent" 
-                      : "text-primary dark:text-slate-300 hover:bg-accent hover:text-slate-900 hover:border-accent"
+                      : "text-primary dark:text-slate-300 hover:bg-secondary hover:text-white hover:border-secondary"
                   )}
                 >
                   {lvl.label}
@@ -515,7 +515,7 @@ export default function MeetingsPage() {
                       <div className="absolute top-6 left-6 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-50">
                         <Dialog open={editMeeting?.id === meeting.id} onOpenChange={(open) => !open && setEditMeeting(null)}>
                           <DialogTrigger asChild>
-                            <Button onClick={() => setEditMeeting(meeting)} size="icon" className="bg-white dark:bg-slate-800 text-primary dark:text-white rounded-full shadow-lg border border-slate-100 dark:border-slate-700 hover:bg-accent hover:text-primary">
+                            <Button onClick={() => setEditMeeting(meeting)} size="icon" className="bg-white dark:bg-slate-800 text-primary dark:text-white rounded-full shadow-lg border border-slate-100 dark:border-slate-700 hover:bg-secondary hover:text-white">
                               <Edit className="w-4 h-4" />
                             </Button>
                           </DialogTrigger>
@@ -606,7 +606,7 @@ export default function MeetingsPage() {
                                     <ScrollArea className="h-40">
                                       <div className="grid grid-cols-1 gap-2 pr-4">
                                         {sortedLeaders.map((leader: any) => (
-                                          <div key={leader.id} className="flex items-center space-x-2 bg-white dark:bg-slate-800 p-2 rounded-lg border border-slate-100 dark:border-slate-700">
+                                          <div key={leader.id} className="flex items-center space-x-2 bg-white dark:bg-slate-800 p-2 rounded-lg border border-slate-100 dark:border-slate-700 hover:border-secondary transition-colors">
                                             <Checkbox 
                                               id={`edit-leader-${leader.id}`} 
                                               checked={(editMeeting.attendees || []).includes(leader.name)}
@@ -634,7 +634,7 @@ export default function MeetingsPage() {
                               </div>
                             )}
                             <DialogFooter>
-                              <Button onClick={handleUpdateMeeting} disabled={isActionLoading} className="w-full bg-primary text-primary-foreground h-12 rounded-xl font-bold">Save Changes</Button>
+                              <Button onClick={handleUpdateMeeting} disabled={isActionLoading} className="w-full bg-primary text-primary-foreground h-12 rounded-xl font-bold hover:bg-secondary">Save Changes</Button>
                             </DialogFooter>
                           </DialogContent>
                         </Dialog>
@@ -670,7 +670,7 @@ export default function MeetingsPage() {
                           {meeting.status}
                         </Badge>
                       </div>
-                      <CardTitle className="text-2xl font-headline font-bold text-primary dark:text-white group-hover:text-accent transition-colors leading-tight">
+                      <CardTitle className="text-2xl font-headline font-bold text-primary dark:text-white group-hover:text-secondary transition-colors leading-tight">
                         {meeting.title}
                       </CardTitle>
                     </CardHeader>
@@ -715,7 +715,7 @@ export default function MeetingsPage() {
                     <CardFooter className="p-8 pt-0 mt-auto">
                       <Dialog>
                         <DialogTrigger asChild>
-                          <Button className="w-full bg-slate-900 text-white dark:bg-white dark:text-slate-900 font-bold h-12 rounded-xl group/btn hover:bg-accent hover:text-slate-900 dark:hover:bg-accent dark:hover:text-slate-900 transition-colors shadow-lg">
+                          <Button className="w-full bg-slate-900 text-white dark:bg-white dark:text-slate-900 font-bold h-12 rounded-xl group/btn hover:bg-secondary hover:text-white transition-colors shadow-lg">
                             View Details & Minutes <ExternalLink className="ml-2 w-4 h-4 group-hover/btn:scale-110 transition-transform" />
                           </Button>
                         </DialogTrigger>
@@ -763,7 +763,7 @@ export default function MeetingsPage() {
                                         onClick={() => leaderData && setSelectedLeaderProfile(leaderData)}
                                         className={cn(
                                           "bg-accent/10 text-accent border-accent/20 px-4 py-1 rounded-full font-bold transition-all",
-                                          leaderData ? "cursor-pointer hover:bg-accent/20 hover:scale-105" : "opacity-70"
+                                          leaderData ? "cursor-pointer hover:bg-secondary hover:text-white hover:scale-105" : "opacity-70"
                                         )}
                                       >
                                         {attendee}
@@ -840,7 +840,7 @@ export default function MeetingsPage() {
                    </div>
                 </div>
                 <div className="absolute top-4 left-6">
-                   <Badge className="bg-accent text-primary font-bold uppercase text-[9px] px-3 py-1 rounded-full border-none shadow-lg">
+                   <Badge className="bg-accent text-primary-foreground font-bold uppercase text-[9px] px-3 py-1 rounded-full border-none shadow-lg">
                       {selectedLeaderProfile.level === 'Central' ? 'Central Council' : `${selectedLeaderProfile.level} Council`}
                    </Badge>
                 </div>
@@ -878,7 +878,7 @@ export default function MeetingsPage() {
 
                 <Button 
                   onClick={() => setSelectedLeaderProfile(null)}
-                  className="w-full h-12 rounded-xl bg-slate-50 dark:bg-slate-900 text-slate-400 hover:text-primary transition-colors font-bold uppercase text-[10px] tracking-widest border border-slate-100 dark:border-slate-800"
+                  className="w-full h-12 rounded-xl bg-slate-50 dark:bg-slate-900 text-slate-400 hover:text-secondary transition-colors font-bold uppercase text-[10px] tracking-widest border border-slate-100 dark:border-slate-800"
                 >
                   Close Profile
                 </Button>

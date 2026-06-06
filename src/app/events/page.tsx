@@ -217,7 +217,7 @@ export default function EventsPage() {
             {isAdmin && (
               <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button className="bg-accent text-primary font-bold rounded-2xl h-14 px-10 flex gap-2 hover:bg-accent/90 shadow-2xl shadow-accent/20 mx-auto">
+                  <Button className="bg-accent text-primary-foreground font-bold rounded-2xl h-14 px-10 flex gap-2 hover:bg-secondary shadow-2xl shadow-accent/20 mx-auto">
                     <Plus className="w-6 h-6" /> Create New Event Entry
                   </Button>
                 </DialogTrigger>
@@ -295,7 +295,7 @@ export default function EventsPage() {
                     </div>
                   </div>
                   <DialogFooter>
-                    <Button onClick={handleAddEvent} disabled={isActionLoading} className="w-full h-12 rounded-xl bg-accent text-primary font-bold">
+                    <Button onClick={handleAddEvent} disabled={isActionLoading} className="w-full h-12 rounded-xl bg-accent text-primary-foreground font-bold hover:bg-secondary">
                       {isActionLoading ? <Loader2 className="animate-spin" /> : "Publish Event"}
                     </Button>
                   </DialogFooter>
@@ -319,7 +319,7 @@ export default function EventsPage() {
                     "rounded-full px-6 font-bold transition-all border-slate-200 dark:border-slate-700",
                     filter === cat 
                       ? "bg-accent text-slate-900 shadow-lg border-accent" 
-                      : "text-primary dark:text-slate-300 hover:bg-accent hover:text-slate-900 hover:border-accent"
+                      : "text-primary dark:text-slate-300 hover:bg-secondary hover:text-white hover:border-secondary"
                   )}
                 >
                   {cat}
@@ -371,7 +371,7 @@ export default function EventsPage() {
                           <div className="absolute top-4 left-4 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
                             <Dialog>
                               <DialogTrigger asChild>
-                                <Button onClick={() => setEditEvent(event)} size="icon" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full shadow-lg border border-white/20">
+                                <Button onClick={() => setEditEvent(event)} size="icon" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white hover:bg-secondary hover:text-white rounded-full shadow-lg border border-white/20">
                                   <Edit className="w-4 h-4" />
                                 </Button>
                               </DialogTrigger>
@@ -445,7 +445,7 @@ export default function EventsPage() {
                                       <Label>Description</Label>
                                       <Textarea value={editEvent.description} onChange={e => setEditEvent({...editEvent, description: e.target.value})} className="rounded-xl" />
                                     </div>
-                                    <Button onClick={handleUpdateEvent} disabled={isActionLoading} className="w-full mt-4 h-12 rounded-xl bg-accent text-primary font-bold">
+                                    <Button onClick={handleUpdateEvent} disabled={isActionLoading} className="w-full mt-4 h-12 rounded-xl bg-accent text-primary-foreground font-bold hover:bg-secondary">
                                       {isActionLoading ? <Loader2 className="animate-spin mr-2" /> : "Save Changes"}
                                     </Button>
                                   </div>
@@ -478,7 +478,7 @@ export default function EventsPage() {
                           <span className="flex items-center gap-1"><CalendarIcon className="w-3 h-3" /> {event.date}</span>
                           <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> {event.location}</span>
                         </div>
-                        <CardTitle className="text-2xl font-headline font-bold text-primary dark:text-white group-hover:text-accent transition-colors leading-tight">
+                        <CardTitle className="text-2xl font-headline font-bold text-primary dark:text-white group-hover:text-secondary transition-colors leading-tight">
                           {event.title}
                         </CardTitle>
                       </CardHeader>
@@ -488,7 +488,7 @@ export default function EventsPage() {
                         </p>
                       </CardContent>
                       <CardFooter className="p-8 pt-0 border-t border-slate-50 dark:border-slate-800 mt-auto">
-                        <Button variant="ghost" className="p-0 h-auto font-bold text-primary dark:text-white hover:text-accent flex items-center gap-2 group/btn">
+                        <Button variant="ghost" className="p-0 h-auto font-bold text-primary dark:text-white hover:text-secondary flex items-center gap-2 group/btn">
                           View Event Details <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-2 transition-transform" />
                         </Button>
                       </CardFooter>

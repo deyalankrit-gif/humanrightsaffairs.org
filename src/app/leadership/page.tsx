@@ -49,12 +49,12 @@ function LeaderCard({ leader, variant = "default", isAdmin, onEdit, onDelete }: 
 
   return (
     <div className="flex flex-col items-center group relative">
-      <div className={`relative ${sizeClasses[variant]} rounded-2xl overflow-hidden shadow-xl border-2 md:border-4 border-white group-hover:border-accent transition-all duration-500 bg-slate-100 dark:bg-slate-800`}>
+      <div className={`relative ${sizeClasses[variant]} rounded-2xl overflow-hidden shadow-xl border-2 md:border-4 border-white group-hover:border-secondary transition-all duration-500 bg-slate-100 dark:bg-slate-800`}>
         <Image src={img} alt={leader.name} fill className="object-cover group-hover:scale-110 transition-transform duration-700" />
         <div className="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-10">
           {isAdmin && (
             <div className="flex gap-2">
-              <Button onClick={() => onEdit?.(leader)} size="icon" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-full hover:bg-accent hover:text-primary transition-colors border border-white/20 shadow-xl">
+              <Button onClick={() => onEdit?.(leader)} size="icon" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-full hover:bg-secondary hover:text-white transition-colors border border-white/20 shadow-xl">
                 <Edit className="w-4 h-4" />
               </Button>
               <Button onClick={() => onDelete?.(leader.id)} size="icon" className="bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors border border-white/20 shadow-xl">
@@ -181,7 +181,7 @@ export default function LeadershipPage() {
           
           {isAdmin && (
             <Dialog>
-              <DialogTrigger asChild><Button className="bg-accent text-primary font-bold rounded-2xl h-14 px-8 flex gap-2 hover:bg-accent/90 shadow-xl shadow-accent/20 mx-auto"><Plus className="w-5 h-5" /> Commission Leadership Member</Button></DialogTrigger>
+              <DialogTrigger asChild><Button className="bg-accent text-primary-foreground font-bold rounded-2xl h-14 px-8 flex gap-2 hover:bg-secondary shadow-xl shadow-accent/20 mx-auto"><Plus className="w-5 h-5" /> Commission Leadership Member</Button></DialogTrigger>
               <DialogContent className="bg-white dark:bg-slate-900 rounded-[2rem] border-none shadow-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader><DialogTitle>New Leader Profile</DialogTitle></DialogHeader>
                 <div className="space-y-4 py-4">
@@ -229,7 +229,7 @@ export default function LeadershipPage() {
                     </div>
                   )}
                 </div>
-                <DialogFooter><Button onClick={handleAdd} disabled={isActionLoading} className="w-full h-12 rounded-xl bg-accent text-primary font-bold">Publish Profile</Button></DialogFooter>
+                <DialogFooter><Button onClick={handleAdd} disabled={isActionLoading} className="w-full h-12 rounded-xl bg-accent text-primary-foreground font-bold hover:bg-secondary">Publish Profile</Button></DialogFooter>
               </DialogContent>
             </Dialog>
           )}
@@ -416,7 +416,7 @@ export default function LeadershipPage() {
                   </Select>
                 </div>
               )}
-              <Button onClick={handleUpdate} disabled={isActionLoading} className="w-full h-12 rounded-xl mt-4">Save Changes</Button>
+              <Button onClick={handleUpdate} disabled={isActionLoading} className="w-full h-12 rounded-xl mt-4 bg-accent text-primary-foreground hover:bg-secondary">Save Changes</Button>
             </div>
           )}
         </DialogContent>

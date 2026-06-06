@@ -195,7 +195,7 @@ export function MembershipRegistrationDialog({ children }: { children: React.Rea
             </div>
 
             <p className="text-slate-500 text-sm">Please save this reference number. Our regional coordinator will contact you for verification.</p>
-            <Button onClick={() => setOpen(false)} className="w-full h-12 rounded-xl bg-primary text-primary-foreground font-bold">Return to Site</Button>
+            <Button onClick={() => setOpen(false)} className="w-full h-12 rounded-xl bg-primary text-primary-foreground font-bold hover:bg-secondary">Return to Site</Button>
           </div>
         </DialogContent>
       </Dialog>
@@ -505,7 +505,7 @@ export function MembershipRegistrationDialog({ children }: { children: React.Rea
                 )} />
             </div>
 
-            <Button type="submit" disabled={loading} className="w-full h-14 rounded-2xl bg-primary text-primary-foreground font-bold text-lg hover:bg-primary/90 shadow-xl shadow-primary/20 flex gap-2">
+            <Button type="submit" disabled={loading} className="w-full h-14 rounded-2xl bg-primary text-primary-foreground font-bold text-lg hover:bg-secondary shadow-xl shadow-primary/20 flex gap-2">
               {loading ? <Loader2 className="animate-spin" /> : <>Submit Registration Request <ArrowRight className="w-5 h-5" /></>}
             </Button>
           </form>
