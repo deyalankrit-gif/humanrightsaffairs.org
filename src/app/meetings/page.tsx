@@ -1,6 +1,8 @@
+
 "use client"
 
 import React, { useState, useEffect } from 'react'
+import Image from 'next/image'
 import { Footer } from '@/components/footer'
 import { 
   Calendar, 
@@ -17,7 +19,9 @@ import {
   Plus,
   Calendar as CalendarIcon,
   Sparkles,
-  Check
+  Check,
+  ShieldCheck,
+  Award
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -49,6 +53,7 @@ import { format, parse } from "date-fns"
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
 import { INDIA_DATA } from '@/lib/india-data'
+import { PlaceHolderImages } from '@/lib/placeholder-images'
 
 type Meeting = {
   id: string
@@ -65,6 +70,17 @@ type Meeting = {
   attendees?: string[]
 }
 
+type Leader = {
+  id: string
+  name: string
+  title: string
+  imageId?: string
+  gender: 'male' | 'female'
+  level: "Central" | "State" | "District"
+  parentRegion?: string 
+  districtName?: string
+}
+
 export default function MeetingsPage() {
   const [filter, setFilter] = useState("All")
   const [search, setSearch] = useState("")
@@ -72,6 +88,7 @@ export default function MeetingsPage() {
   const [isActionLoading, setIsActionLoading] = useState(false)
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [selectedAttendees, setSelectedAttendees] = useState<string[]>([])
+  const [selectedLeaderProfile, setSelectedLeaderProfile] = useState<Leader | null>(null)
   
   const db = useFirestore()
   const { user } = useUser()
@@ -108,7 +125,9 @@ export default function MeetingsPage() {
   }, [db]);
 
   const { data: meetings, loading: dataLoading } = useCollection(meetingsQuery);
-  const { data: leaders } = useCollection(leadersQuery);
+  const { data: leadersData } = useCollection(leadersQuery);
+
+  const leaders = (leadersData || []) as Leader[]
 
   const sortedLeaders = React.useMemo(() => {
     if (!leaders) return [];
@@ -189,22 +208,22 @@ export default function MeetingsPage() {
 
   const TimeSelector = ({ value, onChange }: { value: string, onChange: (val: string) => void }) => {
     const { hour, minute, period } = splitTime(value)
-    const hours = Array.from({ length: 12 }, (_, i) => (i + 1).toString().padStart(2, '0'))
-    const minutes = Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0'))
+    const hoursArr = Array.from({ length: 12 }, (_, i) => (i + 1).toString().padStart(2, '0'))
+    const minutesArr = Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0'))
     
     return (
       <div className="flex items-center gap-2">
         <Select value={hour} onValueChange={(h) => onChange(`${h}:${minute} ${period}`)}>
           <SelectTrigger className="w-full h-10 rounded-lg"><SelectValue /></SelectTrigger>
           <SelectContent className="max-h-60">
-            {hours.map(h => <SelectItem key={h} value={h}>{h}</SelectItem>)}
+            {hoursArr.map(h => <SelectItem key={h} value={h}>{h}</SelectItem>)}
           </SelectContent>
         </Select>
-        <span className="font-bold">:</span>
+        <span className="font-bold text-slate-400">:</span>
         <Select value={minute} onValueChange={(m) => onChange(`${hour}:${m} ${period}`)}>
           <SelectTrigger className="w-full h-10 rounded-lg"><SelectValue /></SelectTrigger>
           <SelectContent className="max-h-60">
-            {minutes.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}
+            {minutesArr.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}
           </SelectContent>
         </Select>
         <Select value={period} onValueChange={(p) => onChange(`${hour}:${minute} ${p}`)}>
@@ -536,12 +555,24 @@ export default function MeetingsPage() {
                                   <UserCheck className="w-5 h-5 text-accent" /> Leadership Presence
                                 </h4>
                                 <div className="flex flex-wrap gap-2">
-                                  {meeting.attendees.map((attendee, idx) => (
-                                    <Badge key={idx} variant="secondary" className="bg-accent/10 text-accent border-accent/20 px-4 py-1 rounded-full font-bold">
-                                      {attendee}
-                                    </Badge>
-                                  ))}
+                                  {meeting.attendees.map((attendee, idx) => {
+                                    const leaderData = leaders.find(l => l.name === attendee);
+                                    return (
+                                      <Badge 
+                                        key={idx} 
+                                        variant="secondary" 
+                                        onClick={() => leaderData && setSelectedLeaderProfile(leaderData)}
+                                        className={cn(
+                                          "bg-accent/10 text-accent border-accent/20 px-4 py-1 rounded-full font-bold transition-all",
+                                          leaderData ? "cursor-pointer hover:bg-accent/20 hover:scale-105" : "opacity-70"
+                                        )}
+                                      >
+                                        {attendee}
+                                      </Badge>
+                                    );
+                                  })}
                                 </div>
+                                <p className="text-[9px] text-slate-400 font-bold uppercase italic">Click on a name to view official profile credentials.</p>
                               </div>
                             )}
 
@@ -586,6 +617,73 @@ export default function MeetingsPage() {
           )}
         </div>
       </section>
+
+      {/* Leader Brief Profile Dialog */}
+      <Dialog open={!!selectedLeaderProfile} onOpenChange={(open) => !open && setSelectedLeaderProfile(null)}>
+        <DialogContent className="max-w-md rounded-[2.5rem] p-0 overflow-hidden border-none shadow-2xl bg-white dark:bg-slate-950">
+          {selectedLeaderProfile && (
+            <div className="flex flex-col">
+              <div className="relative w-full h-48 bg-primary">
+                <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
+                <div className="absolute inset-0 bg-gradient-to-t from-primary via-primary/20 to-transparent"></div>
+                <div className="absolute -bottom-16 left-1/2 -translate-x-1/2">
+                   <div className="relative w-32 h-32 rounded-[2rem] border-4 border-white dark:border-slate-900 shadow-2xl overflow-hidden bg-slate-100 dark:bg-slate-800">
+                     <Image 
+                        src={selectedLeaderProfile.imageId?.startsWith('data:') ? selectedLeaderProfile.imageId : (PlaceHolderImages.find(i => i.id === selectedLeaderProfile.imageId)?.imageUrl || (selectedLeaderProfile.gender === 'female' ? '/dummy w.png' : '/dummy m.png'))} 
+                        alt={selectedLeaderProfile.name} 
+                        fill 
+                        className="object-cover" 
+                      />
+                   </div>
+                </div>
+                <div className="absolute top-4 left-6">
+                   <Badge className="bg-accent text-primary font-bold uppercase text-[9px] px-3 py-1 rounded-full border-none shadow-lg">
+                      {selectedLeaderProfile.level} Council
+                   </Badge>
+                </div>
+              </div>
+
+              <div className="pt-20 pb-10 px-8 text-center space-y-6">
+                <div className="space-y-1">
+                  <h3 className="text-3xl font-headline font-bold text-primary dark:text-white leading-tight">
+                    {selectedLeaderProfile.name}
+                  </h3>
+                  <p className="text-accent font-black uppercase text-xs tracking-[0.2em]">
+                    {selectedLeaderProfile.title}
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 gap-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+                  <div className="flex items-center justify-center gap-3 text-slate-500 dark:text-slate-400 font-bold uppercase text-[10px] tracking-widest">
+                    <MapPin className="w-3.5 h-3.5 text-accent" />
+                    <span>
+                      {selectedLeaderProfile.districtName ? `${selectedLeaderProfile.districtName}, ` : ''}
+                      {selectedLeaderProfile.parentRegion || 'National HQ'}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-center gap-3 text-slate-500 dark:text-slate-400 font-bold uppercase text-[10px] tracking-widest">
+                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
+                    <span>Verified Official</span>
+                  </div>
+                </div>
+
+                <div className="pt-4">
+                   <p className="text-xs text-slate-400 italic leading-relaxed px-4">
+                     "Inducted under the national mission for constitutional literacy and human rights advocacy."
+                   </p>
+                </div>
+
+                <Button 
+                  onClick={() => setSelectedLeaderProfile(null)}
+                  className="w-full h-12 rounded-xl bg-slate-50 dark:bg-slate-900 text-slate-400 hover:text-primary transition-colors font-bold uppercase text-[10px] tracking-widest border border-slate-100 dark:border-slate-800"
+                >
+                  Close Profile
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       <Footer />
     </main>
