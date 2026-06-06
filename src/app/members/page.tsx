@@ -16,7 +16,8 @@ import {
   Loader2, 
   Plus, 
   Upload,
-  Globe
+  Globe,
+  Calendar as CalendarIcon
 } from 'lucide-react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -38,6 +39,13 @@ import {
   DialogTrigger,
   DialogFooter,
 } from "@/components/ui/dialog"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import { Calendar } from "@/components/ui/calendar"
+import { format, parse } from "date-fns"
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useToast } from '@/hooks/use-toast'
@@ -57,6 +65,7 @@ type Member = {
   email?: string
   phone?: string
   status?: string
+  joiningDate?: string
 }
 
 export default function MembersPage() {
@@ -66,6 +75,7 @@ export default function MembersPage() {
   const [selectedDistrict, setSelectedDistrict] = useState<string | null>(null)
   const [mounted, setMounted] = useState(false)
   const [isAdding, setIsAdding] = useState(false)
+  const [isMirror, setIsMirror] = useState(false)
   const { user } = useUser()
   const db = useFirestore()
   const { toast } = useToast()
@@ -81,11 +91,15 @@ export default function MembersPage() {
     stateName: '',
     districtName: '',
     gender: 'male' as 'male' | 'female',
-    imageId: ''
+    imageId: '',
+    joiningDate: ''
   })
 
   useEffect(() => {
     setMounted(true)
+    if (typeof window !== 'undefined') {
+      setIsMirror(window.self !== window.top)
+    }
   }, [])
 
   const membersQuery = useMemoFirebase(() => {
@@ -95,7 +109,7 @@ export default function MembersPage() {
 
   const { data: firestoreMembers, loading: membersLoading } = useCollection(membersQuery);
 
-  const isAdmin = user?.email === 'deydhritiman@gmail.com'
+  const isAdmin = !!user && isMirror
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -125,8 +139,12 @@ export default function MembersPage() {
   }
 
   const handleAddMember = async () => {
-    if (!newMember.name || !newMember.email || !newMember.memberId) {
-      toast({ variant: "destructive", title: "Validation Error", description: "Name, Email, and Member ID are required." })
+    if (!newMember.name || !newMember.email || !newMember.memberId || !newMember.joiningDate) {
+      toast({ 
+        variant: "destructive", 
+        title: "Validation Error", 
+        description: "Name, Email, Member ID, and Membership Issue Date are required." 
+      })
       return
     }
 
@@ -138,7 +156,20 @@ export default function MembersPage() {
       })
       toast({ title: "Success", description: "New member record established." })
       setIsAdding(false)
-      setNewMember({ name: '', designation: '', email: '', phone: '', level: 'National', status: 'Active', memberId: '', stateName: '', districtName: '', gender: 'male', imageId: '' })
+      setNewMember({ 
+        name: '', 
+        designation: '', 
+        email: '', 
+        phone: '', 
+        level: 'National', 
+        status: 'Active', 
+        memberId: '', 
+        stateName: '', 
+        districtName: '', 
+        gender: 'male', 
+        imageId: '',
+        joiningDate: '' 
+      })
     } catch (error: any) {
       toast({ variant: "destructive", title: "System Error", description: error.message })
       setIsAdding(false)
@@ -165,6 +196,15 @@ export default function MembersPage() {
     return matchesSearch && matchesLevel;
   })
 
+  const parseMemberDate = (dateStr: string) => {
+    if (!dateStr) return undefined;
+    try {
+      return parse(dateStr, "PPP", new Date());
+    } catch {
+      return undefined;
+    }
+  }
+
   if (!mounted) return null
 
   const states = Object.keys(INDIA_DATA).sort();
@@ -188,7 +228,7 @@ export default function MembersPage() {
             <Dialog>
               <DialogTrigger asChild>
                 <Button className="bg-accent text-primary font-bold rounded-2xl h-14 px-10 flex gap-2 hover:bg-accent/90 shadow-2xl shadow-accent/20 mx-auto transform hover:scale-105 transition-all">
-                  <Plus className="w-6 h-6" /> Commission New Membership
+                  <Plus className="w-6 h-6" /> Live Editor: Commission New Membership
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-w-md bg-white dark:bg-slate-900 rounded-[2rem] border-none shadow-2xl max-h-[90vh] overflow-y-auto">
@@ -234,6 +274,27 @@ export default function MembersPage() {
                       </Select>
                     </div>
                   </div>
+
+                  <div className="space-y-2">
+                    <Label>Membership Issue Date</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button variant="outline" className={cn("w-full justify-start text-left font-normal h-11 rounded-xl", !newMember.joiningDate && "text-muted-foreground")}>
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {newMember.joiningDate ? newMember.joiningDate : "Pick a date"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={parseMemberDate(newMember.joiningDate)}
+                          onSelect={(date) => setNewMember({...newMember, joiningDate: date ? format(date, "PPP") : ''})}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+
                   {(newMember.level === 'State' || newMember.level === 'District') && (
                     <div className="space-y-4 pt-2 animate-in fade-in slide-in-from-top-2">
                       <div className="space-y-2">
