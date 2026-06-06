@@ -79,6 +79,23 @@ export default function MemberDetailsPage() {
     }
   }, [profile])
 
+  // Auto-calculate expiry date for the editor
+  useEffect(() => {
+    if (isEditing && editForm?.joiningDate && editForm?.membershipDuration) {
+      try {
+        const joinDate = parse(editForm.joiningDate, "PPP", new Date());
+        const years = parseInt(editForm.membershipDuration);
+        if (!isNaN(years)) {
+          const expiry = addYears(joinDate, years);
+          const formattedExpiry = format(expiry, "PPP");
+          if (editForm.expiryDate !== formattedExpiry) {
+            setEditForm((prev: any) => ({ ...prev, expiryDate: formattedExpiry }));
+          }
+        }
+      } catch (e) {}
+    }
+  }, [isEditing, editForm?.joiningDate, editForm?.membershipDuration]);
+
   const handleSave = async () => {
     if (!docRef) return
     setIsSaving(true)
@@ -181,7 +198,7 @@ export default function MemberDetailsPage() {
                  <CardTitle className="text-lg mb-6">Credential Details</CardTitle>
                  <div className="space-y-6">
                    {isEditing ? (
-                     <div className="space-y-4">
+                     <div className="space-y-6">
                        <div className="grid md:grid-cols-2 gap-4">
                          <div className="space-y-1">
                            <Label className="text-[10px] uppercase font-bold text-slate-400">Full Name</Label>
@@ -192,59 +209,103 @@ export default function MemberDetailsPage() {
                            <Input value={editForm.designation} onChange={e => setEditForm({...editForm, designation: e.target.value})} />
                          </div>
                        </div>
-                       <div className="grid md:grid-cols-2 gap-4">
-                         <div className="space-y-1">
-                           <Label className="text-[10px] uppercase font-bold text-slate-400">Issue Date</Label>
-                           <Popover>
-                             <PopoverTrigger asChild>
-                               <Button variant="outline" className={cn("w-full justify-start text-left font-normal h-10 rounded-lg", !editForm.joiningDate && "text-muted-foreground")}>
-                                 <CalendarIcon className="mr-2 h-4 w-4" />
-                                 {editForm.joiningDate ? editForm.joiningDate : "Pick a date"}
-                               </Button>
-                             </PopoverTrigger>
-                             <PopoverContent className="w-auto p-0" align="start">
-                               <Calendar mode="single" selected={parseMemberDate(editForm.joiningDate)} onSelect={(date) => setEditForm({...editForm, joiningDate: date ? format(date, "PPP") : ''})} initialFocus />
-                             </PopoverContent>
-                           </Popover>
-                         </div>
-                         <div className="space-y-1">
-                           <Label className="text-[10px] uppercase font-bold text-slate-400">Expiry Date</Label>
-                           <Popover>
-                             <PopoverTrigger asChild>
-                               <Button variant="outline" className={cn("w-full justify-start text-left font-normal h-10 rounded-lg", !editForm.expiryDate && "text-muted-foreground")}>
-                                 <CalendarIcon className="mr-2 h-4 w-4" />
-                                 {editForm.expiryDate ? editForm.expiryDate : "Pick a date"}
-                               </Button>
-                             </PopoverTrigger>
-                             <PopoverContent className="w-auto p-0" align="start">
-                               <Calendar mode="single" selected={parseMemberDate(editForm.expiryDate)} onSelect={(date) => setEditForm({...editForm, expiryDate: date ? format(date, "PPP") : ''})} initialFocus />
-                             </PopoverContent>
-                           </Popover>
-                         </div>
+
+                       <div className="bg-slate-50 dark:bg-slate-900 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 space-y-4">
+                          <div className="space-y-2">
+                            <Label className="text-accent font-bold text-[10px] uppercase flex items-center gap-2"><CalendarClock className="w-3.5 h-3.5" /> Membership Duration</Label>
+                            <Select value={editForm.membershipDuration || '1 Year'} onValueChange={(val) => setEditForm({...editForm, membershipDuration: val})}>
+                              <SelectTrigger className="h-11 rounded-xl bg-white dark:bg-slate-800 border-accent/20 font-bold">
+                                <SelectValue placeholder="Select Duration" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="1 Year" className="font-bold">1 Year Term</SelectItem>
+                                <SelectItem value="2 Years" className="font-bold">2 Years Term</SelectItem>
+                                <SelectItem value="3 Years" className="font-bold">3 Years Term</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          <div className="grid md:grid-cols-2 gap-4">
+                            <div className="space-y-1">
+                              <Label className="text-[10px] uppercase font-bold text-slate-400">Issue Date</Label>
+                              <Popover>
+                                <PopoverTrigger asChild>
+                                  <Button variant="outline" className={cn("w-full justify-start text-left font-normal h-10 rounded-lg", !editForm.joiningDate && "text-muted-foreground")}>
+                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                    {editForm.joiningDate ? editForm.joiningDate : "Pick a date"}
+                                  </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0" align="start">
+                                  <Calendar mode="single" selected={parseMemberDate(editForm.joiningDate)} onSelect={(date) => setEditForm({...editForm, joiningDate: date ? format(date, "PPP") : ''})} initialFocus />
+                                </PopoverContent>
+                              </Popover>
+                            </div>
+                            <div className="space-y-1">
+                              <Label className="text-[10px] uppercase font-bold text-slate-400">Expiry Date (Auto-calculated)</Label>
+                              <Popover>
+                                <PopoverTrigger asChild>
+                                  <Button variant="outline" className={cn("w-full justify-start text-left font-normal h-10 rounded-lg bg-slate-100/50 dark:bg-slate-800/50", !editForm.expiryDate && "text-muted-foreground")}>
+                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                    {editForm.expiryDate ? editForm.expiryDate : "Auto-calculated"}
+                                  </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0" align="start">
+                                  <Calendar mode="single" selected={parseMemberDate(editForm.expiryDate)} onSelect={(date) => setEditForm({...editForm, expiryDate: date ? format(date, "PPP") : ''})} initialFocus />
+                                </PopoverContent>
+                              </Popover>
+                            </div>
+                          </div>
                        </div>
+
                        <div className="grid md:grid-cols-2 gap-4">
                           <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">Email</Label><Input value={editForm.email} onChange={e => setEditForm({...editForm, email: e.target.value})} /></div>
                           <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">Phone</Label><Input value={editForm.phone} onChange={e => setEditForm({...editForm, phone: e.target.value})} /></div>
                        </div>
                      </div>
                    ) : (
-                     <div className="grid md:grid-cols-2 gap-6">
-                        <div><p className="text-[9px] font-bold text-slate-400 uppercase">Email</p><p className="text-sm font-bold">{profile.email}</p></div>
-                        <div><p className="text-[9px] font-bold text-slate-400 uppercase">Phone</p><p className="text-sm font-bold">{profile.phone}</p></div>
-                        <div><p className="text-[9px] font-bold text-slate-400 uppercase">Issue Date</p><p className="text-sm font-bold">{profile.joiningDate || 'N/A'}</p></div>
-                        <div><p className="text-[9px] font-bold text-slate-400 uppercase text-red-500">Expiry Date</p><p className="text-sm font-bold text-red-600">{profile.expiryDate || 'N/A'}</p></div>
+                     <div className="grid md:grid-cols-2 gap-8">
+                        <div className="space-y-1">
+                          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Contact Info</p>
+                          <p className="text-sm font-bold text-primary flex items-center gap-2"><Mail className="w-3.5 h-3.5 text-accent" /> {profile.email}</p>
+                          <p className="text-sm font-bold text-primary flex items-center gap-2"><Phone className="w-3.5 h-3.5 text-accent" /> {profile.phone}</p>
+                        </div>
+                        <div className="space-y-1">
+                          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Membership Term</p>
+                          <p className="text-sm font-bold text-primary flex items-center gap-2"><CalendarClock className="w-3.5 h-3.5 text-accent" /> Duration: {profile.membershipDuration || '1 Year'}</p>
+                          <p className="text-sm font-bold text-primary flex items-center gap-2"><Clock className="w-3.5 h-3.5 text-emerald-500" /> Issued: {profile.joiningDate || 'N/A'}</p>
+                          <p className="text-sm font-bold text-red-600 flex items-center gap-2"><AlertCircle className="w-3.5 h-3.5" /> Expires: {profile.expiryDate || 'N/A'}</p>
+                        </div>
                      </div>
                    )}
                  </div>
                </Card>
             </div>
             <div className="space-y-8">
-              <Card className="rounded-3xl p-6 bg-slate-900 text-white"><CardTitle className="text-base text-accent mb-6 uppercase">Operational Center</CardTitle>
-                 <Link href={`/internal/members/${memberId}/id-card`} className="w-full">
-                    <Button variant="outline" className="w-full justify-start rounded-xl h-10 border-accent/20 text-accent font-bold text-[10px] uppercase tracking-widest gap-2">
-                       <IdCard className="w-3.5 h-3.5" /> ID Card
-                    </Button>
-                 </Link>
+              <Card className="rounded-3xl p-6 bg-slate-900 text-white shadow-2xl border-none relative overflow-hidden">
+                 <div className="absolute top-0 right-0 w-32 h-32 bg-accent/5 rounded-full -mr-16 -mt-16 blur-2xl"></div>
+                 <CardTitle className="text-base text-accent mb-6 uppercase tracking-widest font-headline flex items-center gap-2">
+                   <ShieldCheck className="w-4 h-4" /> Operational Center
+                 </CardTitle>
+                 <div className="space-y-3">
+                   <Link href={`/internal/members/${memberId}/id-card`} className="w-full">
+                      <Button variant="outline" className="w-full justify-start rounded-xl h-12 border-white/10 bg-white/5 hover:bg-white/10 text-white font-bold text-[10px] uppercase tracking-widest gap-3 transition-all hover:translate-x-1">
+                         <IdCard className="w-4 h-4 text-accent" /> Digital ID Card
+                      </Button>
+                   </Link>
+                   <Link href={`/internal/members/${memberId}/certificate`} className="w-full">
+                      <Button variant="outline" className="w-full justify-start rounded-xl h-12 border-white/10 bg-white/5 hover:bg-white/10 text-white font-bold text-[10px] uppercase tracking-widest gap-3 transition-all hover:translate-x-1">
+                         <Award className="w-4 h-4 text-emerald-400" /> induction Certificate
+                      </Button>
+                   </Link>
+                   <Link href={`/internal/members/${memberId}/appointment`} className="w-full">
+                      <Button variant="outline" className="w-full justify-start rounded-xl h-12 border-white/10 bg-white/5 hover:bg-white/10 text-white font-bold text-[10px] uppercase tracking-widest gap-3 transition-all hover:translate-x-1">
+                         <FileText className="w-4 h-4 text-indigo-400" /> Appointment Letter
+                      </Button>
+                   </Link>
+                 </div>
+                 <div className="mt-8 pt-6 border-t border-white/5 text-center">
+                    <p className="text-[8px] font-bold text-slate-500 uppercase tracking-[0.2em]">Authorized for Internal Use Only</p>
+                 </div>
               </Card>
             </div>
           </div>

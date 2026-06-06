@@ -44,7 +44,7 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Calendar } from '@/components/ui/calendar'
-import { format, parse } from 'date-fns'
+import { format, parse, addYears } from 'date-fns'
 import { useToast } from '@/hooks/use-toast'
 import {
   DropdownMenu,
@@ -97,6 +97,20 @@ export default function InternalMembersDirectory() {
       router.push('/internal/login')
     }
   }, [user, authLoading, router])
+
+  // Auto-calculate expiry date based on issue date and duration
+  useEffect(() => {
+    if (newMember.joiningDate && newMember.membershipDuration) {
+      try {
+        const joinDate = parse(newMember.joiningDate, "PPP", new Date());
+        const years = parseInt(newMember.membershipDuration);
+        if (!isNaN(years)) {
+          const expiry = addYears(joinDate, years);
+          setNewMember(prev => ({ ...prev, expiryDate: format(expiry, "PPP") }));
+        }
+      } catch (e) {}
+    }
+  }, [newMember.joiningDate, newMember.membershipDuration]);
 
   const handleAddMember = async () => {
     if (!newMember.name || !newMember.email || !newMember.memberId || !newMember.joiningDate) {
@@ -169,36 +183,54 @@ export default function InternalMembersDirectory() {
                       <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">Full Name</Label><Input value={newMember.name} onChange={e => setNewMember({...newMember, name: e.target.value})} /></div>
                       <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">Member ID</Label><Input value={newMember.memberId} onChange={e => setNewMember({...newMember, memberId: e.target.value})} /></div>
                    </div>
-                   <div className="grid grid-cols-2 gap-4">
+
+                   <div className="bg-slate-50 dark:bg-slate-900 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 space-y-4">
                       <div className="space-y-1">
-                        <Label className="text-[10px] uppercase font-bold text-slate-400">Issue Date</Label>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <Button variant="outline" className={cn("w-full justify-start text-left font-normal h-10 rounded-lg", !newMember.joiningDate && "text-muted-foreground")}>
-                              <CalendarIcon className="mr-2 h-4 w-4" />
-                              {newMember.joiningDate ? newMember.joiningDate : "Pick a date"}
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar mode="single" selected={parseMemberDate(newMember.joiningDate)} onSelect={(date) => setNewMember({...newMember, joiningDate: date ? format(date, "PPP") : ''})} initialFocus />
-                          </PopoverContent>
-                        </Popover>
+                        <Label className="text-[10px] uppercase font-bold text-accent">Membership Duration</Label>
+                        <Select value={newMember.membershipDuration} onValueChange={(val) => setNewMember({...newMember, membershipDuration: val})}>
+                          <SelectTrigger className="h-11 rounded-xl bg-white dark:bg-slate-800 border-accent/20">
+                            <SelectValue placeholder="Select Duration" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="1 Year">1 Year Term</SelectItem>
+                            <SelectItem value="2 Years">2 Years Term</SelectItem>
+                            <SelectItem value="3 Years">3 Years Term</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
-                      <div className="space-y-1">
-                        <Label className="text-[10px] uppercase font-bold text-slate-400">Expiry Date</Label>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <Button variant="outline" className={cn("w-full justify-start text-left font-normal h-10 rounded-lg", !newMember.expiryDate && "text-muted-foreground")}>
-                              <CalendarIcon className="mr-2 h-4 w-4" />
-                              {newMember.expiryDate ? newMember.expiryDate : "Pick a date"}
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar mode="single" selected={parseMemberDate(newMember.expiryDate)} onSelect={(date) => setNewMember({...newMember, expiryDate: date ? format(date, "PPP") : ''})} initialFocus />
-                          </PopoverContent>
-                        </Popover>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                          <Label className="text-[10px] uppercase font-bold text-slate-400">Issue Date</Label>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button variant="outline" className={cn("w-full justify-start text-left font-normal h-10 rounded-lg", !newMember.joiningDate && "text-muted-foreground")}>
+                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                {newMember.joiningDate ? newMember.joiningDate : "Pick a date"}
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                              <Calendar mode="single" selected={parseMemberDate(newMember.joiningDate)} onSelect={(date) => setNewMember({...newMember, joiningDate: date ? format(date, "PPP") : ''})} initialFocus />
+                            </PopoverContent>
+                          </Popover>
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-[10px] uppercase font-bold text-slate-400">Expiry Date</Label>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button variant="outline" className={cn("w-full justify-start text-left font-normal h-10 rounded-lg bg-slate-100/50 dark:bg-slate-800/50 border-dashed", !newMember.expiryDate && "text-muted-foreground")}>
+                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                {newMember.expiryDate ? newMember.expiryDate : "Auto-calculated"}
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                              <Calendar mode="single" selected={parseMemberDate(newMember.expiryDate)} onSelect={(date) => setNewMember({...newMember, expiryDate: date ? format(date, "PPP") : ''})} initialFocus />
+                            </PopoverContent>
+                          </Popover>
+                        </div>
                       </div>
                    </div>
+
                    <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">Email</Label><Input type="email" value={newMember.email} onChange={e => setNewMember({...newMember, email: e.target.value})} /></div>
                       <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">Phone</Label><Input value={newMember.phone} onChange={e => setNewMember({...newMember, phone: e.target.value})} /></div>
