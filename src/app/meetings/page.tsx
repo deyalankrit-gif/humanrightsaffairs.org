@@ -1,6 +1,7 @@
+
 "use client"
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Footer } from '@/components/footer'
 import { 
   Calendar, 
@@ -13,14 +14,20 @@ import {
   Info,
   ExternalLink,
   Globe,
-  UserCheck
+  UserCheck,
+  Plus,
+  Calendar as CalendarIcon,
+  Sparkles
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
-import { useCollection, useFirestore, useMemoFirebase } from '@/firebase'
-import { collection, query, orderBy } from 'firebase/firestore'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { useCollection, useFirestore, useMemoFirebase, useUser } from '@/firebase'
+import { collection, query, orderBy, addDoc, serverTimestamp } from 'firebase/firestore'
 import {
   Dialog,
   DialogContent,
@@ -28,8 +35,18 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogDescription,
+  DialogFooter,
 } from "@/components/ui/dialog"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import { Calendar as CalendarComponent } from "@/components/ui/calendar"
+import { format, parse } from "date-fns"
+import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
+import { INDIA_DATA } from '@/lib/india-data'
 
 type Meeting = {
   id: string
@@ -49,7 +66,32 @@ type Meeting = {
 export default function MeetingsPage() {
   const [filter, setFilter] = useState("All")
   const [search, setSearch] = useState("")
+  const [isMirror, setIsMirror] = useState(false)
+  const [isActionLoading, setIsActionLoading] = useState(false)
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const db = useFirestore()
+  const { user } = useUser()
+  const { toast } = useToast()
+
+  const isAdmin = user?.email === 'deydhritiman@gmail.com' && isMirror
+
+  const [newMeeting, setNewMeeting] = useState({
+    title: '',
+    date: '',
+    time: '09:00 AM',
+    location: '',
+    agenda: '',
+    level: 'National' as 'National' | 'State' | 'District',
+    stateName: '',
+    districtName: '',
+    status: 'Upcoming' as const
+  })
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setIsMirror(window.self !== window.top)
+    }
+  }, [])
 
   const meetingsQuery = useMemoFirebase(() => {
     if (!db) return null;
@@ -60,9 +102,7 @@ export default function MeetingsPage() {
 
   const formatTo12h = (timeStr: string) => {
     if (!timeStr) return '';
-    // If it's already in 12h format (contains AM/PM), return as is
     if (timeStr.includes('AM') || timeStr.includes('PM')) return timeStr;
-    
     const match = timeStr.match(/^(\d{1,2}):(\d{2})$/);
     if (match) {
       let h = parseInt(match[1]);
@@ -73,6 +113,82 @@ export default function MeetingsPage() {
       return `${h.toString().padStart(2, '0')}:${m} ${ampm}`;
     }
     return timeStr;
+  }
+
+  const handleAddMeeting = async () => {
+    if (!db) return
+    if (!newMeeting.title || !newMeeting.date || !newMeeting.location) {
+      toast({ variant: "destructive", title: "Missing Fields", description: "Title, date, and location are required." })
+      return
+    }
+
+    setIsActionLoading(true)
+    try {
+      await addDoc(collection(db, 'meetings'), {
+        ...newMeeting,
+        createdAt: serverTimestamp()
+      })
+      toast({ title: "Assembly Scheduled", description: "The meeting record has been established." })
+      setNewMeeting({
+        title: '', date: '', time: '09:00 AM', location: '', agenda: '',
+        level: 'National', stateName: '', districtName: '', status: 'Upcoming'
+      })
+      setIsAddDialogOpen(false)
+    } catch (e: any) {
+      toast({ variant: "destructive", title: "Error", description: e.message })
+    } finally {
+      setIsActionLoading(false)
+    }
+  }
+
+  const splitTime = (timeStr: string) => {
+    const parts = timeStr.split(' ');
+    const timeParts = parts[0]?.split(':') || ['09', '00'];
+    return {
+      hour: timeParts[0],
+      minute: timeParts[1],
+      period: parts[1] || 'AM'
+    }
+  }
+
+  const TimeSelector = ({ value, onChange }: { value: string, onChange: (val: string) => void }) => {
+    const { hour, minute, period } = splitTime(value)
+    const hours = Array.from({ length: 12 }, (_, i) => (i + 1).toString().padStart(2, '0'))
+    const minutes = Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0'))
+    
+    return (
+      <div className="flex items-center gap-2">
+        <Select value={hour} onValueChange={(h) => onChange(`${h}:${minute} ${period}`)}>
+          <SelectTrigger className="w-full h-10 rounded-lg"><SelectValue /></SelectTrigger>
+          <SelectContent className="max-h-60">
+            {hours.map(h => <SelectItem key={h} value={h}>{h}</SelectItem>)}
+          </SelectContent>
+        </Select>
+        <span className="font-bold">:</span>
+        <Select value={minute} onValueChange={(m) => onChange(`${hour}:${m} ${period}`)}>
+          <SelectTrigger className="w-full h-10 rounded-lg"><SelectValue /></SelectTrigger>
+          <SelectContent className="max-h-60">
+            {minutes.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}
+          </SelectContent>
+        </Select>
+        <Select value={period} onValueChange={(p) => onChange(`${hour}:${minute} ${p}`)}>
+          <SelectTrigger className="w-full h-10 rounded-lg"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="AM">AM</SelectItem>
+            <SelectItem value="PM">PM</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+    )
+  }
+
+  const parseMeetingDate = (dateStr: string) => {
+    if (!dateStr) return undefined;
+    try {
+      return parse(dateStr, "PPP", new Date());
+    } catch {
+      return undefined;
+    }
   }
 
   const filteredMeetings = (meetings as Meeting[] || []).filter(m => 
@@ -90,6 +206,8 @@ export default function MeetingsPage() {
     { label: "District Level", value: "District" }
   ]
 
+  const states = Object.keys(INDIA_DATA).sort()
+
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
       <section className="pt-40 pb-20 bg-primary text-primary-foreground relative overflow-hidden">
@@ -104,6 +222,115 @@ export default function MeetingsPage() {
             <p className="text-xl opacity-80 leading-relaxed max-w-2xl mx-auto text-primary-foreground">
               A transparent record of our democratic decision-making processes, assemblies, and strategic planning sessions.
             </p>
+
+            {isAdmin && (
+              <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button className="bg-accent text-primary font-bold rounded-2xl h-14 px-10 flex gap-2 hover:bg-accent/90 shadow-2xl shadow-accent/20 mx-auto transform hover:scale-105 transition-all">
+                    <Plus className="w-6 h-6" /> Live Editor: Publish New Event
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-xl bg-white dark:bg-slate-900 rounded-[2rem] border-none shadow-2xl max-h-[90vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle className="text-2xl font-headline font-bold text-primary dark:text-white">Schedule New Assembly</DialogTitle>
+                    <DialogDescription>Record a new meeting or event in the public archive.</DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4 py-4">
+                    <div className="space-y-1">
+                      <Label className="text-[10px] uppercase font-bold text-slate-400">Meeting Title</Label>
+                      <Input value={newMeeting.title} onChange={e => setNewMeeting({...newMeeting, title: e.target.value})} placeholder="e.g. District Committee Planning" className="rounded-xl h-11" />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                        <Label className="text-[10px] uppercase font-bold text-slate-400">Induction Date</Label>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button variant="outline" className={cn("w-full justify-start text-left font-normal h-11 rounded-xl", !newMeeting.date && "text-muted-foreground")}>
+                              <CalendarIcon className="mr-2 h-4 w-4" />
+                              {newMeeting.date ? newMeeting.date : "Pick a date"}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <CalendarComponent
+                              mode="single"
+                              selected={parseMeetingDate(newMeeting.date)}
+                              onSelect={(date) => setNewMeeting({...newMeeting, date: date ? format(date, "PPP") : ''})}
+                              initialFocus
+                            />
+                          </PopoverContent>
+                        </Popover>
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-[10px] uppercase font-bold text-slate-400">Meeting Time (AM/PM)</Label>
+                        <TimeSelector value={newMeeting.time} onChange={(val) => setNewMeeting({...newMeeting, time: val})} />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                        <Label className="text-[10px] uppercase font-bold text-slate-400">Level</Label>
+                        <Select value={newMeeting.level} onValueChange={(val: any) => setNewMeeting({...newMeeting, level: val, stateName: '', districtName: ''})}>
+                          <SelectTrigger className="rounded-xl h-11"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="National">National Level</SelectItem>
+                            <SelectItem value="State">State Level</SelectItem>
+                            <SelectItem value="District">District Level</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-[10px] uppercase font-bold text-slate-400">Status</Label>
+                        <Select value={newMeeting.status} onValueChange={(val: any) => setNewMeeting({...newMeeting, status: val})}>
+                          <SelectTrigger className="rounded-xl h-11"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Upcoming">Upcoming</SelectItem>
+                            <SelectItem value="Completed">Completed</SelectItem>
+                            <SelectItem value="Postponed">Postponed</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
+                    {(newMeeting.level === 'State' || newMeeting.level === 'District') && (
+                      <div className="grid grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-1">
+                        <div className="space-y-1">
+                          <Label className="text-[10px] uppercase font-bold text-slate-400">State</Label>
+                          <Select value={newMeeting.stateName} onValueChange={(val) => setNewMeeting({...newMeeting, stateName: val, districtName: ''})}>
+                            <SelectTrigger className="rounded-xl h-11"><SelectValue placeholder="Select State" /></SelectTrigger>
+                            <SelectContent className="max-h-60">{states.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+                          </Select>
+                        </div>
+                        {newMeeting.level === 'District' && (
+                          <div className="space-y-1">
+                            <Label className="text-[10px] uppercase font-bold text-slate-400">District</Label>
+                            <Select value={newMeeting.districtName} onValueChange={(val) => setNewMeeting({...newMeeting, districtName: val})} disabled={!newMeeting.stateName}>
+                              <SelectTrigger className="rounded-xl h-11"><SelectValue placeholder="Select District" /></SelectTrigger>
+                              <SelectContent className="max-h-60">{(INDIA_DATA[newMeeting.stateName] || []).map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
+                            </Select>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    <div className="space-y-1">
+                      <Label className="text-[10px] uppercase font-bold text-slate-400">Location (Venue)</Label>
+                      <Input value={newMeeting.location} onChange={e => setNewMeeting({...newMeeting, location: e.target.value})} placeholder="Full address or Venue name" className="rounded-xl h-11" />
+                    </div>
+
+                    <div className="space-y-1">
+                      <Label className="text-[10px] uppercase font-bold text-slate-400">Meeting Agenda</Label>
+                      <Textarea value={newMeeting.agenda} onChange={e => setNewMeeting({...newMeeting, agenda: e.target.value})} placeholder="Key points of discussion..." className="rounded-xl min-h-[100px]" />
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button onClick={handleAddMeeting} disabled={isActionLoading} className="w-full bg-accent text-primary font-bold h-12 rounded-xl text-lg shadow-xl shadow-accent/20">
+                      {isActionLoading ? <Loader2 className="animate-spin" /> : "Publish to Archive"}
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            )}
           </div>
         </div>
       </section>
