@@ -186,8 +186,8 @@ export default function LeadershipPage() {
                       <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => handleFileChange(e, false)} />
                     </Button>
                   </div>
-                  <Input value={newLeader.name} onChange={e => setNewMember({...newLeader, name: e.target.value})} placeholder="Full Name" />
-                  <Input value={newLeader.title} onChange={e => setNewMember({...newLeader, title: e.target.value})} placeholder="Designation" />
+                  <input className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" value={newLeader.name} onChange={e => setNewMember({...newLeader, name: e.target.value})} placeholder="Full Name" />
+                  <input className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" value={newLeader.title} onChange={e => setNewMember({...newLeader, title: e.target.value})} placeholder="Designation" />
                   <div className="grid grid-cols-2 gap-4">
                     <Select value={newLeader.level} onValueChange={(val: any) => setNewMember({...newLeader, level: val, parentRegion: '', districtName: ''})}>
                       <SelectTrigger><SelectValue placeholder="Level" /></SelectTrigger>
@@ -204,7 +204,7 @@ export default function LeadershipPage() {
                   </div>
                   {(newLeader.level === 'State' || newLeader.level === 'District') && (
                     <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
-                      <Label className="flex items-center gap-2"><Globe className="w-3 h-3 text-accent" /> State / UT</Label>
+                      <Label className="flex items-center gap-2 text-primary dark:text-white"><Globe className="w-3 h-3 text-accent" /> State / UT</Label>
                       <Select value={newLeader.parentRegion} onValueChange={(val) => setNewMember({...newLeader, parentRegion: val, districtName: ''})}>
                         <SelectTrigger className="h-11 rounded-xl"><SelectValue placeholder="Choose State" /></SelectTrigger>
                         <SelectContent className="max-h-60">{allStates.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
@@ -213,7 +213,7 @@ export default function LeadershipPage() {
                   )}
                   {newLeader.level === 'District' && newLeader.parentRegion && (
                     <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
-                      <Label className="flex items-center gap-2"><MapPin className="w-3 h-3 text-accent" /> District</Label>
+                      <Label className="flex items-center gap-2 text-primary dark:text-white"><MapPin className="w-3 h-3 text-accent" /> District</Label>
                       <Select value={newLeader.districtName} onValueChange={(val) => setNewMember({...newLeader, districtName: val})}>
                         <SelectTrigger className="h-11 rounded-xl"><SelectValue placeholder="Choose District" /></SelectTrigger>
                         <SelectContent className="max-h-60">{(INDIA_DATA[newLeader.parentRegion] || []).map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
@@ -236,9 +236,9 @@ export default function LeadershipPage() {
             <>
               {/* Central Governance Section */}
               <div className="flex flex-col items-center mb-32">
-                <div className="flex items-center gap-2 text-primary dark:text-white font-bold uppercase tracking-[0.2em] mb-12">
-                  <Award className="w-6 h-6 text-accent" />
-                  <span>Central Governance</span>
+                <div className="flex items-center gap-3 text-primary dark:text-white font-black uppercase tracking-[0.25em] mb-12">
+                  <Award className="w-8 h-8 text-accent md:w-10 md:h-10" />
+                  <span className="text-xl md:text-3xl lg:text-4xl">Central Governance</span>
                 </div>
                 <div className="flex flex-wrap justify-center gap-12">
                   {centralTeam.map((leader, i) => (
@@ -264,7 +264,6 @@ export default function LeadershipPage() {
                     </div>
                     <Select value={activeState || ''} onValueChange={(val) => { 
                       setActiveState(val); 
-                      // If state is WB, set Howrah, otherwise set first district or null
                       if (val === 'West Bengal') {
                         setActiveDistrict('Howrah')
                       } else {
@@ -285,7 +284,6 @@ export default function LeadershipPage() {
                 <div className="space-y-24 min-h-[400px]">
                   {activeState && (
                     <div className="bg-white dark:bg-slate-900 p-8 md:p-16 rounded-[4rem] shadow-sm border border-slate-100 dark:border-slate-800 animate-in fade-in zoom-in-95 duration-500">
-                      {/* State Title & State Leaders */}
                       <div className="flex flex-col items-center mb-16">
                         <div className="bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 px-8 py-2 rounded-full font-bold text-lg mb-12 shadow-sm border border-emerald-100 dark:border-emerald-800 uppercase tracking-widest">
                           {activeState} Chapter
@@ -308,7 +306,6 @@ export default function LeadershipPage() {
                         )}
                       </div>
 
-                      {/* District Level Committees */}
                       <div className="space-y-12 mt-20 pt-20 border-t border-slate-100 dark:border-slate-800">
                          <div className="flex flex-col items-center gap-6">
                             <div className="flex items-center gap-4">
@@ -377,8 +374,8 @@ export default function LeadershipPage() {
                 </div>
                 <Button variant="outline" className="w-full relative h-12 rounded-xl"><Upload className="w-4 h-4 mr-2" /> Change Photo<input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => handleFileChange(e, true)} /></Button>
               </div>
-              <Input value={editLeader.name} onChange={e => setEditLeader({...editLeader, name: e.target.value})} placeholder="Name" />
-              <Input value={editLeader.title} onChange={e => setEditLeader({...editLeader, title: e.target.value})} placeholder="Title" />
+              <input className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" value={editLeader.name} onChange={e => setEditLeader({...editLeader, name: e.target.value})} placeholder="Name" />
+              <input className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" value={editLeader.title} onChange={e => setEditLeader({...editLeader, title: e.target.value})} placeholder="Title" />
               <div className="grid grid-cols-2 gap-4">
                 <Select value={editLeader.level} onValueChange={(val: any) => setEditLeader({...editLeader, level: val, parentRegion: '', districtName: ''})}>
                   <SelectTrigger><SelectValue placeholder="Level" /></SelectTrigger>
@@ -395,7 +392,7 @@ export default function LeadershipPage() {
               </div>
               {(editLeader.level === 'State' || editLeader.level === 'District') && (
                 <div className="space-y-2">
-                  <Label>State / UT</Label>
+                  <Label className="text-primary dark:text-white">State / UT</Label>
                   <Select value={editLeader.parentRegion} onValueChange={(val) => setEditLeader({...editLeader, parentRegion: val, districtName: ''})}>
                     <SelectTrigger><SelectValue placeholder="Choose State" /></SelectTrigger>
                     <SelectContent className="max-h-60">{allStates.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
@@ -404,7 +401,7 @@ export default function LeadershipPage() {
               )}
               {editLeader.level === 'District' && editLeader.parentRegion && (
                 <div className="space-y-2">
-                  <Label>District</Label>
+                  <Label className="text-primary dark:text-white">District</Label>
                   <Select value={editLeader.districtName} onValueChange={(val) => setEditLeader({...editLeader, districtName: val})}>
                     <SelectTrigger><SelectValue placeholder="Choose District" /></SelectTrigger>
                     <SelectContent className="max-h-60">{(INDIA_DATA[editLeader.parentRegion] || []).map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
