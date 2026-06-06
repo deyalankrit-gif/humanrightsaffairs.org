@@ -75,10 +75,18 @@ function LeaderCard({ leader, variant = "default", isAdmin, onEdit, onDelete }: 
 
 export default function LeadershipPage() {
   const [isActionLoading, setIsActionLoading] = useState(false)
+  const [isMirror, setIsMirror] = useState(false)
   const { user } = useUser()
   const db = useFirestore()
   const { toast } = useToast()
-  const isAdmin = user?.email === 'deydhritiman@gmail.com'
+
+  const isAdmin = user?.email === 'deydhritiman@gmail.com' && isMirror
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setIsMirror(window.self !== window.top)
+    }
+  }, [])
 
   const leadersQuery = useMemoFirebase(() => {
     if (!db) return null;
@@ -192,9 +200,9 @@ export default function LeadershipPage() {
                     <Select value={newLeader.level} onValueChange={(val: any) => setNewMember({...newLeader, level: val, parentRegion: '', districtName: ''})}>
                       <SelectTrigger><SelectValue placeholder="Level" /></SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Central">Central</SelectItem>
-                        <SelectItem value="State">State</SelectItem>
-                        <SelectItem value="District">District</SelectItem>
+                        <SelectItem value="Central">Central Council</SelectItem>
+                        <SelectItem value="State">State Level</SelectItem>
+                        <SelectItem value="District">District Level</SelectItem>
                       </SelectContent>
                     </Select>
                     <Select value={newLeader.gender} onValueChange={(val: any) => setNewMember({...newLeader, gender: val})}>
@@ -234,11 +242,11 @@ export default function LeadershipPage() {
             <div className="text-center py-20"><Loader2 className="w-10 h-10 animate-spin text-accent mx-auto mb-4" /></div>
           ) : (
             <>
-              {/* Central Governance Section */}
+              {/* Central Council Section */}
               <div className="flex flex-col items-center mb-32">
                 <div className="flex items-center gap-3 text-primary dark:text-white font-black uppercase tracking-[0.25em] mb-12">
                   <Award className="w-8 h-8 text-accent md:w-10 md:h-10" />
-                  <span className="text-xl md:text-3xl lg:text-4xl">Central Governance</span>
+                  <span className="text-xl md:text-3xl lg:text-4xl">Central Council</span>
                 </div>
                 <div className="flex flex-wrap justify-center gap-12">
                   {centralTeam.map((leader, i) => (
@@ -380,9 +388,9 @@ export default function LeadershipPage() {
                 <Select value={editLeader.level} onValueChange={(val: any) => setEditLeader({...editLeader, level: val, parentRegion: '', districtName: ''})}>
                   <SelectTrigger><SelectValue placeholder="Level" /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Central">Central</SelectItem>
-                    <SelectItem value="State">State</SelectItem>
-                    <SelectItem value="District">District</SelectItem>
+                    <SelectItem value="Central">Central Council</SelectItem>
+                    <SelectItem value="State">State Level</SelectItem>
+                    <SelectItem value="District">District Level</SelectItem>
                   </SelectContent>
                 </Select>
                 <Select value={editLeader.gender} onValueChange={(val: any) => setEditLeader({...editLeader, gender: val})}>

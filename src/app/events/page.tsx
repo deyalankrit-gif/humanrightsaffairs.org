@@ -1,7 +1,7 @@
 
 "use client"
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { Footer } from '@/components/footer'
 import { PlaceHolderImages } from '@/lib/placeholder-images'
@@ -61,11 +61,18 @@ export default function EventsPage() {
   const [search, setSearch] = useState("")
   const [isActionLoading, setIsActionLoading] = useState(false)
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
+  const [isMirror, setIsMirror] = useState(false)
   const { user } = useUser()
   const db = useFirestore()
   const { toast } = useToast()
   
-  const isAdmin = user?.email === 'deydhritiman@gmail.com'
+  const isAdmin = user?.email === 'deydhritiman@gmail.com' && isMirror
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setIsMirror(window.self !== window.top)
+    }
+  }, [])
 
   const eventsQuery = useMemoFirebase(() => {
     if (!db) return null;

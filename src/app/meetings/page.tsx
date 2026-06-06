@@ -21,7 +21,9 @@ import {
   Sparkles,
   Check,
   ShieldCheck,
-  Award
+  Award,
+  Edit,
+  Trash2
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -43,6 +45,17 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import {
   Popover,
   PopoverContent,
@@ -89,6 +102,7 @@ export default function MeetingsPage() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [selectedAttendees, setSelectedAttendees] = useState<string[]>([])
   const [selectedLeaderProfile, setSelectedLeaderProfile] = useState<Leader | null>(null)
+  const [editMeeting, setEditMeeting] = useState<any>(null)
   
   const db = useFirestore()
   const { user } = useUser()
@@ -190,10 +204,41 @@ export default function MeetingsPage() {
     }
   }
 
-  const toggleAttendee = (name: string) => {
-    setSelectedAttendees(prev => 
-      prev.includes(name) ? prev.filter(a => a !== name) : [...prev, name]
-    )
+  const handleUpdateMeeting = async () => {
+    if (!db || !editMeeting) return
+    setIsActionLoading(true)
+    const { id, ...data } = editMeeting
+    const docRef = doc(db, 'meetings', id)
+
+    updateDoc(docRef, data)
+      .then(() => {
+        toast({ title: "Meeting Record Updated" })
+        setEditMeeting(null)
+        setIsActionLoading(false)
+      })
+      .catch(() => setIsActionLoading(false))
+  }
+
+  const handleDeleteMeeting = (id: string) => {
+    if (!db) return
+    deleteDoc(doc(db, 'meetings', id))
+      .then(() => toast({ title: "Meeting Deleted" }))
+  }
+
+  const toggleAttendee = (name: string, isEdit: boolean = false) => {
+    if (isEdit) {
+      setEditMeeting((prev: any) => {
+        const attendees = prev.attendees || [];
+        const newAttendees = attendees.includes(name) 
+          ? attendees.filter((a: string) => a !== name) 
+          : [...attendees, name];
+        return { ...prev, attendees: newAttendees };
+      });
+    } else {
+      setSelectedAttendees(prev => 
+        prev.includes(name) ? prev.filter(a => a !== name) : [...prev, name]
+      )
+    }
   }
 
   const splitTime = (timeStr: string) => {
@@ -256,7 +301,7 @@ export default function MeetingsPage() {
 
   const levels = [
     { label: "All Levels", value: "All" },
-    { label: "National Level", value: "National" },
+    { label: "Central Council", value: "National" },
     { label: "State Level", value: "State" },
     { label: "District Level", value: "District" }
   ]
@@ -328,7 +373,7 @@ export default function MeetingsPage() {
                         <Select value={newMeeting.level} onValueChange={(val: any) => setNewMeeting({...newMeeting, level: val, stateName: '', districtName: ''})}>
                           <SelectTrigger className="rounded-xl h-11"><SelectValue /></SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="National">National Level</SelectItem>
+                            <SelectItem value="National">Central Council</SelectItem>
                             <SelectItem value="State">State Level</SelectItem>
                             <SelectItem value="District">District Level</SelectItem>
                           </SelectContent>
@@ -465,10 +510,157 @@ export default function MeetingsPage() {
               {filteredMeetings.length > 0 ? (
                 filteredMeetings.map((meeting) => (
                   <Card key={meeting.id} className="group border-none shadow-sm hover:shadow-2xl transition-all duration-500 rounded-[2.5rem] overflow-hidden bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 relative flex flex-col">
+                    
+                    {isAdmin && (
+                      <div className="absolute top-6 left-6 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-50">
+                        <Dialog open={editMeeting?.id === meeting.id} onOpenChange={(open) => !open && setEditMeeting(null)}>
+                          <DialogTrigger asChild>
+                            <Button onClick={() => setEditMeeting(meeting)} size="icon" className="bg-white dark:bg-slate-800 text-primary dark:text-white rounded-full shadow-lg border border-slate-100 dark:border-slate-700 hover:bg-accent hover:text-primary">
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="max-w-xl bg-white dark:bg-slate-900 rounded-[2rem] border-none shadow-2xl max-h-[90vh] overflow-y-auto">
+                            <DialogHeader>
+                              <DialogTitle>Modify Meeting Record</DialogTitle>
+                            </DialogHeader>
+                            {editMeeting && (
+                              <div className="space-y-4 py-2">
+                                <div className="space-y-1">
+                                  <Label className="text-[10px] font-bold uppercase text-slate-400">Title</Label>
+                                  <Input value={editMeeting.title} onChange={e => setEditMeeting({...editMeeting, title: e.target.value})} />
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                  <div className="space-y-1">
+                                    <Label className="text-[10px] font-bold uppercase text-slate-400">Date</Label>
+                                    <Popover>
+                                      <PopoverTrigger asChild>
+                                        <Button variant="outline" className={cn("w-full justify-start text-left font-normal h-11 rounded-xl", !editMeeting.date && "text-muted-foreground")}>
+                                          <CalendarIcon className="mr-2 h-4 w-4" />
+                                          {editMeeting.date ? editMeeting.date : "Pick a date"}
+                                        </Button>
+                                      </PopoverTrigger>
+                                      <PopoverContent className="w-auto p-0" align="start">
+                                        <CalendarComponent
+                                          mode="single"
+                                          selected={parseMeetingDate(editMeeting.date)}
+                                          onSelect={(date) => setEditMeeting({...editMeeting, date: date ? format(date, "PPP") : ''})}
+                                          initialFocus
+                                        />
+                                      </PopoverContent>
+                                    </Popover>
+                                  </div>
+                                  <div className="space-y-1">
+                                    <Label className="text-[10px] font-bold uppercase text-slate-400">Time</Label>
+                                    <TimeSelector value={editMeeting.time} onChange={(val) => setEditMeeting({...editMeeting, time: val})} />
+                                  </div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                  <div className="space-y-1">
+                                    <Label className="text-[10px] font-bold uppercase text-slate-400">Level</Label>
+                                    <Select value={editMeeting.level} onValueChange={(val: any) => setEditMeeting({...editMeeting, level: val})}>
+                                      <SelectTrigger><SelectValue /></SelectTrigger>
+                                      <SelectContent>
+                                        <SelectItem value="National">Central Council</SelectItem>
+                                        <SelectItem value="State">State Level</SelectItem>
+                                        <SelectItem value="District">District Level</SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                  </div>
+                                  <div className="space-y-1">
+                                    <Label className="text-[10px] font-bold uppercase text-slate-400">Status</Label>
+                                    <Select value={editMeeting.status} onValueChange={(val: any) => setEditMeeting({...editMeeting, status: val})}>
+                                      <SelectTrigger><SelectValue /></SelectTrigger>
+                                      <SelectContent>
+                                        <SelectItem value="Upcoming">Upcoming</SelectItem>
+                                        <SelectItem value="Completed">Completed</SelectItem>
+                                        <SelectItem value="Postponed">Postponed</SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                  </div>
+                                </div>
+                                
+                                {(editMeeting.level === 'State' || editMeeting.level === 'District') && (
+                                  <div className="space-y-4">
+                                    <div className="space-y-1">
+                                      <Label className="text-[10px] font-bold uppercase text-slate-400">State</Label>
+                                      <Select value={editMeeting.stateName} onValueChange={(val) => setEditMeeting({...editMeeting, stateName: val, districtName: ''})}>
+                                        <SelectTrigger><SelectValue placeholder="Select State" /></SelectTrigger>
+                                        <SelectContent className="max-h-60">{states.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+                                      </Select>
+                                    </div>
+                                    {editMeeting.stateName && editMeeting.level === 'District' && (
+                                      <div className="space-y-1">
+                                        <Label className="text-[10px] font-bold uppercase text-slate-400">District</Label>
+                                        <Select value={editMeeting.districtName} onValueChange={(val) => setEditMeeting({...editMeeting, districtName: val})}>
+                                          <SelectTrigger><SelectValue placeholder="Select District" /></SelectTrigger>
+                                          <SelectContent className="max-h-60">{(INDIA_DATA[editMeeting.stateName] || []).map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
+                                        </Select>
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+
+                                <div className="space-y-2">
+                                  <Label className="text-[10px] uppercase font-bold text-slate-400">Leadership Attendance</Label>
+                                  <div className="border border-slate-100 dark:border-slate-800 rounded-2xl bg-slate-50 dark:bg-slate-900 p-4">
+                                    <ScrollArea className="h-40">
+                                      <div className="grid grid-cols-1 gap-2 pr-4">
+                                        {sortedLeaders.map((leader: any) => (
+                                          <div key={leader.id} className="flex items-center space-x-2 bg-white dark:bg-slate-800 p-2 rounded-lg border border-slate-100 dark:border-slate-700">
+                                            <Checkbox 
+                                              id={`edit-leader-${leader.id}`} 
+                                              checked={(editMeeting.attendees || []).includes(leader.name)}
+                                              onCheckedChange={() => toggleAttendee(leader.name, true)}
+                                              className="border-accent"
+                                            />
+                                            <label htmlFor={`edit-leader-${leader.id}`} className="text-xs font-bold text-slate-700 dark:text-slate-300 cursor-pointer flex-1">
+                                              {leader.name} <span className="text-[8px] text-slate-400 uppercase ml-2">— {leader.title} ({leader.level})</span>
+                                            </label>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </ScrollArea>
+                                  </div>
+                                </div>
+
+                                <div className="space-y-1">
+                                  <Label className="text-[10px] font-bold uppercase text-slate-400">Agenda</Label>
+                                  <Textarea value={editMeeting.agenda} onChange={e => setEditMeeting({...editMeeting, agenda: e.target.value})} className="rounded-xl min-h-[100px]" />
+                                </div>
+                                <div className="space-y-1">
+                                  <Label className="text-[10px] font-bold uppercase text-slate-400">Official Minutes</Label>
+                                  <Textarea value={editMeeting.minutes} onChange={e => setEditMeeting({...editMeeting, minutes: e.target.value})} placeholder="Induct resolutions here..." className="rounded-xl min-h-[120px]" />
+                                </div>
+                              </div>
+                            )}
+                            <DialogFooter>
+                              <Button onClick={handleUpdateMeeting} disabled={isActionLoading} className="w-full bg-primary text-white h-12 rounded-xl font-bold">Save Changes</Button>
+                            </DialogFooter>
+                          </DialogContent>
+                        </Dialog>
+
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button size="icon" className="bg-red-500 text-white rounded-full shadow-lg hover:bg-red-600 border border-white/20">
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent className="rounded-[2rem] bg-white dark:bg-slate-900">
+                            <AlertDialogHeader><AlertDialogTitle>Purge Record?</AlertDialogTitle></AlertDialogHeader>
+                            <AlertDialogDescription>Permanently remove this assembly record from the public archives?</AlertDialogDescription>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel className="rounded-xl">Keep Record</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => handleDeleteMeeting(meeting.id)} className="bg-red-500 hover:bg-red-600 rounded-xl border-none">Purge</AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
+                    )}
+
                     <CardHeader className="p-8 pb-0">
                       <div className="flex items-center justify-between mb-4">
                         <Badge variant="outline" className="border-accent text-accent font-bold uppercase text-[10px] px-3">
-                          {meeting.level} Chapter
+                          {meeting.level === 'National' ? 'Central Council' : `${meeting.level} Chapter`}
                         </Badge>
                         <Badge className={cn(
                           "font-bold text-[10px] px-3",
@@ -530,7 +722,9 @@ export default function MeetingsPage() {
                         <DialogContent className="max-w-2xl rounded-[2.5rem] bg-white dark:bg-slate-950 max-h-[90vh] overflow-y-auto border-none shadow-2xl">
                           <DialogHeader>
                             <DialogTitle className="text-3xl font-headline font-bold text-primary dark:text-white">{meeting.title}</DialogTitle>
-                            <DialogDescription className="font-bold text-accent uppercase tracking-widest text-xs">{meeting.level} Meeting Details</DialogDescription>
+                            <DialogDescription className="font-bold text-accent uppercase tracking-widest text-xs">
+                              {meeting.level === 'National' ? 'Central Council' : meeting.level} Assembly Details
+                            </DialogDescription>
                           </DialogHeader>
                           
                           <div className="py-6 space-y-8">
@@ -545,7 +739,7 @@ export default function MeetingsPage() {
                                </div>
                                <div className="bg-slate-50 dark:bg-slate-900 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 col-span-2 md:col-span-1">
                                   <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Region</p>
-                                  <p className="font-bold text-sm text-foreground uppercase">{meeting.districtName ? `${meeting.districtName}, ` : ''}{meeting.stateName || 'National'}</p>
+                                  <p className="font-bold text-sm text-foreground uppercase">{meeting.districtName ? `${meeting.districtName}, ` : ''}{meeting.stateName || 'Central Council'}</p>
                                </div>
                             </div>
 
@@ -642,7 +836,7 @@ export default function MeetingsPage() {
                 </div>
                 <div className="absolute top-4 left-6">
                    <Badge className="bg-accent text-primary font-bold uppercase text-[9px] px-3 py-1 rounded-full border-none shadow-lg">
-                      {selectedLeaderProfile.level} Council
+                      {selectedLeaderProfile.level === 'Central' ? 'Central Council' : `${selectedLeaderProfile.level} Council`}
                    </Badge>
                 </div>
               </div>
