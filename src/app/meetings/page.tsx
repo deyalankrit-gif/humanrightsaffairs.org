@@ -110,6 +110,26 @@ export default function MeetingsPage() {
   const { data: meetings, loading: dataLoading } = useCollection(meetingsQuery);
   const { data: leaders } = useCollection(leadersQuery);
 
+  // Sorting leaders by Rank: Central > State > District, then Chairman/Founder priority
+  const sortedLeaders = React.useMemo(() => {
+    if (!leaders) return [];
+    return [...leaders].sort((a: any, b: any) => {
+      const levelRank: Record<string, number> = { 'Central': 3, 'State': 2, 'District': 1 };
+      const rankA = levelRank[a.level] || 0;
+      const rankB = levelRank[b.level] || 0;
+      
+      if (rankA !== rankB) return rankB - rankA;
+      
+      // Secondary sort by executive title
+      const isHighA = (a.title || '').includes('Chairman') || (a.title || '').includes('Founder');
+      const isHighB = (b.title || '').includes('Chairman') || (b.title || '').includes('Founder');
+      if (isHighA && !isHighB) return -1;
+      if (!isHighA && isHighB) return 1;
+      
+      return (a.name || '').localeCompare(b.name || '');
+    });
+  }, [leaders]);
+
   const formatTo12h = (timeStr: string) => {
     if (!timeStr) return '';
     if (timeStr.includes('AM') || timeStr.includes('PM')) return timeStr;
@@ -336,15 +356,15 @@ export default function MeetingsPage() {
                       <Input value={newMeeting.location} onChange={e => setNewMeeting({...newMeeting, location: e.target.value})} placeholder="Full address or Venue name" className="rounded-xl h-11" />
                     </div>
 
-                    {/* Attendance Selection */}
+                    {/* Attendance Selection - Sorted by Rank */}
                     <div className="space-y-2">
                        <Label className="text-[10px] uppercase font-bold text-slate-400 flex items-center gap-2">
-                         <Users className="w-3 h-3 text-accent" /> Select Attendees from Leadership Tree
+                         <Users className="w-3 h-3 text-accent" /> Select Attendees (Rank Sorted)
                        </Label>
                        <div className="border border-slate-100 dark:border-slate-800 rounded-2xl bg-slate-50/50 dark:bg-slate-900/50 p-4">
                           <ScrollArea className="h-40">
                              <div className="grid grid-cols-1 gap-2 pr-4">
-                                {leaders && leaders.map((leader: any) => (
+                                {sortedLeaders.map((leader: any) => (
                                   <div key={leader.id} className="flex items-center space-x-2 bg-white dark:bg-slate-800 p-2 rounded-lg border border-slate-100 dark:border-slate-700 hover:border-accent transition-colors">
                                     <Checkbox 
                                       id={`leader-${leader.id}`} 
@@ -357,7 +377,7 @@ export default function MeetingsPage() {
                                     </label>
                                   </div>
                                 ))}
-                                {(!leaders || leaders.length === 0) && (
+                                {(!sortedLeaders || sortedLeaders.length === 0) && (
                                   <p className="text-[10px] text-slate-400 text-center py-8">No leadership records available for selection.</p>
                                 )}
                              </div>

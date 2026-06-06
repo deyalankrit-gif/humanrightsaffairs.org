@@ -103,6 +103,26 @@ export default function InternalMeetingsManagement() {
   const { data: meetings, loading: dataLoading } = useCollection(meetingsQuery);
   const { data: leaders } = useCollection(leadersQuery);
 
+  // Sorting leaders by organizational rank: Central > State > District, then priority titles
+  const sortedLeaders = React.useMemo(() => {
+    if (!leaders) return [];
+    return [...leaders].sort((a: any, b: any) => {
+      const levelRank: Record<string, number> = { 'Central': 3, 'State': 2, 'District': 1 };
+      const rankA = levelRank[a.level] || 0;
+      const rankB = levelRank[b.level] || 0;
+      
+      if (rankA !== rankB) return rankB - rankA;
+      
+      // Title priority sort (Chairman/Founder first)
+      const isHighA = (a.title || '').includes('Chairman') || (a.title || '').includes('Founder');
+      const isHighB = (b.title || '').includes('Chairman') || (b.title || '').includes('Founder');
+      if (isHighA && !isHighB) return -1;
+      if (!isHighA && isHighB) return 1;
+      
+      return (a.name || '').localeCompare(b.name || '');
+    });
+  }, [leaders]);
+
   const hours = Array.from({ length: 12 }, (_, i) => (i + 1).toString().padStart(2, '0'))
   const minutes = Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0'))
 
@@ -291,7 +311,6 @@ export default function InternalMeetingsManagement() {
                             value={newMeeting.time} 
                             onChange={(val) => setNewMeeting({...newMeeting, time: val})} 
                           />
-                          <p className="text-[8px] text-slate-400 font-bold uppercase mt-1">Select hour (1-12), minute and period</p>
                        </div>
                     </div>
                     <div className="space-y-1">
@@ -330,15 +349,15 @@ export default function InternalMeetingsManagement() {
                        <Input value={newMeeting.location} onChange={e => setNewMeeting({...newMeeting, location: e.target.value})} placeholder="Venue Details" />
                     </div>
 
-                    {/* Attendance Selection */}
+                    {/* Attendance Selection - Rank Sorted */}
                     <div className="space-y-2">
                        <Label className="text-[10px] font-bold uppercase text-slate-400 flex items-center gap-2">
-                         <Users className="w-3 h-3 text-accent" /> Official Presence (Leadership Tree)
+                         <Users className="w-3 h-3 text-accent" /> Official Presence (Rank Sorted Selection)
                        </Label>
                        <div className="border border-slate-100 dark:border-slate-800 rounded-2xl bg-slate-50/50 dark:bg-slate-900/50 p-4">
                           <ScrollArea className="h-40">
                              <div className="grid grid-cols-1 gap-2 pr-4">
-                                {leaders && leaders.map((leader: any) => (
+                                {sortedLeaders.map((leader: any) => (
                                   <div key={leader.id} className="flex items-center space-x-2 bg-white dark:bg-slate-800 p-2 rounded-lg border border-slate-100 dark:border-slate-700 hover:border-accent transition-colors">
                                     <Checkbox 
                                       id={`leader-${leader.id}`} 
@@ -347,11 +366,11 @@ export default function InternalMeetingsManagement() {
                                       className="border-accent"
                                     />
                                     <label htmlFor={`leader-${leader.id}`} className="text-xs font-bold text-slate-700 dark:text-slate-300 cursor-pointer flex-1">
-                                      {leader.name} <span className="text-[8px] text-slate-400 uppercase ml-2">— {leader.title}</span>
+                                      {leader.name} <span className="text-[8px] text-slate-400 uppercase ml-2">— {leader.title} ({leader.level})</span>
                                     </label>
                                   </div>
                                 ))}
-                                {(!leaders || leaders.length === 0) && (
+                                {(!sortedLeaders || sortedLeaders.length === 0) && (
                                   <p className="text-[10px] text-slate-400 text-center py-8">No leadership records available.</p>
                                 )}
                              </div>
@@ -472,7 +491,7 @@ export default function InternalMeetingsManagement() {
                                        </div>
                                     </div>
 
-                                    {/* Edit Attendees */}
+                                    {/* Edit Attendees - Rank Sorted Selection */}
                                     <div className="space-y-2">
                                        <Label className="text-[10px] font-bold uppercase text-slate-400 flex items-center gap-2">
                                          <Users className="w-3 h-3 text-accent" /> Modify Official Presence
@@ -480,7 +499,7 @@ export default function InternalMeetingsManagement() {
                                        <div className="border border-slate-100 dark:border-slate-800 rounded-2xl bg-slate-50 dark:bg-slate-900 p-4">
                                           <ScrollArea className="h-40">
                                              <div className="grid grid-cols-1 gap-2 pr-4">
-                                                {leaders && leaders.map((leader: any) => (
+                                                {sortedLeaders.map((leader: any) => (
                                                   <div key={leader.id} className="flex items-center space-x-2 bg-white dark:bg-slate-800 p-2 rounded-lg border border-slate-100 dark:border-slate-700">
                                                     <Checkbox 
                                                       id={`edit-leader-${leader.id}`} 
@@ -489,7 +508,7 @@ export default function InternalMeetingsManagement() {
                                                       className="border-accent"
                                                     />
                                                     <label htmlFor={`edit-leader-${leader.id}`} className="text-xs font-bold text-slate-700 dark:text-slate-300 cursor-pointer flex-1">
-                                                      {leader.name} <span className="text-[8px] text-slate-400 uppercase ml-2">— {leader.title}</span>
+                                                      {leader.name} <span className="text-[8px] text-slate-400 uppercase ml-2">— {leader.title} ({leader.level})</span>
                                                     </label>
                                                   </div>
                                                 ))}
