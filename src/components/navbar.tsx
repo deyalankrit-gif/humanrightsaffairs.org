@@ -44,8 +44,24 @@ export function Navbar() {
       }
       
       window.addEventListener('hashchange', handleHashChange)
-      handleHashChange()
-      return () => window.removeEventListener('hashchange', handleHashChange)
+      handleHashChange() // Initial check
+
+      // Also listen to click events on links to update hash immediately
+      const handleLinkClick = (e: MouseEvent) => {
+        const target = e.target as HTMLElement;
+        const link = target.closest('a');
+        if (link && link.hash) {
+          setActiveHash(link.hash.replace('#', ''));
+        } else if (link && link.pathname !== pathname) {
+          setActiveHash('');
+        }
+      }
+      window.addEventListener('click', handleLinkClick)
+
+      return () => {
+        window.removeEventListener('hashchange', handleHashChange)
+        window.removeEventListener('click', handleLinkClick)
+      }
     }
   }, [pathname])
 
@@ -65,17 +81,21 @@ export function Navbar() {
 
       <nav className="flex-1 flex items-center overflow-x-auto no-scrollbar gap-1 md:gap-2 px-2">
         {publicLinks.map((link) => {
-          const isHashLink = link.href.includes('/#')
+          const isHashLink = link.href.includes('#')
+          const linkPath = isHashLink ? link.href.split('#')[0] || '/' : link.href
           const linkHash = isHashLink ? link.href.split('#')[1] : ''
           
           let isActive = false
           if (isHashLink) {
-            isActive = pathname === '/' && activeHash === linkHash
-          } else if (link.href === '/') {
-            isActive = pathname === '/' && activeHash === ''
+            // Section link is active if on the right page AND hash matches
+            isActive = (pathname === linkPath) && activeHash === linkHash
           } else {
-            // Strict exact match for page links to prevent Home link being stuck
-            isActive = pathname === link.href
+            // Page link is active if pathname matches AND there is NO hash active
+            if (link.href === '/') {
+              isActive = pathname === '/' && activeHash === ''
+            } else {
+              isActive = pathname === link.href
+            }
           }
 
           return (
@@ -85,7 +105,7 @@ export function Navbar() {
               className={cn(
                 "whitespace-nowrap flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[13px] font-bold transition-all",
                 isActive 
-                  ? "bg-accent text-white shadow-sm ring-1 ring-accent/20" 
+                  ? "bg-accent text-white shadow-md ring-1 ring-accent/20" 
                   : "text-muted-foreground hover:text-primary hover:bg-muted"
               )}
             >
