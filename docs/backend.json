@@ -67,6 +67,7 @@
       "type": "object",
       "properties": {
         "name": { "type": "string" },
+        "designationCategory": { "type": "string", "enum": ["General Member", "Office-bearing Member"] },
         "designation": { "type": "string" },
         "profession": { "type": "string" },
         "gender": { "type": "string", "enum": ["Male", "Female", "Other"] },
@@ -112,6 +113,7 @@
         "level": { "type": "string", "enum": ["National", "State", "District"] },
         "stateName": { "type": "string" },
         "districtName": { "type": "string" },
+        "designationCategory": { "type": "string", "enum": ["General Member", "Office-bearing Member"] },
         "memberType": { "type": "string", "enum": ["Executive Designation", "Regular Member", "Volunteer"] },
         "membershipDuration": { "type": "string", "enum": ["1 Year", "2 Years", "3 Years"] },
         "hasNoCriminalRecord": { "type": "boolean", "description": "Affidavit declaring no past criminal records." },

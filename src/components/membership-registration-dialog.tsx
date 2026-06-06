@@ -83,6 +83,7 @@ const formSchema = z.object({
   level: z.string().min(1, "Operational level required"),
   stateName: z.string().optional(),
   districtName: z.string().optional(),
+  designationCategory: z.string().min(1, "Please select category"),
   memberType: z.string().min(1, "Please select membership type"),
   membershipDuration: z.enum(["1 Year", "2 Years", "3 Years"], { required_error: "Please select duration" }),
   hasNoCriminalRecord: z.boolean().refine(val => val === true, "You must check the criminal record affidavit"),
@@ -116,6 +117,7 @@ export function MembershipRegistrationDialog({ children }: { children: React.Rea
       education: '',
       experience: '',
       level: 'National',
+      designationCategory: 'General Member',
       memberType: 'Regular Member',
       membershipDuration: '1 Year',
       hasNoCriminalRecord: false,
@@ -125,6 +127,7 @@ export function MembershipRegistrationDialog({ children }: { children: React.Rea
 
   const level = form.watch('level')
   const selectedState = form.watch('stateName')
+  const designationCategory = form.watch('designationCategory')
   const states = Object.keys(INDIA_DATA).sort()
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -262,6 +265,29 @@ export function MembershipRegistrationDialog({ children }: { children: React.Rea
                   <FormMessage />
                 </FormItem>
               )} />
+            </div>
+
+            {/* Designation Preference */}
+            <div className="bg-slate-50 dark:bg-slate-900 p-6 rounded-3xl border border-slate-100 dark:border-slate-800 space-y-4">
+               <FormField control={form.control} name="designationCategory" render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-primary dark:text-white mb-2">Category Preference *</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl><SelectTrigger className="h-11 rounded-xl bg-white dark:bg-slate-800"><SelectValue /></SelectTrigger></FormControl>
+                    <SelectContent>
+                      <SelectItem value="General Member" className="font-bold">General Member (No specific title)</SelectItem>
+                      <SelectItem value="Office-bearing Member" className="font-bold">Office-bearing Member (Applying for title)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )} />
+              
+              {designationCategory === 'Office-bearing Member' && (
+                <p className="text-[10px] text-accent font-bold uppercase tracking-tighter animate-in fade-in slide-in-from-top-1">
+                  * Note: Specific designations will be assigned by the Board of Governance during vetting.
+                </p>
+              )}
             </div>
 
             {/* Personal Details */}

@@ -77,7 +77,10 @@ export default function MemberDetailsPage() {
 
   useEffect(() => {
     if (profile) {
-      setEditForm(profile)
+      setEditForm({
+        ...profile,
+        designationCategory: profile.designationCategory || (profile.designation === 'General Member' ? 'General Member' : 'Office-bearing Member')
+      })
     }
   }, [profile])
 
@@ -241,10 +244,32 @@ export default function MemberDetailsPage() {
                               </SelectContent>
                             </Select>
                           </div>
+                        </div>
+
+                        <div className="grid md:grid-cols-2 gap-6 p-4 rounded-xl bg-white dark:bg-slate-950 border border-slate-100">
                           <div className="space-y-2">
-                             <Label className="text-[10px] uppercase font-bold text-slate-400">Designation</Label>
-                             <Input value={editForm.designation} onChange={e => setEditForm({...editForm, designation: e.target.value})} />
+                            <Label className="text-[10px] uppercase font-bold text-accent">Designation Category</Label>
+                            <Select value={editForm.designationCategory} onValueChange={(val: any) => {
+                              const isGeneral = val === 'General Member';
+                              setEditForm({
+                                ...editForm, 
+                                designationCategory: val, 
+                                designation: isGeneral ? 'General Member' : ''
+                              });
+                            }}>
+                              <SelectTrigger className="rounded-xl border-accent/20"><SelectValue /></SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="General Member">General Member</SelectItem>
+                                <SelectItem value="Office-bearing Member">Office-bearing Member</SelectItem>
+                              </SelectContent>
+                            </Select>
                           </div>
+                          {editForm.designationCategory === 'Office-bearing Member' && (
+                            <div className="space-y-2 animate-in fade-in slide-in-from-left-2">
+                              <Label className="text-[10px] uppercase font-bold text-accent">Specific Designation</Label>
+                              <Input value={editForm.designation} onChange={e => setEditForm({...editForm, designation: e.target.value})} className="rounded-xl border-accent/20" />
+                            </div>
+                          )}
                         </div>
 
                         <div className="grid md:grid-cols-2 gap-4">

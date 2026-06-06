@@ -70,7 +70,8 @@ export default function InternalMembersDirectory() {
   
   const [newMember, setNewMember] = useState({
     name: '',
-    designation: '',
+    designationCategory: 'General Member',
+    designation: 'General Member',
     profession: '',
     gender: 'Male',
     bloodGroup: '',
@@ -129,7 +130,7 @@ export default function InternalMembersDirectory() {
       toast({ title: "Success", description: "Member record established." })
       setIsAdding(false)
       setNewMember({
-        name: '', designation: '', profession: '', gender: 'Male', bloodGroup: '',
+        name: '', designationCategory: 'General Member', designation: 'General Member', profession: '', gender: 'Male', bloodGroup: '',
         email: '', phone: '', address: '', postOffice: '', policeStation: '', pinCode: '',
         level: 'National', status: 'Active',
         memberId: '', stateName: '', districtName: '', joiningDate: '', expiryDate: '',
@@ -191,6 +192,32 @@ export default function InternalMembersDirectory() {
                       <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">Member ID *</Label><Input value={newMember.memberId} onChange={e => setNewMember({...newMember, memberId: e.target.value})} /></div>
                    </div>
 
+                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50 dark:bg-slate-900 p-6 rounded-2xl border border-slate-100 dark:border-slate-800">
+                      <div className="space-y-1">
+                        <Label className="text-[10px] uppercase font-bold text-accent">Designation Category</Label>
+                        <Select value={newMember.designationCategory} onValueChange={(val: any) => {
+                          const isGeneral = val === 'General Member';
+                          setNewMember({
+                            ...newMember, 
+                            designationCategory: val, 
+                            designation: isGeneral ? 'General Member' : ''
+                          });
+                        }}>
+                          <SelectTrigger className="rounded-xl border-accent/20 bg-white dark:bg-slate-800"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="General Member">General Member</SelectItem>
+                            <SelectItem value="Office-bearing Member">Office-bearing Member</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      {newMember.designationCategory === 'Office-bearing Member' && (
+                        <div className="space-y-1 animate-in fade-in slide-in-from-left-2">
+                          <Label className="text-[10px] uppercase font-bold text-accent">Manual Designation</Label>
+                          <Input placeholder="e.g. Treasurer" value={newMember.designation} onChange={e => setNewMember({...newMember, designation: e.target.value})} className="rounded-xl border-accent/20" />
+                        </div>
+                      )}
+                   </div>
+
                    <div className="grid grid-cols-3 gap-4">
                       <div className="space-y-1">
                         <Label className="text-[10px] uppercase font-bold text-slate-400">Gender</Label>
@@ -209,8 +236,8 @@ export default function InternalMembersDirectory() {
                         </Select>
                       </div>
                       <div className="space-y-1">
-                        <Label className="text-[10px] uppercase font-bold text-slate-400">Designation</Label>
-                        <Input value={newMember.designation} onChange={e => setNewMember({...newMember, designation: e.target.value})} />
+                        <Label className="text-[10px] uppercase font-bold text-slate-400">Profession</Label>
+                        <Input value={newMember.profession} onChange={e => setNewMember({...newMember, profession: e.target.value})} />
                       </div>
                    </div>
 

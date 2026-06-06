@@ -58,6 +58,7 @@ type Member = {
   id: string
   memberId?: string
   name: string
+  designationCategory?: string
   designation: string
   level: "National" | "State" | "District"
   stateName?: string
@@ -91,7 +92,8 @@ export default function MembersPage() {
 
   const [newMember, setNewMember] = useState({
     name: '',
-    designation: '',
+    designationCategory: 'General Member',
+    designation: 'General Member',
     email: '',
     phone: '',
     level: 'National' as const,
@@ -188,7 +190,8 @@ export default function MembersPage() {
       setIsAdding(false)
       setNewMember({ 
         name: '', 
-        designation: '', 
+        designationCategory: 'General Member',
+        designation: 'General Member', 
         email: '', 
         phone: '', 
         level: 'National', 
@@ -312,16 +315,39 @@ export default function MembersPage() {
                     </div>
                   </div>
 
+                  {/* Designation Category & Title */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 rounded-3xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
+                    <div className="space-y-2">
+                      <Label className="text-[10px] uppercase font-bold text-accent">Designation Category</Label>
+                      <Select value={newMember.designationCategory} onValueChange={(val: any) => {
+                        const isGeneral = val === 'General Member';
+                        setNewMember({
+                          ...newMember, 
+                          designationCategory: val, 
+                          designation: isGeneral ? 'General Member' : ''
+                        });
+                      }}>
+                        <SelectTrigger className="rounded-xl border-accent/20"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="General Member">General Member</SelectItem>
+                          <SelectItem value="Office-bearing Member">Office-bearing Member</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    {newMember.designationCategory === 'Office-bearing Member' && (
+                      <div className="space-y-2 animate-in fade-in slide-in-from-left-2">
+                        <Label className="text-[10px] uppercase font-bold text-accent">Specific Designation</Label>
+                        <Input placeholder="e.g. Secretary, Treasurer" value={newMember.designation} onChange={e => setNewMember({...newMember, designation: e.target.value})} className="rounded-xl border-accent/20" />
+                      </div>
+                    )}
+                  </div>
+
                   {/* ID & Term Block */}
-                  <div className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-3xl space-y-4 border border-slate-100 dark:border-slate-800">
-                    <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-3xl space-y-4 border border-slate-100 dark:border-slate-800 shadow-inner">
+                    <div className="grid grid-cols-1 gap-4">
                       <div className="space-y-2">
                         <Label>Member ID *</Label>
                         <Input placeholder="M-XXXX" value={newMember.memberId} onChange={e => setNewMember({...newMember, memberId: e.target.value})} />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Designation</Label>
-                        <Input placeholder="e.g. Secretary" value={newMember.designation} onChange={e => setNewMember({...newMember, designation: e.target.value})} />
                       </div>
                     </div>
                     
