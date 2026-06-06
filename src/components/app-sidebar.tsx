@@ -132,7 +132,7 @@ export function AppSidebar() {
                     tooltip={link.name}
                     className={cn(
                       "h-11 rounded-xl transition-all px-4",
-                      isActive ? "bg-accent text-white font-bold hover:bg-accent/90" : "hover:bg-accent/5",
+                      isActive ? "bg-accent text-white font-bold hover:bg-secondary hover:text-white" : "hover:bg-secondary/10 hover:text-secondary",
                       isPublicView && "text-emerald-600 dark:text-emerald-400 font-black hover:bg-emerald-50 dark:hover:bg-emerald-950/30"
                     )}
                   >

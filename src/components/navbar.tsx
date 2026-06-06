@@ -46,7 +46,6 @@ export function Navbar() {
       window.addEventListener('hashchange', handleHashChange)
       handleHashChange() // Initial check
 
-      // Also listen to click events on links to update hash immediately
       const handleLinkClick = (e: MouseEvent) => {
         const target = e.target as HTMLElement;
         const link = target.closest('a');
@@ -87,10 +86,8 @@ export function Navbar() {
           
           let isActive = false
           if (isHashLink) {
-            // Section link is active if on the right page AND hash matches
             isActive = (pathname === linkPath) && activeHash === linkHash
           } else {
-            // Page link is active if pathname matches AND there is NO hash active
             if (link.href === '/') {
               isActive = pathname === '/' && activeHash === ''
             } else {
@@ -106,7 +103,7 @@ export function Navbar() {
                 "whitespace-nowrap flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[13px] font-bold transition-all",
                 isActive 
                   ? "bg-accent text-white shadow-md ring-1 ring-accent/20" 
-                  : "text-muted-foreground hover:text-primary hover:bg-muted"
+                  : "text-muted-foreground hover:text-white hover:bg-secondary"
               )}
             >
               <link.icon className={cn("w-3.5 h-3.5", isActive ? "text-white" : "text-muted-foreground")} />

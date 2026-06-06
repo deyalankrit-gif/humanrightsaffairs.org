@@ -22,7 +22,8 @@ import {
   ShieldCheck,
   Award,
   Edit,
-  Trash2
+  Trash2,
+  CircleCheck
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -43,6 +44,7 @@ import {
   DialogTrigger,
   DialogDescription,
   DialogFooter,
+  DialogClose,
 } from "@/components/ui/dialog"
 import {
   AlertDialog,
@@ -50,7 +52,6 @@ import {
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
-  AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
@@ -263,7 +264,7 @@ export default function MeetingsPage() {
             {hoursArr.map(h => <SelectItem key={h} value={h}>{h}</SelectItem>)}
           </SelectContent>
         </Select>
-        <span className="font-bold text-slate-400">:</span>
+        <span className="font-bold text-slate-400 text-white">:</span>
         <Select value={minute} onValueChange={(m) => onChange(`${hour}:${m} ${period}`)}>
           <SelectTrigger className="w-full h-10 rounded-lg"><SelectValue /></SelectTrigger>
           <SelectContent className="max-h-60">
@@ -291,7 +292,7 @@ export default function MeetingsPage() {
   }
 
   const filteredMeetings = (meetings as Meeting[] || []).filter(m => 
-    (filter === "All" || m.level === filter) &&
+    (filter === "All" || (filter === "National" ? m.level === "National" : m.level === filter)) &&
     ((m.title || '').toLowerCase().includes(search.toLowerCase()) || 
      (m.location || '').toLowerCase().includes(search.toLowerCase()) ||
      (m.stateName || '').toLowerCase().includes(search.toLowerCase()) ||
@@ -299,7 +300,7 @@ export default function MeetingsPage() {
   )
 
   const levels = [
-    { label: "All Levels", value: "All" },
+    { label: "All Chapters", value: "All" },
     { label: "Central Council", value: "National" },
     { label: "State Level", value: "State" },
     { label: "District Level", value: "District" }
@@ -316,20 +317,20 @@ export default function MeetingsPage() {
         </div>
         <div className="container mx-auto px-4 relative z-10 text-center">
           <div className="max-w-3xl mx-auto space-y-6">
-            <Badge className="bg-accent text-white font-bold px-4 py-1.5 uppercase tracking-widest text-xs border-none">Organizational Assemblies</Badge>
+            <Badge className="bg-accent text-white font-bold px-4 py-1.5 uppercase tracking-widest text-xs border-none">Assembly Archives</Badge>
             <h1 className="text-5xl md:text-7xl font-headline font-bold mb-6 text-primary-foreground">General <span className="text-accent italic">Meetings</span></h1>
             <p className="text-xl opacity-80 leading-relaxed max-w-2xl mx-auto text-lg mb-8 text-primary-foreground">
-              A transparent record of our democratic decision-making processes, assemblies, and strategic planning sessions.
+              Official records of our democratic decision-making processes, Strategic planning, and induction assemblies.
             </p>
 
             {isAdmin && (
               <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button className="bg-accent text-white font-bold rounded-2xl h-14 px-10 flex gap-2 hover:bg-secondary shadow-2xl shadow-accent/20 mx-auto transform hover:scale-105 transition-all">
-                    <Plus className="w-6 h-6" /> Live Editor: Publish New Event
+                  <Button className="bg-accent text-white font-bold rounded-2xl h-14 px-10 flex gap-2 hover:bg-secondary hover:text-white shadow-2xl shadow-accent/20 mx-auto transform hover:scale-105 transition-all">
+                    <Plus className="w-6 h-6" /> Live Mirror Editor: Schedule New
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-xl bg-white dark:bg-slate-900 rounded-[2rem] border-none shadow-2xl max-h-[90vh] overflow-y-auto">
+                <DialogContent className="max-w-xl bg-white dark:bg-slate-900 rounded-[2.5rem] border-none shadow-2xl max-h-[90vh] overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle className="text-2xl font-headline font-bold text-primary dark:text-white">Schedule New Assembly</DialogTitle>
                     <DialogDescription>Record a new meeting or event in the public archive.</DialogDescription>
@@ -337,12 +338,12 @@ export default function MeetingsPage() {
                   <div className="space-y-4 py-4">
                     <div className="space-y-1">
                       <Label className="text-[10px] uppercase font-bold text-slate-400">Meeting Title</Label>
-                      <Input value={newMeeting.title} onChange={e => setNewMeeting({...newMeeting, title: e.target.value})} placeholder="e.g. District Committee Planning" className="rounded-xl h-11" />
+                      <Input value={newMeeting.title} onChange={e => setNewMeeting({...newMeeting, title: e.target.value})} placeholder="e.g. Central Council Strategic Review" className="rounded-xl h-11" />
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-1">
-                        <Label className="text-[10px] uppercase font-bold text-slate-400">Induction Date</Label>
+                        <Label className="text-[10px] uppercase font-bold text-slate-400">Assembly Date</Label>
                         <Popover>
                           <PopoverTrigger asChild>
                             <Button variant="outline" className={cn("w-full justify-start text-left font-normal h-11 rounded-xl", !newMeeting.date && "text-muted-foreground")}>
@@ -361,14 +362,14 @@ export default function MeetingsPage() {
                         </Popover>
                       </div>
                       <div className="space-y-1">
-                        <Label className="text-[10px] uppercase font-bold text-slate-400">Meeting Time (AM/PM)</Label>
+                        <Label className="text-[10px] uppercase font-bold text-slate-400">Start Time</Label>
                         <TimeSelector value={newMeeting.time} onChange={(val) => setNewMeeting({...newMeeting, time: val})} />
                       </div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-1">
-                        <Label className="text-[10px] uppercase font-bold text-slate-400">Level</Label>
+                        <Label className="text-[10px] uppercase font-bold text-slate-400">Operational Level</Label>
                         <Select value={newMeeting.level} onValueChange={(val: any) => setNewMeeting({...newMeeting, level: val, stateName: '', districtName: ''})}>
                           <SelectTrigger className="rounded-xl h-11"><SelectValue /></SelectTrigger>
                           <SelectContent>
@@ -379,7 +380,7 @@ export default function MeetingsPage() {
                         </Select>
                       </div>
                       <div className="space-y-1">
-                        <Label className="text-[10px] uppercase font-bold text-slate-400">Status</Label>
+                        <Label className="text-[10px] uppercase font-bold text-slate-400">Current Status</Label>
                         <Select value={newMeeting.status} onValueChange={(val: any) => setNewMeeting({...newMeeting, status: val})}>
                           <SelectTrigger className="rounded-xl h-11"><SelectValue /></SelectTrigger>
                           <SelectContent>
@@ -392,19 +393,19 @@ export default function MeetingsPage() {
                     </div>
 
                     {(newMeeting.level === 'State' || newMeeting.level === 'District') && (
-                      <div className="space-y-4 animate-in fade-in slide-in-from-top-1">
+                      <div className="grid grid-cols-1 gap-4 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 animate-in fade-in slide-in-from-top-1">
                         <div className="space-y-1">
-                          <Label className="text-[10px] uppercase font-bold text-slate-400">State</Label>
+                          <Label className="text-[10px] uppercase font-bold text-accent">Select State *</Label>
                           <Select value={newMeeting.stateName} onValueChange={(val) => setNewMeeting({...newMeeting, stateName: val, districtName: ''})}>
-                            <SelectTrigger className="rounded-xl h-11"><SelectValue placeholder="Select State" /></SelectTrigger>
+                            <SelectTrigger className="rounded-xl h-11 border-accent/20 bg-white dark:bg-slate-900"><SelectValue placeholder="Choose State" /></SelectTrigger>
                             <SelectContent className="max-h-60">{states.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
                           </Select>
                         </div>
                         {newMeeting.stateName && newMeeting.level === 'District' && (
                           <div className="space-y-1 animate-in fade-in slide-in-from-top-1">
-                            <Label className="text-[10px] uppercase font-bold text-slate-400">District</Label>
+                            <Label className="text-[10px] uppercase font-bold text-accent">Select District *</Label>
                             <Select value={newMeeting.districtName} onValueChange={(val) => setNewMeeting({...newMeeting, districtName: val})}>
-                              <SelectTrigger className="rounded-xl h-11"><SelectValue placeholder="Select District" /></SelectTrigger>
+                              <SelectTrigger className="rounded-xl h-11 border-accent/20 bg-white dark:bg-slate-900"><SelectValue placeholder="Choose District" /></SelectTrigger>
                               <SelectContent className="max-h-60">{(INDIA_DATA[newMeeting.stateName] || []).map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
                             </Select>
                           </div>
@@ -413,7 +414,7 @@ export default function MeetingsPage() {
                     )}
 
                     <div className="space-y-1">
-                      <Label className="text-[10px] uppercase font-bold text-slate-400">Location (Venue)</Label>
+                      <Label className="text-[10px] uppercase font-bold text-slate-400">Assembly Venue</Label>
                       <Input value={newMeeting.location} onChange={e => setNewMeeting({...newMeeting, location: e.target.value})} placeholder="Full address or Venue name" className="rounded-xl h-11" />
                     </div>
 
@@ -437,25 +438,22 @@ export default function MeetingsPage() {
                                     </label>
                                   </div>
                                 ))}
-                                {(!sortedLeaders || sortedLeaders.length === 0) && (
-                                  <p className="text-[10px] text-slate-400 text-center py-8">No leadership records available for selection.</p>
-                                )}
                              </div>
                           </ScrollArea>
                           <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800">
-                             <p className="text-[9px] font-bold text-accent uppercase tracking-widest">Selected: {selectedAttendees.length} Leaders</p>
+                             <p className="text-[9px] font-bold text-accent uppercase tracking-widest">Tagged: {selectedAttendees.length} Officials</p>
                           </div>
                        </div>
                     </div>
 
                     <div className="space-y-1">
-                      <Label className="text-[10px] uppercase font-bold text-slate-400">Meeting Agenda</Label>
+                      <Label className="text-[10px] uppercase font-bold text-slate-400">Primary Agenda</Label>
                       <Textarea value={newMeeting.agenda} onChange={e => setNewMeeting({...newMeeting, agenda: e.target.value})} placeholder="Key points of discussion..." className="rounded-xl min-h-[100px]" />
                     </div>
                   </div>
                   <DialogFooter>
-                    <Button onClick={handleAddMeeting} disabled={isActionLoading} className="w-full bg-accent text-white font-bold h-12 rounded-xl text-lg shadow-xl shadow-accent/20 hover:bg-secondary transition-all">
-                      {isActionLoading ? <Loader2 className="animate-spin" /> : "Publish to Archive"}
+                    <Button onClick={handleAddMeeting} disabled={isActionLoading} className="w-full bg-accent text-white font-bold h-12 rounded-xl text-lg shadow-xl shadow-accent/20 hover:bg-secondary hover:text-white transition-all">
+                      {isActionLoading ? <Loader2 className="animate-spin" /> : "Publish Official Record"}
                     </Button>
                   </DialogFooter>
                 </DialogContent>
@@ -465,7 +463,7 @@ export default function MeetingsPage() {
         </div>
       </section>
 
-      <section className="py-12 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-[56px] md:top-[64px] z-30 shadow-sm transition-colors">
+      <section className="py-12 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-[48px] md:top-[56px] z-30 shadow-sm transition-colors">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row gap-6 items-center justify-between">
             <div className="flex flex-wrap gap-2">
@@ -477,7 +475,7 @@ export default function MeetingsPage() {
                   className={cn(
                     "rounded-full px-6 font-bold transition-all border-slate-200 dark:border-slate-700",
                     filter === lvl.value 
-                      ? "bg-accent text-white shadow-lg border-accent hover:bg-secondary" 
+                      ? "bg-accent text-white shadow-lg border-accent hover:bg-secondary hover:text-white" 
                       : "text-primary dark:text-slate-300 hover:bg-secondary hover:text-white hover:border-secondary"
                   )}
                 >
@@ -518,19 +516,19 @@ export default function MeetingsPage() {
                               <Edit className="w-4 h-4" />
                             </Button>
                           </DialogTrigger>
-                          <DialogContent className="max-w-xl bg-white dark:bg-slate-900 rounded-[2rem] border-none shadow-2xl max-h-[90vh] overflow-y-auto">
+                          <DialogContent className="max-w-xl bg-white dark:bg-slate-900 rounded-[2.5rem] border-none shadow-2xl max-h-[90vh] overflow-y-auto">
                             <DialogHeader>
-                              <DialogTitle>Modify Meeting Record</DialogTitle>
+                              <DialogTitle className="text-2xl font-headline font-bold text-primary dark:text-white">Modify Meeting Record</DialogTitle>
                             </DialogHeader>
                             {editMeeting && (
                               <div className="space-y-4 py-2">
                                 <div className="space-y-1">
-                                  <Label className="text-[10px] font-bold uppercase text-slate-400">Title</Label>
+                                  <Label className="text-[10px] font-bold uppercase text-slate-400">Record Title</Label>
                                   <Input value={editMeeting.title} onChange={e => setEditMeeting({...editMeeting, title: e.target.value})} />
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                   <div className="space-y-1">
-                                    <Label className="text-[10px] font-bold uppercase text-slate-400">Date</Label>
+                                    <Label className="text-[10px] font-bold uppercase text-slate-400">Assembly Date</Label>
                                     <Popover>
                                       <PopoverTrigger asChild>
                                         <Button variant="outline" className={cn("w-full justify-start text-left font-normal h-11 rounded-xl", !editMeeting.date && "text-muted-foreground")}>
@@ -549,13 +547,13 @@ export default function MeetingsPage() {
                                     </Popover>
                                   </div>
                                   <div className="space-y-1">
-                                    <Label className="text-[10px] font-bold uppercase text-slate-400">Time</Label>
+                                    <Label className="text-[10px] font-bold uppercase text-slate-400">Start Time</Label>
                                     <TimeSelector value={editMeeting.time} onChange={(val) => setEditMeeting({...editMeeting, time: val})} />
                                   </div>
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                   <div className="space-y-1">
-                                    <Label className="text-[10px] font-bold uppercase text-slate-400">Level</Label>
+                                    <Label className="text-[10px] font-bold uppercase text-slate-400">Chapter Level</Label>
                                     <Select value={editMeeting.level} onValueChange={(val: any) => setEditMeeting({...editMeeting, level: val})}>
                                       <SelectTrigger><SelectValue /></SelectTrigger>
                                       <SelectContent>
@@ -579,19 +577,19 @@ export default function MeetingsPage() {
                                 </div>
                                 
                                 {(editMeeting.level === 'State' || editMeeting.level === 'District') && (
-                                  <div className="space-y-4">
+                                  <div className="grid grid-cols-1 gap-4 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
                                     <div className="space-y-1">
-                                      <Label className="text-[10px] font-bold uppercase text-slate-400">State</Label>
+                                      <Label className="text-[10px] uppercase font-bold text-accent">Chapter State *</Label>
                                       <Select value={editMeeting.stateName} onValueChange={(val) => setEditMeeting({...editMeeting, stateName: val, districtName: ''})}>
-                                        <SelectTrigger><SelectValue placeholder="Select State" /></SelectTrigger>
+                                        <SelectTrigger className="rounded-xl h-11 border-accent/20 bg-white dark:bg-slate-900"><SelectValue placeholder="Select State" /></SelectTrigger>
                                         <SelectContent className="max-h-60">{states.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
                                       </Select>
                                     </div>
                                     {editMeeting.stateName && editMeeting.level === 'District' && (
                                       <div className="space-y-1">
-                                        <Label className="text-[10px] font-bold uppercase text-slate-400">District</Label>
+                                        <Label className="text-[10px] uppercase font-bold text-accent">Chapter District *</Label>
                                         <Select value={editMeeting.districtName} onValueChange={(val) => setEditMeeting({...editMeeting, districtName: val})}>
-                                          <SelectTrigger><SelectValue placeholder="Select District" /></SelectTrigger>
+                                          <SelectTrigger className="rounded-xl h-11 border-accent/20 bg-white dark:bg-slate-900"><SelectValue placeholder="Select District" /></SelectTrigger>
                                           <SelectContent className="max-h-60">{(INDIA_DATA[editMeeting.stateName] || []).map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
                                         </Select>
                                       </div>
@@ -600,7 +598,7 @@ export default function MeetingsPage() {
                                 )}
 
                                 <div className="space-y-2">
-                                  <Label className="text-[10px] uppercase font-bold text-slate-400">Leadership Attendance</Label>
+                                  <Label className="text-[10px] uppercase font-bold text-slate-400">Modify Attendance</Label>
                                   <div className="border border-slate-100 dark:border-slate-800 rounded-2xl bg-slate-50 dark:bg-slate-900 p-4">
                                     <ScrollArea className="h-40">
                                       <div className="grid grid-cols-1 gap-2 pr-4">
@@ -623,17 +621,17 @@ export default function MeetingsPage() {
                                 </div>
 
                                 <div className="space-y-1">
-                                  <Label className="text-[10px] font-bold uppercase text-slate-400">Agenda</Label>
+                                  <Label className="text-[10px] font-bold uppercase text-slate-400">Revised Agenda</Label>
                                   <Textarea value={editMeeting.agenda} onChange={e => setEditMeeting({...editMeeting, agenda: e.target.value})} className="rounded-xl min-h-[100px]" />
                                 </div>
                                 <div className="space-y-1">
-                                  <Label className="text-[10px] font-bold uppercase text-slate-400">Official Minutes</Label>
+                                  <Label className="text-[10px] font-bold uppercase text-slate-400">Final Minutes & Resolutions</Label>
                                   <Textarea value={editMeeting.minutes} onChange={e => setEditMeeting({...editMeeting, minutes: e.target.value})} placeholder="Induct resolutions here..." className="rounded-xl min-h-[120px]" />
                                 </div>
                               </div>
                             )}
                             <DialogFooter>
-                              <Button onClick={handleUpdateMeeting} disabled={isActionLoading} className="w-full bg-primary text-primary-foreground h-12 rounded-xl font-bold hover:bg-secondary">Save Changes</Button>
+                              <Button onClick={handleUpdateMeeting} disabled={isActionLoading} className="w-full bg-primary text-primary-foreground h-12 rounded-xl font-bold hover:bg-secondary hover:text-white transition-all">Save Official Changes</Button>
                             </DialogFooter>
                           </DialogContent>
                         </Dialog>
@@ -644,12 +642,12 @@ export default function MeetingsPage() {
                               <Trash2 className="w-4 h-4" />
                             </Button>
                           </AlertDialogTrigger>
-                          <AlertDialogContent className="rounded-[2rem] bg-white dark:bg-slate-900">
-                            <AlertDialogHeader><AlertDialogTitle>Purge Record?</AlertDialogTitle></AlertDialogHeader>
-                            <AlertDialogDescription>Permanently remove this assembly record from the public archives?</AlertDialogDescription>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel className="rounded-xl">Keep Record</AlertDialogCancel>
-                              <AlertDialogAction onClick={() => handleDeleteMeeting(meeting.id)} className="bg-red-500 hover:bg-red-600 rounded-xl border-none text-white font-bold">Purge</AlertDialogAction>
+                          <AlertDialogContent className="rounded-[2.5rem] bg-white dark:bg-slate-900 border-none shadow-2xl">
+                            <AlertDialogHeader><AlertDialogTitle className="text-2xl font-headline font-bold">Purge Record?</AlertDialogTitle></AlertDialogHeader>
+                            <AlertDialogDescription className="text-base">Permanently remove this assembly record from the public archives? This action is irreversible.</AlertDialogDescription>
+                            <AlertDialogFooter className="mt-6">
+                              <AlertDialogCancel className="rounded-xl h-11 font-bold">Cancel</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => handleDeleteMeeting(meeting.id)} className="bg-red-500 hover:bg-red-600 rounded-xl h-11 font-bold border-none text-white">Confirm Purge</AlertDialogAction>
                             </AlertDialogFooter>
                           </AlertDialogContent>
                         </AlertDialog>
@@ -659,7 +657,7 @@ export default function MeetingsPage() {
                     <CardHeader className="p-8 pb-0">
                       <div className="flex items-center justify-between mb-4">
                         <Badge variant="outline" className="border-accent text-accent font-bold uppercase text-[10px] px-3">
-                          {meeting.level === 'National' ? 'Central Council' : `${meeting.level} Chapter`}
+                          {meeting.level === 'National' ? 'Central Council' : `${meeting.level} Council`}
                         </Badge>
                         <Badge className={cn(
                           "font-bold text-[10px] px-3",
@@ -692,9 +690,9 @@ export default function MeetingsPage() {
                         {(meeting.stateName || meeting.districtName) && (
                           <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 animate-in fade-in slide-in-from-top-2 duration-500">
                              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 flex items-center gap-2">
-                               <Globe className="w-3 h-3 text-accent" /> Operational Region
+                               <Globe className="w-3 h-3 text-accent" /> Jurisdictional Scope
                              </p>
-                             <p className="text-lg font-headline font-bold text-accent drop-shadow-sm uppercase">
+                             <p className="text-lg font-headline font-bold text-accent drop-shadow-sm uppercase leading-tight">
                                 {meeting.districtName ? `${meeting.districtName}, ` : ''}{meeting.stateName}
                              </p>
                           </div>
@@ -703,9 +701,9 @@ export default function MeetingsPage() {
                       
                       <div className="pt-4 border-t border-slate-100 dark:border-slate-800">
                          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2">
-                           <Info className="w-3 h-3" /> Agenda Preview
+                           <Info className="w-3 h-3" /> Agenda Summary
                          </p>
-                         <p className="text-sm text-muted-foreground line-clamp-3 italic">
+                         <p className="text-sm text-muted-foreground line-clamp-3 italic leading-relaxed">
                            "{meeting.agenda}"
                          </p>
                       </div>
@@ -715,19 +713,19 @@ export default function MeetingsPage() {
                       <Dialog>
                         <DialogTrigger asChild>
                           <Button className="w-full bg-slate-900 text-white dark:bg-white dark:text-slate-900 font-bold h-12 rounded-xl group/btn hover:bg-secondary hover:text-white transition-all shadow-lg">
-                            View Details & Minutes <ExternalLink className="ml-2 w-4 h-4 group-hover/btn:scale-110 transition-transform" />
+                            Examine Minutes <ExternalLink className="ml-2 w-4 h-4 group-hover/btn:scale-110 transition-transform" />
                           </Button>
                         </DialogTrigger>
                         <DialogContent className="max-w-2xl rounded-[2.5rem] bg-white dark:bg-slate-950 max-h-[90vh] overflow-y-auto border-none shadow-2xl">
                           <DialogHeader className="sr-only">
-                            <DialogTitle>{meeting.title} - Details & Minutes</DialogTitle>
-                            <DialogDescription>A detailed view of the organizational assembly's agenda, attendees, and finalized minutes.</DialogDescription>
+                            <DialogTitle>{meeting.title} - Minutes</DialogTitle>
+                            <DialogDescription>Full assembly breakdown including agenda, official presence, and finalized organizational minutes.</DialogDescription>
                           </DialogHeader>
                           
                           <div className="header-visible mb-6">
                             <h2 className="text-3xl font-headline font-bold text-primary dark:text-white">{meeting.title}</h2>
                             <p className="font-bold text-accent uppercase tracking-widest text-xs">
-                              {meeting.level === 'National' ? 'Central Council' : meeting.level} Assembly Details
+                              {meeting.level === 'National' ? 'Central Council' : meeting.level} Assembly Breakdown
                             </p>
                           </div>
                           
@@ -742,7 +740,7 @@ export default function MeetingsPage() {
                                   <p className="font-bold text-sm text-foreground">{formatTo12h(meeting.time)}</p>
                                </div>
                                <div className="bg-slate-50 dark:bg-slate-900 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 col-span-2 md:col-span-1">
-                                  <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Region</p>
+                                  <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Scope</p>
                                   <p className="font-bold text-sm text-foreground uppercase">{meeting.districtName ? `${meeting.districtName}, ` : ''}{meeting.stateName || 'Central Council'}</p>
                                </div>
                             </div>
@@ -750,7 +748,7 @@ export default function MeetingsPage() {
                             {meeting.attendees && meeting.attendees.length > 0 && (
                               <div className="space-y-4">
                                 <h4 className="font-headline font-bold text-xl flex items-center gap-2 text-foreground">
-                                  <UserCheck className="w-5 h-5 text-accent" /> Leadership Presence
+                                  <CircleCheck className="w-5 h-5 text-accent" /> Leadership Presence
                                 </h4>
                                 <div className="flex flex-wrap gap-2">
                                   {meeting.attendees.map((attendee, idx) => {
@@ -762,7 +760,7 @@ export default function MeetingsPage() {
                                         onClick={() => leaderData && setSelectedLeaderProfile(leaderData)}
                                         className={cn(
                                           "bg-accent/10 text-accent border-accent/20 px-4 py-1 rounded-full font-bold transition-all",
-                                          leaderData ? "cursor-pointer hover:bg-secondary hover:text-white hover:scale-105" : "opacity-70"
+                                          leaderData ? "cursor-pointer hover:bg-secondary hover:text-white hover:scale-105 shadow-sm" : "opacity-70"
                                         )}
                                       >
                                         {attendee}
@@ -770,7 +768,7 @@ export default function MeetingsPage() {
                                     );
                                   })}
                                 </div>
-                                <p className="text-[9px] text-slate-400 font-bold uppercase italic">Click on a name to view official profile credentials.</p>
+                                <p className="text-[9px] text-slate-400 font-bold uppercase italic tracking-tighter">Click on an official to view their verified credentials.</p>
                               </div>
                             )}
 
@@ -778,8 +776,8 @@ export default function MeetingsPage() {
                                <h4 className="font-headline font-bold text-xl flex items-center gap-2 text-foreground">
                                  <FileText className="w-5 h-5 text-accent" /> Meeting Agenda
                                </h4>
-                               <div className="p-6 bg-slate-50 dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800">
-                                 <p className="text-sm leading-relaxed text-muted-foreground whitespace-pre-line">
+                               <div className="p-6 bg-slate-50 dark:bg-slate-900 rounded-[2rem] border border-slate-100 dark:border-slate-800">
+                                 <p className="text-sm leading-relaxed text-muted-foreground whitespace-pre-line font-medium">
                                    {meeting.agenda}
                                  </p>
                                </div>
@@ -788,10 +786,10 @@ export default function MeetingsPage() {
                             {meeting.minutes && (
                               <div className="space-y-4">
                                 <h4 className="font-headline font-bold text-xl flex items-center gap-2 text-foreground">
-                                  <Users className="w-5 h-5 text-secondary" /> Minutes & Resolutions
+                                  <Users className="w-5 h-5 text-secondary" /> Official Minutes & Resolutions
                                 </h4>
-                                <div className="p-6 bg-emerald-50/30 dark:bg-emerald-900/10 rounded-3xl border border-emerald-100 dark:border-emerald-900/30">
-                                  <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-300 whitespace-pre-line font-medium italic">
+                                <div className="p-6 bg-emerald-50/30 dark:bg-emerald-900/10 rounded-[2rem] border border-emerald-100 dark:border-emerald-900/30">
+                                  <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-300 whitespace-pre-line font-bold italic">
                                     {meeting.minutes}
                                   </p>
                                 </div>
@@ -808,7 +806,7 @@ export default function MeetingsPage() {
                   <div className="w-20 h-20 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-300 dark:text-slate-600">
                     <Handshake className="w-10 h-10" />
                   </div>
-                  <h3 className="text-2xl font-headline font-bold text-primary dark:text-white">No meetings found</h3>
+                  <h3 className="text-2xl font-headline font-bold text-primary dark:text-white">No assembly records identified</h3>
                 </div>
               )}
             </div>
@@ -821,7 +819,7 @@ export default function MeetingsPage() {
         <DialogContent className="max-w-md rounded-[2.5rem] p-0 overflow-hidden border-none shadow-2xl bg-white dark:bg-slate-950">
           <DialogHeader className="sr-only">
             <DialogTitle>Official Personnel Profile</DialogTitle>
-            <DialogDescription>Credentials and organizational background of the selected leader.</DialogDescription>
+            <DialogDescription>Institutional credentials and operational region of the selected official.</DialogDescription>
           </DialogHeader>
           {selectedLeaderProfile && (
             <div className="flex flex-col">
@@ -871,7 +869,7 @@ export default function MeetingsPage() {
 
                 <div className="pt-4">
                    <p className="text-xs text-slate-400 italic leading-relaxed px-4">
-                     "Inducted under the national mission for constitutional literacy and human rights advocacy."
+                     "Committed to the mission of constitutional literacy and legal advocacy under the HRAT charter."
                    </p>
                 </div>
 
