@@ -101,6 +101,12 @@
       "description": "Donation call to action image for footer",
       "imageUrl": "https://picsum.photos/seed/donation/400/300",
       "imageHint": "charity"
+    },
+    {
+      "id": "donation-action-image",
+      "description": "Direct donation prompt image",
+      "imageUrl": "https://picsum.photos/seed/charity-support/600/400",
+      "imageHint": "donation support"
     }
   ]
 }

@@ -303,7 +303,7 @@ export default function MembersPage() {
                   {/* Photo & Basic Info */}
                   <div className="grid md:grid-cols-3 gap-6 items-start">
                     <div className="flex flex-col items-center gap-3">
-                      <div className="relative w-32 h-32 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden border-2 border-dashed border-slate-300">
+                      <div className="relative w-32 h-32 rounded-full bg-slate-50 dark:bg-slate-800 overflow-hidden border-2 border-dashed border-slate-300">
                         {newMember.imageId ? (
                           <Image src={newMember.imageId} alt="Preview" fill className="object-cover" />
                         ) : (
@@ -450,7 +450,7 @@ export default function MembersPage() {
                         <Label>Operational Level</Label>
                         <Select value={newMember.level} onValueChange={(val: any) => setNewMember({...newMember, level: val, stateName: '', districtName: ''})}>
                           <SelectTrigger><SelectValue /></SelectTrigger>
-                          <SelectContent><SelectItem value="National">National</SelectItem><SelectItem value="State">State</SelectItem><SelectItem value="District">District</SelectItem></SelectContent>
+                          <SelectContent><SelectItem value="National">Central Council</SelectItem><SelectItem value="State">State Level</SelectItem><SelectItem value="District">District Level</SelectItem></SelectContent>
                         </Select>
                       </div>
                       {(newMember.level === 'State' || newMember.level === 'District') && (
@@ -504,7 +504,7 @@ export default function MembersPage() {
                         : "text-primary dark:text-slate-300 hover:bg-secondary hover:text-white hover:border-secondary"
                     )}
                   >
-                    {level === 'All' ? 'All Levels' : `${level} Level`}
+                    {level === 'All' ? 'All Levels' : level === 'National' ? 'Central Council' : `${level} Level`}
                   </Button>
                 ))}
               </div>
@@ -580,7 +580,7 @@ export default function MembersPage() {
                           <Image src={displayImg} alt={member.name} fill className="object-cover transition-transform duration-500" />
                           <div className="absolute top-1 right-1">
                             <Badge className="bg-primary/80 backdrop-blur-md text-white font-bold border-none text-[6px] px-1 py-0 leading-none h-auto">
-                              {member.level}
+                              {member.level === 'National' ? 'Central' : member.level}
                             </Badge>
                           </div>
                         </div>

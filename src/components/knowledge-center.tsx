@@ -202,7 +202,7 @@ export function KnowledgeCenter() {
                 <div className="flex flex-col sm:flex-row gap-4 pt-4">
                   <Button 
                     onClick={handleAccessRepository}
-                    className="flex-1 bg-primary text-primary-foreground dark:bg-slate-100 dark:text-primary font-bold py-6 rounded-xl hover:bg-secondary hover:text-white text-lg shadow-xl shadow-primary/10"
+                    className="flex-1 bg-primary text-white font-bold py-6 rounded-xl hover:bg-secondary hover:text-white text-lg shadow-xl shadow-primary/10"
                   >
                     Access Full Repository
                   </Button>

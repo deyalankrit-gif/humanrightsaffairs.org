@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useEffect } from 'react'
@@ -54,7 +53,7 @@ function LeaderCard({ leader, variant = "default", isAdmin, onEdit, onDelete }: 
         <div className="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-10">
           {isAdmin && (
             <div className="flex gap-2">
-              <Button onClick={() => onEdit?.(leader)} size="icon" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-full hover:bg-secondary hover:text-white transition-colors border border-white/20 shadow-xl">
+              <Button onClick={() => onEdit?.(leader)} size="icon" className="bg-white dark:bg-slate-800 text-primary dark:text-white rounded-full hover:bg-secondary hover:text-white transition-colors border border-white/20 shadow-xl">
                 <Edit className="w-4 h-4" />
               </Button>
               <Button onClick={() => onDelete?.(leader.id)} size="icon" className="bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors border border-white/20 shadow-xl">
@@ -416,7 +415,7 @@ export default function LeadershipPage() {
                   </Select>
                 </div>
               )}
-              <Button onClick={handleUpdate} disabled={isActionLoading} className="w-full h-12 rounded-xl mt-4 bg-accent text-white hover:bg-secondary hover:text-white">Save Changes</Button>
+              <Button onClick={handleUpdate} disabled={isActionLoading} className="w-full h-12 rounded-xl mt-4 bg-accent text-white hover:bg-secondary hover:text-white font-bold transition-all">Save Changes</Button>
             </div>
           )}
         </DialogContent>

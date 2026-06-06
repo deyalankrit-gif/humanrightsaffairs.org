@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useEffect } from 'react'
@@ -60,11 +59,18 @@ type TerminatedMember = {
 export default function TerminatedMembersPage() {
   const [search, setSearch] = useState("")
   const [isActionLoading, setIsActionLoading] = useState(false)
+  const [isMirror, setIsMirror] = useState(false)
   const { user } = useUser()
   const db = useFirestore()
   const { toast } = useToast()
 
-  const isAdmin = user?.email === 'deydhritiman@gmail.com'
+  const isAdmin = user?.email === 'deydhritiman@gmail.com' && isMirror
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setIsMirror(window.self !== window.top)
+    }
+  }, [])
 
   const terminatedQuery = useMemoFirebase(() => {
     if (!db) return null;
@@ -174,7 +180,7 @@ export default function TerminatedMembersPage() {
           {isAdmin && (
             <Dialog>
               <DialogTrigger asChild>
-                <Button className="bg-red-500 text-white font-bold rounded-2xl h-14 px-10 flex gap-2 hover:bg-red-600 shadow-2xl shadow-red-500/20 mx-auto">
+                <Button className="bg-red-500 text-white font-bold rounded-2xl h-14 px-10 flex gap-2 hover:bg-secondary hover:text-white shadow-2xl shadow-red-500/20 mx-auto transition-all">
                   <Plus className="w-6 h-6" /> Add Termination Entry
                 </Button>
               </DialogTrigger>
@@ -234,7 +240,7 @@ export default function TerminatedMembersPage() {
                       <Select value={newMember.level} onValueChange={(val: any) => setNewMember({...newMember, level: val})}>
                         <SelectTrigger className="h-12 rounded-xl"><SelectValue /></SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="National">National Level</SelectItem>
+                          <SelectItem value="National">Central Council</SelectItem>
                           <SelectItem value="State">State Level</SelectItem>
                           <SelectItem value="District">District Level</SelectItem>
                         </SelectContent>
@@ -273,7 +279,7 @@ export default function TerminatedMembersPage() {
                   </div>
                 </div>
                 <DialogFooter>
-                  <Button onClick={handleAdd} disabled={isActionLoading} className="w-full bg-red-500 hover:bg-red-600 text-white h-12 rounded-xl">Publish Notice</Button>
+                  <Button onClick={handleAdd} disabled={isActionLoading} className="w-full bg-red-500 hover:bg-secondary text-white font-bold h-12 rounded-xl">Publish Notice</Button>
                 </DialogFooter>
               </DialogContent>
             </Dialog>
@@ -358,7 +364,7 @@ export default function TerminatedMembersPage() {
                                   </div>
                                   {member.level && (
                                     <Badge variant="outline" className="border-red-200 text-red-400 text-[9px] font-bold uppercase py-0">
-                                      {member.level}
+                                      {member.level === 'National' ? 'Central Council' : member.level}
                                     </Badge>
                                   )}
                                 </div>
@@ -432,7 +438,7 @@ export default function TerminatedMembersPage() {
                                         <Select value={editMember.level} onValueChange={(val: any) => setEditMember({...editMember, level: val})}>
                                           <SelectTrigger className="h-12 rounded-xl"><SelectValue /></SelectTrigger>
                                           <SelectContent>
-                                            <SelectItem value="National">National Level</SelectItem>
+                                            <SelectItem value="National">Central Council</SelectItem>
                                             <SelectItem value="State">State Level</SelectItem>
                                             <SelectItem value="District">District Level</SelectItem>
                                           </SelectContent>
@@ -466,7 +472,7 @@ export default function TerminatedMembersPage() {
                                       <Label>Reason</Label>
                                       <Textarea value={editMember.reason} onChange={e => setEditMember({...editMember, reason: e.target.value})} className="rounded-xl" />
                                     </div>
-                                    <Button onClick={handleUpdate} disabled={isActionLoading} className="w-full bg-primary text-primary-foreground h-12 rounded-xl hover:bg-secondary">
+                                    <Button onClick={handleUpdate} disabled={isActionLoading} className="w-full bg-primary text-white font-bold h-12 rounded-xl hover:bg-secondary transition-all">
                                       {isActionLoading ? <Loader2 className="animate-spin mr-2" /> : "Save Changes"}
                                     </Button>
                                   </div>
@@ -483,7 +489,7 @@ export default function TerminatedMembersPage() {
                                 <AlertDialogHeader><AlertDialogTitle>Remove Notice?</AlertDialogTitle></AlertDialogHeader>
                                 <div className="flex justify-end gap-3 mt-4">
                                   <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
-                                  <AlertDialogAction onClick={() => handleDelete(member.id)} className="bg-red-500 hover:bg-red-600 rounded-xl border-none">Remove</AlertDialogAction>
+                                  <AlertDialogAction onClick={() => handleDelete(member.id)} className="bg-red-500 hover:bg-red-600 rounded-xl border-none font-bold text-white transition-all">Remove</AlertDialogAction>
                                 </div>
                               </AlertDialogContent>
                             </AlertDialog>
