@@ -5,7 +5,7 @@ import React, { useState } from 'react'
 import Image from 'next/image'
 import { Footer } from '@/components/footer'
 import { PlaceHolderImages } from '@/lib/placeholder-images'
-import { Shield, Award, Plus, Edit, Trash2, Loader2, Upload, Globe, MapPin, ChevronRight } from 'lucide-react'
+import { Shield, Award, Plus, Edit, Trash2, Loader2, Upload, Globe, MapPin, ChevronRight, Users } from 'lucide-react'
 import { useCollection, useFirestore, useMemoFirebase, useUser } from '@/firebase'
 import { collection, query, orderBy, addDoc, deleteDoc, doc, updateDoc, serverTimestamp } from 'firebase/firestore'
 import { Button } from '@/components/ui/button'
@@ -289,22 +289,27 @@ export default function LeadershipPage() {
                           </div>
                         </div>
 
-                        {/* District Sub-Chapters */}
+                        {/* District Level Committees */}
                         {uniqueDistricts.length > 0 && (
-                          <div className="space-y-12 mt-16 pt-16 border-t border-slate-100 dark:border-slate-800">
-                             <div className="text-center">
-                                <h5 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em] flex items-center justify-center gap-2">
-                                   District Level Committees <ChevronRight className="w-3 h-3 text-accent" />
-                                </h5>
+                          <div className="space-y-12 mt-20 pt-20 border-t border-slate-100 dark:border-slate-800">
+                             <div className="text-center max-w-2xl mx-auto space-y-4">
+                                <div className="inline-flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-bold uppercase text-[10px] tracking-[0.3em]">
+                                   <Users className="w-4 h-4" />
+                                   District Level Committees
+                                </div>
+                                <h5 className="text-2xl md:text-3xl font-headline font-bold text-primary dark:text-white">Grassroots Vanguard</h5>
+                                <p className="text-sm md:text-base text-slate-500 dark:text-slate-400 leading-relaxed italic">
+                                  "Our District Committees form the vital local bridge between constitutional rights and citizen action, providing immediate intervention and legal oversight at the roots of our society."
+                                </p>
                              </div>
                              <div className="grid md:grid-cols-2 gap-12">
                                 {uniqueDistricts.map(dist => (
-                                  <div key={dist} className="bg-slate-50 dark:bg-slate-950/50 p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 flex flex-col items-center transition-all hover:shadow-lg hover:-translate-y-1">
-                                     <div className="flex items-center gap-2 mb-8 text-primary dark:text-accent font-bold uppercase text-[10px] tracking-widest bg-white dark:bg-slate-900 px-4 py-1.5 rounded-full shadow-sm border border-slate-100 dark:border-slate-800">
-                                        <MapPin className="w-3 h-3 text-accent" />
-                                        {dist} District
+                                  <div key={dist} className="bg-slate-50 dark:bg-slate-950/50 p-8 md:p-12 rounded-[3rem] border border-slate-100 dark:border-slate-800 flex flex-col items-center transition-all hover:shadow-2xl hover:bg-white dark:hover:bg-slate-900 group/district">
+                                     <div className="flex items-center gap-2 mb-10 text-primary dark:text-accent font-bold uppercase text-[11px] tracking-[0.2em] bg-white dark:bg-slate-900 px-6 py-2 rounded-full shadow-md border border-slate-100 dark:border-slate-800 group-hover/district:scale-110 transition-transform">
+                                        <MapPin className="w-3.5 h-3.5 text-accent" />
+                                        {dist} District Cell
                                      </div>
-                                     <div className="flex flex-wrap justify-center gap-6">
+                                     <div className="flex flex-wrap justify-center gap-8">
                                         {districtLeaders.filter(dl => dl.districtName === dist).map(dl => (
                                           <LeaderCard 
                                             key={dl.id} 
