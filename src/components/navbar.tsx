@@ -40,16 +40,17 @@ export function Navbar() {
       setIsIframe(window.self !== window.top)
       
       const handleHashChange = () => {
-        setActiveHash(window.location.hash)
+        // Normalize hash by removing the '#' prefix
+        setActiveHash(window.location.hash.replace('#', ''))
       }
       
       window.addEventListener('hashchange', handleHashChange)
-      // Capture initial hash
-      setActiveHash(window.location.hash)
+      // Sync on mount and pathname change
+      handleHashChange()
       
       return () => window.removeEventListener('hashchange', handleHashChange)
     }
-  }, [])
+  }, [pathname])
 
   // Do not render the public navbar if viewed within a mirror/iframe
   if (isIframe) return null
@@ -68,16 +69,17 @@ export function Navbar() {
 
       <nav className="flex-1 flex items-center overflow-x-auto no-scrollbar gap-1 md:gap-2 px-2">
         {publicLinks.map((link) => {
-          const isHashLink = link.href.startsWith('/#')
-          const linkHash = isHashLink ? link.href.substring(1) : ''
+          const isHashLink = link.href.includes('/#')
+          const linkHash = isHashLink ? link.href.split('#')[1] : ''
           
-          // Logic: 
-          // 1. If it's a hash link (e.g. /#grievances), it's active if on / and hash matches.
-          // 2. If it's Home (/), it's active if on / and NO hash is present.
-          // 3. Otherwise standard path matching.
-          const isActive = isHashLink 
-            ? (pathname === '/' && activeHash === linkHash)
-            : (pathname === link.href && (link.href !== '/' || activeHash === '')) || (link.href !== '/' && pathname.startsWith(link.href))
+          let isActive = false
+          if (isHashLink) {
+            isActive = pathname === '/' && activeHash === linkHash
+          } else if (link.href === '/') {
+            isActive = pathname === '/' && activeHash === ''
+          } else {
+            isActive = pathname === link.href || pathname.startsWith(link.href)
+          }
 
           return (
             <Link 
@@ -86,7 +88,7 @@ export function Navbar() {
               className={cn(
                 "whitespace-nowrap flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[13px] font-bold transition-all",
                 isActive 
-                  ? "bg-accent text-white shadow-sm" 
+                  ? "bg-accent text-white shadow-sm ring-1 ring-accent/20" 
                   : "text-muted-foreground hover:text-primary hover:bg-muted"
               )}
             >

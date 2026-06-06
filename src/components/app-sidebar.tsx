@@ -75,13 +75,13 @@ export function AppSidebar() {
   React.useEffect(() => {
     if (typeof window !== 'undefined') {
       const handleHashChange = () => {
-        setActiveHash(window.location.hash)
+        setActiveHash(window.location.hash.replace('#', ''))
       }
       window.addEventListener('hashchange', handleHashChange)
-      setActiveHash(window.location.hash)
+      handleHashChange()
       return () => window.removeEventListener('hashchange', handleHashChange)
     }
-  }, [])
+  }, [pathname])
 
   return (
     <Sidebar collapsible="icon" className="border-r bg-sidebar">
@@ -104,14 +104,21 @@ export function AppSidebar() {
           </SidebarGroupLabel>
           <SidebarMenu>
             {links.map((link) => {
-              const isHashLink = !isAdminPortal && link.href.startsWith('/#')
-              const linkHash = isHashLink ? link.href.substring(1) : ''
+              const isHashLink = !isAdminPortal && link.href.includes('/#')
+              const linkHash = isHashLink ? link.href.split('#')[1] : ''
               
-              const isActive = isHashLink 
-                ? (pathname === '/' && activeHash === linkHash)
-                : isAdminPortal 
-                  ? (pathname === link.href || (link.href !== '/' && pathname.startsWith(link.href)))
-                  : (pathname === link.href && (link.href !== '/' || activeHash === '')) || (link.href !== '/' && pathname.startsWith(link.href))
+              let isActive = false
+              if (isAdminPortal) {
+                isActive = pathname === link.href || (link.href !== '/' && pathname.startsWith(link.href))
+              } else {
+                if (isHashLink) {
+                  isActive = pathname === '/' && activeHash === linkHash
+                } else if (link.href === '/') {
+                  isActive = pathname === '/' && activeHash === ''
+                } else {
+                  isActive = pathname === link.href || pathname.startsWith(link.href)
+                }
+              }
 
               const isPublicView = link.name === 'Public Site View'
               
@@ -146,7 +153,7 @@ export function AppSidebar() {
         {!isAdminPortal && (
           <div className="group-data-[collapsible=icon]:hidden">
             <DonationDialog>
-              <Button className="w-full bg-accent text-primary font-bold rounded-xl gap-2 h-11 hover:bg-secondary hover:text-white transition-all">
+              <Button className="w-full bg-accent text-white font-bold rounded-xl gap-2 h-11 hover:bg-secondary transition-all">
                 <HeartHandshake className="w-4 h-4" /> Support Cause
               </Button>
             </DonationDialog>

@@ -325,7 +325,7 @@ export default function MeetingsPage() {
             {isAdmin && (
               <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button className="bg-accent text-white font-bold rounded-2xl h-14 px-10 flex gap-2 hover:bg-secondary hover:text-white shadow-2xl shadow-accent/20 mx-auto transform hover:scale-105 transition-all">
+                  <Button className="bg-accent text-white font-bold rounded-2xl h-14 px-10 flex gap-2 hover:bg-secondary shadow-2xl shadow-accent/20 mx-auto transform hover:scale-105 transition-all">
                     <Plus className="w-6 h-6" /> Live Editor: Publish New Event
                   </Button>
                 </DialogTrigger>
@@ -454,7 +454,7 @@ export default function MeetingsPage() {
                     </div>
                   </div>
                   <DialogFooter>
-                    <Button onClick={handleAddMeeting} disabled={isActionLoading} className="w-full bg-accent text-white font-bold h-12 rounded-xl text-lg shadow-xl shadow-accent/20 hover:bg-secondary hover:text-white transition-all">
+                    <Button onClick={handleAddMeeting} disabled={isActionLoading} className="w-full bg-accent text-white font-bold h-12 rounded-xl text-lg shadow-xl shadow-accent/20 hover:bg-secondary transition-all">
                       {isActionLoading ? <Loader2 className="animate-spin" /> : "Publish to Archive"}
                     </Button>
                   </DialogFooter>
@@ -477,7 +477,7 @@ export default function MeetingsPage() {
                   className={cn(
                     "rounded-full px-6 font-bold transition-all border-slate-200 dark:border-slate-700",
                     filter === lvl.value 
-                      ? "bg-accent text-white shadow-lg border-accent hover:bg-secondary hover:text-white" 
+                      ? "bg-accent text-white shadow-lg border-accent hover:bg-secondary" 
                       : "text-primary dark:text-slate-300 hover:bg-secondary hover:text-white hover:border-secondary"
                   )}
                 >
@@ -633,7 +633,7 @@ export default function MeetingsPage() {
                               </div>
                             )}
                             <DialogFooter>
-                              <Button onClick={handleUpdateMeeting} disabled={isActionLoading} className="w-full bg-primary text-white h-12 rounded-xl font-bold hover:bg-secondary hover:text-white">Save Changes</Button>
+                              <Button onClick={handleUpdateMeeting} disabled={isActionLoading} className="w-full bg-primary text-primary-foreground h-12 rounded-xl font-bold hover:bg-secondary">Save Changes</Button>
                             </DialogFooter>
                           </DialogContent>
                         </Dialog>
