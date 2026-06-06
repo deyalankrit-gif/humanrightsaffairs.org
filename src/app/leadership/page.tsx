@@ -87,8 +87,8 @@ export default function LeadershipPage() {
 
   const { data: firestoreLeaders, loading: dataLoading } = useCollection(leadersQuery);
 
-  const [activeState, setActiveState] = useState<string | null>(null)
-  const [activeDistrict, setActiveDistrict] = useState<string | null>(null)
+  const [activeState, setActiveState] = useState<string | null>("West Bengal")
+  const [activeDistrict, setActiveDistrict] = useState<string | null>("Howrah")
   const [editLeader, setEditLeader] = useState<any>(null)
   const [newLeader, setNewMember] = useState({
     name: '',
@@ -102,19 +102,8 @@ export default function LeadershipPage() {
 
   const leaders = (firestoreLeaders || []) as Leader[]
   
-  const regionsWithLeadership = Array.from(new Set([
-    ...leaders.filter(l => l.level === 'State').map(l => l.parentRegion),
-    ...leaders.filter(l => l.level === 'District').map(l => l.parentRegion)
-  ])).filter(Boolean) as string[]
-  
-  regionsWithLeadership.sort()
-
-  // Initialize activeState
-  useEffect(() => {
-    if (!activeState && regionsWithLeadership.length > 0) {
-      setActiveState(regionsWithLeadership[0])
-    }
-  }, [regionsWithLeadership, activeState])
+  const allStates = Object.keys(INDIA_DATA).sort()
+  const allDistrictsInState = activeState ? INDIA_DATA[activeState] : []
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, isEdit: boolean) => {
     const file = e.target.files?.[0]
@@ -168,7 +157,9 @@ export default function LeadershipPage() {
   }
 
   const centralTeam = leaders.filter(l => l.level === 'Central')
-  const states = Object.keys(INDIA_DATA).sort()
+  
+  const activeStateLeaders = leaders.filter(l => l.level === 'State' && l.parentRegion === activeState)
+  const activeDistrictLeaders = leaders.filter(l => l.level === 'District' && l.parentRegion === activeState && l.districtName === activeDistrict)
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
@@ -216,7 +207,7 @@ export default function LeadershipPage() {
                       <Label className="flex items-center gap-2"><Globe className="w-3 h-3 text-accent" /> State / UT</Label>
                       <Select value={newLeader.parentRegion} onValueChange={(val) => setNewMember({...newLeader, parentRegion: val, districtName: ''})}>
                         <SelectTrigger className="h-11 rounded-xl"><SelectValue placeholder="Choose State" /></SelectTrigger>
-                        <SelectContent className="max-h-60">{states.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+                        <SelectContent className="max-h-60">{allStates.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
                       </Select>
                     </div>
                   )}
@@ -271,16 +262,23 @@ export default function LeadershipPage() {
                       <Shield className="w-6 h-6 text-emerald-500" />
                       <span>Regional Chapters</span>
                     </div>
-                    {regionsWithLeadership.length > 0 && (
-                      <Select value={activeState || ''} onValueChange={(val) => { setActiveState(val); setActiveDistrict(null); }}>
-                        <SelectTrigger className="w-[180px] md:w-[220px] h-10 rounded-full bg-white dark:bg-slate-900 border-emerald-100 shadow-sm font-bold text-xs">
-                          <SelectValue placeholder="Select State/UT" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {regionsWithLeadership.map(r => <SelectItem key={r} value={r} className="font-bold text-xs">{r}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
-                    )}
+                    <Select value={activeState || ''} onValueChange={(val) => { 
+                      setActiveState(val); 
+                      // If state is WB, set Howrah, otherwise set first district or null
+                      if (val === 'West Bengal') {
+                        setActiveDistrict('Howrah')
+                      } else {
+                        const stateDistricts = INDIA_DATA[val] || []
+                        setActiveDistrict(stateDistricts.length > 0 ? stateDistricts[0] : null)
+                      }
+                    }}>
+                      <SelectTrigger className="w-[180px] md:w-[220px] h-10 rounded-full bg-white dark:bg-slate-900 border-emerald-100 shadow-sm font-bold text-xs">
+                        <SelectValue placeholder="Select State/UT" />
+                      </SelectTrigger>
+                      <SelectContent className="max-h-80">
+                        {allStates.map(r => <SelectItem key={r} value={r} className="font-bold text-xs">{r}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
                 
@@ -293,74 +291,71 @@ export default function LeadershipPage() {
                           {activeState} Chapter
                         </div>
                         
-                        <div className="flex flex-wrap justify-center gap-10">
-                          {leaders.filter(l => l.level === 'State' && l.parentRegion === activeState).map(leader => (
-                            <LeaderCard 
-                              key={leader.id} 
-                              leader={leader} 
-                              isAdmin={isAdmin} 
-                              onEdit={setEditLeader} 
-                              onDelete={handleDelete} 
-                            />
-                          ))}
-                        </div>
+                        {activeStateLeaders.length > 0 ? (
+                          <div className="flex flex-wrap justify-center gap-10">
+                            {activeStateLeaders.map(leader => (
+                              <LeaderCard 
+                                key={leader.id} 
+                                leader={leader} 
+                                isAdmin={isAdmin} 
+                                onEdit={setEditLeader} 
+                                onDelete={handleDelete} 
+                              />
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] animate-pulse">No commissioned chapter leaders recorded for this region.</p>
+                        )}
                       </div>
 
                       {/* District Level Committees */}
-                      {(() => {
-                        const districtLeaders = leaders.filter(l => l.level === 'District' && l.parentRegion === activeState);
-                        const uniqueDistricts = Array.from(new Set(districtLeaders.map(l => l.districtName))).filter(Boolean) as string[];
-                        uniqueDistricts.sort();
-                        
-                        if (uniqueDistricts.length === 0) return null;
+                      <div className="space-y-12 mt-20 pt-20 border-t border-slate-100 dark:border-slate-800">
+                         <div className="flex flex-col items-center gap-6">
+                            <div className="flex items-center gap-4">
+                              <div className="inline-flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-bold uppercase text-[10px] tracking-[0.3em]">
+                                 <Users className="w-4 h-4" />
+                                 District Level Committee
+                              </div>
+                              <Select value={activeDistrict || ''} onValueChange={setActiveDistrict}>
+                                <SelectTrigger className="w-[180px] h-8 rounded-full bg-slate-50 dark:bg-slate-950 border-indigo-100 text-[10px] font-bold shadow-inner">
+                                  <SelectValue placeholder="Select District" />
+                                </SelectTrigger>
+                                <SelectContent className="max-h-80">
+                                  {allDistrictsInState.map(d => <SelectItem key={d} value={d} className="text-[10px] font-bold">{d}</SelectItem>)}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                         </div>
 
-                        // Auto-select first district if none selected
-                        if (!activeDistrict || !uniqueDistricts.includes(activeDistrict)) {
-                          setActiveDistrict(uniqueDistricts[0]);
-                        }
-
-                        return (
-                          <div className="space-y-12 mt-20 pt-20 border-t border-slate-100 dark:border-slate-800">
-                             <div className="flex flex-col items-center gap-6">
-                                <div className="flex items-center gap-4">
-                                  <div className="inline-flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-bold uppercase text-[10px] tracking-[0.3em]">
-                                     <Users className="w-4 h-4" />
-                                     District Level Committee
-                                  </div>
-                                  <Select value={activeDistrict || ''} onValueChange={setActiveDistrict}>
-                                    <SelectTrigger className="w-[180px] h-8 rounded-full bg-slate-50 dark:bg-slate-950 border-indigo-100 text-[10px] font-bold shadow-inner">
-                                      <SelectValue placeholder="Select District" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      {uniqueDistricts.map(d => <SelectItem key={d} value={d} className="text-[10px] font-bold">{d}</SelectItem>)}
-                                    </SelectContent>
-                                  </Select>
+                         {activeDistrict ? (
+                           <div className="bg-slate-50 dark:bg-slate-950/50 p-8 md:p-12 rounded-[3rem] border border-slate-100 dark:border-slate-800 flex flex-col items-center transition-all hover:shadow-2xl hover:bg-white dark:hover:bg-slate-900 group/district animate-in slide-in-from-bottom-4 duration-500">
+                              <div className="flex items-center gap-2 mb-10 text-primary dark:text-accent font-bold uppercase text-[11px] tracking-[0.2em] bg-white dark:bg-slate-900 px-6 py-2 rounded-full shadow-md border border-slate-100 dark:border-slate-800 group-hover/district:scale-110 transition-transform">
+                                 <MapPin className="w-3.5 h-3.5 text-accent" />
+                                 {activeDistrict} Cell
+                              </div>
+                              {activeDistrictLeaders.length > 0 ? (
+                                <div className="flex flex-wrap justify-center gap-8">
+                                   {activeDistrictLeaders.map(dl => (
+                                     <LeaderCard 
+                                       key={dl.id} 
+                                       leader={dl} 
+                                       variant="small" 
+                                       isAdmin={isAdmin} 
+                                       onEdit={setEditLeader} 
+                                       onDelete={handleDelete} 
+                                     />
+                                   ))}
                                 </div>
-                             </div>
-
-                             {activeDistrict && (
-                               <div className="bg-slate-50 dark:bg-slate-950/50 p-8 md:p-12 rounded-[3rem] border border-slate-100 dark:border-slate-800 flex flex-col items-center transition-all hover:shadow-2xl hover:bg-white dark:hover:bg-slate-900 group/district animate-in slide-in-from-bottom-4 duration-500">
-                                  <div className="flex items-center gap-2 mb-10 text-primary dark:text-accent font-bold uppercase text-[11px] tracking-[0.2em] bg-white dark:bg-slate-900 px-6 py-2 rounded-full shadow-md border border-slate-100 dark:border-slate-800 group-hover/district:scale-110 transition-transform">
-                                     <MapPin className="w-3.5 h-3.5 text-accent" />
-                                     {activeDistrict} Cell
-                                  </div>
-                                  <div className="flex flex-wrap justify-center gap-8">
-                                     {districtLeaders.filter(dl => dl.districtName === activeDistrict).map(dl => (
-                                       <LeaderCard 
-                                         key={dl.id} 
-                                         leader={dl} 
-                                         variant="small" 
-                                         isAdmin={isAdmin} 
-                                         onEdit={setEditLeader} 
-                                         onDelete={handleDelete} 
-                                       />
-                                     ))}
-                                  </div>
-                               </div>
-                             )}
-                          </div>
-                        );
-                      })()}
+                              ) : (
+                                <p className="text-slate-400 font-bold uppercase tracking-widest text-[9px] animate-pulse">No commissioned district officials recorded for {activeDistrict}.</p>
+                              )}
+                           </div>
+                         ) : (
+                           <div className="text-center py-10 opacity-50">
+                              <p className="text-[10px] font-bold uppercase tracking-[0.2em]">Select a district to view committee officials.</p>
+                           </div>
+                         )}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -386,11 +381,15 @@ export default function LeadershipPage() {
               <Input value={editLeader.title} onChange={e => setEditLeader({...editLeader, title: e.target.value})} placeholder="Title" />
               <div className="grid grid-cols-2 gap-4">
                 <Select value={editLeader.level} onValueChange={(val: any) => setEditLeader({...editLeader, level: val, parentRegion: '', districtName: ''})}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent><SelectItem value="Central">Central</SelectItem><SelectItem value="State">State</SelectItem><SelectItem value="District">District</SelectItem></SelectContent>
+                  <SelectTrigger><SelectValue placeholder="Level" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Central">Central</SelectItem>
+                    <SelectItem value="State">State</SelectItem>
+                    <SelectItem value="District">District</SelectItem>
+                  </SelectContent>
                 </Select>
                 <Select value={editLeader.gender} onValueChange={(val: any) => setEditLeader({...editLeader, gender: val})}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder="Gender" /></SelectTrigger>
                   <SelectContent><SelectItem value="male">Male</SelectItem><SelectItem value="female">Female</SelectItem></SelectContent>
                 </Select>
               </div>
@@ -399,7 +398,7 @@ export default function LeadershipPage() {
                   <Label>State / UT</Label>
                   <Select value={editLeader.parentRegion} onValueChange={(val) => setEditLeader({...editLeader, parentRegion: val, districtName: ''})}>
                     <SelectTrigger><SelectValue placeholder="Choose State" /></SelectTrigger>
-                    <SelectContent className="max-h-60">{states.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+                    <SelectContent className="max-h-60">{allStates.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
                   </Select>
                 </div>
               )}
