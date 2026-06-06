@@ -17,7 +17,9 @@ import {
   Plus, 
   Upload,
   Globe,
-  Calendar as CalendarIcon
+  Calendar as CalendarIcon,
+  Heart,
+  Home
 } from 'lucide-react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -68,6 +70,11 @@ type Member = {
   joiningDate?: string
   expiryDate?: string
   membershipDuration?: string
+  bloodGroup?: string
+  address?: string
+  postOffice?: string
+  policeStation?: string
+  pinCode?: string
 }
 
 export default function MembersPage() {
@@ -96,7 +103,12 @@ export default function MembersPage() {
     imageId: '',
     joiningDate: '',
     expiryDate: '',
-    membershipDuration: '1 Year'
+    membershipDuration: '1 Year',
+    bloodGroup: '',
+    address: '',
+    postOffice: '',
+    policeStation: '',
+    pinCode: ''
   })
 
   useEffect(() => {
@@ -188,7 +200,12 @@ export default function MembersPage() {
         imageId: '',
         joiningDate: '',
         expiryDate: '',
-        membershipDuration: '1 Year'
+        membershipDuration: '1 Year',
+        bloodGroup: '',
+        address: '',
+        postOffice: '',
+        policeStation: '',
+        pinCode: ''
       })
     } catch (error: any) {
       toast({ variant: "destructive", title: "System Error", description: error.message })
@@ -251,166 +268,142 @@ export default function MembersPage() {
                   <Plus className="w-6 h-6" /> Live Editor: Commission New Membership
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-md bg-white dark:bg-slate-900 rounded-[2rem] border-none shadow-2xl max-h-[90vh] overflow-y-auto">
+              <DialogContent className="max-w-2xl bg-white dark:bg-slate-900 rounded-[2rem] border-none shadow-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle className="text-2xl font-headline font-bold text-primary dark:text-white">New Member Record</DialogTitle>
                 </DialogHeader>
-                <div className="space-y-4 py-4">
-                  <div className="space-y-2">
-                    <Label>Profile Picture</Label>
-                    <div className="flex flex-col items-center gap-4 p-4 border-2 border-dashed rounded-2xl">
-                      <div className="relative w-32 h-32 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden border">
-                        <Image 
-                          src={newMember.imageId?.startsWith('data:') ? newMember.imageId : (newMember.gender === 'female' ? '/dummy w.png' : '/dummy m.png')} 
-                          alt="Preview" 
-                          fill 
-                          className="object-cover"
-                        />
-                      </div>
-                      <Button variant="outline" className="w-full relative h-12 rounded-xl">
-                        <Upload className="w-4 h-4 mr-2" /> Upload Photo
+                <div className="space-y-6 py-4">
+                  {/* Photo & Basic Info */}
+                  <div className="grid md:grid-cols-3 gap-6 items-start">
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="relative w-32 h-32 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden border-2 border-dashed border-slate-300">
+                        {newMember.imageId ? (
+                          <Image src={newMember.imageId} alt="Preview" fill className="object-cover" />
+                        ) : (
+                          <div className="flex items-center justify-center h-full"><User className="w-10 h-10 text-slate-300" /></div>
+                        )}
                         <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={handleFileChange} />
-                      </Button>
+                      </div>
+                      <Label className="text-[10px] uppercase font-bold text-slate-400">Profile Photo</Label>
                     </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Full Name</Label>
-                    <Input placeholder="e.g. Sanchita Banerjee" value={newMember.name} onChange={(e) => setNewMember({...newMember, name: e.target.value})} />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>Member ID</Label>
-                      <Input placeholder="e.g. M1024" value={newMember.memberId} onChange={(e) => setNewMember({...newMember, memberId: e.target.value})} />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Operational Level</Label>
-                      <Select value={newMember.level} onValueChange={(val) => setNewMember({...newMember, level: val as any, stateName: '', districtName: ''})}>
-                        <SelectTrigger><SelectValue placeholder="Select Level" /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="National">National Level</SelectItem>
-                          <SelectItem value="State">State Level</SelectItem>
-                          <SelectItem value="District">District Level</SelectItem>
-                        </SelectContent>
-                      </Select>
+                    <div className="md:col-span-2 space-y-4">
+                      <div className="space-y-2">
+                        <Label>Full Name *</Label>
+                        <Input placeholder="Member Name" value={newMember.name} onChange={e => setNewMember({...newMember, name: e.target.value})} />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label>Gender</Label>
+                          <Select value={newMember.gender} onValueChange={(val: any) => setNewMember({...newMember, gender: val})}>
+                            <SelectTrigger><SelectValue /></SelectTrigger>
+                            <SelectContent><SelectItem value="male">Male</SelectItem><SelectItem value="female">Female</SelectItem></SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Blood Group</Label>
+                          <Select value={newMember.bloodGroup} onValueChange={val => setNewMember({...newMember, bloodGroup: val})}>
+                            <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
+                            <SelectContent>
+                              {["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].map(bg => <SelectItem key={bg} value={bg}>{bg}</SelectItem>)}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
                     </div>
                   </div>
 
-                  <div className="bg-accent/5 p-4 rounded-2xl border border-accent/20 space-y-4">
-                    <div className="space-y-2">
-                      <Label className="text-accent font-bold text-[10px] uppercase">Membership Duration</Label>
-                      <Select value={newMember.membershipDuration} onValueChange={(val) => setNewMember({...newMember, membershipDuration: val})}>
-                        <SelectTrigger className="h-11 rounded-xl bg-white dark:bg-slate-800 border-accent/30">
-                          <SelectValue placeholder="Select Duration" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="1 Year">1 Year Term</SelectItem>
-                          <SelectItem value="2 Years">2 Years Term</SelectItem>
-                          <SelectItem value="3 Years">3 Years Term</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
+                  {/* ID & Term Block */}
+                  <div className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-3xl space-y-4 border border-slate-100 dark:border-slate-800">
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label>Membership Issue Date</Label>
+                        <Label>Member ID *</Label>
+                        <Input placeholder="M-XXXX" value={newMember.memberId} onChange={e => setNewMember({...newMember, memberId: e.target.value})} />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Designation</Label>
+                        <Input placeholder="e.g. Secretary" value={newMember.designation} onChange={e => setNewMember({...newMember, designation: e.target.value})} />
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="space-y-2">
+                        <Label>Duration</Label>
+                        <Select value={newMember.membershipDuration} onValueChange={val => setNewMember({...newMember, membershipDuration: val})}>
+                          <SelectTrigger><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="1 Year">1 Year</SelectItem>
+                            <SelectItem value="2 Years">2 Years</SelectItem>
+                            <SelectItem value="3 Years">3 Years</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Issue Date *</Label>
                         <Popover>
                           <PopoverTrigger asChild>
-                            <Button variant="outline" className={cn("w-full justify-start text-left font-normal h-11 rounded-xl", !newMember.joiningDate && "text-muted-foreground")}>
+                            <Button variant="outline" className={cn("w-full justify-start text-left font-normal h-10 rounded-xl", !newMember.joiningDate && "text-muted-foreground")}>
                               <CalendarIcon className="mr-2 h-4 w-4" />
                               {newMember.joiningDate ? newMember.joiningDate : "Pick a date"}
                             </Button>
                           </PopoverTrigger>
                           <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar
-                              mode="single"
-                              selected={parseMemberDate(newMember.joiningDate)}
-                              onSelect={(date) => setNewMember({...newMember, joiningDate: date ? format(date, "PPP") : ''})}
-                              initialFocus
-                            />
+                            <Calendar mode="single" selected={parseMemberDate(newMember.joiningDate)} onSelect={(date) => setNewMember({...newMember, joiningDate: date ? format(date, "PPP") : ''})} initialFocus />
                           </PopoverContent>
                         </Popover>
                       </div>
                       <div className="space-y-2">
-                        <Label>Membership Expiry Date</Label>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <Button variant="outline" className={cn("w-full justify-start text-left font-normal h-11 rounded-xl bg-slate-50 dark:bg-slate-900 border-dashed", !newMember.expiryDate && "text-muted-foreground")}>
-                              <CalendarIcon className="mr-2 h-4 w-4" />
-                              {newMember.expiryDate ? newMember.expiryDate : "Auto-calculated"}
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar
-                              mode="single"
-                              selected={parseMemberDate(newMember.expiryDate)}
-                              onSelect={(date) => setNewMember({...newMember, expiryDate: date ? format(date, "PPP") : ''})}
-                              initialFocus
-                            />
-                          </PopoverContent>
-                        </Popover>
+                        <Label>Expiry Date</Label>
+                        <Input disabled value={newMember.expiryDate} className="bg-slate-100/50 dark:bg-slate-900/50" />
                       </div>
                     </div>
                   </div>
 
-                  {(newMember.level === 'State' || newMember.level === 'District') && (
-                    <div className="space-y-4 pt-2 animate-in fade-in slide-in-from-top-2">
+                  {/* Contact & Location Block */}
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                       <div className="space-y-2"><Label>Email</Label><Input type="email" value={newMember.email} onChange={e => setNewMember({...newMember, email: e.target.value})} /></div>
+                       <div className="space-y-2"><Label>Phone</Label><Input value={newMember.phone} onChange={e => setNewMember({...newMember, phone: e.target.value})} /></div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Full Address</Label>
+                      <Input placeholder="House No, Village, Lane" value={newMember.address} onChange={e => setNewMember({...newMember, address: e.target.value})} />
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="space-y-2"><Label>Post Office</Label><Input value={newMember.postOffice} onChange={e => setNewMember({...newMember, postOffice: e.target.value})} /></div>
+                      <div className="space-y-2"><Label>Police Station</Label><Input value={newMember.policeStation} onChange={e => setNewMember({...newMember, policeStation: e.target.value})} /></div>
+                      <div className="space-y-2"><Label>PIN Code</Label><Input value={newMember.pinCode} onChange={e => setNewMember({...newMember, pinCode: e.target.value})} /></div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label className="flex items-center gap-2"><Globe className="w-3 h-3 text-accent" /> State Chapter</Label>
-                        <Select value={newMember.stateName} onValueChange={(val) => setNewMember({...newMember, stateName: val, districtName: ''})}>
-                          <SelectTrigger><SelectValue placeholder="Select State" /></SelectTrigger>
-                          <SelectContent className="max-h-60">
-                            {states.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-                          </SelectContent>
+                        <Label>Operational Level</Label>
+                        <Select value={newMember.level} onValueChange={(val: any) => setNewMember({...newMember, level: val, stateName: '', districtName: ''})}>
+                          <SelectTrigger><SelectValue /></SelectTrigger>
+                          <SelectContent><SelectItem value="National">National</SelectItem><SelectItem value="State">State</SelectItem><SelectItem value="District">District</SelectItem></SelectContent>
                         </Select>
                       </div>
-                      {newMember.level === 'District' && newMember.stateName && (
-                        <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
-                          <Label className="flex items-center gap-2"><MapPin className="w-3 h-3 text-accent" /> District</Label>
-                          <Select value={newMember.districtName} onValueChange={(val) => setNewMember({...newMember, districtName: val})}>
-                            <SelectTrigger><SelectValue placeholder="Select District" /></SelectTrigger>
-                            <SelectContent className="max-h-60">
-                              {(INDIA_DATA[newMember.stateName] || []).map(d => (
-                                <SelectItem key={d} value={d}>{d}</SelectItem>
-                              ))}
-                            </SelectContent>
+                      {(newMember.level === 'State' || newMember.level === 'District') && (
+                        <div className="space-y-2">
+                          <Label>State</Label>
+                          <Select value={newMember.stateName} onValueChange={val => setNewMember({...newMember, stateName: val, districtName: ''})}>
+                            <SelectTrigger><SelectValue placeholder="State" /></SelectTrigger>
+                            <SelectContent className="max-h-60">{states.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
                           </Select>
                         </div>
                       )}
                     </div>
-                  )}
-                  <div className="space-y-2">
-                    <Label>Designation</Label>
-                    <Input placeholder="e.g. State Secretary" value={newMember.designation} onChange={(e) => setNewMember({...newMember, designation: e.target.value})} />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>Gender</Label>
-                      <Select value={newMember.gender} onValueChange={(val: any) => setNewMember({...newMember, gender: val})}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="male">Male</SelectItem>
-                          <SelectItem value="female">Female</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Status</Label>
-                      <Select value={newMember.status} onValueChange={(val) => setNewMember({...newMember, status: val})}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Active">Active</SelectItem>
-                          <SelectItem value="Inactive">Inactive</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Official Email</Label>
-                    <Input type="email" placeholder="name@hrat-india.org" value={newMember.email} onChange={(e) => setNewMember({...newMember, email: e.target.value})} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Contact Phone</Label>
-                    <Input placeholder="+91 XXXXX XXXXX" value={newMember.phone} onChange={(e) => setNewMember({...newMember, phone: e.target.value})} />
+
+                    {newMember.level === 'District' && newMember.stateName && (
+                      <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
+                        <Label>District</Label>
+                        <Select value={newMember.districtName} onValueChange={val => setNewMember({...newMember, districtName: val})}>
+                          <SelectTrigger><SelectValue placeholder="District" /></SelectTrigger>
+                          <SelectContent className="max-h-60">{(INDIA_DATA[newMember.stateName] || []).map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
+                        </Select>
+                      </div>
+                    )}
                   </div>
                 </div>
                 <DialogFooter>
