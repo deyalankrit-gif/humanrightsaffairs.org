@@ -634,7 +634,7 @@ export default function MeetingsPage() {
                               </div>
                             )}
                             <DialogFooter>
-                              <Button onClick={handleUpdateMeeting} disabled={isActionLoading} className="w-full bg-primary text-white h-12 rounded-xl font-bold">Save Changes</Button>
+                              <Button onClick={handleUpdateMeeting} disabled={isActionLoading} className="w-full bg-primary text-primary-foreground h-12 rounded-xl font-bold">Save Changes</Button>
                             </DialogFooter>
                           </DialogContent>
                         </Dialog>
@@ -720,12 +720,17 @@ export default function MeetingsPage() {
                           </Button>
                         </DialogTrigger>
                         <DialogContent className="max-w-2xl rounded-[2.5rem] bg-white dark:bg-slate-950 max-h-[90vh] overflow-y-auto border-none shadow-2xl">
-                          <DialogHeader>
-                            <DialogTitle className="text-3xl font-headline font-bold text-primary dark:text-white">{meeting.title}</DialogTitle>
-                            <DialogDescription className="font-bold text-accent uppercase tracking-widest text-xs">
-                              {meeting.level === 'National' ? 'Central Council' : meeting.level} Assembly Details
-                            </DialogDescription>
+                          <DialogHeader className="sr-only">
+                            <DialogTitle>{meeting.title} - Details & Minutes</DialogTitle>
+                            <DialogDescription>A detailed view of the organizational assembly's agenda, attendees, and finalized minutes.</DialogDescription>
                           </DialogHeader>
+                          
+                          <div className="header-visible mb-6">
+                            <h2 className="text-3xl font-headline font-bold text-primary dark:text-white">{meeting.title}</h2>
+                            <p className="font-bold text-accent uppercase tracking-widest text-xs">
+                              {meeting.level === 'National' ? 'Central Council' : meeting.level} Assembly Details
+                            </p>
+                          </div>
                           
                           <div className="py-6 space-y-8">
                             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">

@@ -108,7 +108,7 @@ export function KnowledgeCenter() {
           <Button 
             variant="outline" 
             onClick={scrollToSearch}
-            className="border-primary text-primary hover:bg-primary hover:text-white dark:border-slate-700 dark:text-slate-300 w-full md:w-auto font-bold"
+            className="border-primary text-primary hover:bg-primary hover:text-primary-foreground dark:border-slate-700 dark:text-slate-300 w-full md:w-auto font-bold"
           >
             View All Documentation
           </Button>
@@ -139,7 +139,7 @@ export function KnowledgeCenter() {
                   Read More <ExternalLink className="w-3 h-3 md:w-4 md:h-4" />
                 </Button>
                 {guide.id === 'manuals' && (
-                  <Button size="sm" onClick={() => window.open('https://bprd.nic.in/uploads/pdf/BNS%20Book_After%20Correction.pdf', '_blank')} className="bg-primary text-white dark:bg-slate-100 dark:text-primary ml-auto text-xs h-8 md:h-9">
+                  <Button size="sm" onClick={() => window.open('https://bprd.nic.in/uploads/pdf/BNS%20Book_After%20Correction.pdf', '_blank')} className="bg-primary text-primary-foreground dark:bg-slate-100 dark:text-primary ml-auto text-xs h-8 md:h-9">
                     <Download className="w-3 h-3 md:w-4 md:h-4 mr-2" /> Download
                   </Button>
                 )}
@@ -188,7 +188,7 @@ export function KnowledgeCenter() {
               <div className="flex flex-col sm:flex-row gap-4 pt-4">
                 <Button 
                   onClick={handleAccessRepository}
-                  className="flex-1 bg-primary text-white dark:bg-slate-100 dark:text-primary font-bold py-6 rounded-xl hover:bg-primary/90 text-lg shadow-xl shadow-primary/10"
+                  className="flex-1 bg-primary text-primary-foreground dark:bg-slate-100 dark:text-primary font-bold py-6 rounded-xl hover:bg-primary/90 text-lg shadow-xl shadow-primary/10"
                 >
                   Access Full Repository
                 </Button>

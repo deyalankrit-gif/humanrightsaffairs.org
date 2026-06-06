@@ -52,7 +52,7 @@ export function DocSearch() {
           <Button 
             onClick={handleSearch}
             disabled={isSearching}
-            className="h-14 px-8 rounded-xl bg-primary text-white font-bold text-lg hover:bg-primary/90 flex gap-2"
+            className="h-14 px-8 rounded-xl bg-primary text-primary-foreground font-bold text-lg hover:bg-primary/90 flex gap-2"
           >
             {isSearching ? 'Analyzing...' : (
               <>

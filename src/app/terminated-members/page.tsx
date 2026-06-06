@@ -466,7 +466,7 @@ export default function TerminatedMembersPage() {
                                       <Label>Reason</Label>
                                       <Textarea value={editMember.reason} onChange={e => setEditMember({...editMember, reason: e.target.value})} className="rounded-xl" />
                                     </div>
-                                    <Button onClick={handleUpdate} disabled={isActionLoading} className="w-full bg-primary text-white h-12 rounded-xl">
+                                    <Button onClick={handleUpdate} disabled={isActionLoading} className="w-full bg-primary text-primary-foreground h-12 rounded-xl">
                                       {isActionLoading ? <Loader2 className="animate-spin mr-2" /> : "Save Changes"}
                                     </Button>
                                   </div>
