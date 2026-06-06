@@ -68,8 +68,20 @@ const adminLinks = [
 
 export function AppSidebar() {
   const pathname = usePathname()
+  const [activeHash, setActiveHash] = React.useState('')
   const isAdminPortal = pathname.startsWith('/internal')
   const links = isAdminPortal ? adminLinks : publicLinks
+
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const handleHashChange = () => {
+        setActiveHash(window.location.hash)
+      }
+      window.addEventListener('hashchange', handleHashChange)
+      setActiveHash(window.location.hash)
+      return () => window.removeEventListener('hashchange', handleHashChange)
+    }
+  }, [])
 
   return (
     <Sidebar collapsible="icon" className="border-r bg-sidebar">
@@ -92,7 +104,15 @@ export function AppSidebar() {
           </SidebarGroupLabel>
           <SidebarMenu>
             {links.map((link) => {
-              const isActive = pathname === link.href || (link.href !== '/' && pathname.startsWith(link.href))
+              const isHashLink = !isAdminPortal && link.href.startsWith('/#')
+              const linkHash = isHashLink ? link.href.substring(1) : ''
+              
+              const isActive = isHashLink 
+                ? (pathname === '/' && activeHash === linkHash)
+                : isAdminPortal 
+                  ? (pathname === link.href || (link.href !== '/' && pathname.startsWith(link.href)))
+                  : (pathname === link.href && (link.href !== '/' || activeHash === '')) || (link.href !== '/' && pathname.startsWith(link.href))
+
               const isPublicView = link.name === 'Public Site View'
               
               return (
@@ -126,7 +146,7 @@ export function AppSidebar() {
         {!isAdminPortal && (
           <div className="group-data-[collapsible=icon]:hidden">
             <DonationDialog>
-              <Button className="w-full bg-accent text-primary font-bold rounded-xl gap-2 h-11">
+              <Button className="w-full bg-accent text-primary font-bold rounded-xl gap-2 h-11 hover:bg-secondary hover:text-white transition-all">
                 <HeartHandshake className="w-4 h-4" /> Support Cause
               </Button>
             </DonationDialog>

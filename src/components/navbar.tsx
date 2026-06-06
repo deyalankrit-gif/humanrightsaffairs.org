@@ -33,17 +33,25 @@ const publicLinks = [
 export function Navbar() {
   const pathname = usePathname()
   const [isIframe, setIsIframe] = useState(false)
+  const [activeHash, setActiveHash] = useState('')
 
   useEffect(() => {
-    // Detect if the component is being rendered inside an iframe
-    // (e.g., the Public Site Mirror in the admin portal)
     if (typeof window !== 'undefined') {
       setIsIframe(window.self !== window.top)
+      
+      const handleHashChange = () => {
+        setActiveHash(window.location.hash)
+      }
+      
+      window.addEventListener('hashchange', handleHashChange)
+      // Capture initial hash
+      setActiveHash(window.location.hash)
+      
+      return () => window.removeEventListener('hashchange', handleHashChange)
     }
   }, [])
 
   // Do not render the public navbar if viewed within a mirror/iframe
-  // to prevent double headers in the admin portal.
   if (isIframe) return null
 
   return (
@@ -60,7 +68,17 @@ export function Navbar() {
 
       <nav className="flex-1 flex items-center overflow-x-auto no-scrollbar gap-1 md:gap-2 px-2">
         {publicLinks.map((link) => {
-          const isActive = pathname === link.href || (link.href !== '/' && pathname.startsWith(link.href))
+          const isHashLink = link.href.startsWith('/#')
+          const linkHash = isHashLink ? link.href.substring(1) : ''
+          
+          // Logic: 
+          // 1. If it's a hash link (e.g. /#grievances), it's active if on / and hash matches.
+          // 2. If it's Home (/), it's active if on / and NO hash is present.
+          // 3. Otherwise standard path matching.
+          const isActive = isHashLink 
+            ? (pathname === '/' && activeHash === linkHash)
+            : (pathname === link.href && (link.href !== '/' || activeHash === '')) || (link.href !== '/' && pathname.startsWith(link.href))
+
           return (
             <Link 
               key={link.name} 
