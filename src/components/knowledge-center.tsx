@@ -69,6 +69,12 @@ const guides = [
 
 export function KnowledgeCenter() {
   const [selectedGuide, setSelectedGuide] = useState<typeof guides[0] | null>(null)
+  const [open, setOpen] = useState(false)
+
+  const handleOpenDetail = (guide: typeof guides[0]) => {
+    setSelectedGuide(guide)
+    setOpen(true)
+  }
 
   const handleAccessRepository = () => {
     if (!selectedGuide) return;
@@ -122,7 +128,7 @@ export function KnowledgeCenter() {
               <div className="relative z-10 flex flex-wrap gap-2 mt-4 md:mt-0">
                 <Button 
                   variant="ghost" 
-                  onClick={() => setSelectedGuide(guide)}
+                  onClick={() => handleOpenDetail(guide)}
                   className="text-primary dark:text-white hover:text-white hover:bg-secondary font-bold px-4 rounded-lg flex items-center gap-1 text-xs md:text-sm transition-all"
                 >
                   Read More <ExternalLink className="w-3 h-3 md:w-4 md:h-4" />
@@ -138,16 +144,18 @@ export function KnowledgeCenter() {
         </div>
       </div>
 
-      <Dialog open={!!selectedGuide} onOpenChange={(open) => !open && setSelectedGuide(null)}>
-        <DialogContent className="max-w-2xl rounded-[2.5rem] p-0 overflow-hidden border-none shadow-2xl relative bg-white dark:bg-slate-950">
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="max-w-2xl rounded-[2.5rem] p-0 overflow-hidden border-none shadow-2xl relative bg-white dark:bg-slate-950 max-h-[90vh] flex flex-col">
           <DialogHeader className="sr-only">
-            <DialogTitle>{selectedGuide?.title || 'Details'}</DialogTitle>
+            <DialogTitle>{selectedGuide?.title || 'Guide Details'}</DialogTitle>
+            <DialogDescription>Comprehensive overview of human rights documentation.</DialogDescription>
           </DialogHeader>
+          
           {selectedGuide && (
-            <div className="flex flex-col max-h-[90vh]">
+            <div className="flex flex-col h-full overflow-hidden">
               <div className="absolute right-6 top-6 z-50">
                 <DialogClose asChild>
-                  <Button variant="ghost" size="icon" className="rounded-full bg-white/20 hover:bg-white/40 backdrop-blur-md text-primary h-10 w-10 border border-white/20 shadow-lg">
+                  <Button variant="ghost" size="icon" className="rounded-full bg-black/5 hover:bg-black/10 text-primary h-10 w-10 border border-white/20 shadow-lg dark:bg-white/10 dark:text-white">
                     <X className="w-6 h-6" />
                   </Button>
                 </DialogClose>
@@ -167,7 +175,7 @@ export function KnowledgeCenter() {
                 </div>
               </div>
 
-              <div className="p-8 md:p-12 space-y-8 overflow-y-auto">
+              <div className="p-8 md:p-12 space-y-8 overflow-y-auto scrollbar-hide flex-1">
                 <div className="space-y-4">
                   <h4 className="text-xs font-bold uppercase tracking-widest text-accent">Overview</h4>
                   <p className="text-muted-foreground leading-relaxed text-base md:text-lg">

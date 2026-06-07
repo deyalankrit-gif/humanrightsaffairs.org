@@ -47,6 +47,18 @@
       "description": "AI Advocate Bot Avatar",
       "imageUrl": "/advocate.jpeg",
       "imageHint": "advocate avatar"
+    },
+    {
+      "id": "donation-bg-1",
+      "description": "Inspirational portrait for donation section",
+      "imageUrl": "/female.jpeg",
+      "imageHint": "indian female"
+    },
+    {
+      "id": "donation-bg-2",
+      "description": "Portrait of a child for donation section",
+      "imageUrl": "/child.jpeg",
+      "imageHint": "indian child"
     }
   ]
 }
