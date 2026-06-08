@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useRef, useEffect } from 'react'
@@ -314,8 +313,8 @@ export function DonationDialog({ children, defaultAmount, initialStep = 'details
                         </FormControl>
                         <SelectContent>
                           <SelectItem value="UPI QR Code" className="font-bold">Instant UPI QR Code</SelectItem>
-                          <SelectItem value="Bank Transfer" className="font-bold">Direct Bank Transfer</SelectItem>
-                          <SelectItem value="Cheque" className="font-bold">Cheque Payment</SelectItem>
+                          <SelectItem value="Cheque" className="font-bold">Cheque</SelectItem>
+                          <SelectItem value="Bank Transfer" className="font-bold">Online Bank Transfer</SelectItem>
                           <SelectItem value="Cash" className="font-bold">Cash Contribution</SelectItem>
                           <SelectItem value="Credit/Debit Card" className="font-bold">Online Card Payment</SelectItem>
                         </SelectContent>
