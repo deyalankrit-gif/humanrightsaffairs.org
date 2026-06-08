@@ -4,7 +4,25 @@ import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { Footer } from '@/components/footer'
 import { PlaceHolderImages } from '@/lib/placeholder-images'
-import { Calendar as CalendarIcon, MapPin, Search, ArrowRight, Camera, Plus, Edit, Trash2, Loader2, Upload } from 'lucide-react'
+import { 
+  Calendar as CalendarIcon, 
+  MapPin, 
+  Search, 
+  ArrowRight, 
+  Camera, 
+  Plus, 
+  Edit, 
+  Trash2, 
+  Loader2, 
+  Upload,
+  X,
+  Play,
+  Film,
+  Info,
+  CheckCircle2,
+  ExternalLink,
+  ShieldCheck
+} from 'lucide-react'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -21,6 +39,7 @@ import {
   DialogTrigger,
   DialogFooter,
   DialogDescription,
+  DialogClose,
 } from "@/components/ui/dialog"
 import {
   AlertDialog,
@@ -60,6 +79,7 @@ export default function EventsPage() {
   const [search, setSearch] = useState("")
   const [isActionLoading, setIsActionLoading] = useState(false)
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
+  const [selectedEventDetails, setSelectedEventDetails] = useState<Event | null>(null)
   const [isMirror, setIsMirror] = useState(false)
   const { user } = useUser()
   const db = useFirestore()
@@ -352,7 +372,7 @@ export default function EventsPage() {
                   const isCustomImg = event.imageId?.startsWith('data:')
                   const img = isCustomImg ? event.imageId : PlaceHolderImages.find(i => i.id === event.imageId)?.imageUrl
                   return (
-                    <Card key={event.id} className="group border-none shadow-sm hover:shadow-2xl transition-all duration-500 rounded-[2rem] overflow-hidden bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 relative">
+                    <Card key={event.id} className="group border-none shadow-sm hover:shadow-2xl transition-all duration-500 rounded-[2rem] overflow-hidden bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 relative flex flex-col">
                       <div className="relative aspect-[4/3] overflow-hidden">
                         <Image 
                           src={img || 'https://picsum.photos/seed/event/800/600'} 
@@ -482,12 +502,16 @@ export default function EventsPage() {
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="p-8 pt-4">
-                        <p className="text-muted-foreground text-sm leading-relaxed">
+                        <p className="text-muted-foreground text-sm leading-relaxed line-clamp-3">
                           {event.description}
                         </p>
                       </CardContent>
                       <CardFooter className="p-8 pt-0 border-t border-slate-50 dark:border-slate-800 mt-auto">
-                        <Button variant="ghost" className="p-0 h-auto font-bold text-primary dark:text-white hover:text-secondary flex items-center gap-2 group/btn transition-colors">
+                        <Button 
+                          variant="ghost" 
+                          onClick={() => setSelectedEventDetails(event)}
+                          className="p-0 h-auto font-bold text-primary dark:text-white hover:text-secondary flex items-center gap-2 group/btn transition-colors hover:bg-transparent"
+                        >
                           View Event Details <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-2 transition-transform" />
                         </Button>
                       </CardFooter>
@@ -507,6 +531,129 @@ export default function EventsPage() {
           )}
         </div>
       </section>
+
+      {/* Detailed Event Modal */}
+      <Dialog open={!!selectedEventDetails} onOpenChange={(open) => !open && setSelectedEventDetails(null)}>
+        <DialogContent className="max-w-5xl p-0 border-none shadow-2xl rounded-[2.5rem] overflow-hidden bg-white dark:bg-slate-950 flex flex-col [&>button]:hidden max-h-[90vh]">
+          <div className="absolute right-6 top-6 z-50">
+            <DialogClose asChild>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="rounded-full bg-blue-600 hover:bg-blue-500 text-white h-10 w-10 shadow-xl border-2 border-white/20 transition-all hover:scale-110 hover:rotate-90 duration-300 active:scale-95"
+              >
+                <X className="w-6 h-6 text-white" />
+              </Button>
+            </DialogClose>
+          </div>
+
+          {selectedEventDetails && (
+            <div className="flex-1 overflow-y-auto custom-scrollbar">
+              <div className="flex flex-col">
+                <div className="relative bg-gradient-to-br from-secondary via-primary to-accent p-12 md:p-20 text-white overflow-hidden border-b-8 border-accent/20">
+                  <div className="absolute top-0 right-0 opacity-10 pointer-events-none transform translate-x-12 translate-y-[-20px]">
+                    <ShieldCheck className="w-64 h-64 md:w-96 md:h-96" />
+                  </div>
+                  <div className="relative z-10 space-y-4 max-w-3xl">
+                    <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/20">
+                      <Camera className="w-4 h-4 text-accent" />
+                      <span className="text-[10px] font-black uppercase tracking-[0.2em]">{selectedEventDetails.category} Profile</span>
+                    </div>
+                    <h2 className="text-4xl md:text-7xl font-headline font-bold leading-tight drop-shadow-xl">
+                      {selectedEventDetails.title}
+                    </h2>
+                    <div className="flex flex-wrap items-center gap-6 pt-4 text-white/80 font-bold uppercase tracking-widest text-xs md:text-sm">
+                      <span className="flex items-center gap-2"><CalendarIcon className="w-5 h-5 text-accent" /> {selectedEventDetails.date}</span>
+                      <span className="flex items-center gap-2"><MapPin className="w-5 h-5 text-accent" /> {selectedEventDetails.location}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-8 md:p-16 space-y-16 pb-24">
+                  {/* Narrative Section */}
+                  <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    <h3 className="text-xs font-black uppercase tracking-[0.3em] text-accent flex items-center gap-2">
+                       <span className="w-8 h-px bg-accent"></span> Mission Narrative
+                    </h3>
+                    <p className="text-xl md:text-2xl text-slate-700 dark:text-slate-300 leading-relaxed font-body font-medium italic border-l-4 border-accent pl-6">
+                      "{selectedEventDetails.description}"
+                    </p>
+                  </div>
+
+                  {/* High-Fidelity Gallery (3 Images) */}
+                  <div className="space-y-8 animate-in fade-in slide-in-from-bottom-6 duration-700">
+                    <h3 className="text-xs font-black uppercase tracking-[0.3em] text-primary dark:text-white flex items-center gap-2">
+                       <Camera className="w-4 h-4 text-emerald-500" /> Captured Moments
+                    </h3>
+                    <div className="grid md:grid-cols-3 gap-6">
+                      {[1, 2, 3].map((idx) => (
+                        <div key={idx} className="group relative aspect-[4/5] rounded-[2rem] overflow-hidden shadow-xl border-4 border-white dark:border-slate-800 transition-all hover:scale-[1.02] hover:shadow-2xl">
+                          <Image 
+                            src={`https://picsum.photos/seed/event-${selectedEventDetails.id}-${idx}/600/800`} 
+                            alt={`Gallery ${idx}`} 
+                            fill 
+                            className="object-cover"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-6">
+                            <p className="text-white text-xs font-bold uppercase tracking-widest leading-tight">
+                               {idx === 1 && "On-ground Engagement"}
+                               {idx === 2 && "Legal Literacy Workshop"}
+                               {idx === 3 && "Community Outreach Session"}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Video Feature Section */}
+                  <div className="space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-1000">
+                    <h3 className="text-xs font-black uppercase tracking-[0.3em] text-primary dark:text-white flex items-center gap-2">
+                       <Film className="w-4 h-4 text-red-500" /> Mission Highlights (Video)
+                    </h3>
+                    <div className="relative aspect-video rounded-[3rem] overflow-hidden shadow-2xl border-4 border-slate-100 dark:border-slate-800 bg-slate-100 dark:bg-slate-900 group">
+                      <Image 
+                        src={`https://picsum.photos/seed/event-vid-${selectedEventDetails.id}/1200/675`} 
+                        alt="Video Thumbnail" 
+                        fill 
+                        className="object-cover opacity-60 grayscale group-hover:grayscale-0 transition-all duration-700"
+                      />
+                      <div className="absolute inset-0 flex flex-col items-center justify-center gap-6">
+                         <div className="w-24 h-24 bg-white/20 backdrop-blur-xl rounded-full flex items-center justify-center border-4 border-white/40 group-hover:scale-110 transition-transform cursor-pointer shadow-2xl">
+                           <Play className="w-10 h-10 text-white fill-white ml-1" />
+                         </div>
+                         <p className="text-white font-black uppercase tracking-[0.3em] text-sm drop-shadow-lg">Watch Official Footage</p>
+                      </div>
+                      <div className="absolute bottom-6 left-6 right-6 p-6 bg-primary/40 backdrop-blur-md rounded-2xl border border-white/10 flex items-center justify-between">
+                         <div className="flex items-center gap-3">
+                            <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+                            <p className="text-xs font-bold text-white uppercase tracking-wider">Documentary: {selectedEventDetails.title} (2025)</p>
+                         </div>
+                         <ExternalLink className="w-4 h-4 text-white/60" />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Modal Footer Controls */}
+                  <div className="pt-12 flex flex-col gap-4 items-center">
+                    <Button 
+                      size="lg" 
+                      onClick={() => setSelectedEventDetails(null)}
+                      className="w-full bg-primary text-primary-foreground font-bold h-16 rounded-2xl text-lg hover:bg-secondary hover:text-white transition-all shadow-xl shadow-primary/20 group"
+                    >
+                      Close Page
+                    </Button>
+                    
+                    <p className="text-center text-[10px] font-bold text-slate-400 uppercase tracking-[0.25em] mt-4">
+                      Official Mission Record • Human Rights Affairs Trust
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       <Footer />
     </main>
