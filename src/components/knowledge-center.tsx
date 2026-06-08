@@ -160,7 +160,7 @@ export function KnowledgeCenter() {
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden rounded-[2.5rem] p-0 border-none shadow-2xl bg-white dark:bg-slate-950 flex flex-col">
           <DialogHeader className="sr-only">
             <DialogTitle>{selectedGuide?.title || 'Guide Details'}</DialogTitle>
-            <DialogDescription>A detailed overview of essential human rights and constitutional protections.</DialogDescription>
+            <DialogDescription>Detailed human rights documentation.</DialogDescription>
           </DialogHeader>
           
           <div className="absolute right-6 top-6 z-50">
@@ -172,14 +172,13 @@ export function KnowledgeCenter() {
           </div>
 
           {selectedGuide && (
-            <div className="flex-1 overflow-y-auto no-scrollbar scroll-smooth">
+            <div className="flex-1 overflow-y-auto scroll-smooth custom-scrollbar">
               <div className="flex flex-col">
-                {/* Header Banner */}
                 <div className="relative bg-primary p-12 md:p-16 text-primary-foreground overflow-hidden shrink-0">
                   <div className="absolute top-0 right-0 opacity-10 pointer-events-none transform translate-x-10 translate-y-[-10px]">
                     {React.cloneElement(selectedGuide.icon as React.ReactElement, { className: "w-64 h-64 md:w-80 md:h-80" })}
                   </div>
-                  <div className="relative z-10 space-y-6">
+                  <div className="relative z-10 space-y-4">
                     <div className="inline-flex items-center gap-2 bg-accent/20 backdrop-blur-md px-4 py-1.5 rounded-full border border-accent/30">
                       <ShieldCheck className="w-4 h-4 text-accent" />
                       <span className="text-[10px] font-black uppercase tracking-[0.2em] text-accent">Official Legal Resource</span>
@@ -187,54 +186,64 @@ export function KnowledgeCenter() {
                     <h2 className="text-4xl md:text-6xl font-headline font-bold leading-tight pr-12">
                       {selectedGuide.title}
                     </h2>
+                    <p className="text-xl text-primary-foreground/70 font-medium italic">
+                      {selectedGuide.desc}
+                    </p>
                   </div>
                 </div>
 
-                {/* Main Content */}
-                <div className="p-8 md:p-12 space-y-12">
-                  <div className="space-y-6">
-                    <h3 className="text-xs font-black uppercase tracking-[0.3em] text-accent">Institutional Overview</h3>
-                    <p className="text-xl md:text-2xl text-slate-700 dark:text-slate-300 leading-relaxed font-body font-medium italic">
+                <div className="p-8 md:p-12 space-y-12 pb-24">
+                  <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    <h3 className="text-xs font-black uppercase tracking-[0.3em] text-accent flex items-center gap-2">
+                       <span className="w-8 h-px bg-accent"></span> Overview
+                    </h3>
+                    <p className="text-xl md:text-2xl text-slate-700 dark:text-slate-300 leading-relaxed font-body font-medium italic border-l-4 border-accent pl-6">
                       "{selectedGuide.overview}"
                     </p>
                   </div>
 
                   <div className="grid md:grid-cols-2 gap-12 pt-8 border-t border-slate-100 dark:border-slate-800">
-                     <div className="space-y-6">
+                     <div className="space-y-6 animate-in fade-in slide-in-from-left-4 duration-700">
                         <h4 className="text-xs font-black uppercase tracking-[0.3em] text-primary dark:text-white flex items-center gap-2">
                           <CheckCircle2 className="w-4 h-4 text-emerald-500" /> Key Areas of Focus
                         </h4>
                         <ul className="space-y-4">
                           {selectedGuide.features.map((feature, idx) => (
-                            <li key={idx} className="flex items-center gap-3 bg-slate-50 dark:bg-slate-900 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 group hover:border-accent transition-all">
-                               <span className="w-6 h-6 bg-accent text-white rounded-full flex items-center justify-center text-[10px] font-bold">{idx + 1}</span>
+                            <li key={idx} className="flex items-center gap-3 bg-slate-50 dark:bg-slate-900 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 group hover:border-accent transition-all shadow-sm">
+                               <span className="w-7 h-7 bg-accent text-primary rounded-full flex items-center justify-center text-[10px] font-bold shadow-md">{idx + 1}</span>
                                <span className="font-bold text-slate-700 dark:text-slate-200">{feature}</span>
                             </li>
                           ))}
                         </ul>
                      </div>
 
-                     <div className="space-y-6">
-                        <h4 className="text-xs font-black uppercase tracking-[0.3em] text-primary dark:text-white">Why This Matters</h4>
-                        <div className="p-8 rounded-[2.5rem] bg-indigo-50 dark:bg-indigo-950/20 border border-indigo-100 dark:border-indigo-900/30">
-                          <p className="text-slate-600 dark:text-slate-400 leading-relaxed italic text-sm md:text-base">
-                            "Understanding your constitutional rights is the bedrock of democracy. This awareness empowers you to protect your dignity, support your community, and ensure that justice remains a fundamental promise for every citizen."
+                     <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-700">
+                        <h4 className="text-xs font-black uppercase tracking-[0.3em] text-primary dark:text-white">Significance</h4>
+                        <div className="p-8 rounded-[2.5rem] bg-indigo-50 dark:bg-indigo-950/20 border border-indigo-100 dark:border-indigo-900/30 shadow-inner">
+                          <p className="text-slate-600 dark:text-slate-400 leading-relaxed italic text-sm md:text-base font-medium">
+                            "The knowledge of these rights is not just informative—it is transformative. By understanding the legal safeguards provided by the State, every citizen becomes a vital part of a just and transparent democracy."
                           </p>
                         </div>
                      </div>
                   </div>
 
-                  {/* Footer Call to Action */}
-                  <div className="pt-12">
-                     <Button 
+                  <div className="pt-12 flex flex-col gap-4 items-center">
+                    <Button 
                       size="lg" 
                       onClick={handleAccessRepository}
-                      className="w-full bg-accent text-white font-bold h-16 rounded-2xl text-lg hover:bg-secondary hover:text-white transition-all shadow-xl shadow-accent/20 group"
+                      className="w-full bg-accent text-primary font-bold h-16 rounded-2xl text-lg hover:bg-secondary hover:text-white transition-all shadow-xl shadow-accent/20 group"
                     >
                       Access Full Repository <ExternalLink className="ml-2 w-5 h-5 group-hover:scale-110 transition-transform" />
                     </Button>
-                    <p className="text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-6">
-                      Verified Digital Record under HRAT Charter
+                    
+                    <DialogClose asChild>
+                      <Button variant="outline" className="w-full h-14 rounded-2xl border-slate-200 text-slate-500 font-bold hover:bg-slate-50">
+                        Close Page
+                      </Button>
+                    </DialogClose>
+                    
+                    <p className="text-center text-[10px] font-bold text-slate-400 uppercase tracking-[0.25em] mt-4">
+                      Official Record • Human Rights Affairs Trust
                     </p>
                   </div>
                 </div>

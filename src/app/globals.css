@@ -111,6 +111,25 @@
     scrollbar-width: none;
   }
 
+  /* Custom Sidebar & Modal Scrollbar */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: hsl(var(--accent));
+    border-radius: 10px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--accent) / 0.8);
+  }
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--accent)) transparent;
+  }
+
   /* Admin Header Scrollbar Styles */
   .admin-scrollbar::-webkit-scrollbar {
     height: 4px;

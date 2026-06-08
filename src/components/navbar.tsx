@@ -71,11 +71,10 @@ export function Navbar() {
           if (isHashLink) {
             isActive = pathname === linkPath && activeHash === linkHash
           } else {
-            // Home link only active if we are at root and no specific section hash is active
             if (link.href === '/') {
               isActive = pathname === '/' && activeHash === ''
             } else {
-              isActive = pathname === link.href
+              isActive = pathname === link.href && activeHash === ''
             }
           }
 
@@ -83,7 +82,10 @@ export function Navbar() {
             <Link 
               key={link.name} 
               href={link.href}
-              onClick={() => isHashLink ? setActiveHash(linkHash) : setActiveHash('')}
+              onClick={() => {
+                if (isHashLink) setActiveHash(linkHash)
+                else setActiveHash('')
+              }}
               className={cn(
                 "whitespace-nowrap flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[13px] font-bold transition-all",
                 isActive 
