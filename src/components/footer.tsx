@@ -80,7 +80,7 @@ export function Footer() {
           <div>
             <h4 className="text-lg font-headline font-bold mb-6 text-accent">Legal Support</h4>
             <ul className="space-y-4 text-primary-foreground/80">
-              <li><Link href="#" className="hover:text-accent transition-colors font-medium">Pro-Bono Services</Link></li>
+              <li><Link href="/legal/pro-bono" className="hover:text-accent transition-colors font-medium">Pro-Bono Services</Link></li>
               <li><Link href="/legal/fir-format" className="hover:text-accent transition-colors font-medium">Filing an FIR</Link></li>
               <li><Link href="/legal/rti-assistant" className="hover:text-accent transition-colors font-medium">RTI Assistant</Link></li>
               <li><Link href="/legal/bail-procedure" className="hover:text-accent transition-colors font-medium">Bail Procedures</Link></li>
