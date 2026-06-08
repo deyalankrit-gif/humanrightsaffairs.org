@@ -41,7 +41,12 @@ export default function FIRFormatPage() {
     mobileNo: '',
     email: '',
     submissionDate: new Date().toLocaleDateString('en-IN'),
-    submissionPlace: ''
+    submissionPlace: '',
+    evidenceDocs: 'Relevant documents/records',
+    evidencePhotos: 'Photographs and/or video recordings',
+    evidenceAudio: 'Audio recordings (if any)',
+    evidenceMedical: 'Medical reports/documents (if applicable)',
+    evidenceOther: 'Any other supporting evidence'
   })
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -79,11 +84,11 @@ The following persons witnessed the incident:
 
 Available Evidence:
 In support of my complaint, I possess the following evidence:
-- Relevant documents/records
-- Photographs and/or video recordings
-- Audio recordings (if any)
-- Medical reports/documents (if applicable)
-- Any other supporting evidence
+- ${formData.evidenceDocs}
+- ${formData.evidencePhotos}
+- ${formData.evidenceAudio}
+- ${formData.evidenceMedical}
+- ${formData.evidenceOther}
 
 The aforesaid incident discloses the commission of a cognizable offence. Therefore, I request you to kindly register this written complaint as an FIR, conduct a fair and impartial investigation, and take appropriate legal action against the accused person(s) in accordance with the law.
 
@@ -260,12 +265,27 @@ Place: ${formData.submissionPlace || '________'}
                     <div className="space-y-4">
                       <p className="font-bold underline text-primary dark:text-accent uppercase tracking-widest text-xs">Available Evidence:</p>
                       <p className="opacity-70">In support of my complaint, I possess the following evidence:</p>
-                      <ul className="list-disc pl-8 space-y-2 italic text-slate-600 dark:text-slate-400">
-                        <li>Relevant documents/records</li>
-                        <li>Photographs and/or video recordings</li>
-                        <li>Audio recordings (if any)</li>
-                        <li>Medical reports/documents (if applicable)</li>
-                        <li>Any other supporting evidence</li>
+                      <ul className="space-y-2 italic text-slate-600 dark:text-slate-400">
+                        <li className="flex items-center gap-2">
+                          <span className="w-1.5 h-1.5 rounded-full bg-slate-400 shrink-0" />
+                          <Fillable name="evidenceDocs" placeholder="Relevant documents/records" className="w-full italic" />
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <span className="w-1.5 h-1.5 rounded-full bg-slate-400 shrink-0" />
+                          <Fillable name="evidencePhotos" placeholder="Photographs and/or video recordings" className="w-full italic" />
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <span className="w-1.5 h-1.5 rounded-full bg-slate-400 shrink-0" />
+                          <Fillable name="evidenceAudio" placeholder="Audio recordings (if any)" className="w-full italic" />
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <span className="w-1.5 h-1.5 rounded-full bg-slate-400 shrink-0" />
+                          <Fillable name="evidenceMedical" placeholder="Medical reports/documents (if applicable)" className="w-full italic" />
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <span className="w-1.5 h-1.5 rounded-full bg-slate-400 shrink-0" />
+                          <Fillable name="evidenceOther" placeholder="Any other supporting evidence" className="w-full italic" />
+                        </li>
                       </ul>
                     </div>
 
