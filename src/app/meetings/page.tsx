@@ -824,6 +824,11 @@ export default function MeetingsPage() {
       {/* Verified Leader Profile Modal */}
       <Dialog open={!!selectedLeaderProfile} onOpenChange={(open) => !open && setSelectedLeaderProfile(null)}>
         <DialogContent className="max-w-md rounded-[2.5rem] border-none shadow-2xl bg-white dark:bg-slate-950 p-0 overflow-hidden [&>button]:hidden">
+          <DialogHeader className="sr-only">
+            <DialogTitle>{selectedLeaderProfile?.name || 'Leader Profile'}</DialogTitle>
+            <DialogDescription>Verified credentials and jurisdictional details of the official.</DialogDescription>
+          </DialogHeader>
+          
           {selectedLeaderProfile && (
             <div className="flex flex-col">
               <div className="relative aspect-[3/4] w-full">
