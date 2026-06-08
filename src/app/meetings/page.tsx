@@ -137,7 +137,7 @@ export default function MeetingsPage() {
   const leadersQuery = useMemoFirebase(() => {
     if (!db) return null;
     return query(collection(db, 'leadership'), orderBy('name', 'asc'));
-  }, [db]);
+  }, [db, user]);
 
   const { data: meetings, loading: dataLoading } = useCollection(meetingsQuery);
   const { data: leadersData } = useCollection(leadersQuery);
@@ -513,7 +513,7 @@ export default function MeetingsPage() {
                       <div className="absolute top-6 left-6 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-50">
                         <Dialog open={editMeeting?.id === meeting.id} onOpenChange={(open) => !open && setEditMeeting(null)}>
                           <DialogTrigger asChild>
-                            <Button onClick={() => setEditMeeting(meeting)} size="icon" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-full shadow-lg border border-slate-100 dark:border-slate-700 hover:bg-secondary hover:text-white transition-colors">
+                            <Button onClick={() => setEditMeeting(meeting)} size="icon" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-full shadow-lg border border-slate-100 dark:border-slate-700 hover:bg-secondary hover:text-white transition-colors">
                               <Edit className="w-4 h-4" />
                             </Button>
                           </DialogTrigger>
@@ -821,22 +821,23 @@ export default function MeetingsPage() {
         </div>
       </section>
 
-      {/* Verified Leader Profile Modal */}
+      {/* Verified Leader Profile Modal - Refined for Square Proportion & Full Visibility */}
       <Dialog open={!!selectedLeaderProfile} onOpenChange={(open) => !open && setSelectedLeaderProfile(null)}>
-        <DialogContent className="max-w-md rounded-[2.5rem] border-none shadow-2xl bg-white dark:bg-slate-950 p-0 overflow-hidden [&>button]:hidden">
+        <DialogContent className="max-w-[480px] w-full h-[480px] rounded-[2.5rem] border-none shadow-2xl bg-white dark:bg-slate-950 p-0 overflow-hidden [&>button]:hidden flex flex-col">
           <DialogHeader className="sr-only">
             <DialogTitle>{selectedLeaderProfile?.name || 'Leader Profile'}</DialogTitle>
             <DialogDescription>Verified credentials and jurisdictional details of the official.</DialogDescription>
           </DialogHeader>
           
           {selectedLeaderProfile && (
-            <div className="flex flex-col">
-              <div className="relative aspect-video w-full">
+            <div className="flex flex-col h-full">
+              {/* Header Image - Taller to ensure head is not cut off */}
+              <div className="relative h-[260px] w-full shrink-0">
                  <Image 
                    src={selectedLeaderProfile.imageId?.startsWith('data:') ? selectedLeaderProfile.imageId : (PlaceHolderImages.find(i => i.id === selectedLeaderProfile.imageId)?.imageUrl || (selectedLeaderProfile.gender === 'female' ? '/dummy w.png' : '/dummy m.png'))} 
                    alt={selectedLeaderProfile.name} 
                    fill 
-                   className="object-cover"
+                   className="object-cover object-top"
                  />
                  <div className="absolute inset-0 bg-gradient-to-t from-primary via-primary/20 to-transparent"></div>
                  
@@ -852,56 +853,55 @@ export default function MeetingsPage() {
                  </div>
 
                  <div className="absolute bottom-4 left-6 right-6 z-10 space-y-1">
-                    <div className="flex items-center gap-2 bg-accent/20 backdrop-blur-md px-3 py-1 rounded-full border border-accent/30 w-fit">
-                      <BadgeCheck className="w-3.5 h-3.5 text-accent" />
-                      <span className="text-[9px] font-black uppercase tracking-[0.2em] text-accent">{selectedLeaderProfile.level} Council Official</span>
+                    <div className="flex items-center gap-2 bg-accent/30 backdrop-blur-md px-3 py-1 rounded-full border border-accent/40 w-fit">
+                      <BadgeCheck className="w-3 h-3 text-accent" />
+                      <span className="text-[8px] font-black uppercase tracking-[0.2em] text-accent">{selectedLeaderProfile.level} Council Official</span>
                     </div>
                     <h2 className="text-2xl font-headline font-bold text-white drop-shadow-lg leading-tight">
                       {selectedLeaderProfile.name}
                     </h2>
-                    <p className="text-white/80 font-bold uppercase tracking-[0.2em] text-[10px] border-l-2 border-accent pl-3">
+                    <p className="text-white/80 font-bold uppercase tracking-[0.2em] text-[9px] border-l-2 border-accent pl-3">
                       {selectedLeaderProfile.title}
                     </p>
                  </div>
               </div>
               
-              <div className="p-6 space-y-4">
-                 <div className="grid grid-cols-1 gap-3">
-                    <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800">
-                       <MapPin className="w-4 h-4 text-accent shrink-0" />
-                       <div className="flex flex-col">
-                          <span className="text-[7px] font-black text-slate-400 uppercase tracking-widest">Active Jurisdiction</span>
-                          <span className="text-xs font-bold text-primary dark:text-white uppercase truncate">
-                             {selectedLeaderProfile.districtName ? `${selectedLeaderProfile.districtName}, ` : ''}{selectedLeaderProfile.parentRegion || 'National Center'}
-                          </span>
+              {/* Info Section - Condensed to fit square profile */}
+              <div className="p-5 flex-1 flex flex-col justify-between">
+                 <div className="space-y-3">
+                    <div className="grid grid-cols-1 gap-2">
+                       <div className="flex items-center gap-3 p-2.5 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800">
+                          <MapPin className="w-4 h-4 text-accent shrink-0" />
+                          <div className="flex flex-col">
+                             <span className="text-[7px] font-black text-slate-400 uppercase tracking-widest">Active Jurisdiction</span>
+                             <span className="text-xs font-bold text-primary dark:text-white uppercase truncate">
+                                {selectedLeaderProfile.districtName ? `${selectedLeaderProfile.districtName}, ` : ''}{selectedLeaderProfile.parentRegion || 'National Center'}
+                             </span>
+                          </div>
                        </div>
-                    </div>
 
-                    <div className="flex items-center gap-3 p-3 bg-emerald-50/50 dark:bg-emerald-950/20 rounded-2xl border border-emerald-100 dark:border-emerald-900/30">
-                       <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0" />
-                       <div className="flex flex-col">
-                          <span className="text-[7px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">Commission Status</span>
-                          <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400">Verified HRAT Representative</span>
+                       <div className="flex items-center gap-3 p-2.5 bg-emerald-50/50 dark:bg-emerald-950/20 rounded-2xl border border-emerald-100 dark:border-emerald-900/30">
+                          <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0" />
+                          <div className="flex flex-col">
+                             <span className="text-[7px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">Commission Status</span>
+                             <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400">Verified HRAT Representative</span>
+                          </div>
                        </div>
                     </div>
                  </div>
 
-                 <div className="pt-3 border-t border-slate-100 dark:border-slate-800">
-                    <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-relaxed italic font-medium line-clamp-2">
-                      "Official representative authorized to lead strategic assemblies and coordinate community outreach programs under the direct oversight of the Central Council."
-                    </p>
+                 <div className="space-y-3 pt-2">
+                   <Button 
+                     onClick={() => setSelectedLeaderProfile(null)}
+                     className="w-full bg-primary text-white font-bold h-10 rounded-xl hover:bg-secondary hover:text-white transition-all shadow-xl shadow-primary/10 text-xs"
+                   >
+                     Close Record
+                   </Button>
+
+                   <p className="text-center text-[7px] font-bold text-slate-400 uppercase tracking-[0.3em]">
+                     Central Personnel Registry • Human Rights Affairs Trust
+                   </p>
                  </div>
-
-                 <Button 
-                   onClick={() => setSelectedLeaderProfile(null)}
-                   className="w-full bg-primary text-white font-bold h-10 rounded-xl hover:bg-secondary hover:text-white transition-all shadow-xl shadow-primary/10 text-xs"
-                 >
-                   Close Record
-                 </Button>
-
-                 <p className="text-center text-[7px] font-bold text-slate-400 uppercase tracking-[0.3em]">
-                   Central Personnel Registry • Human Rights Affairs Trust
-                 </p>
               </div>
             </div>
           )}
