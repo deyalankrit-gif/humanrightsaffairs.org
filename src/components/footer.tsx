@@ -82,7 +82,7 @@ export function Footer() {
             <ul className="space-y-4 text-primary-foreground/80">
               <li><Link href="#" className="hover:text-accent transition-colors font-medium">Pro-Bono Services</Link></li>
               <li><Link href="/legal/fir-format" className="hover:text-accent transition-colors font-medium">Filing an FIR</Link></li>
-              <li><Link href="#" className="hover:text-accent transition-colors font-medium">RTI Assistance</Link></li>
+              <li><Link href="/legal/rti-assistant" className="hover:text-accent transition-colors font-medium">RTI Assistant</Link></li>
               <li><Link href="/legal/bail-procedure" className="hover:text-accent transition-colors font-medium">Bail Procedures</Link></li>
               <li><Link href="#" className="hover:text-accent transition-colors font-medium">Privacy Policy</Link></li>
             </ul>
