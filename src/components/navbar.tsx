@@ -71,7 +71,12 @@ export function Navbar() {
           if (isHashLink) {
             isActive = pathname === linkPath && activeHash === linkHash
           } else {
-            isActive = pathname === link.href && activeHash === ''
+            // Home link only active if we are at root and no specific section hash is active
+            if (link.href === '/') {
+              isActive = pathname === '/' && activeHash === ''
+            } else {
+              isActive = pathname === link.href
+            }
           }
 
           return (
