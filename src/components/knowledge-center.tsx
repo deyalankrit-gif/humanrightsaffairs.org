@@ -178,7 +178,7 @@ export function KnowledgeCenter() {
           {selectedGuide && (
             <div className="flex-1 overflow-y-auto scroll-smooth custom-scrollbar">
               <div className="flex flex-col">
-                <div className="relative bg-gradient-to-br from-primary via-primary/95 to-accent/30 p-12 md:p-16 text-primary-foreground overflow-hidden shrink-0 border-b-8 border-accent/20">
+                <div className="relative bg-gradient-to-br from-primary via-primary/95 to-accent p-12 md:p-16 text-primary-foreground overflow-hidden shrink-0 border-b-8 border-accent/20">
                   <div className="absolute top-0 right-0 opacity-10 pointer-events-none transform translate-x-10 translate-y-[-10px]">
                     {React.cloneElement(selectedGuide.icon as React.ReactElement, { className: "w-64 h-64 md:w-80 md:h-80" })}
                   </div>
@@ -241,7 +241,10 @@ export function KnowledgeCenter() {
                     </Button>
                     
                     <DialogClose asChild>
-                      <Button variant="outline" className="w-full h-14 rounded-2xl border-slate-200 text-slate-500 font-bold hover:bg-slate-50">
+                      <Button 
+                        variant="outline" 
+                        className="w-full h-14 rounded-2xl border-slate-200 text-slate-500 font-bold hover:bg-primary hover:text-primary-foreground transition-colors"
+                      >
                         Close Page
                       </Button>
                     </DialogClose>
