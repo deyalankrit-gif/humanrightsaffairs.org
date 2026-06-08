@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from "react"
@@ -76,11 +75,10 @@ export function AppSidebar() {
   React.useEffect(() => {
     if (typeof window !== 'undefined') {
       const handleHashChange = () => {
-        setActiveHash(window.location.hash.replace('#', ''))
+        setActiveHash(window.location.hash || '')
       }
       window.addEventListener('hashchange', handleHashChange)
       handleHashChange()
-
       return () => window.removeEventListener('hashchange', handleHashChange)
     }
   }, [])
@@ -113,14 +111,12 @@ export function AppSidebar() {
               } else {
                 const isHashLink = link.href.includes('#')
                 const linkPath = isHashLink ? link.href.split('#')[0] || '/' : link.href
-                const linkHash = isHashLink ? link.href.split('#')[1] : ''
+                const linkHash = isHashLink ? '#' + link.href.split('#')[1] : ''
                 
                 if (isHashLink) {
-                  isActive = (pathname === linkPath) && activeHash === linkHash
-                } else if (link.href === '/') {
-                  isActive = (pathname === '/') && (activeHash === '')
+                  isActive = pathname === linkPath && activeHash === linkHash
                 } else {
-                  isActive = pathname === link.href
+                  isActive = pathname === link.href && activeHash === ''
                 }
               }
 
@@ -134,20 +130,20 @@ export function AppSidebar() {
                       "h-11 rounded-xl transition-all px-4",
                       isActive 
                         ? "bg-accent text-white font-bold hover:bg-secondary hover:text-white shadow-md" 
-                        : "hover:bg-secondary/10 hover:text-secondary"
+                        : "hover:bg-secondary/10 hover:text-secondary group/btn"
                     )}
                   >
                     <Link 
                       href={link.href}
                       onClick={() => {
-                        if (link.href.includes('#')) setActiveHash(link.href.split('#')[1])
+                        if (link.href.includes('#')) setActiveHash('#' + link.href.split('#')[1])
                         else if (!isAdminPortal) setActiveHash('')
                       }}
                       className="flex items-center gap-3"
                     >
                       <link.icon className={cn(
                         "w-5 h-5", 
-                        isActive ? "text-white" : "text-muted-foreground"
+                        isActive ? "text-white" : "text-muted-foreground group-hover/btn:text-secondary"
                       )} />
                       <span className="group-data-[collapsible=icon]:hidden">{link.name}</span>
                     </Link>

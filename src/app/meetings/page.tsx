@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useEffect } from 'react'
@@ -451,7 +450,7 @@ export default function MeetingsPage() {
                     </div>
                   </div>
                   <DialogFooter>
-                    <Button onClick={handleAddMeeting} disabled={isActionLoading} className="w-full bg-accent text-white font-bold h-12 rounded-xl text-lg shadow-xl shadow-accent/20 hover:bg-secondary transition-all">
+                    <Button onClick={handleAddMeeting} disabled={isActionLoading} className="w-full bg-accent text-white font-bold h-12 rounded-xl text-lg shadow-xl shadow-accent/20 hover:bg-secondary hover:text-white transition-all">
                       {isActionLoading ? <Loader2 className="animate-spin" /> : "Publish Official Record"}
                     </Button>
                   </DialogFooter>
@@ -475,7 +474,7 @@ export default function MeetingsPage() {
                     "rounded-full px-6 font-bold transition-all border-slate-200 dark:border-slate-700",
                     filter === lvl.value 
                       ? "bg-accent text-white shadow-lg border-accent hover:bg-secondary hover:text-white" 
-                      : "text-primary dark:text-slate-300 hover:bg-secondary hover:text-white hover:border-secondary"
+                      : "text-primary dark:text-slate-300 hover:bg-secondary hover:text-white hover:border-secondary transition-colors"
                   )}
                 >
                   {lvl.label}
@@ -511,7 +510,7 @@ export default function MeetingsPage() {
                       <div className="absolute top-6 left-6 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-50">
                         <Dialog open={editMeeting?.id === meeting.id} onOpenChange={(open) => !open && setEditMeeting(null)}>
                           <DialogTrigger asChild>
-                            <Button onClick={() => setEditMeeting(meeting)} size="icon" className="bg-white dark:bg-slate-800 text-primary dark:text-white rounded-full shadow-lg border border-slate-100 dark:border-slate-700 hover:bg-secondary hover:text-white">
+                            <Button onClick={() => setEditMeeting(meeting)} size="icon" className="bg-white dark:bg-slate-800 text-primary dark:text-white rounded-full shadow-lg border border-slate-100 dark:border-slate-700 hover:bg-secondary hover:text-white transition-colors">
                               <Edit className="w-4 h-4" />
                             </Button>
                           </DialogTrigger>
@@ -637,7 +636,7 @@ export default function MeetingsPage() {
 
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
-                            <Button size="icon" className="bg-red-500 text-white rounded-full shadow-lg hover:bg-red-600 border border-white/20">
+                            <Button size="icon" className="bg-red-500 text-white rounded-full shadow-lg hover:bg-red-600 border border-white/20 transition-colors">
                               <Trash2 className="w-4 h-4" />
                             </Button>
                           </AlertDialogTrigger>
@@ -646,7 +645,7 @@ export default function MeetingsPage() {
                             <AlertDialogDescription className="text-base">Permanently remove this assembly record from the public archives? This action is irreversible.</AlertDialogDescription>
                             <AlertDialogFooter className="mt-6">
                               <AlertDialogCancel className="rounded-xl h-11 font-bold">Cancel</AlertDialogCancel>
-                              <AlertDialogAction onClick={() => handleDeleteMeeting(meeting.id)} className="bg-red-500 hover:bg-red-600 rounded-xl h-11 font-bold border-none text-white">Confirm Purge</AlertDialogAction>
+                              <AlertDialogAction onClick={() => handleDeleteMeeting(meeting.id)} className="bg-red-500 hover:bg-red-600 rounded-xl h-11 font-bold border-none text-white transition-all">Confirm Purge</AlertDialogAction>
                             </AlertDialogFooter>
                           </AlertDialogContent>
                         </AlertDialog>
@@ -719,7 +718,7 @@ export default function MeetingsPage() {
                           <div className="flex flex-col">
                             <div className="absolute right-6 top-6 z-50">
                               <DialogClose asChild>
-                                <Button variant="ghost" size="icon" className="rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-primary h-10 w-10 border border-slate-200 dark:border-slate-700 shadow-lg">
+                                <Button variant="ghost" size="icon" className="rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-primary h-10 w-10 border border-slate-200 dark:border-slate-700 shadow-lg transition-all">
                                   <X className="w-6 h-6" />
                                 </Button>
                               </DialogClose>
@@ -817,77 +816,6 @@ export default function MeetingsPage() {
           )}
         </div>
       </section>
-
-      {/* Leader Brief Profile Dialog */}
-      <Dialog open={!!selectedLeaderProfile} onOpenChange={(open) => !open && setSelectedLeaderProfile(null)}>
-        <DialogContent className="max-w-md rounded-[2.5rem] p-0 overflow-hidden border-none shadow-2xl bg-white dark:bg-slate-950">
-          <DialogHeader className="sr-only">
-            <DialogTitle>Official Personnel Profile</DialogTitle>
-            <DialogDescription>Institutional credentials and operational region of the selected official.</DialogDescription>
-          </DialogHeader>
-          {selectedLeaderProfile && (
-            <div className="flex flex-col">
-              <div className="relative w-full h-48 bg-primary">
-                <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
-                <div className="absolute inset-0 bg-gradient-to-t from-primary via-primary/20 to-transparent"></div>
-                <div className="absolute -bottom-16 left-1/2 -translate-x-1/2">
-                   <div className="relative w-32 h-32 rounded-[2rem] border-4 border-white dark:border-slate-900 shadow-2xl overflow-hidden bg-slate-100 dark:bg-slate-800">
-                     <Image 
-                        src={selectedLeaderProfile.imageId?.startsWith('data:') ? selectedLeaderProfile.imageId : (PlaceHolderImages.find(i => i.id === selectedLeaderProfile.imageId)?.imageUrl || (selectedLeaderProfile.gender === 'female' ? '/dummy w.png' : '/dummy m.png'))} 
-                        alt={selectedLeaderProfile.name} 
-                        fill 
-                        className="object-cover" 
-                      />
-                   </div>
-                </div>
-                <div className="absolute top-4 left-6">
-                   <Badge className="bg-accent text-white font-bold uppercase text-[9px] px-3 py-1 rounded-full border-none shadow-lg">
-                      {selectedLeaderProfile.level === 'Central' ? 'Central Council' : `${selectedLeaderProfile.level} Council`}
-                   </Badge>
-                </div>
-              </div>
-
-              <div className="pt-20 pb-10 px-8 text-center space-y-6">
-                <div className="space-y-1">
-                  <h3 className="text-3xl font-headline font-bold text-primary dark:text-white leading-tight">
-                    {selectedLeaderProfile.name}
-                  </h3>
-                  <p className="text-accent font-black uppercase text-xs tracking-[0.2em]">
-                    {selectedLeaderProfile.title}
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-1 gap-4 pt-4 border-t border-slate-100 dark:border-slate-800">
-                  <div className="flex items-center justify-center gap-3 text-slate-500 dark:text-slate-400 font-bold uppercase text-[10px] tracking-widest">
-                    <MapPin className="w-3.5 h-3.5 text-accent" />
-                    <span>
-                      {selectedLeaderProfile.districtName ? `${selectedLeaderProfile.districtName}, ` : ''}
-                      {selectedLeaderProfile.parentRegion || 'National HQ'}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-center gap-3 text-slate-500 dark:text-slate-400 font-bold uppercase text-[10px] tracking-widest">
-                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
-                    <span>Verified Official</span>
-                  </div>
-                </div>
-
-                <div className="pt-4">
-                   <p className="text-xs text-slate-400 italic leading-relaxed px-4">
-                     "Committed to the mission of constitutional literacy and legal advocacy under the HRAT charter."
-                   </p>
-                </div>
-
-                <Button 
-                  onClick={() => setSelectedLeaderProfile(null)}
-                  className="w-full h-12 rounded-xl bg-slate-50 dark:bg-slate-900 text-slate-400 hover:text-secondary transition-colors font-bold uppercase text-[10px] tracking-widest border border-slate-100 dark:border-slate-800"
-                >
-                  Close Profile
-                </Button>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
 
       <Footer />
     </main>

@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useEffect, useState } from 'react'
@@ -39,14 +38,11 @@ export function Navbar() {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       setIsIframe(window.self !== window.top)
-      
       const handleHashChange = () => {
-        setActiveHash(window.location.hash.replace('#', ''))
+        setActiveHash(window.location.hash || '')
       }
-      
       window.addEventListener('hashchange', handleHashChange)
       handleHashChange()
-
       return () => window.removeEventListener('hashchange', handleHashChange)
     }
   }, [])
@@ -69,32 +65,25 @@ export function Navbar() {
         {publicLinks.map((link) => {
           const isHashLink = link.href.includes('#')
           const linkPath = isHashLink ? link.href.split('#')[0] || '/' : link.href
-          const linkHash = isHashLink ? link.href.split('#')[1] : ''
+          const linkHash = isHashLink ? '#' + link.href.split('#')[1] : ''
           
           let isActive = false
           if (isHashLink) {
-            isActive = (pathname === linkPath) && activeHash === linkHash
+            isActive = pathname === linkPath && activeHash === linkHash
           } else {
-            if (link.href === '/') {
-              isActive = (pathname === '/') && (activeHash === '')
-            } else {
-              isActive = pathname === link.href
-            }
+            isActive = pathname === link.href && activeHash === ''
           }
 
           return (
             <Link 
               key={link.name} 
               href={link.href}
-              onClick={() => {
-                if (isHashLink) setActiveHash(linkHash)
-                else setActiveHash('')
-              }}
+              onClick={() => isHashLink ? setActiveHash(linkHash) : setActiveHash('')}
               className={cn(
-                "whitespace-nowrap flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[13px] font-bold transition-all",
+                "whitespace-nowrap flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[13px] font-bold transition-all",
                 isActive 
-                  ? "bg-accent text-white shadow-md ring-1 ring-accent/20" 
-                  : "text-muted-foreground hover:text-white hover:bg-secondary"
+                  ? "bg-accent text-white shadow-lg ring-1 ring-accent/20" 
+                  : "text-muted-foreground hover:text-white hover:bg-secondary transition-colors"
               )}
             >
               <link.icon className={cn("w-3.5 h-3.5", isActive ? "text-white" : "text-muted-foreground")} />

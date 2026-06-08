@@ -193,7 +193,6 @@ export default function MembersPage() {
       return
     }
 
-    // Pattern Validation: 6 letters + 4 digits
     const idPattern = /^[A-Z]{6}[0-9]{4}$/;
     if (!idPattern.test(newMember.memberId)) {
       toast({ 
@@ -249,14 +248,12 @@ export default function MembersPage() {
       m.memberId?.toLowerCase().includes(search.toLowerCase());
     
     let matchesLevel = levelFilter === "All" || m.level === levelFilter;
-    
     if (selectedState) {
       matchesLevel = m.stateName === selectedState;
       if (selectedDistrict) {
         matchesLevel = matchesLevel && m.districtName === selectedDistrict;
       }
     }
-    
     return matchesSearch && matchesLevel;
   })
 
@@ -300,7 +297,6 @@ export default function MembersPage() {
                   <DialogTitle className="text-2xl font-headline font-bold text-primary dark:text-white">New Member Record</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-6 py-4">
-                  {/* Photo & Basic Info */}
                   <div className="grid md:grid-cols-3 gap-6 items-start">
                     <div className="flex flex-col items-center gap-3">
                       <div className="relative w-32 h-32 rounded-full bg-slate-50 dark:bg-slate-800 overflow-hidden border-2 border-dashed border-slate-300">
@@ -339,7 +335,6 @@ export default function MembersPage() {
                     </div>
                   </div>
 
-                  {/* Designation Category & Title */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 rounded-3xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
                     <div className="space-y-2">
                       <Label className="text-[10px] uppercase font-bold text-accent">Designation Category</Label>
@@ -366,7 +361,6 @@ export default function MembersPage() {
                     )}
                   </div>
 
-                  {/* ID & Term Block */}
                   <div className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-3xl space-y-4 border border-slate-100 dark:border-slate-800 shadow-inner">
                     <div className="grid grid-cols-1 gap-4">
                       <div className="space-y-2">
@@ -383,14 +377,12 @@ export default function MembersPage() {
                             type="button" 
                             variant="outline" 
                             size="icon" 
-                            className="h-11 w-11 shrink-0 rounded-xl border-dashed hover:bg-secondary hover:text-white"
+                            className="h-11 w-11 shrink-0 rounded-xl border-dashed hover:bg-secondary hover:text-white transition-colors"
                             onClick={() => setNewMember({...newMember, memberId: generateMemberId()})}
-                            title="Auto-Generate ID"
                           >
-                            <Sparkles className="w-4 h-4 text-accent group-hover:text-white" />
+                            <Sparkles className="w-4 h-4 text-accent" />
                           </Button>
                         </div>
-                        <p className="text-[9px] text-slate-400 font-bold uppercase">Format: 6 Letters + 4 Digits</p>
                       </div>
                     </div>
                     
@@ -427,24 +419,20 @@ export default function MembersPage() {
                     </div>
                   </div>
 
-                  {/* Contact & Location Block */}
                   <div className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                        <div className="space-y-2"><Label>Email</Label><Input type="email" value={newMember.email} onChange={e => setNewMember({...newMember, email: e.target.value})} /></div>
                        <div className="space-y-2"><Label>Phone</Label><Input value={newMember.phone} onChange={e => setNewMember({...newMember, phone: e.target.value})} /></div>
                     </div>
-
                     <div className="space-y-2">
                       <Label>Full Address</Label>
                       <Input placeholder="House No, Village, Lane" value={newMember.address} onChange={e => setNewMember({...newMember, address: e.target.value})} />
                     </div>
-
                     <div className="grid grid-cols-3 gap-4">
                       <div className="space-y-2"><Label>Post Office</Label><Input value={newMember.postOffice} onChange={e => setNewMember({...newMember, postOffice: e.target.value})} /></div>
                       <div className="space-y-2"><Label>Police Station</Label><Input value={newMember.policeStation} onChange={e => setNewMember({...newMember, policeStation: e.target.value})} /></div>
                       <div className="space-y-2"><Label>PIN Code</Label><Input value={newMember.pinCode} onChange={e => setNewMember({...newMember, pinCode: e.target.value})} /></div>
                     </div>
-
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label>Operational Level</Label>
@@ -463,7 +451,6 @@ export default function MembersPage() {
                         </div>
                       )}
                     </div>
-
                     {newMember.level === 'District' && newMember.stateName && (
                       <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
                         <Label>District</Label>
@@ -501,7 +488,7 @@ export default function MembersPage() {
                       "rounded-full px-4 h-8 text-[10px] font-bold transition-all border-slate-200 dark:border-slate-700",
                       levelFilter === level && !selectedState
                         ? "bg-accent text-white shadow-sm border-accent hover:bg-secondary hover:text-white" 
-                        : "text-primary dark:text-slate-300 hover:bg-secondary hover:text-white hover:border-secondary"
+                        : "text-primary dark:text-slate-300 hover:bg-secondary hover:text-white hover:border-secondary transition-colors"
                     )}
                   >
                     {level === 'All' ? 'All Levels' : level === 'National' ? 'Central Council' : `${level} Level`}
@@ -516,7 +503,7 @@ export default function MembersPage() {
                   <DropdownMenuTrigger asChild>
                     <Button variant={selectedState ? "default" : "outline"} className={cn(
                       "rounded-full px-4 h-8 text-[10px] font-bold flex items-center gap-2 transition-all",
-                      selectedState ? "bg-accent text-white hover:bg-secondary hover:text-white" : "text-primary dark:text-white border-slate-200 dark:border-slate-700 hover:bg-secondary hover:text-white hover:border-secondary"
+                      selectedState ? "bg-accent text-white hover:bg-secondary hover:text-white" : "text-primary dark:text-white border-slate-200 dark:border-slate-700 hover:bg-secondary hover:text-white hover:border-secondary transition-colors"
                     )}>
                       {selectedState || "Filter by State"} <ChevronDown className="w-3 h-3 opacity-50" />
                     </Button>
@@ -533,7 +520,7 @@ export default function MembersPage() {
                     <DropdownMenuTrigger asChild>
                       <Button variant={selectedDistrict ? "default" : "outline"} className={cn(
                         "rounded-full px-4 h-8 text-[10px] font-bold flex items-center gap-2 animate-in fade-in slide-in-from-left-2 transition-all",
-                        selectedDistrict ? "bg-accent text-white hover:bg-secondary hover:text-white" : "text-primary dark:text-white border-slate-200 dark:border-slate-700 hover:bg-secondary hover:text-white hover:border-secondary"
+                        selectedDistrict ? "bg-accent text-white hover:bg-secondary hover:text-white" : "text-primary dark:text-white border-slate-200 dark:border-slate-700 hover:bg-secondary hover:text-white hover:border-secondary transition-colors"
                       )}>
                         {selectedDistrict || "Select District"} <ChevronDown className="w-3 h-3 opacity-50" />
                       </Button>

@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState } from 'react'
@@ -8,10 +7,10 @@ import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogClose,
+  DialogDescription,
 } from "@/components/ui/dialog"
 
 const guides = [
@@ -78,15 +77,28 @@ export function KnowledgeCenter() {
 
   const handleAccessRepository = () => {
     if (!selectedGuide) return;
-    let url = 'https://bprd.nic.in/uploads/pdf/BNS%20Book_After%20Correction.pdf';
-    
-    if (selectedGuide.id === 'constitution') url = 'https://www.indiacode.nic.in/bitstream/123456789/19150/1/constitution_of_india.pdf';
-    else if (selectedGuide.id === 'womens-rights') url = 'https://clpr.org.in/wp-content/uploads/2024/12/Womens-Book_Accessible.pdf';
-    else if (selectedGuide.id === 'labor-laws') url = 'https://ncib.in/pdf/ncib_pdf/Labour%20Act.pdf';
-    else if (selectedGuide.id === 'rti') url = 'https://cic.gov.in/sites/default/files/RTI-Act_English.pdf';
-    
-    window.open(url, '_blank');
-  }
+    let url = "";
+    switch (selectedGuide.id) {
+      case "constitution":
+        url = "https://www.india.gov.in/my-government/constitution-of-india";
+        break;
+      case "womens-rights":
+        url = "https://clpr.org.in/wp-content/uploads/2024/12/Womens-Book_Accessible.pdf";
+        break;
+      case "labor-laws":
+        url = "https://clc.gov.in/clc/labour-law";
+        break;
+      case "rti":
+        url = "https://rti.dopt.gov.in/";
+        break;
+      case "manuals":
+        url = "https://bprd.nic.in/uploads/pdf/BNS%20Book_After%20Correction.pdf";
+        break;
+      default:
+        return;
+    }
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
 
   return (
     <section id="knowledge" className="py-16 md:py-24 bg-slate-50 dark:bg-slate-900">
@@ -103,7 +115,7 @@ export function KnowledgeCenter() {
           <Button 
             variant="outline" 
             asChild
-            className="border-primary text-primary hover:bg-secondary hover:text-white dark:border-slate-700 dark:text-slate-300 w-full md:w-auto font-bold"
+            className="border-primary text-primary hover:bg-secondary hover:text-white dark:border-slate-700 dark:text-slate-300 w-full md:w-auto font-bold transition-colors"
           >
             <a href="#search">View All Documentation</a>
           </Button>
@@ -134,7 +146,7 @@ export function KnowledgeCenter() {
                   Read More <ExternalLink className="w-3 h-3 md:w-4 md:h-4" />
                 </Button>
                 {guide.id === 'manuals' && (
-                  <Button size="sm" onClick={() => window.open('https://bprd.nic.in/uploads/pdf/BNS%20Book_After%20Correction.pdf', '_blank')} className="bg-primary text-white ml-auto text-xs h-8 md:h-9 hover:bg-secondary hover:text-white">
+                  <Button size="sm" onClick={() => window.open('https://bprd.nic.in/uploads/pdf/BNS%20Book_After%20Correction.pdf', '_blank')} className="bg-primary text-white ml-auto text-xs h-8 md:h-9 hover:bg-secondary hover:text-white transition-colors">
                     <Download className="w-3 h-3 md:w-4 md:h-4 mr-2" /> Download
                   </Button>
                 )}
@@ -145,63 +157,84 @@ export function KnowledgeCenter() {
       </div>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-2xl rounded-[2.5rem] p-0 overflow-hidden border-none shadow-2xl relative bg-white dark:bg-slate-950 max-h-[90vh] flex flex-col">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden rounded-[2.5rem] p-0 border-none shadow-2xl bg-white dark:bg-slate-950">
           <DialogHeader className="sr-only">
             <DialogTitle>{selectedGuide?.title || 'Guide Details'}</DialogTitle>
-            <DialogDescription>Comprehensive overview of human rights documentation.</DialogDescription>
+            <DialogDescription>A detailed overview of essential human rights and constitutional protections.</DialogDescription>
           </DialogHeader>
           
-          {selectedGuide && (
-            <div className="flex flex-col h-full overflow-hidden">
-              <div className="absolute right-6 top-6 z-50">
-                <DialogClose asChild>
-                  <Button variant="ghost" size="icon" className="rounded-full bg-black/5 hover:bg-black/10 text-primary h-10 w-10 border border-white/20 shadow-lg dark:bg-white/10 dark:text-white">
-                    <X className="w-6 h-6" />
-                  </Button>
-                </DialogClose>
-              </div>
+          <div className="absolute right-6 top-6 z-50">
+            <DialogClose asChild>
+              <Button variant="ghost" size="icon" className="rounded-full bg-black/10 hover:bg-black/20 dark:bg-white/10 dark:hover:bg-white/20 text-white dark:text-white h-10 w-10 backdrop-blur-xl border border-white/20 transition-all">
+                <X className="w-6 h-6" />
+              </Button>
+            </DialogClose>
+          </div>
 
-              <div className={`p-8 md:p-12 ${selectedGuide.color} relative shrink-0`}>
-                <div className="relative z-10 text-left">
-                  <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl w-fit shadow-sm mb-6">
-                    {React.cloneElement(selectedGuide.icon as React.ReactElement, { className: "w-10 h-10" })}
+          {selectedGuide && (
+            <div className="flex flex-col h-full overflow-y-auto no-scrollbar">
+              {/* Header Banner */}
+              <div className="relative bg-primary p-12 md:p-16 text-white overflow-hidden shrink-0">
+                <div className="absolute top-0 right-0 opacity-10 pointer-events-none transform translate-x-10 translate-y-[-10px]">
+                  {React.cloneElement(selectedGuide.icon as React.ReactElement, { className: "w-64 h-64 md:w-80 md:h-80" })}
+                </div>
+                <div className="relative z-10 space-y-6">
+                  <div className="inline-flex items-center gap-2 bg-accent/20 backdrop-blur-md px-4 py-1.5 rounded-full border border-accent/30">
+                    <ShieldCheck className="w-4 h-4 text-accent" />
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-accent">Official Legal Resource</span>
                   </div>
-                  <h2 className="text-3xl md:text-4xl font-headline font-bold text-primary dark:text-white mb-2 pr-12 leading-tight">
+                  <h2 className="text-4xl md:text-6xl font-headline font-bold leading-tight">
                     {selectedGuide.title}
                   </h2>
-                  <p className="text-lg text-slate-600 dark:text-slate-300 font-medium leading-relaxed">
-                    {selectedGuide.desc}
-                  </p>
                 </div>
               </div>
 
-              <div className="p-8 md:p-12 space-y-8 overflow-y-auto scrollbar-hide flex-1">
-                <div className="space-y-4">
-                  <h4 className="text-xs font-bold uppercase tracking-widest text-accent">Overview</h4>
-                  <p className="text-muted-foreground leading-relaxed text-base md:text-lg">
-                    {selectedGuide.overview}
+              {/* Main Content */}
+              <div className="p-8 md:p-12 space-y-12">
+                <div className="space-y-6">
+                  <h3 className="text-xs font-black uppercase tracking-[0.3em] text-accent">Institutional Overview</h3>
+                  <p className="text-xl md:text-2xl text-slate-700 dark:text-slate-300 leading-relaxed font-body font-medium italic">
+                    "{selectedGuide.overview}"
                   </p>
                 </div>
-                
-                <div className="space-y-4">
-                  <h4 className="text-xs font-bold uppercase tracking-widest text-accent">Key Areas of Focus</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {selectedGuide.features.map((feature, i) => (
-                      <div key={i} className="flex items-start gap-3 bg-slate-50 dark:bg-slate-900 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 group hover:border-accent/30 transition-colors">
-                        <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
-                        <span className="text-sm font-bold text-foreground">{feature}</span>
+
+                <div className="grid md:grid-cols-2 gap-12 pt-8 border-t border-slate-100 dark:border-slate-800">
+                   <div className="space-y-6">
+                      <h4 className="text-xs font-black uppercase tracking-[0.3em] text-primary dark:text-white flex items-center gap-2">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-500" /> Key Areas of Focus
+                      </h4>
+                      <ul className="space-y-4">
+                        {selectedGuide.features.map((feature, idx) => (
+                          <li key={idx} className="flex items-center gap-3 bg-slate-50 dark:bg-slate-900 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 group hover:border-accent transition-all">
+                             <span className="w-6 h-6 bg-accent text-white rounded-full flex items-center justify-center text-[10px] font-bold">{idx + 1}</span>
+                             <span className="font-bold text-slate-700 dark:text-slate-200">{feature}</span>
+                          </li>
+                        ))}
+                      </ul>
+                   </div>
+
+                   <div className="space-y-6">
+                      <h4 className="text-xs font-black uppercase tracking-[0.3em] text-primary dark:text-white">Why This Matters</h4>
+                      <div className="p-8 rounded-[2.5rem] bg-indigo-50 dark:bg-indigo-950/20 border border-indigo-100 dark:border-indigo-900/30">
+                        <p className="text-slate-600 dark:text-slate-400 leading-relaxed italic text-sm md:text-base">
+                          "Understanding your constitutional rights is the bedrock of democracy. This awareness empowers you to protect your dignity, support your community, and ensure that justice remains a fundamental promise for every citizen."
+                        </p>
                       </div>
-                    ))}
-                  </div>
+                   </div>
                 </div>
 
-                <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                  <Button 
+                {/* Footer Call to Action */}
+                <div className="pt-12">
+                   <Button 
+                    size="lg" 
                     onClick={handleAccessRepository}
-                    className="flex-1 bg-primary text-white font-bold py-6 rounded-xl hover:bg-secondary hover:text-white transition-all text-lg shadow-xl shadow-primary/10"
+                    className="w-full bg-accent text-white font-bold h-16 rounded-2xl text-lg hover:bg-secondary hover:text-white transition-all shadow-xl shadow-accent/20 group"
                   >
-                    Access Full Repository
+                    Access Full Repository <ExternalLink className="ml-2 w-5 h-5 group-hover:scale-110 transition-transform" />
                   </Button>
+                  <p className="text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-6">
+                    Verified Digital Record under HRAT Charter
+                  </p>
                 </div>
               </div>
             </div>

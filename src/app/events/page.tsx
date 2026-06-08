@@ -318,7 +318,7 @@ export default function EventsPage() {
                     "rounded-full px-6 font-bold transition-all border-slate-200 dark:border-slate-700",
                     filter === cat 
                       ? "bg-accent text-white shadow-lg border-accent hover:bg-secondary hover:text-white" 
-                      : "text-primary dark:text-slate-300 hover:bg-secondary hover:text-white hover:border-secondary"
+                      : "text-primary dark:text-slate-300 hover:bg-secondary hover:text-white hover:border-secondary transition-colors"
                   )}
                 >
                   {cat}
@@ -370,7 +370,7 @@ export default function EventsPage() {
                           <div className="absolute top-4 left-4 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
                             <Dialog>
                               <DialogTrigger asChild>
-                                <Button onClick={() => setEditEvent(event)} size="icon" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white hover:bg-secondary hover:text-white rounded-full shadow-lg border border-white/20">
+                                <Button onClick={() => setEditEvent(event)} size="icon" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white hover:bg-secondary hover:text-white rounded-full shadow-lg border border-white/20 transition-all">
                                   <Edit className="w-4 h-4" />
                                 </Button>
                               </DialogTrigger>
@@ -454,7 +454,7 @@ export default function EventsPage() {
 
                             <AlertDialog>
                               <AlertDialogTrigger asChild>
-                                <Button size="icon" className="bg-red-500/90 hover:bg-red-600 text-white rounded-full shadow-lg border border-white/20">
+                                <Button size="icon" className="bg-red-500/90 hover:bg-red-600 text-white rounded-full shadow-lg border border-white/20 transition-all">
                                   <Trash2 className="w-4 h-4" />
                                 </Button>
                               </AlertDialogTrigger>
@@ -487,7 +487,7 @@ export default function EventsPage() {
                         </p>
                       </CardContent>
                       <CardFooter className="p-8 pt-0 border-t border-slate-50 dark:border-slate-800 mt-auto">
-                        <Button variant="ghost" className="p-0 h-auto font-bold text-primary dark:text-white hover:text-secondary flex items-center gap-2 group/btn">
+                        <Button variant="ghost" className="p-0 h-auto font-bold text-primary dark:text-white hover:text-secondary flex items-center gap-2 group/btn transition-colors">
                           View Event Details <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-2 transition-transform" />
                         </Button>
                       </CardFooter>
