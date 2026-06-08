@@ -153,7 +153,7 @@ export default function Home() {
                   <div key={i} className="flex flex-col sm:flex-row items-center gap-2 md:gap-3 text-white hover:opacity-80 transition-opacity cursor-default justify-center">
                     <div className="p-2 md:p-3 bg-white/5 rounded-lg md:rounded-xl shrink-0">{stat.icon}</div>
                     <div className="space-y-0 text-center sm:text-left">
-                      <p className="text-xs md:text-sm font-bold font-headline leading-none">{stat.count}</p>
+                      <p className="text-xs md:sm font-bold font-headline leading-none">{stat.count}</p>
                       <p className="text-[7px] md:text-[8px] font-bold uppercase tracking-[0.1em] text-slate-400 leading-tight">
                         {stat.label}
                       </p>
@@ -269,14 +269,14 @@ export default function Home() {
               </p>
 
               {/* Official Bank Account Details Box */}
-              <div className="mt-10 bg-white/5 backdrop-blur-md p-8 rounded-[2.5rem] border border-white/10 max-w-xl mx-auto shadow-2xl relative group overflow-hidden">
+              <div className="mt-10 bg-white/5 backdrop-blur-md p-8 rounded-[2.5rem] border border-white/10 max-w-md mx-auto shadow-2xl relative group overflow-hidden">
                 <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/10 rounded-full -mr-12 -mt-12 blur-2xl"></div>
                 <div className="relative z-10 flex flex-col items-center">
                   <div className="bg-emerald-500/20 p-3 rounded-2xl mb-4 group-hover:scale-110 transition-transform">
                     <Building2 className="w-8 h-8 text-emerald-400" />
                   </div>
                   <h3 className="text-xs font-black uppercase tracking-[0.3em] text-emerald-400 mb-6 flex items-center gap-2">
-                     Official Registry Ledger
+                     Official Bank Details
                   </h3>
                   <div className="w-full space-y-4 font-body">
                     <div className="text-center pb-4 border-b border-white/5">
