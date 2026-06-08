@@ -165,8 +165,12 @@ export function KnowledgeCenter() {
           
           <div className="absolute right-6 top-6 z-50">
             <DialogClose asChild>
-              <Button variant="ghost" size="icon" className="rounded-full bg-black/10 hover:bg-black/20 dark:bg-white/10 dark:hover:bg-white/20 text-white h-10 w-10 backdrop-blur-xl border border-white/20 transition-all">
-                <X className="w-6 h-6" />
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="rounded-full bg-blue-600 hover:bg-blue-500 text-white h-10 w-10 shadow-xl border-2 border-white/20 transition-all hover:scale-110 hover:rotate-90 duration-300 active:scale-95"
+              >
+                <X className="w-6 h-6 text-white" />
               </Button>
             </DialogClose>
           </div>
