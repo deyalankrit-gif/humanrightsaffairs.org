@@ -40,10 +40,8 @@ import {
   Loader2, 
   Camera,
   IndianRupee,
-  Globe,
-  QrCode,
-  ArrowRight,
   ShieldCheck,
+  ArrowRight,
   Hash
 } from 'lucide-react'
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore'
@@ -104,7 +102,7 @@ export function DonationDialog({ children, defaultAmount, initialStep = 'details
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setLoading(true)
-    const transactionId = donationData?.transactionId || `TXN-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
+    const transactionId = `TXN-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
     
     const data = {
       ...values,
@@ -125,26 +123,26 @@ export function DonationDialog({ children, defaultAmount, initialStep = 'details
   const handleFinalSubmission = async (data: any) => {
     setLoading(true)
     
-    // Safety check for transactionId (especially if starting at QR step)
-    const transactionId = data?.transactionId || donationData?.transactionId || `TXN-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
+    // Robust safety check for data and transactionId
+    const safeTransactionId = data?.transactionId || donationData?.transactionId || `TXN-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
     
     const finalData = {
-      name: data?.name || form.getValues('name') || 'Valued Donor',
-      email: data?.email || form.getValues('email') || 'anonymous@hrat-india.org',
-      phone: data?.phone || form.getValues('phone') || 'N/A',
-      address: data?.address || form.getValues('address') || 'Direct Contribution',
-      pan: data?.pan || form.getValues('pan') || 'N/A',
-      aadhaar: data?.aadhaar || form.getValues('aadhaar') || 'N/A',
-      amount: data?.amount || form.getValues('amount') || defaultAmount || "0",
-      paymentMethod: data?.paymentMethod || form.getValues('paymentMethod') || 'UPI QR Code',
-      transactionId,
+      name: data?.name || form.getValues('name') || donationData?.name || 'Valued Donor',
+      email: data?.email || form.getValues('email') || donationData?.email || 'anonymous@hrat-india.org',
+      phone: data?.phone || form.getValues('phone') || donationData?.phone || 'N/A',
+      address: data?.address || form.getValues('address') || donationData?.address || 'Direct Contribution',
+      pan: data?.pan || form.getValues('pan') || donationData?.pan || 'N/A',
+      aadhaar: data?.aadhaar || form.getValues('aadhaar') || donationData?.aadhaar || 'N/A',
+      amount: data?.amount || form.getValues('amount') || donationData?.amount || defaultAmount || "0",
+      paymentMethod: data?.paymentMethod || form.getValues('paymentMethod') || donationData?.paymentMethod || 'Instant UPI QR Code',
+      transactionId: safeTransactionId,
       status: 'completed',
       createdAt: serverTimestamp(),
-      timestamp: data?.timestamp || new Date().toLocaleString(),
-      photo: data?.photo || photo
+      timestamp: data?.timestamp || donationData?.timestamp || new Date().toLocaleString(),
+      photo: data?.photo || donationData?.photo || photo
     }
     
-    const docRef = doc(db, "donations", transactionId)
+    const docRef = doc(db, "donations", safeTransactionId)
     
     setDoc(docRef, finalData)
       .then(() => {
@@ -214,7 +212,7 @@ export function DonationDialog({ children, defaultAmount, initialStep = 'details
       <DialogTrigger asChild>
         {children}
       </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto rounded-[2rem] border-none shadow-2xl">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto rounded-[2.5rem] border-none shadow-2xl">
         <DialogHeader>
           <DialogTitle className="text-3xl font-headline font-bold text-primary flex items-center gap-3">
             {step === 'details' && "Donor Information"}
@@ -224,7 +222,7 @@ export function DonationDialog({ children, defaultAmount, initialStep = 'details
               <Image src="/HRAT%20Logo.jpeg" alt="HRAT Logo" fill className="object-contain" />
             </div>
           </DialogTitle>
-          <DialogDescription className="text-base">
+          <DialogDescription className="text-base font-medium">
             {step === 'details' && "Specify your contribution details and preferred payment method."}
             {step === 'qr' && `Please scan to donate ₹${donationData?.amount || defaultAmount || form.getValues('amount')} via UPI.`}
             {step === 'success' && "Thank you for your contribution to human rights."}
