@@ -11,7 +11,7 @@ import { DocSearch } from '@/components/doc-search'
 import { MemberGrievances } from '@/components/member-grievances'
 import { Footer } from '@/components/footer'
 import { Button } from '@/components/ui/button'
-import { Shield, Scale, Users, HeartHandshake, ArrowRight, Gavel, CheckCircle2, MessageSquareText } from 'lucide-react'
+import { Shield, Scale, Users, HeartHandshake, ArrowRight, Gavel, CheckCircle2, MessageSquareText, Building2 } from 'lucide-react'
 import { DonationDialog } from '@/components/donation-dialog'
 import { Typewriter } from '@/components/typewriter'
 import { PlaceHolderImages } from '@/lib/placeholder-images'
@@ -267,6 +267,35 @@ export default function Home() {
               <p className="text-sm md:text-xl text-slate-300 leading-relaxed max-w-2xl mx-auto font-medium">
                 Your contributions help us provide free legal aid to the marginalized and run awareness campaigns across rural India. All donations are tax-exempt under 80G.
               </p>
+
+              {/* Official Bank Account Details Box */}
+              <div className="mt-10 bg-white/5 backdrop-blur-md p-8 rounded-[2.5rem] border border-white/10 max-w-xl mx-auto shadow-2xl relative group overflow-hidden">
+                <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/10 rounded-full -mr-12 -mt-12 blur-2xl"></div>
+                <div className="relative z-10 flex flex-col items-center">
+                  <div className="bg-emerald-500/20 p-3 rounded-2xl mb-4 group-hover:scale-110 transition-transform">
+                    <Building2 className="w-8 h-8 text-emerald-400" />
+                  </div>
+                  <h3 className="text-xs font-black uppercase tracking-[0.3em] text-emerald-400 mb-6 flex items-center gap-2">
+                     Official Registry Ledger
+                  </h3>
+                  <div className="w-full space-y-4 font-body">
+                    <div className="text-center pb-4 border-b border-white/5">
+                      <p className="text-xl font-bold text-white">State Bank of India</p>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">(64519) Mangal Deep Island Khaki Estate Branch</p>
+                    </div>
+                    <div className="grid grid-cols-1 gap-3">
+                      <div className="flex justify-between items-center bg-black/20 p-4 rounded-2xl border border-white/5">
+                         <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">IFS Code</span>
+                         <span className="font-mono text-lg font-bold text-accent">SBIN0064519</span>
+                      </div>
+                      <div className="flex justify-between items-center bg-black/20 p-4 rounded-2xl border border-white/5">
+                         <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Account No</span>
+                         <span className="font-mono text-lg font-bold text-accent">44784606147</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
               
               <div className="pt-8 flex flex-col items-center space-y-8">
                 <div className="flex flex-col items-center space-y-4">
