@@ -1,3 +1,4 @@
+
 import Image from 'next/image'
 import { Mail, Phone, MapPin, Facebook, Twitter, Instagram, Youtube } from 'lucide-react'
 import Link from 'next/link'
@@ -81,7 +82,7 @@ export function Footer() {
             <h4 className="text-lg font-headline font-bold mb-6 text-accent">Legal Support</h4>
             <ul className="space-y-4 text-primary-foreground/80">
               <li><Link href="#" className="hover:text-accent transition-colors font-medium">Pro-Bono Services</Link></li>
-              <li><Link href="#" className="hover:text-accent transition-colors font-medium">Filing an FIR</Link></li>
+              <li><Link href="/legal/fir-format" className="hover:text-accent transition-colors font-medium">Filing an FIR</Link></li>
               <li><Link href="#" className="hover:text-accent transition-colors font-medium">RTI Assistance</Link></li>
               <li><Link href="#" className="hover:text-accent transition-colors font-medium">Bail Procedures</Link></li>
               <li><Link href="#" className="hover:text-accent transition-colors font-medium">Privacy Policy</Link></li>
@@ -102,7 +103,7 @@ export function Footer() {
                 </li>
                 <li className="flex gap-3">
                   <Mail className="w-5 h-5 text-accent shrink-0" />
-                  <a href="mailto:humanrightsaffairstrust@gmail.com" className="text-sm hover:text-accent transition-colors">humanrightsaffairstrust@gmail.com</a>
+                  <a href="mailto:humanrightsaffairstrust@gmail.com" className="text-sm hover:text-accent transition-colors font-bold">humanrightsaffairstrust@gmail.com</a>
                 </li>
               </ul>
             </div>
@@ -120,7 +121,7 @@ export function Footer() {
                 </li>
                 <li className="flex gap-3">
                   <Mail className="w-5 h-5 text-accent shrink-0" />
-                  <a href="mailto:hrat.wb.chairman@gmail.com" className="text-sm hover:text-accent transition-colors">hrat.wb.chairman@gmail.com</a>
+                  <a href="mailto:hrat.wb.chairman@gmail.com" className="text-sm hover:text-accent transition-colors font-bold">hrat.wb.chairman@gmail.com</a>
                 </li>
               </ul>
             </div>
@@ -140,3 +141,4 @@ export function Footer() {
     </footer>
   )
 }
+    
