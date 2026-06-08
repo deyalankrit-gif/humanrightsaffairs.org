@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo, useEffect, useState } from 'react'
@@ -272,7 +273,7 @@ export default function ExpensesManagementPage() {
                      </div>
                    </div>
                    <DialogFooter>
-                     <Button onClick={handleAddExpense} disabled={isActionLoading} className="w-full h-11 rounded-xl bg-red-500 mt-4">Commit to Ledger</Button>
+                     <Button onClick={handleAddExpense} disabled={isActionLoading} className="w-full h-11 rounded-xl bg-red-500 mt-4 text-white">Commit to Ledger</Button>
                    </DialogFooter>
                 </DialogContent>
               </Dialog>
@@ -316,7 +317,7 @@ export default function ExpensesManagementPage() {
                       <div className="p-5 bg-slate-50 dark:bg-slate-800 md:w-44 text-center border-r border-slate-100 flex flex-col items-center justify-center shrink-0">
                          <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Amount</p>
                          <p className="text-2xl font-headline font-bold text-primary dark:text-white leading-none mb-2">₹{expense.amount?.toLocaleString()}</p>
-                         <Badge className={cn("text-[8px] font-bold px-2 py-0.5 uppercase rounded-full", expense.status === 'Paid' ? 'bg-emerald-500' : 'bg-amber-500')}>
+                         <Badge className={cn("text-[8px] font-bold px-2 py-0.5 uppercase rounded-full", expense.status === 'Paid' ? 'bg-emerald-500 text-white' : 'bg-amber-500 text-white')}>
                            {expense.status}
                          </Badge>
                       </div>
@@ -389,7 +390,7 @@ export default function ExpensesManagementPage() {
                                   </div>
                                 </div>
                               )}
-                              <Button onClick={handleUpdate} disabled={isActionLoading} className="w-full h-11 rounded-xl bg-primary text-white">Commit Changes</Button>
+                              <Button onClick={handleUpdate} disabled={isActionLoading} className="w-full h-11 rounded-xl bg-primary text-primary-foreground">Commit Changes</Button>
                             </DialogContent>
                           </Dialog>
                           <Button variant="ghost" size="sm" onClick={() => handleDelete(expense.id)} className="h-8 rounded-lg text-slate-400 hover:text-red-500"><Trash2 className="w-3 h-3" /></Button>

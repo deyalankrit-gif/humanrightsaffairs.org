@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useEffect } from 'react'
@@ -308,7 +309,7 @@ export default function MeetingsPage() {
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
-      <section className="pt-40 pb-20 bg-primary text-white relative overflow-hidden">
+      <section className="pt-40 pb-20 bg-primary text-primary-foreground relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-full opacity-5 pointer-events-none">
           <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-accent rounded-full blur-[100px]"></div>
           <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-secondary rounded-full blur-[100px]"></div>
@@ -510,7 +511,7 @@ export default function MeetingsPage() {
                       <div className="absolute top-6 left-6 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-50">
                         <Dialog open={editMeeting?.id === meeting.id} onOpenChange={(open) => !open && setEditMeeting(null)}>
                           <DialogTrigger asChild>
-                            <Button onClick={() => setEditMeeting(meeting)} size="icon" className="bg-white dark:bg-slate-800 text-primary dark:text-white rounded-full shadow-lg border border-slate-100 dark:border-slate-700 hover:bg-secondary hover:text-white transition-colors">
+                            <Button onClick={() => setEditMeeting(meeting)} size="icon" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-full shadow-lg border border-slate-100 dark:border-slate-700 hover:bg-secondary hover:text-white transition-colors">
                               <Edit className="w-4 h-4" />
                             </Button>
                           </DialogTrigger>
@@ -629,7 +630,7 @@ export default function MeetingsPage() {
                               </div>
                             )}
                             <DialogFooter>
-                              <Button onClick={handleUpdateMeeting} disabled={isActionLoading} className="w-full bg-primary text-white h-12 rounded-xl font-bold hover:bg-secondary hover:text-white transition-all">Save Official Changes</Button>
+                              <Button onClick={handleUpdateMeeting} disabled={isActionLoading} className="w-full bg-primary text-primary-foreground h-12 rounded-xl font-bold hover:bg-secondary hover:text-white transition-all">Save Official Changes</Button>
                             </DialogFooter>
                           </DialogContent>
                         </Dialog>
@@ -660,7 +661,7 @@ export default function MeetingsPage() {
                         <Badge className={cn(
                           "font-bold text-[10px] px-3",
                           meeting.status === 'Upcoming' ? 'bg-emerald-500 text-white' : 
-                          meeting.status === 'Completed' ? 'bg-primary text-white dark:text-slate-900 dark:bg-white' : 'bg-red-500 text-white'
+                          meeting.status === 'Completed' ? 'bg-primary text-primary-foreground dark:text-slate-900 dark:bg-white' : 'bg-red-500 text-white'
                         )}>
                           {meeting.status}
                         </Badge>

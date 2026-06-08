@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState } from 'react'
@@ -146,7 +147,7 @@ export function KnowledgeCenter() {
                   Read More <ExternalLink className="w-3 h-3 md:w-4 md:h-4" />
                 </Button>
                 {guide.id === 'manuals' && (
-                  <Button size="sm" onClick={() => window.open('https://bprd.nic.in/uploads/pdf/BNS%20Book_After%20Correction.pdf', '_blank')} className="bg-primary text-white ml-auto text-xs h-8 md:h-9 hover:bg-secondary hover:text-white transition-colors">
+                  <Button size="sm" onClick={() => window.open('https://bprd.nic.in/uploads/pdf/BNS%20Book_After%20Correction.pdf', '_blank')} className="bg-primary text-primary-foreground ml-auto text-xs h-8 md:h-9 hover:bg-secondary hover:text-white transition-colors">
                     <Download className="w-3 h-3 md:w-4 md:h-4 mr-2" /> Download
                   </Button>
                 )}
@@ -174,7 +175,7 @@ export function KnowledgeCenter() {
           {selectedGuide && (
             <div className="flex flex-col h-full overflow-y-auto no-scrollbar">
               {/* Header Banner */}
-              <div className="relative bg-primary p-12 md:p-16 text-white overflow-hidden shrink-0">
+              <div className="relative bg-primary p-12 md:p-16 text-primary-foreground overflow-hidden shrink-0">
                 <div className="absolute top-0 right-0 opacity-10 pointer-events-none transform translate-x-10 translate-y-[-10px]">
                   {React.cloneElement(selectedGuide.icon as React.ReactElement, { className: "w-64 h-64 md:w-80 md:h-80" })}
                 </div>
