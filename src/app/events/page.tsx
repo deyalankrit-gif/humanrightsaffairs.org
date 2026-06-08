@@ -535,6 +535,11 @@ export default function EventsPage() {
       {/* Detailed Event Modal */}
       <Dialog open={!!selectedEventDetails} onOpenChange={(open) => !open && setSelectedEventDetails(null)}>
         <DialogContent className="max-w-5xl p-0 border-none shadow-2xl rounded-[2.5rem] overflow-hidden bg-white dark:bg-slate-950 flex flex-col [&>button]:hidden max-h-[90vh]">
+          <DialogHeader className="sr-only">
+            <DialogTitle>{selectedEventDetails?.title || 'Event Details'}</DialogTitle>
+            <DialogDescription>Detailed view of organizational mission impact.</DialogDescription>
+          </DialogHeader>
+          
           <div className="absolute right-6 top-6 z-50">
             <DialogClose asChild>
               <Button 
@@ -652,7 +657,7 @@ export default function EventsPage() {
               </div>
             </div>
           )}
-        </DialogContent>
+        </div>
       </Dialog>
 
       <Footer />
