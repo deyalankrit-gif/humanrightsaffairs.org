@@ -157,7 +157,7 @@ export function KnowledgeCenter() {
       </div>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden rounded-[2.5rem] p-0 border-none shadow-2xl bg-white dark:bg-slate-950 flex flex-col">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden rounded-[2.5rem] p-0 border-none shadow-2xl bg-white dark:bg-slate-950 flex flex-col [&>button]:hidden">
           <DialogHeader className="sr-only">
             <DialogTitle>{selectedGuide?.title || 'Guide Details'}</DialogTitle>
             <DialogDescription>Detailed human rights documentation.</DialogDescription>
