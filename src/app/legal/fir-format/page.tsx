@@ -13,7 +13,8 @@ import {
   Scale, 
   Info,
   CheckCircle2,
-  Download
+  Download,
+  BadgeCheck
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -90,7 +91,9 @@ export default function FIRFormatPage() {
             
             {/* Disclaimer Alert */}
             <div className="mb-12 bg-amber-50 dark:bg-amber-950/20 border-2 border-amber-200 dark:border-amber-900 p-6 rounded-[2rem] flex gap-4 items-start print:hidden">
-              <Info className="w-6 h-6 text-amber-600 shrink-0 mt-1" />
+              <div className="p-3 bg-amber-100 rounded-xl">
+                <Info className="w-6 h-6 text-amber-600 shrink-0" />
+              </div>
               <div className="space-y-1">
                 <p className="font-bold text-amber-900 dark:text-amber-400 text-sm uppercase tracking-wider">Note to Citizens</p>
                 <p className="text-amber-800/80 dark:text-amber-400/80 text-sm leading-relaxed italic">
@@ -250,4 +253,3 @@ export default function FIRFormatPage() {
     </main>
   )
 }
-    
