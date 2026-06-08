@@ -120,7 +120,7 @@ export function MemberGrievances() {
     <div className="max-w-4xl mx-auto px-4">
       <Card className="border-none shadow-2xl rounded-[2.5rem] overflow-hidden bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
         <div className="grid md:grid-cols-5 h-full">
-          <div className="md:col-span-2 bg-primary dark:bg-slate-800 p-8 md:p-12 text-white flex flex-col justify-between relative overflow-hidden">
+          <div className="md:col-span-2 bg-primary dark:bg-slate-800 p-8 md:p-12 text-primary-foreground flex flex-col justify-between relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-accent/10 rounded-full -mr-16 -mt-16 blur-2xl"></div>
             <div className="relative z-10 space-y-8">
               <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center border border-white/10">
@@ -202,7 +202,7 @@ export function MemberGrievances() {
                 <Button 
                   type="submit" 
                   disabled={isSubmitting}
-                  className="w-full h-14 rounded-2xl bg-primary text-white font-bold text-lg hover:bg-secondary transition-all flex gap-2"
+                  className="w-full h-14 rounded-2xl bg-primary text-primary-foreground font-bold text-lg hover:bg-secondary transition-all flex gap-2"
                 >
                   {isSubmitting ? <Loader2 className="animate-spin" /> : <>Submit Formal Grievance <ArrowRight className="w-5 h-5" /></>}
                 </Button>
