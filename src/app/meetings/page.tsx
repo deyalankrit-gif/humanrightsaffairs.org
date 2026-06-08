@@ -821,9 +821,9 @@ export default function MeetingsPage() {
         </div>
       </section>
 
-      {/* Verified Leader Profile Modal - Refined for Square Proportion & Full Visibility */}
+      {/* Verified Leader Profile Modal - Optimized for Full Portrait Visibility */}
       <Dialog open={!!selectedLeaderProfile} onOpenChange={(open) => !open && setSelectedLeaderProfile(null)}>
-        <DialogContent className="max-w-[480px] w-full h-[480px] rounded-[2.5rem] border-none shadow-2xl bg-white dark:bg-slate-950 p-0 overflow-hidden [&>button]:hidden flex flex-col">
+        <DialogContent className="max-w-[480px] w-full h-[560px] rounded-[2.5rem] border-none shadow-2xl bg-white dark:bg-slate-950 p-0 overflow-hidden [&>button]:hidden flex flex-col">
           <DialogHeader className="sr-only">
             <DialogTitle>{selectedLeaderProfile?.name || 'Leader Profile'}</DialogTitle>
             <DialogDescription>Verified credentials and jurisdictional details of the official.</DialogDescription>
@@ -831,8 +831,8 @@ export default function MeetingsPage() {
           
           {selectedLeaderProfile && (
             <div className="flex flex-col h-full">
-              {/* Header Image - Taller to ensure head is not cut off */}
-              <div className="relative h-[260px] w-full shrink-0">
+              {/* Header Image - Expanded to ensure head is not cut off */}
+              <div className="relative h-[340px] w-full shrink-0">
                  <Image 
                    src={selectedLeaderProfile.imageId?.startsWith('data:') ? selectedLeaderProfile.imageId : (PlaceHolderImages.find(i => i.id === selectedLeaderProfile.imageId)?.imageUrl || (selectedLeaderProfile.gender === 'female' ? '/dummy w.png' : '/dummy m.png'))} 
                    alt={selectedLeaderProfile.name} 
@@ -848,7 +848,7 @@ export default function MeetingsPage() {
                       onClick={() => setSelectedLeaderProfile(null)}
                       className="rounded-full bg-blue-600 hover:bg-blue-500 text-white h-10 w-10 shadow-xl border-2 border-white/20 transition-all hover:scale-110 duration-300"
                     >
-                      <X className="w-6 h-6" />
+                      <X className="w-6 h-6 text-white" />
                     </Button>
                  </div>
 
@@ -866,7 +866,7 @@ export default function MeetingsPage() {
                  </div>
               </div>
               
-              {/* Info Section - Condensed to fit square profile */}
+              {/* Info Section - Condensed to fit vertically expanded profile */}
               <div className="p-5 flex-1 flex flex-col justify-between">
                  <div className="space-y-3">
                     <div className="grid grid-cols-1 gap-2">
