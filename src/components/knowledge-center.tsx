@@ -165,7 +165,7 @@ export function KnowledgeCenter() {
           
           <div className="absolute right-6 top-6 z-50">
             <DialogClose asChild>
-              <Button variant="ghost" size="icon" className="rounded-full bg-black/10 hover:bg-black/20 dark:bg-white/10 dark:hover:bg-white/20 text-white dark:text-white h-10 w-10 backdrop-blur-xl border border-white/20 transition-all">
+              <Button variant="ghost" size="icon" className="rounded-full bg-black/10 hover:bg-black/20 dark:bg-white/10 dark:hover:bg-white/20 text-white h-10 w-10 backdrop-blur-xl border border-white/20 transition-all">
                 <X className="w-6 h-6" />
               </Button>
             </DialogClose>
@@ -174,7 +174,7 @@ export function KnowledgeCenter() {
           {selectedGuide && (
             <div className="flex-1 overflow-y-auto scroll-smooth custom-scrollbar">
               <div className="flex flex-col">
-                <div className="relative bg-primary p-12 md:p-16 text-primary-foreground overflow-hidden shrink-0">
+                <div className="relative bg-gradient-to-br from-primary via-primary/95 to-accent/30 p-12 md:p-16 text-primary-foreground overflow-hidden shrink-0 border-b-8 border-accent/20">
                   <div className="absolute top-0 right-0 opacity-10 pointer-events-none transform translate-x-10 translate-y-[-10px]">
                     {React.cloneElement(selectedGuide.icon as React.ReactElement, { className: "w-64 h-64 md:w-80 md:h-80" })}
                   </div>
