@@ -124,13 +124,27 @@ export function DonationDialog({ children, defaultAmount, initialStep = 'details
 
   const handleFinalSubmission = async (data: any) => {
     setLoading(true)
+    
+    // Safety check for transactionId (especially if starting at QR step)
+    const transactionId = data?.transactionId || donationData?.transactionId || `TXN-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
+    
     const finalData = {
-      ...data,
+      name: data?.name || form.getValues('name') || 'Valued Donor',
+      email: data?.email || form.getValues('email') || 'anonymous@hrat-india.org',
+      phone: data?.phone || form.getValues('phone') || 'N/A',
+      address: data?.address || form.getValues('address') || 'Direct Contribution',
+      pan: data?.pan || form.getValues('pan') || 'N/A',
+      aadhaar: data?.aadhaar || form.getValues('aadhaar') || 'N/A',
+      amount: data?.amount || form.getValues('amount') || defaultAmount || "0",
+      paymentMethod: data?.paymentMethod || form.getValues('paymentMethod') || 'UPI QR Code',
+      transactionId,
       status: 'completed',
-      createdAt: serverTimestamp()
+      createdAt: serverTimestamp(),
+      timestamp: data?.timestamp || new Date().toLocaleString(),
+      photo: data?.photo || photo
     }
     
-    const docRef = doc(db, "donations", data.transactionId)
+    const docRef = doc(db, "donations", transactionId)
     
     setDoc(docRef, finalData)
       .then(() => {
@@ -170,7 +184,7 @@ export function DonationDialog({ children, defaultAmount, initialStep = 'details
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `Invoice-${donationData?.transactionId}.txt`
+    a.download = `Invoice-${donationData?.transactionId || 'Donation'}.txt`
     a.click()
   }
 
@@ -212,7 +226,7 @@ export function DonationDialog({ children, defaultAmount, initialStep = 'details
           </DialogTitle>
           <DialogDescription className="text-base">
             {step === 'details' && "Specify your contribution details and preferred payment method."}
-            {step === 'qr' && `Please scan to donate ₹${donationData?.amount} via UPI.`}
+            {step === 'qr' && `Please scan to donate ₹${donationData?.amount || defaultAmount || form.getValues('amount')} via UPI.`}
             {step === 'success' && "Thank you for your contribution to human rights."}
           </DialogDescription>
         </DialogHeader>
@@ -389,7 +403,7 @@ export function DonationDialog({ children, defaultAmount, initialStep = 'details
                   <ShieldCheck className="w-6 h-6 text-emerald-600 shrink-0 mt-1" />
                   <div>
                     <p className="font-bold text-emerald-900 leading-tight">Secure UPI Gateway</p>
-                    <p className="text-xs text-emerald-700">Please scan and pay ₹<strong>{donationData?.amount}</strong>. Once complete, click the button below to finalize your authenticated receipt.</p>
+                    <p className="text-xs text-emerald-700">Please scan and pay ₹<strong>{donationData?.amount || defaultAmount || form.getValues('amount')}</strong>. Once complete, click the button below to finalize your authenticated receipt.</p>
                   </div>
                 </div>
                 
@@ -458,8 +472,8 @@ export function DonationDialog({ children, defaultAmount, initialStep = 'details
                 <div className="text-right space-y-4">
                   <div>
                     <h6 className="font-bold text-slate-400 uppercase text-[9px] tracking-widest mb-2">Verification IDs</h6>
-                    <p className="text-slate-500 font-bold">PAN: <span className="text-primary font-mono">{donationData?.pan?.toUpperCase()}</span></p>
-                    <p className="text-slate-500 font-bold">Aadhaar: <span className="text-primary font-mono">**** **** {donationData?.aadhaar?.slice(-4)}</span></p>
+                    <p className="text-slate-500 font-bold">PAN: <span className="text-primary font-mono">{donationData?.pan?.toUpperCase() || 'N/A'}</span></p>
+                    <p className="text-slate-500 font-bold">Aadhaar: <span className="text-primary font-mono">**** **** {donationData?.aadhaar?.slice(-4) || 'XXXX'}</span></p>
                   </div>
                   <div className="bg-emerald-50 p-3 rounded-xl inline-block border border-emerald-100">
                     <p className="text-emerald-700 font-bold text-[10px] uppercase tracking-wider italic">Exempt under Section 80G</p>
