@@ -239,7 +239,7 @@ export function MembershipRegistrationDialog({ children }: { children: React.Rea
                   </FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl><SelectTrigger className="h-12 rounded-xl border-accent/30 bg-white dark:bg-slate-900 font-bold"><SelectValue /></SelectTrigger></FormControl>
-                    <SelectContent>
+                    <SelectContent position="popper" className="z-[999999] bg-white">
                       <SelectItem value="Executive Designation" className="font-bold">Executive Designation</SelectItem>
                       <SelectItem value="Regular Member" className="font-bold">Regular Member</SelectItem>
                       <SelectItem value="Volunteer" className="font-bold">Volunteer</SelectItem>
@@ -256,7 +256,7 @@ export function MembershipRegistrationDialog({ children }: { children: React.Rea
                   </FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl><SelectTrigger className="h-12 rounded-xl border-accent/30 bg-white dark:bg-slate-900 font-bold"><SelectValue /></SelectTrigger></FormControl>
-                    <SelectContent>
+                    <SelectContent position="popper" className="z-[999999] bg-white">
                       <SelectItem value="1 Year" className="font-bold">1 Year Term</SelectItem>
                       <SelectItem value="2 Years" className="font-bold">2 Years Term</SelectItem>
                       <SelectItem value="3 Years" className="font-bold">3 Years Term</SelectItem>
@@ -274,7 +274,7 @@ export function MembershipRegistrationDialog({ children }: { children: React.Rea
                   <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-primary dark:text-white mb-2">Category Preference *</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl><SelectTrigger className="h-11 rounded-xl bg-white dark:bg-slate-800"><SelectValue /></SelectTrigger></FormControl>
-                    <SelectContent>
+                    <SelectContent position="popper" className="z-[999999] bg-white">
                       <SelectItem value="General Member" className="font-bold">General Member (No specific title)</SelectItem>
                       <SelectItem value="Office-bearing Member" className="font-bold">Office-bearing Member (Applying for title)</SelectItem>
                     </SelectContent>
@@ -306,7 +306,7 @@ export function MembershipRegistrationDialog({ children }: { children: React.Rea
                   </FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl><SelectTrigger className="h-11 rounded-xl"><SelectValue placeholder="Select" /></SelectTrigger></FormControl>
-                    <SelectContent>
+                    <SelectContent position="popper" className="z-[999999] bg-white">
                       {["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].map(bg => <SelectItem key={bg} value={bg}>{bg}</SelectItem>)}
                     </SelectContent>
                   </Select>
@@ -345,7 +345,7 @@ export function MembershipRegistrationDialog({ children }: { children: React.Rea
                   <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Gender *</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl><SelectTrigger className="h-11 rounded-xl"><SelectValue placeholder="Select" /></SelectTrigger></FormControl>
-                    <SelectContent><SelectItem value="Male">Male</SelectItem><SelectItem value="Female">Female</SelectItem></SelectContent>
+                    <SelectContent position="popper" className="z-[999999] bg-white"><SelectItem value="Male">Male</SelectItem><SelectItem value="Female">Female</SelectItem></SelectContent>
                   </Select>
                   <FormMessage />
                 </FormItem>
@@ -398,7 +398,7 @@ export function MembershipRegistrationDialog({ children }: { children: React.Rea
                   <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Operational Level *</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl><SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger></FormControl>
-                    <SelectContent>
+                    <SelectContent position="popper" className="z-[999999] bg-white">
                       <SelectItem value="National">National Level</SelectItem>
                       <SelectItem value="State">State Level</SelectItem>
                       <SelectItem value="District">District Level</SelectItem>
@@ -413,7 +413,7 @@ export function MembershipRegistrationDialog({ children }: { children: React.Rea
                     <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">State Chapter *</FormLabel>
                     <Select onValueChange={(val) => { field.onChange(val); form.setValue('districtName', '') }}>
                       <FormControl><SelectTrigger className="h-11 rounded-xl"><SelectValue placeholder="Select State" /></SelectTrigger></FormControl>
-                      <SelectContent className="max-h-60">{states.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+                      <SelectContent position="popper" className="z-[1000000] bg-white max-h-60">{states.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
                     </Select>
                     <FormMessage />
                   </FormItem>
@@ -427,7 +427,7 @@ export function MembershipRegistrationDialog({ children }: { children: React.Rea
                   <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">District Committee *</FormLabel>
                   <Select onValueChange={field.onChange}>
                     <FormControl><SelectTrigger className="h-11 rounded-xl"><SelectValue placeholder="Select District" /></SelectTrigger></FormControl>
-                    <SelectContent className="max-h-60">{(INDIA_DATA[selectedState] || []).map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
+                    <SelectContent position="popper" className="z-[1000000] bg-white max-h-60">{(INDIA_DATA[selectedState] || []).map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
                   </Select>
                   <FormMessage />
                 </FormItem>
