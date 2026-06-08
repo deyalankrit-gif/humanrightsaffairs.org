@@ -717,12 +717,16 @@ export default function MeetingsPage() {
                             Examine Minutes <ExternalLink className="ml-2 w-4 h-4 group-hover/btn:scale-110 transition-transform" />
                           </Button>
                         </DialogTrigger>
-                        <DialogContent className="max-w-2xl rounded-[2.5rem] bg-white dark:bg-slate-950 max-h-[90vh] overflow-y-auto border-none shadow-2xl">
+                        <DialogContent className="max-w-2xl rounded-[2.5rem] bg-white dark:bg-slate-950 max-h-[90vh] overflow-y-auto border-none shadow-2xl [&>button]:hidden">
                           <div className="flex flex-col">
                             <div className="absolute right-6 top-6 z-50">
                               <DialogClose asChild>
-                                <Button variant="ghost" size="icon" className="rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-primary h-10 w-10 border border-slate-200 dark:border-slate-700 shadow-lg transition-all">
-                                  <X className="w-6 h-6" />
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon" 
+                                  className="rounded-full bg-blue-600 hover:bg-blue-500 text-white h-10 w-10 shadow-xl border-2 border-white/20 transition-all hover:scale-110 hover:rotate-90 duration-300 active:scale-95"
+                                >
+                                  <X className="w-6 h-6 text-white" />
                                 </Button>
                               </DialogClose>
                             </div>
