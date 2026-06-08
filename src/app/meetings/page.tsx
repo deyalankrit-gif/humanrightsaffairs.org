@@ -23,7 +23,9 @@ import {
   Edit,
   Trash2,
   CircleCheck,
-  X
+  X,
+  BadgeCheck,
+  User
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -762,10 +764,11 @@ export default function MeetingsPage() {
                                           variant="secondary" 
                                           onClick={() => leaderData && setSelectedLeaderProfile(leaderData)}
                                           className={cn(
-                                            "bg-accent/10 text-accent border-accent/20 px-4 py-1 rounded-full font-bold transition-all",
+                                            "bg-accent/10 text-accent border-accent/20 px-4 py-1.5 rounded-full font-bold transition-all flex items-center gap-2",
                                             leaderData ? "cursor-pointer hover:bg-secondary hover:text-white hover:scale-105 shadow-sm" : "opacity-70"
                                           )}
                                         >
+                                          <CircleCheck className={cn("w-3 h-3", leaderData ? "text-accent" : "text-slate-300")} />
                                           {attendee}
                                         </Badge>
                                       );
@@ -817,6 +820,88 @@ export default function MeetingsPage() {
           )}
         </div>
       </section>
+
+      {/* Verified Leader Profile Modal */}
+      <Dialog open={!!selectedLeaderProfile} onOpenChange={(open) => !open && setSelectedLeaderProfile(null)}>
+        <DialogContent className="max-w-md rounded-[2.5rem] border-none shadow-2xl bg-white dark:bg-slate-950 p-0 overflow-hidden [&>button]:hidden">
+          {selectedLeaderProfile && (
+            <div className="flex flex-col">
+              <div className="relative aspect-[3/4] w-full">
+                 <Image 
+                   src={selectedLeaderProfile.imageId?.startsWith('data:') ? selectedLeaderProfile.imageId : (PlaceHolderImages.find(i => i.id === selectedLeaderProfile.imageId)?.imageUrl || (selectedLeaderProfile.gender === 'female' ? '/dummy w.png' : '/dummy m.png'))} 
+                   alt={selectedLeaderProfile.name} 
+                   fill 
+                   className="object-cover"
+                 />
+                 <div className="absolute inset-0 bg-gradient-to-t from-primary via-primary/20 to-transparent"></div>
+                 
+                 <div className="absolute top-4 right-4 z-20">
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      onClick={() => setSelectedLeaderProfile(null)}
+                      className="rounded-full bg-blue-600 hover:bg-blue-500 text-white h-10 w-10 shadow-xl border-2 border-white/20 transition-all hover:scale-110 duration-300"
+                    >
+                      <X className="w-6 h-6" />
+                    </Button>
+                 </div>
+
+                 <div className="absolute bottom-6 left-6 right-6 z-10 space-y-2">
+                    <div className="flex items-center gap-2 bg-accent/20 backdrop-blur-md px-3 py-1 rounded-full border border-accent/30 w-fit">
+                      <BadgeCheck className="w-3.5 h-3.5 text-accent" />
+                      <span className="text-[9px] font-black uppercase tracking-[0.2em] text-accent">{selectedLeaderProfile.level} Council Official</span>
+                    </div>
+                    <h2 className="text-3xl font-headline font-bold text-white drop-shadow-lg leading-tight">
+                      {selectedLeaderProfile.name}
+                    </h2>
+                    <p className="text-white/80 font-bold uppercase tracking-[0.2em] text-[10px] border-l-2 border-accent pl-3">
+                      {selectedLeaderProfile.title}
+                    </p>
+                 </div>
+              </div>
+              
+              <div className="p-8 space-y-6">
+                 <div className="space-y-4">
+                    <div className="flex items-center gap-3 p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800">
+                       <MapPin className="w-5 h-5 text-accent shrink-0" />
+                       <div className="flex flex-col">
+                          <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Active Jurisdiction</span>
+                          <span className="text-xs font-bold text-primary dark:text-white uppercase">
+                             {selectedLeaderProfile.districtName ? `${selectedLeaderProfile.districtName}, ` : ''}{selectedLeaderProfile.parentRegion || 'National Center'}
+                          </span>
+                       </div>
+                    </div>
+
+                    <div className="flex items-center gap-3 p-4 bg-emerald-50/50 dark:bg-emerald-950/20 rounded-2xl border border-emerald-100 dark:border-emerald-900/30">
+                       <ShieldCheck className="w-5 h-5 text-emerald-500 shrink-0" />
+                       <div className="flex flex-col">
+                          <span className="text-[8px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">Commission Status</span>
+                          <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400">Verified HRAT Representative</span>
+                       </div>
+                    </div>
+                 </div>
+
+                 <div className="pt-4 border-t border-slate-100 dark:border-slate-800">
+                    <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed italic font-medium">
+                      "Official representative authorized to lead strategic assemblies and coordinate community outreach programs under the direct oversight of the Central Council."
+                    </p>
+                 </div>
+
+                 <Button 
+                   onClick={() => setSelectedLeaderProfile(null)}
+                   className="w-full bg-primary text-white font-bold h-12 rounded-xl hover:bg-secondary hover:text-white transition-all shadow-xl shadow-primary/10"
+                 >
+                   Close Record
+                 </Button>
+
+                 <p className="text-center text-[8px] font-bold text-slate-400 uppercase tracking-[0.3em]">
+                   Central Personnel Registry • Human Rights Affairs Trust
+                 </p>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       <Footer />
     </main>

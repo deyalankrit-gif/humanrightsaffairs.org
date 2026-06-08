@@ -323,13 +323,17 @@ export function DonationDialog({ children, defaultAmount, initialStep = 'details
                             <SelectValue placeholder="Select Method" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent>
-                          <SelectItem value="UPI QR Code" className="font-bold">Instant UPI QR Code</SelectItem>
-                          <SelectItem value="Cheque" className="font-bold">Cheque</SelectItem>
-                          <SelectItem value="Bank Transfer" className="font-bold">Online Bank Transfer</SelectItem>
-                          <SelectItem value="Cash" className="font-bold">Cash Contribution</SelectItem>
-                          <SelectItem value="Credit/Debit Card" className="font-bold">Online Card Payment</SelectItem>
-                        </SelectContent>
+                        <SelectContent
+                         position="popper"
+                          sideOffset={5}
+                          className="z-[999999] bg-white"
+                         >
+                         <SelectItem value="UPI QR Code">Instant UPI QR Code</SelectItem>
+                         <SelectItem value="Cheque">Cheque</SelectItem>
+                         <SelectItem value="Bank Transfer">Online Bank Transfer</SelectItem>
+                         <SelectItem value="Cash">Cash Contribution</SelectItem>
+                         <SelectItem value="Credit/Debit Card">Online Card Payment</SelectItem>
+                       </SelectContent>
                       </Select>
                       <FormMessage />
                     </FormItem>
