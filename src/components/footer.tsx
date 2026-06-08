@@ -102,7 +102,7 @@ export function Footer() {
                 </li>
                 <li className="flex gap-3">
                   <Mail className="w-5 h-5 text-accent shrink-0" />
-                  <span className="text-sm">humanrightsaffairstrust@gmail.com</span>
+                  <a href="mailto:humanrightsaffairstrust@gmail.com" className="text-sm hover:text-accent transition-colors">humanrightsaffairstrust@gmail.com</a>
                 </li>
               </ul>
             </div>
@@ -120,7 +120,7 @@ export function Footer() {
                 </li>
                 <li className="flex gap-3">
                   <Mail className="w-5 h-5 text-accent shrink-0" />
-                  <span className="text-sm">hrat.wb.chairman@gmail.com</span>
+                  <a href="mailto:hrat.wb.chairman@gmail.com" className="text-sm hover:text-accent transition-colors">hrat.wb.chairman@gmail.com</a>
                 </li>
               </ul>
             </div>
