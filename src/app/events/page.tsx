@@ -657,7 +657,7 @@ export default function EventsPage() {
               </div>
             </div>
           )}
-        </div>
+        </DialogContent>
       </Dialog>
 
       <Footer />
