@@ -133,14 +133,14 @@ export default function IDCardGenerator() {
                <span className="text-[28px] font-black text-[#001f54] tracking-tighter uppercase opacity-20">{member.memberId}</span>
             </div>
 
-            {/* Content Container - Padded Top to ensure gap from ID watermark */}
-            <div className="flex px-10 mt-28 gap-10">
-               {/* Portrait Section */}
-               <div className="relative w-48 h-[240px] rounded-[2rem] overflow-hidden border-[6px] border-slate-50 shadow-2xl bg-slate-100 ring-1 ring-slate-200 shrink-0">
+            {/* Content Container - Shifted up slightly to create footer gap */}
+            <div className="flex px-10 mt-24 gap-10">
+               {/* Portrait Section - Adjusted height for vertical balance */}
+               <div className="relative w-48 h-[220px] rounded-[2rem] overflow-hidden border-[6px] border-slate-50 shadow-2xl bg-slate-100 ring-1 ring-slate-200 shrink-0">
                   <Image src={displayImg} alt={member.name} fill className="object-cover" />
                   
-                  {/* Holographic Logo Overlay Bottom-Right - Shifted closer to corner */}
-                  <div className="absolute bottom-1 right-1 w-12 h-12 rounded-full bg-white/40 backdrop-blur-lg p-1.5 border-2 border-white/60 shadow-[0_0_15px_rgba(255,255,255,0.5)] z-20 overflow-hidden">
+                  {/* Holographic Logo Overlay Extreme Corner */}
+                  <div className="absolute bottom-1 right-1 w-11 h-11 rounded-full bg-white/40 backdrop-blur-lg p-1 border-2 border-white/60 shadow-[0_0_15px_rgba(255,255,255,0.5)] z-20 overflow-hidden">
                     <div className="relative w-full h-full">
                       <Image src="/HRAT%20Logo.jpeg" alt="Hologram" fill className="object-contain opacity-80 brightness-110" />
                     </div>
@@ -150,29 +150,30 @@ export default function IDCardGenerator() {
                {/* Center Information Block */}
                <div className="flex-1 flex flex-col pt-2">
                   <div className="text-center space-y-1 mb-8">
-                     <p className="text-[14px] font-black text-[#006400] tracking-tight leading-none uppercase">Registered by Govt. of India NITI Aayog</p>
+                     <p className="text-[15px] font-black text-[#006400] tracking-tight leading-none uppercase">Registered by Govt. of India NITI Aayog</p>
                      <p className="text-[13px] font-black text-[#006400] tracking-tight leading-none uppercase">Regd.No. - WB/2025/0762605</p>
                   </div>
 
                   <div className="space-y-1.5">
-                     <h2 className="text-[24px] font-black text-slate-900 leading-tight uppercase tracking-tighter drop-shadow-sm whitespace-nowrap truncate">
+                     <h2 className="text-[22px] font-black text-slate-900 leading-tight uppercase tracking-tighter drop-shadow-sm whitespace-nowrap truncate">
                        {member.name}
                      </h2>
-                     <p className="text-[15px] font-black text-[#006400] uppercase tracking-wide border-l-4 border-[#006400] pl-4">
+                     <p className="text-[14px] font-black text-[#006400] uppercase tracking-wide border-l-4 border-[#006400] pl-4">
                         {member.designation} ({member.level === 'District' ? member.districtName?.toUpperCase() : member.stateName?.toUpperCase() || 'WEST BENGAL'} {member.level?.toUpperCase()} COMMITTEE)
                      </p>
                   </div>
                </div>
 
-               {/* Right Side: QR & Dates */}
+               {/* Right Side: QR & Real-Time Sync Dates */}
                <div className="w-52 flex flex-col items-end pt-2 space-y-6">
                   <div className="text-right">
-                    <p className="text-[14px] font-black text-[#001f54] font-mono mb-2 tracking-widest">{member.memberId}</p>
-                    <div className="relative w-28 h-28 bg-white border-2 border-slate-100 p-1 rounded-2xl shadow-xl">
+                    <p className="text-[13px] font-black text-[#001f54] font-mono mb-2 tracking-widest">{member.memberId}</p>
+                    <div className="relative w-26 h-26 bg-white border-2 border-slate-100 p-1 rounded-2xl shadow-xl">
                        <Image 
                         src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=HRAT-VERIFY-${member.memberId}`} 
                         alt="Verification QR" 
-                        fill 
+                        width={100}
+                        height={100}
                         className="object-contain"
                        />
                     </div>
@@ -202,7 +203,7 @@ export default function IDCardGenerator() {
                </div>
             </div>
 
-            {/* Footer Banner - Symmetrical Slanted Division */}
+            {/* Footer Banner - Precise Centered Slant Separation */}
             <div className="absolute bottom-0 left-0 w-full h-[65px] overflow-hidden">
                <div className="absolute inset-0 bg-[#001f54]"></div>
                <div 
@@ -210,9 +211,8 @@ export default function IDCardGenerator() {
                  style={{ clipPath: 'polygon(20% 0, 100% 0, 100% 100%, 0% 100%)' }}
                ></div>
                
-               {/* Centrally Aligned Contact Info split by slant */}
                <div className="relative z-20 w-full h-full flex items-center text-white">
-                  {/* Left Half: Email on Navy */}
+                  {/* Left Half: Centered Email */}
                   <div className="flex items-center gap-3 w-1/2 justify-center pr-6">
                     <div className="bg-white/10 rounded-full p-1.5">
                       <Mail className="w-4 h-4 text-white fill-white" />
@@ -220,7 +220,7 @@ export default function IDCardGenerator() {
                     <span className="text-[16px] font-bold tracking-tight text-slate-50">humanrightsaffairstrust@gmail.com</span>
                   </div>
 
-                  {/* Right Half: Website on Red */}
+                  {/* Right Half: Centered Website */}
                   <div className="flex items-center gap-3 w-1/2 justify-center pl-10">
                     <div className="bg-white/10 rounded-full p-1.5">
                       <Globe className="w-4 h-4 text-white" />
@@ -255,12 +255,10 @@ export default function IDCardGenerator() {
                               <Phone className="w-4 h-4 text-accent" />
                               <p className="text-[14px] font-bold text-slate-700">{member.phone}</p>
                            </div>
-                           {member.bloodGroup && (
-                             <div className="flex items-center gap-3">
-                                <Heart className="w-4 h-4 text-red-500 fill-red-500/20" />
-                                <p className="text-[14px] font-bold text-slate-700">Blood Group: <span className="text-red-600 font-black">{member.bloodGroup}</span></p>
-                             </div>
-                           )}
+                           <div className="flex items-center gap-3">
+                              <Heart className="w-4 h-4 text-red-500 fill-red-500/20" />
+                              <p className="text-[14px] font-bold text-slate-700">Blood Group: <span className="text-red-600 font-black">{member.bloodGroup || 'N/A'}</span></p>
+                           </div>
                         </div>
                      </div>
                   </div>
