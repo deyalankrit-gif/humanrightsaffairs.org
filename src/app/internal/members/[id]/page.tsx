@@ -370,17 +370,17 @@ export default function MemberDetailsPage() {
                  </CardTitle>
                  <div className="space-y-3">
                    <Link href={`/internal/members/${memberId}/id-card`} className="w-full">
-                      <Button variant="outline" className="w-full justify-start rounded-xl h-12 border-white/10 bg-white/5 hover:bg-white/10 text-white font-bold text-[10px] uppercase tracking-widest gap-3 transition-all hover:translate-x-1">
+                      <Button variant="outline" className="w-full justify-start rounded-xl h-12 border-white/10 bg-white/5 hover:bg-white/10 text-white hover:text-white font-bold text-[10px] uppercase tracking-widest gap-3 transition-all hover:translate-x-1">
                          <IdCard className="w-4 h-4 text-accent" /> Digital ID Card
                       </Button>
                    </Link>
                    <Link href={`/internal/members/${memberId}/certificate`} className="w-full">
-                      <Button variant="outline" className="w-full justify-start rounded-xl h-12 border-white/10 bg-white/5 hover:bg-white/10 text-white font-bold text-[10px] uppercase tracking-widest gap-3 transition-all hover:translate-x-1">
-                         <Award className="w-4 h-4 text-emerald-400" /> Induction Certificate
+                      <Button variant="outline" className="w-full justify-start rounded-xl h-12 border-white/10 bg-white/5 hover:bg-white/10 text-white hover:text-white font-bold text-[10px] uppercase tracking-widest gap-3 transition-all hover:translate-x-1">
+                         <Award className="w-4 h-4 text-emerald-400" /> Introduction Certificate
                       </Button>
                    </Link>
                    <Link href={`/internal/members/${memberId}/appointment`} className="w-full">
-                      <Button variant="outline" className="w-full justify-start rounded-xl h-12 border-white/10 bg-white/5 hover:bg-white/10 text-white font-bold text-[10px] uppercase tracking-widest gap-3 transition-all hover:translate-x-1">
+                      <Button variant="outline" className="w-full justify-start rounded-xl h-12 border-white/10 bg-white/5 hover:bg-white/10 text-white hover:text-white font-bold text-[10px] uppercase tracking-widest gap-3 transition-all hover:translate-x-1">
                          <FileText className="w-4 h-4 text-indigo-400" /> Appointment Letter
                       </Button>
                    </Link>
