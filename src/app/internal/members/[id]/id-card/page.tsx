@@ -128,19 +128,19 @@ export default function IDCardGenerator() {
               </div>
             </div>
 
-            {/* Member ID Watermark Top Left */}
-            <div className="absolute top-[115px] left-10">
+            {/* Member ID Watermark Top Left - Positioned for Spacing */}
+            <div className="absolute top-[110px] left-10">
                <span className="text-[28px] font-black text-[#001f54] tracking-tighter uppercase opacity-20">{member.memberId}</span>
             </div>
 
-            {/* Content Container */}
-            <div className="flex px-10 mt-24 gap-10">
+            {/* Content Container - Padded Top to ensure gap from ID watermark */}
+            <div className="flex px-10 mt-28 gap-10">
                {/* Portrait Section */}
                <div className="relative w-48 h-[240px] rounded-[2rem] overflow-hidden border-[6px] border-slate-50 shadow-2xl bg-slate-100 ring-1 ring-slate-200 shrink-0">
                   <Image src={displayImg} alt={member.name} fill className="object-cover" />
                   
-                  {/* Holographic Logo Overlay Bottom-Right */}
-                  <div className="absolute bottom-4 right-4 w-12 h-12 rounded-full bg-white/40 backdrop-blur-lg p-1.5 border-2 border-white/60 shadow-[0_0_15px_rgba(255,255,255,0.5)] z-20 overflow-hidden">
+                  {/* Holographic Logo Overlay Bottom-Right - Shifted closer to corner */}
+                  <div className="absolute bottom-1 right-1 w-12 h-12 rounded-full bg-white/40 backdrop-blur-lg p-1.5 border-2 border-white/60 shadow-[0_0_15px_rgba(255,255,255,0.5)] z-20 overflow-hidden">
                     <div className="relative w-full h-full">
                       <Image src="/HRAT%20Logo.jpeg" alt="Hologram" fill className="object-contain opacity-80 brightness-110" />
                     </div>
@@ -150,12 +150,12 @@ export default function IDCardGenerator() {
                {/* Center Information Block */}
                <div className="flex-1 flex flex-col pt-2">
                   <div className="text-center space-y-1 mb-8">
-                     <p className="text-[12px] font-black text-[#006400] tracking-tight leading-none uppercase">Registered by Govt. of India NITI Aayog</p>
-                     <p className="text-[12px] font-black text-[#006400] tracking-tight leading-none uppercase">Regd.No. - WB/2025/0762605</p>
+                     <p className="text-[14px] font-black text-[#006400] tracking-tight leading-none uppercase">Registered by Govt. of India NITI Aayog</p>
+                     <p className="text-[13px] font-black text-[#006400] tracking-tight leading-none uppercase">Regd.No. - WB/2025/0762605</p>
                   </div>
 
                   <div className="space-y-1.5">
-                     <h2 className="text-[26px] font-black text-slate-900 leading-tight uppercase tracking-tighter drop-shadow-sm whitespace-nowrap truncate">
+                     <h2 className="text-[24px] font-black text-slate-900 leading-tight uppercase tracking-tighter drop-shadow-sm whitespace-nowrap truncate">
                        {member.name}
                      </h2>
                      <p className="text-[15px] font-black text-[#006400] uppercase tracking-wide border-l-4 border-[#006400] pl-4">
@@ -202,7 +202,7 @@ export default function IDCardGenerator() {
                </div>
             </div>
 
-            {/* Footer Banner - Slanted Division matching Header */}
+            {/* Footer Banner - Symmetrical Slanted Division */}
             <div className="absolute bottom-0 left-0 w-full h-[65px] overflow-hidden">
                <div className="absolute inset-0 bg-[#001f54]"></div>
                <div 
@@ -250,15 +250,23 @@ export default function IDCardGenerator() {
                               Pin Code: {member.pinCode}
                            </p>
                         </div>
-                        <div className="flex items-center gap-3 pt-2 border-t border-slate-100 mt-2">
-                           <Phone className="w-4 h-4 text-accent" />
-                           <p className="text-[14px] font-bold text-slate-700">{member.phone}</p>
+                        <div className="grid grid-cols-2 gap-4 pt-2 border-t border-slate-100 mt-2">
+                           <div className="flex items-center gap-3">
+                              <Phone className="w-4 h-4 text-accent" />
+                              <p className="text-[14px] font-bold text-slate-700">{member.phone}</p>
+                           </div>
+                           {member.bloodGroup && (
+                             <div className="flex items-center gap-3">
+                                <Heart className="w-4 h-4 text-red-500 fill-red-500/20" />
+                                <p className="text-[14px] font-bold text-slate-700">Blood Group: <span className="text-red-600 font-black">{member.bloodGroup}</span></p>
+                             </div>
+                           )}
                         </div>
                      </div>
                   </div>
                   <div className="text-right">
                      <p className="text-[11px] font-black text-slate-400 uppercase tracking-[0.25em] mb-3">Organizational Seal</p>
-                     <div className="w-44 h-24 border-[3px] border-dashed border-slate-200 bg-white/60 rounded-2xl flex items-center justify-center shadow-inner overflow-hidden">
+                     <div className="w-44 h-24 border-[3px] border-dashed border-slate-200 bg-white/60 rounded-2xl flex items-center justify-center shadow-inner overflow-hidden relative">
                         <div className="relative w-16 h-16 opacity-10">
                            <Image src="/HRAT%20Logo.jpeg" alt="HRAT Seal" fill className="object-contain grayscale" />
                         </div>
