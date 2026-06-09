@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState } from 'react'
@@ -56,7 +55,8 @@ import {
   Camera,
   Hash,
   Heart,
-  Home
+  Home,
+  Sparkles
 } from 'lucide-react'
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
 import { useFirestore } from '@/firebase'
@@ -83,7 +83,6 @@ const formSchema = z.object({
   level: z.string().min(1, "Operational level required"),
   stateName: z.string().optional(),
   districtName: z.string().optional(),
-  designationCategory: z.string().min(1, "Please select category"),
   memberType: z.string().min(1, "Please select membership type"),
   membershipDuration: z.enum(["1 Year", "2 Years", "3 Years"], { required_error: "Please select duration" }),
   hasNoCriminalRecord: z.boolean().refine(val => val === true, "You must check the criminal record affidavit"),
@@ -117,8 +116,7 @@ export function MembershipRegistrationDialog({ children }: { children: React.Rea
       education: '',
       experience: '',
       level: 'National',
-      designationCategory: 'General Member',
-      memberType: 'Regular Member',
+      memberType: 'General Member',
       membershipDuration: '1 Year',
       hasNoCriminalRecord: false,
       hasAcceptedDeclaration: false,
@@ -127,7 +125,7 @@ export function MembershipRegistrationDialog({ children }: { children: React.Rea
 
   const level = form.watch('level')
   const selectedState = form.watch('stateName')
-  const designationCategory = form.watch('designationCategory')
+  const memberType = form.watch('memberType')
   const states = Object.keys(INDIA_DATA).sort()
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -239,10 +237,10 @@ export function MembershipRegistrationDialog({ children }: { children: React.Rea
                   </FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl><SelectTrigger className="h-12 rounded-xl border-accent/30 bg-white dark:bg-slate-900 font-bold"><SelectValue /></SelectTrigger></FormControl>
-                    <SelectContent position="popper" className="z-[999999] bg-white">
+                    <SelectContent position="popper" className="z-[1000000] bg-white">
                       <SelectItem value="Executive Designation" className="font-bold">Executive Designation</SelectItem>
-                      <SelectItem value="Regular Member" className="font-bold">Regular Member</SelectItem>
-                      <SelectItem value="Volunteer" className="font-bold">Volunteer</SelectItem>
+                      <SelectItem value="Board Member" className="font-bold">Board Member</SelectItem>
+                      <SelectItem value="General Member" className="font-bold">General Member</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -256,7 +254,7 @@ export function MembershipRegistrationDialog({ children }: { children: React.Rea
                   </FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl><SelectTrigger className="h-12 rounded-xl border-accent/30 bg-white dark:bg-slate-900 font-bold"><SelectValue /></SelectTrigger></FormControl>
-                    <SelectContent position="popper" className="z-[999999] bg-white">
+                    <SelectContent position="popper" className="z-[1000000] bg-white">
                       <SelectItem value="1 Year" className="font-bold">1 Year Term</SelectItem>
                       <SelectItem value="2 Years" className="font-bold">2 Years Term</SelectItem>
                       <SelectItem value="3 Years" className="font-bold">3 Years Term</SelectItem>
@@ -265,28 +263,13 @@ export function MembershipRegistrationDialog({ children }: { children: React.Rea
                   <FormMessage />
                 </FormItem>
               )} />
-            </div>
 
-            {/* Designation Preference */}
-            <div className="bg-slate-50 dark:bg-slate-900 p-6 rounded-3xl border border-slate-100 dark:border-slate-800 space-y-4">
-               <FormField control={form.control} name="designationCategory" render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-primary dark:text-white mb-2">Category Preference *</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl><SelectTrigger className="h-11 rounded-xl bg-white dark:bg-slate-800"><SelectValue /></SelectTrigger></FormControl>
-                    <SelectContent position="popper" className="z-[999999] bg-white">
-                      <SelectItem value="General Member" className="font-bold">General Member (No specific title)</SelectItem>
-                      <SelectItem value="Office-bearing Member" className="font-bold">Office-bearing Member (Applying for title)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )} />
-              
-              {designationCategory === 'Office-bearing Member' && (
-                <p className="text-[10px] text-accent font-bold uppercase tracking-tighter animate-in fade-in slide-in-from-top-1">
-                  * Note: Specific designations will be assigned by the Board of Governance during vetting.
-                </p>
+              {(memberType === 'Executive Designation' || memberType === 'Board Member') && (
+                <div className="col-span-full animate-in fade-in slide-in-from-top-1">
+                  <p className="text-[10px] text-accent font-bold uppercase tracking-tighter">
+                    * Note: Specific designations will be assigned by the Board of Governance during vetting.
+                  </p>
+                </div>
               )}
             </div>
 
@@ -306,7 +289,7 @@ export function MembershipRegistrationDialog({ children }: { children: React.Rea
                   </FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl><SelectTrigger className="h-11 rounded-xl"><SelectValue placeholder="Select" /></SelectTrigger></FormControl>
-                    <SelectContent position="popper" className="z-[999999] bg-white">
+                    <SelectContent position="popper" className="z-[1000000] bg-white">
                       {["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].map(bg => <SelectItem key={bg} value={bg}>{bg}</SelectItem>)}
                     </SelectContent>
                   </Select>
@@ -345,7 +328,7 @@ export function MembershipRegistrationDialog({ children }: { children: React.Rea
                   <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Gender *</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl><SelectTrigger className="h-11 rounded-xl"><SelectValue placeholder="Select" /></SelectTrigger></FormControl>
-                    <SelectContent position="popper" className="z-[999999] bg-white"><SelectItem value="Male">Male</SelectItem><SelectItem value="Female">Female</SelectItem></SelectContent>
+                    <SelectContent position="popper" className="z-[1000000] bg-white"><SelectItem value="Male">Male</SelectItem><SelectItem value="Female">Female</SelectItem></SelectContent>
                   </Select>
                   <FormMessage />
                 </FormItem>
@@ -398,7 +381,7 @@ export function MembershipRegistrationDialog({ children }: { children: React.Rea
                   <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Operational Level *</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl><SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger></FormControl>
-                    <SelectContent position="popper" className="z-[999999] bg-white">
+                    <SelectContent position="popper" className="z-[1000000] bg-white">
                       <SelectItem value="National">National Level</SelectItem>
                       <SelectItem value="State">State Level</SelectItem>
                       <SelectItem value="District">District Level</SelectItem>
