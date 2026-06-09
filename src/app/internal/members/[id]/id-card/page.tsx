@@ -106,50 +106,55 @@ export default function IDCardGenerator() {
             "relative w-[800px] h-[500px] bg-white rounded-3xl shadow-[0_50px_100px_rgba(0,0,0,0.1)] overflow-hidden border border-slate-100 print:shadow-none print:border-slate-200 transition-all duration-500 select-none",
             view !== 'front' && "hidden print:block"
           )}>
-            {/* Header Section */}
-            <div className="h-[100px] flex relative">
-              {/* Slanted Navy Blue Segment */}
-              <div className="w-[45%] bg-[#001f54] text-white flex items-center px-10 relative overflow-hidden">
-                 <h1 className="text-[42px] font-black italic tracking-tighter uppercase leading-none z-10 drop-shadow-lg">HUMAN RIGHTS</h1>
-                 <div className="absolute right-0 top-0 h-full w-20 bg-[#001f54] skew-x-[-28deg] translate-x-1/2 border-r-[8px] border-white z-10 shadow-[4px_0_10px_rgba(0,0,0,0.3)]"></div>
-              </div>
-              {/* Slanted Red Segment */}
-              <div className="flex-1 bg-[#c91010] text-white flex items-center px-14 relative">
-                 <h1 className="text-[42px] font-black italic tracking-tighter uppercase leading-none z-0 drop-shadow-lg">AFFAIR TRUST</h1>
-                 {/* Logo on the right */}
-                 <div className="absolute right-8 top-1/2 -translate-y-1/2 w-24 h-24 bg-white rounded-full p-1.5 shadow-2xl z-30 border-[5px] border-white ring-4 ring-black/5">
-                    <div className="relative w-full h-full">
-                      <Image src="/HRAT%20Logo.jpeg" alt="Logo" fill className="object-contain p-1" />
-                    </div>
-                 </div>
+            {/* Header Section with Slanted Division */}
+            <div className="h-[100px] w-full flex relative overflow-hidden">
+              <div className="absolute inset-0 bg-[#001f54]"></div>
+              <div 
+                className="absolute right-0 top-0 h-full w-[65%] bg-[#c91010]" 
+                style={{ clipPath: 'polygon(15% 0, 100% 0, 100% 100%, 0% 100%)' }}
+              ></div>
+              
+              <div className="relative z-20 w-full h-full flex items-center px-10">
+                <h1 className="text-[36px] font-black italic tracking-tighter uppercase leading-none text-white drop-shadow-lg whitespace-nowrap">
+                  HUMAN RIGHTS AFFAIRS TRUST
+                </h1>
+                
+                {/* Transparent Logo with Gold Outline */}
+                <div className="absolute right-8 top-1/2 -translate-y-1/2 w-24 h-24 rounded-full p-0.5 border-2 border-[#D4AF37] shadow-2xl z-30">
+                  <div className="relative w-full h-full rounded-full overflow-hidden">
+                    <Image src="/HRAT%20Logo.jpeg" alt="Logo" fill className="object-contain" />
+                  </div>
+                </div>
               </div>
             </div>
 
-            {/* Member ID Watermark Top Left - High Contrast */}
+            {/* Member ID Watermark Top Left - Reduced size and opacity */}
             <div className="absolute top-[115px] left-10">
-               <span className="text-[40px] font-black text-[#001f54] tracking-tighter uppercase opacity-90">{member.memberId || 'WB25LA09531'}</span>
+               <span className="text-[28px] font-black text-[#001f54] tracking-tighter uppercase opacity-30">{member.memberId || 'WB25LA09531'}</span>
             </div>
 
-            <div className="flex px-10 mt-14 gap-10">
+            <div className="flex px-10 mt-12 gap-10">
                {/* Portrait Section */}
-               <div className="relative w-56 h-[280px] rounded-[2rem] overflow-hidden border-[8px] border-slate-50 shadow-2xl bg-slate-100 ring-2 ring-slate-200 shrink-0">
+               <div className="relative w-56 h-[280px] rounded-[2rem] overflow-hidden border-[6px] border-slate-50 shadow-2xl bg-slate-100 ring-1 ring-slate-200 shrink-0">
                   <Image src={displayImg} alt={member.name} fill className="object-cover" />
                   {/* Portrait Hologram/Seal Overlay */}
-                  <div className="absolute bottom-3 right-3 w-12 h-12 rounded-full bg-white/40 backdrop-blur-md p-1.5 border-2 border-white/60 shadow-xl">
-                    <Image src="/HRAT%20Logo.jpeg" alt="Watermark" fill className="object-contain opacity-80 grayscale" />
+                  <div className="absolute bottom-3 right-3 w-10 h-10 rounded-full bg-white/30 backdrop-blur-md p-1 border-2 border-white/50 shadow-xl">
+                    <Image src="/HRAT%20Logo.jpeg" alt="Watermark" fill className="object-contain opacity-60 grayscale" />
                   </div>
                </div>
 
                {/* Center Information Block */}
-               <div className="flex-1 flex flex-col pt-6">
-                  <div className="text-center space-y-1 mb-12">
-                     <p className="text-[24px] font-black text-[#006400] tracking-tight leading-none uppercase">Registered by Govt. of India NITI Aayog</p>
-                     <p className="text-[24px] font-black text-[#006400] tracking-tight leading-none uppercase">Regd.No. - WB/2025/0762605</p>
+               <div className="flex-1 flex flex-col pt-2">
+                  <div className="text-center space-y-1 mb-10">
+                     <p className="text-[16px] font-black text-[#006400] tracking-tight leading-none uppercase">Registered by Govt. of India NITI Aayog</p>
+                     <p className="text-[16px] font-black text-[#006400] tracking-tight leading-none uppercase">Regd.No. - WB/2025/0762605</p>
                   </div>
 
                   <div className="space-y-2">
-                     <h2 className="text-[44px] font-black text-slate-900 leading-[1.1] uppercase tracking-tighter drop-shadow-sm">{member.name}</h2>
-                     <p className="text-[18px] font-black text-[#006400] uppercase tracking-wide border-l-4 border-[#006400] pl-4">
+                     <h2 className="text-[32px] font-black text-slate-900 leading-tight uppercase tracking-tighter drop-shadow-sm whitespace-nowrap truncate">
+                       {member.name}
+                     </h2>
+                     <p className="text-[16px] font-black text-[#006400] uppercase tracking-wide border-l-4 border-[#006400] pl-4">
                         {member.designation} ({member.level === 'District' ? member.districtName?.toUpperCase() : member.stateName?.toUpperCase() || 'WEST BENGAL'} {member.level?.toUpperCase()} COMMITTEE)
                      </p>
                   </div>
@@ -158,8 +163,8 @@ export default function IDCardGenerator() {
                {/* Right Side: QR & Dates */}
                <div className="w-52 flex flex-col items-end pt-2 space-y-6">
                   <div className="text-right">
-                    <p className="text-[16px] font-black text-[#001f54] font-mono mb-2 tracking-widest">{member.memberId || 'WB25LA09531'}</p>
-                    <div className="relative w-32 h-32 bg-white border-2 border-slate-100 p-1.5 rounded-2xl shadow-xl hover:scale-105 transition-transform">
+                    <p className="text-[14px] font-black text-[#001f54] font-mono mb-2 tracking-widest">{member.memberId || 'WB25LA09531'}</p>
+                    <div className="relative w-28 h-28 bg-white border-2 border-slate-100 p-1 rounded-2xl shadow-xl">
                        <Image 
                         src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=HRAT-VERIFY-${member.memberId}`} 
                         alt="Verification QR" 
@@ -169,7 +174,7 @@ export default function IDCardGenerator() {
                     </div>
                   </div>
                   
-                  <div className="text-[14px] font-bold text-slate-800 space-y-1.5 leading-tight pr-1 font-mono">
+                  <div className="text-[13px] font-bold text-slate-800 space-y-1 leading-tight pr-1 font-mono">
                      <div className="flex justify-end gap-3">
                         <span className="text-slate-400">Issue :</span> 
                         <span className="text-primary">{member.joiningDate || '01.05.2025'}</span>
@@ -192,23 +197,28 @@ export default function IDCardGenerator() {
                </div>
             </div>
 
-            {/* Footer Banner */}
-            <div className="absolute bottom-0 left-0 w-full h-[65px] bg-[#001f54] flex items-center px-10 text-white border-t-[4px] border-white/10">
-               {/* Suffix Red Slant */}
-               <div className="absolute left-0 top-0 h-full w-28 bg-[#c91010] skew-x-[38deg] -translate-x-1/2 border-r-[5px] border-white shadow-lg"></div>
+            {/* Footer Banner - Slanted Division matching Header */}
+            <div className="absolute bottom-0 left-0 w-full h-[65px] flex relative overflow-hidden">
+               <div className="absolute inset-0 bg-[#001f54]"></div>
+               <div 
+                 className="absolute left-0 top-0 h-full w-[35%] bg-[#c91010]" 
+                 style={{ clipPath: 'polygon(0 0, 85% 0, 100% 100%, 0% 100%)' }}
+               ></div>
                
-               <div className="flex items-center gap-3 relative z-10 mr-auto ml-12">
-                  <div className="bg-white rounded-full p-1.5 shadow-md">
-                    <Mail className="w-4 h-4 text-[#c91010] fill-[#c91010]" />
+               <div className="relative z-20 w-full h-full flex items-center px-10 text-white">
+                  <div className="flex items-center gap-3 ml-[30%] mr-auto">
+                    <div className="bg-white/10 rounded-full p-1.5">
+                      <Mail className="w-3.5 h-3.5 text-white fill-white" />
+                    </div>
+                    <span className="text-[14px] font-bold tracking-tight text-slate-50">humanrightsaffairstrust@gmail.com</span>
                   </div>
-                  <span className="text-[16px] font-black tracking-tight text-slate-50">humanrightsaffairstrust@gmail.com</span>
-               </div>
 
-               <div className="flex items-center gap-3 relative z-10">
-                  <div className="bg-white rounded-full p-1.5 shadow-md">
-                    <Globe className="w-4 h-4 text-[#001f54]" />
+                  <div className="flex items-center gap-3">
+                    <div className="bg-white/10 rounded-full p-1.5">
+                      <Globe className="w-3.5 h-3.5 text-white" />
+                    </div>
+                    <span className="text-[14px] font-bold tracking-tight text-slate-50">www.humanrightsaffairs.org</span>
                   </div>
-                  <span className="text-[16px] font-black tracking-tight text-slate-50">www.humanrightsaffairs.org</span>
                </div>
             </div>
           </div>
