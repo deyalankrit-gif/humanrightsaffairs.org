@@ -190,7 +190,7 @@ export default function IDCardGenerator() {
                         <span className="text-[#c91010]">{member.expiryDate}</span>
                      </div>
                      <div className="flex justify-end gap-3">
-                        <span className="text-slate-400">Mobile :</span> 
+                        <span className="text-slate-400">Helpline :</span> 
                         <span className="text-primary">+91 70631 11471</span>
                      </div>
                      {member.bloodGroup && (
@@ -252,7 +252,7 @@ export default function IDCardGenerator() {
                         </div>
                         <div className="grid grid-cols-2 gap-4 pt-2 border-t border-slate-100 mt-2">
                            <div className="flex items-center gap-3">
-                              <Phone className="w-4 h-4 text-accent" />
+                              <Phone className="w-4 h-4 text-accent shrink-0" />
                               <p className="text-[14px] font-bold text-slate-700">{member.phone}</p>
                            </div>
                            <div className="flex items-center gap-3">
