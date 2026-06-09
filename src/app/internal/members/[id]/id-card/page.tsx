@@ -6,15 +6,15 @@ import Image from 'next/image'
 import { useDoc, useFirestore, useUser, useMemoFirebase } from '@/firebase'
 import { doc } from 'firebase/firestore'
 import { Button } from '@/components/ui/button'
-import { Printer, ArrowLeft, Download, Mail, Globe, MapPin, ShieldCheck, BadgeCheck, X } from 'lucide-react'
+import { Printer, ArrowLeft, Download, Mail, Globe, MapPin, ShieldCheck, BadgeCheck, X, Heart, Phone } from 'lucide-react'
 import { Loader2 } from 'lucide-react'
 import { PlaceHolderImages } from '@/lib/placeholder-images'
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
 
 /**
- * IDCardGenerator produces an exact replica of the provided reference image,
- * populating it with dynamic member data.
+ * IDCardGenerator produces a high-fidelity digital ID card using all available
+ * member details, matching the HRAT institutional branding precisely.
  */
 export default function IDCardGenerator() {
   const { id } = useParams()
@@ -101,7 +101,7 @@ export default function IDCardGenerator() {
         {/* High-Fidelity ID Card Container */}
         <div className="w-full flex flex-col items-center gap-12 print:gap-10">
           
-          {/* FRONT SIDE - PRECISE REPLICA OF REFERENCE */}
+          {/* FRONT SIDE - PRECISE REPLICA OF INSTITUTIONAL STANDARD */}
           <div className={cn(
             "relative w-[800px] h-[500px] bg-white rounded-3xl shadow-[0_50px_100px_rgba(0,0,0,0.1)] overflow-hidden border border-slate-100 print:shadow-none print:border-slate-200 transition-all duration-500 select-none",
             view !== 'front' && "hidden print:block"
@@ -142,7 +142,7 @@ export default function IDCardGenerator() {
 
                {/* Center Information Block */}
                <div className="flex-1 flex flex-col pt-6">
-                  <div className="text-center space-y-1 mb-16">
+                  <div className="text-center space-y-1 mb-12">
                      <p className="text-[24px] font-black text-[#006400] tracking-tight leading-none uppercase">Registered by Govt. of India NITI Aayog</p>
                      <p className="text-[24px] font-black text-[#006400] tracking-tight leading-none uppercase">Regd.No. - WB/2025/0762605</p>
                   </div>
@@ -150,7 +150,7 @@ export default function IDCardGenerator() {
                   <div className="space-y-2">
                      <h2 className="text-[44px] font-black text-slate-900 leading-[1.1] uppercase tracking-tighter drop-shadow-sm">{member.name}</h2>
                      <p className="text-[18px] font-black text-[#006400] uppercase tracking-wide border-l-4 border-[#006400] pl-4">
-                        {member.designation} ({member.stateName?.toUpperCase() || 'WEST BENGAL'} STATE COMMITTEE)
+                        {member.designation} ({member.level === 'District' ? member.districtName?.toUpperCase() : member.stateName?.toUpperCase() || 'WEST BENGAL'} {member.level?.toUpperCase()} COMMITTEE)
                      </p>
                   </div>
                </div>
@@ -169,7 +169,7 @@ export default function IDCardGenerator() {
                     </div>
                   </div>
                   
-                  <div className="text-[14px] font-bold text-slate-800 space-y-1 leading-tight pr-1 font-mono">
+                  <div className="text-[14px] font-bold text-slate-800 space-y-1.5 leading-tight pr-1 font-mono">
                      <div className="flex justify-end gap-3">
                         <span className="text-slate-400">Issue :</span> 
                         <span className="text-primary">{member.joiningDate || '01.05.2025'}</span>
@@ -182,6 +182,12 @@ export default function IDCardGenerator() {
                         <span className="text-slate-400">Mobile :</span> 
                         <span className="text-primary">+91 {member.phone?.slice(0, 5)}XXXXX</span>
                      </div>
+                     {member.bloodGroup && (
+                       <div className="flex justify-end gap-3">
+                          <span className="text-slate-400">B.Grp :</span> 
+                          <span className="text-[#c91010] font-black">{member.bloodGroup}</span>
+                       </div>
+                     )}
                   </div>
                </div>
             </div>
@@ -207,37 +213,48 @@ export default function IDCardGenerator() {
             </div>
           </div>
 
-          {/* BACK SIDE - DUMMY WITH PROFESSIONAL LAYOUT */}
+          {/* BACK SIDE - DETAILED PERSONNEL RECORD */}
           <div className={cn(
             "relative w-[800px] h-[500px] bg-[#f8fafc] rounded-3xl shadow-[0_50px_100px_rgba(0,0,0,0.1)] overflow-hidden border border-slate-200 print:shadow-none print:border-slate-300 transition-all duration-500",
             view !== 'back' && "hidden print:block"
           )}>
             <div className="h-5 bg-[#c91010] w-full shadow-sm"></div>
-            <div className="p-12 flex flex-col h-full bg-[url('https://www.transparenttextures.com/patterns/white-diamond.png')]">
-               <div className="flex justify-between items-start mb-10">
-                  <div className="space-y-6">
-                     <h3 className="text-[28px] font-black text-[#001f54] uppercase tracking-tighter border-b-[4px] border-accent w-fit pb-1">Organizational Mandate</h3>
-                     <ul className="space-y-3 text-[14px] font-bold text-slate-600 list-disc pl-6 max-w-lg leading-relaxed italic">
-                        <li>This card is for official identification purposes only.</li>
-                        <li>Representation without valid authorization is a punishable offense.</li>
-                        <li>Misuse of organizational branding is strictly prohibited under Indian law.</li>
-                        <li>Report loss of card to the National HQ immediately.</li>
-                     </ul>
+            <div className="p-10 flex flex-col h-full bg-[url('https://www.transparenttextures.com/patterns/white-diamond.png')]">
+               <div className="flex justify-between items-start mb-8">
+                  <div className="space-y-4">
+                     <h3 className="text-[28px] font-black text-[#001f54] uppercase tracking-tighter border-b-[4px] border-accent w-fit pb-1">Personnel Information</h3>
+                     <div className="space-y-2 bg-white/60 p-4 rounded-2xl border border-slate-100 shadow-sm max-w-lg">
+                        <div className="flex gap-3">
+                           <MapPin className="w-4 h-4 text-accent shrink-0 mt-1" />
+                           <p className="text-[14px] font-bold text-slate-700 leading-relaxed">
+                              {member.address}<br />
+                              P.O: {member.postOffice}, P.S: {member.policeStation}<br />
+                              Pin Code: {member.pinCode}
+                           </p>
+                        </div>
+                        <div className="flex items-center gap-3 pt-2 border-t border-slate-100 mt-2">
+                           <Phone className="w-4 h-4 text-accent" />
+                           <p className="text-[14px] font-bold text-slate-700">{member.phone}</p>
+                        </div>
+                     </div>
                   </div>
                   <div className="text-right">
-                     <p className="text-[11px] font-black text-slate-400 uppercase tracking-[0.25em] mb-3">Institutional Seal</p>
-                     <div className="w-44 h-20 border-[3px] border-dashed border-slate-200 bg-white/60 rounded-2xl flex items-center justify-center shadow-inner">
-                        <span className="text-[10px] text-slate-300 font-bold uppercase tracking-widest">Manual Stamp</span>
+                     <p className="text-[11px] font-black text-slate-400 uppercase tracking-[0.25em] mb-3">Organizational Seal</p>
+                     <div className="w-44 h-24 border-[3px] border-dashed border-slate-200 bg-white/60 rounded-2xl flex items-center justify-center shadow-inner overflow-hidden">
+                        <div className="relative w-16 h-16 opacity-10">
+                           <Image src="/HRAT%20Logo.jpeg" alt="HRAT Seal" fill className="object-contain grayscale" />
+                        </div>
+                        <span className="absolute text-[10px] text-slate-300 font-bold uppercase tracking-widest">Digital Stamp</span>
                      </div>
                   </div>
                </div>
 
-               <div className="grid grid-cols-2 gap-10 mt-auto pb-16">
+               <div className="grid grid-cols-2 gap-10 mt-auto pb-12">
                   <div className="space-y-3 p-5 bg-white border border-slate-100 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
                      <p className="text-[12px] font-black text-accent uppercase tracking-[0.15em] flex items-center gap-2">
-                        <MapPin className="w-4 h-4" /> National Head Office
+                        <Globe className="w-4 h-4" /> National Head Office
                      </p>
-                     <p className="text-[14px] font-bold text-slate-700 leading-tight">
+                     <p className="text-[13px] font-bold text-slate-700 leading-tight">
                         9567, Tokri Walan Azad Market, Delhi. <br /> Pin - 110006
                      </p>
                   </div>
@@ -245,13 +262,13 @@ export default function IDCardGenerator() {
                      <p className="text-[12px] font-black text-accent uppercase tracking-[0.15em] flex items-center gap-2">
                         <MapPin className="w-4 h-4" /> State Office (WB)
                      </p>
-                     <p className="text-[14px] font-bold text-slate-700 leading-tight">
-                        Deganga, North 24 Parganas, WB - 743423
+                     <p className="text-[13px] font-bold text-slate-700 leading-tight">
+                        Biswanathpur, PO-Ramnathpur, P.S. Deganga, North 24 Parganas, WB - 743423
                      </p>
                   </div>
                </div>
 
-               <div className="flex justify-between items-end border-t-2 border-slate-100 pt-8 mt-4">
+               <div className="flex justify-between items-end border-t-2 border-slate-100 pt-6 mt-4">
                   <div className="flex items-center gap-5 opacity-50">
                      <div className="relative w-14 h-14 grayscale hover:grayscale-0 transition-all duration-500">
                         <Image src="/HRAT%20Logo.jpeg" alt="Seal" fill className="object-contain" />
@@ -261,7 +278,7 @@ export default function IDCardGenerator() {
                      </p>
                   </div>
                   <div className="text-right">
-                     <div className="h-12 border-b-[3px] border-slate-300 w-56 ml-auto mb-2"></div>
+                     <div className="h-10 border-b-[3px] border-slate-300 w-56 ml-auto mb-2"></div>
                      <p className="text-[18px] font-black text-[#001f54] uppercase tracking-tighter leading-none">Central Chairman</p>
                      <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest mt-1">Authorized Signatory</p>
                   </div>
@@ -277,8 +294,8 @@ export default function IDCardGenerator() {
            <ShieldCheck className="w-14 h-14 text-accent mx-auto mb-6 drop-shadow-xl animate-float" />
            <h3 className="font-headline font-bold text-2xl mb-3 text-primary">High-Fidelity Verified Identity</h3>
            <p className="text-slate-500 text-sm mb-8 leading-relaxed font-medium">
-             This layout is optimized for **Industrial PVC Card Printing (85.6mm x 53.98mm)**. 
-             The typography and slanted header branding are locked for organizational consistency.
+             This identity record for <strong>{member.name}</strong> is generated using verified credentials. 
+             Optimized for **Industrial PVC Card Printing** (85.6mm x 53.98mm).
            </p>
            <div className="flex flex-col gap-3">
              <div className="flex items-center gap-3 text-[11px] font-bold text-emerald-600 uppercase justify-center bg-emerald-50 py-2.5 rounded-xl border border-emerald-100 shadow-sm">
