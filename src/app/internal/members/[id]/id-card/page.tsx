@@ -120,7 +120,7 @@ export default function IDCardGenerator() {
                 </h1>
                 
                 {/* Transparent Logo with Gold Outline */}
-                <div className="absolute right-8 top-1/2 -translate-y-1/2 w-24 h-24 rounded-full p-0.5 border-2 border-[#D4AF37] shadow-2xl z-30">
+                <div className="absolute right-8 top-1/2 -translate-y-1/2 w-24 h-24 rounded-full p-0.5 border-2 border-[#D4AF37] shadow-2xl z-30 flex items-center justify-center">
                   <div className="relative w-full h-full rounded-full overflow-hidden">
                     <Image src="/HRAT%20Logo.jpeg" alt="Logo" fill className="object-contain" />
                   </div>
@@ -128,33 +128,36 @@ export default function IDCardGenerator() {
               </div>
             </div>
 
-            {/* Member ID Watermark Top Left - Reduced size and opacity */}
+            {/* Member ID Watermark Top Left */}
             <div className="absolute top-[115px] left-10">
-               <span className="text-[28px] font-black text-[#001f54] tracking-tighter uppercase opacity-30">{member.memberId || 'WB25LA09531'}</span>
+               <span className="text-[28px] font-black text-[#001f54] tracking-tighter uppercase opacity-20">{member.memberId || 'WB25LA09531'}</span>
             </div>
 
             <div className="flex px-10 mt-12 gap-10">
-               {/* Portrait Section */}
-               <div className="relative w-56 h-[280px] rounded-[2rem] overflow-hidden border-[6px] border-slate-50 shadow-2xl bg-slate-100 ring-1 ring-slate-200 shrink-0">
+               {/* Portrait Section - Slightly Smaller with Hologram */}
+               <div className="relative w-48 h-[240px] rounded-[2rem] overflow-hidden border-[6px] border-slate-50 shadow-2xl bg-slate-100 ring-1 ring-slate-200 shrink-0">
                   <Image src={displayImg} alt={member.name} fill className="object-cover" />
-                  {/* Portrait Hologram/Seal Overlay */}
-                  <div className="absolute bottom-3 right-3 w-10 h-10 rounded-full bg-white/30 backdrop-blur-md p-1 border-2 border-white/50 shadow-xl">
-                    <Image src="/HRAT%20Logo.jpeg" alt="Watermark" fill className="object-contain opacity-60 grayscale" />
+                  
+                  {/* Holographic Logo Overlay Bottom-Right */}
+                  <div className="absolute bottom-4 right-4 w-12 h-12 rounded-full bg-white/40 backdrop-blur-lg p-1.5 border-2 border-white/60 shadow-[0_0_15px_rgba(255,255,255,0.5)] z-20 overflow-hidden">
+                    <div className="relative w-full h-full">
+                      <Image src="/HRAT%20Logo.jpeg" alt="Hologram" fill className="object-contain opacity-80 brightness-110" />
+                    </div>
                   </div>
                </div>
 
                {/* Center Information Block */}
                <div className="flex-1 flex flex-col pt-2">
-                  <div className="text-center space-y-1 mb-10">
-                     <p className="text-[16px] font-black text-[#006400] tracking-tight leading-none uppercase">Registered by Govt. of India NITI Aayog</p>
-                     <p className="text-[16px] font-black text-[#006400] tracking-tight leading-none uppercase">Regd.No. - WB/2025/0762605</p>
+                  <div className="text-center space-y-1 mb-8">
+                     <p className="text-[14px] font-black text-[#006400] tracking-tight leading-none uppercase">Registered by Govt. of India NITI Aayog</p>
+                     <p className="text-[14px] font-black text-[#006400] tracking-tight leading-none uppercase">Regd.No. - WB/2025/0762605</p>
                   </div>
 
-                  <div className="space-y-2">
-                     <h2 className="text-[32px] font-black text-slate-900 leading-tight uppercase tracking-tighter drop-shadow-sm whitespace-nowrap truncate">
+                  <div className="space-y-1.5">
+                     <h2 className="text-[28px] font-black text-slate-900 leading-tight uppercase tracking-tighter drop-shadow-sm whitespace-nowrap truncate">
                        {member.name}
                      </h2>
-                     <p className="text-[16px] font-black text-[#006400] uppercase tracking-wide border-l-4 border-[#006400] pl-4">
+                     <p className="text-[15px] font-black text-[#006400] uppercase tracking-wide border-l-4 border-[#006400] pl-4">
                         {member.designation} ({member.level === 'District' ? member.districtName?.toUpperCase() : member.stateName?.toUpperCase() || 'WEST BENGAL'} {member.level?.toUpperCase()} COMMITTEE)
                      </p>
                   </div>
