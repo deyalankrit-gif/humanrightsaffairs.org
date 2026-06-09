@@ -15,6 +15,7 @@ import { cn } from '@/lib/utils'
 /**
  * IDCardGenerator produces a high-fidelity digital ID card using all available
  * member details, matching the HRAT institutional branding precisely.
+ * Updated to support stacked print layout (Front top, Back bottom).
  */
 export default function IDCardGenerator() {
   const { id } = useParams()
@@ -98,12 +99,12 @@ export default function IDCardGenerator() {
           </div>
         </div>
 
-        {/* High-Fidelity ID Card Container */}
-        <div className="w-full flex flex-col items-center gap-12 print:gap-10 print:mt-10">
+        {/* High-Fidelity ID Card Container - Optimized for Print Stacking */}
+        <div className="w-full flex flex-col items-center gap-12 print:gap-8 print:py-10">
           
-          {/* FRONT SIDE - PRECISE REPLICA OF INSTITUTIONAL STANDARD */}
+          {/* FRONT SIDE */}
           <div className={cn(
-            "relative w-[800px] h-[500px] bg-white rounded-3xl shadow-[0_50px_100px_rgba(0,0,0,0.1)] overflow-hidden border border-slate-100 print:shadow-none print:border-slate-200 transition-all duration-500 select-none",
+            "relative w-[800px] h-[500px] bg-white rounded-3xl shadow-[0_50px_100px_rgba(0,0,0,0.1)] overflow-hidden border border-slate-100 print:shadow-none print:border-2 print:border-slate-300 transition-all duration-500 select-none shrink-0",
             view !== 'front' && "hidden print:block"
           )}>
             {/* Header Section with Slanted Division */}
@@ -128,14 +129,14 @@ export default function IDCardGenerator() {
               </div>
             </div>
 
-            {/* Member ID Watermark Top Left - Positioned for Spacing */}
+            {/* Member ID Watermark Top Left */}
             <div className="absolute top-[110px] left-10">
                <span className="text-[28px] font-black text-[#001f54] tracking-tighter uppercase opacity-20">{member.memberId}</span>
             </div>
 
-            {/* Content Container - Shifted up slightly to create footer gap */}
+            {/* Content Container */}
             <div className="flex px-10 mt-24 gap-10">
-               {/* Portrait Section - Adjusted height for vertical balance */}
+               {/* Portrait Section */}
                <div className="relative w-48 h-[220px] rounded-[2rem] overflow-hidden border-[6px] border-slate-50 shadow-2xl bg-slate-100 ring-1 ring-slate-200 shrink-0">
                   <Image src={displayImg} alt={member.name} fill className="object-cover" />
                   
@@ -164,7 +165,7 @@ export default function IDCardGenerator() {
                   </div>
                </div>
 
-               {/* Right Side: QR & Real-Time Sync Dates */}
+               {/* Right Side: QR & Dates */}
                <div className="w-52 flex flex-col items-end pt-2 space-y-6">
                   <div className="text-right">
                     <p className="text-[13px] font-black text-[#001f54] font-mono mb-2 tracking-widest">{member.memberId}</p>
@@ -179,7 +180,6 @@ export default function IDCardGenerator() {
                     </div>
                   </div>
                   
-                  {/* Real-Time Synchronized Data Block */}
                   <div className="text-[13px] font-bold text-slate-800 space-y-1 leading-tight pr-1 font-mono">
                      <div className="flex justify-end gap-3">
                         <span className="text-slate-400">Issue :</span> 
@@ -197,7 +197,7 @@ export default function IDCardGenerator() {
                </div>
             </div>
 
-            {/* Footer Banner - Precise Centered Slant Separation */}
+            {/* Footer Banner */}
             <div className="absolute bottom-0 left-0 w-full h-[65px] overflow-hidden">
                <div className="absolute inset-0 bg-[#001f54]"></div>
                <div 
@@ -206,7 +206,6 @@ export default function IDCardGenerator() {
                ></div>
                
                <div className="relative z-20 w-full h-full flex items-center text-white">
-                  {/* Left Half: Centered Email */}
                   <div className="flex items-center gap-3 w-1/2 justify-center pr-6">
                     <div className="bg-white/10 rounded-full p-1.5">
                       <Mail className="w-4 h-4 text-white fill-white" />
@@ -214,7 +213,6 @@ export default function IDCardGenerator() {
                     <span className="text-[18px] font-bold tracking-tight text-slate-50">humanrightsaffairstrust@gmail.com</span>
                   </div>
 
-                  {/* Right Half: Centered Website */}
                   <div className="flex items-center gap-3 w-1/2 justify-center pl-10">
                     <div className="bg-white/10 rounded-full p-1.5">
                       <Globe className="w-4 h-4 text-white" />
@@ -225,9 +223,9 @@ export default function IDCardGenerator() {
             </div>
           </div>
 
-          {/* BACK SIDE - DETAILED PERSONNEL RECORD */}
+          {/* BACK SIDE */}
           <div className={cn(
-            "relative w-[800px] h-[500px] bg-[#f8fafc] rounded-3xl shadow-[0_50px_100px_rgba(0,0,0,0.1)] overflow-hidden border border-slate-200 print:shadow-none print:border-slate-300 transition-all duration-500",
+            "relative w-[800px] h-[500px] bg-[#f8fafc] rounded-3xl shadow-[0_50px_100px_rgba(0,0,0,0.1)] overflow-hidden border border-slate-200 print:shadow-none print:border-2 print:border-slate-300 transition-all duration-500 shrink-0",
             view !== 'back' && "hidden print:block"
           )}>
             <div className="h-5 bg-[#c91010] w-full shadow-sm"></div>
