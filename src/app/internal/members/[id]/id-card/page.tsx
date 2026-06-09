@@ -119,9 +119,9 @@ export default function IDCardGenerator() {
                   HUMAN RIGHTS AFFAIRS TRUST
                 </h1>
                 
-                {/* Transparent Logo with Gold Outline */}
+                {/* Transparent Logo with Gold Outline - Resized Inner Logo */}
                 <div className="absolute right-8 top-1/2 -translate-y-1/2 w-24 h-24 rounded-full p-0.5 border-2 border-[#D4AF37] shadow-2xl z-30 flex items-center justify-center">
-                  <div className="relative w-full h-full rounded-full overflow-hidden">
+                  <div className="relative w-20 h-20 rounded-full overflow-hidden">
                     <Image src="/HRAT%20Logo.jpeg" alt="Logo" fill className="object-contain" />
                   </div>
                 </div>
@@ -150,7 +150,7 @@ export default function IDCardGenerator() {
                {/* Center Information Block */}
                <div className="flex-1 flex flex-col pt-2">
                   <div className="text-center space-y-1 mb-8">
-                     <p className="text-[18px] font-black text-[#006400] tracking-tight leading-none uppercase">Registered by Govt. of India NITI Aayog</p>
+                     <p className="text-[20px] font-black text-[#006400] tracking-tight leading-none uppercase">Registered by Govt. of India NITI Aayog</p>
                      <p className="text-[15px] font-black text-[#006400] tracking-tight leading-none uppercase">Regd.No. - WB/2025/0762605</p>
                   </div>
 
