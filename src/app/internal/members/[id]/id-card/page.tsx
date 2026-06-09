@@ -133,7 +133,7 @@ export default function IDCardGenerator() {
                <span className="text-[28px] font-black text-[#001f54] tracking-tighter uppercase opacity-20">{member.memberId || 'WB25LA09531'}</span>
             </div>
 
-            <div className="flex px-10 mt-12 gap-10">
+            <div className="flex px-10 mt-20 gap-10">
                {/* Portrait Section - Slightly Smaller with Hologram */}
                <div className="relative w-48 h-[240px] rounded-[2rem] overflow-hidden border-[6px] border-slate-50 shadow-2xl bg-slate-100 ring-1 ring-slate-200 shrink-0">
                   <Image src={displayImg} alt={member.name} fill className="object-cover" />
@@ -211,16 +211,16 @@ export default function IDCardGenerator() {
                <div className="relative z-20 w-full h-full flex items-center px-10 text-white">
                   <div className="flex items-center gap-3 ml-[30%] mr-auto">
                     <div className="bg-white/10 rounded-full p-1.5">
-                      <Mail className="w-3.5 h-3.5 text-white fill-white" />
+                      <Mail className="w-4 h-4 text-white fill-white" />
                     </div>
-                    <span className="text-[14px] font-bold tracking-tight text-slate-50">humanrightsaffairstrust@gmail.com</span>
+                    <span className="text-[16px] font-bold tracking-tight text-slate-50">humanrightsaffairstrust@gmail.com</span>
                   </div>
 
                   <div className="flex items-center gap-3">
                     <div className="bg-white/10 rounded-full p-1.5">
-                      <Globe className="w-3.5 h-3.5 text-white" />
+                      <Globe className="w-4 h-4 text-white" />
                     </div>
-                    <span className="text-[14px] font-bold tracking-tight text-slate-50">www.humanrightsaffairs.org</span>
+                    <span className="text-[16px] font-bold tracking-tight text-slate-50">www.humanrightsaffairs.org</span>
                   </div>
                </div>
             </div>
