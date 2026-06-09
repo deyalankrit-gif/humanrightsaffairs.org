@@ -150,8 +150,8 @@ export default function IDCardGenerator() {
                {/* Center Information Block */}
                <div className="flex-1 flex flex-col pt-2">
                   <div className="text-center space-y-1 mb-8">
-                     <p className="text-[15px] font-black text-[#006400] tracking-tight leading-none uppercase">Registered by Govt. of India NITI Aayog</p>
-                     <p className="text-[13px] font-black text-[#006400] tracking-tight leading-none uppercase">Regd.No. - WB/2025/0762605</p>
+                     <p className="text-[18px] font-black text-[#006400] tracking-tight leading-none uppercase">Registered by Govt. of India NITI Aayog</p>
+                     <p className="text-[15px] font-black text-[#006400] tracking-tight leading-none uppercase">Regd.No. - WB/2025/0762605</p>
                   </div>
 
                   <div className="space-y-1.5">
@@ -191,7 +191,7 @@ export default function IDCardGenerator() {
                      </div>
                      <div className="flex justify-end gap-3">
                         <span className="text-slate-400">Mobile :</span> 
-                        <span className="text-primary">{member.phone}</span>
+                        <span className="text-primary">+91 70631 11471</span>
                      </div>
                      {member.bloodGroup && (
                        <div className="flex justify-end gap-3">
@@ -217,7 +217,7 @@ export default function IDCardGenerator() {
                     <div className="bg-white/10 rounded-full p-1.5">
                       <Mail className="w-4 h-4 text-white fill-white" />
                     </div>
-                    <span className="text-[16px] font-bold tracking-tight text-slate-50">humanrightsaffairstrust@gmail.com</span>
+                    <span className="text-[18px] font-bold tracking-tight text-slate-50">humanrightsaffairstrust@gmail.com</span>
                   </div>
 
                   {/* Right Half: Centered Website */}
@@ -225,7 +225,7 @@ export default function IDCardGenerator() {
                     <div className="bg-white/10 rounded-full p-1.5">
                       <Globe className="w-4 h-4 text-white" />
                     </div>
-                    <span className="text-[16px] font-bold tracking-tight text-slate-50">www.humanrightsaffairs.org</span>
+                    <span className="text-[18px] font-bold tracking-tight text-slate-50">www.humanrightsaffairs.org</span>
                   </div>
                </div>
             </div>
