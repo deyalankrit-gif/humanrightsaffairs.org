@@ -84,7 +84,7 @@ export function AppSidebar() {
   }, [])
 
   return (
-    <Sidebar collapsible="icon" className="border-r bg-sidebar">
+    <Sidebar collapsible="icon" className="border-r bg-sidebar print:hidden">
       <SidebarHeader className="h-20 border-b flex items-center justify-center">
         <Link href="/" className="flex items-center gap-3 px-4 w-full">
           <div className="relative w-10 h-10 shrink-0">

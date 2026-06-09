@@ -64,7 +64,7 @@ export default function IDCardGenerator() {
 
   return (
     <main className="min-h-screen bg-slate-100 p-8 print:p-0 print:bg-white flex flex-col items-center">
-      <div className="max-w-4xl w-full flex flex-col gap-8">
+      <div className="max-w-4xl w-full flex flex-col gap-8 print:gap-0">
         
         <div className="flex items-center justify-between print:hidden">
           <Button variant="ghost" onClick={() => router.back()} className="gap-2 font-bold uppercase text-[10px] tracking-widest text-slate-500 hover:text-primary transition-colors">
@@ -99,7 +99,7 @@ export default function IDCardGenerator() {
         </div>
 
         {/* High-Fidelity ID Card Container */}
-        <div className="w-full flex flex-col items-center gap-12 print:gap-10">
+        <div className="w-full flex flex-col items-center gap-12 print:gap-10 print:mt-10">
           
           {/* FRONT SIDE - PRECISE REPLICA OF INSTITUTIONAL STANDARD */}
           <div className={cn(
@@ -119,9 +119,9 @@ export default function IDCardGenerator() {
                   HUMAN RIGHTS AFFAIRS TRUST
                 </h1>
                 
-                {/* Transparent Logo with Gold Outline - Resized Inner Logo */}
+                {/* Framed Logo with Authority Ring */}
                 <div className="absolute right-8 top-1/2 -translate-y-1/2 w-24 h-24 rounded-full p-0.5 border-2 border-[#D4AF37] shadow-2xl z-30 flex items-center justify-center">
-                  <div className="relative w-20 h-20 rounded-full overflow-hidden">
+                  <div className="relative w-16 h-16 rounded-full overflow-hidden">
                     <Image src="/HRAT%20Logo.jpeg" alt="Logo" fill className="object-contain" />
                   </div>
                 </div>
@@ -150,7 +150,7 @@ export default function IDCardGenerator() {
                {/* Center Information Block */}
                <div className="flex-1 flex flex-col pt-2">
                   <div className="text-center space-y-1 mb-8">
-                     <p className="text-[20px] font-black text-[#006400] tracking-tight leading-none uppercase">Registered by Govt. of India NITI Aayog</p>
+                     <p className="text-[22px] font-black text-[#006400] tracking-tight leading-none uppercase">Registered by Govt. of India NITI Aayog</p>
                      <p className="text-[15px] font-black text-[#006400] tracking-tight leading-none uppercase">Regd.No. - WB/2025/0762605</p>
                   </div>
 
@@ -193,12 +193,6 @@ export default function IDCardGenerator() {
                         <span className="text-slate-400">Helpline :</span> 
                         <span className="text-primary">+91 70631 11471</span>
                      </div>
-                     {member.bloodGroup && (
-                       <div className="flex justify-end gap-3">
-                          <span className="text-slate-400">B.Grp :</span> 
-                          <span className="text-[#c91010] font-black">{member.bloodGroup}</span>
-                       </div>
-                     )}
                   </div>
                </div>
             </div>
@@ -321,10 +315,8 @@ export default function IDCardGenerator() {
              This identity record for <strong>{member.name}</strong> is generated using verified credentials. 
              Optimized for **Industrial PVC Card Printing** (85.6mm x 53.98mm).
            </p>
-           <div className="flex flex-col gap-3">
-             <div className="flex items-center gap-3 text-[11px] font-bold text-emerald-600 uppercase justify-center bg-emerald-50 py-2.5 rounded-xl border border-emerald-100 shadow-sm">
-               <BadgeCheck className="w-5 h-5 text-emerald-500" /> NITI Aayog Verified Credentials & 80G Compliant
-             </div>
+           <div className="flex items-center gap-3 text-[11px] font-bold text-emerald-600 uppercase justify-center bg-emerald-50 py-2.5 rounded-xl border border-emerald-100 shadow-sm">
+             <BadgeCheck className="w-5 h-5 text-emerald-500" /> NITI Aayog Verified Credentials & 80G Compliant
            </div>
         </div>
 

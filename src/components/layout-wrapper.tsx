@@ -37,7 +37,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
         <div className="flex min-h-screen bg-background w-full">
           <AppSidebar />
           <SidebarInset className="flex flex-col">
-            <header className="flex h-10 shrink-0 items-center gap-2 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 px-4 transition-all duration-300">
+            <header className="flex h-10 shrink-0 items-center gap-2 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 px-4 transition-all duration-300 print:hidden">
               <SidebarTrigger className="-ml-1 scale-90" />
               <Separator orientation="vertical" className="mr-2 h-4" />
               <div className="flex-1">
