@@ -128,12 +128,13 @@ export default function IDCardGenerator() {
               </div>
             </div>
 
-            {/* Member ID Watermark Top Left */}
+            {/* Member ID Watermark Top Left - Reduced scale for better gap */}
             <div className="absolute top-[115px] left-10">
                <span className="text-[28px] font-black text-[#001f54] tracking-tighter uppercase opacity-20">{member.memberId || 'WB25LA09531'}</span>
             </div>
 
-            <div className="flex px-10 mt-20 gap-10">
+            {/* Content Container - Increased margin to ensure gap below watermark */}
+            <div className="flex px-10 mt-24 gap-10">
                {/* Portrait Section - Slightly Smaller with Hologram */}
                <div className="relative w-48 h-[240px] rounded-[2rem] overflow-hidden border-[6px] border-slate-50 shadow-2xl bg-slate-100 ring-1 ring-slate-200 shrink-0">
                   <Image src={displayImg} alt={member.name} fill className="object-cover" />
@@ -149,12 +150,12 @@ export default function IDCardGenerator() {
                {/* Center Information Block */}
                <div className="flex-1 flex flex-col pt-2">
                   <div className="text-center space-y-1 mb-8">
-                     <p className="text-[14px] font-black text-[#006400] tracking-tight leading-none uppercase">Registered by Govt. of India NITI Aayog</p>
-                     <p className="text-[14px] font-black text-[#006400] tracking-tight leading-none uppercase">Regd.No. - WB/2025/0762605</p>
+                     <p className="text-[12px] font-black text-[#006400] tracking-tight leading-none uppercase">Registered by Govt. of India NITI Aayog</p>
+                     <p className="text-[12px] font-black text-[#006400] tracking-tight leading-none uppercase">Regd.No. - WB/2025/0762605</p>
                   </div>
 
                   <div className="space-y-1.5">
-                     <h2 className="text-[28px] font-black text-slate-900 leading-tight uppercase tracking-tighter drop-shadow-sm whitespace-nowrap truncate">
+                     <h2 className="text-[26px] font-black text-slate-900 leading-tight uppercase tracking-tighter drop-shadow-sm whitespace-nowrap truncate">
                        {member.name}
                      </h2>
                      <p className="text-[15px] font-black text-[#006400] uppercase tracking-wide border-l-4 border-[#006400] pl-4">
@@ -201,15 +202,16 @@ export default function IDCardGenerator() {
             </div>
 
             {/* Footer Banner - Slanted Division matching Header */}
-            <div className="absolute bottom-0 left-0 w-full h-[65px] flex relative overflow-hidden">
+            <div className="absolute bottom-0 left-0 w-full h-[65px] overflow-hidden">
                <div className="absolute inset-0 bg-[#001f54]"></div>
                <div 
                  className="absolute left-0 top-0 h-full w-[35%] bg-[#c91010]" 
                  style={{ clipPath: 'polygon(0 0, 85% 0, 100% 100%, 0% 100%)' }}
                ></div>
                
-               <div className="relative z-20 w-full h-full flex items-center px-10 text-white">
-                  <div className="flex items-center gap-3 ml-[30%] mr-auto">
+               {/* Centrally Aligned Contact Info */}
+               <div className="relative z-20 w-full h-full flex items-center justify-center gap-10 text-white">
+                  <div className="flex items-center gap-3">
                     <div className="bg-white/10 rounded-full p-1.5">
                       <Mail className="w-4 h-4 text-white fill-white" />
                     </div>
