@@ -244,6 +244,7 @@ export default function MeetingsPage() {
   }
 
   const splitTime = (timeStr: string) => {
+    if (!timeStr) return { hour: '09', minute: '00', period: 'AM' };
     const parts = timeStr.split(' ');
     const timeParts = parts[0]?.split(':') || ['09', '00'];
     return {
@@ -353,7 +354,7 @@ export default function MeetingsPage() {
                               {newMeeting.date ? newMeeting.date : "Pick a date"}
                             </Button>
                           </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
+                          <PopoverContent className="w-auto p-0 z-[1000000]" align="start">
                             <CalendarComponent
                               mode="single"
                               selected={parseMeetingDate(newMeeting.date)}
@@ -733,7 +734,7 @@ export default function MeetingsPage() {
                         {editMeeting.date ? editMeeting.date : "Pick a date"}
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
+                    <PopoverContent className="w-auto p-0 z-[1000000]" align="start">
                       <CalendarComponent
                         mode="single"
                         selected={parseMeetingDate(editMeeting.date)}
