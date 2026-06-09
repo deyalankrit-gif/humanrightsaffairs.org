@@ -201,24 +201,26 @@ export default function IDCardGenerator() {
                </div>
             </div>
 
-            {/* Footer Banner - Slanted Division matching Header */}
+            {/* Footer Banner - Slanted Division matching Header with Divider between links */}
             <div className="absolute bottom-0 left-0 w-full h-[65px] overflow-hidden">
                <div className="absolute inset-0 bg-[#001f54]"></div>
                <div 
-                 className="absolute left-0 top-0 h-full w-[35%] bg-[#c91010]" 
-                 style={{ clipPath: 'polygon(0 0, 85% 0, 100% 100%, 0% 100%)' }}
+                 className="absolute right-0 top-0 h-full w-[55%] bg-[#c91010]" 
+                 style={{ clipPath: 'polygon(20% 0, 100% 0, 100% 100%, 0% 100%)' }}
                ></div>
                
-               {/* Centrally Aligned Contact Info */}
-               <div className="relative z-20 w-full h-full flex items-center justify-center gap-10 text-white">
-                  <div className="flex items-center gap-3">
+               {/* Centrally Aligned Contact Info split by slant */}
+               <div className="relative z-20 w-full h-full flex items-center text-white">
+                  {/* Left Half: Email on Navy */}
+                  <div className="flex items-center gap-3 w-1/2 justify-center pr-6">
                     <div className="bg-white/10 rounded-full p-1.5">
                       <Mail className="w-4 h-4 text-white fill-white" />
                     </div>
                     <span className="text-[16px] font-bold tracking-tight text-slate-50">humanrightsaffairstrust@gmail.com</span>
                   </div>
 
-                  <div className="flex items-center gap-3">
+                  {/* Right Half: Website on Red */}
+                  <div className="flex items-center gap-3 w-1/2 justify-center pl-10">
                     <div className="bg-white/10 rounded-full p-1.5">
                       <Globe className="w-4 h-4 text-white" />
                     </div>
