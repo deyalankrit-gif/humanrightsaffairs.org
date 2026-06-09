@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useEffect } from 'react'
@@ -101,6 +100,7 @@ export default function MeetingsPage() {
   const [isMirror, setIsMirror] = useState(false)
   const [isActionLoading, setIsActionLoading] = useState(false)
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [selectedAttendees, setSelectedAttendees] = useState<string[]>([])
   const [selectedLeaderProfile, setSelectedLeaderProfile] = useState<Leader | null>(null)
   const [editMeeting, setEditMeeting] = useState<any>(null)
@@ -215,6 +215,7 @@ export default function MeetingsPage() {
       .then(() => {
         toast({ title: "Meeting Record Updated" })
         setEditMeeting(null)
+        setIsEditDialogOpen(false)
         setIsActionLoading(false)
       })
       .catch(() => setIsActionLoading(false))
@@ -261,20 +262,20 @@ export default function MeetingsPage() {
       <div className="flex items-center gap-2">
         <Select value={hour} onValueChange={(h) => onChange(`${h}:${minute} ${period}`)}>
           <SelectTrigger className="w-full h-10 rounded-lg"><SelectValue /></SelectTrigger>
-          <SelectContent className="max-h-60">
+          <SelectContent position="popper" className="z-[999999] bg-white max-h-60">
             {hoursArr.map(h => <SelectItem key={h} value={h}>{h}</SelectItem>)}
           </SelectContent>
         </Select>
         <span className="font-bold text-slate-400">:</span>
         <Select value={minute} onValueChange={(m) => onChange(`${hour}:${m} ${period}`)}>
           <SelectTrigger className="w-full h-10 rounded-lg"><SelectValue /></SelectTrigger>
-          <SelectContent className="max-h-60">
+          <SelectContent position="popper" className="z-[999999] bg-white max-h-60">
             {minutesArr.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}
           </SelectContent>
         </Select>
         <Select value={period} onValueChange={(p) => onChange(`${hour}:${minute} ${p}`)}>
           <SelectTrigger className="w-full h-10 rounded-lg"><SelectValue /></SelectTrigger>
-          <SelectContent>
+          <SelectContent position="popper" className="z-[999999] bg-white">
             <SelectItem value="AM">AM</SelectItem>
             <SelectItem value="PM">PM</SelectItem>
           </SelectContent>
@@ -373,7 +374,7 @@ export default function MeetingsPage() {
                         <Label className="text-[10px] uppercase font-bold text-slate-400">Operational Level</Label>
                         <Select value={newMeeting.level} onValueChange={(val: any) => setNewMeeting({...newMeeting, level: val, stateName: '', districtName: ''})}>
                           <SelectTrigger className="rounded-xl h-11"><SelectValue /></SelectTrigger>
-                          <SelectContent>
+                          <SelectContent position="popper" className="z-[999999] bg-white">
                             <SelectItem value="National">Central Council</SelectItem>
                             <SelectItem value="State">State Level</SelectItem>
                             <SelectItem value="District">District Level</SelectItem>
@@ -384,7 +385,7 @@ export default function MeetingsPage() {
                         <Label className="text-[10px] uppercase font-bold text-slate-400">Current Status</Label>
                         <Select value={newMeeting.status} onValueChange={(val: any) => setNewMeeting({...newMeeting, status: val})}>
                           <SelectTrigger className="rounded-xl h-11"><SelectValue /></SelectTrigger>
-                          <SelectContent>
+                          <SelectContent position="popper" className="z-[999999] bg-white">
                             <SelectItem value="Upcoming">Upcoming</SelectItem>
                             <SelectItem value="Completed">Completed</SelectItem>
                             <SelectItem value="Postponed">Postponed</SelectItem>
@@ -399,7 +400,7 @@ export default function MeetingsPage() {
                           <Label className="text-[10px] uppercase font-bold text-accent">Select State *</Label>
                           <Select value={newMeeting.stateName} onValueChange={(val) => setNewMeeting({...newMeeting, stateName: val, districtName: ''})}>
                             <SelectTrigger className="rounded-xl h-11 border-accent/20 bg-white dark:bg-slate-900"><SelectValue placeholder="Choose State" /></SelectTrigger>
-                            <SelectContent className="max-h-60">{states.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+                            <SelectContent position="popper" className="z-[999999] bg-white max-h-60">{states.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
                           </Select>
                         </div>
                         {newMeeting.stateName && (newMeeting.level === 'District') && (
@@ -407,7 +408,7 @@ export default function MeetingsPage() {
                             <Label className="text-[10px] uppercase font-bold text-accent">Select District *</Label>
                             <Select value={newMeeting.districtName} onValueChange={(val) => setNewMeeting({...newMeeting, districtName: val})}>
                               <SelectTrigger className="rounded-xl h-11 border-accent/20 bg-white dark:bg-slate-900"><SelectValue placeholder="Choose District" /></SelectTrigger>
-                              <SelectContent className="max-h-60">{(INDIA_DATA[newMeeting.stateName] || []).map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
+                              <SelectContent position="popper" className="z-[999999] bg-white max-h-60">{(INDIA_DATA[newMeeting.stateName] || []).map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
                             </Select>
                           </div>
                         )}
@@ -511,131 +512,16 @@ export default function MeetingsPage() {
                     
                     {isAdmin && (
                       <div className="absolute top-6 left-6 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-50">
-                        <Dialog open={editMeeting?.id === meeting.id} onOpenChange={(open) => !open && setEditMeeting(null)}>
-                          <DialogTrigger asChild>
-                            <Button onClick={() => setEditMeeting(meeting)} size="icon" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-full shadow-lg border border-slate-100 dark:border-slate-700 hover:bg-secondary hover:text-white transition-colors">
-                              <Edit className="w-4 h-4" />
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent className="max-w-xl bg-white dark:bg-slate-900 rounded-[2.5rem] border-none shadow-2xl max-h-[90vh] overflow-y-auto">
-                            <DialogHeader>
-                              <DialogTitle className="text-2xl font-headline font-bold text-primary dark:text-white">Modify Meeting Record</DialogTitle>
-                            </DialogHeader>
-                            {editMeeting && (
-                              <div className="space-y-4 py-2">
-                                <div className="space-y-1">
-                                  <Label className="text-[10px] font-bold uppercase text-slate-400">Record Title</Label>
-                                  <Input value={editMeeting.title} onChange={e => setEditMeeting({...editMeeting, title: e.target.value})} />
-                                </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                  <div className="space-y-1">
-                                    <Label className="text-[10px] font-bold uppercase text-slate-400">Assembly Date</Label>
-                                    <Popover>
-                                      <PopoverTrigger asChild>
-                                        <Button variant="outline" className={cn("w-full justify-start text-left font-normal h-11 rounded-xl", !editMeeting.date && "text-muted-foreground")}>
-                                          <CalendarIcon className="mr-2 h-4 w-4" />
-                                          {editMeeting.date ? editMeeting.date : "Pick a date"}
-                                        </Button>
-                                      </PopoverTrigger>
-                                      <PopoverContent className="w-auto p-0" align="start">
-                                        <CalendarComponent
-                                          mode="single"
-                                          selected={parseMeetingDate(editMeeting.date)}
-                                          onSelect={(date) => setEditMeeting({...editMeeting, date: date ? format(date, "PPP") : ''})}
-                                          initialFocus
-                                        />
-                                      </PopoverContent>
-                                    </Popover>
-                                  </div>
-                                  <div className="space-y-1">
-                                    <Label className="text-[10px] font-bold uppercase text-slate-400">Start Time</Label>
-                                    <TimeSelector value={editMeeting.time} onChange={(val) => setEditMeeting({...editMeeting, time: val})} />
-                                  </div>
-                                </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                  <div className="space-y-1">
-                                    <Label className="text-[10px] font-bold uppercase text-slate-400">Chapter Level</Label>
-                                    <Select value={editMeeting.level} onValueChange={(val: any) => setEditMeeting({...editMeeting, level: val})}>
-                                      <SelectTrigger><SelectValue /></SelectTrigger>
-                                      <SelectContent>
-                                        <SelectItem value="National">Central Council</SelectItem>
-                                        <SelectItem value="State">State Level</SelectItem>
-                                        <SelectItem value="District">District Level</SelectItem>
-                                      </SelectContent>
-                                    </Select>
-                                  </div>
-                                  <div className="space-y-1">
-                                    <Label className="text-[10px] font-bold uppercase text-slate-400">Status</Label>
-                                    <Select value={editMeeting.status} onValueChange={(val: any) => setEditMeeting({...editMeeting, status: val})}>
-                                      <SelectTrigger><SelectValue /></SelectTrigger>
-                                      <SelectContent>
-                                        <SelectItem value="Upcoming">Upcoming</SelectItem>
-                                        <SelectItem value="Completed">Completed</SelectItem>
-                                        <SelectItem value="Postponed">Postponed</SelectItem>
-                                      </SelectContent>
-                                    </Select>
-                                  </div>
-                                </div>
-                                
-                                {(editMeeting.level === 'State' || editMeeting.level === 'District') && (
-                                  <div className="grid grid-cols-1 gap-4 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
-                                    <div className="space-y-1">
-                                      <Label className="text-[10px] uppercase font-bold text-accent">Chapter State *</Label>
-                                      <Select value={editMeeting.stateName} onValueChange={(val) => setEditMeeting({...editMeeting, stateName: val, districtName: ''})}>
-                                        <SelectTrigger className="rounded-xl h-11 border-accent/20 bg-white dark:bg-slate-900"><SelectValue placeholder="Select State" /></SelectTrigger>
-                                        <SelectContent className="max-h-60">{states.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
-                                      </Select>
-                                    </div>
-                                    {editMeeting.stateName && (editMeeting.level === 'District') && (
-                                      <div className="space-y-1">
-                                        <Label className="text-[10px] uppercase font-bold text-accent">Chapter District *</Label>
-                                        <Select value={editMeeting.districtName} onValueChange={(val) => setEditMeeting({...editMeeting, districtName: val})}>
-                                          <SelectTrigger className="rounded-xl h-11 border-accent/20 bg-white dark:bg-slate-900"><SelectValue placeholder="Select District" /></SelectTrigger>
-                                          <SelectContent className="max-h-60">{(INDIA_DATA[editMeeting.stateName] || []).map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
-                                        </Select>
-                                      </div>
-                                    )}
-                                  </div>
-                                )}
-
-                                <div className="space-y-2">
-                                  <Label className="text-[10px] uppercase font-bold text-slate-400">Modify Attendance</Label>
-                                  <div className="border border-slate-100 dark:border-slate-800 rounded-2xl bg-slate-50 dark:bg-slate-900 p-4">
-                                    <ScrollArea className="h-40">
-                                      <div className="grid grid-cols-1 gap-2 pr-4">
-                                        {sortedLeaders.map((leader: any) => (
-                                          <div key={leader.id} className="flex items-center space-x-2 bg-white dark:bg-slate-800 p-2 rounded-lg border border-slate-100 dark:border-slate-700 hover:border-secondary transition-colors">
-                                            <Checkbox 
-                                              id={`edit-leader-${leader.id}`} 
-                                              checked={(editMeeting.attendees || []).includes(leader.name)}
-                                              onCheckedChange={() => toggleAttendee(leader.name, true)}
-                                              className="border-accent"
-                                            />
-                                            <label htmlFor={`edit-leader-${leader.id}`} className="text-xs font-bold text-slate-700 dark:text-slate-300 cursor-pointer flex-1">
-                                              {leader.name} <span className="text-[8px] text-slate-400 uppercase ml-2">— {leader.title} ({leader.level})</span>
-                                            </label>
-                                          </div>
-                                        ))}
-                                      </div>
-                                    </ScrollArea>
-                                  </div>
-                                </div>
-
-                                <div className="space-y-1">
-                                  <Label className="text-[10px] font-bold uppercase text-slate-400">Revised Agenda</Label>
-                                  <Textarea value={editMeeting.agenda} onChange={e => setEditMeeting({...editMeeting, agenda: e.target.value})} className="rounded-xl min-h-[100px]" />
-                                </div>
-                                <div className="space-y-1">
-                                  <Label className="text-[10px] font-bold uppercase text-slate-400">Final Minutes & Resolutions</Label>
-                                  <Textarea value={editMeeting.minutes} onChange={e => setEditMeeting({...editMeeting, minutes: e.target.value})} placeholder="Induct resolutions here..." className="rounded-xl min-h-[120px]" />
-                                </div>
-                              </div>
-                            )}
-                            <DialogFooter>
-                              <Button onClick={handleUpdateMeeting} disabled={isActionLoading} className="w-full bg-primary text-primary-foreground h-12 rounded-xl font-bold hover:bg-secondary hover:text-white transition-all">Save Official Changes</Button>
-                            </DialogFooter>
-                          </DialogContent>
-                        </Dialog>
+                        <Button 
+                          onClick={() => {
+                            setEditMeeting(meeting);
+                            setIsEditDialogOpen(true);
+                          }} 
+                          size="icon" 
+                          className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-full shadow-lg border border-slate-100 dark:border-slate-700 hover:bg-secondary hover:text-white transition-colors"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Button>
 
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
@@ -825,7 +711,129 @@ export default function MeetingsPage() {
         </div>
       </section>
 
-      {/* Verified Leader Profile Modal - Optimized for Full Portrait Visibility */}
+      {/* Unified Edit Dialog (Admin Only) */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="max-w-xl bg-white dark:bg-slate-900 rounded-[2.5rem] border-none shadow-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-headline font-bold text-primary dark:text-white">Modify Meeting Record</DialogTitle>
+          </DialogHeader>
+          {editMeeting && (
+            <div className="space-y-4 py-2">
+              <div className="space-y-1">
+                <Label className="text-[10px] font-bold uppercase text-slate-400">Record Title</Label>
+                <Input value={editMeeting.title} onChange={e => setEditMeeting({...editMeeting, title: e.target.value})} />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <Label className="text-[10px] font-bold uppercase text-slate-400">Assembly Date</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className={cn("w-full justify-start text-left font-normal h-11 rounded-xl", !editMeeting.date && "text-muted-foreground")}>
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {editMeeting.date ? editMeeting.date : "Pick a date"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <CalendarComponent
+                        mode="single"
+                        selected={parseMeetingDate(editMeeting.date)}
+                        onSelect={(date) => setEditMeeting({...editMeeting, date: date ? format(date, "PPP") : ''})}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-[10px] font-bold uppercase text-slate-400">Start Time</Label>
+                  <TimeSelector value={editMeeting.time} onChange={(val) => setEditMeeting({...editMeeting, time: val})} />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <Label className="text-[10px] font-bold uppercase text-slate-400">Chapter Level</Label>
+                  <Select value={editMeeting.level} onValueChange={(val: any) => setEditMeeting({...editMeeting, level: val})}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent position="popper" className="z-[1000000] bg-white">
+                      <SelectItem value="National">Central Council</SelectItem>
+                      <SelectItem value="State">State Level</SelectItem>
+                      <SelectItem value="District">District Level</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-[10px] font-bold uppercase text-slate-400">Status</Label>
+                  <Select value={editMeeting.status} onValueChange={(val: any) => setEditMeeting({...editMeeting, status: val})}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent position="popper" className="z-[1000000] bg-white">
+                      <SelectItem value="Upcoming">Upcoming</SelectItem>
+                      <SelectItem value="Completed">Completed</SelectItem>
+                      <SelectItem value="Postponed">Postponed</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              
+              {(editMeeting.level === 'State' || editMeeting.level === 'District') && (
+                <div className="grid grid-cols-1 gap-4 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
+                  <div className="space-y-1">
+                    <Label className="text-[10px] uppercase font-bold text-accent">Chapter State *</Label>
+                    <Select value={editMeeting.stateName} onValueChange={(val) => setEditMeeting({...editMeeting, stateName: val, districtName: ''})}>
+                      <SelectTrigger className="rounded-xl h-11 border-accent/20 bg-white dark:bg-slate-900"><SelectValue placeholder="Select State" /></SelectTrigger>
+                      <SelectContent position="popper" className="z-[1000000] bg-white max-h-60">{states.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+                    </Select>
+                  </div>
+                  {editMeeting.stateName && (editMeeting.level === 'District') && (
+                    <div className="space-y-1">
+                      <Label className="text-[10px] uppercase font-bold text-accent">Chapter District *</Label>
+                      <Select value={editMeeting.districtName} onValueChange={(val) => setEditMeeting({...editMeeting, districtName: val})}>
+                        <SelectTrigger className="rounded-xl h-11 border-accent/20 bg-white dark:bg-slate-900"><SelectValue placeholder="Select District" /></SelectTrigger>
+                        <SelectContent position="popper" className="z-[1000000] bg-white max-h-60">{(INDIA_DATA[editMeeting.stateName] || []).map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
+                      </Select>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <Label className="text-[10px] uppercase font-bold text-slate-400">Modify Attendance</Label>
+                <div className="border border-slate-100 dark:border-slate-800 rounded-2xl bg-slate-50 dark:bg-slate-900 p-4">
+                  <ScrollArea className="h-40">
+                    <div className="grid grid-cols-1 gap-2 pr-4">
+                      {sortedLeaders.map((leader: any) => (
+                        <div key={leader.id} className="flex items-center space-x-2 bg-white dark:bg-slate-800 p-2 rounded-lg border border-slate-100 dark:border-slate-700 hover:border-secondary transition-colors">
+                          <Checkbox 
+                            id={`edit-leader-${leader.id}`} 
+                            checked={(editMeeting.attendees || []).includes(leader.name)}
+                            onCheckedChange={() => toggleAttendee(leader.name, true)}
+                            className="border-accent"
+                          />
+                          <label htmlFor={`edit-leader-${leader.id}`} className="text-xs font-bold text-slate-700 dark:text-slate-300 cursor-pointer flex-1">
+                            {leader.name} <span className="text-[8px] text-slate-400 uppercase ml-2">— {leader.title} ({leader.level})</span>
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <Label className="text-[10px] font-bold uppercase text-slate-400">Revised Agenda</Label>
+                <Textarea value={editMeeting.agenda} onChange={e => setEditMeeting({...editMeeting, agenda: e.target.value})} className="rounded-xl min-h-[100px]" />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-[10px] font-bold uppercase text-slate-400">Final Minutes & Resolutions</Label>
+                <Textarea value={editMeeting.minutes} onChange={e => setEditMeeting({...editMeeting, minutes: e.target.value})} placeholder="Induct resolutions here..." className="rounded-xl min-h-[120px]" />
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button onClick={handleUpdateMeeting} disabled={isActionLoading} className="w-full bg-primary text-primary-foreground h-12 rounded-xl font-bold hover:bg-secondary hover:text-white transition-all">Save Official Changes</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Verified Leader Profile Modal */}
       <Dialog open={!!selectedLeaderProfile} onOpenChange={(open) => !open && setSelectedLeaderProfile(null)}>
         <DialogContent className="max-w-[480px] w-full h-[560px] rounded-[2.5rem] border-none shadow-2xl bg-white dark:bg-slate-950 p-0 overflow-hidden [&>button]:hidden flex flex-col">
           <DialogHeader className="sr-only">
@@ -835,7 +843,6 @@ export default function MeetingsPage() {
           
           {selectedLeaderProfile && (
             <div className="flex flex-col h-full">
-              {/* Header Image - Expanded to ensure head is not cut off */}
               <div className="relative h-[340px] w-full shrink-0">
                  <Image 
                    src={selectedLeaderProfile.imageId?.startsWith('data:') ? selectedLeaderProfile.imageId : (PlaceHolderImages.find(i => i.id === selectedLeaderProfile.imageId)?.imageUrl || (selectedLeaderProfile.gender === 'female' ? '/dummy w.png' : '/dummy m.png'))} 
@@ -870,7 +877,6 @@ export default function MeetingsPage() {
                  </div>
               </div>
               
-              {/* Info Section - Condensed to fit vertically expanded profile */}
               <div className="p-5 flex-1 flex flex-col justify-between">
                  <div className="space-y-3">
                     <div className="grid grid-cols-1 gap-2">
