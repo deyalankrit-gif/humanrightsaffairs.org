@@ -128,14 +128,14 @@ export default function IDCardGenerator() {
               </div>
             </div>
 
-            {/* Member ID Watermark Top Left - Reduced scale for better gap */}
+            {/* Member ID Watermark Top Left */}
             <div className="absolute top-[115px] left-10">
-               <span className="text-[28px] font-black text-[#001f54] tracking-tighter uppercase opacity-20">{member.memberId || 'WB25LA09531'}</span>
+               <span className="text-[28px] font-black text-[#001f54] tracking-tighter uppercase opacity-20">{member.memberId}</span>
             </div>
 
-            {/* Content Container - Increased margin to ensure gap below watermark */}
+            {/* Content Container */}
             <div className="flex px-10 mt-24 gap-10">
-               {/* Portrait Section - Slightly Smaller with Hologram */}
+               {/* Portrait Section */}
                <div className="relative w-48 h-[240px] rounded-[2rem] overflow-hidden border-[6px] border-slate-50 shadow-2xl bg-slate-100 ring-1 ring-slate-200 shrink-0">
                   <Image src={displayImg} alt={member.name} fill className="object-cover" />
                   
@@ -167,7 +167,7 @@ export default function IDCardGenerator() {
                {/* Right Side: QR & Dates */}
                <div className="w-52 flex flex-col items-end pt-2 space-y-6">
                   <div className="text-right">
-                    <p className="text-[14px] font-black text-[#001f54] font-mono mb-2 tracking-widest">{member.memberId || 'WB25LA09531'}</p>
+                    <p className="text-[14px] font-black text-[#001f54] font-mono mb-2 tracking-widest">{member.memberId}</p>
                     <div className="relative w-28 h-28 bg-white border-2 border-slate-100 p-1 rounded-2xl shadow-xl">
                        <Image 
                         src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=HRAT-VERIFY-${member.memberId}`} 
@@ -178,18 +178,19 @@ export default function IDCardGenerator() {
                     </div>
                   </div>
                   
+                  {/* Real-Time Synchronized Data Block */}
                   <div className="text-[13px] font-bold text-slate-800 space-y-1 leading-tight pr-1 font-mono">
                      <div className="flex justify-end gap-3">
                         <span className="text-slate-400">Issue :</span> 
-                        <span className="text-primary">{member.joiningDate || '01.05.2025'}</span>
+                        <span className="text-primary">{member.joiningDate}</span>
                      </div>
                      <div className="flex justify-end gap-3">
                         <span className="text-slate-400">Expire :</span> 
-                        <span className="text-[#c91010]">{member.expiryDate || '01.05.2028'}</span>
+                        <span className="text-[#c91010]">{member.expiryDate}</span>
                      </div>
                      <div className="flex justify-end gap-3">
                         <span className="text-slate-400">Mobile :</span> 
-                        <span className="text-primary">+91 {member.phone?.slice(0, 5)}XXXXX</span>
+                        <span className="text-primary">{member.phone}</span>
                      </div>
                      {member.bloodGroup && (
                        <div className="flex justify-end gap-3">
@@ -201,7 +202,7 @@ export default function IDCardGenerator() {
                </div>
             </div>
 
-            {/* Footer Banner - Slanted Division matching Header with Divider between links */}
+            {/* Footer Banner - Slanted Division matching Header */}
             <div className="absolute bottom-0 left-0 w-full h-[65px] overflow-hidden">
                <div className="absolute inset-0 bg-[#001f54]"></div>
                <div 
