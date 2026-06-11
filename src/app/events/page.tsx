@@ -24,7 +24,9 @@ import {
   ExternalLink,
   ShieldCheck,
   Video,
-  Type
+  Type,
+  Link as LinkIcon,
+  AlertTriangle
 } from 'lucide-react'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -128,6 +130,17 @@ export default function EventsPage() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, isEdit: boolean, field: 'imageId' | 'videoUrl' | 'galleryImages', index?: number) => {
     const file = e.target.files?.[0]
     if (file) {
+      // Size check: Firestore document limit is 1MB. Data URIs add ~33% overhead.
+      // We aim for < 800KB for all assets combined.
+      if (file.size > 1024 * 500 && field === 'videoUrl') {
+        toast({
+          variant: "destructive",
+          title: "File Too Large",
+          description: "Videos must be under 500KB to store in the database. Please use a URL link instead for larger videos."
+        });
+        return;
+      }
+
       if (field === 'videoUrl') {
         setIsVideoProcessing(true)
         setVideoProgress(0)
@@ -145,21 +158,23 @@ export default function EventsPage() {
       reader.onloadend = () => {
         const dataUri = reader.result as string
         if (isEdit) {
-          if (field === 'galleryImages' && index !== undefined) {
-            const newGallery = [...(editEvent.galleryImages || ['', '', ''])]
-            newGallery[index] = dataUri
-            setEditEvent({ ...editEvent, galleryImages: newGallery })
-          } else {
-            setEditEvent({ ...editEvent, [field]: dataUri })
-          }
+          setEditEvent((prev: any) => {
+            if (field === 'galleryImages' && index !== undefined) {
+              const newGallery = [...(prev.galleryImages || ['', '', ''])]
+              newGallery[index] = dataUri
+              return { ...prev, galleryImages: newGallery }
+            }
+            return { ...prev, [field]: dataUri }
+          })
         } else {
-          if (field === 'galleryImages' && index !== undefined) {
-            const newGallery = [...newEvent.galleryImages]
-            newGallery[index] = dataUri
-            setNewEvent({ ...newEvent, galleryImages: newGallery })
-          } else {
-            setNewEvent({ ...newEvent, [field]: dataUri })
-          }
+          setNewEvent((prev: any) => {
+            if (field === 'galleryImages' && index !== undefined) {
+              const newGallery = [...prev.galleryImages]
+              newGallery[index] = dataUri
+              return { ...prev, galleryImages: newGallery }
+            }
+            return { ...prev, [field]: dataUri }
+          })
         }
         
         if (field === 'videoUrl') {
@@ -199,12 +214,14 @@ export default function EventsPage() {
         setIsActionLoading(false)
       })
       .catch(async (err) => {
-        const permissionError = new FirestorePermissionError({
-          path: 'events',
-          operation: 'create',
-          requestResourceData: eventData,
-        } satisfies SecurityRuleContext);
-        errorEmitter.emit('permission-error', permissionError);
+        console.error("Firestore Error:", err);
+        toast({
+          variant: "destructive",
+          title: "Publication Failed",
+          description: err.message.includes("large") 
+            ? "Document size limit exceeded. Please reduce photo sizes or use a video link."
+            : "Verification failed. Please check administrative permissions."
+        })
         setIsActionLoading(false)
       })
   }
@@ -238,12 +255,13 @@ export default function EventsPage() {
         setIsActionLoading(false)
       })
       .catch(async (err) => {
-        const permissionError = new FirestorePermissionError({
-          path: docRef.path,
-          operation: 'update',
-          requestResourceData: data,
-        } satisfies SecurityRuleContext);
-        errorEmitter.emit('permission-error', permissionError);
+        toast({
+          variant: "destructive",
+          title: "Update Failed",
+          description: err.message.includes("large") 
+            ? "Record size too large. Please use smaller assets."
+            : "Permissions denied or connectivity lost."
+        })
         setIsActionLoading(false)
       })
   }
@@ -345,7 +363,7 @@ export default function EventsPage() {
                                     onChange={e => {
                                       const newCaps = [...newEvent.galleryCaptions]
                                       newCaps[idx] = e.target.value
-                                      setNewEvent({...newEvent, galleryCaptions: newCaps})
+                                      setNewEvent(prev => ({...prev, galleryCaptions: newCaps}))
                                     }}
                                     className="h-10 rounded-xl"
                                   />
@@ -355,7 +373,7 @@ export default function EventsPage() {
                        </div>
                     </div>
 
-                    {/* Video Upload */}
+                    {/* Video Upload & URL */}
                     <div className="space-y-4">
                        <Label className="text-xs font-bold uppercase tracking-widest text-indigo-500">Mission Highlight Video & Caption</Label>
                        <div className="p-4 border-2 border-dashed rounded-2xl bg-indigo-50/30 dark:bg-indigo-900/10 border-indigo-100 flex flex-col gap-4">
@@ -370,21 +388,32 @@ export default function EventsPage() {
                               </div>
                             )}
                             <div className="flex-1 w-full space-y-4">
-                              <Button variant="outline" className="w-full relative h-12 rounded-xl border-indigo-200 text-indigo-600" disabled={isVideoProcessing}>
-                                <Film className="w-4 h-4 mr-2" /> {isVideoProcessing ? "Processing..." : newEvent.videoUrl ? "Change Highlight Video" : "Upload Highlight Video"}
-                                <input 
-                                  type="file" 
-                                  accept="video/*" 
-                                  className="absolute inset-0 opacity-0 cursor-pointer"
-                                  onChange={(e) => handleFileChange(e, false, 'videoUrl')}
-                                  disabled={isVideoProcessing}
-                                />
-                              </Button>
+                              <div className="grid grid-cols-1 gap-2">
+                                <Button variant="outline" className="w-full relative h-10 rounded-xl border-indigo-200 text-indigo-600 text-xs" disabled={isVideoProcessing}>
+                                  <Film className="w-3.5 h-3.5 mr-2" /> {isVideoProcessing ? "Processing..." : newEvent.videoUrl?.startsWith('data:') ? "Video Selected (Max 500KB)" : "Upload File (Small Clips)"}
+                                  <input 
+                                    type="file" 
+                                    accept="video/mp4,video/webm" 
+                                    className="absolute inset-0 opacity-0 cursor-pointer"
+                                    onChange={(e) => handleFileChange(e, false, 'videoUrl')}
+                                    disabled={isVideoProcessing}
+                                  />
+                                </Button>
+                                <div className="relative">
+                                  <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-400" />
+                                  <Input 
+                                    placeholder="Or paste Video URL (YouTube, Drive, etc.)" 
+                                    className="pl-8 h-10 rounded-xl border-indigo-50 bg-white text-xs"
+                                    value={newEvent.videoUrl?.startsWith('data:') ? '' : newEvent.videoUrl}
+                                    onChange={e => setNewEvent(prev => ({...prev, videoUrl: e.target.value}))}
+                                  />
+                                </div>
+                              </div>
                               
                               {isVideoProcessing && (
                                 <div className="space-y-2 animate-in fade-in duration-500">
                                   <div className="flex justify-between items-center text-[10px] font-bold text-indigo-500 uppercase">
-                                    <span>Verifying Assets...</span>
+                                    <span>Processing Stream...</span>
                                     <span>{videoProgress}%</span>
                                   </div>
                                   <Progress value={videoProgress} className="h-1.5 bg-indigo-100" />
@@ -392,12 +421,20 @@ export default function EventsPage() {
                               )}
                             </div>
                           </div>
+                          
+                          <div className="space-y-1 bg-amber-50 dark:bg-amber-950/20 p-2 rounded-lg border border-amber-100 flex items-start gap-2">
+                             <AlertTriangle className="w-3.5 h-3.5 text-amber-500 shrink-0 mt-0.5" />
+                             <p className="text-[10px] text-amber-700 leading-tight">
+                               <strong>Database Tip:</strong> Videos uploaded directly must be under 500KB. For high-quality mission footage, we recommend providing an external link instead.
+                             </p>
+                          </div>
+
                           <div className="space-y-2">
                             <Label className="text-[10px] font-black uppercase text-indigo-400">Video Description Label</Label>
                             <Input 
                               placeholder="e.g. Documentary: Ground Zero Advocacy" 
                               value={newEvent.videoCaption}
-                              onChange={e => setNewEvent({...newEvent, videoCaption: e.target.value})}
+                              onChange={e => setNewEvent(prev => ({...prev, videoCaption: e.target.value}))}
                               className="h-10 rounded-xl border-indigo-100"
                             />
                           </div>
@@ -406,7 +443,7 @@ export default function EventsPage() {
 
                     <div className="space-y-2">
                       <Label>Event Title</Label>
-                      <Input value={newEvent.title} onChange={e => setNewEvent({...newEvent, title: e.target.value})} placeholder="e.g. Legal Aid Camp" className="h-12 rounded-xl" />
+                      <Input value={newEvent.title} onChange={e => setNewEvent(prev => ({...prev, title: e.target.value}))} placeholder="e.g. Legal Aid Camp" className="h-12 rounded-xl" />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
@@ -422,7 +459,7 @@ export default function EventsPage() {
                             <Calendar
                               mode="single"
                               selected={parseEventDate(newEvent.date)}
-                              onSelect={(date) => setNewEvent({...newEvent, date: date ? format(date, "PPP") : ''})}
+                              onSelect={(date) => setNewEvent(prev => ({...prev, date: date ? format(date, "PPP") : ''}))}
                               initialFocus
                             />
                           </PopoverContent>
@@ -430,7 +467,7 @@ export default function EventsPage() {
                       </div>
                       <div className="space-y-2">
                         <Label>Category</Label>
-                        <Select value={newEvent.category} onValueChange={(val: any) => setNewEvent({...newEvent, category: val})}>
+                        <Select value={newEvent.category} onValueChange={(val: any) => setNewEvent(prev => ({...prev, category: val}))}>
                           <SelectTrigger className="h-12 rounded-xl"><SelectValue /></SelectTrigger>
                           <SelectContent className="z-[1000001]">
                             {categories.filter(c => c !== 'All').map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
@@ -440,11 +477,11 @@ export default function EventsPage() {
                     </div>
                     <div className="space-y-2">
                       <Label>Location</Label>
-                      <Input value={newEvent.location} onChange={e => setNewEvent({...newEvent, location: e.target.value})} placeholder="Kolkata, WB" className="h-12 rounded-xl" />
+                      <Input value={newEvent.location} onChange={e => setNewEvent(prev => ({...prev, location: e.target.value}))} placeholder="Kolkata, WB" className="h-12 rounded-xl" />
                     </div>
                     <div className="space-y-2">
                       <Label>Description</Label>
-                      <Textarea value={newEvent.description} onChange={e => setNewEvent({...newEvent, description: e.target.value})} placeholder="Brief details about the event impact..." className="rounded-xl" />
+                      <Textarea value={newEvent.description} onChange={e => setNewEvent(prev => ({...prev, description: e.target.value}))} placeholder="Brief details about the event impact..." className="rounded-xl" />
                     </div>
                   </div>
                   <DialogFooter>
@@ -584,7 +621,7 @@ export default function EventsPage() {
                                                     onChange={e => {
                                                       const newCaps = [...(editEvent.galleryCaptions || ['', '', ''])]
                                                       newCaps[idx] = e.target.value
-                                                      setEditEvent({...editEvent, galleryCaptions: newCaps})
+                                                      setEditEvent(prev => ({...prev, galleryCaptions: newCaps}))
                                                     }}
                                                     className="h-10 rounded-xl"
                                                   />
@@ -599,16 +636,27 @@ export default function EventsPage() {
                                        <Label className="text-xs font-bold uppercase tracking-widest text-indigo-500">Mission Highlight Video & Caption</Label>
                                        <div className="p-4 border-2 border-dashed rounded-2xl bg-indigo-50/30 dark:bg-indigo-900/10 border-indigo-100 flex flex-col gap-4">
                                           <div className="space-y-4">
-                                            <Button variant="outline" className="w-full relative h-12 rounded-xl border-indigo-200 text-indigo-600" disabled={isVideoProcessing}>
-                                              <Film className="w-4 h-4 mr-2" /> {isVideoProcessing ? "Processing Video..." : editEvent.videoUrl ? "Change Video" : "Upload Video"}
-                                              <input 
-                                                type="file" 
-                                                accept="video/*" 
-                                                className="absolute inset-0 opacity-0 cursor-pointer"
-                                                onChange={(e) => handleFileChange(e, true, 'videoUrl')}
-                                                disabled={isVideoProcessing}
-                                              />
-                                            </Button>
+                                            <div className="grid grid-cols-1 gap-2">
+                                              <Button variant="outline" className="w-full relative h-10 rounded-xl border-indigo-200 text-indigo-600 text-xs" disabled={isVideoProcessing}>
+                                                <Film className="w-3.5 h-3.5 mr-2" /> {isVideoProcessing ? "Processing..." : editEvent.videoUrl?.startsWith('data:') ? "Video Selected (Max 500KB)" : "Change Video (File)"}
+                                                <input 
+                                                  type="file" 
+                                                  accept="video/mp4,video/webm" 
+                                                  className="absolute inset-0 opacity-0 cursor-pointer"
+                                                  onChange={(e) => handleFileChange(e, true, 'videoUrl')}
+                                                  disabled={isVideoProcessing}
+                                                />
+                                              </Button>
+                                              <div className="relative">
+                                                <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-400" />
+                                                <Input 
+                                                  placeholder="Or change Video URL" 
+                                                  className="pl-8 h-10 rounded-xl border-indigo-50 bg-white text-xs"
+                                                  value={editEvent.videoUrl?.startsWith('data:') ? '' : editEvent.videoUrl}
+                                                  onChange={e => setEditEvent(prev => ({...prev, videoUrl: e.target.value}))}
+                                                />
+                                              </div>
+                                            </div>
 
                                             {isVideoProcessing && (
                                               <div className="space-y-2">
@@ -626,7 +674,7 @@ export default function EventsPage() {
                                             <Input 
                                               placeholder="Video caption label..." 
                                               value={editEvent.videoCaption || ''}
-                                              onChange={e => setEditEvent({...editEvent, videoCaption: e.target.value})}
+                                              onChange={e => setEditEvent(prev => ({...prev, videoCaption: e.target.value}))}
                                               className="h-10 rounded-xl border-indigo-100"
                                             />
                                           </div>
@@ -635,7 +683,7 @@ export default function EventsPage() {
 
                                     <div className="space-y-2">
                                       <Label>Event Title</Label>
-                                      <Input value={editEvent.title} onChange={e => setEditEvent({...editEvent, title: e.target.value})} className="h-12 rounded-xl" />
+                                      <Input value={editEvent.title} onChange={e => setEditEvent(prev => ({...prev, title: e.target.value}))} className="h-12 rounded-xl" />
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
                                       <div className="space-y-2">
@@ -651,7 +699,7 @@ export default function EventsPage() {
                                             <Calendar
                                               mode="single"
                                               selected={parseEventDate(editEvent.date)}
-                                              onSelect={(date) => setEditEvent({...editEvent, date: date ? format(date, "PPP") : ''})}
+                                              onSelect={(date) => setEditEvent(prev => ({...prev, date: date ? format(date, "PPP") : ''}))}
                                               initialFocus
                                             />
                                           </PopoverContent>
@@ -659,7 +707,7 @@ export default function EventsPage() {
                                       </div>
                                       <div className="space-y-2">
                                         <Label>Category</Label>
-                                        <Select value={editEvent.category} onValueChange={(val: any) => setEditEvent({...editEvent, category: val})}>
+                                        <Select value={editEvent.category} onValueChange={(val: any) => setEditEvent(prev => ({...prev, category: val}))}>
                                           <SelectTrigger className="h-12 rounded-xl"><SelectValue /></SelectTrigger>
                                           <SelectContent className="z-[1000001]">
                                             {categories.filter(c => c !== 'All').map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
@@ -669,11 +717,11 @@ export default function EventsPage() {
                                     </div>
                                     <div className="space-y-2">
                                       <Label>Location</Label>
-                                      <Input value={editEvent.location} onChange={e => setEditEvent({...editEvent, location: e.target.value})} className="h-12 rounded-xl" />
+                                      <Input value={editEvent.location} onChange={e => setEditEvent(prev => ({...prev, location: e.target.value}))} className="h-12 rounded-xl" />
                                     </div>
                                     <div className="space-y-2">
                                       <Label>Description</Label>
-                                      <Textarea value={editEvent.description} onChange={e => setEditEvent({...editEvent, description: e.target.value})} className="rounded-xl" />
+                                      <Textarea value={editEvent.description} onChange={e => setEditEvent(prev => ({...prev, description: e.target.value}))} className="rounded-xl" />
                                     </div>
                                     <Button onClick={handleUpdateEvent} disabled={isActionLoading || isVideoProcessing} className="w-full mt-4 h-12 rounded-xl bg-accent text-white font-bold hover:bg-secondary hover:text-white transition-all">
                                       {isActionLoading ? <Loader2 className="animate-spin mr-2" /> : "Save Changes"}
