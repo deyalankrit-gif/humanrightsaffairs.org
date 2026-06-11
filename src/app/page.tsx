@@ -135,7 +135,7 @@ export default function Home() {
                 </Button>
               </DonationDialog>
               <Link href="/#knowledge">
-                <Button size="lg" className="bg-secondary text-white font-bold hover:bg-accent px-6 py-5 md:px-10 md:py-7 rounded-xl text-sm md:text-lg transition-all shadow-xl shadow-secondary/10">
+                <Button size="lg" className="bg-secondary text-white font-bold hover:bg-accent px-6 py-5 md:px-10 md:py-7 rounded-xl text-sm md:text-lg transition-all shadow-xl shadow-secondary/10 hover:scale-105 active:scale-95 hover:shadow-2xl hover:shadow-accent/20">
                   Explore Rights Library
                 </Button>
               </Link>
