@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo, useEffect, useState } from 'react'
@@ -6,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useUser, useCollection, useFirestore, useMemoFirebase } from '@/firebase'
 import { collection, query, orderBy, deleteDoc, doc, updateDoc, addDoc, serverTimestamp } from 'firebase/firestore'
 import { Footer } from '@/components/footer'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
@@ -22,14 +21,8 @@ import {
   IndianRupee, 
   User, 
   Calendar as CalendarIcon, 
-  Hash,
-  FilterX,
   TrendingDown,
-  Receipt,
-  Info,
-  CreditCard,
-  Banknote,
-  Smartphone
+  FilterX
 } from 'lucide-react'
 import {
   Dialog,
@@ -39,17 +32,6 @@ import {
   DialogTrigger,
   DialogFooter,
 } from "@/components/ui/dialog"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
 import {
   Popover,
   PopoverContent,
@@ -71,6 +53,7 @@ export default function ExpensesManagementPage() {
   const [categoryFilter, setCategoryFilter] = useState('All')
   const [isActionLoading, setIsActionLoading] = useState(false)
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [editExpense, setEditExpense] = useState<any>(null)
 
   const [newExpense, setNewExpense] = useState({
@@ -111,53 +94,33 @@ export default function ExpensesManagementPage() {
       toast({ variant: "destructive", title: "Required Fields", description: "Title, Amount, and Payee are mandatory." });
       return;
     }
-
     setIsActionLoading(true)
-    const data = { ...newExpense, amount: Number(newExpense.amount), createdAt: serverTimestamp() }
-    try {
-      await addDoc(collection(db, 'expenses'), data)
-      toast({ title: "Expense Logged", description: "Record has been successfully added to the ledger." })
-      setNewExpense({
-        title: '', category: 'Logistics', amount: 0, 
-        date: format(new Date(), 'PPP'), payee: '', 
-        description: '', paymentMethod: 'Bank Transfer', status: 'Paid', referenceNumber: '',
-        voucherNumber: '', bankTransferDetails: '', upiTransactionId: '',
-        chequeNumber: '', bankName: '', branchName: '', cardReference: ''
+    addDoc(collection(db, 'expenses'), { ...newExpense, amount: Number(newExpense.amount), createdAt: serverTimestamp() })
+      .then(() => {
+        toast({ title: "Expense Logged" })
+        setIsAddDialogOpen(false)
+        setIsActionLoading(false)
       })
-      setIsAddDialogOpen(false)
-    } catch (e: any) {
-      toast({ variant: "destructive", title: "System Error", description: e.message })
-    } finally {
-      setIsActionLoading(false)
-    }
+      .catch(() => setIsActionLoading(false))
   }
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = (id: string) => {
     if (!db) return;
-    setIsActionLoading(true)
-    try {
-      await deleteDoc(doc(db, 'expenses', id))
-      toast({ title: "Record Deleted" })
-    } catch (e: any) {
-      toast({ variant: "destructive", title: "System Error", description: e.message })
-    } finally {
-      setIsActionLoading(false)
-    }
+    deleteDoc(doc(db, 'expenses', id)).then(() => toast({ title: "Record Deleted" }))
   }
 
-  const handleUpdate = async () => {
+  const handleUpdate = () => {
     if (!db || !editExpense) return;
     setIsActionLoading(true)
     const { id, ...data } = editExpense
-    try {
-      await updateDoc(doc(db, 'expenses', id), { ...data, amount: Number(data.amount), updatedAt: serverTimestamp() })
-      toast({ title: "Ledger Updated" })
-      setEditExpense(null)
-    } catch (e: any) {
-      toast({ variant: "destructive", title: "Update Failed", description: e.message })
-    } finally {
-      setIsActionLoading(false)
-    }
+    updateDoc(doc(db, 'expenses', id), { ...data, amount: Number(data.amount), updatedAt: serverTimestamp() })
+      .then(() => {
+        toast({ title: "Ledger Updated" })
+        setEditExpense(null)
+        setIsEditDialogOpen(false)
+        setIsActionLoading(false)
+      })
+      .catch(() => setIsActionLoading(false))
   }
 
   const parseExpenseDate = (dateStr: string) => {
@@ -177,130 +140,60 @@ export default function ExpensesManagementPage() {
   const paymentMethods = ["Cash", "Bank Transfer", "UPI", "Cheque", "Credit/Debit Card"]
 
   const filtered = (expenses || []).filter((e: any) => {
-    const matchesSearch = e.title?.toLowerCase().includes(search.toLowerCase()) || 
-                          e.payee?.toLowerCase().includes(search.toLowerCase());
+    const matchesSearch = e.title?.toLowerCase().includes(search.toLowerCase()) || e.payee?.toLowerCase().includes(search.toLowerCase());
     const matchesStatus = statusFilter === 'All' || e.status === statusFilter;
     const matchesCategory = categoryFilter === 'All' || e.category === categoryFilter;
     return matchesSearch && matchesStatus && matchesCategory;
   })
 
-  const totalSpent = filtered.reduce((acc, curr: any) => acc + Number(curr.amount || 0), 0)
-
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
-      <section className="pt-16 pb-8 bg-slate-900 text-white border-b-8 border-red-500/20 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-1/3 h-full bg-red-500/5 -skew-x-12"></div>
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="space-y-1 text-center md:text-left">
-              <div className="inline-flex items-center gap-2 bg-red-500/20 text-red-400 px-3 py-1 rounded-full text-[9px] font-bold uppercase border border-red-500/30">
-                <TrendingDown className="w-2.5 h-2.5" /> Outflow Ledger
-              </div>
-              <h1 className="text-3xl md:text-4xl font-headline font-bold">Organizational <span className="text-red-500 italic">Expenses</span></h1>
-              <p className="text-slate-400 text-[11px]">Track all organizational expenditure and operational costs.</p>
-            </div>
-            
-            <div className="flex items-center gap-3">
-              <div className="bg-white/5 px-4 py-2 rounded-xl border border-white/10 text-right">
-                <p className="text-[8px] font-bold text-slate-500 uppercase mb-0.5">Total</p>
-                <p className="text-xl font-bold text-red-500 leading-none">₹{totalSpent.toLocaleString()}</p>
-              </div>
-
-              <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button size="sm" className="bg-red-500 text-white font-bold rounded-xl h-11 px-6 flex gap-2 shadow-lg">
-                    <Plus className="w-4 h-4" /> Log Expense
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-xl rounded-3xl max-h-[90vh] overflow-y-auto">
-                   <DialogHeader><DialogTitle>Record Expense</DialogTitle></DialogHeader>
-                   <div className="space-y-4 py-4">
-                     <div className="space-y-1">
-                       <Label className="text-[10px] font-bold uppercase">Expense Title</Label>
-                       <Input value={newExpense.title} onChange={e => setNewExpense({...newExpense, title: e.target.value})} placeholder="e.g. Office Rent - March" />
-                     </div>
-                     <div className="grid grid-cols-2 gap-4">
-                       <div className="space-y-1">
-                         <Label className="text-[10px] font-bold uppercase">Category</Label>
-                         <Select value={newExpense.category} onValueChange={(val: any) => setNewExpense({...newExpense, category: val})}>
-                           <SelectTrigger><SelectValue /></SelectTrigger>
-                           <SelectContent>{expenseCategories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
-                         </Select>
-                       </div>
-                       <div className="space-y-1">
-                         <Label className="text-[10px] font-bold uppercase">Date</Label>
-                         <Popover>
-                          <PopoverTrigger asChild>
-                            <Button variant="outline" className={cn("w-full justify-start text-left font-normal h-10 rounded-lg", !newExpense.date && "text-muted-foreground")}>
-                              <CalendarIcon className="mr-2 h-4 w-4" />
-                              {newExpense.date ? newExpense.date : "Pick a date"}
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar
-                              mode="single"
-                              selected={parseExpenseDate(newExpense.date)}
-                              onSelect={(date) => setNewExpense({...newExpense, date: date ? format(date, "PPP") : ''})}
-                              initialFocus
-                            />
-                          </PopoverContent>
-                        </Popover>
-                       </div>
-                     </div>
-                     <div className="grid grid-cols-2 gap-4">
-                       <div className="space-y-1">
-                         <Label className="text-[10px] font-bold uppercase">Payee Name</Label>
-                         <Input value={newExpense.payee} onChange={e => setNewExpense({...newExpense, payee: e.target.value})} placeholder="Person or Company" />
-                       </div>
-                       <div className="space-y-1">
-                         <Label className="text-[10px] font-bold uppercase">Amount (₹)</Label>
-                         <div className="relative">
-                            <IndianRupee className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
-                            <Input type="number" className="pl-9" value={newExpense.amount} onChange={e => setNewExpense({...newExpense, amount: Number(e.target.value)})} />
-                         </div>
-                       </div>
-                     </div>
-                     <div className="space-y-1">
-                       <Label className="text-[10px] font-bold uppercase">Description (Optional)</Label>
-                       <Textarea value={newExpense.description} onChange={e => setNewExpense({...newExpense, description: e.target.value})} placeholder="Notes about this expenditure..." />
-                     </div>
-                     <div className="space-y-1">
-                       <Label className="text-[10px] font-bold uppercase text-red-500">Payment Channel</Label>
-                       <Select value={newExpense.paymentMethod} onValueChange={(val: any) => setNewExpense({...newExpense, paymentMethod: val})}>
-                         <SelectTrigger className="border-red-100 bg-red-50/30 font-bold"><SelectValue /></SelectTrigger>
-                         <SelectContent>{paymentMethods.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}</SelectContent>
-                       </Select>
-                     </div>
-                   </div>
-                   <DialogFooter>
-                     <Button onClick={handleAddExpense} disabled={isActionLoading} className="w-full h-11 rounded-xl bg-red-500 mt-4 text-white">Commit to Ledger</Button>
-                   </DialogFooter>
-                </DialogContent>
-              </Dialog>
-            </div>
-          </div>
+      <section className="pt-16 pb-8 bg-slate-900 text-white border-b-8 border-red-500/20">
+        <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="space-y-1"><TrendingDown className="text-red-400 w-8 h-8" /><h1 className="text-3xl font-headline font-bold">Organizational <span className="text-red-500 italic">Expenses</span></h1></div>
+          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+            <DialogTrigger asChild><Button size="sm" className="bg-red-500 text-white font-bold rounded-xl h-11 px-6 flex gap-2 shadow-lg"><Plus className="w-4 h-4" /> Log Expense</Button></DialogTrigger>
+            <DialogContent className="max-w-xl rounded-3xl max-h-[90vh] overflow-y-auto">
+               <DialogHeader><DialogTitle>Record Expense</DialogTitle></DialogHeader>
+               <div className="space-y-4 py-4">
+                 <div className="space-y-1"><Label className="text-[10px] font-bold uppercase">Expense Title</Label><Input value={newExpense.title} onChange={e => setNewExpense({...newExpense, title: e.target.value})} /></div>
+                 <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1"><Label className="text-[10px] font-bold uppercase">Category</Label>
+                      <Select value={newExpense.category} onValueChange={(val: any) => setNewExpense({...newExpense, category: val})}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent position="popper" className="z-[1000001]">{expenseCategories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1"><Label className="text-[10px] font-bold uppercase">Date</Label>
+                       <Popover>
+                        <PopoverTrigger asChild><Button variant="outline" className="w-full h-10 rounded-lg">{newExpense.date}</Button></PopoverTrigger>
+                        <PopoverContent className="w-auto p-0 z-[1000002]" align="start"><Calendar mode="single" selected={parseExpenseDate(newExpense.date)} onSelect={(date) => setNewExpense({...newExpense, date: date ? format(date, "PPP") : ''})} initialFocus /></PopoverContent>
+                      </Popover>
+                    </div>
+                 </div>
+                 <div className="space-y-1"><Label className="text-[10px] font-bold uppercase">Payment Channel</Label>
+                    <Select value={newExpense.paymentMethod} onValueChange={(val: any) => setNewExpense({...newExpense, paymentMethod: val})}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent position="popper" className="z-[1000001]">{paymentMethods.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}</SelectContent>
+                    </Select>
+                 </div>
+               </div>
+               <DialogFooter><Button onClick={handleAddExpense} disabled={isActionLoading} className="w-full h-11 rounded-xl bg-red-500 mt-4 text-white">Commit to Ledger</Button></DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
       </section>
 
       <section className="py-6 bg-white dark:bg-slate-900 border-b sticky top-10 z-30 shadow-sm">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col lg:flex-row items-center justify-between gap-4">
-            <div className="flex flex-wrap items-center gap-2">
-              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                <SelectTrigger className="w-36 h-9 rounded-lg text-[11px] font-bold bg-slate-50 border-none"><SelectValue /></SelectTrigger>
-                <SelectContent><SelectItem value="All">All Categories</SelectItem>{expenseCategories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
-              </Select>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-28 h-9 rounded-lg text-[11px] font-bold bg-slate-50 border-none"><SelectValue /></SelectTrigger>
-                <SelectContent><SelectItem value="All">All Status</SelectItem><SelectItem value="Paid">Paid</SelectItem><SelectItem value="Pending">Pending</SelectItem></SelectContent>
-              </Select>
-              <Button variant="ghost" size="icon" className="h-9 w-9 text-slate-400" onClick={() => { setSearch(''); setStatusFilter('All'); setCategoryFilter('All'); }}><FilterX className="w-4 h-4" /></Button>
-            </div>
-            <div className="relative w-full max-w-xs">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
-              <Input placeholder="Search records..." className="pl-8 h-9 rounded-lg border-slate-100 text-xs" value={search} onChange={(e) => setSearch(e.target.value)} />
-            </div>
+        <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="flex gap-2">
+            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+              <SelectTrigger className="w-40"><SelectValue placeholder="Category" /></SelectTrigger>
+              <SelectContent position="popper" className="z-[1000001]"><SelectItem value="All">All Categories</SelectItem>{expenseCategories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+            </Select>
+            <Button variant="ghost" onClick={() => { setSearch(''); setCategoryFilter('All'); }}><FilterX className="w-4 h-4" /></Button>
           </div>
+          <Input placeholder="Search records..." className="max-w-xs" value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
       </section>
 
@@ -315,85 +208,17 @@ export default function ExpensesManagementPage() {
                   <CardContent className="p-0">
                     <div className="flex flex-col md:flex-row items-stretch">
                       <div className="p-5 bg-slate-50 dark:bg-slate-800 md:w-44 text-center border-r border-slate-100 flex flex-col items-center justify-center shrink-0">
-                         <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Amount</p>
                          <p className="text-2xl font-headline font-bold text-primary dark:text-white leading-none mb-2">₹{expense.amount?.toLocaleString()}</p>
-                         <Badge className={cn("text-[8px] font-bold px-2 py-0.5 uppercase rounded-full", expense.status === 'Paid' ? 'bg-emerald-500 text-white' : 'bg-amber-500 text-white')}>
-                           {expense.status}
-                         </Badge>
+                         <Badge className={cn("text-[8px] font-bold px-2 py-0.5 uppercase", expense.status === 'Paid' ? 'bg-emerald-500' : 'bg-amber-500')}>{expense.status}</Badge>
                       </div>
-                      <div className="flex-1 p-5 grid lg:grid-cols-4 gap-6 items-center">
-                        <div className="lg:col-span-2 space-y-1">
-                             <Badge variant="outline" className="border-red-200 text-red-500 text-[8px] font-bold uppercase px-1.5 py-0">{expense.category}</Badge>
-                             <h3 className="text-lg font-headline font-bold text-primary dark:text-white leading-tight">{expense.title}</h3>
-                             <div className="flex flex-wrap gap-3 text-[10px] font-bold text-slate-500 mt-1">
-                               <span className="flex items-center gap-1"><User className="w-2.5 h-2.5 text-red-500" /> {expense.payee}</span>
-                               <span className="flex items-center gap-1"><CalendarIcon className="w-2.5 h-2.5 text-red-500" /> {expense.date}</span>
-                             </div>
+                      <div className="flex-1 p-5 flex items-center justify-between">
+                        <div>
+                             <h3 className="text-lg font-bold text-primary dark:text-white leading-tight">{expense.title}</h3>
+                             <p className="text-xs text-slate-500">{expense.payee} • {expense.date}</p>
                         </div>
-                        <div className="flex justify-end gap-2">
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <Button onClick={() => setEditExpense(expense)} variant="outline" size="sm" className="h-8 rounded-lg text-[10px] font-bold border-slate-200"><Edit className="w-3 h-3 mr-1" /> Edit</Button>
-                            </DialogTrigger>
-                            <DialogContent className="max-w-xl rounded-3xl max-h-[90vh] overflow-y-auto">
-                              <DialogHeader><DialogTitle>Modify Expense Record</DialogTitle></DialogHeader>
-                              {editExpense && (
-                                <div className="space-y-4 py-4">
-                                  <div className="space-y-1">
-                                    <Label className="text-[10px] font-bold uppercase">Expense Title</Label>
-                                    <Input value={editExpense.title} onChange={e => setEditExpense({...editExpense, title: e.target.value})} />
-                                  </div>
-                                  <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-1">
-                                      <Label className="text-[10px] font-bold uppercase">Category</Label>
-                                      <Select value={editExpense.category} onValueChange={(val: any) => setEditExpense({...editExpense, category: val})}>
-                                        <SelectTrigger><SelectValue /></SelectTrigger>
-                                        <SelectContent>{expenseCategories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
-                                      </Select>
-                                    </div>
-                                    <div className="space-y-1">
-                                      <Label className="text-[10px] font-bold uppercase">Date</Label>
-                                      <Popover>
-                                        <PopoverTrigger asChild>
-                                          <Button variant="outline" className={cn("w-full justify-start text-left font-normal h-10 rounded-lg", !editExpense.date && "text-muted-foreground")}>
-                                            <CalendarIcon className="mr-2 h-4 w-4" />
-                                            {editExpense.date ? editExpense.date : "Pick a date"}
-                                          </Button>
-                                        </PopoverTrigger>
-                                        <PopoverContent className="w-auto p-0" align="start">
-                                          <Calendar
-                                            mode="single"
-                                            selected={parseExpenseDate(editExpense.date)}
-                                            onSelect={(date) => setEditExpense({...editExpense, date: date ? format(date, "PPP") : ''})}
-                                            initialFocus
-                                          />
-                                        </PopoverContent>
-                                      </Popover>
-                                    </div>
-                                  </div>
-                                  <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-1">
-                                      <Label className="text-[10px] font-bold uppercase">Payee</Label>
-                                      <Input value={editExpense.payee} onChange={e => setEditExpense({...editExpense, payee: e.target.value})} />
-                                    </div>
-                                    <div className="space-y-1">
-                                      <Label className="text-[10px] font-bold uppercase">Amount (₹)</Label>
-                                      <Input type="number" value={editExpense.amount} onChange={e => setEditExpense({...editExpense, amount: Number(e.target.value)})} />
-                                    </div>
-                                  </div>
-                                  <div className="space-y-1">
-                                    <Label className="text-[10px] font-bold uppercase">Status</Label>
-                                    <Select value={editExpense.status} onValueChange={(val: any) => setEditExpense({...editExpense, status: val})}>
-                                      <SelectTrigger><SelectValue /></SelectTrigger>
-                                      <SelectContent><SelectItem value="Paid">Paid</SelectItem><SelectItem value="Pending">Pending</SelectItem></SelectContent>
-                                    </Select>
-                                  </div>
-                                </div>
-                              )}
-                              <Button onClick={handleUpdate} disabled={isActionLoading} className="w-full h-11 rounded-xl bg-primary text-primary-foreground">Commit Changes</Button>
-                            </DialogContent>
-                          </Dialog>
-                          <Button variant="ghost" size="sm" onClick={() => handleDelete(expense.id)} className="h-8 rounded-lg text-slate-400 hover:text-red-500"><Trash2 className="w-3 h-3" /></Button>
+                        <div className="flex gap-2">
+                           <Button onClick={() => { setEditExpense(expense); setIsEditDialogOpen(true); }} variant="outline" size="sm" className="h-8 rounded-lg text-[10px] font-bold"><Edit className="w-3 h-3 mr-1" /> Edit</Button>
+                           <Button variant="ghost" size="sm" onClick={() => handleDelete(expense.id)} className="h-8 rounded-lg text-slate-400 hover:text-red-500"><Trash2 className="w-3 h-3" /></Button>
                         </div>
                       </div>
                     </div>
@@ -405,6 +230,31 @@ export default function ExpensesManagementPage() {
         </div>
       </section>
 
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="max-w-xl rounded-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader><DialogTitle>Modify Expense Record</DialogTitle></DialogHeader>
+          {editExpense && (
+            <div className="space-y-4 py-4">
+              <div className="space-y-1"><Label className="text-[10px] font-bold uppercase">Expense Title</Label><Input value={editExpense.title} onChange={e => setEditExpense({...editExpense, title: e.target.value})} /></div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1"><Label className="text-[10px] font-bold uppercase">Category</Label>
+                  <Select value={editExpense.category} onValueChange={(val: any) => setEditExpense({...editExpense, category: val})}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent position="popper" className="z-[1000001]">{expenseCategories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1"><Label className="text-[10px] font-bold uppercase">Status</Label>
+                  <Select value={editExpense.status} onValueChange={(val: any) => setEditExpense({...editExpense, status: val})}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent position="popper" className="z-[1000001]"><SelectItem value="Paid">Paid</SelectItem><SelectItem value="Pending">Pending</SelectItem></SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <Button onClick={handleUpdate} disabled={isActionLoading} className="w-full h-11 rounded-xl bg-primary text-primary-foreground">Commit Changes</Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
       <Footer />
     </main>
   )

@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useUser, useCollection, useFirestore, useMemoFirebase } from '@/firebase'
-import { collection, query, orderBy, addDoc, serverTimestamp, where } from 'firebase/firestore'
+import { collection, query, orderBy, addDoc, serverTimestamp } from 'firebase/firestore'
 import { Footer } from '@/components/footer'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -11,26 +11,12 @@ import { Badge } from '@/components/ui/badge'
 import { 
   Search, 
   Lock, 
-  Hash,
-  Mail,
-  Phone,
-  ArrowRight,
   Loader2,
   UserPlus,
   MapPin,
-  Globe,
-  User,
-  Briefcase,
-  RefreshCw,
-  CheckCircle2,
-  Calendar as CalendarIcon,
   Sparkles,
-  IdCard,
-  FileText,
-  Award,
-  ChevronDown,
   Heart,
-  Home
+  Calendar as CalendarIcon
 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { 
@@ -47,12 +33,6 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar'
 import { format, parse, addYears } from 'date-fns'
 import { useToast } from '@/hooks/use-toast'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import Link from 'next/link'
 import { INDIA_DATA } from '@/lib/india-data'
 import { cn } from '@/lib/utils'
@@ -66,6 +46,7 @@ export default function InternalMembersDirectory() {
   const [search, setSearch] = useState('')
   const [levelFilter, setLevelFilter] = useState('All')
   const [isAdding, setIsAdding] = useState(false)
+  const [isDialogOpen, setIsAddingDialogOpen] = useState(false)
   
   const [newMember, setNewMember] = useState({
     name: '',
@@ -103,7 +84,7 @@ export default function InternalMembersDirectory() {
     }
   }, [user, authLoading, router])
 
-  // Auto-calculate expiry date based on issue date and duration
+  // Auto-calculate expiry date
   useEffect(() => {
     if (newMember.joiningDate && newMember.membershipDuration) {
       try {
@@ -136,13 +117,12 @@ export default function InternalMembersDirectory() {
       return
     }
 
-    // Pattern Validation: 6 letters + 4 digits
     const idPattern = /^[A-Z]{6}[0-9]{4}$/;
     if (!idPattern.test(newMember.memberId)) {
       toast({ 
         variant: "destructive", 
         title: "Invalid Member ID", 
-        description: "ID must be 10 characters: 6 uppercase letters followed by 4 digits (e.g. ABCDEF1234)." 
+        description: "ID must be 10 characters: 6 uppercase letters followed by 4 digits." 
       })
       return
     }
@@ -152,6 +132,7 @@ export default function InternalMembersDirectory() {
       await addDoc(collection(db, 'memberProfiles'), { ...newMember, createdAt: serverTimestamp() })
       toast({ title: "Success", description: "Member record established." })
       setIsAdding(false)
+      setIsAddingDialogOpen(false)
       setNewMember({
         name: '', designationCategory: 'General Member', designation: 'General Member', profession: '', gender: 'Male', bloodGroup: '',
         email: '', phone: '', address: '', postOffice: '', policeStation: '', pinCode: '',
@@ -200,7 +181,7 @@ export default function InternalMembersDirectory() {
               <p className="text-slate-400 text-[11px] max-w-xl">Internal dashboard for managing operational contact protocols.</p>
             </div>
             
-            <Dialog>
+            <Dialog open={isDialogOpen} onOpenChange={setIsAddingDialogOpen}>
               <DialogTrigger asChild>
                 <Button size="sm" className="bg-accent text-primary font-bold rounded-xl h-11 px-6 flex gap-2 shadow-lg">
                   <UserPlus className="w-4 h-4" /> Commission Member
@@ -209,7 +190,6 @@ export default function InternalMembersDirectory() {
               <DialogContent className="max-w-2xl rounded-[2.5rem] max-h-[90vh] overflow-y-auto">
                 <DialogHeader><DialogTitle>Personnel Commissioning</DialogTitle></DialogHeader>
                 <div className="space-y-6 py-4">
-                   {/* Personal & ID Section */}
                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-1">
                         <Label className="text-[10px] uppercase font-bold text-slate-400">Full Name *</Label>
@@ -231,7 +211,6 @@ export default function InternalMembersDirectory() {
                             size="icon" 
                             className="h-11 w-11 shrink-0 rounded-xl border-dashed hover:bg-accent/10"
                             onClick={() => setNewMember({...newMember, memberId: generateMemberId()})}
-                            title="Auto-Generate ID"
                           >
                             <Sparkles className="w-4 h-4 text-accent" />
                           </Button>
@@ -251,10 +230,7 @@ export default function InternalMembersDirectory() {
                           });
                         }}>
                           <SelectTrigger className="rounded-xl border-accent/20 bg-white dark:bg-slate-800"><SelectValue /></SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="General Member">General Member</SelectItem>
-                            <SelectItem value="Office-bearing Member">Office-bearing Member</SelectItem>
-                          </SelectContent>
+                          <SelectContent position="popper" className="z-[1000001]"><SelectItem value="General Member">General Member</SelectItem><SelectItem value="Office-bearing Member">Office-bearing Member</SelectItem></SelectContent>
                         </Select>
                       </div>
                       {newMember.designationCategory === 'Office-bearing Member' && (
@@ -270,17 +246,17 @@ export default function InternalMembersDirectory() {
                         <Label className="text-[10px] uppercase font-bold text-slate-400">Gender</Label>
                         <Select value={newMember.gender} onValueChange={(val: any) => setNewMember({...newMember, gender: val})}>
                           <SelectTrigger><SelectValue /></SelectTrigger>
-                          <SelectContent><SelectItem value="Male">Male</SelectItem><SelectItem value="Female">Female</SelectItem></SelectContent>
+                          <SelectContent position="popper" className="z-[1000001]"><SelectItem value="Male">Male</SelectItem><SelectItem value="Female">Female</SelectItem></SelectContent>
                         </Select>
                       </div>
                       <div className="space-y-1">
                         <Label className="text-[10px] uppercase font-bold text-slate-400">Blood Group</Label>
                         <Select value={newMember.bloodGroup} onValueChange={val => setNewMember({...newMember, bloodGroup: val})}>
-                          <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
-                          <SelectContent>
-                            {["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].map(bg => <SelectItem key={bg} value={bg}>{bg}</SelectItem>)}
-                          </SelectContent>
-                        </Select>
+                            <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
+                            <SelectContent position="popper" className="z-[1000001]">
+                              {["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].map(bg => <SelectItem key={bg} value={bg}>{bg}</SelectItem>)}
+                            </SelectContent>
+                          </Select>
                       </div>
                       <div className="space-y-1">
                         <Label className="text-[10px] uppercase font-bold text-slate-400">Profession</Label>
@@ -288,19 +264,12 @@ export default function InternalMembersDirectory() {
                       </div>
                    </div>
 
-                   {/* Membership Term Block */}
-                   <div className="bg-slate-50 dark:bg-slate-900 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 space-y-4 shadow-inner">
+                   <div className="bg-slate-50 dark:bg-slate-900 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 space-y-4">
                       <div className="space-y-1">
                         <Label className="text-[10px] uppercase font-bold text-accent">Membership Duration</Label>
                         <Select value={newMember.membershipDuration} onValueChange={(val) => setNewMember({...newMember, membershipDuration: val})}>
-                          <SelectTrigger className="h-11 rounded-xl bg-white dark:bg-slate-800 border-accent/20">
-                            <SelectValue placeholder="Select Duration" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="1 Year">1 Year Term</SelectItem>
-                            <SelectItem value="2 Years">2 Years Term</SelectItem>
-                            <SelectItem value="3 Years">3 Years Term</SelectItem>
-                          </SelectContent>
+                          <SelectTrigger className="h-11 rounded-xl bg-white dark:bg-slate-800 border-accent/20"><SelectValue /></SelectTrigger>
+                          <SelectContent position="popper" className="z-[1000001]"><SelectItem value="1 Year">1 Year Term</SelectItem><SelectItem value="2 Years">2 Years Term</SelectItem><SelectItem value="3 Years">3 Years Term</SelectItem></SelectContent>
                         </Select>
                       </div>
 
@@ -314,7 +283,7 @@ export default function InternalMembersDirectory() {
                                 {newMember.joiningDate ? newMember.joiningDate : "Pick induction date"}
                               </Button>
                             </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="start">
+                            <PopoverContent className="w-auto p-0 z-[1000002]" align="start">
                               <Calendar mode="single" selected={parseMemberDate(newMember.joiningDate)} onSelect={(date) => setNewMember({...newMember, joiningDate: date ? format(date, "PPP") : ''})} initialFocus />
                             </PopoverContent>
                           </Popover>
@@ -326,26 +295,11 @@ export default function InternalMembersDirectory() {
                       </div>
                    </div>
 
-                   {/* Contact & Geography */}
                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">Email *</Label><Input type="email" value={newMember.email} onChange={e => setNewMember({...newMember, email: e.target.value})} /></div>
-                      <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">Phone</Label><Input value={newMember.phone} onChange={e => setNewMember({...newMember, phone: e.target.value})} /></div>
-                   </div>
-
-                   <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">Full Address</Label><Input placeholder="Street / Village / House" value={newMember.address} onChange={e => setNewMember({...newMember, address: e.target.value})} /></div>
-                   
-                   <div className="grid grid-cols-3 gap-4">
-                      <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">Post Office</Label><Input value={newMember.postOffice} onChange={e => setNewMember({...newMember, postOffice: e.target.value})} /></div>
-                      <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">Police Station</Label><Input value={newMember.policeStation} onChange={e => setNewMember({...newMember, policeStation: e.target.value})} /></div>
-                      <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">PIN Code</Label><Input value={newMember.pinCode} onChange={e => setNewMember({...newMember, pinCode: e.target.value})} /></div>
-                   </div>
-
-                   <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-1">
-                        <Label className="text-[10px] uppercase font-bold text-slate-400">Operational Level</Label>
+                      <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">Operational Level</Label>
                         <Select value={newMember.level} onValueChange={(val: any) => setNewMember({...newMember, level: val, stateName: '', districtName: ''})}>
                           <SelectTrigger><SelectValue /></SelectTrigger>
-                          <SelectContent><SelectItem value="National">National</SelectItem><SelectItem value="State">State</SelectItem><SelectItem value="District">District</SelectItem></SelectContent>
+                          <SelectContent position="popper" className="z-[1000001]"><SelectItem value="National">National</SelectItem><SelectItem value="State">State</SelectItem><SelectItem value="District">District</SelectItem></SelectContent>
                         </Select>
                       </div>
                       {(newMember.level === 'State' || newMember.level === 'District') && (
@@ -353,21 +307,11 @@ export default function InternalMembersDirectory() {
                            <Label className="text-[10px] uppercase font-bold text-slate-400">State</Label>
                            <Select value={newMember.stateName} onValueChange={val => setNewMember({...newMember, stateName: val, districtName: ''})}>
                              <SelectTrigger><SelectValue placeholder="Choose State" /></SelectTrigger>
-                             <SelectContent className="max-h-60">{states.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+                             <SelectContent className="max-h-60 z-[1000001]">{states.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
                            </Select>
                         </div>
                       )}
                    </div>
-                   
-                   {newMember.level === 'District' && newMember.stateName && (
-                     <div className="space-y-1 animate-in fade-in slide-in-from-top-1">
-                        <Label className="text-[10px] uppercase font-bold text-slate-400">District</Label>
-                        <Select value={newMember.districtName} onValueChange={val => setNewMember({...newMember, districtName: val})}>
-                          <SelectTrigger><SelectValue placeholder="Choose District" /></SelectTrigger>
-                          <SelectContent className="max-h-60">{(INDIA_DATA[newMember.stateName] || []).map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
-                        </Select>
-                     </div>
-                   )}
                 </div>
                 <DialogFooter><Button onClick={handleAddMember} disabled={isAdding} className="w-full h-11 rounded-xl bg-accent text-primary font-bold">Establish Official Record</Button></DialogFooter>
               </DialogContent>
@@ -416,12 +360,8 @@ export default function InternalMembersDirectory() {
                           </div>
                         </div>
                         <div className="flex justify-end gap-2">
-                          <Link href={`/internal/members/${member.id}`}>
-                            <Button size="sm" className="h-8 rounded-lg text-[10px] px-3 font-bold">Profile</Button>
-                          </Link>
-                          <Link href={`/internal/members/${member.id}/id-card`}>
-                            <Button variant="outline" size="sm" className="h-8 rounded-lg text-[10px] px-3 font-bold border-accent text-accent">ID Card</Button>
-                          </Link>
+                          <Link href={`/internal/members/${member.id}`}><Button size="sm" className="h-8 rounded-lg text-[10px] px-3 font-bold">Profile</Button></Link>
+                          <Link href={`/internal/members/${member.id}/id-card`}><Button variant="outline" size="sm" className="h-8 rounded-lg text-[10px] px-3 font-bold border-accent text-accent">ID Card</Button></Link>
                         </div>
                       </div>
                     </div>
@@ -432,7 +372,6 @@ export default function InternalMembersDirectory() {
           )}
         </div>
       </section>
-
       <Footer />
     </main>
   )
