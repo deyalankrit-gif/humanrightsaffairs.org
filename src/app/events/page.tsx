@@ -23,7 +23,8 @@ import {
   CheckCircle2,
   ExternalLink,
   ShieldCheck,
-  Video
+  Video,
+  Type
 } from 'lucide-react'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -74,7 +75,9 @@ type Event = {
   category: "Campaign" | "Workshop" | "Convention" | "Relief" | "Social Projects"
   imageId?: string
   galleryImages?: string[]
+  galleryCaptions?: string[]
   videoUrl?: string
+  videoCaption?: string
   description: string
 }
 
@@ -113,7 +116,9 @@ export default function EventsPage() {
     description: '',
     imageId: 'event-legal-aid',
     galleryImages: ['', '', ''],
-    videoUrl: ''
+    galleryCaptions: ['', '', ''],
+    videoUrl: '',
+    videoCaption: ''
   })
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, isEdit: boolean, field: 'imageId' | 'videoUrl' | 'galleryImages', index?: number) => {
@@ -166,7 +171,7 @@ export default function EventsPage() {
     addDoc(collection(db, 'events'), eventData)
       .then(() => {
         toast({ title: "Event Created", description: "The new event has been added to the gallery." })
-        setNewEvent({ title: '', date: '', location: '', category: 'Campaign', description: '', imageId: 'event-legal-aid', galleryImages: ['', '', ''], videoUrl: '' })
+        setNewEvent({ title: '', date: '', location: '', category: 'Campaign', description: '', imageId: 'event-legal-aid', galleryImages: ['', '', ''], galleryCaptions: ['', '', ''], videoUrl: '', videoCaption: '' })
         setIsAddDialogOpen(false)
         setIsActionLoading(false)
       })
@@ -258,7 +263,7 @@ export default function EventsPage() {
                     <Plus className="w-6 h-6" /> Create New Event Entry
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-xl bg-white dark:bg-slate-900 rounded-[2rem] max-h-[90vh] overflow-y-auto border-none shadow-2xl">
+                <DialogContent className="max-w-2xl bg-white dark:bg-slate-900 rounded-[2rem] max-h-[90vh] overflow-y-auto border-none shadow-2xl">
                   <DialogHeader>
                     <DialogTitle>New Event Entry</DialogTitle>
                     <DialogDescription>Add a new highlight to the mission gallery with full project profile assets.</DialogDescription>
@@ -292,11 +297,11 @@ export default function EventsPage() {
 
                     {/* Additional Still Photos */}
                     <div className="space-y-4">
-                       <Label className="text-xs font-bold uppercase tracking-widest text-accent">Additional Still Photos (For Project Profile)</Label>
-                       <div className="grid grid-cols-3 gap-4">
+                       <Label className="text-xs font-bold uppercase tracking-widest text-accent">Additional Still Photos & Captions</Label>
+                       <div className="grid grid-cols-1 gap-6">
                           {[0, 1, 2].map((idx) => (
-                            <div key={idx} className="flex flex-col gap-2">
-                               <div className="relative aspect-[3/4] bg-slate-100 dark:bg-slate-800 rounded-xl overflow-hidden border-2 border-dashed border-slate-200">
+                            <div key={idx} className="flex flex-col md:flex-row gap-4 items-start p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800">
+                               <div className="relative w-full md:w-32 aspect-[3/4] bg-slate-100 dark:bg-slate-800 rounded-xl overflow-hidden border-2 border-dashed border-slate-200 shrink-0">
                                   {newEvent.galleryImages[idx] ? (
                                     <Image src={newEvent.galleryImages[idx]} alt={`Gallery ${idx}`} fill className="object-cover" />
                                   ) : (
@@ -309,33 +314,57 @@ export default function EventsPage() {
                                     onChange={(e) => handleFileChange(e, false, 'galleryImages', idx)}
                                   />
                                </div>
-                               <p className="text-[8px] text-center font-bold text-slate-400 uppercase">Image {idx + 1}</p>
+                               <div className="flex-1 w-full space-y-2">
+                                  <Label className="text-[10px] font-black uppercase text-slate-400">Photo {idx + 1} Caption</Label>
+                                  <Input 
+                                    placeholder="e.g. Community Outreach Session" 
+                                    value={newEvent.galleryCaptions[idx]} 
+                                    onChange={e => {
+                                      const newCaps = [...newEvent.galleryCaptions]
+                                      newCaps[idx] = e.target.value
+                                      setNewEvent({...newEvent, galleryCaptions: newCaps})
+                                    }}
+                                    className="h-10 rounded-xl"
+                                  />
+                               </div>
                             </div>
                           ))}
                        </div>
                     </div>
 
                     {/* Video Upload */}
-                    <div className="space-y-2">
-                       <Label className="text-xs font-bold uppercase tracking-widest text-indigo-500">Mission Highlight Video</Label>
-                       <div className="p-4 border-2 border-dashed rounded-2xl bg-indigo-50/30 dark:bg-indigo-900/10 border-indigo-100 flex flex-col items-center gap-4">
-                          {newEvent.videoUrl ? (
-                            <div className="w-full aspect-video rounded-xl overflow-hidden bg-black flex items-center justify-center">
-                               <Video className="w-12 h-12 text-indigo-400 animate-pulse" />
-                               <p className="text-xs text-white ml-2 font-bold">Video Ready</p>
-                            </div>
-                          ) : (
-                            <Film className="w-10 h-10 text-indigo-300" />
-                          )}
-                          <Button variant="outline" className="w-full relative h-12 rounded-xl border-indigo-200 text-indigo-600">
-                            <Film className="w-4 h-4 mr-2" /> Upload Highlight Video
-                            <input 
-                              type="file" 
-                              accept="video/*" 
-                              className="absolute inset-0 opacity-0 cursor-pointer"
-                              onChange={(e) => handleFileChange(e, false, 'videoUrl')}
+                    <div className="space-y-4">
+                       <Label className="text-xs font-bold uppercase tracking-widest text-indigo-500">Mission Highlight Video & Caption</Label>
+                       <div className="p-4 border-2 border-dashed rounded-2xl bg-indigo-50/30 dark:bg-indigo-900/10 border-indigo-100 flex flex-col gap-4">
+                          <div className="flex flex-col md:flex-row gap-4 items-center">
+                            {newEvent.videoUrl ? (
+                              <div className="w-full md:w-32 aspect-video rounded-xl overflow-hidden bg-black flex items-center justify-center shrink-0">
+                                 <Video className="w-8 h-8 text-indigo-400 animate-pulse" />
+                              </div>
+                            ) : (
+                              <div className="w-full md:w-32 aspect-video bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center shrink-0 border border-indigo-50">
+                                <Film className="w-6 h-6 text-indigo-200" />
+                              </div>
+                            )}
+                            <Button variant="outline" className="w-full relative h-12 rounded-xl border-indigo-200 text-indigo-600">
+                              <Film className="w-4 h-4 mr-2" /> {newEvent.videoUrl ? "Change Highlight Video" : "Upload Highlight Video"}
+                              <input 
+                                type="file" 
+                                accept="video/*" 
+                                className="absolute inset-0 opacity-0 cursor-pointer"
+                                onChange={(e) => handleFileChange(e, false, 'videoUrl')}
+                              />
+                            </Button>
+                          </div>
+                          <div className="space-y-2">
+                            <Label className="text-[10px] font-black uppercase text-indigo-400">Video Description Label</Label>
+                            <Input 
+                              placeholder="e.g. Documentary: Ground Zero Advocacy" 
+                              value={newEvent.videoCaption}
+                              onChange={e => setNewEvent({...newEvent, videoCaption: e.target.value})}
+                              className="h-10 rounded-xl border-indigo-100"
                             />
-                          </Button>
+                          </div>
                        </div>
                     </div>
 
@@ -463,7 +492,7 @@ export default function EventsPage() {
                                   <Edit className="w-4 h-4" />
                                 </Button>
                               </DialogTrigger>
-                              <DialogContent className="max-w-xl bg-white dark:bg-slate-900 rounded-[2rem] max-h-[90vh] overflow-y-auto border-none shadow-2xl">
+                              <DialogContent className="max-w-2xl bg-white dark:bg-slate-900 rounded-[2rem] max-h-[90vh] overflow-y-auto border-none shadow-2xl">
                                 <DialogHeader>
                                   <DialogTitle>Modify Event Record</DialogTitle>
                                 </DialogHeader>
@@ -492,13 +521,13 @@ export default function EventsPage() {
                                       </div>
                                     </div>
 
-                                    {/* Edit Gallery */}
+                                    {/* Edit Gallery & Captions */}
                                     <div className="space-y-4">
-                                       <Label className="text-xs font-bold uppercase tracking-widest text-accent">Additional Still Photos</Label>
-                                       <div className="grid grid-cols-3 gap-4">
+                                       <Label className="text-xs font-bold uppercase tracking-widest text-accent">Additional Still Photos & Captions</Label>
+                                       <div className="grid grid-cols-1 gap-6">
                                           {[0, 1, 2].map((idx) => (
-                                            <div key={idx} className="flex flex-col gap-2">
-                                               <div className="relative aspect-[3/4] bg-slate-100 dark:bg-slate-800 rounded-xl overflow-hidden border-2 border-dashed border-slate-200">
+                                            <div key={idx} className="flex flex-col md:flex-row gap-4 items-start p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800">
+                                               <div className="relative w-full md:w-32 aspect-[3/4] bg-slate-100 dark:bg-slate-800 rounded-xl overflow-hidden border-2 border-dashed border-slate-200 shrink-0">
                                                   {(editEvent.galleryImages?.[idx]) ? (
                                                     <Image src={editEvent.galleryImages[idx]} alt={`Gallery ${idx}`} fill className="object-cover" />
                                                   ) : (
@@ -511,15 +540,28 @@ export default function EventsPage() {
                                                     onChange={(e) => handleFileChange(e, true, 'galleryImages', idx)}
                                                   />
                                                </div>
+                                               <div className="flex-1 w-full space-y-2">
+                                                  <Label className="text-[10px] font-black uppercase text-slate-400">Photo {idx + 1} Caption</Label>
+                                                  <Input 
+                                                    placeholder="Photo caption..." 
+                                                    value={editEvent.galleryCaptions?.[idx] || ''} 
+                                                    onChange={e => {
+                                                      const newCaps = [...(editEvent.galleryCaptions || ['', '', ''])]
+                                                      newCaps[idx] = e.target.value
+                                                      setEditEvent({...editEvent, galleryCaptions: newCaps})
+                                                    }}
+                                                    className="h-10 rounded-xl"
+                                                  />
+                                               </div>
                                             </div>
                                           ))}
                                        </div>
                                     </div>
 
-                                    {/* Edit Video */}
-                                    <div className="space-y-2">
-                                       <Label className="text-xs font-bold uppercase tracking-widest text-indigo-500">Mission Highlight Video</Label>
-                                       <div className="p-4 border-2 border-dashed rounded-2xl bg-indigo-50/30 dark:bg-indigo-900/10 border-indigo-100 flex flex-col items-center gap-4">
+                                    {/* Edit Video & Caption */}
+                                    <div className="space-y-4">
+                                       <Label className="text-xs font-bold uppercase tracking-widest text-indigo-500">Mission Highlight Video & Caption</Label>
+                                       <div className="p-4 border-2 border-dashed rounded-2xl bg-indigo-50/30 dark:bg-indigo-900/10 border-indigo-100 flex flex-col gap-4">
                                           <Button variant="outline" className="w-full relative h-12 rounded-xl border-indigo-200 text-indigo-600">
                                             <Film className="w-4 h-4 mr-2" /> {editEvent.videoUrl ? "Change Video" : "Upload Video"}
                                             <input 
@@ -529,6 +571,15 @@ export default function EventsPage() {
                                               onChange={(e) => handleFileChange(e, true, 'videoUrl')}
                                             />
                                           </Button>
+                                          <div className="space-y-2">
+                                            <Label className="text-[10px] font-black uppercase text-indigo-400">Video Description Label</Label>
+                                            <Input 
+                                              placeholder="Video caption label..." 
+                                              value={editEvent.videoCaption || ''}
+                                              onChange={e => setEditEvent({...editEvent, videoCaption: e.target.value})}
+                                              className="h-10 rounded-xl border-indigo-100"
+                                            />
+                                          </div>
                                        </div>
                                     </div>
 
@@ -703,6 +754,11 @@ export default function EventsPage() {
                     <div className="grid md:grid-cols-3 gap-6">
                       {[0, 1, 2].map((idx) => {
                         const img = selectedEventDetails.galleryImages?.[idx] || `https://picsum.photos/seed/event-${selectedEventDetails.id}-${idx}/600/800`
+                        const caption = selectedEventDetails.galleryCaptions?.[idx] || (
+                          idx === 0 ? "On-ground Engagement" : 
+                          idx === 1 ? "Legal Literacy Workshop" : 
+                          "Community Outreach Session"
+                        )
                         return (
                           <div key={idx} className="group relative aspect-[4/5] rounded-[2rem] overflow-hidden shadow-xl border-4 border-white dark:border-slate-800 transition-all hover:scale-[1.02] hover:shadow-2xl">
                             <Image 
@@ -713,9 +769,7 @@ export default function EventsPage() {
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-6">
                               <p className="text-white text-xs font-bold uppercase tracking-widest leading-tight">
-                                {idx === 0 && "On-ground Engagement"}
-                                {idx === 1 && "Legal Literacy Workshop"}
-                                {idx === 2 && "Community Outreach Session"}
+                                {caption}
                               </p>
                             </div>
                           </div>
@@ -754,7 +808,9 @@ export default function EventsPage() {
                       <div className="absolute bottom-6 left-6 right-6 p-6 bg-primary/40 backdrop-blur-md rounded-2xl border border-white/10 flex items-center justify-between">
                          <div className="flex items-center gap-3">
                             <CheckCircle2 className="w-5 h-5 text-emerald-400" />
-                            <p className="text-xs font-bold text-white uppercase tracking-wider">Documentary: {selectedEventDetails.title}</p>
+                            <p className="text-xs font-bold text-white uppercase tracking-wider">
+                              {selectedEventDetails.videoCaption ? selectedEventDetails.videoCaption : `Documentary: ${selectedEventDetails.title}`}
+                            </p>
                          </div>
                          <ExternalLink className="w-4 h-4 text-white/60" />
                       </div>

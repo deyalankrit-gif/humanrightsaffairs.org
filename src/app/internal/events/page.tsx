@@ -24,7 +24,8 @@ import {
   ShieldCheck,
   Upload,
   Camera,
-  Film
+  Film,
+  Type
 } from 'lucide-react'
 import {
   Dialog,
@@ -66,7 +67,9 @@ export default function InternalEventsManagement() {
     description: '',
     imageId: 'event-legal-aid',
     galleryImages: ['', '', ''],
-    videoUrl: ''
+    galleryCaptions: ['', '', ''],
+    videoUrl: '',
+    videoCaption: ''
   })
 
   useEffect(() => {
@@ -121,7 +124,7 @@ export default function InternalEventsManagement() {
     addDoc(collection(db, 'events'), { ...newEvent, createdAt: serverTimestamp() })
       .then(() => {
         toast({ title: "Event Published" })
-        setNewEvent({ title: '', date: '', location: '', category: 'Campaign', description: '', imageId: 'event-legal-aid', galleryImages: ['', '', ''], videoUrl: '' })
+        setNewEvent({ title: '', date: '', location: '', category: 'Campaign', description: '', imageId: 'event-legal-aid', galleryImages: ['', '', ''], galleryCaptions: ['', '', ''], videoUrl: '', videoCaption: '' })
         setIsAddDialogOpen(false)
         setIsActionLoading(false)
       })
@@ -181,7 +184,7 @@ export default function InternalEventsManagement() {
             
             <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
               <DialogTrigger asChild><Button size="sm" className="bg-accent text-primary font-bold rounded-xl h-11 px-6 flex gap-2 shadow-lg"><Plus className="w-4 h-4" /> Publish New Event</Button></DialogTrigger>
-              <DialogContent className="max-w-xl rounded-3xl overflow-y-auto max-h-[90vh] border-none shadow-2xl">
+              <DialogContent className="max-w-2xl rounded-3xl overflow-y-auto max-h-[90vh] border-none shadow-2xl">
                 <DialogHeader><DialogTitle>New Full Project Profile</DialogTitle></DialogHeader>
                 <div className="space-y-6 py-2">
                   <div className="space-y-1">
@@ -195,27 +198,53 @@ export default function InternalEventsManagement() {
                   </div>
 
                   <div className="space-y-3">
-                     <Label className="text-[10px] uppercase font-bold text-accent">Additional Still Photos (Gallery)</Label>
-                     <div className="grid grid-cols-3 gap-3">
+                     <Label className="text-[10px] uppercase font-bold text-accent">Additional Still Photos & Captions</Label>
+                     <div className="grid grid-cols-1 gap-4">
                         {[0, 1, 2].map((idx) => (
-                          <div key={idx} className="relative aspect-square rounded-xl overflow-hidden border-2 border-dashed bg-slate-50 flex items-center justify-center">
-                             {newEvent.galleryImages[idx] ? (
-                               <Image src={newEvent.galleryImages[idx]} alt="Gallery" fill className="object-cover" />
-                             ) : (
-                               <Camera className="w-5 h-5 text-slate-300" />
-                             )}
-                             <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => handleFileChange(e, false, 'galleryImages', idx)} />
+                          <div key={idx} className="flex flex-col md:flex-row gap-4 p-3 bg-slate-50 rounded-2xl border border-slate-100">
+                             <div className="relative w-24 h-24 rounded-xl overflow-hidden border-2 border-dashed bg-white flex items-center justify-center shrink-0">
+                                {newEvent.galleryImages[idx] ? (
+                                  <Image src={newEvent.galleryImages[idx]} alt="Gallery" fill className="object-cover" />
+                                ) : (
+                                  <Camera className="w-5 h-5 text-slate-300" />
+                                )}
+                                <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => handleFileChange(e, false, 'galleryImages', idx)} />
+                             </div>
+                             <div className="flex-1 w-full space-y-1">
+                                <Label className="text-[9px] font-bold text-slate-400 uppercase">Caption {idx + 1}</Label>
+                                <Input 
+                                  placeholder="Describe this moment..." 
+                                  value={newEvent.galleryCaptions[idx]} 
+                                  onChange={e => {
+                                    const newCaps = [...newEvent.galleryCaptions]
+                                    newCaps[idx] = e.target.value
+                                    setNewEvent({...newEvent, galleryCaptions: newCaps})
+                                  }}
+                                  className="h-9 text-xs rounded-lg"
+                                />
+                             </div>
                           </div>
                         ))}
                      </div>
                   </div>
 
-                  <div className="space-y-2">
-                     <Label className="text-[10px] uppercase font-bold text-indigo-500">Mission Highlight Video</Label>
-                     <Button variant="outline" className="w-full relative h-10 rounded-xl border-indigo-100 text-indigo-600 border-dashed">
-                        <Film className="w-4 h-4 mr-2" /> {newEvent.videoUrl ? "Video Selected" : "Upload Project Video"}
-                        <input type="file" accept="video/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => handleFileChange(e, false, 'videoUrl')} />
-                     </Button>
+                  <div className="space-y-3 p-4 bg-indigo-50/50 rounded-2xl border border-indigo-100">
+                     <Label className="text-[10px] uppercase font-bold text-indigo-500">Mission Highlight Video & Caption</Label>
+                     <div className="flex flex-col gap-3">
+                        <Button variant="outline" className="w-full relative h-10 rounded-xl border-indigo-200 text-indigo-600 border-dashed bg-white">
+                           <Film className="w-4 h-4 mr-2" /> {newEvent.videoUrl ? "Highlight Video Loaded" : "Upload Official Footage"}
+                           <input type="file" accept="video/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => handleFileChange(e, false, 'videoUrl')} />
+                        </Button>
+                        <div className="space-y-1">
+                           <Label className="text-[9px] font-bold text-indigo-400 uppercase">Video Description</Label>
+                           <Input 
+                             placeholder="Documentary label..." 
+                             value={newEvent.videoCaption}
+                             onChange={e => setNewEvent({...newEvent, videoCaption: e.target.value})}
+                             className="h-9 text-xs rounded-lg border-indigo-100"
+                           />
+                        </div>
+                     </div>
                   </div>
 
                   <div className="space-y-1"><Label className="text-[10px] uppercase font-bold">Title</Label><Input value={newEvent.title} onChange={e => setNewEvent({...newEvent, title: e.target.value})} className="h-10 rounded-lg text-sm" /></div>
@@ -231,7 +260,7 @@ export default function InternalEventsManagement() {
                       <Label className="text-[10px] uppercase font-bold">Category</Label>
                       <Select value={newEvent.category} onValueChange={(val: any) => setNewEvent({...newEvent, category: val})}>
                         <SelectTrigger className="h-10 rounded-lg text-xs"><SelectValue /></SelectTrigger>
-                        <SelectContent position="popper" className="z-[1000001]">{categories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+                        <SelectContent position="popper" className="z-[1000001] bg-white">{categories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
                       </Select>
                     </div>
                   </div>
@@ -294,7 +323,7 @@ export default function InternalEventsManagement() {
       </section>
 
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="max-w-xl rounded-3xl overflow-y-auto max-h-[90vh] border-none shadow-2xl">
+        <DialogContent className="max-w-2xl rounded-3xl overflow-y-auto max-h-[90vh] border-none shadow-2xl">
           <DialogHeader><DialogTitle>Edit Event Record</DialogTitle></DialogHeader>
           {editEvent && (
             <div className="space-y-6 py-2">
@@ -309,27 +338,53 @@ export default function InternalEventsManagement() {
               </div>
 
               <div className="space-y-3">
-                 <Label className="text-[10px] uppercase font-bold text-accent">Additional Still Photos</Label>
-                 <div className="grid grid-cols-3 gap-3">
+                 <Label className="text-[10px] uppercase font-bold text-accent">Additional Still Photos & Captions</Label>
+                 <div className="grid grid-cols-1 gap-4">
                     {[0, 1, 2].map((idx) => (
-                      <div key={idx} className="relative aspect-square rounded-xl overflow-hidden border-2 border-dashed bg-slate-50 flex items-center justify-center">
-                         {(editEvent.galleryImages?.[idx]) ? (
-                           <Image src={editEvent.galleryImages[idx]} alt="Gallery" fill className="object-cover" />
-                         ) : (
-                           <Camera className="w-5 h-5 text-slate-300" />
-                         )}
-                         <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => handleFileChange(e, true, 'galleryImages', idx)} />
+                      <div key={idx} className="flex flex-col md:flex-row gap-4 p-3 bg-slate-50 rounded-2xl border border-slate-100">
+                         <div className="relative w-24 h-24 rounded-xl overflow-hidden border-2 border-dashed bg-white flex items-center justify-center shrink-0">
+                            {(editEvent.galleryImages?.[idx]) ? (
+                              <Image src={editEvent.galleryImages[idx]} alt="Gallery" fill className="object-cover" />
+                            ) : (
+                              <Camera className="w-5 h-5 text-slate-300" />
+                            )}
+                            <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => handleFileChange(e, true, 'galleryImages', idx)} />
+                         </div>
+                         <div className="flex-1 w-full space-y-1">
+                            <Label className="text-[9px] font-bold text-slate-400 uppercase">Caption {idx + 1}</Label>
+                            <Input 
+                              placeholder="Moment description..." 
+                              value={editEvent.galleryCaptions?.[idx] || ''} 
+                              onChange={e => {
+                                const newCaps = [...(editEvent.galleryCaptions || ['', '', ''])]
+                                newCaps[idx] = e.target.value
+                                setEditEvent({...editEvent, galleryCaptions: newCaps})
+                              }}
+                              className="h-9 text-xs rounded-lg"
+                            />
+                         </div>
                       </div>
                     ))}
                  </div>
               </div>
 
-              <div className="space-y-2">
-                 <Label className="text-[10px] uppercase font-bold text-indigo-500">Mission Highlight Video</Label>
-                 <Button variant="outline" className="w-full relative h-10 rounded-xl border-indigo-100 text-indigo-600 border-dashed">
-                    <Film className="w-4 h-4 mr-2" /> {editEvent.videoUrl ? "Change Video" : "Upload Project Video"}
-                    <input type="file" accept="video/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => handleFileChange(e, true, 'videoUrl')} />
-                 </Button>
+              <div className="space-y-3 p-4 bg-indigo-50/50 rounded-2xl border border-indigo-100">
+                 <Label className="text-[10px] uppercase font-bold text-indigo-500">Mission Highlight Video & Caption</Label>
+                 <div className="flex flex-col gap-3">
+                    <Button variant="outline" className="w-full relative h-10 rounded-xl border-indigo-100 text-indigo-600 border-dashed bg-white">
+                       <Film className="w-4 h-4 mr-2" /> {editEvent.videoUrl ? "Change Project Video" : "Upload Project Video"}
+                       <input type="file" accept="video/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => handleFileChange(e, true, 'videoUrl')} />
+                    </Button>
+                    <div className="space-y-1">
+                       <Label className="text-[9px] font-bold text-indigo-400 uppercase">Video Description</Label>
+                       <Input 
+                         placeholder="Documentary caption..." 
+                         value={editEvent.videoCaption || ''}
+                         onChange={e => setEditEvent({...editEvent, videoCaption: e.target.value})}
+                         className="h-9 text-xs rounded-lg border-indigo-100"
+                       />
+                    </div>
+                 </div>
               </div>
 
               <div className="space-y-1"><Label className="text-[10px] uppercase font-bold">Title</Label><Input value={editEvent.title} onChange={e => setEditEvent({...editEvent, title: e.target.value})} className="h-10 rounded-lg text-sm" /></div>
@@ -345,7 +400,7 @@ export default function InternalEventsManagement() {
                   <Label className="text-[10px] uppercase font-bold">Category</Label>
                   <Select value={editEvent.category} onValueChange={(val: any) => setEditEvent({...editEvent, category: val})}>
                     <SelectTrigger className="h-10 rounded-lg text-xs"><SelectValue /></SelectTrigger>
-                    <SelectContent position="popper" className="z-[1000001]">{categories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+                    <SelectContent position="popper" className="z-[1000001] bg-white">{categories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
                   </Select>
                 </div>
               </div>

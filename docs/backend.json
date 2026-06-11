@@ -136,7 +136,9 @@
         "description": { "type": "string" },
         "imageId": { "type": "string" },
         "galleryImages": { "type": "array", "items": { "type": "string" }, "description": "Three additional still photos for the official project profile." },
+        "galleryCaptions": { "type": "array", "items": { "type": "string" }, "description": "Captions for the three additional still photos." },
         "videoUrl": { "type": "string", "description": "Project highlight video data URI or URL." },
+        "videoCaption": { "type": "string", "description": "Caption for the project highlight video." },
         "createdAt": { "type": "string", "format": "date-time" }
       }
     },
