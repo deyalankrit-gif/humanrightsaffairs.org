@@ -1,4 +1,3 @@
-
 "use client"
 
 import React from 'react'
@@ -10,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 const helplines = [
   { id: 1, name: "National Human Rights Commission", phone: "14433", state: "National", type: "General" },
   { id: 2, name: "Women's Helpline (Domestic Violence)", phone: "1091", state: "National", type: "Women" },
-  { id: 3, name: "Child Helpline", phone: "1098", state: "National", type: "Children" },
+  { id: 3, name: "Child Helpline (Child abuse/child labor)", phone: "1098", state: "National", type: "Children" },
   { id: 4, name: "Police Emergency", phone: "112", state: "National", type: "Police" },
   { id: 5, name: "Legal Aid Authority (DLSA)", phone: "15100", state: "Delhi", type: "Legal" },
   { id: 6, name: "Cyber Crime Helpline", phone: "1930", state: "National", type: "Cyber" },
