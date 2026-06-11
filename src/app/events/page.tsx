@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useEffect } from 'react'
@@ -21,7 +22,8 @@ import {
   Info,
   CheckCircle2,
   ExternalLink,
-  ShieldCheck
+  ShieldCheck,
+  Video
 } from 'lucide-react'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -71,6 +73,8 @@ type Event = {
   location: string
   category: "Campaign" | "Workshop" | "Convention" | "Relief" | "Social Projects"
   imageId?: string
+  galleryImages?: string[]
+  videoUrl?: string
   description: string
 }
 
@@ -107,19 +111,33 @@ export default function EventsPage() {
     location: '',
     category: 'Campaign' as const,
     description: '',
-    imageId: 'event-legal-aid'
+    imageId: 'event-legal-aid',
+    galleryImages: ['', '', ''],
+    videoUrl: ''
   })
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, isEdit: boolean) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, isEdit: boolean, field: 'imageId' | 'videoUrl' | 'galleryImages', index?: number) => {
     const file = e.target.files?.[0]
     if (file) {
       const reader = new FileReader()
       reader.onloadend = () => {
         const dataUri = reader.result as string
         if (isEdit) {
-          setEditEvent({ ...editEvent, imageId: dataUri })
+          if (field === 'galleryImages' && index !== undefined) {
+            const newGallery = [...(editEvent.galleryImages || ['', '', ''])]
+            newGallery[index] = dataUri
+            setEditEvent({ ...editEvent, galleryImages: newGallery })
+          } else {
+            setEditEvent({ ...editEvent, [field]: dataUri })
+          }
         } else {
-          setNewEvent({ ...newEvent, imageId: dataUri })
+          if (field === 'galleryImages' && index !== undefined) {
+            const newGallery = [...newEvent.galleryImages]
+            newGallery[index] = dataUri
+            setNewEvent({ ...newEvent, galleryImages: newGallery })
+          } else {
+            setNewEvent({ ...newEvent, [field]: dataUri })
+          }
         }
       }
       reader.readAsDataURL(file)
@@ -148,7 +166,7 @@ export default function EventsPage() {
     addDoc(collection(db, 'events'), eventData)
       .then(() => {
         toast({ title: "Event Created", description: "The new event has been added to the gallery." })
-        setNewEvent({ title: '', date: '', location: '', category: 'Campaign', description: '', imageId: 'event-legal-aid' })
+        setNewEvent({ title: '', date: '', location: '', category: 'Campaign', description: '', imageId: 'event-legal-aid', galleryImages: ['', '', ''], videoUrl: '' })
         setIsAddDialogOpen(false)
         setIsActionLoading(false)
       })
@@ -240,14 +258,15 @@ export default function EventsPage() {
                     <Plus className="w-6 h-6" /> Create New Event Entry
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-md bg-white dark:bg-slate-900 rounded-[2rem] max-h-[90vh] overflow-y-auto border-none shadow-2xl">
+                <DialogContent className="max-w-xl bg-white dark:bg-slate-900 rounded-[2rem] max-h-[90vh] overflow-y-auto border-none shadow-2xl">
                   <DialogHeader>
                     <DialogTitle>New Event Entry</DialogTitle>
-                    <DialogDescription>Add a new highlight to the mission gallery.</DialogDescription>
+                    <DialogDescription>Add a new highlight to the mission gallery with full project profile assets.</DialogDescription>
                   </DialogHeader>
-                  <div className="space-y-4 py-4">
+                  <div className="space-y-6 py-4">
+                    {/* Primary Image */}
                     <div className="space-y-2">
-                      <Label>Event Picture</Label>
+                      <Label className="text-xs font-bold uppercase tracking-widest text-slate-400">Primary Event Picture</Label>
                       <div className="flex flex-col items-center gap-4 p-4 border-2 border-dashed rounded-2xl">
                         {newEvent.imageId && (
                           <div className="relative w-full aspect-video rounded-xl overflow-hidden">
@@ -260,16 +279,66 @@ export default function EventsPage() {
                           </div>
                         )}
                         <Button variant="outline" className="w-full relative h-12 rounded-xl">
-                          <Upload className="w-4 h-4 mr-2" /> Upload Photo
+                          <Upload className="w-4 h-4 mr-2" /> Upload Main Photo
                           <input 
                             type="file" 
                             accept="image/*" 
                             className="absolute inset-0 opacity-0 cursor-pointer"
-                            onChange={(e) => handleFileChange(e, false)}
+                            onChange={(e) => handleFileChange(e, false, 'imageId')}
                           />
                         </Button>
                       </div>
                     </div>
+
+                    {/* Additional Still Photos */}
+                    <div className="space-y-4">
+                       <Label className="text-xs font-bold uppercase tracking-widest text-accent">Additional Still Photos (For Project Profile)</Label>
+                       <div className="grid grid-cols-3 gap-4">
+                          {[0, 1, 2].map((idx) => (
+                            <div key={idx} className="flex flex-col gap-2">
+                               <div className="relative aspect-[3/4] bg-slate-100 dark:bg-slate-800 rounded-xl overflow-hidden border-2 border-dashed border-slate-200">
+                                  {newEvent.galleryImages[idx] ? (
+                                    <Image src={newEvent.galleryImages[idx]} alt={`Gallery ${idx}`} fill className="object-cover" />
+                                  ) : (
+                                    <div className="flex items-center justify-center h-full"><Camera className="w-6 h-6 text-slate-300" /></div>
+                                  )}
+                                  <input 
+                                    type="file" 
+                                    accept="image/*" 
+                                    className="absolute inset-0 opacity-0 cursor-pointer"
+                                    onChange={(e) => handleFileChange(e, false, 'galleryImages', idx)}
+                                  />
+                               </div>
+                               <p className="text-[8px] text-center font-bold text-slate-400 uppercase">Image {idx + 1}</p>
+                            </div>
+                          ))}
+                       </div>
+                    </div>
+
+                    {/* Video Upload */}
+                    <div className="space-y-2">
+                       <Label className="text-xs font-bold uppercase tracking-widest text-indigo-500">Mission Highlight Video</Label>
+                       <div className="p-4 border-2 border-dashed rounded-2xl bg-indigo-50/30 dark:bg-indigo-900/10 border-indigo-100 flex flex-col items-center gap-4">
+                          {newEvent.videoUrl ? (
+                            <div className="w-full aspect-video rounded-xl overflow-hidden bg-black flex items-center justify-center">
+                               <Video className="w-12 h-12 text-indigo-400 animate-pulse" />
+                               <p className="text-xs text-white ml-2 font-bold">Video Ready</p>
+                            </div>
+                          ) : (
+                            <Film className="w-10 h-10 text-indigo-300" />
+                          )}
+                          <Button variant="outline" className="w-full relative h-12 rounded-xl border-indigo-200 text-indigo-600">
+                            <Film className="w-4 h-4 mr-2" /> Upload Highlight Video
+                            <input 
+                              type="file" 
+                              accept="video/*" 
+                              className="absolute inset-0 opacity-0 cursor-pointer"
+                              onChange={(e) => handleFileChange(e, false, 'videoUrl')}
+                            />
+                          </Button>
+                       </div>
+                    </div>
+
                     <div className="space-y-2">
                       <Label>Event Title</Label>
                       <Input value={newEvent.title} onChange={e => setNewEvent({...newEvent, title: e.target.value})} placeholder="e.g. Legal Aid Camp" className="h-12 rounded-xl" />
@@ -284,7 +353,7 @@ export default function EventsPage() {
                               {newEvent.date ? newEvent.date : "Pick a date"}
                             </Button>
                           </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
+                          <PopoverContent className="w-auto p-0 z-[1000001]" align="start">
                             <Calendar
                               mode="single"
                               selected={parseEventDate(newEvent.date)}
@@ -298,7 +367,7 @@ export default function EventsPage() {
                         <Label>Category</Label>
                         <Select value={newEvent.category} onValueChange={(val: any) => setNewEvent({...newEvent, category: val})}>
                           <SelectTrigger className="h-12 rounded-xl"><SelectValue /></SelectTrigger>
-                          <SelectContent>
+                          <SelectContent className="z-[1000001]">
                             {categories.filter(c => c !== 'All').map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                           </SelectContent>
                         </Select>
@@ -315,7 +384,7 @@ export default function EventsPage() {
                   </div>
                   <DialogFooter>
                     <Button onClick={handleAddEvent} disabled={isActionLoading} className="w-full h-12 rounded-xl bg-accent text-white font-bold hover:bg-secondary hover:text-white transition-all">
-                      {isActionLoading ? <Loader2 className="animate-spin" /> : "Publish Event"}
+                      {isActionLoading ? <Loader2 className="animate-spin" /> : "Publish Full Event Record"}
                     </Button>
                   </DialogFooter>
                 </DialogContent>
@@ -394,14 +463,14 @@ export default function EventsPage() {
                                   <Edit className="w-4 h-4" />
                                 </Button>
                               </DialogTrigger>
-                              <DialogContent className="max-w-md bg-white dark:bg-slate-900 rounded-[2rem] max-h-[90vh] overflow-y-auto border-none shadow-2xl">
+                              <DialogContent className="max-w-xl bg-white dark:bg-slate-900 rounded-[2rem] max-h-[90vh] overflow-y-auto border-none shadow-2xl">
                                 <DialogHeader>
-                                  <DialogTitle>Modify Event</DialogTitle>
+                                  <DialogTitle>Modify Event Record</DialogTitle>
                                 </DialogHeader>
                                 {editEvent && (
-                                  <div className="space-y-4 py-4">
+                                  <div className="space-y-6 py-4">
                                     <div className="space-y-2">
-                                      <Label>Event Picture</Label>
+                                      <Label className="text-xs font-bold uppercase tracking-widest text-slate-400">Primary Picture</Label>
                                       <div className="flex flex-col items-center gap-4 p-4 border-2 border-dashed rounded-2xl">
                                         <div className="relative w-full aspect-video rounded-xl overflow-hidden">
                                           <Image 
@@ -412,16 +481,57 @@ export default function EventsPage() {
                                           />
                                         </div>
                                         <Button variant="outline" className="w-full relative h-12 rounded-xl">
-                                          <Upload className="w-4 h-4 mr-2" /> Change Photo
+                                          <Upload className="w-4 h-4 mr-2" /> Change Main Photo
                                           <input 
                                             type="file" 
                                             accept="image/*" 
                                             className="absolute inset-0 opacity-0 cursor-pointer"
-                                            onChange={(e) => handleFileChange(e, true)}
+                                            onChange={(e) => handleFileChange(e, true, 'imageId')}
                                           />
                                         </Button>
                                       </div>
                                     </div>
+
+                                    {/* Edit Gallery */}
+                                    <div className="space-y-4">
+                                       <Label className="text-xs font-bold uppercase tracking-widest text-accent">Additional Still Photos</Label>
+                                       <div className="grid grid-cols-3 gap-4">
+                                          {[0, 1, 2].map((idx) => (
+                                            <div key={idx} className="flex flex-col gap-2">
+                                               <div className="relative aspect-[3/4] bg-slate-100 dark:bg-slate-800 rounded-xl overflow-hidden border-2 border-dashed border-slate-200">
+                                                  {(editEvent.galleryImages?.[idx]) ? (
+                                                    <Image src={editEvent.galleryImages[idx]} alt={`Gallery ${idx}`} fill className="object-cover" />
+                                                  ) : (
+                                                    <div className="flex items-center justify-center h-full"><Camera className="w-6 h-6 text-slate-300" /></div>
+                                                  )}
+                                                  <input 
+                                                    type="file" 
+                                                    accept="image/*" 
+                                                    className="absolute inset-0 opacity-0 cursor-pointer"
+                                                    onChange={(e) => handleFileChange(e, true, 'galleryImages', idx)}
+                                                  />
+                                               </div>
+                                            </div>
+                                          ))}
+                                       </div>
+                                    </div>
+
+                                    {/* Edit Video */}
+                                    <div className="space-y-2">
+                                       <Label className="text-xs font-bold uppercase tracking-widest text-indigo-500">Mission Highlight Video</Label>
+                                       <div className="p-4 border-2 border-dashed rounded-2xl bg-indigo-50/30 dark:bg-indigo-900/10 border-indigo-100 flex flex-col items-center gap-4">
+                                          <Button variant="outline" className="w-full relative h-12 rounded-xl border-indigo-200 text-indigo-600">
+                                            <Film className="w-4 h-4 mr-2" /> {editEvent.videoUrl ? "Change Video" : "Upload Video"}
+                                            <input 
+                                              type="file" 
+                                              accept="video/*" 
+                                              className="absolute inset-0 opacity-0 cursor-pointer"
+                                              onChange={(e) => handleFileChange(e, true, 'videoUrl')}
+                                            />
+                                          </Button>
+                                       </div>
+                                    </div>
+
                                     <div className="space-y-2">
                                       <Label>Event Title</Label>
                                       <Input value={editEvent.title} onChange={e => setEditEvent({...editEvent, title: e.target.value})} className="h-12 rounded-xl" />
@@ -436,7 +546,7 @@ export default function EventsPage() {
                                               {editEvent.date ? editEvent.date : "Pick a date"}
                                             </Button>
                                           </PopoverTrigger>
-                                          <PopoverContent className="w-auto p-0" align="start">
+                                          <PopoverContent className="w-auto p-0 z-[1000001]" align="start">
                                             <Calendar
                                               mode="single"
                                               selected={parseEventDate(editEvent.date)}
@@ -450,7 +560,7 @@ export default function EventsPage() {
                                         <Label>Category</Label>
                                         <Select value={editEvent.category} onValueChange={(val: any) => setEditEvent({...editEvent, category: val})}>
                                           <SelectTrigger className="h-12 rounded-xl"><SelectValue /></SelectTrigger>
-                                          <SelectContent>
+                                          <SelectContent className="z-[1000001]">
                                             {categories.filter(c => c !== 'All').map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                                           </SelectContent>
                                         </Select>
@@ -532,7 +642,7 @@ export default function EventsPage() {
         </div>
       </section>
 
-      {/* Detailed Event Modal */}
+      {/* Detailed Event Modal (Official Project Profile) */}
       <Dialog open={!!selectedEventDetails} onOpenChange={(open) => !open && setSelectedEventDetails(null)}>
         <DialogContent className="max-w-5xl p-0 border-none shadow-2xl rounded-[2.5rem] overflow-hidden bg-white dark:bg-slate-950 flex flex-col [&>button]:hidden max-h-[90vh]">
           <DialogHeader className="sr-only">
@@ -585,29 +695,32 @@ export default function EventsPage() {
                     </p>
                   </div>
 
-                  {/* High-Fidelity Gallery (3 Images) */}
+                  {/* High-Fidelity Gallery (3 Uploaded Images) */}
                   <div className="space-y-8 animate-in fade-in slide-in-from-bottom-6 duration-700">
                     <h3 className="text-xs font-black uppercase tracking-[0.3em] text-primary dark:text-white flex items-center gap-2">
                        <Camera className="w-4 h-4 text-emerald-500" /> Captured Moments
                     </h3>
                     <div className="grid md:grid-cols-3 gap-6">
-                      {[1, 2, 3].map((idx) => (
-                        <div key={idx} className="group relative aspect-[4/5] rounded-[2rem] overflow-hidden shadow-xl border-4 border-white dark:border-slate-800 transition-all hover:scale-[1.02] hover:shadow-2xl">
-                          <Image 
-                            src={`https://picsum.photos/seed/event-${selectedEventDetails.id}-${idx}/600/800`} 
-                            alt={`Gallery ${idx}`} 
-                            fill 
-                            className="object-cover"
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-6">
-                            <p className="text-white text-xs font-bold uppercase tracking-widest leading-tight">
-                               {idx === 1 && "On-ground Engagement"}
-                               {idx === 2 && "Legal Literacy Workshop"}
-                               {idx === 3 && "Community Outreach Session"}
-                            </p>
+                      {[0, 1, 2].map((idx) => {
+                        const img = selectedEventDetails.galleryImages?.[idx] || `https://picsum.photos/seed/event-${selectedEventDetails.id}-${idx}/600/800`
+                        return (
+                          <div key={idx} className="group relative aspect-[4/5] rounded-[2rem] overflow-hidden shadow-xl border-4 border-white dark:border-slate-800 transition-all hover:scale-[1.02] hover:shadow-2xl">
+                            <Image 
+                              src={img} 
+                              alt={`Gallery ${idx + 1}`} 
+                              fill 
+                              className="object-cover"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-6">
+                              <p className="text-white text-xs font-bold uppercase tracking-widest leading-tight">
+                                {idx === 0 && "On-ground Engagement"}
+                                {idx === 1 && "Legal Literacy Workshop"}
+                                {idx === 2 && "Community Outreach Session"}
+                              </p>
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        )
+                      })}
                     </div>
                   </div>
 
@@ -616,23 +729,32 @@ export default function EventsPage() {
                     <h3 className="text-xs font-black uppercase tracking-[0.3em] text-primary dark:text-white flex items-center gap-2">
                        <Film className="w-4 h-4 text-red-500" /> Mission Highlights (Video)
                     </h3>
-                    <div className="relative aspect-video rounded-[3rem] overflow-hidden shadow-2xl border-4 border-slate-100 dark:border-slate-800 bg-slate-100 dark:bg-slate-900 group">
-                      <Image 
-                        src={`https://picsum.photos/seed/event-vid-${selectedEventDetails.id}/1200/675`} 
-                        alt="Video Thumbnail" 
-                        fill 
-                        className="object-cover opacity-60 grayscale group-hover:grayscale-0 transition-all duration-700"
-                      />
-                      <div className="absolute inset-0 flex flex-col items-center justify-center gap-6">
-                         <div className="w-24 h-24 bg-white/20 backdrop-blur-xl rounded-full flex items-center justify-center border-4 border-white/40 group-hover:scale-110 transition-transform cursor-pointer shadow-2xl">
-                           <Play className="w-10 h-10 text-white fill-white ml-1" />
-                         </div>
-                         <p className="text-white font-black uppercase tracking-[0.3em] text-sm drop-shadow-lg">Watch Official Footage</p>
-                      </div>
+                    <div className="relative aspect-video rounded-[3rem] overflow-hidden shadow-2xl border-4 border-slate-100 dark:border-slate-800 bg-black group">
+                      {selectedEventDetails.videoUrl ? (
+                        <video controls className="w-full h-full object-cover">
+                          <source src={selectedEventDetails.videoUrl} />
+                          Your browser does not support the video tag.
+                        </video>
+                      ) : (
+                        <>
+                          <Image 
+                            src={`https://picsum.photos/seed/event-vid-${selectedEventDetails.id}/1200/675`} 
+                            alt="Video Thumbnail" 
+                            fill 
+                            className="object-cover opacity-60 grayscale group-hover:grayscale-0 transition-all duration-700"
+                          />
+                          <div className="absolute inset-0 flex flex-col items-center justify-center gap-6">
+                             <div className="w-24 h-24 bg-white/20 backdrop-blur-xl rounded-full flex items-center justify-center border-4 border-white/40 group-hover:scale-110 transition-transform cursor-pointer shadow-2xl">
+                               <Play className="w-10 h-10 text-white fill-white ml-1" />
+                             </div>
+                             <p className="text-white font-black uppercase tracking-[0.3em] text-sm drop-shadow-lg">Watch Official Footage</p>
+                          </div>
+                        </>
+                      )}
                       <div className="absolute bottom-6 left-6 right-6 p-6 bg-primary/40 backdrop-blur-md rounded-2xl border border-white/10 flex items-center justify-between">
                          <div className="flex items-center gap-3">
                             <CheckCircle2 className="w-5 h-5 text-emerald-400" />
-                            <p className="text-xs font-bold text-white uppercase tracking-wider">Documentary: {selectedEventDetails.title} (2025)</p>
+                            <p className="text-xs font-bold text-white uppercase tracking-wider">Documentary: {selectedEventDetails.title}</p>
                          </div>
                          <ExternalLink className="w-4 h-4 text-white/60" />
                       </div>
