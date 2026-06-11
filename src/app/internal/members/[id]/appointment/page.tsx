@@ -152,7 +152,7 @@ export default function AppointmentLetterGenerator() {
 
           {/* Page Footer */}
           <div className="absolute bottom-12 left-12 right-12 text-center text-[8px] text-slate-400 uppercase tracking-widest font-sans border-t pt-4">
-             JusticeShield is a non-profit registered under the Societies Registration Act. Reg No: WB/2025/0762605.
+             JusticeShield is a non-profit registered under the Societies Registration Act. <a href="https://ngodarpan.gov.in/#/search-ngo" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors font-bold">Reg No: WB/2025/0762605</a>.
           </div>
         </div>
 

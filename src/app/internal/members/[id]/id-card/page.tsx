@@ -152,7 +152,7 @@ export default function IDCardGenerator() {
                <div className="flex-1 flex flex-col pt-2">
                   <div className="text-center space-y-1 mb-8">
                      <p className="text-[22px] font-black text-[#006400] tracking-tight leading-none uppercase">Registered by Govt. of India NITI Aayog</p>
-                     <p className="text-[15px] font-black text-[#006400] tracking-tight leading-none uppercase">Regd.No. - WB/2025/0762605</p>
+                     <a href="https://ngodarpan.gov.in/#/search-ngo" target="_blank" rel="noopener noreferrer" className="text-[15px] font-black text-[#006400] tracking-tight leading-none uppercase hover:underline decoration-[#006400]/50 underline-offset-4">Regd.No. - WB/2025/0762605</a>
                   </div>
 
                   <div className="space-y-1.5">
@@ -314,7 +314,7 @@ export default function IDCardGenerator() {
              Optimized for **Industrial PVC Card Printing** (85.6mm x 53.98mm).
            </p>
            <div className="flex items-center gap-3 text-[11px] font-bold text-emerald-600 uppercase justify-center bg-emerald-50 py-2.5 rounded-xl border border-emerald-100 shadow-sm">
-             <BadgeCheck className="w-5 h-5 text-emerald-500" /> NITI Aayog Verified Credentials & 80G Compliant
+             <BadgeCheck className="w-5 h-5 text-emerald-500" /> NITI Aayog Verified Credentials & <a href="https://ngodarpan.gov.in/#/search-ngo" target="_blank" rel="noopener noreferrer" className="hover:underline">80G Compliant</a>
            </div>
         </div>
 

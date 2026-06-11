@@ -27,7 +27,7 @@ export function Footer() {
               </div>
             </Link>
             <p className="text-primary-foreground/80 text-sm leading-relaxed">
-              Human Rights Affairs Trust (Justice Shield) is a Central Government Registered Human Rights Organization in India <span className="font-bold text-accent">(Reg. No. WB/2025/0762605)</span>. Dedicated to constitutional literacy & legal aid & Social Justice.
+              Human Rights Affairs Trust (Justice Shield) is a Central Government Registered Human Rights Organization in India <a href="https://ngodarpan.gov.in/#/search-ngo" target="_blank" rel="noopener noreferrer" className="font-bold text-accent hover:underline decoration-accent/50 underline-offset-4">(Reg. No. WB/2025/0762605)</a>. Dedicated to constitutional literacy & legal aid & Social Justice.
             </p>
             
             <div className="space-y-4">

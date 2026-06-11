@@ -500,7 +500,7 @@ export function DonationDialog({ children, defaultAmount, initialStep = 'details
               <div className="footer border-t pt-8 text-center space-y-2">
                 <p className="text-[9px] text-slate-400 leading-relaxed">
                   This is a digitally authenticated tax receipt issued by the Human Rights Affairs Trust. <br />
-                  Reg No: WB/2025/0762605 | NITI Aayog Verified
+                  <a href="https://ngodarpan.gov.in/#/search-ngo" target="_blank" rel="noopener noreferrer" className="hover:text-accent transition-colors font-bold">Reg No: WB/2025/0762605</a> | NITI Aayog Verified
                 </p>
                 <div className="flex justify-center pt-2">
                    <div className="w-12 h-12 relative grayscale opacity-40">
