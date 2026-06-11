@@ -1,4 +1,3 @@
-
 import Image from 'next/image'
 import Link from 'next/link'
 import { ChairmanMessage } from '@/components/chairman-message'
@@ -136,7 +135,7 @@ export default function Home() {
                 </Button>
               </DonationDialog>
               <Link href="/#knowledge">
-                <Button size="lg" variant="outline" className="border-white/30 text-white bg-white/5 hover:bg-white/15 px-6 py-5 md:px-10 md:py-7 rounded-xl text-sm md:text-lg backdrop-blur-md transition-all border-2 font-bold">
+                <Button size="lg" className="bg-secondary text-white font-bold hover:bg-accent px-6 py-5 md:px-10 md:py-7 rounded-xl text-sm md:text-lg transition-all shadow-xl shadow-secondary/10">
                   Explore Rights Library
                 </Button>
               </Link>
