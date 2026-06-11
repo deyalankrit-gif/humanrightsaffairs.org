@@ -127,15 +127,15 @@ export default function EventsPage() {
     videoCaption: ''
   })
 
-  // Utility to check the size of the document to be written to Firestore
+  // Critical Utility: Firestore limits individual docs to 1MB. 
+  // Base64 adds ~33% size. We cap stringified JSON at 750KB for safety.
   const validateProjectSize = (data: any) => {
     const size = new Blob([JSON.stringify(data)]).size;
-    // Firestore limit is 1MB. We cap at 800KB to account for Base64 overhead and metadata.
-    if (size > 850000) {
+    if (size > 800000) {
       toast({
         variant: "destructive",
-        title: "Record Size Exceeded",
-        description: `Total size (${(size / 1024).toFixed(0)}KB) exceeds the 1MB database limit. Please use external URLs for video/photos or reduce image quality.`
+        title: "Payload Capacity Exceeded",
+        description: `Total size (${(size / 1024).toFixed(0)}KB) is too large. Please use YouTube/Drive links for video and smaller image files.`
       });
       return false;
     }
@@ -145,14 +145,16 @@ export default function EventsPage() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, isEdit: boolean, field: 'imageId' | 'videoUrl' | 'galleryImages', index?: number) => {
     const file = e.target.files?.[0]
     if (file) {
-      // Direct file cap: Images shouldn't exceed 200KB, Videos 300KB for Base64 storage
-      const cap = field === 'videoUrl' ? 307200 : 204800; // 300KB vs 200KB
+      // Conservative limits for individual assets when stored as Base64
+      let cap = 153600; // 150KB default for images
+      if (field === 'videoUrl') cap = 204800; // 200KB for direct video
+      if (field === 'galleryImages') cap = 102400; // 100KB for gallery stills
       
       if (file.size > cap) {
         toast({
           variant: "destructive",
-          title: "File Too Large",
-          description: `${field === 'videoUrl' ? 'Videos' : 'Images'} stored directly must be under ${cap / 1024}KB. Please use an external link instead.`
+          title: "Asset Too Heavy",
+          description: `Direct storage limit is ${cap / 1024}KB. Use an external URL for larger files.`
         });
         return;
       }
@@ -163,40 +165,30 @@ export default function EventsPage() {
       }
 
       const reader = new FileReader()
-      
       reader.onprogress = (event) => {
         if (event.lengthComputable && field === 'videoUrl') {
-          const progress = Math.round((event.loaded / event.total) * 100)
-          setVideoProgress(progress)
+          setVideoProgress(Math.round((event.loaded / event.total) * 100))
         }
       }
 
       reader.onloadend = () => {
         const dataUri = reader.result as string
-        if (isEdit) {
-          setEditEvent((prev: any) => {
-            if (field === 'galleryImages' && index !== undefined) {
-              const newGallery = [...(prev.galleryImages || ['', '', ''])]
-              newGallery[index] = dataUri
-              return { ...prev, galleryImages: newGallery }
-            }
-            return { ...prev, [field]: dataUri }
-          })
-        } else {
-          setNewEvent((prev: any) => {
-            if (field === 'galleryImages' && index !== undefined) {
-              const newGallery = [...prev.galleryImages]
-              newGallery[index] = dataUri
-              return { ...prev, galleryImages: newGallery }
-            }
-            return { ...prev, [field]: dataUri }
-          })
+        const update = (prev: any) => {
+          if (field === 'galleryImages' && index !== undefined) {
+            const newGallery = [...(prev.galleryImages || ['', '', ''])]
+            newGallery[index] = dataUri
+            return { ...prev, galleryImages: newGallery }
+          }
+          return { ...prev, [field]: dataUri }
         }
+
+        if (isEdit) setEditEvent(update);
+        else setNewEvent(update);
         
         if (field === 'videoUrl') {
           setIsVideoProcessing(false)
           setVideoProgress(0)
-          toast({ title: "Media Buffered", description: "Asset has been processed for secure storage." })
+          toast({ title: "Asset Verified", description: "Media processed for database entry." })
         }
       }
       reader.readAsDataURL(file)
@@ -205,9 +197,8 @@ export default function EventsPage() {
 
   const handleAddEvent = () => {
     if (!db) return;
-    
-    if (!newEvent.title.trim() || !newEvent.date.trim() || !newEvent.location.trim()) {
-      toast({ variant: "destructive", title: "Missing Fields", description: "Please provide essential project details." });
+    if (!newEvent.title.trim() || !newEvent.date.trim()) {
+      toast({ variant: "destructive", title: "Incomplete Data", description: "Basic logistics are required." });
       return;
     }
 
@@ -218,27 +209,15 @@ export default function EventsPage() {
 
     addDoc(collection(db, 'events'), eventData)
       .then(() => {
-        toast({ title: "Project Published", description: "The official record has been committed to the gallery." })
+        toast({ title: "Project Published", description: "Record committed to registry." })
         setNewEvent({ title: '', date: '', location: '', category: 'Campaign', description: '', imageId: 'event-legal-aid', galleryImages: ['', '', ''], galleryCaptions: ['', '', ''], videoUrl: '', videoCaption: '' })
         setIsAddDialogOpen(false)
         setIsActionLoading(false)
       })
-      .catch(async (err) => {
-        toast({
-          variant: "destructive",
-          title: "Publication Error",
-          description: err.message.includes("large") 
-            ? "Record size too large. Convert video to a URL link." 
-            : "Permissions denied. Check administrative status."
-        })
+      .catch((err) => {
+        toast({ variant: "destructive", title: "Publication Failed", description: "Database rejected the payload size. Reduce image quality." })
         setIsActionLoading(false)
       })
-  }
-
-  const handleDeleteEvent = (id: string) => {
-    if (!db) return;
-    const docRef = doc(db, 'events', id)
-    deleteDoc(docRef).then(() => toast({ title: "Record Purged" }))
   }
 
   const handleUpdateEvent = () => {
@@ -247,22 +226,14 @@ export default function EventsPage() {
 
     setIsActionLoading(true)
     const { id, ...data } = editEvent
-    const docRef = doc(db, 'events', id)
-
-    updateDoc(docRef, data)
+    updateDoc(doc(db, 'events', id), data)
       .then(() => {
-        toast({ title: "Project Updated" })
+        toast({ title: "Registry Updated" })
         setEditEvent(null)
         setIsActionLoading(false)
       })
-      .catch(async (err) => {
-        toast({
-          variant: "destructive",
-          title: "Update Failed",
-          description: err.message.includes("large") 
-            ? "Total project assets exceed 1MB. Use smaller files or external links." 
-            : "Sync failed. Check connection."
-        })
+      .catch(() => {
+        toast({ variant: "destructive", title: "Sync Failed", description: "Check connection and file sizes." })
         setIsActionLoading(false)
       })
   }
@@ -290,7 +261,7 @@ export default function EventsPage() {
             <Badge className="bg-accent text-white font-bold mb-6 px-4 py-1 border-none uppercase tracking-widest text-[10px]">Mission Impact</Badge>
             <h1 className="text-5xl md:text-7xl font-headline font-bold mb-6">Our <span className="text-accent italic">Event</span> Gallery</h1>
             <p className="text-xl opacity-80 leading-relaxed mb-8 text-primary-foreground">
-              Witness the journey of JusticeShield as we traverse the length and breadth of India to protect, educate, and empower.
+              Official Project Profiles documenting JusticeShield activities across the nation.
             </p>
 
             {isAdmin && (
@@ -302,8 +273,8 @@ export default function EventsPage() {
                 </DialogTrigger>
                 <DialogContent className="max-w-2xl bg-white dark:bg-slate-900 rounded-[2rem] max-h-[90vh] overflow-y-auto border-none shadow-2xl">
                   <DialogHeader>
-                    <DialogTitle>New Event Entry</DialogTitle>
-                    <DialogDescription>Add a new highlight with high-fidelity project profile assets (Limit: 1MB Total).</DialogDescription>
+                    <DialogTitle>Project Profile Entry</DialogTitle>
+                    <DialogDescription>Firestore limit is 1MB. Use External Links for high-res video.</DialogDescription>
                   </DialogHeader>
                   <div className="space-y-6 py-4">
                     {/* Size Warning */}
@@ -311,14 +282,14 @@ export default function EventsPage() {
                        <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
                        <div className="space-y-1">
                           <p className="text-xs font-bold text-amber-900 dark:text-amber-400 uppercase tracking-wider">Database Payload Warning</p>
-                          <p className="text-[10px] text-amber-800 dark:text-amber-500 leading-relaxed">
-                            Total combined size of images and video must be under **1MB**. For high-quality footage, we recommend providing a **YouTube/Drive URL** instead of a direct upload.
+                          <p className="text-[10px] text-amber-800 dark:text-amber-500 leading-relaxed font-bold">
+                            Storing files as Base64 consumes massive database space. Please prioritize **YouTube/Drive URLs** for videos. Images MUST be under **150KB** each.
                           </p>
                        </div>
                     </div>
 
                     <div className="space-y-2">
-                      <Label className="text-xs font-bold uppercase tracking-widest text-slate-400">Primary Event Picture</Label>
+                      <Label className="text-xs font-bold uppercase tracking-widest text-slate-400">Primary Event Picture (Max 150KB)</Label>
                       <div className="flex flex-col items-center gap-4 p-4 border-2 border-dashed rounded-2xl">
                         {newEvent.imageId && (
                           <div className="relative w-full aspect-video rounded-xl overflow-hidden">
@@ -331,7 +302,7 @@ export default function EventsPage() {
                           </div>
                         )}
                         <Button variant="outline" className="w-full relative h-12 rounded-xl">
-                          <Upload className="w-4 h-4 mr-2" /> Upload Main Photo (Max 200KB)
+                          <Upload className="w-4 h-4 mr-2" /> Upload Main Photo
                           <input 
                             type="file" 
                             accept="image/*" 
@@ -343,7 +314,7 @@ export default function EventsPage() {
                     </div>
 
                     <div className="space-y-4">
-                       <Label className="text-xs font-bold uppercase tracking-widest text-accent">Additional Still Photos & Captions</Label>
+                       <Label className="text-xs font-bold uppercase tracking-widest text-accent">Additional Still Photos (Max 100KB Each)</Label>
                        <div className="grid grid-cols-1 gap-6">
                           {[0, 1, 2].map((idx) => (
                             <div key={idx} className="flex flex-col md:flex-row gap-4 items-start p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-inner">
@@ -363,7 +334,7 @@ export default function EventsPage() {
                                <div className="flex-1 w-full space-y-2">
                                   <Label className="text-[10px] font-black uppercase text-slate-400">Photo {idx + 1} Caption</Label>
                                   <Input 
-                                    placeholder="e.g. Community Outreach Session" 
+                                    placeholder="Context for this moment..." 
                                     value={newEvent.galleryCaptions[idx]} 
                                     onChange={e => {
                                       const newCaps = [...newEvent.galleryCaptions]
@@ -372,7 +343,6 @@ export default function EventsPage() {
                                     }}
                                     className="h-10 rounded-xl"
                                   />
-                                  <p className="text-[9px] text-slate-400 italic">Recommended Image size: &lt;150KB</p>
                                </div>
                             </div>
                           ))}
@@ -380,7 +350,7 @@ export default function EventsPage() {
                     </div>
 
                     <div className="space-y-4">
-                       <Label className="text-xs font-bold uppercase tracking-widest text-indigo-500">Mission Highlight Video & Caption</Label>
+                       <Label className="text-xs font-bold uppercase tracking-widest text-indigo-500">Mission Highlight Video</Label>
                        <div className="p-4 border-2 border-dashed rounded-2xl bg-indigo-50/30 dark:bg-indigo-900/10 border-indigo-100 flex flex-col gap-4">
                           <div className="flex flex-col md:flex-row gap-4 items-center">
                             <div className="w-full md:w-32 aspect-video bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center shrink-0 border border-indigo-50">
@@ -389,7 +359,7 @@ export default function EventsPage() {
                             <div className="flex-1 w-full space-y-4">
                               <div className="grid grid-cols-1 gap-2">
                                 <Button variant="outline" className="w-full relative h-10 rounded-xl border-indigo-200 text-indigo-600 text-xs" disabled={isVideoProcessing}>
-                                  <Film className="w-3.5 h-3.5 mr-2" /> {isVideoProcessing ? "Transferring..." : "Upload Small Clip (<300KB)"}
+                                  <Film className="w-3.5 h-3.5 mr-2" /> {isVideoProcessing ? "Transferring..." : "Upload Small Clip (<200KB)"}
                                   <input 
                                     type="file" 
                                     accept="video/mp4,video/webm" 
@@ -401,7 +371,7 @@ export default function EventsPage() {
                                 <div className="relative">
                                   <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-400" />
                                   <Input 
-                                    placeholder="Or paste High-Res Link (YouTube/Drive)" 
+                                    placeholder="Preferred: High-Res Link (YouTube/Drive)" 
                                     className="pl-8 h-10 rounded-xl border-indigo-50 bg-white text-xs"
                                     value={newEvent.videoUrl?.startsWith('data:') ? '' : newEvent.videoUrl}
                                     onChange={e => setNewEvent(prev => ({...prev, videoUrl: e.target.value}))}
@@ -412,7 +382,7 @@ export default function EventsPage() {
                               {isVideoProcessing && (
                                 <div className="space-y-2 animate-in fade-in duration-500">
                                   <div className="flex justify-between items-center text-[10px] font-bold text-indigo-500 uppercase">
-                                    <span>Buffering Stream...</span>
+                                    <span>Syncing Data Stream...</span>
                                     <span>{videoProgress}%</span>
                                   </div>
                                   <Progress value={videoProgress} className="h-1.5 bg-indigo-100" />
@@ -422,9 +392,9 @@ export default function EventsPage() {
                           </div>
 
                           <div className="space-y-2">
-                            <Label className="text-[10px] font-black uppercase text-indigo-400">Video Descriptive Title</Label>
+                            <Label className="text-[10px] font-black uppercase text-indigo-400">Video Documentary Label</Label>
                             <Input 
-                              placeholder="e.g. Documentary: Ground Zero Advocacy" 
+                              placeholder="e.g. Ground Zero Advocacy: Chapter 1" 
                               value={newEvent.videoCaption}
                               onChange={e => setNewEvent(prev => ({...prev, videoCaption: e.target.value}))}
                               className="h-10 rounded-xl border-indigo-100"
@@ -434,8 +404,8 @@ export default function EventsPage() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label>Event Title</Label>
-                      <Input value={newEvent.title} onChange={e => setNewEvent(prev => ({...prev, title: e.target.value}))} placeholder="e.g. Legal Aid Camp" className="h-12 rounded-xl" />
+                      <Label>Record Title</Label>
+                      <Input value={newEvent.title} onChange={e => setNewEvent(prev => ({...prev, title: e.target.value}))} placeholder="e.g. Constitutional Awareness Convention" className="h-12 rounded-xl" />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
@@ -468,17 +438,13 @@ export default function EventsPage() {
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <Label>Location</Label>
-                      <Input value={newEvent.location} onChange={e => setNewEvent(prev => ({...prev, location: e.target.value}))} placeholder="City, State" className="h-12 rounded-xl" />
-                    </div>
-                    <div className="space-y-2">
                       <Label>Impact Narrative</Label>
                       <Textarea value={newEvent.description} onChange={e => setNewEvent(prev => ({...prev, description: e.target.value}))} placeholder="Summarize the organizational footprint..." className="rounded-xl min-h-[100px]" />
                     </div>
                   </div>
                   <DialogFooter>
                     <Button onClick={handleAddEvent} disabled={isActionLoading || isVideoProcessing} className="w-full h-12 rounded-xl bg-accent text-white font-bold hover:bg-secondary transition-all">
-                      {isActionLoading ? <Loader2 className="animate-spin" /> : "Publish Project Profile"}
+                      {isActionLoading ? <Loader2 className="animate-spin" /> : "Verify & Publish Record"}
                     </Button>
                   </DialogFooter>
                 </DialogContent>
@@ -545,7 +511,7 @@ export default function EventsPage() {
                                 <DialogHeader><DialogTitle>Modify Event Record</DialogTitle></DialogHeader>
                                 {editEvent && (
                                   <div className="space-y-6 py-4">
-                                    <div className="bg-amber-50 dark:bg-amber-950/20 p-4 rounded-2xl border border-amber-200 flex gap-3"><AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" /><p className="text-[10px] text-amber-800 dark:text-amber-500 font-bold uppercase">Keep total profile size under 1MB. Use External Links for high-res video.</p></div>
+                                    <div className="bg-amber-50 p-4 rounded-2xl border border-amber-200 flex gap-3"><AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" /><p className="text-[10px] text-amber-800 font-bold uppercase">Record size capped at 1MB. Use External Links for new videos.</p></div>
                                     <div className="space-y-2">
                                       <Label className="text-xs font-bold uppercase tracking-widest text-slate-400">Primary Picture</Label>
                                       <div className="flex flex-col items-center gap-4 p-4 border-2 border-dashed rounded-2xl">
