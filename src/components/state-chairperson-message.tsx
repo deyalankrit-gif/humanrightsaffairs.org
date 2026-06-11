@@ -23,7 +23,7 @@ export function StateChairpersonMessage() {
             </h2>
             <div className="space-y-4 text-base text-muted-foreground font-body leading-relaxed">
               <p>
-                "As the Chairman of West Bengal, my focus is to ensure that the mission of JusticeShield reaches every corner of our state. We are dedicated to providing accessible legal support and awareness to the marginalized communities across all districts."
+                "As the Chairman of West Bengal, my focus is to ensure that the mission of Justice Shield reaches every corner of our state. We are dedicated to provide accessible legal support and awareness to the marginalized communities across all districts."
               </p>
               <p>
                 "Our state chapter is actively working with legal experts and local volunteers to bridge the gap between rights and reality. We believe that an informed citizen is a protected citizen."
