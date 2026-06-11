@@ -1,4 +1,3 @@
-
 import Image from 'next/image'
 import { Quote } from 'lucide-react'
 import { PlaceHolderImages } from '@/lib/placeholder-images'
@@ -41,7 +40,7 @@ export function ChairmanMessage() {
                 "At Human Rights Affairs Trust, we believe that every individual, regardless of their background, deserves the full protection of their constitutional rights. Our organization was founded on the bedrock of Indian democratic values and international humanitarian principles."
               </p>
               <p>
-                "Through JusticeShield, we are bridging the gap between legal complexity and the common man. Our mission is to empower every citizen with knowledge and provide a robust shield against injustice."
+                "Through Justice Shield, we are bridging the gap between legal complexity and the common man. Our mission is to empower every citizen with knowledge and provide a strong shield against injustice."
               </p>
             </div>
             <div className="flex items-center gap-4 pt-4 border-t border-slate-200 dark:border-slate-800">
