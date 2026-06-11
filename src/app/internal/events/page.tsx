@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Progress } from '@/components/ui/progress'
 import { 
   Plus, 
   Search, 
@@ -58,6 +59,8 @@ export default function InternalEventsManagement() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [editEvent, setEditEvent] = useState<any>(null)
+  const [videoProgress, setVideoProgress] = useState<number>(0)
+  const [isVideoProcessing, setIsVideoProcessing] = useState(false)
   
   const [newEvent, setNewEvent] = useState({
     title: '',
@@ -88,7 +91,20 @@ export default function InternalEventsManagement() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, isEdit: boolean, field: 'imageId' | 'videoUrl' | 'galleryImages', index?: number) => {
     const file = e.target.files?.[0]
     if (file) {
+      if (field === 'videoUrl') {
+        setIsVideoProcessing(true)
+        setVideoProgress(0)
+      }
+
       const reader = new FileReader()
+      
+      reader.onprogress = (event) => {
+        if (event.lengthComputable && field === 'videoUrl') {
+          const progress = Math.round((event.loaded / event.total) * 100)
+          setVideoProgress(progress)
+        }
+      }
+
       reader.onloadend = () => {
         const dataUri = reader.result as string
         if (isEdit) {
@@ -107,6 +123,12 @@ export default function InternalEventsManagement() {
           } else {
             setNewEvent({ ...newEvent, [field]: dataUri })
           }
+        }
+
+        if (field === 'videoUrl') {
+          setIsVideoProcessing(false)
+          setVideoProgress(0)
+          toast({ title: "Verification Success", description: "Highlight video optimized for project profile." })
         }
       }
       reader.readAsDataURL(file)
@@ -231,10 +253,23 @@ export default function InternalEventsManagement() {
                   <div className="space-y-3 p-4 bg-indigo-50/50 rounded-2xl border border-indigo-100">
                      <Label className="text-[10px] uppercase font-bold text-indigo-500">Mission Highlight Video & Caption</Label>
                      <div className="flex flex-col gap-3">
-                        <Button variant="outline" className="w-full relative h-10 rounded-xl border-indigo-200 text-indigo-600 border-dashed bg-white">
-                           <Film className="w-4 h-4 mr-2" /> {newEvent.videoUrl ? "Highlight Video Loaded" : "Upload Official Footage"}
-                           <input type="file" accept="video/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => handleFileChange(e, false, 'videoUrl')} />
-                        </Button>
+                        <div className="space-y-4">
+                          <Button variant="outline" className="w-full relative h-10 rounded-xl border-indigo-200 text-indigo-600 border-dashed bg-white" disabled={isVideoProcessing}>
+                             <Film className="w-4 h-4 mr-2" /> {isVideoProcessing ? "Transferring Data..." : newEvent.videoUrl ? "Highlight Video Loaded" : "Upload Official Footage"}
+                             <input type="file" accept="video/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => handleFileChange(e, false, 'videoUrl')} disabled={isVideoProcessing} />
+                          </Button>
+
+                          {isVideoProcessing && (
+                            <div className="space-y-2 animate-in fade-in duration-300">
+                              <div className="flex justify-between items-center text-[9px] font-bold text-indigo-500 uppercase">
+                                <span>Verifying Buffer...</span>
+                                <span>{videoProgress}%</span>
+                              </div>
+                              <Progress value={videoProgress} className="h-1 bg-indigo-100" />
+                            </div>
+                          )}
+                        </div>
+
                         <div className="space-y-1">
                            <Label className="text-[9px] font-bold text-indigo-400 uppercase">Video Description</Label>
                            <Input 
@@ -273,7 +308,7 @@ export default function InternalEventsManagement() {
                      <Textarea value={newEvent.description} onChange={e => setNewEvent({...newEvent, description: e.target.value})} className="rounded-xl" />
                   </div>
                 </div>
-                <DialogFooter><Button onClick={handleAddEvent} className="w-full h-11 rounded-xl">Establish Official Record</Button></DialogFooter>
+                <DialogFooter><Button onClick={handleAddEvent} disabled={isActionLoading || isVideoProcessing} className="w-full h-11 rounded-xl">Establish Official Record</Button></DialogFooter>
               </DialogContent>
             </Dialog>
           </div>
@@ -371,10 +406,23 @@ export default function InternalEventsManagement() {
               <div className="space-y-3 p-4 bg-indigo-50/50 rounded-2xl border border-indigo-100">
                  <Label className="text-[10px] uppercase font-bold text-indigo-500">Mission Highlight Video & Caption</Label>
                  <div className="flex flex-col gap-3">
-                    <Button variant="outline" className="w-full relative h-10 rounded-xl border-indigo-100 text-indigo-600 border-dashed bg-white">
-                       <Film className="w-4 h-4 mr-2" /> {editEvent.videoUrl ? "Change Project Video" : "Upload Project Video"}
-                       <input type="file" accept="video/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => handleFileChange(e, true, 'videoUrl')} />
-                    </Button>
+                    <div className="space-y-4">
+                      <Button variant="outline" className="w-full relative h-10 rounded-xl border-indigo-100 text-indigo-600 border-dashed bg-white" disabled={isVideoProcessing}>
+                         <Film className="w-4 h-4 mr-2" /> {isVideoProcessing ? "Analyzing Footage..." : editEvent.videoUrl ? "Change Project Video" : "Upload Project Video"}
+                         <input type="file" accept="video/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => handleFileChange(e, true, 'videoUrl')} disabled={isVideoProcessing} />
+                      </Button>
+
+                      {isVideoProcessing && (
+                        <div className="space-y-2 animate-in fade-in duration-300">
+                          <div className="flex justify-between items-center text-[9px] font-bold text-indigo-500 uppercase">
+                            <span>Indexing Frames...</span>
+                            <span>{videoProgress}%</span>
+                          </div>
+                          <Progress value={videoProgress} className="h-1 bg-indigo-100" />
+                        </div>
+                      )}
+                    </div>
+
                     <div className="space-y-1">
                        <Label className="text-[9px] font-bold text-indigo-400 uppercase">Video Description</Label>
                        <Input 
@@ -406,7 +454,7 @@ export default function InternalEventsManagement() {
               </div>
               <div className="space-y-1"><Label className="text-[10px] uppercase font-bold">Venue</Label><Input value={editEvent.location} onChange={e => setEditEvent({...editEvent, location: e.target.value})} className="h-10 rounded-lg" /></div>
               <div className="space-y-1"><Label className="text-[10px] uppercase font-bold">Description</Label><Textarea value={editEvent.description} onChange={e => setEditEvent({...editEvent, description: e.target.value})} className="rounded-xl" /></div>
-              <Button onClick={handleUpdateEvent} disabled={isActionLoading} className="w-full h-11 rounded-xl">Save Official Changes</Button>
+              <Button onClick={handleUpdateEvent} disabled={isActionLoading || isVideoProcessing} className="w-full h-11 rounded-xl">Save Official Changes</Button>
             </div>
           )}
         </DialogContent>

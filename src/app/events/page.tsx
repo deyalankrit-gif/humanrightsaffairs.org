@@ -34,6 +34,7 @@ import { useCollection, useFirestore, useMemoFirebase, useUser } from '@/firebas
 import { collection, query, orderBy, addDoc, deleteDoc, doc, updateDoc, serverTimestamp } from 'firebase/firestore'
 import { errorEmitter } from '@/firebase/error-emitter'
 import { FirestorePermissionError, type SecurityRuleContext } from '@/firebase/errors'
+import { Progress } from '@/components/ui/progress'
 import {
   Dialog,
   DialogContent,
@@ -88,6 +89,9 @@ export default function EventsPage() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [selectedEventDetails, setSelectedEventDetails] = useState<Event | null>(null)
   const [isMirror, setIsMirror] = useState(false)
+  const [videoProgress, setVideoProgress] = useState<number>(0)
+  const [isVideoProcessing, setIsVideoProcessing] = useState(false)
+  
   const { user } = useUser()
   const db = useFirestore()
   const { toast } = useToast()
@@ -124,7 +128,20 @@ export default function EventsPage() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, isEdit: boolean, field: 'imageId' | 'videoUrl' | 'galleryImages', index?: number) => {
     const file = e.target.files?.[0]
     if (file) {
+      if (field === 'videoUrl') {
+        setIsVideoProcessing(true)
+        setVideoProgress(0)
+      }
+
       const reader = new FileReader()
+      
+      reader.onprogress = (event) => {
+        if (event.lengthComputable && field === 'videoUrl') {
+          const progress = Math.round((event.loaded / event.total) * 100)
+          setVideoProgress(progress)
+        }
+      }
+
       reader.onloadend = () => {
         const dataUri = reader.result as string
         if (isEdit) {
@@ -143,6 +160,12 @@ export default function EventsPage() {
           } else {
             setNewEvent({ ...newEvent, [field]: dataUri })
           }
+        }
+        
+        if (field === 'videoUrl') {
+          setIsVideoProcessing(false)
+          setVideoProgress(0)
+          toast({ title: "Video Processed", description: "Highlight footage has been synchronized." })
         }
       }
       reader.readAsDataURL(file)
@@ -346,15 +369,28 @@ export default function EventsPage() {
                                 <Film className="w-6 h-6 text-indigo-200" />
                               </div>
                             )}
-                            <Button variant="outline" className="w-full relative h-12 rounded-xl border-indigo-200 text-indigo-600">
-                              <Film className="w-4 h-4 mr-2" /> {newEvent.videoUrl ? "Change Highlight Video" : "Upload Highlight Video"}
-                              <input 
-                                type="file" 
-                                accept="video/*" 
-                                className="absolute inset-0 opacity-0 cursor-pointer"
-                                onChange={(e) => handleFileChange(e, false, 'videoUrl')}
-                              />
-                            </Button>
+                            <div className="flex-1 w-full space-y-4">
+                              <Button variant="outline" className="w-full relative h-12 rounded-xl border-indigo-200 text-indigo-600" disabled={isVideoProcessing}>
+                                <Film className="w-4 h-4 mr-2" /> {isVideoProcessing ? "Processing..." : newEvent.videoUrl ? "Change Highlight Video" : "Upload Highlight Video"}
+                                <input 
+                                  type="file" 
+                                  accept="video/*" 
+                                  className="absolute inset-0 opacity-0 cursor-pointer"
+                                  onChange={(e) => handleFileChange(e, false, 'videoUrl')}
+                                  disabled={isVideoProcessing}
+                                />
+                              </Button>
+                              
+                              {isVideoProcessing && (
+                                <div className="space-y-2 animate-in fade-in duration-500">
+                                  <div className="flex justify-between items-center text-[10px] font-bold text-indigo-500 uppercase">
+                                    <span>Verifying Assets...</span>
+                                    <span>{videoProgress}%</span>
+                                  </div>
+                                  <Progress value={videoProgress} className="h-1.5 bg-indigo-100" />
+                                </div>
+                              )}
+                            </div>
                           </div>
                           <div className="space-y-2">
                             <Label className="text-[10px] font-black uppercase text-indigo-400">Video Description Label</Label>
@@ -412,7 +448,7 @@ export default function EventsPage() {
                     </div>
                   </div>
                   <DialogFooter>
-                    <Button onClick={handleAddEvent} disabled={isActionLoading} className="w-full h-12 rounded-xl bg-accent text-white font-bold hover:bg-secondary hover:text-white transition-all">
+                    <Button onClick={handleAddEvent} disabled={isActionLoading || isVideoProcessing} className="w-full h-12 rounded-xl bg-accent text-white font-bold hover:bg-secondary hover:text-white transition-all">
                       {isActionLoading ? <Loader2 className="animate-spin" /> : "Publish Full Event Record"}
                     </Button>
                   </DialogFooter>
@@ -562,15 +598,29 @@ export default function EventsPage() {
                                     <div className="space-y-4">
                                        <Label className="text-xs font-bold uppercase tracking-widest text-indigo-500">Mission Highlight Video & Caption</Label>
                                        <div className="p-4 border-2 border-dashed rounded-2xl bg-indigo-50/30 dark:bg-indigo-900/10 border-indigo-100 flex flex-col gap-4">
-                                          <Button variant="outline" className="w-full relative h-12 rounded-xl border-indigo-200 text-indigo-600">
-                                            <Film className="w-4 h-4 mr-2" /> {editEvent.videoUrl ? "Change Video" : "Upload Video"}
-                                            <input 
-                                              type="file" 
-                                              accept="video/*" 
-                                              className="absolute inset-0 opacity-0 cursor-pointer"
-                                              onChange={(e) => handleFileChange(e, true, 'videoUrl')}
-                                            />
-                                          </Button>
+                                          <div className="space-y-4">
+                                            <Button variant="outline" className="w-full relative h-12 rounded-xl border-indigo-200 text-indigo-600" disabled={isVideoProcessing}>
+                                              <Film className="w-4 h-4 mr-2" /> {isVideoProcessing ? "Processing Video..." : editEvent.videoUrl ? "Change Video" : "Upload Video"}
+                                              <input 
+                                                type="file" 
+                                                accept="video/*" 
+                                                className="absolute inset-0 opacity-0 cursor-pointer"
+                                                onChange={(e) => handleFileChange(e, true, 'videoUrl')}
+                                                disabled={isVideoProcessing}
+                                              />
+                                            </Button>
+
+                                            {isVideoProcessing && (
+                                              <div className="space-y-2">
+                                                <div className="flex justify-between items-center text-[10px] font-bold text-indigo-500 uppercase">
+                                                  <span>Syncing Data Stream...</span>
+                                                  <span>{videoProgress}%</span>
+                                                </div>
+                                                <Progress value={videoProgress} className="h-1.5 bg-indigo-100" />
+                                              </div>
+                                            )}
+                                          </div>
+                                          
                                           <div className="space-y-2">
                                             <Label className="text-[10px] font-black uppercase text-indigo-400">Video Description Label</Label>
                                             <Input 
@@ -625,7 +675,7 @@ export default function EventsPage() {
                                       <Label>Description</Label>
                                       <Textarea value={editEvent.description} onChange={e => setEditEvent({...editEvent, description: e.target.value})} className="rounded-xl" />
                                     </div>
-                                    <Button onClick={handleUpdateEvent} disabled={isActionLoading} className="w-full mt-4 h-12 rounded-xl bg-accent text-white font-bold hover:bg-secondary hover:text-white transition-all">
+                                    <Button onClick={handleUpdateEvent} disabled={isActionLoading || isVideoProcessing} className="w-full mt-4 h-12 rounded-xl bg-accent text-white font-bold hover:bg-secondary hover:text-white transition-all">
                                       {isActionLoading ? <Loader2 className="animate-spin mr-2" /> : "Save Changes"}
                                     </Button>
                                   </div>
