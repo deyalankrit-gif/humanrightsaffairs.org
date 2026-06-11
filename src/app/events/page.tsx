@@ -127,16 +127,32 @@ export default function EventsPage() {
     videoCaption: ''
   })
 
+  // Utility to check the size of the document to be written to Firestore
+  const validateProjectSize = (data: any) => {
+    const size = new Blob([JSON.stringify(data)]).size;
+    // Firestore limit is 1MB. We cap at 800KB to account for Base64 overhead and metadata.
+    if (size > 850000) {
+      toast({
+        variant: "destructive",
+        title: "Record Size Exceeded",
+        description: `Total size (${(size / 1024).toFixed(0)}KB) exceeds the 1MB database limit. Please use external URLs for video/photos or reduce image quality.`
+      });
+      return false;
+    }
+    return true;
+  }
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, isEdit: boolean, field: 'imageId' | 'videoUrl' | 'galleryImages', index?: number) => {
     const file = e.target.files?.[0]
     if (file) {
-      // Size check: Firestore document limit is 1MB. Data URIs add ~33% overhead.
-      // We aim for < 800KB for all assets combined.
-      if (file.size > 1024 * 500 && field === 'videoUrl') {
+      // Direct file cap: Images shouldn't exceed 200KB, Videos 300KB for Base64 storage
+      const cap = field === 'videoUrl' ? 307200 : 204800; // 300KB vs 200KB
+      
+      if (file.size > cap) {
         toast({
           variant: "destructive",
           title: "File Too Large",
-          description: "Videos must be under 500KB to store in the database. Please use a URL link instead for larger videos."
+          description: `${field === 'videoUrl' ? 'Videos' : 'Images'} stored directly must be under ${cap / 1024}KB. Please use an external link instead.`
         });
         return;
       }
@@ -180,7 +196,7 @@ export default function EventsPage() {
         if (field === 'videoUrl') {
           setIsVideoProcessing(false)
           setVideoProgress(0)
-          toast({ title: "Video Processed", description: "Highlight footage has been synchronized." })
+          toast({ title: "Media Buffered", description: "Asset has been processed for secure storage." })
         }
       }
       reader.readAsDataURL(file)
@@ -191,36 +207,29 @@ export default function EventsPage() {
     if (!db) return;
     
     if (!newEvent.title.trim() || !newEvent.date.trim() || !newEvent.location.trim()) {
-      toast({
-        variant: "destructive",
-        title: "Missing Fields",
-        description: "Please fill in the title, date, and location before publishing."
-      });
+      toast({ variant: "destructive", title: "Missing Fields", description: "Please provide essential project details." });
       return;
     }
 
+    if (!validateProjectSize(newEvent)) return;
+
     setIsActionLoading(true)
-    
-    const eventData = {
-      ...newEvent,
-      createdAt: serverTimestamp()
-    }
+    const eventData = { ...newEvent, createdAt: serverTimestamp() }
 
     addDoc(collection(db, 'events'), eventData)
       .then(() => {
-        toast({ title: "Event Created", description: "The new event has been added to the gallery." })
+        toast({ title: "Project Published", description: "The official record has been committed to the gallery." })
         setNewEvent({ title: '', date: '', location: '', category: 'Campaign', description: '', imageId: 'event-legal-aid', galleryImages: ['', '', ''], galleryCaptions: ['', '', ''], videoUrl: '', videoCaption: '' })
         setIsAddDialogOpen(false)
         setIsActionLoading(false)
       })
       .catch(async (err) => {
-        console.error("Firestore Error:", err);
         toast({
           variant: "destructive",
-          title: "Publication Failed",
+          title: "Publication Error",
           description: err.message.includes("large") 
-            ? "Document size limit exceeded. Please reduce photo sizes or use a video link."
-            : "Verification failed. Please check administrative permissions."
+            ? "Record size too large. Convert video to a URL link." 
+            : "Permissions denied. Check administrative status."
         })
         setIsActionLoading(false)
       })
@@ -229,28 +238,20 @@ export default function EventsPage() {
   const handleDeleteEvent = (id: string) => {
     if (!db) return;
     const docRef = doc(db, 'events', id)
-    deleteDoc(docRef)
-      .then(() => {
-        toast({ title: "Event Deleted" })
-      })
-      .catch(async (err) => {
-        const permissionError = new FirestorePermissionError({
-          path: docRef.path,
-          operation: 'delete',
-        } satisfies SecurityRuleContext);
-        errorEmitter.emit('permission-error', permissionError);
-      })
+    deleteDoc(docRef).then(() => toast({ title: "Record Purged" }))
   }
 
   const handleUpdateEvent = () => {
     if (!db || !editEvent) return
+    if (!validateProjectSize(editEvent)) return;
+
     setIsActionLoading(true)
     const { id, ...data } = editEvent
     const docRef = doc(db, 'events', id)
 
     updateDoc(docRef, data)
       .then(() => {
-        toast({ title: "Event Updated" })
+        toast({ title: "Project Updated" })
         setEditEvent(null)
         setIsActionLoading(false)
       })
@@ -259,15 +260,19 @@ export default function EventsPage() {
           variant: "destructive",
           title: "Update Failed",
           description: err.message.includes("large") 
-            ? "Record size too large. Please use smaller assets."
-            : "Permissions denied or connectivity lost."
+            ? "Total project assets exceed 1MB. Use smaller files or external links." 
+            : "Sync failed. Check connection."
         })
         setIsActionLoading(false)
       })
   }
 
-  const events = (firestoreEvents || []) as Event[]
-  const filteredEvents = events.filter(e => {
+  const parseEventDate = (dateStr: string) => {
+    if (!dateStr) return undefined;
+    try { return parse(dateStr, "PPP", new Date()); } catch { return undefined; }
+  }
+
+  const filteredEvents = (firestoreEvents || []).filter(e => {
     const matchesCategory = filter === "All" || e.category === filter;
     const matchesSearch = (e.title || '').toLowerCase().includes(search.toLowerCase()) || 
                           (e.location || '').toLowerCase().includes(search.toLowerCase());
@@ -276,22 +281,13 @@ export default function EventsPage() {
 
   const categories = ["All", "Campaign", "Workshop", "Convention", "Relief", "Social Projects"]
 
-  const parseEventDate = (dateStr: string) => {
-    if (!dateStr) return undefined;
-    try {
-      return parse(dateStr, "PPP", new Date());
-    } catch {
-      return undefined;
-    }
-  }
-
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
       <section className="pt-40 pb-20 bg-primary text-primary-foreground relative overflow-hidden">
         <div className="absolute top-0 right-0 w-1/2 h-full bg-accent/10 -skew-x-12"></div>
         <div className="container mx-auto px-4 relative z-10 text-center">
           <div className="max-w-3xl mx-auto">
-            <Badge className="bg-accent text-white font-bold mb-6 px-4 py-1 border-none">Mission Impact</Badge>
+            <Badge className="bg-accent text-white font-bold mb-6 px-4 py-1 border-none uppercase tracking-widest text-[10px]">Mission Impact</Badge>
             <h1 className="text-5xl md:text-7xl font-headline font-bold mb-6">Our <span className="text-accent italic">Event</span> Gallery</h1>
             <p className="text-xl opacity-80 leading-relaxed mb-8 text-primary-foreground">
               Witness the journey of JusticeShield as we traverse the length and breadth of India to protect, educate, and empower.
@@ -307,10 +303,20 @@ export default function EventsPage() {
                 <DialogContent className="max-w-2xl bg-white dark:bg-slate-900 rounded-[2rem] max-h-[90vh] overflow-y-auto border-none shadow-2xl">
                   <DialogHeader>
                     <DialogTitle>New Event Entry</DialogTitle>
-                    <DialogDescription>Add a new highlight to the mission gallery with full project profile assets.</DialogDescription>
+                    <DialogDescription>Add a new highlight with high-fidelity project profile assets (Limit: 1MB Total).</DialogDescription>
                   </DialogHeader>
                   <div className="space-y-6 py-4">
-                    {/* Primary Image */}
+                    {/* Size Warning */}
+                    <div className="bg-amber-50 dark:bg-amber-950/20 p-4 rounded-2xl border border-amber-200 dark:border-amber-900 flex gap-3">
+                       <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                       <div className="space-y-1">
+                          <p className="text-xs font-bold text-amber-900 dark:text-amber-400 uppercase tracking-wider">Database Payload Warning</p>
+                          <p className="text-[10px] text-amber-800 dark:text-amber-500 leading-relaxed">
+                            Total combined size of images and video must be under **1MB**. For high-quality footage, we recommend providing a **YouTube/Drive URL** instead of a direct upload.
+                          </p>
+                       </div>
+                    </div>
+
                     <div className="space-y-2">
                       <Label className="text-xs font-bold uppercase tracking-widest text-slate-400">Primary Event Picture</Label>
                       <div className="flex flex-col items-center gap-4 p-4 border-2 border-dashed rounded-2xl">
@@ -325,7 +331,7 @@ export default function EventsPage() {
                           </div>
                         )}
                         <Button variant="outline" className="w-full relative h-12 rounded-xl">
-                          <Upload className="w-4 h-4 mr-2" /> Upload Main Photo
+                          <Upload className="w-4 h-4 mr-2" /> Upload Main Photo (Max 200KB)
                           <input 
                             type="file" 
                             accept="image/*" 
@@ -336,12 +342,11 @@ export default function EventsPage() {
                       </div>
                     </div>
 
-                    {/* Additional Still Photos */}
                     <div className="space-y-4">
                        <Label className="text-xs font-bold uppercase tracking-widest text-accent">Additional Still Photos & Captions</Label>
                        <div className="grid grid-cols-1 gap-6">
                           {[0, 1, 2].map((idx) => (
-                            <div key={idx} className="flex flex-col md:flex-row gap-4 items-start p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800">
+                            <div key={idx} className="flex flex-col md:flex-row gap-4 items-start p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-inner">
                                <div className="relative w-full md:w-32 aspect-[3/4] bg-slate-100 dark:bg-slate-800 rounded-xl overflow-hidden border-2 border-dashed border-slate-200 shrink-0">
                                   {newEvent.galleryImages[idx] ? (
                                     <Image src={newEvent.galleryImages[idx]} alt={`Gallery ${idx}`} fill className="object-cover" />
@@ -367,30 +372,24 @@ export default function EventsPage() {
                                     }}
                                     className="h-10 rounded-xl"
                                   />
+                                  <p className="text-[9px] text-slate-400 italic">Recommended Image size: &lt;150KB</p>
                                </div>
                             </div>
                           ))}
                        </div>
                     </div>
 
-                    {/* Video Upload & URL */}
                     <div className="space-y-4">
                        <Label className="text-xs font-bold uppercase tracking-widest text-indigo-500">Mission Highlight Video & Caption</Label>
                        <div className="p-4 border-2 border-dashed rounded-2xl bg-indigo-50/30 dark:bg-indigo-900/10 border-indigo-100 flex flex-col gap-4">
                           <div className="flex flex-col md:flex-row gap-4 items-center">
-                            {newEvent.videoUrl ? (
-                              <div className="w-full md:w-32 aspect-video rounded-xl overflow-hidden bg-black flex items-center justify-center shrink-0">
-                                 <Video className="w-8 h-8 text-indigo-400 animate-pulse" />
-                              </div>
-                            ) : (
-                              <div className="w-full md:w-32 aspect-video bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center shrink-0 border border-indigo-50">
-                                <Film className="w-6 h-6 text-indigo-200" />
-                              </div>
-                            )}
+                            <div className="w-full md:w-32 aspect-video bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center shrink-0 border border-indigo-50">
+                               {newEvent.videoUrl?.startsWith('data:') ? <Video className="w-8 h-8 text-indigo-400 animate-pulse" /> : <Film className="w-6 h-6 text-indigo-200" />}
+                            </div>
                             <div className="flex-1 w-full space-y-4">
                               <div className="grid grid-cols-1 gap-2">
                                 <Button variant="outline" className="w-full relative h-10 rounded-xl border-indigo-200 text-indigo-600 text-xs" disabled={isVideoProcessing}>
-                                  <Film className="w-3.5 h-3.5 mr-2" /> {isVideoProcessing ? "Processing..." : newEvent.videoUrl?.startsWith('data:') ? "Video Selected (Max 500KB)" : "Upload File (Small Clips)"}
+                                  <Film className="w-3.5 h-3.5 mr-2" /> {isVideoProcessing ? "Transferring..." : "Upload Small Clip (<300KB)"}
                                   <input 
                                     type="file" 
                                     accept="video/mp4,video/webm" 
@@ -402,7 +401,7 @@ export default function EventsPage() {
                                 <div className="relative">
                                   <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-400" />
                                   <Input 
-                                    placeholder="Or paste Video URL (YouTube, Drive, etc.)" 
+                                    placeholder="Or paste High-Res Link (YouTube/Drive)" 
                                     className="pl-8 h-10 rounded-xl border-indigo-50 bg-white text-xs"
                                     value={newEvent.videoUrl?.startsWith('data:') ? '' : newEvent.videoUrl}
                                     onChange={e => setNewEvent(prev => ({...prev, videoUrl: e.target.value}))}
@@ -413,7 +412,7 @@ export default function EventsPage() {
                               {isVideoProcessing && (
                                 <div className="space-y-2 animate-in fade-in duration-500">
                                   <div className="flex justify-between items-center text-[10px] font-bold text-indigo-500 uppercase">
-                                    <span>Processing Stream...</span>
+                                    <span>Buffering Stream...</span>
                                     <span>{videoProgress}%</span>
                                   </div>
                                   <Progress value={videoProgress} className="h-1.5 bg-indigo-100" />
@@ -421,16 +420,9 @@ export default function EventsPage() {
                               )}
                             </div>
                           </div>
-                          
-                          <div className="space-y-1 bg-amber-50 dark:bg-amber-950/20 p-2 rounded-lg border border-amber-100 flex items-start gap-2">
-                             <AlertTriangle className="w-3.5 h-3.5 text-amber-500 shrink-0 mt-0.5" />
-                             <p className="text-[10px] text-amber-700 leading-tight">
-                               <strong>Database Tip:</strong> Videos uploaded directly must be under 500KB. For high-quality mission footage, we recommend providing an external link instead.
-                             </p>
-                          </div>
 
                           <div className="space-y-2">
-                            <Label className="text-[10px] font-black uppercase text-indigo-400">Video Description Label</Label>
+                            <Label className="text-[10px] font-black uppercase text-indigo-400">Video Descriptive Title</Label>
                             <Input 
                               placeholder="e.g. Documentary: Ground Zero Advocacy" 
                               value={newEvent.videoCaption}
@@ -477,16 +469,16 @@ export default function EventsPage() {
                     </div>
                     <div className="space-y-2">
                       <Label>Location</Label>
-                      <Input value={newEvent.location} onChange={e => setNewEvent(prev => ({...prev, location: e.target.value}))} placeholder="Kolkata, WB" className="h-12 rounded-xl" />
+                      <Input value={newEvent.location} onChange={e => setNewEvent(prev => ({...prev, location: e.target.value}))} placeholder="City, State" className="h-12 rounded-xl" />
                     </div>
                     <div className="space-y-2">
-                      <Label>Description</Label>
-                      <Textarea value={newEvent.description} onChange={e => setNewEvent(prev => ({...prev, description: e.target.value}))} placeholder="Brief details about the event impact..." className="rounded-xl" />
+                      <Label>Impact Narrative</Label>
+                      <Textarea value={newEvent.description} onChange={e => setNewEvent(prev => ({...prev, description: e.target.value}))} placeholder="Summarize the organizational footprint..." className="rounded-xl min-h-[100px]" />
                     </div>
                   </div>
                   <DialogFooter>
-                    <Button onClick={handleAddEvent} disabled={isActionLoading || isVideoProcessing} className="w-full h-12 rounded-xl bg-accent text-white font-bold hover:bg-secondary hover:text-white transition-all">
-                      {isActionLoading ? <Loader2 className="animate-spin" /> : "Publish Full Event Record"}
+                    <Button onClick={handleAddEvent} disabled={isActionLoading || isVideoProcessing} className="w-full h-12 rounded-xl bg-accent text-white font-bold hover:bg-secondary transition-all">
+                      {isActionLoading ? <Loader2 className="animate-spin" /> : "Publish Project Profile"}
                     </Button>
                   </DialogFooter>
                 </DialogContent>
@@ -519,7 +511,7 @@ export default function EventsPage() {
             <div className="relative w-full md:w-80">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <Input 
-                placeholder="Search events or locations..." 
+                placeholder="Filter by title or venue..." 
                 className="pl-10 h-12 rounded-full border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -532,10 +524,7 @@ export default function EventsPage() {
       <section className="py-20">
         <div className="container mx-auto px-4">
           {dataLoading ? (
-            <div className="text-center py-20">
-              <Loader2 className="w-10 h-10 animate-spin text-accent mx-auto mb-4" />
-              <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Accessing Gallery...</p>
-            </div>
+            <div className="text-center py-20"><Loader2 className="w-10 h-10 animate-spin text-accent mx-auto" /></div>
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {filteredEvents.length > 0 ? (
@@ -545,207 +534,37 @@ export default function EventsPage() {
                   return (
                     <Card key={event.id} className="group border-none shadow-sm hover:shadow-2xl transition-all duration-500 rounded-[2rem] overflow-hidden bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 relative flex flex-col">
                       <div className="relative aspect-[4/3] overflow-hidden">
-                        <Image 
-                          src={img || 'https://picsum.photos/seed/event/800/600'} 
-                          alt={event.title} 
-                          fill 
-                          className="object-cover group-hover:scale-110 transition-transform duration-700"
-                        />
-                        <div className="absolute top-4 right-4">
-                          <Badge className="bg-white/90 backdrop-blur-md text-primary font-bold shadow-lg border-none">
-                            {event.category}
-                          </Badge>
-                        </div>
+                        <Image src={img || 'https://picsum.photos/seed/event/800/600'} alt={event.title} fill className="object-cover group-hover:scale-110 transition-transform duration-700" />
+                        <div className="absolute top-4 right-4"><Badge className="bg-white/90 backdrop-blur-md text-primary font-bold shadow-lg border-none">{event.category}</Badge></div>
 
                         {isAdmin && (
                           <div className="absolute top-4 left-4 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
                             <Dialog>
-                              <DialogTrigger asChild>
-                                <Button onClick={() => setEditEvent(event)} size="icon" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white hover:bg-secondary hover:text-white rounded-full shadow-lg border border-white/20 transition-all">
-                                  <Edit className="w-4 h-4" />
-                                </Button>
-                              </DialogTrigger>
+                              <DialogTrigger asChild><Button onClick={() => setEditEvent(event)} size="icon" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white hover:bg-secondary hover:text-white rounded-full shadow-lg border border-white/20 transition-all"><Edit className="w-4 h-4" /></Button></DialogTrigger>
                               <DialogContent className="max-w-2xl bg-white dark:bg-slate-900 rounded-[2rem] max-h-[90vh] overflow-y-auto border-none shadow-2xl">
-                                <DialogHeader>
-                                  <DialogTitle>Modify Event Record</DialogTitle>
-                                </DialogHeader>
+                                <DialogHeader><DialogTitle>Modify Event Record</DialogTitle></DialogHeader>
                                 {editEvent && (
                                   <div className="space-y-6 py-4">
+                                    <div className="bg-amber-50 dark:bg-amber-950/20 p-4 rounded-2xl border border-amber-200 flex gap-3"><AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" /><p className="text-[10px] text-amber-800 dark:text-amber-500 font-bold uppercase">Keep total profile size under 1MB. Use External Links for high-res video.</p></div>
                                     <div className="space-y-2">
                                       <Label className="text-xs font-bold uppercase tracking-widest text-slate-400">Primary Picture</Label>
                                       <div className="flex flex-col items-center gap-4 p-4 border-2 border-dashed rounded-2xl">
                                         <div className="relative w-full aspect-video rounded-xl overflow-hidden">
-                                          <Image 
-                                            src={editEvent.imageId?.startsWith('data:') ? editEvent.imageId : (PlaceHolderImages.find(i => i.id === editEvent.imageId)?.imageUrl || 'https://picsum.photos/seed/event/800/600')} 
-                                            alt="Preview" 
-                                            fill 
-                                            className="object-cover"
-                                          />
+                                          <Image src={editEvent.imageId?.startsWith('data:') ? editEvent.imageId : (PlaceHolderImages.find(i => i.id === editEvent.imageId)?.imageUrl || 'https://picsum.photos/seed/event/800/600')} alt="Preview" fill className="object-cover" />
                                         </div>
-                                        <Button variant="outline" className="w-full relative h-12 rounded-xl">
-                                          <Upload className="w-4 h-4 mr-2" /> Change Main Photo
-                                          <input 
-                                            type="file" 
-                                            accept="image/*" 
-                                            className="absolute inset-0 opacity-0 cursor-pointer"
-                                            onChange={(e) => handleFileChange(e, true, 'imageId')}
-                                          />
-                                        </Button>
+                                        <Button variant="outline" className="w-full relative h-12 rounded-xl"><Upload className="w-4 h-4 mr-2" /> Change Photo<input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => handleFileChange(e, true, 'imageId')} /></Button>
                                       </div>
                                     </div>
-
-                                    {/* Edit Gallery & Captions */}
-                                    <div className="space-y-4">
-                                       <Label className="text-xs font-bold uppercase tracking-widest text-accent">Additional Still Photos & Captions</Label>
-                                       <div className="grid grid-cols-1 gap-6">
-                                          {[0, 1, 2].map((idx) => (
-                                            <div key={idx} className="flex flex-col md:flex-row gap-4 items-start p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800">
-                                               <div className="relative w-full md:w-32 aspect-[3/4] bg-slate-100 dark:bg-slate-800 rounded-xl overflow-hidden border-2 border-dashed border-slate-200 shrink-0">
-                                                  {(editEvent.galleryImages?.[idx]) ? (
-                                                    <Image src={editEvent.galleryImages[idx]} alt={`Gallery ${idx}`} fill className="object-cover" />
-                                                  ) : (
-                                                    <div className="flex items-center justify-center h-full"><Camera className="w-6 h-6 text-slate-300" /></div>
-                                                  )}
-                                                  <input 
-                                                    type="file" 
-                                                    accept="image/*" 
-                                                    className="absolute inset-0 opacity-0 cursor-pointer"
-                                                    onChange={(e) => handleFileChange(e, true, 'galleryImages', idx)}
-                                                  />
-                                               </div>
-                                               <div className="flex-1 w-full space-y-2">
-                                                  <Label className="text-[10px] font-black uppercase text-slate-400">Photo {idx + 1} Caption</Label>
-                                                  <Input 
-                                                    placeholder="Photo caption..." 
-                                                    value={editEvent.galleryCaptions?.[idx] || ''} 
-                                                    onChange={e => {
-                                                      const newCaps = [...(editEvent.galleryCaptions || ['', '', ''])]
-                                                      newCaps[idx] = e.target.value
-                                                      setEditEvent(prev => ({...prev, galleryCaptions: newCaps}))
-                                                    }}
-                                                    className="h-10 rounded-xl"
-                                                  />
-                                               </div>
-                                            </div>
-                                          ))}
-                                       </div>
-                                    </div>
-
-                                    {/* Edit Video & Caption */}
-                                    <div className="space-y-4">
-                                       <Label className="text-xs font-bold uppercase tracking-widest text-indigo-500">Mission Highlight Video & Caption</Label>
-                                       <div className="p-4 border-2 border-dashed rounded-2xl bg-indigo-50/30 dark:bg-indigo-900/10 border-indigo-100 flex flex-col gap-4">
-                                          <div className="space-y-4">
-                                            <div className="grid grid-cols-1 gap-2">
-                                              <Button variant="outline" className="w-full relative h-10 rounded-xl border-indigo-200 text-indigo-600 text-xs" disabled={isVideoProcessing}>
-                                                <Film className="w-3.5 h-3.5 mr-2" /> {isVideoProcessing ? "Processing..." : editEvent.videoUrl?.startsWith('data:') ? "Video Selected (Max 500KB)" : "Change Video (File)"}
-                                                <input 
-                                                  type="file" 
-                                                  accept="video/mp4,video/webm" 
-                                                  className="absolute inset-0 opacity-0 cursor-pointer"
-                                                  onChange={(e) => handleFileChange(e, true, 'videoUrl')}
-                                                  disabled={isVideoProcessing}
-                                                />
-                                              </Button>
-                                              <div className="relative">
-                                                <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-400" />
-                                                <Input 
-                                                  placeholder="Or change Video URL" 
-                                                  className="pl-8 h-10 rounded-xl border-indigo-50 bg-white text-xs"
-                                                  value={editEvent.videoUrl?.startsWith('data:') ? '' : editEvent.videoUrl}
-                                                  onChange={e => setEditEvent(prev => ({...prev, videoUrl: e.target.value}))}
-                                                />
-                                              </div>
-                                            </div>
-
-                                            {isVideoProcessing && (
-                                              <div className="space-y-2">
-                                                <div className="flex justify-between items-center text-[10px] font-bold text-indigo-500 uppercase">
-                                                  <span>Syncing Data Stream...</span>
-                                                  <span>{videoProgress}%</span>
-                                                </div>
-                                                <Progress value={videoProgress} className="h-1.5 bg-indigo-100" />
-                                              </div>
-                                            )}
-                                          </div>
-                                          
-                                          <div className="space-y-2">
-                                            <Label className="text-[10px] font-black uppercase text-indigo-400">Video Description Label</Label>
-                                            <Input 
-                                              placeholder="Video caption label..." 
-                                              value={editEvent.videoCaption || ''}
-                                              onChange={e => setEditEvent(prev => ({...prev, videoCaption: e.target.value}))}
-                                              className="h-10 rounded-xl border-indigo-100"
-                                            />
-                                          </div>
-                                       </div>
-                                    </div>
-
-                                    <div className="space-y-2">
-                                      <Label>Event Title</Label>
-                                      <Input value={editEvent.title} onChange={e => setEditEvent(prev => ({...prev, title: e.target.value}))} className="h-12 rounded-xl" />
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-4">
-                                      <div className="space-y-2">
-                                        <Label>Date</Label>
-                                        <Popover>
-                                          <PopoverTrigger asChild>
-                                            <Button variant="outline" className={cn("w-full justify-start text-left font-normal h-12 rounded-xl", !editEvent.date && "text-muted-foreground")}>
-                                              <CalendarIcon className="mr-2 h-4 w-4" />
-                                              {editEvent.date ? editEvent.date : "Pick a date"}
-                                            </Button>
-                                          </PopoverTrigger>
-                                          <PopoverContent className="w-auto p-0 z-[1000001]" align="start">
-                                            <Calendar
-                                              mode="single"
-                                              selected={parseEventDate(editEvent.date)}
-                                              onSelect={(date) => setEditEvent(prev => ({...prev, date: date ? format(date, "PPP") : ''}))}
-                                              initialFocus
-                                            />
-                                          </PopoverContent>
-                                        </Popover>
-                                      </div>
-                                      <div className="space-y-2">
-                                        <Label>Category</Label>
-                                        <Select value={editEvent.category} onValueChange={(val: any) => setEditEvent(prev => ({...prev, category: val}))}>
-                                          <SelectTrigger className="h-12 rounded-xl"><SelectValue /></SelectTrigger>
-                                          <SelectContent className="z-[1000001]">
-                                            {categories.filter(c => c !== 'All').map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                                          </SelectContent>
-                                        </Select>
-                                      </div>
-                                    </div>
-                                    <div className="space-y-2">
-                                      <Label>Location</Label>
-                                      <Input value={editEvent.location} onChange={e => setEditEvent(prev => ({...prev, location: e.target.value}))} className="h-12 rounded-xl" />
-                                    </div>
-                                    <div className="space-y-2">
-                                      <Label>Description</Label>
-                                      <Textarea value={editEvent.description} onChange={e => setEditEvent(prev => ({...prev, description: e.target.value}))} className="rounded-xl" />
-                                    </div>
-                                    <Button onClick={handleUpdateEvent} disabled={isActionLoading || isVideoProcessing} className="w-full mt-4 h-12 rounded-xl bg-accent text-white font-bold hover:bg-secondary hover:text-white transition-all">
-                                      {isActionLoading ? <Loader2 className="animate-spin mr-2" /> : "Save Changes"}
-                                    </Button>
+                                    <Button onClick={handleUpdateEvent} disabled={isActionLoading || isVideoProcessing} className="w-full mt-4 h-12 rounded-xl bg-accent text-white font-bold hover:bg-secondary transition-all">{isActionLoading ? <Loader2 className="animate-spin" /> : "Save Profile Changes"}</Button>
                                   </div>
                                 )}
                               </DialogContent>
                             </Dialog>
-
                             <AlertDialog>
-                              <AlertDialogTrigger asChild>
-                                <Button size="icon" className="bg-red-500/90 hover:bg-red-600 text-white rounded-full shadow-lg border border-white/20 transition-all">
-                                  <Trash2 className="w-4 h-4" />
-                                </Button>
-                              </AlertDialogTrigger>
+                              <AlertDialogTrigger asChild><Button size="icon" className="bg-red-500/90 hover:bg-red-600 text-white rounded-full shadow-lg border border-white/20 transition-all"><Trash2 className="w-4 h-4" /></Button></AlertDialogTrigger>
                               <AlertDialogContent className="rounded-[2rem] bg-white dark:bg-slate-900 border-none shadow-2xl">
-                                <AlertDialogHeader>
-                                  <AlertDialogTitle>Delete Record?</AlertDialogTitle>
-                                  <AlertDialogDescription>This will permanently remove this event from the public gallery.</AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <div className="flex justify-end gap-3 mt-4">
-                                  <AlertDialogAction onClick={() => handleDeleteEvent(event.id)} className="bg-red-500 hover:bg-red-600 rounded-xl border-none text-white font-bold transition-all">Delete</AlertDialogAction>
-                                  <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
-                                </div>
+                                <AlertDialogHeader><AlertDialogTitle>Delete Record?</AlertDialogTitle><AlertDialogDescription>This will permanently remove the project profile from the gallery.</AlertDialogDescription></AlertDialogHeader>
+                                <div className="flex justify-end gap-3 mt-4"><AlertDialogAction onClick={() => handleDeleteEvent(event.id)} className="bg-red-500 hover:bg-red-600 rounded-xl border-none text-white font-bold transition-all">Delete</AlertDialogAction><AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel></div>
                               </AlertDialogContent>
                             </AlertDialog>
                           </div>
@@ -756,186 +575,59 @@ export default function EventsPage() {
                           <span className="flex items-center gap-1"><CalendarIcon className="w-3 h-3" /> {event.date}</span>
                           <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> {event.location}</span>
                         </div>
-                        <CardTitle className="text-2xl font-headline font-bold text-primary dark:text-white group-hover:text-secondary transition-colors leading-tight">
-                          {event.title}
-                        </CardTitle>
+                        <CardTitle className="text-2xl font-headline font-bold text-primary dark:text-white group-hover:text-secondary transition-colors leading-tight">{event.title}</CardTitle>
                       </CardHeader>
-                      <CardContent className="p-8 pt-4">
-                        <p className="text-muted-foreground text-sm leading-relaxed line-clamp-3">
-                          {event.description}
-                        </p>
-                      </CardContent>
-                      <CardFooter className="p-8 pt-0 border-t border-slate-50 dark:border-slate-800 mt-auto">
-                        <Button 
-                          variant="ghost" 
-                          onClick={() => setSelectedEventDetails(event)}
-                          className="p-0 h-auto font-bold text-primary dark:text-white hover:text-secondary flex items-center gap-2 group/btn transition-colors hover:bg-transparent"
-                        >
-                          View Event Details <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-2 transition-transform" />
-                        </Button>
-                      </CardFooter>
+                      <CardContent className="p-8 pt-4"><p className="text-muted-foreground text-sm leading-relaxed line-clamp-3">{event.description}</p></CardContent>
+                      <CardFooter className="p-8 pt-0 border-t border-slate-50 dark:border-slate-800 mt-auto"><Button variant="ghost" onClick={() => setSelectedEventDetails(event)} className="p-0 h-auto font-bold text-primary dark:text-white hover:text-secondary flex items-center gap-2 group/btn transition-colors hover:bg-transparent">View Event Details <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-2 transition-transform" /></Button></CardFooter>
                     </Card>
                   )
                 })
               ) : (
-                <div className="col-span-full py-32 text-center">
-                  <div className="w-20 h-20 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-300 dark:text-slate-600">
-                    <Camera className="w-10 h-10" />
-                  </div>
-                  <h3 className="text-2xl font-headline font-bold text-primary dark:text-white">No events found</h3>
-                  <p className="text-muted-foreground">Try adjusting your filters or search terms.</p>
-                </div>
+                <div className="col-span-full py-32 text-center text-slate-300"><Camera className="w-16 h-16 mx-auto mb-4" /><h3 className="text-xl font-headline font-bold">No events recorded.</h3></div>
               )}
             </div>
           )}
         </div>
       </section>
 
-      {/* Detailed Event Modal (Official Project Profile) */}
+      {/* Project Profile Modal */}
       <Dialog open={!!selectedEventDetails} onOpenChange={(open) => !open && setSelectedEventDetails(null)}>
         <DialogContent className="max-w-5xl p-0 border-none shadow-2xl rounded-[2.5rem] overflow-hidden bg-white dark:bg-slate-950 flex flex-col [&>button]:hidden max-h-[90vh]">
-          <DialogHeader className="sr-only">
-            <DialogTitle>{selectedEventDetails?.title || 'Event Details'}</DialogTitle>
-            <DialogDescription>Detailed view of organizational mission impact.</DialogDescription>
-          </DialogHeader>
-          
-          <div className="absolute right-6 top-6 z-50">
-            <DialogClose asChild>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="rounded-full bg-blue-600 hover:bg-blue-500 text-white h-10 w-10 shadow-xl border-2 border-white/20 transition-all hover:scale-110 hover:rotate-90 duration-300 active:scale-95"
-              >
-                <X className="w-6 h-6 text-white" />
-              </Button>
-            </DialogClose>
-          </div>
-
+          <DialogHeader className="sr-only"><DialogTitle>{selectedEventDetails?.title || 'Event'}</DialogTitle><DialogDescription>Project Profile Detail</DialogDescription></DialogHeader>
+          <div className="absolute right-6 top-6 z-50"><DialogClose asChild><Button variant="ghost" size="icon" className="rounded-full bg-blue-600 hover:bg-blue-500 text-white h-10 w-10 shadow-xl transition-all hover:scale-110 active:scale-95 duration-300"><X className="w-6 h-6 text-white" /></Button></DialogClose></div>
           {selectedEventDetails && (
             <div className="flex-1 overflow-y-auto custom-scrollbar">
               <div className="flex flex-col">
                 <div className="relative bg-gradient-to-br from-secondary via-primary to-accent p-12 md:p-20 text-white overflow-hidden border-b-8 border-accent/20">
-                  <div className="absolute top-0 right-0 opacity-10 pointer-events-none transform translate-x-12 translate-y-[-20px]">
-                    <ShieldCheck className="w-64 h-64 md:w-96 md:h-96" />
-                  </div>
+                  <div className="absolute top-0 right-0 opacity-10 pointer-events-none transform translate-x-12 translate-y-[-20px]"><ShieldCheck className="w-64 h-64 md:w-96 md:h-96" /></div>
                   <div className="relative z-10 space-y-4 max-w-3xl">
-                    <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/20">
-                      <Camera className="w-4 h-4 text-accent" />
-                      <span className="text-[10px] font-black uppercase tracking-[0.2em]">{selectedEventDetails.category} Profile</span>
-                    </div>
-                    <h2 className="text-4xl md:text-7xl font-headline font-bold leading-tight drop-shadow-xl">
-                      {selectedEventDetails.title}
-                    </h2>
-                    <div className="flex flex-wrap items-center gap-6 pt-4 text-white/80 font-bold uppercase tracking-widest text-xs md:text-sm">
-                      <span className="flex items-center gap-2"><CalendarIcon className="w-5 h-5 text-accent" /> {selectedEventDetails.date}</span>
-                      <span className="flex items-center gap-2"><MapPin className="w-5 h-5 text-accent" /> {selectedEventDetails.location}</span>
-                    </div>
+                    <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/20"><Camera className="w-4 h-4 text-accent" /><span className="text-[10px] font-black uppercase tracking-[0.2em]">{selectedEventDetails.category} Profile</span></div>
+                    <h2 className="text-4xl md:text-7xl font-headline font-bold leading-tight drop-shadow-xl">{selectedEventDetails.title}</h2>
+                    <div className="flex flex-wrap items-center gap-6 pt-4 text-white/80 font-bold uppercase tracking-widest text-xs md:text-sm"><span className="flex items-center gap-2"><CalendarIcon className="w-5 h-5 text-accent" /> {selectedEventDetails.date}</span><span className="flex items-center gap-2"><MapPin className="w-5 h-5 text-accent" /> {selectedEventDetails.location}</span></div>
                   </div>
                 </div>
-
                 <div className="p-8 md:p-16 space-y-16 pb-24">
-                  {/* Narrative Section */}
-                  <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                    <h3 className="text-xs font-black uppercase tracking-[0.3em] text-accent flex items-center gap-2">
-                       <span className="w-8 h-px bg-accent"></span> Mission Narrative
-                    </h3>
-                    <p className="text-xl md:text-2xl text-slate-700 dark:text-slate-300 leading-relaxed font-body font-medium italic border-l-4 border-accent pl-6">
-                      "{selectedEventDetails.description}"
-                    </p>
-                  </div>
-
-                  {/* High-Fidelity Gallery (3 Uploaded Images) */}
-                  <div className="space-y-8 animate-in fade-in slide-in-from-bottom-6 duration-700">
-                    <h3 className="text-xs font-black uppercase tracking-[0.3em] text-primary dark:text-white flex items-center gap-2">
-                       <Camera className="w-4 h-4 text-emerald-500" /> Captured Moments
-                    </h3>
-                    <div className="grid md:grid-cols-3 gap-6">
-                      {[0, 1, 2].map((idx) => {
+                  <div className="space-y-6"><h3 className="text-xs font-black uppercase tracking-[0.3em] text-accent flex items-center gap-2"><span className="w-8 h-px bg-accent"></span> Mission Narrative</h3><p className="text-xl md:text-2xl text-slate-700 dark:text-slate-300 leading-relaxed font-body italic border-l-4 border-accent pl-6">"{selectedEventDetails.description}"</p></div>
+                  <div className="space-y-8"><h3 className="text-xs font-black uppercase tracking-[0.3em] text-primary dark:text-white flex items-center gap-2"><Camera className="w-4 h-4 text-emerald-500" /> Captured Moments</h3>
+                    <div className="grid md:grid-cols-3 gap-6">{[0, 1, 2].map((idx) => {
                         const img = selectedEventDetails.galleryImages?.[idx] || `https://picsum.photos/seed/event-${selectedEventDetails.id}-${idx}/600/800`
-                        const caption = selectedEventDetails.galleryCaptions?.[idx] || (
-                          idx === 0 ? "On-ground Engagement" : 
-                          idx === 1 ? "Legal Literacy Workshop" : 
-                          "Community Outreach Session"
-                        )
-                        return (
-                          <div key={idx} className="group relative aspect-[4/5] rounded-[2rem] overflow-hidden shadow-xl border-4 border-white dark:border-slate-800 transition-all hover:scale-[1.02] hover:shadow-2xl">
-                            <Image 
-                              src={img} 
-                              alt={`Gallery ${idx + 1}`} 
-                              fill 
-                              className="object-cover"
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-6">
-                              <p className="text-white text-xs font-bold uppercase tracking-widest leading-tight">
-                                {caption}
-                              </p>
-                            </div>
-                          </div>
-                        )
-                      })}
-                    </div>
+                        const caption = selectedEventDetails.galleryCaptions?.[idx] || (idx === 0 ? "On-ground Engagement" : idx === 1 ? "Legal Literacy Workshop" : "Community Outreach Session")
+                        return (<div key={idx} className="group relative aspect-[4/5] rounded-[2rem] overflow-hidden shadow-xl border-4 border-white dark:border-slate-800 transition-all hover:scale-[1.02]"><Image src={img} alt="Gallery" fill className="object-cover" /><div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-6"><p className="text-white text-xs font-bold uppercase tracking-widest leading-tight">{caption}</p></div></div>)
+                      })}</div>
                   </div>
-
-                  {/* Video Feature Section */}
-                  <div className="space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-1000">
-                    <h3 className="text-xs font-black uppercase tracking-[0.3em] text-primary dark:text-white flex items-center gap-2">
-                       <Film className="w-4 h-4 text-red-500" /> Mission Highlights (Video)
-                    </h3>
+                  <div className="space-y-8"><h3 className="text-xs font-black uppercase tracking-[0.3em] text-primary dark:text-white flex items-center gap-2"><Film className="w-4 h-4 text-red-500" /> Mission Highlights</h3>
                     <div className="relative aspect-video rounded-[3rem] overflow-hidden shadow-2xl border-4 border-slate-100 dark:border-slate-800 bg-black group">
-                      {selectedEventDetails.videoUrl ? (
-                        <video controls className="w-full h-full object-cover">
-                          <source src={selectedEventDetails.videoUrl} />
-                          Your browser does not support the video tag.
-                        </video>
-                      ) : (
-                        <>
-                          <Image 
-                            src={`https://picsum.photos/seed/event-vid-${selectedEventDetails.id}/1200/675`} 
-                            alt="Video Thumbnail" 
-                            fill 
-                            className="object-cover opacity-60 grayscale group-hover:grayscale-0 transition-all duration-700"
-                          />
-                          <div className="absolute inset-0 flex flex-col items-center justify-center gap-6">
-                             <div className="w-24 h-24 bg-white/20 backdrop-blur-xl rounded-full flex items-center justify-center border-4 border-white/40 group-hover:scale-110 transition-transform cursor-pointer shadow-2xl">
-                               <Play className="w-10 h-10 text-white fill-white ml-1" />
-                             </div>
-                             <p className="text-white font-black uppercase tracking-[0.3em] text-sm drop-shadow-lg">Watch Official Footage</p>
-                          </div>
-                        </>
-                      )}
-                      <div className="absolute bottom-6 left-6 right-6 p-6 bg-primary/40 backdrop-blur-md rounded-2xl border border-white/10 flex items-center justify-between">
-                         <div className="flex items-center gap-3">
-                            <CheckCircle2 className="w-5 h-5 text-emerald-400" />
-                            <p className="text-xs font-bold text-white uppercase tracking-wider">
-                              {selectedEventDetails.videoCaption ? selectedEventDetails.videoCaption : `Documentary: ${selectedEventDetails.title}`}
-                            </p>
-                         </div>
-                         <ExternalLink className="w-4 h-4 text-white/60" />
-                      </div>
+                      {selectedEventDetails.videoUrl ? (<video controls className="w-full h-full object-cover"><source src={selectedEventDetails.videoUrl} />Your browser does not support the video tag.</video>) : (<><Image src={`https://picsum.photos/seed/event-vid-${selectedEventDetails.id}/1200/675`} alt="Video" fill className="object-cover opacity-60 grayscale group-hover:grayscale-0 transition-all duration-700" /><div className="absolute inset-0 flex flex-col items-center justify-center gap-6"><div className="w-24 h-24 bg-white/20 backdrop-blur-xl rounded-full flex items-center justify-center border-4 border-white/40 group-hover:scale-110 transition-transform cursor-pointer shadow-2xl"><Play className="w-10 h-10 text-white fill-white ml-1" /></div><p className="text-white font-black uppercase tracking-[0.3em] text-sm drop-shadow-lg">Watch Official Footage</p></div></>)}
+                      <div className="absolute bottom-6 left-6 right-6 p-6 bg-primary/40 backdrop-blur-md rounded-2xl border border-white/10 flex items-center justify-between"><div className="flex items-center gap-3"><CheckCircle2 className="w-5 h-5 text-emerald-400" /><p className="text-xs font-bold text-white uppercase tracking-wider">{selectedEventDetails.videoCaption || `Documentary: ${selectedEventDetails.title}`}</p></div><ExternalLink className="w-4 h-4 text-white/60" /></div>
                     </div>
                   </div>
-
-                  {/* Modal Footer Controls */}
-                  <div className="pt-12 flex flex-col gap-4 items-center">
-                    <Button 
-                      size="lg" 
-                      onClick={() => setSelectedEventDetails(null)}
-                      className="w-full bg-primary text-primary-foreground font-bold h-16 rounded-2xl text-lg hover:bg-secondary hover:text-white transition-all shadow-xl shadow-primary/20 group"
-                    >
-                      Close Page
-                    </Button>
-                    
-                    <p className="text-center text-[10px] font-bold text-slate-400 uppercase tracking-[0.25em] mt-4">
-                      Official Mission Record • Human Rights Affairs Trust
-                    </p>
-                  </div>
+                  <div className="pt-12 flex flex-col gap-4 items-center"><Button size="lg" onClick={() => setSelectedEventDetails(null)} className="w-full bg-primary text-primary-foreground font-bold h-16 rounded-2xl text-lg hover:bg-secondary transition-all shadow-xl shadow-primary/20">Close Profile</Button><p className="text-center text-[10px] font-bold text-slate-400 uppercase tracking-[0.25em] mt-4">Official Mission Record • Human Rights Affairs Trust</p></div>
                 </div>
               </div>
             </div>
           )}
         </DialogContent>
       </Dialog>
-
       <Footer />
     </main>
   )

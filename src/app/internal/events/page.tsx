@@ -28,7 +28,8 @@ import {
   Film,
   Type,
   Link as LinkIcon,
-  AlertTriangle
+  AlertTriangle,
+  FileWarning
 } from 'lucide-react'
 import {
   Dialog,
@@ -90,15 +91,28 @@ export default function InternalEventsManagement() {
 
   const { data: events, loading: eventsLoading } = useCollection(eventsQuery);
 
+  const validateDocumentSize = (data: any) => {
+    const size = new Blob([JSON.stringify(data)]).size;
+    if (size > 850000) {
+      toast({
+        variant: "destructive",
+        title: "Record Too Large",
+        description: `Profile size (${(size / 1024).toFixed(0)}KB) exceeds capacity. Remove some high-res images or use external Video URLs.`
+      });
+      return false;
+    }
+    return true;
+  }
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, isEdit: boolean, field: 'imageId' | 'videoUrl' | 'galleryImages', index?: number) => {
     const file = e.target.files?.[0]
     if (file) {
-      // 500KB limit for database-stored video data URIs
-      if (file.size > 1024 * 500 && field === 'videoUrl') {
+      const limit = field === 'videoUrl' ? 307200 : 204800; // Strictly enforce 300KB/200KB limits
+      if (file.size > limit) {
         toast({
           variant: "destructive",
-          title: "File Too Heavy",
-          description: "This video exceeds the 500KB limit for database storage. Please provide a direct link (YouTube/Drive) instead."
+          title: "Asset Limit Exceeded",
+          description: `Direct database uploads must be under ${limit/1024}KB. Use a URL link for larger media.`
         });
         return;
       }
@@ -109,40 +123,29 @@ export default function InternalEventsManagement() {
       }
 
       const reader = new FileReader()
-      
       reader.onprogress = (event) => {
         if (event.lengthComputable && field === 'videoUrl') {
-          const progress = Math.round((event.loaded / event.total) * 100)
-          setVideoProgress(progress)
+          setVideoProgress(Math.round((event.loaded / event.total) * 100))
         }
       }
 
       reader.onloadend = () => {
         const dataUri = reader.result as string
-        if (isEdit) {
-          setEditEvent((prev: any) => {
-            if (field === 'galleryImages' && index !== undefined) {
-              const newGallery = [...(prev.galleryImages || ['', '', ''])]
-              newGallery[index] = dataUri
-              return { ...prev, galleryImages: newGallery }
-            }
-            return { ...prev, [field]: dataUri }
-          })
-        } else {
-          setNewEvent((prev: any) => {
-            if (field === 'galleryImages' && index !== undefined) {
-              const newGallery = [...prev.galleryImages]
-              newGallery[index] = dataUri
-              return { ...prev, galleryImages: newGallery }
-            }
-            return { ...prev, [field]: dataUri }
-          })
+        const updateFunc = (prev: any) => {
+          if (field === 'galleryImages' && index !== undefined) {
+            const newGallery = [...(prev.galleryImages || ['', '', ''])]
+            newGallery[index] = dataUri
+            return { ...prev, galleryImages: newGallery }
+          }
+          return { ...prev, [field]: dataUri }
         }
+        
+        if (isEdit) setEditEvent(updateFunc);
+        else setNewEvent(updateFunc);
 
         if (field === 'videoUrl') {
           setIsVideoProcessing(false)
-          setVideoProgress(0)
-          toast({ title: "Processing Complete", description: "Video clip has been buffered for storage." })
+          toast({ title: "Verification Success", description: "Video buffered for archival storage." })
         }
       }
       reader.readAsDataURL(file)
@@ -151,10 +154,12 @@ export default function InternalEventsManagement() {
 
   const handleAddEvent = () => {
     if (!db) return;
-    if (!newEvent.title.trim() || !newEvent.date.trim() || !newEvent.location.trim()) {
-      toast({ variant: "destructive", title: "Required Info", description: "Title, date, and location are mandatory." });
+    if (!newEvent.title || !newEvent.date || !newEvent.location) {
+      toast({ variant: "destructive", title: "Incomplete Form", description: "Mandatory logistical fields are empty." });
       return;
     }
+
+    if (!validateDocumentSize(newEvent)) return;
 
     setIsActionLoading(true)
     addDoc(collection(db, 'events'), { ...newEvent, createdAt: serverTimestamp() })
@@ -165,56 +170,37 @@ export default function InternalEventsManagement() {
         setIsActionLoading(false)
       })
       .catch((err) => {
-        toast({
-          variant: "destructive",
-          title: "Database Error",
-          description: err.message.includes("large") 
-            ? "Record exceeds capacity. Use a link for the video instead of uploading."
-            : "Publication failed. Check connectivity."
-        })
+        toast({ variant: "destructive", title: "Archive Error", description: err.message.includes("large") ? "Record capacity reached. Use links instead." : "Sync failed." })
         setIsActionLoading(false)
       })
   }
 
-  const handleDeleteEvent = (id: string) => {
-    if (!db) return;
-    deleteDoc(doc(db, 'events', id)).then(() => toast({ title: "Event Removed" }))
-  }
-
   const handleUpdateEvent = () => {
     if (!db || !editEvent) return
+    if (!validateDocumentSize(editEvent)) return;
+
     setIsActionLoading(true)
     const { id, ...data } = editEvent
     updateDoc(doc(db, 'events', id), data)
       .then(() => {
-        toast({ title: "Event Updated" })
+        toast({ title: "Archive Updated" })
         setEditEvent(null)
         setIsEditDialogOpen(false)
         setIsActionLoading(false)
       })
       .catch((err) => {
-        toast({
-          variant: "destructive",
-          title: "Sync Error",
-          description: err.message.includes("large") 
-            ? "Document too large. Convert the video to a URL link."
-            : "Failed to update record."
-        })
+        toast({ variant: "destructive", title: "Update Refused", description: err.message.includes("large") ? "Assets too heavy. Use external URLs." : "Permissions denied." })
         setIsActionLoading(false)
       })
   }
 
   const parseEventDate = (dateStr: string) => {
     if (!dateStr) return undefined;
-    try {
-      return parse(dateStr, "PPP", new Date());
-    } catch {
-      return undefined;
-    }
+    try { return parse(dateStr, "PPP", new Date()); } catch { return undefined; }
   }
 
   if (authLoading || !user) {
-    return <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950"><Loader2 className="w-10 h-10 animate-spin text-accent" /></div>
+    return <div className="min-h-screen flex items-center justify-center bg-slate-50"><Loader2 className="w-10 h-10 animate-spin text-accent" /></div>
   }
 
   const filtered = (events || []).filter((e: any) => 
@@ -227,297 +213,57 @@ export default function InternalEventsManagement() {
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
       <section className="pt-16 pb-8 bg-slate-900 text-white border-b-8 border-accent/20">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="space-y-1">
-              <div className="inline-flex items-center gap-2 bg-accent/20 text-accent px-3 py-1 rounded-full text-[9px] font-bold uppercase border border-accent/30">
-                <ShieldCheck className="w-2.5 h-2.5" /> Event Governance
-              </div>
-              <h1 className="text-3xl md:text-4xl font-headline font-bold">Mission <span className="text-accent italic">Logistics</span></h1>
-            </div>
-            
-            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-              <DialogTrigger asChild><Button size="sm" className="bg-accent text-primary font-bold rounded-xl h-11 px-6 flex gap-2 shadow-lg"><Plus className="w-4 h-4" /> Publish New Event</Button></DialogTrigger>
-              <DialogContent className="max-w-2xl rounded-3xl overflow-y-auto max-h-[90vh] border-none shadow-2xl">
-                <DialogHeader><DialogTitle>New Full Project Profile</DialogTitle></DialogHeader>
-                <div className="space-y-6 py-2">
-                  <div className="space-y-1">
-                    <Label className="text-[10px] uppercase font-bold text-slate-400">Main Event Image</Label>
-                    <div className="flex flex-col items-center gap-3 p-3 border-2 border-dashed rounded-xl">
-                      <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-slate-100">
-                        <Image src={newEvent.imageId.startsWith('data:') ? newEvent.imageId : (PlaceHolderImages.find(i => i.id === newEvent.imageId)?.imageUrl || '')} alt="Preview" fill className="object-cover" />
+        <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="space-y-1"><div className="inline-flex items-center gap-2 bg-accent/20 text-accent px-3 py-1 rounded-full text-[9px] font-bold uppercase border border-accent/30"><ShieldCheck className="w-2.5 h-2.5" /> Registry Control</div><h1 className="text-3xl md:text-4xl font-headline font-bold">Mission <span className="text-accent italic">Archives</span></h1></div>
+          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}><DialogTrigger asChild><Button size="sm" className="bg-accent text-primary font-bold rounded-xl h-11 px-6 flex gap-2"><Plus className="w-4 h-4" /> Publish Record</Button></DialogTrigger>
+            <DialogContent className="max-w-2xl rounded-3xl overflow-y-auto max-h-[90vh] border-none">
+              <DialogHeader><DialogTitle>Establish Official Project Profile</DialogTitle></DialogHeader>
+              <div className="space-y-6 py-2">
+                <div className="bg-red-50 dark:bg-red-950/20 p-4 rounded-2xl border border-red-200 flex gap-3"><FileWarning className="w-5 h-5 text-red-600 shrink-0 mt-1" /><div className="space-y-1"><p className="text-[10px] font-black uppercase text-red-600">Payload Enforcement (1MB MAX)</p><p className="text-[9px] text-red-700 dark:text-red-400">Storing large media as Base64 will fail. Images MUST be &lt;200KB. For Video, use a Direct URL Link instead of uploading files.</p></div></div>
+                
+                <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">Cover Image (Max 200KB)</Label><div className="flex flex-col items-center gap-3 p-3 border-2 border-dashed rounded-xl"><div className="relative w-full aspect-video rounded-lg overflow-hidden bg-slate-100"><Image src={newEvent.imageId.startsWith('data:') ? newEvent.imageId : (PlaceHolderImages.find(i => i.id === newEvent.imageId)?.imageUrl || '')} alt="Cover" fill className="object-cover" /></div><Button variant="outline" size="sm" className="w-full relative h-9 rounded-lg"><Upload className="w-3.5 h-3.5 mr-2" /> Select Image<input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => handleFileChange(e, false, 'imageId')} /></Button></div></div>
+
+                <div className="space-y-3"><Label className="text-[10px] uppercase font-bold text-accent">Additional Still Photos (Total Max 800KB)</Label><div className="grid grid-cols-1 gap-4">{[0, 1, 2].map((idx) => (
+                      <div key={idx} className="flex flex-col md:flex-row gap-4 p-3 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-100">
+                         <div className="relative w-24 h-24 rounded-xl overflow-hidden border-2 border-dashed bg-white flex items-center justify-center shrink-0">{newEvent.galleryImages[idx] ? (<Image src={newEvent.galleryImages[idx]} alt="Gallery" fill className="object-cover" />) : (<Camera className="w-5 h-5 text-slate-300" />)}<input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => handleFileChange(e, false, 'galleryImages', idx)} /></div>
+                         <div className="flex-1 w-full space-y-1"><Label className="text-[9px] font-bold text-slate-400 uppercase">Caption {idx + 1}</Label><Input placeholder="Moment context..." value={newEvent.galleryCaptions[idx]} onChange={e => { const n = [...newEvent.galleryCaptions]; n[idx] = e.target.value; setNewEvent(p => ({...p, galleryCaptions: n})) }} className="h-9 text-xs rounded-lg" /></div>
                       </div>
-                      <Button variant="outline" size="sm" className="w-full relative h-9 rounded-lg"><Upload className="w-3.5 h-3.5 mr-2" /> Select Image<input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => handleFileChange(e, false, 'imageId')} /></Button>
-                    </div>
-                  </div>
+                    ))}</div></div>
 
-                  <div className="space-y-3">
-                     <Label className="text-[10px] uppercase font-bold text-accent">Additional Still Photos & Captions</Label>
-                     <div className="grid grid-cols-1 gap-4">
-                        {[0, 1, 2].map((idx) => (
-                          <div key={idx} className="flex flex-col md:flex-row gap-4 p-3 bg-slate-50 rounded-2xl border border-slate-100">
-                             <div className="relative w-24 h-24 rounded-xl overflow-hidden border-2 border-dashed bg-white flex items-center justify-center shrink-0">
-                                {newEvent.galleryImages[idx] ? (
-                                  <Image src={newEvent.galleryImages[idx]} alt="Gallery" fill className="object-cover" />
-                                ) : (
-                                  <Camera className="w-5 h-5 text-slate-300" />
-                                )}
-                                <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => handleFileChange(e, false, 'galleryImages', idx)} />
-                             </div>
-                             <div className="flex-1 w-full space-y-1">
-                                <Label className="text-[9px] font-bold text-slate-400 uppercase">Caption {idx + 1}</Label>
-                                <Input 
-                                  placeholder="Describe this moment..." 
-                                  value={newEvent.galleryCaptions[idx]} 
-                                  onChange={e => {
-                                    const newCaps = [...newEvent.galleryCaptions]
-                                    newCaps[idx] = e.target.value
-                                    setNewEvent(prev => ({...prev, galleryCaptions: newCaps}))
-                                  }}
-                                  className="h-9 text-xs rounded-lg"
-                                />
-                             </div>
-                          </div>
-                        ))}
-                     </div>
-                  </div>
+                <div className="space-y-3 p-4 bg-indigo-50/50 dark:bg-indigo-900/10 rounded-2xl border border-indigo-100"><Label className="text-[10px] uppercase font-bold text-indigo-500">Mission Highlight Video (External Link Recommended)</Label>
+                  <div className="flex flex-col gap-3"><div className="space-y-4"><div className="grid grid-cols-1 gap-2"><Button variant="outline" className="w-full relative h-10 rounded-xl border-indigo-200 text-indigo-600 border-dashed bg-white text-[10px]" disabled={isVideoProcessing}><Film className="w-3.5 h-3.5 mr-2" /> {isVideoProcessing ? "Indexing..." : "Upload Mini Clip (<300KB)"}<input type="file" accept="video/mp4,video/webm" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => handleFileChange(e, false, 'videoUrl')} disabled={isVideoProcessing} /></Button><div className="relative"><LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-400" /><Input placeholder="Direct Link (YouTube/Drive/Hosting)" className="pl-8 h-9 text-[10px] rounded-xl border-indigo-100 bg-white" value={newEvent.videoUrl?.startsWith('data:') ? '' : newEvent.videoUrl} onChange={e => setNewEvent(p => ({...p, videoUrl: e.target.value}))} /></div></div>
+                      {isVideoProcessing && (<div className="space-y-2"><div className="flex justify-between items-center text-[9px] font-bold text-indigo-500 uppercase"><span>Transferring Bytes...</span><span>{videoProgress}%</span></div><Progress value={videoProgress} className="h-1 bg-indigo-100" /></div>)}</div>
+                    <div className="space-y-1"><Label className="text-[9px] font-bold text-indigo-400 uppercase">Documentary Description</Label><Input placeholder="Video label..." value={newEvent.videoCaption} onChange={e => setNewEvent(p => ({...p, videoCaption: e.target.value}))} className="h-9 text-xs rounded-lg border-indigo-100" /></div>
+                  </div></div>
 
-                  <div className="space-y-3 p-4 bg-indigo-50/50 rounded-2xl border border-indigo-100">
-                     <Label className="text-[10px] uppercase font-bold text-indigo-500">Mission Highlight Video & Caption</Label>
-                     <div className="flex flex-col gap-3">
-                        <div className="space-y-4">
-                          <div className="grid grid-cols-1 gap-2">
-                             <Button variant="outline" className="w-full relative h-10 rounded-xl border-indigo-200 text-indigo-600 border-dashed bg-white text-[10px]" disabled={isVideoProcessing}>
-                               <Film className="w-3.5 h-3.5 mr-2" /> {isVideoProcessing ? "Transferring Data..." : newEvent.videoUrl?.startsWith('data:') ? "Video Buffered" : "Upload Video (Max 500KB)"}
-                               <input type="file" accept="video/mp4,video/webm" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => handleFileChange(e, false, 'videoUrl')} disabled={isVideoProcessing} />
-                             </Button>
-                             <div className="relative">
-                                <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-400" />
-                                <Input 
-                                  placeholder="Or paste Video URL" 
-                                  className="pl-8 h-9 text-[10px] rounded-xl border-indigo-100 bg-white"
-                                  value={newEvent.videoUrl?.startsWith('data:') ? '' : newEvent.videoUrl}
-                                  onChange={e => setNewEvent(prev => ({...prev, videoUrl: e.target.value}))}
-                                />
-                             </div>
-                          </div>
-
-                          {isVideoProcessing && (
-                            <div className="space-y-2 animate-in fade-in duration-300">
-                              <div className="flex justify-between items-center text-[9px] font-bold text-indigo-500 uppercase">
-                                <span>Verifying Buffer...</span>
-                                <span>{videoProgress}%</span>
-                              </div>
-                              <Progress value={videoProgress} className="h-1 bg-indigo-100" />
-                            </div>
-                          )}
-                          
-                          {!isVideoProcessing && !newEvent.videoUrl && (
-                            <div className="flex items-start gap-2 text-[9px] text-slate-500 italic">
-                               <AlertTriangle className="w-3 h-3 text-amber-500 shrink-0 mt-0.5" />
-                               <span>Larger videos must be linked via URL to avoid database limits.</span>
-                            </div>
-                          )}
-                        </div>
-
-                        <div className="space-y-1">
-                           <Label className="text-[9px] font-bold text-indigo-400 uppercase">Video Description</Label>
-                           <Input 
-                             placeholder="Documentary label..." 
-                             value={newEvent.videoCaption}
-                             onChange={e => setNewEvent(prev => ({...prev, videoCaption: e.target.value}))}
-                             className="h-9 text-xs rounded-lg border-indigo-100"
-                           />
-                        </div>
-                     </div>
-                  </div>
-
-                  <div className="space-y-1"><Label className="text-[10px] uppercase font-bold">Title</Label><Input value={newEvent.title} onChange={e => setNewEvent(prev => ({...prev, title: e.target.value}))} className="h-10 rounded-lg text-sm" /></div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1">
-                       <Label className="text-[10px] uppercase font-bold">Date</Label>
-                       <Popover>
-                        <PopoverTrigger asChild><Button variant="outline" className={cn("w-full justify-start text-left font-normal h-10 rounded-lg text-sm", !newEvent.date && "text-muted-foreground")}><CalendarIcon className="mr-2 h-4 w-4" />{newEvent.date ? newEvent.date : "Pick a date"}</Button></PopoverTrigger>
-                        <PopoverContent className="w-auto p-0 z-[1000001]" align="start"><Calendar mode="single" selected={parseEventDate(newEvent.date)} onSelect={(date) => setNewEvent(prev => ({...prev, date: date ? format(date, "PPP") : ''}))} initialFocus /></PopoverContent>
-                      </Popover>
-                    </div>
-                    <div className="space-y-1">
-                      <Label className="text-[10px] uppercase font-bold">Category</Label>
-                      <Select value={newEvent.category} onValueChange={(val: any) => setNewEvent(prev => ({...prev, category: val}))}>
-                        <SelectTrigger className="h-10 rounded-lg text-xs"><SelectValue /></SelectTrigger>
-                        <SelectContent position="popper" className="z-[1000001] bg-white">{categories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  <div className="space-y-1">
-                     <Label className="text-[10px] uppercase font-bold">Venue Location</Label>
-                     <Input value={newEvent.location} onChange={e => setNewEvent(prev => ({...prev, location: e.target.value}))} className="h-10 rounded-lg" />
-                  </div>
-                  <div className="space-y-1">
-                     <Label className="text-[10px] uppercase font-bold">Mission Description</Label>
-                     <Textarea value={newEvent.description} onChange={e => setNewEvent(prev => ({...prev, description: e.target.value}))} className="rounded-xl" />
-                  </div>
+                <div className="space-y-1"><Label className="text-[10px] uppercase font-bold">Title</Label><Input value={newEvent.title} onChange={e => setNewEvent(p => ({...p, title: e.target.value}))} className="h-10 rounded-lg text-sm" /></div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1"><Label className="text-[10px] uppercase font-bold">Date</Label><Popover><PopoverTrigger asChild><Button variant="outline" className={cn("w-full justify-start text-left font-normal h-10 rounded-lg text-sm", !newEvent.date && "text-muted-foreground")}><CalendarIcon className="mr-2 h-4 w-4" />{newEvent.date || "Pick Date"}</Button></PopoverTrigger><PopoverContent className="w-auto p-0 z-[1000001]" align="start"><Calendar mode="single" selected={parseEventDate(newEvent.date)} onSelect={(d) => setNewEvent(p => ({...p, date: d ? format(d, "PPP") : ''}))} initialFocus /></PopoverContent></Popover></div>
+                  <div className="space-y-1"><Label className="text-[10px] uppercase font-bold">Category</Label><Select value={newEvent.category} onValueChange={(v: any) => setNewEvent(p => ({...p, category: v}))}><SelectTrigger className="h-10 rounded-lg text-xs"><SelectValue /></SelectTrigger><SelectContent position="popper" className="z-[1000001] bg-white">{categories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent></Select></div>
                 </div>
-                <DialogFooter><Button onClick={handleAddEvent} disabled={isActionLoading || isVideoProcessing} className="w-full h-11 rounded-xl">Establish Official Record</Button></DialogFooter>
-              </DialogContent>
-            </Dialog>
-          </div>
+                <div className="space-y-1"><Label className="text-[10px] uppercase font-bold">Logistics Venue</Label><Input value={newEvent.location} onChange={e => setNewEvent(p => ({...p, location: e.target.value}))} className="h-10 rounded-lg" /></div>
+                <div className="space-y-1"><Label className="text-[10px] uppercase font-bold">Official Narrative</Label><Textarea value={newEvent.description} onChange={e => setNewEvent(p => ({...p, description: e.target.value}))} className="rounded-xl min-h-[100px]" /></div>
+              </div>
+              <DialogFooter><Button onClick={handleAddEvent} disabled={isActionLoading || isVideoProcessing} className="w-full h-11 rounded-xl bg-accent text-primary font-bold">Verify & Publish Profile</Button></DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
       </section>
 
-      <section className="py-6 border-b bg-white dark:bg-slate-900 sticky top-10 z-30 shadow-sm">
-        <div className="container mx-auto px-4">
-          <div className="relative max-w-lg">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <Input placeholder="Filter by title or location..." className="pl-9 h-11 rounded-xl border-slate-200 text-sm" value={search} onChange={(e) => setSearch(e.target.value)} />
-          </div>
-        </div>
-      </section>
+      <section className="py-6 border-b bg-white dark:bg-slate-900 sticky top-10 z-30 shadow-sm"><div className="container mx-auto px-4"><div className="relative max-w-lg"><Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" /><Input placeholder="Filter registry by title or location..." className="pl-9 h-11 rounded-xl border-slate-200 text-sm" value={search} onChange={(e) => setSearch(e.target.value)} /></div></div></section>
 
-      <section className="py-8">
-        <div className="container mx-auto px-4">
-          {eventsLoading ? (
-            <div className="text-center py-20"><Loader2 className="w-8 h-8 animate-spin text-accent mx-auto" /></div>
-          ) : (
-            <div className="grid gap-4">
-              {filtered.map((event: any) => (
-                <Card key={event.id} className="border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900 rounded-2xl border border-slate-100">
-                  <CardContent className="p-0">
-                    <div className="flex flex-col md:flex-row items-stretch">
-                      <div className="relative w-full md:w-48 aspect-video md:aspect-auto overflow-hidden shrink-0">
-                        <Image src={event.imageId?.startsWith('data:') ? event.imageId : (PlaceHolderImages.find(i => i.id === event.imageId)?.imageUrl || 'https://picsum.photos/seed/event/800/600')} alt={event.title} fill className="object-cover" />
-                      </div>
-                      <div className="flex-1 p-5 flex items-center justify-between">
-                        <div className="space-y-1">
-                          <Badge variant="outline" className="border-accent text-accent text-[8px] font-bold uppercase px-1.5 py-0">{event.category}</Badge>
-                          <h3 className="text-lg font-bold text-slate-900 dark:text-white leading-tight">{event.title}</h3>
-                          <div className="text-[10px] font-bold text-slate-500">{event.date}</div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                           <Button onClick={() => { setEditEvent(event); setIsEditDialogOpen(true); }} variant="outline" size="icon" className="h-8 w-8 rounded-lg border-slate-200"><Edit className="w-3.5 h-3.5" /></Button>
-                           <Button variant="destructive" size="icon" onClick={() => handleDeleteEvent(event.id)} className="h-8 w-8 rounded-lg"><Trash2 className="w-3.5 h-3.5" /></Button>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
+      <section className="py-8"><div className="container mx-auto px-4">{eventsLoading ? (<div className="text-center py-20"><Loader2 className="w-8 h-8 animate-spin text-accent mx-auto" /></div>) : (<div className="grid gap-4">{filtered.map((e: any) => (<Card key={e.id} className="border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900 rounded-2xl border border-slate-100"><CardContent className="p-0"><div className="flex flex-col md:flex-row items-stretch"><div className="relative w-full md:w-48 aspect-video md:aspect-auto overflow-hidden shrink-0"><Image src={e.imageId?.startsWith('data:') ? e.imageId : (PlaceHolderImages.find(i => i.id === e.imageId)?.imageUrl || 'https://picsum.photos/seed/event/800/600')} alt="Thumb" fill className="object-cover" /></div><div className="flex-1 p-5 flex items-center justify-between"><div><Badge variant="outline" className="border-accent text-accent text-[8px] font-bold uppercase px-1.5 py-0">{e.category}</Badge><h3 className="text-lg font-bold leading-tight">{e.title}</h3><div className="text-[10px] font-bold text-slate-500 uppercase">{e.date}</div></div><div className="flex items-center gap-2"><Button onClick={() => { setEditEvent(e); setIsEditDialogOpen(true); }} variant="outline" size="icon" className="h-8 w-8 rounded-lg"><Edit className="w-3.5 h-3.5" /></Button><Button variant="destructive" size="icon" onClick={() => deleteDoc(doc(db, 'events', e.id))} className="h-8 w-8 rounded-lg"><Trash2 className="w-3.5 h-3.5" /></Button></div></div></div></CardContent></Card>))}</div>)}</div></section>
 
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="max-w-2xl rounded-3xl overflow-y-auto max-h-[90vh] border-none shadow-2xl">
-          <DialogHeader><DialogTitle>Edit Event Record</DialogTitle></DialogHeader>
-          {editEvent && (
-            <div className="space-y-6 py-2">
-              <div className="space-y-1">
-                <Label className="text-[10px] uppercase font-bold text-slate-400">Cover Image</Label>
-                <div className="flex flex-col items-center gap-3 p-3 border-2 border-dashed rounded-xl">
-                  <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-slate-100">
-                    <Image src={editEvent.imageId?.startsWith('data:') ? editEvent.imageId : (PlaceHolderImages.find(i => i.id === editEvent.imageId)?.imageUrl || '')} alt="Preview" fill className="object-cover" />
-                  </div>
-                  <Button variant="outline" size="sm" className="w-full relative h-9 rounded-lg"><Upload className="w-3.5 h-3.5 mr-2" /> Change Image<input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => handleFileChange(e, true, 'imageId')} /></Button>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                 <Label className="text-[10px] uppercase font-bold text-accent">Additional Still Photos & Captions</Label>
-                 <div className="grid grid-cols-1 gap-4">
-                    {[0, 1, 2].map((idx) => (
-                      <div key={idx} className="flex flex-col md:flex-row gap-4 p-3 bg-slate-50 rounded-2xl border border-slate-100">
-                         <div className="relative w-24 h-24 rounded-xl overflow-hidden border-2 border-dashed bg-white flex items-center justify-center shrink-0">
-                            {(editEvent.galleryImages?.[idx]) ? (
-                              <Image src={editEvent.galleryImages[idx]} alt="Gallery" fill className="object-cover" />
-                            ) : (
-                              <Camera className="w-5 h-5 text-slate-300" />
-                            )}
-                            <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => handleFileChange(e, true, 'galleryImages', idx)} />
-                         </div>
-                         <div className="flex-1 w-full space-y-1">
-                            <Label className="text-[9px] font-bold text-slate-400 uppercase">Caption {idx + 1}</Label>
-                            <Input 
-                              placeholder="Moment description..." 
-                              value={editEvent.galleryCaptions?.[idx] || ''} 
-                              onChange={e => {
-                                const newCaps = [...(editEvent.galleryCaptions || ['', '', ''])]
-                                newCaps[idx] = e.target.value
-                                setEditEvent(prev => ({...prev, galleryCaptions: newCaps}))
-                              }}
-                              className="h-9 text-xs rounded-lg"
-                            />
-                         </div>
-                      </div>
-                    ))}
-                 </div>
-              </div>
-
-              <div className="space-y-3 p-4 bg-indigo-50/50 rounded-2xl border border-indigo-100">
-                 <Label className="text-[10px] uppercase font-bold text-indigo-500">Mission Highlight Video & Caption</Label>
-                 <div className="flex flex-col gap-3">
-                    <div className="space-y-4">
-                      <div className="grid grid-cols-1 gap-2">
-                        <Button variant="outline" className="w-full relative h-10 rounded-xl border-indigo-100 text-indigo-600 border-dashed bg-white text-[10px]" disabled={isVideoProcessing}>
-                           <Film className="w-4 h-4 mr-2" /> {isVideoProcessing ? "Analyzing Footage..." : editEvent.videoUrl?.startsWith('data:') ? "Video Buffered" : "Change Video (File)"}
-                           <input type="file" accept="video/mp4,video/webm" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => handleFileChange(e, true, 'videoUrl')} disabled={isVideoProcessing} />
-                        </Button>
-                        <div className="relative">
-                          <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-400" />
-                          <Input 
-                            placeholder="Update Video URL" 
-                            className="pl-8 h-9 text-[10px] rounded-xl border-indigo-100 bg-white"
-                            value={editEvent.videoUrl?.startsWith('data:') ? '' : editEvent.videoUrl}
-                            onChange={e => setEditEvent(prev => ({...prev, videoUrl: e.target.value}))}
-                          />
-                        </div>
-                      </div>
-
-                      {isVideoProcessing && (
-                        <div className="space-y-2 animate-in fade-in duration-300">
-                          <div className="flex justify-between items-center text-[9px] font-bold text-indigo-500 uppercase">
-                            <span>Indexing Frames...</span>
-                            <span>{videoProgress}%</span>
-                          </div>
-                          <Progress value={videoProgress} className="h-1 bg-indigo-100" />
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="space-y-1">
-                       <Label className="text-[9px] font-bold text-indigo-400 uppercase">Video Description</Label>
-                       <Input 
-                         placeholder="Documentary caption..." 
-                         value={editEvent.videoCaption || ''}
-                         onChange={e => setEditEvent(prev => ({...prev, videoCaption: e.target.value}))}
-                         className="h-9 text-xs rounded-lg border-indigo-100"
-                       />
-                    </div>
-                 </div>
-              </div>
-
-              <div className="space-y-1"><Label className="text-[10px] uppercase font-bold">Title</Label><Input value={editEvent.title} onChange={e => setEditEvent(prev => ({...prev, title: e.target.value}))} className="h-10 rounded-lg text-sm" /></div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                   <Label className="text-[10px] uppercase font-bold">Date</Label>
-                   <Popover>
-                    <PopoverTrigger asChild><Button variant="outline" className={cn("w-full justify-start text-left font-normal h-10 rounded-lg text-sm", !editEvent.date && "text-muted-foreground")}><CalendarIcon className="mr-2 h-4 w-4" />{editEvent.date || "Pick a date"}</Button></PopoverTrigger>
-                    <PopoverContent className="w-auto p-0 z-[1000001]" align="start"><Calendar mode="single" selected={parseEventDate(editEvent.date)} onSelect={(date) => setEditEvent(prev => ({...prev, date: date ? format(date, "PPP") : ''}))} initialFocus /></PopoverContent>
-                  </Popover>
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-[10px] uppercase font-bold">Category</Label>
-                  <Select value={editEvent.category} onValueChange={(val: any) => setEditEvent(prev => ({...prev, category: val}))}>
-                    <SelectTrigger className="h-10 rounded-lg text-xs"><SelectValue /></SelectTrigger>
-                    <SelectContent position="popper" className="z-[1000001] bg-white">{categories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <div className="space-y-1"><Label className="text-[10px] uppercase font-bold">Venue</Label><Input value={editEvent.location} onChange={e => setEditEvent(prev => ({...prev, location: e.target.value}))} className="h-10 rounded-lg" /></div>
-              <div className="space-y-1"><Label className="text-[10px] uppercase font-bold">Description</Label><Textarea value={editEvent.description} onChange={e => setEditEvent(prev => ({...prev, description: e.target.value}))} className="rounded-xl" /></div>
-              <Button onClick={handleUpdateEvent} disabled={isActionLoading || isVideoProcessing} className="w-full h-11 rounded-xl">Save Official Changes</Button>
-            </div>
-          )}
+          <DialogHeader><DialogTitle>Update Project Profile</DialogTitle></DialogHeader>
+          {editEvent && (<div className="space-y-6 py-2">
+              <div className="bg-amber-50 p-4 rounded-xl border border-amber-200"><p className="text-[10px] font-bold text-amber-700 uppercase">Warning: Document must stay under 1MB. Use URLs for new videos.</p></div>
+              <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">Cover Image</Label><div className="flex flex-col items-center gap-3 p-3 border-2 border-dashed rounded-xl"><div className="relative w-full aspect-video rounded-lg overflow-hidden bg-slate-100"><Image src={editEvent.imageId?.startsWith('data:') ? editEvent.imageId : (PlaceHolderImages.find(i => i.id === editEvent.imageId)?.imageUrl || '')} alt="Preview" fill className="object-cover" /></div><Button variant="outline" size="sm" className="w-full relative h-9 rounded-lg"><Upload className="w-3.5 h-3.5 mr-2" /> Change Image<input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => handleFileChange(e, true, 'imageId')} /></Button></div></div>
+              <div className="space-y-1"><Label className="text-[10px] uppercase font-bold">Title</Label><Input value={editEvent.title} onChange={e => setEditEvent(p => ({...p, title: e.target.value}))} className="h-10 rounded-lg text-sm" /></div>
+              <div className="space-y-1"><Label className="text-[10px] uppercase font-bold">Narrative</Label><Textarea value={editEvent.description} onChange={e => setEditEvent(p => ({...p, description: e.target.value}))} className="rounded-xl min-h-[120px]" /></div>
+              <Button onClick={handleUpdateEvent} disabled={isActionLoading || isVideoProcessing} className="w-full h-11 rounded-xl bg-primary text-white font-bold transition-all">{isActionLoading ? <Loader2 className="animate-spin" /> : "Commit Changes to Registry"}</Button>
+            </div>)}
         </DialogContent>
       </Dialog>
       <Footer />
