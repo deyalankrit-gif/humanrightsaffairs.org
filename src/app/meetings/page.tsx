@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useEffect } from 'react'
@@ -56,6 +57,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
+  AlertDialogFooter
 } from "@/components/ui/alert-dialog"
 import {
   Popover,
@@ -735,7 +737,7 @@ export default function MeetingsPage() {
                         {editMeeting.date ? editMeeting.date : "Pick a date"}
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0 z-[1000000]" align="start">
+                    <PopoverContent className="w-auto p-0 z-[1000001]" align="start">
                       <CalendarComponent
                         mode="single"
                         selected={parseMeetingDate(editMeeting.date)}
@@ -755,7 +757,7 @@ export default function MeetingsPage() {
                   <Label className="text-[10px] font-bold uppercase text-slate-400">Chapter Level</Label>
                   <Select value={editMeeting.level} onValueChange={(val: any) => setEditMeeting({...editMeeting, level: val})}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent position="popper" className="z-[1000000] bg-white">
+                    <SelectContent position="popper" className="z-[1000001] bg-white">
                       <SelectItem value="National">Central Council</SelectItem>
                       <SelectItem value="State">State Level</SelectItem>
                       <SelectItem value="District">District Level</SelectItem>
@@ -766,7 +768,7 @@ export default function MeetingsPage() {
                   <Label className="text-[10px] font-bold uppercase text-slate-400">Status</Label>
                   <Select value={editMeeting.status} onValueChange={(val: any) => setEditMeeting({...editMeeting, status: val})}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent position="popper" className="z-[1000000] bg-white">
+                    <SelectContent position="popper" className="z-[1000001] bg-white">
                       <SelectItem value="Upcoming">Upcoming</SelectItem>
                       <SelectItem value="Completed">Completed</SelectItem>
                       <SelectItem value="Postponed">Postponed</SelectItem>
@@ -781,7 +783,7 @@ export default function MeetingsPage() {
                     <Label className="text-[10px] uppercase font-bold text-accent">Chapter State *</Label>
                     <Select value={editMeeting.stateName} onValueChange={(val) => setEditMeeting({...editMeeting, stateName: val, districtName: ''})}>
                       <SelectTrigger className="rounded-xl h-11 border-accent/20 bg-white dark:bg-slate-900"><SelectValue placeholder="Select State" /></SelectTrigger>
-                      <SelectContent position="popper" className="z-[1000000] bg-white max-h-60">{states.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+                      <SelectContent position="popper" className="z-[1000001] bg-white max-h-60">{states.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
                     </Select>
                   </div>
                   {editMeeting.stateName && (editMeeting.level === 'District') && (
@@ -789,7 +791,7 @@ export default function MeetingsPage() {
                       <Label className="text-[10px] uppercase font-bold text-accent">Chapter District *</Label>
                       <Select value={editMeeting.districtName} onValueChange={(val) => setEditMeeting({...editMeeting, districtName: val})}>
                         <SelectTrigger className="rounded-xl h-11 border-accent/20 bg-white dark:bg-slate-900"><SelectValue placeholder="Select District" /></SelectTrigger>
-                        <SelectContent position="popper" className="z-[1000000] bg-white max-h-60">{(INDIA_DATA[editMeeting.stateName] || []).map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
+                        <SelectContent position="popper" className="z-[1000001] bg-white max-h-60">{(INDIA_DATA[editMeeting.stateName] || []).map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
                       </Select>
                     </div>
                   )}
