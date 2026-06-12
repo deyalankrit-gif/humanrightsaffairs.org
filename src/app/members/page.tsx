@@ -19,7 +19,10 @@ import {
   Calendar as CalendarIcon,
   Heart,
   Home,
-  Sparkles
+  Sparkles,
+  Camera,
+  Mail,
+  Phone
 } from 'lucide-react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -77,6 +80,7 @@ type Member = {
   postOffice?: string
   policeStation?: string
   pinCode?: string
+  profession?: string
 }
 
 export default function MembersPage() {
@@ -95,23 +99,24 @@ export default function MembersPage() {
     name: '',
     designationCategory: 'General Member',
     designation: 'General Member',
+    profession: '',
+    gender: 'male' as 'male' | 'female',
+    bloodGroup: '',
     email: '',
     phone: '',
+    address: '',
+    postOffice: '',
+    policeStation: '',
+    pinCode: '',
     level: 'National' as const,
     status: 'Active',
     memberId: '',
     stateName: '',
     districtName: '',
-    gender: 'male' as 'male' | 'female',
     imageId: '',
     joiningDate: '',
     expiryDate: '',
-    membershipDuration: '1 Year',
-    bloodGroup: '',
-    address: '',
-    postOffice: '',
-    policeStation: '',
-    pinCode: ''
+    membershipDuration: '1 Year'
   })
 
   useEffect(() => {
@@ -162,7 +167,7 @@ export default function MembersPage() {
     if (file) {
       const reader = new FileReader()
       reader.onloadend = () => {
-        setNewMember({ ...newMember, imageId: reader.result as string })
+        setNewMember(prev => ({ ...prev, imageId: reader.result as string }))
       }
       reader.readAsDataURL(file)
     }
@@ -216,6 +221,7 @@ export default function MembersPage() {
         name: '', 
         designationCategory: 'General Member',
         designation: 'General Member', 
+        profession: '',
         email: '', 
         phone: '', 
         level: 'National', 
@@ -295,7 +301,7 @@ export default function MembersPage() {
               </DialogTrigger>
               <DialogContent className="max-w-2xl bg-white dark:bg-slate-900 rounded-[2rem] border-none shadow-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                  <DialogTitle className="text-2xl font-headline font-bold text-primary dark:text-white">New Member Record</DialogTitle>
+                  <DialogTitle className="text-2xl font-headline font-bold text-primary dark:text-white">Personnel Commissioning</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-6 py-4">
                   <div className="grid md:grid-cols-3 gap-6 items-start">
@@ -308,36 +314,40 @@ export default function MembersPage() {
                         )}
                         <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={handleFileChange} />
                       </div>
-                      <Label className="text-[10px] uppercase font-bold text-slate-400">Profile Photo</Label>
+                      <Label className="text-[10px] uppercase font-bold text-slate-400">Commissioning Photo</Label>
                     </div>
                     <div className="md:col-span-2 space-y-4">
-                      <div className="space-y-2">
-                        <Label>Full Name *</Label>
-                        <Input placeholder="Member Name" value={newMember.name} onChange={e => setNewMember({...newMember, name: e.target.value})} />
+                      <div className="space-y-1">
+                        <Label className="text-[10px] uppercase font-bold text-slate-400">Full Legal Name *</Label>
+                        <Input placeholder="Full Legal Name" value={newMember.name} onChange={e => setNewMember({...newMember, name: e.target.value})} className="h-11 rounded-xl" />
                       </div>
                       <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label>Gender</Label>
+                        <div className="space-y-1">
+                          <Label className="text-[10px] uppercase font-bold text-slate-400">Gender</Label>
                           <Select value={newMember.gender} onValueChange={(val: any) => setNewMember({...newMember, gender: val})}>
-                            <SelectTrigger><SelectValue /></SelectTrigger>
-                            <SelectContent><SelectItem value="male">Male</SelectItem><SelectItem value="female">Female</SelectItem></SelectContent>
+                            <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
+                            <SelectContent position="popper" className="z-[1000001] bg-white"><SelectItem value="male">Male</SelectItem><SelectItem value="female">Female</SelectItem></SelectContent>
                           </Select>
                         </div>
-                        <div className="space-y-2">
-                          <Label>Blood Group</Label>
+                        <div className="space-y-1">
+                          <Label className="text-[10px] uppercase font-bold text-slate-400">Blood Group</Label>
                           <Select value={newMember.bloodGroup} onValueChange={val => setNewMember({...newMember, bloodGroup: val})}>
-                            <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
-                            <SelectContent>
+                            <SelectTrigger className="h-11 rounded-xl"><SelectValue placeholder="Select" /></SelectTrigger>
+                            <SelectContent position="popper" className="z-[1000001] bg-white">
                               {["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].map(bg => <SelectItem key={bg} value={bg}>{bg}</SelectItem>)}
                             </SelectContent>
                           </Select>
                         </div>
                       </div>
+                      <div className="space-y-1">
+                        <Label className="text-[10px] uppercase font-bold text-slate-400">Current Profession *</Label>
+                        <Input placeholder="e.g. Advocate, Teacher" value={newMember.profession} onChange={e => setNewMember({...newMember, profession: e.target.value})} className="h-11 rounded-xl" />
+                      </div>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 rounded-3xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
-                    <div className="space-y-2">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 rounded-3xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
+                    <div className="space-y-1">
                       <Label className="text-[10px] uppercase font-bold text-accent">Designation Category</Label>
                       <Select value={newMember.designationCategory} onValueChange={(val: any) => {
                         const isFixed = val === 'General Member' || val === 'Volunteer';
@@ -347,8 +357,8 @@ export default function MembersPage() {
                           designation: isFixed ? val : ''
                         });
                       }}>
-                        <SelectTrigger className="rounded-xl border-accent/20"><SelectValue /></SelectTrigger>
-                        <SelectContent>
+                        <SelectTrigger className="rounded-xl border-accent/20 bg-white dark:bg-slate-900"><SelectValue /></SelectTrigger>
+                        <SelectContent position="popper" className="z-[1000001] bg-white">
                           <SelectItem value="General Member">General Member</SelectItem>
                           <SelectItem value="Office-bearing Member">Office-bearing Member</SelectItem>
                           <SelectItem value="Volunteer">Volunteer</SelectItem>
@@ -356,9 +366,9 @@ export default function MembersPage() {
                       </Select>
                     </div>
                     {newMember.designationCategory === 'Office-bearing Member' && (
-                      <div className="space-y-2 animate-in fade-in slide-in-from-left-2">
-                        <Label className="text-[10px] uppercase font-bold text-accent">Specific Designation</Label>
-                        <Input placeholder="e.g. Secretary, Treasurer" value={newMember.designation} onChange={e => setNewMember({...newMember, designation: e.target.value})} className="rounded-xl border-accent/20" />
+                      <div className="space-y-1 animate-in fade-in slide-in-from-left-2">
+                        <Label className="text-[10px] uppercase font-bold text-accent">Manual Designation</Label>
+                        <Input placeholder="e.g. Secretary, Treasurer" value={newMember.designation} onChange={e => setNewMember({...newMember, designation: e.target.value})} className="rounded-xl border-accent/20 h-11" />
                       </div>
                     )}
                   </div>
@@ -366,13 +376,13 @@ export default function MembersPage() {
                   <div className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-3xl space-y-4 border border-slate-100 dark:border-slate-800 shadow-inner">
                     <div className="grid grid-cols-1 gap-4">
                       <div className="space-y-2">
-                        <Label>Member ID *</Label>
+                        <Label className="text-[10px] uppercase font-bold text-slate-400">Commissioned Member ID *</Label>
                         <div className="flex gap-2">
                           <Input 
                             placeholder="ABCDEF1234" 
                             value={newMember.memberId} 
                             onChange={e => setNewMember({...newMember, memberId: e.target.value.toUpperCase()})} 
-                            className="h-11 rounded-xl font-mono"
+                            className="h-11 rounded-xl font-mono bg-white dark:bg-slate-900"
                             maxLength={10}
                           />
                           <Button 
@@ -390,82 +400,82 @@ export default function MembersPage() {
                     
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div className="space-y-2">
-                        <Label>Duration</Label>
+                        <Label className="text-[10px] uppercase font-bold text-slate-400">Duration</Label>
                         <Select value={newMember.membershipDuration} onValueChange={val => setNewMember({...newMember, membershipDuration: val})}>
-                          <SelectTrigger><SelectValue /></SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="1 Year">1 Year</SelectItem>
-                            <SelectItem value="2 Years">2 Years</SelectItem>
-                            <SelectItem value="3 Years">3 Years</SelectItem>
+                          <SelectTrigger className="h-11 rounded-xl bg-white dark:bg-slate-900"><SelectValue /></SelectTrigger>
+                          <SelectContent position="popper" className="z-[1000001] bg-white">
+                            <SelectItem value="1 Year">1 Year Term</SelectItem>
+                            <SelectItem value="2 Years">2 Years Term</SelectItem>
+                            <SelectItem value="3 Years">3 Years Term</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
                       <div className="space-y-2">
-                        <Label>Issue Date *</Label>
+                        <Label className="text-[10px] uppercase font-bold text-slate-400">Issue Date *</Label>
                         <Popover>
                           <PopoverTrigger asChild>
-                            <Button variant="outline" className={cn("w-full justify-start text-left font-normal h-10 rounded-lg", !newMember.joiningDate && "text-muted-foreground")}>
+                            <Button variant="outline" className={cn("w-full justify-start text-left font-normal h-11 rounded-xl bg-white dark:bg-slate-900", !newMember.joiningDate && "text-muted-foreground")}>
                               <CalendarIcon className="mr-2 h-4 w-4" />
-                              {newMember.joiningDate ? newMember.joiningDate : "Pick a date"}
+                              {newMember.joiningDate ? newMember.joiningDate : "Pick date"}
                             </Button>
                           </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
+                          <PopoverContent className="w-auto p-0 z-[1000002]" align="start">
                             <Calendar mode="single" selected={parseMemberDate(newMember.joiningDate)} onSelect={(date) => setNewMember({...newMember, joiningDate: date ? format(date, "PPP") : ''})} initialFocus />
                           </PopoverContent>
                         </Popover>
                       </div>
                       <div className="space-y-2">
-                        <Label>Expiry Date</Label>
-                        <Input disabled value={newMember.expiryDate} className="bg-slate-100/50 dark:bg-slate-900/50" />
+                        <Label className="text-[10px] uppercase font-bold text-slate-400">Expiry Date</Label>
+                        <Input disabled value={newMember.expiryDate} className="h-11 rounded-xl bg-slate-100/50 dark:bg-slate-950/50" />
                       </div>
                     </div>
                   </div>
 
                   <div className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
-                       <div className="space-y-2"><Label>Email</Label><Input type="email" value={newMember.email} onChange={e => setNewMember({...newMember, email: e.target.value})} /></div>
-                       <div className="space-y-2"><Label>Phone</Label><Input value={newMember.phone} onChange={e => setNewMember({...newMember, phone: e.target.value})} /></div>
+                       <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">Official Email *</Label><Input type="email" placeholder="name@hrat.org" value={newMember.email} onChange={e => setNewMember({...newMember, email: e.target.value})} className="h-11 rounded-xl" /></div>
+                       <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">Phone Number *</Label><Input placeholder="+91" value={newMember.phone} onChange={e => setNewMember({...newMember, phone: e.target.value})} className="h-11 rounded-xl" /></div>
                     </div>
-                    <div className="space-y-2">
-                      <Label>Full Address</Label>
-                      <Input placeholder="House No, Village, Lane" value={newMember.address} onChange={e => setNewMember({...newMember, address: e.target.value})} />
+                    <div className="space-y-1">
+                      <Label className="text-[10px] uppercase font-bold text-slate-400">Verified Residential Address *</Label>
+                      <Input placeholder="House No, Village, Lane" value={newMember.address} onChange={e => setNewMember({...newMember, address: e.target.value})} className="h-11 rounded-xl" />
                     </div>
                     <div className="grid grid-cols-3 gap-4">
-                      <div className="space-y-2"><Label>Post Office</Label><Input value={newMember.postOffice} onChange={e => setNewMember({...newMember, postOffice: e.target.value})} /></div>
-                      <div className="space-y-2"><Label>Police Station</Label><Input value={newMember.policeStation} onChange={e => setNewMember({...newMember, policeStation: e.target.value})} /></div>
-                      <div className="space-y-2"><Label>PIN Code</Label><Input value={newMember.pinCode} onChange={e => setNewMember({...newMember, pinCode: e.target.value})} /></div>
+                      <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">Post Office</Label><Input placeholder="PO Name" value={newMember.postOffice} onChange={e => setNewMember({...newMember, postOffice: e.target.value})} className="h-11 rounded-xl" /></div>
+                      <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">Police Station</Label><Input placeholder="PS Name" value={newMember.policeStation} onChange={e => setNewMember({...newMember, policeStation: e.target.value})} className="h-11 rounded-xl" /></div>
+                      <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">PIN Code</Label><Input placeholder="6 digits" maxLength={6} value={newMember.pinCode} onChange={e => setNewMember({...newMember, pinCode: e.target.value})} className="h-11 rounded-xl font-mono" /></div>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label>Operational Level</Label>
+                      <div className="space-y-1">
+                        <Label className="text-[10px] uppercase font-bold text-slate-400">Operational Level</Label>
                         <Select value={newMember.level} onValueChange={(val: any) => setNewMember({...newMember, level: val, stateName: '', districtName: ''})}>
-                          <SelectTrigger><SelectValue /></SelectTrigger>
-                          <SelectContent><SelectItem value="National">Central Council</SelectItem><SelectItem value="State">State Level</SelectItem><SelectItem value="District">District Level</SelectItem></SelectContent>
+                          <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
+                          <SelectContent position="popper" className="z-[1000001] bg-white"><SelectItem value="National">Central Council</SelectItem><SelectItem value="State">State Level</SelectItem><SelectItem value="District">District Level</SelectItem></SelectContent>
                         </Select>
                       </div>
                       {(newMember.level === 'State' || newMember.level === 'District') && (
-                        <div className="space-y-2">
-                          <Label>State</Label>
+                        <div className="space-y-1 animate-in fade-in slide-in-from-top-1">
+                          <Label className="text-[10px] uppercase font-bold text-slate-400">Regional Chapter (State)</Label>
                           <Select value={newMember.stateName} onValueChange={val => setNewMember({...newMember, stateName: val, districtName: ''})}>
-                            <SelectTrigger><SelectValue placeholder="State" /></SelectTrigger>
-                            <SelectContent className="max-h-60">{states.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+                            <SelectTrigger className="h-11 rounded-xl bg-white dark:bg-slate-900"><SelectValue placeholder="State" /></SelectTrigger>
+                            <SelectContent position="popper" className="max-h-60 z-[1000001] bg-white">{states.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
                           </Select>
                         </div>
                       )}
                     </div>
                     {newMember.level === 'District' && newMember.stateName && (
-                      <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
-                        <Label>District</Label>
+                      <div className="space-y-1 animate-in fade-in slide-in-from-top-2">
+                        <Label className="text-[10px] uppercase font-bold text-slate-400">District Committee</Label>
                         <Select value={newMember.districtName} onValueChange={val => setNewMember({...newMember, districtName: val})}>
-                          <SelectTrigger><SelectValue placeholder="District" /></SelectTrigger>
-                          <SelectContent className="max-h-60">{(INDIA_DATA[newMember.stateName] || []).map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
+                          <SelectTrigger className="h-11 rounded-xl bg-white dark:bg-slate-900"><SelectValue placeholder="District" /></SelectTrigger>
+                          <SelectContent position="popper" className="max-h-60 z-[1000001] bg-white">{(INDIA_DATA[newMember.stateName] || []).map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
                         </Select>
                       </div>
                     )}
                   </div>
                 </div>
                 <DialogFooter>
-                  <Button onClick={handleAddMember} disabled={isAdding} className="w-full h-12 rounded-xl bg-primary text-white font-bold hover:bg-secondary hover:text-white transition-all">
+                  <Button onClick={handleAddMember} disabled={isAdding} className="w-full h-12 rounded-xl bg-primary text-white font-bold hover:bg-secondary hover:text-white transition-all shadow-xl shadow-primary/20">
                     {isAdding ? <Loader2 className="animate-spin mr-2" /> : <Plus className="w-4 h-4 mr-2" />}
                     Confirm Commissioning
                   </Button>
@@ -510,7 +520,7 @@ export default function MembersPage() {
                       {selectedState || "Filter by State"} <ChevronDown className="w-3 h-3 opacity-50" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent className="max-h-80 overflow-y-auto w-56">
+                  <DropdownMenuContent className="max-h-80 overflow-y-auto w-56 bg-white z-[1000001]">
                     {states.map((state) => (
                       <DropdownMenuItem key={state} onClick={() => handleStateSelect(state)} className="font-bold">{state}</DropdownMenuItem>
                     ))}
@@ -527,7 +537,7 @@ export default function MembersPage() {
                         {selectedDistrict || "Select District"} <ChevronDown className="w-3 h-3 opacity-50" />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent className="max-h-80 overflow-y-auto w-56">
+                    <DropdownMenuContent className="max-h-80 overflow-y-auto w-56 bg-white z-[1000001]">
                       {districts.map((district) => (
                         <DropdownMenuItem key={district} onClick={() => handleDistrictSelect(district)} className="font-bold">{district}</DropdownMenuItem>
                       ))}
