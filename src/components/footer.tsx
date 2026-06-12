@@ -18,7 +18,7 @@ export function Footer() {
                   src="/HRAT%20Logo.jpeg" 
                   alt="HRAT Logo" 
                   fill 
-                  className="object-contain brightness-0 invert dark:brightness-100 dark:invert-0"
+                  className="object-contain"
                 />
               </div>
               <div className="flex flex-col">
