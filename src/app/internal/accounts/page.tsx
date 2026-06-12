@@ -213,7 +213,7 @@ export default function AccountManagementPage() {
                       <Button 
                         type="submit" 
                         disabled={isSaving}
-                        className="w-full h-12 rounded-xl bg-accent text-primary font-bold shadow-lg transition-all hover:-translate-y-0.5"
+                        className="w-full h-12 rounded-xl bg-accent text-primary font-bold shadow-lg transition-all hover:bg-secondary hover:text-white hover:-translate-y-0.5"
                       >
                         {isSaving ? <Loader2 className="animate-spin mr-2" /> : <><Save className="w-4 h-4 mr-2" /> Commit Official State</>}
                       </Button>

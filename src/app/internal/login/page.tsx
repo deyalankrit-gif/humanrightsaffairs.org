@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useEffect } from 'react'
@@ -162,7 +161,7 @@ export default function InternalLoginPage() {
               </div>
               <Button 
                 type="submit" 
-                className="w-full bg-accent text-primary font-bold py-6 text-lg hover:bg-accent/90 shadow-xl shadow-accent/10 group" 
+                className="w-full bg-accent text-primary font-bold py-6 text-lg hover:bg-secondary hover:text-white shadow-xl shadow-accent/10 group transition-all" 
                 disabled={isLoading}
               >
                 {isLoading ? (

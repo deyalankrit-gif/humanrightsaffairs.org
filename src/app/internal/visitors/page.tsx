@@ -124,10 +124,10 @@ export default function WebsiteVisitorsPage() {
             </div>
             
             <div className="flex gap-2">
-              <Button onClick={() => handleExport('CSV')} variant="outline" className="bg-white/5 border-white/10 text-white h-10 rounded-xl text-[10px] font-bold uppercase tracking-widest gap-2">
+              <Button onClick={() => handleExport('CSV')} variant="outline" className="bg-white/5 border-white/10 text-white h-10 rounded-xl text-[10px] font-bold uppercase tracking-widest gap-2 hover:bg-white/10 hover:text-white transition-all">
                 <FileDown className="w-3.5 h-3.5" /> CSV
               </Button>
-              <Button onClick={() => handleExport('PDF')} className="bg-accent text-primary h-10 rounded-xl text-[10px] font-black uppercase tracking-widest gap-2 shadow-xl shadow-accent/20">
+              <Button onClick={() => handleExport('PDF')} className="bg-accent text-primary h-10 rounded-xl text-[10px] font-black uppercase tracking-widest gap-2 shadow-xl shadow-accent/20 hover:bg-secondary hover:text-white transition-all">
                 <Download className="w-3.5 h-3.5" /> Export PDF
               </Button>
             </div>
@@ -320,6 +320,7 @@ export default function WebsiteVisitorsPage() {
                    </p>
                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">National Data Security Cell • Human Rights Affairs Trust</p>
                 </div>
+              </div>
             </div>
           )}
         </div>

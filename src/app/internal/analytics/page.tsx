@@ -126,7 +126,7 @@ export default function DonationAnalyticsPage() {
             </div>
 
             <ManualDonationDialog>
-              <Button size="sm" className="bg-accent text-primary font-bold rounded-xl h-11 px-6 flex gap-2 hover:bg-accent/90 shadow-lg shadow-accent/20">
+              <Button size="sm" className="bg-accent text-primary font-bold rounded-xl h-11 px-6 flex gap-2 hover:bg-secondary hover:text-white transition-all shadow-lg shadow-accent/20">
                 <Plus className="w-4 h-4" /> Record Manual Donation
               </Button>
             </ManualDonationDialog>

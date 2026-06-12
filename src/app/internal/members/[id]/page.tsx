@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useEffect, useState } from 'react'
@@ -158,13 +157,13 @@ export default function MemberDetailsPage() {
             <div className="flex gap-2">
               {isEditing ? (
                 <>
-                  <Button size="sm" onClick={() => setIsEditing(false)} variant="outline" className="border-white/10 bg-white/5 text-white h-9 rounded-lg text-[10px] font-bold">Discard</Button>
-                  <Button size="sm" onClick={handleSave} disabled={isSaving} className="bg-accent text-primary font-bold h-9 rounded-lg text-[10px]">
+                  <Button size="sm" onClick={() => setIsEditing(false)} variant="outline" className="border-white/10 bg-white/5 text-white hover:bg-white/10 hover:text-white h-9 rounded-lg text-[10px] font-bold">Discard</Button>
+                  <Button size="sm" onClick={handleSave} disabled={isSaving} className="bg-accent text-primary font-bold h-9 rounded-lg text-[10px] hover:bg-secondary hover:text-white transition-all">
                     {isSaving ? <Loader2 className="w-3 h-3 animate-spin mr-1.5" /> : <Save className="w-3 h-3 mr-1.5" />} Save
                   </Button>
                 </>
               ) : (
-                <Button size="sm" onClick={() => setIsEditing(true)} className="bg-white/10 hover:bg-white/20 text-white border border-white/10 h-9 rounded-lg px-4 text-[10px] font-bold">
+                <Button size="sm" onClick={() => setIsEditing(true)} className="bg-white/10 hover:bg-white/20 text-white border border-white/10 h-9 rounded-lg px-4 text-[10px] font-bold transition-all">
                   <Edit className="w-3 h-3 mr-1.5" /> Modify Profile
                 </Button>
               )}
@@ -384,17 +383,17 @@ export default function MemberDetailsPage() {
                  </CardTitle>
                  <div className="space-y-3">
                    <Link href={`/internal/members/${memberId}/id-card`} className="w-full">
-                      <Button variant="outline" className="w-full justify-start rounded-xl h-12 border-white/10 bg-white/5 hover:bg-white/10 text-white hover:text-white font-bold text-[10px] uppercase tracking-widest gap-3 transition-all hover:translate-x-1">
+                      <Button variant="outline" className="w-full justify-start rounded-xl h-12 border-white/10 bg-white/5 hover:bg-accent hover:text-primary transition-all text-white hover:text-primary font-bold text-[10px] uppercase tracking-widest gap-3 hover:translate-x-1">
                          <IdCard className="w-4 h-4 text-accent" /> Digital ID Card
                       </Button>
                    </Link>
                    <Link href={`/internal/members/${memberId}/certificate`} className="w-full">
-                      <Button variant="outline" className="w-full justify-start rounded-xl h-12 border-white/10 bg-white/5 hover:bg-white/10 text-white hover:text-white font-bold text-[10px] uppercase tracking-widest gap-3 transition-all hover:translate-x-1">
+                      <Button variant="outline" className="w-full justify-start rounded-xl h-12 border-white/10 bg-white/5 hover:bg-secondary hover:text-white transition-all text-white hover:text-white font-bold text-[10px] uppercase tracking-widest gap-3 hover:translate-x-1">
                          <Award className="w-4 h-4 text-emerald-400" /> Introduction Certificate
                       </Button>
                    </Link>
                    <Link href={`/internal/members/${memberId}/appointment`} className="w-full">
-                      <Button variant="outline" className="w-full justify-start rounded-xl h-12 border-white/10 bg-white/5 hover:bg-white/10 text-white hover:text-white font-bold text-[10px] uppercase tracking-widest gap-3 transition-all hover:translate-x-1">
+                      <Button variant="outline" className="w-full justify-start rounded-xl h-12 border-white/10 bg-white/5 hover:bg-secondary hover:text-white transition-all text-white hover:text-white font-bold text-[10px] uppercase tracking-widest gap-3 hover:translate-x-1">
                          <FileText className="w-4 h-4 text-indigo-400" /> Appointment Letter
                       </Button>
                    </Link>

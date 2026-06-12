@@ -142,12 +142,24 @@ export default function InternalVendorsPage() {
             
             <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
               <DialogTrigger asChild>
-                <Button size="sm" className="bg-accent text-primary font-bold rounded-xl h-11 px-6 flex gap-2 shadow-lg">
+                <Button size="sm" className="bg-accent text-primary font-bold rounded-xl h-11 px-6 flex gap-2 hover:bg-secondary hover:text-white transition-all shadow-lg">
                   <Plus className="w-4 h-4" /> Register Vendor
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-2xl rounded-3xl"><DialogHeader><DialogTitle>Register Provider</DialogTitle></DialogHeader>
-                <Button onClick={handleAddVendor} disabled={isActionLoading} className="w-full h-11 rounded-xl mt-4">Commit to Registry</Button>
+              <DialogContent className="max-w-2xl rounded-3xl">
+                <DialogHeader><DialogTitle>Register Provider</DialogTitle></DialogHeader>
+                <div className="space-y-4 py-4">
+                   <div className="grid md:grid-cols-2 gap-4">
+                      <div className="space-y-1"><Label className="text-[10px] font-bold uppercase">Company Name</Label><Input value={newVendor.companyName} onChange={e => setNewVendor({...newVendor, companyName: e.target.value})} /></div>
+                      <div className="space-y-1"><Label className="text-[10px] font-bold uppercase">Vendor Type</Label>
+                        <Select value={newVendor.vendorType} onValueChange={(v: any) => setNewVendor({...newVendor, vendorType: v})}>
+                           <SelectTrigger><SelectValue /></SelectTrigger>
+                           <SelectContent className="bg-white"><SelectItem value="Legal">Legal</SelectItem><SelectItem value="Logistics">Logistics</SelectItem><SelectItem value="Printing">Printing</SelectItem><SelectItem value="IT Services">IT Services</SelectItem></SelectContent>
+                        </Select>
+                      </div>
+                   </div>
+                </div>
+                <Button onClick={handleAddVendor} disabled={isActionLoading} className="w-full h-11 rounded-xl mt-4 bg-primary text-white hover:bg-secondary transition-all font-bold">Commit to Registry</Button>
               </DialogContent>
             </Dialog>
           </div>
@@ -159,7 +171,17 @@ export default function InternalVendorsPage() {
           <div className="flex flex-col lg:flex-row items-center justify-between gap-4">
             <div className="flex flex-wrap items-center gap-1.5 p-1 bg-slate-50 rounded-lg">
               {["All", "Legal", "Logistics", "Printing"].map((t) => (
-                <Button key={t} variant={typeFilter === t ? "default" : "ghost"} onClick={() => setTypeFilter(t)} className={cn("h-7 rounded-md px-4 text-[10px] font-bold uppercase", typeFilter === t ? "bg-accent text-primary shadow-sm" : "text-slate-500")}>{t}</Button>
+                <Button 
+                  key={t} 
+                  variant={typeFilter === t ? "default" : "ghost"} 
+                  onClick={() => setTypeFilter(t)} 
+                  className={cn(
+                    "h-7 rounded-md px-4 text-[10px] font-bold uppercase transition-all", 
+                    typeFilter === t ? "bg-accent text-primary shadow-sm hover:bg-secondary hover:text-white" : "text-slate-500 hover:bg-slate-100"
+                  )}
+                >
+                  {t}
+                </Button>
               ))}
             </div>
             <div className="relative w-full max-w-xs">
@@ -173,7 +195,7 @@ export default function InternalVendorsPage() {
       <section className="py-8">
         <div className="container mx-auto px-4">
           {dataLoading ? (
-            <div className="text-center py-20"><Loader2 className="w-8 h-8 animate-spin text-accent mx-auto" /></div>
+            <div className="text-center py-20"><Loader2 className="w-10 h-10 animate-spin text-accent mx-auto" /></div>
           ) : (
             <div className="grid gap-4">
               {filtered.map((vendor) => (
@@ -194,8 +216,8 @@ export default function InternalVendorsPage() {
                              </div>
                         </div>
                         <div className="flex justify-end gap-2">
-                           <Button size="sm" variant="outline" className="h-8 rounded-lg text-[10px] font-bold border-slate-200">Edit</Button>
-                           <Button size="sm" variant="ghost" className="h-8 w-8 text-slate-300"><Trash2 className="w-3.5 h-3.5" /></Button>
+                           <Button size="sm" variant="outline" className="h-8 rounded-lg text-[10px] font-bold border-slate-200 hover:bg-secondary hover:text-white transition-colors">Edit</Button>
+                           <Button size="sm" variant="ghost" className="h-8 w-8 text-slate-300 hover:text-red-500 hover:bg-red-50 transition-colors"><Trash2 className="w-3.5 h-3.5" /></Button>
                         </div>
                       </div>
                     </div>
