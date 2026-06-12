@@ -73,10 +73,10 @@ export default function Home() {
             src="/Human%20R2.jpeg" 
             alt="Human Rights Heritage" 
             fill 
-            className="object-cover brightness-[0.15] scale-105"
+            className="object-cover brightness-[0.25] scale-105"
             priority
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-primary/60 via-primary/40 to-primary/80 dark:from-slate-950/80 dark:via-slate-950/60 dark:to-slate-950/90"></div>
+          <div className="absolute inset-0 bg-gradient-to-b from-primary/40 via-primary/20 to-primary/60 dark:from-slate-950/70 dark:via-slate-950/50 dark:to-slate-950/80"></div>
         </div>
 
         {/* Transparent Logo in Top Left of Hero */}
