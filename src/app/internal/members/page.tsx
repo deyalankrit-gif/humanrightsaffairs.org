@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useEffect, useState } from 'react'
@@ -34,7 +33,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar'
 import { format, parse, addYears } from 'date-fns'
 import { useToast } from '@/hooks/use-toast'
-import Link from 'link'
+import Link from 'next/link'
 import { INDIA_DATA } from '@/lib/india-data'
 import { cn } from '@/lib/utils'
 
