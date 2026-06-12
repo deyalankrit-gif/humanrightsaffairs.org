@@ -59,7 +59,7 @@ export default function InternalMembersDirectory() {
     designationCategory: 'General Member',
     designation: 'General Member',
     profession: '',
-    gender: 'Male',
+    gender: '',
     bloodGroup: '',
     email: '',
     phone: '',
@@ -130,9 +130,39 @@ export default function InternalMembersDirectory() {
   }
 
   const handleAddMember = async () => {
-    if (!newMember.name || !newMember.email || !newMember.memberId || !newMember.joiningDate) {
-      toast({ variant: "destructive", title: "Validation Error", description: "Name, Email, Member ID, and Issue Date are required." })
-      return
+    // Validation based on mandatory fields
+    const mandatoryFields = [
+      { val: newMember.name, label: "Full Name" },
+      { val: newMember.gender, label: "Gender" },
+      { val: newMember.designationCategory, label: "Designation Category" },
+      { val: newMember.memberId, label: "Member ID" },
+      { val: newMember.membershipDuration, label: "Duration" },
+      { val: newMember.joiningDate, label: "Issue Date" },
+      { val: newMember.phone, label: "Phone Number" },
+      { val: newMember.address, label: "Residential Address" },
+      { val: newMember.postOffice, label: "Post Office" },
+      { val: newMember.policeStation, label: "Police Station" },
+      { val: newMember.pinCode, label: "PIN Code" },
+      { val: newMember.level, label: "Operational Level" }
+    ];
+
+    const missing = mandatoryFields.find(f => !f.val);
+    if (missing) {
+      toast({ 
+        variant: "destructive", 
+        title: "Missing Information", 
+        description: `${missing.label} is mandatory for personnel commissioning.` 
+      });
+      return;
+    }
+
+    if (newMember.designationCategory === 'Office-bearing Member' && !newMember.designation) {
+      toast({ 
+        variant: "destructive", 
+        title: "Missing Information", 
+        description: `Specific designation is mandatory for Office-bearing Members.` 
+      });
+      return;
     }
 
     const idPattern = /^[A-Z]{6}[0-9]{4}$/;
@@ -152,7 +182,7 @@ export default function InternalMembersDirectory() {
       setIsAdding(false)
       setIsAddingDialogOpen(false)
       setNewMember({
-        name: '', designationCategory: 'General Member', designation: 'General Member', profession: '', gender: 'Male', bloodGroup: '',
+        name: '', designationCategory: 'General Member', designation: 'General Member', profession: '', gender: '', bloodGroup: '',
         email: '', phone: '', address: '', postOffice: '', policeStation: '', pinCode: '',
         level: 'National', status: 'Active',
         memberId: '', stateName: '', districtName: '', joiningDate: '', expiryDate: '',
@@ -222,14 +252,14 @@ export default function InternalMembersDirectory() {
                       </div>
                       <div className="md:col-span-2 space-y-4">
                         <div className="space-y-1">
-                          <Label className="text-[10px] uppercase font-bold text-slate-400">Full Name *</Label>
+                          <Label className="text-[10px] uppercase font-bold text-slate-400">Full Name <span className="text-red-500">*</span></Label>
                           <Input placeholder="Full Legal Name" value={newMember.name} onChange={e => setNewMember({...newMember, name: e.target.value})} className="h-11 rounded-xl" />
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                           <div className="space-y-1">
-                            <Label className="text-[10px] uppercase font-bold text-slate-400">Gender</Label>
+                            <Label className="text-[10px] uppercase font-bold text-slate-400">Gender <span className="text-red-500">*</span></Label>
                             <Select value={newMember.gender} onValueChange={(val: any) => setNewMember({...newMember, gender: val})}>
-                              <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
+                              <SelectTrigger className="h-11 rounded-xl"><SelectValue placeholder="Select" /></SelectTrigger>
                               <SelectContent position="popper" className="z-[1000001] bg-white"><SelectItem value="Male">Male</SelectItem><SelectItem value="Female">Female</SelectItem></SelectContent>
                             </Select>
                           </div>
@@ -244,7 +274,7 @@ export default function InternalMembersDirectory() {
                           </div>
                         </div>
                         <div className="space-y-1">
-                          <Label className="text-[10px] uppercase font-bold text-slate-400">Current Profession *</Label>
+                          <Label className="text-[10px] uppercase font-bold text-slate-400">Current Profession</Label>
                           <Input placeholder="e.g. Advocate, Teacher" value={newMember.profession} onChange={e => setNewMember({...newMember, profession: e.target.value})} className="h-11 rounded-xl" />
                         </div>
                       </div>
@@ -252,7 +282,7 @@ export default function InternalMembersDirectory() {
 
                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 rounded-3xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
                       <div className="space-y-1">
-                        <Label className="text-[10px] uppercase font-bold text-accent">Designation Category</Label>
+                        <Label className="text-[10px] uppercase font-bold text-accent">Designation Category <span className="text-red-500">*</span></Label>
                         <Select value={newMember.designationCategory} onValueChange={(val: any) => {
                           const isFixed = val === 'General Member' || val === 'Volunteer';
                           setNewMember({
@@ -271,7 +301,7 @@ export default function InternalMembersDirectory() {
                       </div>
                       {newMember.designationCategory === 'Office-bearing Member' && (
                         <div className="space-y-1 animate-in fade-in slide-in-from-left-2">
-                          <Label className="text-[10px] uppercase font-bold text-accent">Manual Designation</Label>
+                          <Label className="text-[10px] uppercase font-bold text-accent">Manual Designation <span className="text-red-500">*</span></Label>
                           <Input placeholder="e.g. Secretary, Treasurer" value={newMember.designation} onChange={e => setNewMember({...newMember, designation: e.target.value})} className="rounded-xl border-accent/20 h-11" />
                         </div>
                       )}
@@ -280,7 +310,7 @@ export default function InternalMembersDirectory() {
                    <div className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-3xl space-y-4 border border-slate-100 dark:border-slate-800 shadow-inner">
                       <div className="grid grid-cols-1 gap-4">
                         <div className="space-y-2">
-                          <Label className="text-[10px] uppercase font-bold text-slate-400">Commissioned Member ID *</Label>
+                          <Label className="text-[10px] uppercase font-bold text-slate-400">Commissioned Member ID <span className="text-red-500">*</span></Label>
                           <div className="flex gap-2">
                             <Input 
                               placeholder="ABCDEF1234" 
@@ -304,8 +334,8 @@ export default function InternalMembersDirectory() {
                       
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div className="space-y-2">
-                          <Label className="text-[10px] uppercase font-bold text-slate-400">Duration</Label>
-                          <Select value={newMember.membershipDuration} onValueChange={val => setNewMember({...newMember, membershipDuration: val})}>
+                          <Label className="text-[10px] uppercase font-bold text-slate-400">Duration <span className="text-red-500">*</span></Label>
+                          <Select value={newMember.membershipDuration} onValueChange={val => setNewMember({...newMember, membershipDuration: val as any})}>
                             <SelectTrigger className="h-11 rounded-xl bg-white dark:bg-slate-900"><SelectValue /></SelectTrigger>
                             <SelectContent position="popper" className="z-[1000001] bg-white">
                               <SelectItem value="1 Year">1 Year Term</SelectItem>
@@ -315,7 +345,7 @@ export default function InternalMembersDirectory() {
                           </Select>
                         </div>
                         <div className="space-y-2">
-                          <Label className="text-[10px] uppercase font-bold text-slate-400">Issue Date *</Label>
+                          <Label className="text-[10px] uppercase font-bold text-slate-400">Issue Date <span className="text-red-500">*</span></Label>
                           <Popover>
                             <PopoverTrigger asChild>
                               <Button variant="outline" className={cn("w-full justify-start text-left font-normal h-11 rounded-xl bg-white dark:bg-slate-900", !newMember.joiningDate && "text-muted-foreground")}>
@@ -337,21 +367,21 @@ export default function InternalMembersDirectory() {
 
                    <div className="space-y-4">
                       <div className="grid grid-cols-2 gap-4">
-                         <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">Official Email *</Label><Input type="email" placeholder="name@hrat.org" value={newMember.email} onChange={e => setNewMember({...newMember, email: e.target.value})} className="h-11 rounded-xl" /></div>
-                         <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">Phone Number *</Label><Input placeholder="+91" value={newMember.phone} onChange={e => setNewMember({...newMember, phone: e.target.value})} className="h-11 rounded-xl" /></div>
+                         <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">Official Email</Label><Input type="email" placeholder="name@hrat.org" value={newMember.email} onChange={e => setNewMember({...newMember, email: e.target.value})} className="h-11 rounded-xl" /></div>
+                         <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">Phone Number <span className="text-red-500">*</span></Label><Input placeholder="+91" value={newMember.phone} onChange={e => setNewMember({...newMember, phone: e.target.value})} className="h-11 rounded-xl" /></div>
                       </div>
                       <div className="space-y-1">
-                        <Label className="text-[10px] uppercase font-bold text-slate-400">Verified Residential Address *</Label>
+                        <Label className="text-[10px] uppercase font-bold text-slate-400">Verified Residential Address <span className="text-red-500">*</span></Label>
                         <Input placeholder="House No, Village, Lane" value={newMember.address} onChange={e => setNewMember({...newMember, address: e.target.value})} className="h-11 rounded-xl" />
                       </div>
                       <div className="grid grid-cols-3 gap-4">
-                        <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">Post Office</Label><Input placeholder="PO Name" value={newMember.postOffice} onChange={e => setNewMember({...newMember, postOffice: e.target.value})} className="h-11 rounded-xl" /></div>
-                        <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">Police Station</Label><Input placeholder="PS Name" value={newMember.policeStation} onChange={e => setNewMember({...newMember, policeStation: e.target.value})} className="h-11 rounded-xl" /></div>
-                        <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">PIN Code</Label><Input placeholder="6 digits" maxLength={6} value={newMember.pinCode} onChange={e => setNewMember({...newMember, pinCode: e.target.value})} className="h-11 rounded-xl font-mono" /></div>
+                        <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">Post Office <span className="text-red-500">*</span></Label><Input placeholder="PO Name" value={newMember.postOffice} onChange={e => setNewMember({...newMember, postOffice: e.target.value})} className="h-11 rounded-xl" /></div>
+                        <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">Police Station <span className="text-red-500">*</span></Label><Input placeholder="PS Name" value={newMember.policeStation} onChange={e => setNewMember({...newMember, policeStation: e.target.value})} className="h-11 rounded-xl" /></div>
+                        <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">PIN Code <span className="text-red-500">*</span></Label><Input placeholder="6 digits" maxLength={6} value={newMember.pinCode} onChange={e => setNewMember({...newMember, pinCode: e.target.value})} className="h-11 rounded-xl font-mono" /></div>
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1">
-                          <Label className="text-[10px] uppercase font-bold text-slate-400">Operational Level</Label>
+                          <Label className="text-[10px] uppercase font-bold text-slate-400">Operational Level <span className="text-red-500">*</span></Label>
                           <Select value={newMember.level} onValueChange={(val: any) => setNewMember({...newMember, level: val, stateName: '', districtName: ''})}>
                             <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
                             <SelectContent position="popper" className="z-[1000001] bg-white"><SelectItem value="National">Central Council</SelectItem><SelectItem value="State">State Level</SelectItem><SelectItem value="District">District Level</SelectItem></SelectContent>
