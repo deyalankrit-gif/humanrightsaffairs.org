@@ -397,14 +397,16 @@ export default function InternalApplicationsPage() {
                         <div className="lg:col-span-3 space-y-4">
                           <div className="flex flex-col md:flex-row md:items-center gap-3">
                             <h3 className="text-xl font-bold text-primary dark:text-white leading-tight">{a.name}</h3>
-                            <Button 
-                              variant="outline" 
-                              size="sm" 
-                              onClick={() => handleStartCommissioning(a)}
-                              className="h-7 px-3 text-[10px] font-black uppercase tracking-widest text-emerald-600 border-emerald-100 bg-emerald-50/50 hover:bg-emerald-100 transition-all rounded-full"
-                            >
-                              <UserPlus className="w-3 h-3 mr-1.5" /> Convert to New Member
-                            </Button>
+                            {a.status === 'Approved' && (
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                onClick={() => handleStartCommissioning(a)}
+                                className="h-7 px-3 text-[10px] font-black uppercase tracking-widest text-emerald-600 border-emerald-100 bg-emerald-50/50 hover:bg-emerald-100 transition-all rounded-full"
+                              >
+                                <UserPlus className="w-3 h-3 mr-1.5" /> Convert to New Member
+                              </Button>
+                            )}
                           </div>
                           
                           <div className="flex flex-wrap gap-3 text-[10px] font-bold text-slate-500 mt-1">
