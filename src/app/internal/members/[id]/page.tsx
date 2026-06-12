@@ -206,11 +206,24 @@ export default function MemberDetailsPage() {
                  
                  {isEditing ? (
                    <div className="space-y-6">
-                     <div className="grid md:grid-cols-3 gap-4">
+                     <div className="grid md:grid-cols-2 gap-4">
                        <div className="space-y-1">
                          <Label className="text-[10px] uppercase font-bold text-slate-400">Full Name</Label>
                          <Input value={editForm.name} onChange={e => setEditForm({...editForm, name: e.target.value})} />
                        </div>
+                       <div className="space-y-1">
+                         <Label className="text-[10px] uppercase font-bold text-slate-400">Member ID</Label>
+                         <Input 
+                            value={editForm.memberId || ''} 
+                            onChange={e => setEditForm({...editForm, memberId: e.target.value.toUpperCase()})} 
+                            placeholder="ABCDEF1234"
+                            maxLength={10}
+                            className="font-mono"
+                         />
+                       </div>
+                     </div>
+
+                     <div className="grid md:grid-cols-2 gap-4">
                        <div className="space-y-1">
                          <Label className="text-[10px] uppercase font-bold text-slate-400">Gender</Label>
                          <Select value={editForm.gender} onValueChange={(val: any) => setEditForm({...editForm, gender: val})}>
@@ -238,9 +251,9 @@ export default function MemberDetailsPage() {
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="1 Year">1 Year</SelectItem>
-                                <SelectItem value="2 Years">2 Years</SelectItem>
-                                <SelectItem value="3 Years">3 Years</SelectItem>
+                                <SelectItem value="1 Year">1 Year Term</SelectItem>
+                                <SelectItem value="2 Years">2 Years Term</SelectItem>
+                                <SelectItem value="3 Years">3 Years Term</SelectItem>
                               </SelectContent>
                             </Select>
                           </div>
