@@ -174,7 +174,7 @@ export default function TerminatedMembersPage() {
           </div>
           <h1 className="text-5xl md:text-7xl font-headline font-bold mb-6">Terminated <span className="text-red-500 italic">Memberships</span></h1>
           <p className="text-slate-400 max-w-2xl mx-auto text-lg mb-8">
-            This directory lists individuals who are no longer authorized to represent the Human Rights Affairs Trust (JusticeShield).
+            This directory lists individuals who are no longer authorized to represent the Human Rights Affairs Trust (Justice Shield).
           </p>
 
           {isAdmin && (
@@ -396,7 +396,7 @@ export default function TerminatedMembersPage() {
                           <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
                             <Dialog>
                               <DialogTrigger asChild>
-                                <Button onClick={() => setEditMember(member)} size="icon" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white hover:bg-secondary hover:text-white rounded-full shadow-lg border border-white/20">
+                                <Button onClick={() => setEditMember(member)} size="icon" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white hover:bg-secondary hover:text-white rounded-full shadow-lg border border-white/20">
                                   <Edit className="w-4 h-4" />
                                 </Button>
                               </DialogTrigger>

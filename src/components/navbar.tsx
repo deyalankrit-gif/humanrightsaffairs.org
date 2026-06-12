@@ -57,7 +57,7 @@ export function Navbar() {
         </div>
         <div className="flex flex-col">
           <span className="font-headline font-bold text-base md:text-lg leading-none">HRAT</span>
-          <span className="text-[9px] font-bold text-accent uppercase tracking-widest">JusticeShield</span>
+          <span className="text-[9px] font-bold text-accent uppercase tracking-widest">Justice Shield</span>
         </div>
       </Link>
 

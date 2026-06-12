@@ -94,7 +94,7 @@ export function AppSidebar() {
           </div>
           <div className="flex flex-col group-data-[collapsible=icon]:hidden">
             <span className="font-headline font-bold text-lg leading-none text-sidebar-foreground">HRAT</span>
-            <span className="text-[10px] font-bold text-accent uppercase tracking-widest">JusticeShield</span>
+            <span className="text-[10px] font-bold text-accent uppercase tracking-widest">Justice Shield</span>
           </div>
         </Link>
       </SidebarHeader>

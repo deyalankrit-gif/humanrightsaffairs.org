@@ -1,4 +1,3 @@
-
 import type {Metadata} from 'next';
 import './globals.css';
 import { FirebaseClientProvider } from '@/firebase';
@@ -8,7 +7,7 @@ import { ThemeProvider } from '@/components/theme-provider';
 import { LayoutWrapper } from '@/components/layout-wrapper';
 
 export const metadata: Metadata = {
-  title: 'Human Rights Affairs Trust (JusticeShield)',
+  title: 'Human Rights Affairs Trust (Justice Shield)',
   description: 'Human Rights Affairs Trust (Justice Shield) is a Central Government Registered Human Rights Organization in India (Reg. No. WB/2025/0762605). Dedicated to constitutional literacy & legal aid & Social Justice.',
 };
 

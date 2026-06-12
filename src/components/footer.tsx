@@ -23,7 +23,7 @@ export function Footer() {
               </div>
               <div className="flex flex-col">
                 <span className="font-headline font-bold text-xl leading-none">HRAT</span>
-                <span className="text-[10px] font-bold tracking-widest text-accent uppercase">JusticeShield</span>
+                <span className="text-[10px] font-bold tracking-widest text-accent uppercase">Justice Shield</span>
               </div>
             </Link>
             <p className="text-primary-foreground/80 text-sm leading-relaxed">
@@ -128,7 +128,7 @@ export function Footer() {
         </div>
 
         <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-primary-foreground/60 text-xs">© 2024 Human Rights Affairs Trust (JusticeShield). Registered with Central Government of India.</p>
+          <p className="text-primary-foreground/60 text-xs">© 2024 Human Rights Affairs Trust (Justice Shield). Registered with Central Government of India.</p>
           <div className="flex items-center gap-6">
              <div className="bg-white/5 px-4 py-2 rounded-lg border border-white/10 flex items-center gap-2">
                <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>

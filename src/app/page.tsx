@@ -86,7 +86,7 @@ export default function Home() {
           </div>
           <div className="flex flex-col text-white">
             <span className="font-headline font-bold text-2xl leading-none tracking-tight">HRAT</span>
-            <span className="text-[10px] font-bold text-accent uppercase tracking-[0.3em]">JusticeShield</span>
+            <span className="text-[10px] font-bold text-accent uppercase tracking-[0.3em]">Justice Shield</span>
           </div>
         </div>
 
@@ -149,7 +149,7 @@ export default function Home() {
                   { icon: <Shield className="w-4 h-4 md:w-5 md:h-5 text-indigo-400" />, count: "100%", label: "Secure Data Handling" },
                   { icon: <HeartHandshake className="w-4 h-4 md:w-5 md:h-5 text-pink-400" />, count: "20+", label: "National Centers" }
                 ].map((stat, i) => (
-                  <div key={i} className="flex flex-col sm:flex-row items-center gap-2 md:gap-3 text-white hover:opacity-80 transition-opacity cursor-default justify-center">
+                  <div className="flex flex-col sm:flex-row items-center gap-2 md:gap-3 text-white hover:opacity-80 transition-opacity cursor-default justify-center" key={i}>
                     <div className="p-2 md:p-3 bg-white/5 rounded-lg md:rounded-xl shrink-0">{stat.icon}</div>
                     <div className="space-y-0 text-center sm:text-left">
                       <p className="text-xs md:sm font-bold font-headline leading-none">{stat.count}</p>
