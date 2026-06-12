@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from "react"
@@ -55,7 +54,7 @@ const publicLinks = [
 
 const adminLinks = [
   { name: 'Analytics', href: '/internal/analytics', icon: LayoutDashboard },
-  { name: 'Visitors', href: '/internal/visitors', icon: BarChart3 },
+  { name: 'Website Visitor', href: '/internal/visitors', icon: BarChart3 },
   { name: 'Accounts', href: '/internal/accounts', icon: Wallet },
   { name: 'Expenses', href: '/internal/expenses', icon: TrendingDown },
   { name: 'Applications', href: '/internal/applications', icon: FileText },

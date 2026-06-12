@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useEffect, useState, useMemo } from 'react'
@@ -45,7 +44,7 @@ import {
 } from 'recharts'
 import { cn } from '@/lib/utils'
 
-export default function VisitorAnalyticsPage() {
+export default function WebsiteVisitorPage() {
   const { user, loading: authLoading } = useUser()
   const router = useRouter()
   const db = useFirestore()
@@ -100,8 +99,7 @@ export default function VisitorAnalyticsPage() {
   }, [visitors])
 
   const handleExport = (format: 'PDF' | 'Excel' | 'CSV') => {
-    // In a real implementation, this would trigger a report generation service
-    alert(`Generating Visitor Analytics Report in ${format} format...`)
+    alert(`Generating Website Visitor Report in ${format} format...`)
   }
 
   if (authLoading || !user) {
@@ -124,7 +122,7 @@ export default function VisitorAnalyticsPage() {
               <div className="inline-flex items-center gap-2 bg-accent/20 text-accent px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-[0.2em] border border-accent/30">
                 <ShieldCheck className="w-2.5 h-2.5" /> Traffic Oversight
               </div>
-              <h1 className="text-3xl md:text-4xl font-headline font-bold">Visitor <span className="text-accent italic">Analytics</span></h1>
+              <h1 className="text-3xl md:text-4xl font-headline font-bold">Website <span className="text-accent italic">Visitor</span></h1>
               <p className="text-slate-400 text-[11px] max-w-xl">Comprehensive monitor of website engagement and geographic reach.</p>
             </div>
             
@@ -149,7 +147,6 @@ export default function VisitorAnalyticsPage() {
             <div className="text-center py-32"><Loader2 className="w-12 h-12 animate-spin text-accent mx-auto mb-4" /><p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Aggregating Traffic Data...</p></div>
           ) : (
             <div className="space-y-8">
-              {/* Summary Highlights */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                  {[
                    { label: "Total Sessions", value: stats.total, icon: <Users className="w-4 h-4" />, color: "text-blue-500", trend: "+14%" },
@@ -170,7 +167,6 @@ export default function VisitorAnalyticsPage() {
                  ))}
               </div>
 
-              {/* Charts Row */}
               <div className="grid lg:grid-cols-3 gap-6">
                 <Card className="lg:col-span-2 border-none shadow-sm rounded-3xl bg-white dark:bg-slate-900 p-6">
                    <CardHeader className="p-0 mb-6">
@@ -235,7 +231,6 @@ export default function VisitorAnalyticsPage() {
                 </Card>
               </div>
 
-              {/* Geographic Tracking Section */}
               <div className="grid lg:grid-cols-4 gap-6">
                 <Card className="lg:col-span-1 border-none shadow-sm rounded-3xl bg-white dark:bg-slate-900 p-6">
                    <CardHeader className="p-0 mb-6">
@@ -261,7 +256,6 @@ export default function VisitorAnalyticsPage() {
                    </div>
                 </Card>
 
-                {/* Main Visitor Table */}
                 <Card className="lg:col-span-3 border-none shadow-sm rounded-3xl overflow-hidden bg-white dark:bg-slate-900">
                    <CardHeader className="p-6 border-b border-slate-50 dark:border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
                       <div>
@@ -344,7 +338,6 @@ export default function VisitorAnalyticsPage() {
                 </Card>
               </div>
 
-              {/* Privacy Footer Disclaimer */}
               <div className="bg-white dark:bg-slate-900 p-8 rounded-[3rem] border border-slate-100 dark:border-slate-800 text-center space-y-4 shadow-sm">
                  <ShieldCheck className="w-10 h-10 text-emerald-500 mx-auto" />
                  <h3 className="text-xl font-headline font-bold text-primary dark:text-white">Security & Privacy Governance</h3>
