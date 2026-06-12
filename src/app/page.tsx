@@ -87,6 +87,7 @@ export default function Home() {
           <div className="flex flex-col text-white">
             <span className="font-headline font-bold text-2xl leading-none tracking-tight">HRAT</span>
             <span className="text-[10px] font-bold text-accent uppercase tracking-[0.3em]">Justice Shield</span>
+            <span className="text-[12px] font-bold text-white mt-1 border-t border-white/10 pt-1">মানবাধিকার সংগঠন</span>
           </div>
         </div>
 
