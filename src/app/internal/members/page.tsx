@@ -378,7 +378,7 @@ export default function InternalMembersDirectory() {
                       )}
                    </div>
                 </div>
-                <DialogFooter><Button onClick={handleAddMember} disabled={isAdding} className="w-full h-12 rounded-xl bg-accent text-primary font-bold text-lg shadow-xl shadow-accent/20">Establish Official Record</Button></DialogFooter>
+                <DialogFooter><Button onClick={handleAddMember} disabled={isAdding} className="w-full h-12 rounded-xl bg-accent text-primary font-bold text-lg shadow-xl shadow-accent/20 hover:bg-secondary hover:text-white transition-all">Establish Official Record</Button></DialogFooter>
               </DialogContent>
             </Dialog>
           </div>
@@ -390,7 +390,17 @@ export default function InternalMembersDirectory() {
           <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
             <div className="flex flex-wrap gap-1.5 p-1 bg-slate-50 dark:bg-slate-800 rounded-lg">
               {["All", "National", "State", "District"].map((lvl) => (
-                <Button key={lvl} variant={levelFilter === lvl ? "default" : "ghost"} onClick={() => setLevelFilter(lvl)} className={cn("h-7 rounded-md px-4 text-[10px] font-bold uppercase", levelFilter === lvl ? "bg-accent text-primary shadow-sm" : "text-slate-500")}>{lvl}</Button>
+                <Button 
+                  key={lvl} 
+                  variant={levelFilter === lvl ? "default" : "ghost"} 
+                  onClick={() => setLevelFilter(lvl)} 
+                  className={cn(
+                    "h-7 rounded-md px-4 text-[10px] font-bold uppercase transition-colors", 
+                    levelFilter === lvl ? "bg-accent text-primary shadow-sm hover:bg-secondary hover:text-white" : "text-slate-500 hover:bg-slate-100"
+                  )}
+                >
+                  {lvl}
+                </Button>
               ))}
             </div>
             <div className="relative w-full max-w-xs">
@@ -425,7 +435,7 @@ export default function InternalMembersDirectory() {
                           </div>
                         </div>
                         <div className="flex justify-end gap-2">
-                          <Link href={`/internal/members/${member.id}`}><Button size="sm" className="h-8 rounded-lg text-[10px] px-3 font-bold">Profile</Button></Link>
+                          <Link href={`/internal/members/${member.id}`}><Button size="sm" className="h-8 rounded-lg text-[10px] px-3 font-bold hover:bg-secondary hover:text-white transition-colors">Profile</Button></Link>
                         </div>
                       </div>
                     </div>

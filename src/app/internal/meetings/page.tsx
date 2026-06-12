@@ -275,7 +275,7 @@ export default function InternalMeetingsManagement() {
             
             <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
               <DialogTrigger asChild>
-                <Button size="sm" className="bg-accent text-primary font-bold rounded-xl h-11 px-6 shadow-lg hover:bg-accent/90">
+                <Button size="sm" className="bg-accent text-primary font-bold rounded-xl h-11 px-6 shadow-lg hover:bg-secondary hover:text-white transition-all">
                   <Plus className="w-4 h-4 mr-2" /> Schedule Assembly
                 </Button>
               </DialogTrigger>
@@ -387,7 +387,7 @@ export default function InternalMeetingsManagement() {
                     </div>
                  </div>
                  <DialogFooter>
-                   <Button onClick={handleAddMeeting} disabled={isActionLoading} className="w-full h-11 rounded-xl bg-accent text-primary font-bold hover:bg-accent/90 shadow-lg">
+                   <Button onClick={handleAddMeeting} disabled={isActionLoading} className="w-full h-11 rounded-xl bg-accent text-primary font-bold hover:bg-secondary hover:text-white transition-all shadow-lg">
                      {isActionLoading ? <Loader2 className="animate-spin mr-2" /> : "Publish Record"}
                    </Button>
                  </DialogFooter>
@@ -402,7 +402,17 @@ export default function InternalMeetingsManagement() {
           <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
             <div className="flex flex-wrap gap-1.5 p-1 bg-slate-100 dark:bg-slate-800 rounded-lg">
               {["All", "National", "State", "District"].map((lvl) => (
-                <Button key={lvl} variant={levelFilter === lvl ? "default" : "ghost"} onClick={() => setLevelFilter(lvl)} className={cn("h-7 rounded-md px-4 text-[10px] font-bold uppercase", levelFilter === lvl ? "bg-accent text-primary shadow-sm" : "text-slate-500")}>{lvl}</Button>
+                <Button 
+                  key={lvl} 
+                  variant={levelFilter === lvl ? "default" : "ghost"} 
+                  onClick={() => setLevelFilter(lvl)} 
+                  className={cn(
+                    "h-7 rounded-md px-4 text-[10px] font-bold uppercase transition-colors", 
+                    levelFilter === lvl ? "bg-accent text-primary shadow-sm hover:bg-secondary hover:text-white" : "text-slate-500 hover:bg-slate-200"
+                  )}
+                >
+                  {lvl}
+                </Button>
               ))}
             </div>
             <div className="relative w-full max-w-xs">
@@ -448,7 +458,7 @@ export default function InternalMeetingsManagement() {
                                setEditMeeting(meeting);
                                setIsEditDialogOpen(true);
                              }} 
-                             className="h-8 rounded-lg text-[10px] font-bold px-3 hover:bg-accent/10 hover:text-accent border-slate-200"
+                             className="h-8 rounded-lg text-[10px] font-bold px-3 hover:bg-secondary hover:text-white border-slate-200 transition-colors"
                            >
                              <FileText className="w-3 h-3 mr-1" /> Minutes
                            </Button>
@@ -466,7 +476,7 @@ export default function InternalMeetingsManagement() {
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
                                   <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
-                                  <AlertDialogAction onClick={() => handleDeleteMeeting(meeting.id)} className="bg-red-500 hover:bg-red-600 rounded-xl border-none text-white font-bold">Confirm Delete</AlertDialogAction>
+                                  <AlertDialogAction onClick={() => handleDeleteMeeting(meeting.id)} className="bg-red-500 hover:bg-red-600 rounded-xl border-none text-white font-bold transition-colors">Confirm Delete</AlertDialogAction>
                                 </AlertDialogFooter>
                               </AlertDialogContent>
                            </AlertDialog>
@@ -592,7 +602,7 @@ export default function InternalMeetingsManagement() {
             </div>
           )}
           <DialogFooter>
-            <Button onClick={handleUpdateMeeting} disabled={isActionLoading} className="w-full h-11 rounded-xl bg-primary text-white font-bold hover:bg-primary/90">
+            <Button onClick={handleUpdateMeeting} disabled={isActionLoading} className="w-full h-11 rounded-xl bg-primary text-white font-bold hover:bg-secondary hover:text-white transition-all">
               {isActionLoading ? <Loader2 className="animate-spin mr-2" /> : "Commit Changes"}
             </Button>
           </DialogFooter>

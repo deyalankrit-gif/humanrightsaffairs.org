@@ -152,7 +152,7 @@ export default function ExpensesManagementPage() {
         <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="space-y-1"><TrendingDown className="text-red-400 w-8 h-8" /><h1 className="text-3xl font-headline font-bold">Organizational <span className="text-red-500 italic">Expenses</span></h1></div>
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-            <DialogTrigger asChild><Button size="sm" className="bg-red-500 text-white font-bold rounded-xl h-11 px-6 flex gap-2 shadow-lg"><Plus className="w-4 h-4" /> Log Expense</Button></DialogTrigger>
+            <DialogTrigger asChild><Button size="sm" className="bg-red-500 text-white font-bold rounded-xl h-11 px-6 flex gap-2 shadow-lg hover:bg-red-600 transition-colors"><Plus className="w-4 h-4" /> Log Expense</Button></DialogTrigger>
             <DialogContent className="max-w-xl rounded-3xl max-h-[90vh] overflow-y-auto">
                <DialogHeader><DialogTitle>Record Expense</DialogTitle></DialogHeader>
                <div className="space-y-4 py-4">
@@ -161,12 +161,12 @@ export default function ExpensesManagementPage() {
                     <div className="space-y-1"><Label className="text-[10px] font-bold uppercase">Category</Label>
                       <Select value={newExpense.category} onValueChange={(val: any) => setNewExpense({...newExpense, category: val})}>
                         <SelectTrigger><SelectValue /></SelectTrigger>
-                        <SelectContent position="popper" className="z-[1000001]">{expenseCategories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+                        <SelectContent position="popper" className="z-[1000001] bg-white">{expenseCategories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
                       </Select>
                     </div>
                     <div className="space-y-1"><Label className="text-[10px] font-bold uppercase">Date</Label>
                        <Popover>
-                        <PopoverTrigger asChild><Button variant="outline" className="w-full h-10 rounded-lg">{newExpense.date}</Button></PopoverTrigger>
+                        <PopoverTrigger asChild><Button variant="outline" className="w-full h-10 rounded-lg hover:bg-slate-50">{newExpense.date}</Button></PopoverTrigger>
                         <PopoverContent className="w-auto p-0 z-[1000002]" align="start"><Calendar mode="single" selected={parseExpenseDate(newExpense.date)} onSelect={(date) => setNewExpense({...newExpense, date: date ? format(date, "PPP") : ''})} initialFocus /></PopoverContent>
                       </Popover>
                     </div>
@@ -174,11 +174,11 @@ export default function ExpensesManagementPage() {
                  <div className="space-y-1"><Label className="text-[10px] font-bold uppercase">Payment Channel</Label>
                     <Select value={newExpense.paymentMethod} onValueChange={(val: any) => setNewExpense({...newExpense, paymentMethod: val})}>
                       <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent position="popper" className="z-[1000001]">{paymentMethods.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}</SelectContent>
+                      <SelectContent position="popper" className="z-[1000001] bg-white">{paymentMethods.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}</SelectContent>
                     </Select>
                  </div>
                </div>
-               <DialogFooter><Button onClick={handleAddExpense} disabled={isActionLoading} className="w-full h-11 rounded-xl bg-red-500 mt-4 text-white">Commit to Ledger</Button></DialogFooter>
+               <DialogFooter><Button onClick={handleAddExpense} disabled={isActionLoading} className="w-full h-11 rounded-xl bg-red-500 mt-4 text-white hover:bg-red-600 transition-colors">Commit to Ledger</Button></DialogFooter>
             </DialogContent>
           </Dialog>
         </div>
@@ -189,9 +189,9 @@ export default function ExpensesManagementPage() {
           <div className="flex gap-2">
             <Select value={categoryFilter} onValueChange={setCategoryFilter}>
               <SelectTrigger className="w-40"><SelectValue placeholder="Category" /></SelectTrigger>
-              <SelectContent position="popper" className="z-[1000001]"><SelectItem value="All">All Categories</SelectItem>{expenseCategories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+              <SelectContent position="popper" className="z-[1000001] bg-white"><SelectItem value="All">All Categories</SelectItem>{expenseCategories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
             </Select>
-            <Button variant="ghost" onClick={() => { setSearch(''); setCategoryFilter('All'); }}><FilterX className="w-4 h-4" /></Button>
+            <Button variant="ghost" onClick={() => { setSearch(''); setCategoryFilter('All'); }} className="hover:bg-slate-100"><FilterX className="w-4 h-4" /></Button>
           </div>
           <Input placeholder="Search records..." className="max-w-xs" value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
@@ -217,8 +217,8 @@ export default function ExpensesManagementPage() {
                              <p className="text-xs text-slate-500">{expense.payee} • {expense.date}</p>
                         </div>
                         <div className="flex gap-2">
-                           <Button onClick={() => { setEditExpense(expense); setIsEditDialogOpen(true); }} variant="outline" size="sm" className="h-8 rounded-lg text-[10px] font-bold"><Edit className="w-3 h-3 mr-1" /> Edit</Button>
-                           <Button variant="ghost" size="sm" onClick={() => handleDelete(expense.id)} className="h-8 rounded-lg text-slate-400 hover:text-red-500"><Trash2 className="w-3 h-3" /></Button>
+                           <Button onClick={() => { setEditExpense(expense); setIsEditDialogOpen(true); }} variant="outline" size="sm" className="h-8 rounded-lg text-[10px] font-bold hover:bg-secondary hover:text-white transition-colors"><Edit className="w-3 h-3 mr-1" /> Edit</Button>
+                           <Button variant="ghost" size="sm" onClick={() => handleDelete(expense.id)} className="h-8 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors"><Trash2 className="w-3 h-3" /></Button>
                         </div>
                       </div>
                     </div>
@@ -240,17 +240,17 @@ export default function ExpensesManagementPage() {
                 <div className="space-y-1"><Label className="text-[10px] font-bold uppercase">Category</Label>
                   <Select value={editExpense.category} onValueChange={(val: any) => setEditExpense({...editExpense, category: val})}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent position="popper" className="z-[1000001]">{expenseCategories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+                    <SelectContent position="popper" className="z-[1000001] bg-white">{expenseCategories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-1"><Label className="text-[10px] font-bold uppercase">Status</Label>
                   <Select value={editExpense.status} onValueChange={(val: any) => setEditExpense({...editExpense, status: val})}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent position="popper" className="z-[1000001]"><SelectItem value="Paid">Paid</SelectItem><SelectItem value="Pending">Pending</SelectItem></SelectContent>
+                    <SelectContent position="popper" className="z-[1000001] bg-white"><SelectItem value="Paid">Paid</SelectItem><SelectItem value="Pending">Pending</SelectItem></SelectContent>
                   </Select>
                 </div>
               </div>
-              <Button onClick={handleUpdate} disabled={isActionLoading} className="w-full h-11 rounded-xl bg-primary text-primary-foreground">Commit Changes</Button>
+              <Button onClick={handleUpdate} disabled={isActionLoading} className="w-full h-11 rounded-xl bg-primary text-primary-foreground font-bold hover:bg-secondary hover:text-white transition-all">Commit Changes</Button>
             </div>
           )}
         </DialogContent>

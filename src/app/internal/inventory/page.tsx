@@ -146,13 +146,25 @@ export default function InventoryManagementPage() {
             
             <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
               <DialogTrigger asChild>
-                <Button size="sm" className="bg-accent text-primary font-bold rounded-xl h-11 px-6 flex gap-2 shadow-lg">
+                <Button size="sm" className="bg-accent text-primary font-bold rounded-xl h-11 px-6 flex gap-2 shadow-lg hover:bg-secondary hover:text-white transition-all">
                   <Plus className="w-4 h-4" /> New Material Entry
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-w-md rounded-3xl">
                 <DialogHeader><DialogTitle>Add Supply Item</DialogTitle></DialogHeader>
-                <Button onClick={handleAddItem} disabled={isActionLoading} className="w-full h-11 rounded-xl mt-4">Establish Record</Button>
+                <div className="space-y-4 py-4">
+                  <div className="space-y-1"><Label className="text-xs font-bold uppercase">Item Name</Label><Input value={newItem.name} onChange={e => setNewItem({...newItem, name: e.target.value})} className="rounded-xl" /></div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1"><Label className="text-xs font-bold uppercase">Category</Label>
+                      <Select value={newItem.category} onValueChange={(val: any) => setNewItem({...newItem, category: val})}>
+                        <SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>
+                        <SelectContent className="bg-white">{categories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1"><Label className="text-xs font-bold uppercase">Initial Stock</Label><Input type="number" value={newItem.currentStock} onChange={e => setNewItem({...newItem, currentStock: Number(e.target.value)})} className="rounded-xl" /></div>
+                  </div>
+                </div>
+                <Button onClick={handleAddItem} disabled={isActionLoading} className="w-full h-11 rounded-xl mt-4 bg-primary text-white hover:bg-secondary font-bold transition-all">Establish Record</Button>
               </DialogContent>
             </Dialog>
           </div>
@@ -184,7 +196,7 @@ export default function InventoryManagementPage() {
       <section className="py-8">
         <div className="container mx-auto px-4">
           {dataLoading ? (
-            <div className="text-center py-20"><Loader2 className="w-8 h-8 animate-spin text-accent mx-auto" /></div>
+            <div className="text-center py-20"><Loader2 className="w-10 h-10 animate-spin text-accent mx-auto" /></div>
           ) : (
             <div className="grid gap-4">
               {filtered.map((item) => (
@@ -203,8 +215,8 @@ export default function InventoryManagementPage() {
                           <div className="text-[10px] font-bold text-slate-500 uppercase">Out: {item.totalOutflow}</div>
                         </div>
                         <div className="flex justify-end gap-2">
-                           <Button size="sm" variant="outline" className="h-8 rounded-lg text-[10px] font-bold border-slate-200">Adjust</Button>
-                           <Button variant="ghost" size="sm" className="h-8 w-8 text-slate-300 hover:text-red-500"><Trash2 className="w-3.5 h-3.5" /></Button>
+                           <Button size="sm" variant="outline" className="h-8 rounded-lg text-[10px] font-bold border-slate-200 hover:bg-secondary hover:text-white transition-colors">Adjust</Button>
+                           <Button variant="ghost" size="sm" className="h-8 w-8 text-slate-300 hover:text-red-500 hover:bg-red-50 transition-colors"><Trash2 className="w-3.5 h-3.5" /></Button>
                         </div>
                       </div>
                     </div>

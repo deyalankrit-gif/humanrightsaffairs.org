@@ -186,8 +186,8 @@ export default function InternalApplicationsPage() {
                    className={cn(
                      "rounded-lg px-4 font-bold h-8 text-[11px] transition-all",
                      activeFilter === st 
-                       ? "bg-accent text-primary shadow-sm" 
-                       : "text-slate-500"
+                       ? "bg-accent text-primary shadow-sm hover:bg-secondary hover:text-white" 
+                       : "text-slate-500 hover:bg-slate-200"
                    )}
                  >
                    {st}
@@ -262,15 +262,15 @@ export default function InternalApplicationsPage() {
                         <div className="flex flex-col items-end gap-2 h-full justify-center">
                           {a.status === 'Pending' ? (
                             <div className="w-full space-y-2">
-                              <Button size="sm" onClick={() => setActionDialog({ open: true, type: 'Approve', applicationId: a.id, reason: '' })} className="w-full bg-emerald-500 text-white font-bold h-9 rounded-xl text-[11px]">
+                              <Button size="sm" onClick={() => setActionDialog({ open: true, type: 'Approve', applicationId: a.id, reason: '' })} className="w-full bg-emerald-500 text-white font-bold h-9 rounded-xl text-[11px] hover:bg-emerald-600">
                                 <Check className="w-3 h-3 mr-1" /> Approve
                               </Button>
-                              <Button size="sm" variant="outline" onClick={() => setActionDialog({ open: true, type: 'Reject', applicationId: a.id, reason: '' })} className="w-full text-red-500 border-red-100 h-9 rounded-xl text-[11px]">
+                              <Button size="sm" variant="outline" onClick={() => setActionDialog({ open: true, type: 'Reject', applicationId: a.id, reason: '' })} className="w-full text-red-500 border-red-100 h-9 rounded-xl text-[11px] hover:bg-red-50 hover:text-red-700">
                                 <X className="w-3 h-3 mr-1" /> Reject
                               </Button>
                             </div>
                           ) : (
-                            <Button size="sm" variant="ghost" onClick={() => setActionDialog({ open: true, type: 'Archive', applicationId: a.id, reason: '' })} className="w-full text-slate-400 h-9 rounded-xl text-[11px]">
+                            <Button size="sm" variant="ghost" onClick={() => setActionDialog({ open: true, type: 'Archive', applicationId: a.id, reason: '' })} className="w-full text-slate-400 h-9 rounded-xl text-[11px] hover:bg-slate-100">
                               <Archive className="w-3 h-3 mr-1" /> Archive
                             </Button>
                           )}
