@@ -320,7 +320,6 @@ export default function WebsiteVisitorsPage() {
                    </p>
                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">National Data Security Cell • Human Rights Affairs Trust</p>
                 </div>
-              </div>
             </div>
           )}
         </div>
