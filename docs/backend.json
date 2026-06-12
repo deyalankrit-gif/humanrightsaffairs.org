@@ -239,6 +239,33 @@
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["companyName", "vendorType", "contactPerson", "email", "phone"]
+    },
+    "Visitor": {
+      "title": "Visitor",
+      "description": "Website visitor tracking and analytics data.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "ipAddress": { "type": "string" },
+        "deviceType": { "type": "string" },
+        "browser": { "type": "string" },
+        "os": { "type": "string" },
+        "firstVisit": { "type": "string", "format": "date-time" },
+        "lastVisit": { "type": "string", "format": "date-time" },
+        "lastActivity": { "type": "string", "format": "date-time" },
+        "sessionDuration": { "type": "number" },
+        "country": { "type": "string" },
+        "state": { "type": "string" },
+        "city": { "type": "string" },
+        "region": { "type": "string" },
+        "timeZone": { "type": "string" },
+        "totalVisits": { "type": "number" },
+        "pagesVisited": { "type": "array", "items": { "type": "string" } },
+        "userType": { "type": "string", "enum": ["Guest", "Member", "Admin"] },
+        "status": { "type": "string", "enum": ["New", "Returning"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      }
     }
   },
   "auth": {
@@ -256,6 +283,7 @@
     "/meetings/{meetingId}": { "schema": "GeneralMeeting" },
     "/grievances/{grievanceId}": { "schema": "Grievance" },
     "/inventory/{itemId}": { "schema": "InventoryItem" },
-    "/vendors/{vendorId}": { "schema": "Vendor" }
+    "/vendors/{vendorId}": { "schema": "Vendor" },
+    "/visitors/{visitorId}": { "schema": "Visitor" }
   }
 }

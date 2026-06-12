@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -33,7 +34,8 @@ import {
   Truck,
   HeartHandshake,
   Wallet,
-  Monitor
+  Monitor,
+  BarChart3
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -53,6 +55,7 @@ const publicLinks = [
 
 const adminLinks = [
   { name: 'Analytics', href: '/internal/analytics', icon: LayoutDashboard },
+  { name: 'Visitors', href: '/internal/visitors', icon: BarChart3 },
   { name: 'Accounts', href: '/internal/accounts', icon: Wallet },
   { name: 'Expenses', href: '/internal/expenses', icon: TrendingDown },
   { name: 'Applications', href: '/internal/applications', icon: FileText },
