@@ -22,18 +22,11 @@ import {
   Clock,
   Check,
   X,
-  GraduationCap,
-  Briefcase,
-  Info,
-  Gavel,
-  CalendarClock,
-  ClipboardCheck,
-  Hash,
-  Camera,
   Archive,
-  History,
+  Camera,
   Filter,
-  MessageCircle
+  RefreshCw,
+  MessageSquare
 } from 'lucide-react'
 import {
   Dialog,
@@ -43,17 +36,6 @@ import {
   DialogFooter,
   DialogDescription,
 } from "@/components/ui/dialog"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
 import Image from 'next/image'
@@ -69,9 +51,14 @@ export default function InternalApplicationsPage() {
   const [activeFilter, setActiveFilter] = useState<AppStatus>('All')
   const [isActionLoading, setIsActionLoading] = useState(false)
   
-  const [actionDialog, setActionDialog] = useState<{ open: boolean, type: 'Approve' | 'Reject' | 'Archive', applicationId: string, reason: string }>({
+  const [actionDialog, setActionDialog] = useState<{ 
+    open: boolean, 
+    status: 'Pending' | 'Approved' | 'Rejected' | 'Archived', 
+    applicationId: string, 
+    reason: string 
+  }>({
     open: false,
-    type: 'Approve',
+    status: 'Pending',
     applicationId: '',
     reason: ''
   })
@@ -93,27 +80,41 @@ export default function InternalApplicationsPage() {
     if (!db || !actionDialog.applicationId) return
     setIsActionLoading(true)
     
-    let newStatus = 'Pending'
-    if (actionDialog.type === 'Approve') newStatus = 'Approved'
-    else if (actionDialog.type === 'Reject') newStatus = 'Rejected'
-    else if (actionDialog.type === 'Archive') newStatus = 'Archived'
-    
     updateDoc(doc(db, 'memberApplications', actionDialog.applicationId), { 
-      status: newStatus,
+      status: actionDialog.status,
       statusUpdateReason: actionDialog.reason,
       updatedAt: new Date().toISOString()
     })
       .then(() => {
         toast({ 
-          title: `Application ${newStatus}`, 
-          description: actionDialog.type === 'Archive' 
-            ? "Record moved to secure archival storage." 
-            : `Decision logged: ${actionDialog.reason}` 
+          title: `Status: ${actionDialog.status}`, 
+          description: `Application record updated and decision logged.` 
         })
-        setActionDialog({ open: false, type: 'Approve', applicationId: '', reason: '' })
+        setActionDialog({ open: false, status: 'Pending', applicationId: '', reason: '' })
         setIsActionLoading(false)
       })
-      .catch(() => setIsActionLoading(false))
+      .catch(() => {
+        toast({ variant: "destructive", title: "Update Failed", description: "Could not sync status with national database." })
+        setIsActionLoading(false)
+      })
+  }
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'Approved': return 'bg-emerald-500 text-white hover:bg-emerald-600'
+      case 'Rejected': return 'bg-red-500 text-white hover:bg-red-600'
+      case 'Archived': return 'bg-blue-500 text-white hover:bg-blue-600'
+      default: return 'bg-amber-500 text-white hover:bg-amber-600'
+    }
+  }
+
+  const getStatusTextColor = (status: string) => {
+    switch (status) {
+      case 'Approved': return 'text-emerald-400'
+      case 'Rejected': return 'text-red-400'
+      case 'Archived': return 'text-blue-400'
+      default: return 'text-amber-400'
+    }
   }
 
   if (authLoading || !user) {
@@ -163,6 +164,7 @@ export default function InternalApplicationsPage() {
                  { label: 'PND', count: stats.pending, color: 'text-amber-400' },
                  { label: 'APR', count: stats.approved, color: 'text-emerald-400' },
                  { label: 'REJ', count: stats.rejected, color: 'text-red-400' },
+                 { label: 'ARC', count: stats.archived, color: 'text-blue-400' },
                ].map((s) => (
                  <div key={s.label} className="bg-white/5 px-4 py-2 rounded-xl border border-white/10 text-center min-w-[70px]">
                    <p className="text-[8px] text-slate-500 font-bold uppercase mb-0.5">{s.label}</p>
@@ -179,19 +181,18 @@ export default function InternalApplicationsPage() {
           <div className="flex flex-col lg:flex-row items-center justify-between gap-4">
             <div className="flex flex-wrap items-center gap-1.5 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
                {(['All', 'Pending', 'Approved', 'Rejected', 'Archived'] as AppStatus[]).map((st) => (
-                 <Button
+                 <button
                    key={st}
                    onClick={() => setActiveFilter(st)}
-                   variant={activeFilter === st ? "default" : "ghost"}
                    className={cn(
                      "rounded-lg px-4 font-bold h-8 text-[11px] transition-all",
                      activeFilter === st 
-                       ? "bg-accent text-primary shadow-sm hover:bg-secondary hover:text-white" 
+                       ? "bg-accent text-primary shadow-sm" 
                        : "text-slate-500 hover:bg-slate-200"
                    )}
                  >
                    {st}
-                 </Button>
+                 </button>
                ))}
             </div>
 
@@ -215,7 +216,7 @@ export default function InternalApplicationsPage() {
           ) : (
             <div className="grid gap-4">
               {filtered.map((a: any) => (
-                <Card key={a.id} className="border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 relative">
+                <Card key={a.id} className="border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 relative group">
                   <CardContent className="p-0">
                     <div className="flex flex-col md:flex-row items-stretch">
                       <div className="p-6 bg-slate-50 dark:bg-slate-800 md:w-56 text-center border-r border-slate-100 flex flex-col items-center justify-center shrink-0">
@@ -226,7 +227,7 @@ export default function InternalApplicationsPage() {
                             <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">REF ID</p>
                             <p className="font-bold text-sm tracking-tighter text-primary dark:text-white leading-none">{a.referenceId || 'N/A'}</p>
                          </div>
-                         <Badge className={cn("text-[8px] font-bold px-2.5 py-0.5 rounded-full uppercase", a.status === 'Pending' ? 'bg-amber-500' : 'bg-emerald-500')}>
+                         <Badge className={cn("text-[8px] font-bold px-2.5 py-0.5 rounded-full uppercase border-none", getStatusColor(a.status))}>
                            {a.status}
                          </Badge>
                       </div>
@@ -246,34 +247,60 @@ export default function InternalApplicationsPage() {
                              <div className="bg-slate-50 dark:bg-slate-950 p-4 rounded-2xl border border-slate-100 space-y-2">
                                 <div>
                                   <p className="text-[8px] font-bold text-slate-400 uppercase mb-0.5">Education</p>
-                                  <p className="text-[11px] font-bold text-slate-700">{a.education || 'N/A'}</p>
+                                  <p className="text-[11px] font-bold text-slate-700 dark:text-slate-300">{a.education || 'N/A'}</p>
                                 </div>
                                 <div>
                                   <p className="text-[8px] font-bold text-slate-400 uppercase mb-0.5">Experience</p>
-                                  <p className="text-[11px] font-bold text-slate-700">{a.experience || 'N/A'}</p>
+                                  <p className="text-[11px] font-bold text-slate-700 dark:text-slate-300">{a.experience || 'N/A'}</p>
                                 </div>
                              </div>
                              <div className="bg-slate-50 dark:bg-slate-950 p-4 rounded-2xl border border-slate-100 flex items-center justify-center">
                                 <p className="text-[10px] leading-relaxed text-slate-500 italic text-center">"{a.address}"</p>
                              </div>
                           </div>
+                          
+                          {a.statusUpdateReason && (
+                            <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 flex items-start gap-2">
+                              <MessageSquare className="w-3 h-3 text-slate-400 mt-0.5" />
+                              <p className="text-[10px] text-slate-500 font-medium">Log: {a.statusUpdateReason}</p>
+                            </div>
+                          )}
                         </div>
 
                         <div className="flex flex-col items-end gap-2 h-full justify-center">
-                          {a.status === 'Pending' ? (
-                            <div className="w-full space-y-2">
-                              <Button size="sm" onClick={() => setActionDialog({ open: true, type: 'Approve', applicationId: a.id, reason: '' })} className="w-full bg-emerald-500 text-white font-bold h-9 rounded-xl text-[11px] hover:bg-emerald-600">
-                                <Check className="w-3 h-3 mr-1" /> Approve
+                          <div className="w-full space-y-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest text-center mb-1">Update Status</p>
+                            <div className="grid grid-cols-2 gap-2">
+                              <Button 
+                                size="sm" 
+                                onClick={() => setActionDialog({ open: true, status: 'Approved', applicationId: a.id, reason: '' })} 
+                                className="bg-emerald-500 text-white font-bold h-8 rounded-lg text-[9px] hover:bg-emerald-600 px-1"
+                              >
+                                <Check className="w-2.5 h-2.5 mr-1" /> Approve
                               </Button>
-                              <Button size="sm" variant="outline" onClick={() => setActionDialog({ open: true, type: 'Reject', applicationId: a.id, reason: '' })} className="w-full text-red-500 border-red-100 h-9 rounded-xl text-[11px] hover:bg-red-50 hover:text-red-700">
-                                <X className="w-3 h-3 mr-1" /> Reject
+                              <Button 
+                                size="sm" 
+                                onClick={() => setActionDialog({ open: true, status: 'Rejected', applicationId: a.id, reason: '' })} 
+                                className="bg-red-500 text-white font-bold h-8 rounded-lg text-[9px] hover:bg-red-600 px-1"
+                              >
+                                <X className="w-2.5 h-2.5 mr-1" /> Reject
+                              </Button>
+                              <Button 
+                                size="sm" 
+                                onClick={() => setActionDialog({ open: true, status: 'Archived', applicationId: a.id, reason: '' })} 
+                                className="bg-blue-500 text-white font-bold h-8 rounded-lg text-[9px] hover:bg-blue-600 px-1"
+                              >
+                                <Archive className="w-2.5 h-2.5 mr-1" /> Archive
+                              </Button>
+                              <Button 
+                                size="sm" 
+                                onClick={() => setActionDialog({ open: true, status: 'Pending', applicationId: a.id, reason: '' })} 
+                                className="bg-amber-500 text-white font-bold h-8 rounded-lg text-[9px] hover:bg-amber-600 px-1"
+                              >
+                                <Clock className="w-2.5 h-2.5 mr-1" /> Pending
                               </Button>
                             </div>
-                          ) : (
-                            <Button size="sm" variant="ghost" onClick={() => setActionDialog({ open: true, type: 'Archive', applicationId: a.id, reason: '' })} className="w-full text-slate-400 h-9 rounded-xl text-[11px] hover:bg-slate-100">
-                              <Archive className="w-3 h-3 mr-1" /> Archive
-                            </Button>
-                          )}
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -284,6 +311,39 @@ export default function InternalApplicationsPage() {
           )}
         </div>
       </section>
+
+      <Dialog open={actionDialog.open} onOpenChange={(val) => setActionDialog(prev => ({ ...prev, open: val }))}>
+        <DialogContent className="max-w-md rounded-[2rem] border-none shadow-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+               <RefreshCw className="w-5 h-5 text-accent" /> Change Record Status
+            </DialogTitle>
+            <DialogDescription>
+              Transitioning application to <span className={cn("font-bold", getStatusTextColor(actionDialog.status))}>{actionDialog.status}</span>.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+             <div className="space-y-2">
+               <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Status Change Justification *</Label>
+               <Textarea 
+                placeholder="Record the reasoning for this personnel decision..." 
+                className="rounded-xl min-h-[100px]"
+                value={actionDialog.reason}
+                onChange={(e) => setActionDialog(prev => ({ ...prev, reason: e.target.value }))}
+               />
+             </div>
+          </div>
+          <DialogFooter>
+            <Button 
+              onClick={handleUpdateStatus} 
+              disabled={isActionLoading || !actionDialog.reason.trim()}
+              className={cn("w-full h-12 rounded-xl font-bold transition-all", getStatusColor(actionDialog.status))}
+            >
+              {isActionLoading ? <Loader2 className="animate-spin" /> : "Commit Decision to Registry"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Footer />
     </main>
