@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useUser, useCollection, useFirestore, useMemoFirebase } from '@/firebase'
-import { collection, query, orderBy, addDoc, serverTimestamp } from 'firebase/firestore'
+import { collection, query, orderBy, addDoc, serverTimestamp, deleteDoc, doc } from 'firebase/firestore'
 import { Footer } from '@/components/footer'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -21,7 +21,10 @@ import {
   User,
   Mail,
   Phone,
-  Briefcase
+  Briefcase,
+  Trash2,
+  AlertTriangle,
+  ShieldAlert
 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { 
@@ -30,7 +33,8 @@ import {
   DialogHeader, 
   DialogTitle, 
   DialogTrigger,
-  DialogFooter
+  DialogFooter,
+  DialogDescription
 } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -53,6 +57,12 @@ export default function InternalMembersDirectory() {
   const [levelFilter, setLevelFilter] = useState('All')
   const [isAdding, setIsAdding] = useState(false)
   const [isDialogOpen, setIsAddingDialogOpen] = useState(false)
+
+  // Deletion States
+  const [deleteDialogStep, setDeleteDialogStep] = useState<'warning' | 'verify' | null>(null)
+  const [memberToDelete, setMemberToDelete] = useState<any>(null)
+  const [deleteInputText, setDeleteInputText] = useState('')
+  const [isDeleting, setIsDeleting] = useState(false)
   
   const [newMember, setNewMember] = useState({
     name: '',
@@ -130,7 +140,6 @@ export default function InternalMembersDirectory() {
   }
 
   const handleAddMember = async () => {
-    // Validation based on mandatory fields
     const mandatoryFields = [
       { val: newMember.name, label: "Full Name" },
       { val: newMember.gender, label: "Gender" },
@@ -139,7 +148,7 @@ export default function InternalMembersDirectory() {
       { val: newMember.membershipDuration, label: "Duration" },
       { val: newMember.joiningDate, label: "Issue Date" },
       { val: newMember.phone, label: "Phone Number" },
-      { val: newMember.address, label: "Residential Address" },
+      { val: newMember.address, label: "Verified Residential Address" },
       { val: newMember.postOffice, label: "Post Office" },
       { val: newMember.policeStation, label: "Police Station" },
       { val: newMember.pinCode, label: "PIN Code" },
@@ -191,6 +200,22 @@ export default function InternalMembersDirectory() {
     } catch (error: any) {
       toast({ variant: "destructive", title: "System Error" })
       setIsAdding(false)
+    }
+  }
+
+  const handleDeleteMember = async () => {
+    if (!db || !memberToDelete) return
+    setIsDeleting(true)
+    try {
+      await deleteDoc(doc(db, 'memberProfiles', memberToDelete.id))
+      toast({ title: "Record Purged", description: "Personnel file has been removed from the registry." })
+      setDeleteDialogStep(null)
+      setMemberToDelete(null)
+      setDeleteInputText('')
+    } catch (error: any) {
+      toast({ variant: "destructive", title: "System Error", description: "Failed to purge record." })
+    } finally {
+      setIsDeleting(false)
     }
   }
 
@@ -455,7 +480,7 @@ export default function InternalMembersDirectory() {
                          <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">ID</span>
                          <span className="text-xl font-headline font-bold text-primary dark:text-white tracking-tighter">{member.memberId || 'PENDING'}</span>
                       </div>
-                      <div className="flex-1 p-5 grid lg:grid-cols-3 gap-6 items-center">
+                      <div className="flex-1 p-5 flex items-center justify-between">
                         <div className="space-y-1">
                           <h3 className="text-lg font-bold text-primary dark:text-white leading-tight">{member.name}</h3>
                           <div className="flex items-center gap-2 text-[10px] text-slate-500 font-bold uppercase">
@@ -465,7 +490,23 @@ export default function InternalMembersDirectory() {
                           </div>
                         </div>
                         <div className="flex justify-end gap-2">
-                          <Link href={`/internal/members/${member.id}`}><Button size="sm" className="h-8 rounded-lg text-[10px] px-3 font-bold hover:bg-secondary hover:text-white transition-colors">Profile</Button></Link>
+                          <Link href={`/internal/members/${member.id}`}>
+                            <Button size="sm" className="h-8 rounded-lg text-[10px] px-3 font-bold hover:bg-secondary hover:text-white transition-colors">
+                              Profile
+                            </Button>
+                          </Link>
+                          
+                          <Button 
+                            variant="destructive" 
+                            size="sm" 
+                            className="h-8 rounded-lg text-[10px] px-3 font-bold flex gap-1.5"
+                            onClick={() => {
+                              setMemberToDelete(member);
+                              setDeleteDialogStep('warning');
+                            }}
+                          >
+                            <Trash2 className="w-3 h-3" /> Delete
+                          </Button>
                         </div>
                       </div>
                     </div>
@@ -476,6 +517,68 @@ export default function InternalMembersDirectory() {
           )}
         </div>
       </section>
+
+      {/* Two-Stage Deletion Dialog */}
+      <Dialog open={!!deleteDialogStep} onOpenChange={(open) => !open && setDeleteDialogStep(null)}>
+        <DialogContent className="max-w-md rounded-[2rem] border-none shadow-2xl p-0 overflow-hidden">
+          {deleteDialogStep === 'warning' && (
+            <div className="p-8 space-y-6">
+              <div className="flex flex-col items-center text-center space-y-4">
+                <div className="w-20 h-20 bg-red-50 dark:bg-red-950/30 text-red-500 rounded-full flex items-center justify-center animate-pulse">
+                  <ShieldAlert className="w-10 h-10" />
+                </div>
+                <div className="space-y-2">
+                  <DialogTitle className="text-2xl font-headline font-bold text-primary dark:text-white">Security Warning</DialogTitle>
+                  <DialogDescription className="text-sm text-slate-500 leading-relaxed font-medium">
+                    You are attempting to permanently purge the record for <strong className="text-primary dark:text-white">{memberToDelete?.name}</strong>. This action will erase all credentials and operational history associated with ID: <span className="font-mono font-bold text-red-500">{memberToDelete?.memberId}</span>.
+                  </DialogDescription>
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <Button variant="outline" onClick={() => setDeleteDialogStep(null)} className="flex-1 h-12 rounded-xl font-bold">No, Cancel</Button>
+                <Button variant="destructive" onClick={() => setDeleteDialogStep('verify')} className="flex-1 h-12 rounded-xl font-bold bg-red-600 hover:bg-red-700">Yes, Proceed</Button>
+              </div>
+            </div>
+          )}
+
+          {deleteDialogStep === 'verify' && (
+            <div className="p-8 space-y-6">
+              <div className="space-y-4">
+                <div className="inline-flex items-center gap-2 bg-amber-50 dark:bg-amber-950/30 text-amber-600 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border border-amber-100">
+                  <AlertTriangle className="w-3 h-3" /> Final Confirmation Required
+                </div>
+                <div className="space-y-1">
+                  <DialogTitle className="text-xl font-headline font-bold">Verification Protocol</DialogTitle>
+                  <p className="text-sm text-slate-500">To prevent accidental deletion, please type the word <strong className="text-red-600 uppercase">Delete</strong> in the field below to confirm.</p>
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Confirmation Text</Label>
+                <Input 
+                  placeholder="Type 'Delete' here..." 
+                  value={deleteInputText} 
+                  onChange={(e) => setDeleteInputText(e.target.value)} 
+                  className="h-12 rounded-xl border-2 focus:ring-red-500 font-bold"
+                />
+              </div>
+
+              <div className="flex gap-3">
+                <Button variant="ghost" onClick={() => setDeleteDialogStep(null)} className="flex-1 h-12 rounded-xl text-slate-400 font-bold">Abort</Button>
+                <Button 
+                  variant="destructive" 
+                  disabled={deleteInputText !== 'Delete' || isDeleting} 
+                  onClick={handleDeleteMember}
+                  className="flex-1 h-12 rounded-xl font-bold bg-red-600 hover:bg-red-700 shadow-xl shadow-red-600/20"
+                >
+                  {isDeleting ? <Loader2 className="animate-spin" /> : "Permanent Purge"}
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
       <Footer />
     </main>
   )
