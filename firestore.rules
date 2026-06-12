@@ -83,5 +83,11 @@ service cloud.firestore {
     match /vendors/{vendorId} {
       allow read, write: if isAdmin();
     }
+
+    // Visitor Analytics: Admin only read/write, Public create (for tracking)
+    match /visitors/{visitorId} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
   }
 }
