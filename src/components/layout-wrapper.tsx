@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useEffect, useState } from 'react';
@@ -7,6 +8,7 @@ import { HeaderActions } from '@/components/header-actions';
 import { AppSidebar } from '@/components/app-sidebar';
 import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
 import { Separator } from '@/components/ui/separator';
+import { VisitorTracker } from '@/components/visitor-tracker';
 
 /**
  * LayoutWrapper manages the global layout structure, switching between
@@ -61,6 +63,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   // Public Portal Layout or Admin Login Page
   return (
     <div className="flex flex-col min-h-screen relative bg-background">
+      <VisitorTracker />
       {!isAdmin && <Navbar />}
       <div className="flex-1">
         {children}
