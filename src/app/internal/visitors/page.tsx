@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useEffect, useState, useMemo } from 'react'
@@ -312,16 +311,15 @@ export default function WebsiteVisitorsPage() {
                       </div>
                    </CardContent>
                 </Card>
-              </div>
 
-              <div className="bg-white dark:bg-slate-900 p-8 rounded-[3rem] border border-slate-100 dark:border-slate-800 text-center space-y-4 shadow-sm">
-                 <ShieldCheck className="w-10 h-10 text-emerald-500 mx-auto" />
-                 <h3 className="text-xl font-headline font-bold text-primary dark:text-white">Security & Real-Time Integrity</h3>
-                 <p className="text-sm text-slate-500 max-w-3xl mx-auto leading-relaxed italic">
-                   "This dashboard provides a real-time window into institutional engagement. All data is processed securely through end-to-end encrypted streams. Unauthorized tracking or session interception is strictly prohibited."
-                 </p>
-                 <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">National Data Security Cell • Human Rights Affairs Trust</p>
-              </div>
+                <div className="bg-white dark:bg-slate-900 p-8 rounded-[3rem] border border-slate-100 dark:border-slate-800 text-center space-y-4 shadow-sm">
+                   <ShieldCheck className="w-10 h-10 text-emerald-500 mx-auto" />
+                   <h3 className="text-xl font-headline font-bold text-primary dark:text-white">Security & Real-Time Integrity</h3>
+                   <p className="text-sm text-slate-500 max-w-3xl mx-auto leading-relaxed italic">
+                     "This dashboard provides a real-time window into institutional engagement. All data is processed securely through end-to-end encrypted streams. Unauthorized tracking or session interception is strictly prohibited."
+                   </p>
+                   <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">National Data Security Cell • Human Rights Affairs Trust</p>
+                </div>
             </div>
           )}
         </div>
