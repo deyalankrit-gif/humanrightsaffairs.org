@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState } from 'react'
@@ -241,6 +242,7 @@ export function MembershipRegistrationDialog({ children }: { children: React.Rea
                       <SelectItem value="Executive Designation" className="font-bold">Executive Designation</SelectItem>
                       <SelectItem value="Board Member" className="font-bold">Board Member</SelectItem>
                       <SelectItem value="General Member" className="font-bold">General Member</SelectItem>
+                      <SelectItem value="Volunteer" className="font-bold">Volunteer</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />

@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useEffect, useState } from 'react'
@@ -33,7 +34,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar'
 import { format, parse, addYears } from 'date-fns'
 import { useToast } from '@/hooks/use-toast'
-import Link from 'next/link'
+import Link from 'link'
 import { INDIA_DATA } from '@/lib/india-data'
 import { cn } from '@/lib/utils'
 
@@ -222,15 +223,19 @@ export default function InternalMembersDirectory() {
                       <div className="space-y-1">
                         <Label className="text-[10px] uppercase font-bold text-accent">Designation Category</Label>
                         <Select value={newMember.designationCategory} onValueChange={(val: any) => {
-                          const isGeneral = val === 'General Member';
+                          const isFixed = val === 'General Member' || val === 'Volunteer';
                           setNewMember({
                             ...newMember, 
                             designationCategory: val, 
-                            designation: isGeneral ? 'General Member' : ''
+                            designation: isFixed ? val : ''
                           });
                         }}>
                           <SelectTrigger className="rounded-xl border-accent/20 bg-white dark:bg-slate-800"><SelectValue /></SelectTrigger>
-                          <SelectContent position="popper" className="z-[1000001]"><SelectItem value="General Member">General Member</SelectItem><SelectItem value="Office-bearing Member">Office-bearing Member</SelectItem></SelectContent>
+                          <SelectContent position="popper" className="z-[1000001]">
+                            <SelectItem value="General Member">General Member</SelectItem>
+                            <SelectItem value="Office-bearing Member">Office-bearing Member</SelectItem>
+                            <SelectItem value="Volunteer">Volunteer</SelectItem>
+                          </SelectContent>
                         </Select>
                       </div>
                       {newMember.designationCategory === 'Office-bearing Member' && (
@@ -339,7 +344,7 @@ export default function InternalMembersDirectory() {
       <section className="py-8">
         <div className="container mx-auto px-4">
           {profilesLoading ? (
-            <div className="text-center py-20"><Loader2 className="w-8 h-8 animate-spin text-accent mx-auto" /></div>
+            <div className="text-center py-20"><Loader2 className="w-8 h-8 animate-spin text-accent mx-auto mb-4" /><p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Fetching Live Directory...</p></div>
           ) : (
             <div className="grid gap-4">
               {filtered.map((member: any) => (

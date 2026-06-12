@@ -79,7 +79,7 @@ export default function MemberDetailsPage() {
     if (profile) {
       setEditForm({
         ...profile,
-        designationCategory: profile.designationCategory || (profile.designation === 'General Member' ? 'General Member' : 'Office-bearing Member')
+        designationCategory: profile.designationCategory || (profile.designation === 'General Member' ? 'General Member' : profile.designation === 'Volunteer' ? 'Volunteer' : 'Office-bearing Member')
       })
     }
   }, [profile])
@@ -250,17 +250,18 @@ export default function MemberDetailsPage() {
                           <div className="space-y-2">
                             <Label className="text-[10px] uppercase font-bold text-accent">Designation Category</Label>
                             <Select value={editForm.designationCategory} onValueChange={(val: any) => {
-                              const isGeneral = val === 'General Member';
+                              const isFixed = val === 'General Member' || val === 'Volunteer';
                               setEditForm({
                                 ...editForm, 
                                 designationCategory: val, 
-                                designation: isGeneral ? 'General Member' : ''
+                                designation: isFixed ? val : ''
                               });
                             }}>
                               <SelectTrigger className="rounded-xl border-accent/20"><SelectValue /></SelectTrigger>
                               <SelectContent>
                                 <SelectItem value="General Member">General Member</SelectItem>
                                 <SelectItem value="Office-bearing Member">Office-bearing Member</SelectItem>
+                                <SelectItem value="Volunteer">Volunteer</SelectItem>
                               </SelectContent>
                             </Select>
                           </div>
