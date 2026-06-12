@@ -201,7 +201,7 @@ export default function InternalMembersDirectory() {
             
             <Dialog open={isDialogOpen} onOpenChange={setIsAddingDialogOpen}>
               <DialogTrigger asChild>
-                <Button size="sm" className="bg-accent text-primary font-bold rounded-xl h-11 px-6 flex gap-2 shadow-lg">
+                <Button size="sm" className="bg-accent text-primary font-bold rounded-xl h-11 px-6 flex gap-2 shadow-lg hover:bg-secondary hover:text-white transition-all">
                   <UserPlus className="w-4 h-4" /> Commission Member
                 </Button>
               </DialogTrigger>
