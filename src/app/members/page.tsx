@@ -288,9 +288,15 @@ export default function MembersPage() {
             <span>Official Member Records</span>
           </div>
           <h1 className="text-5xl md:text-7xl font-headline font-bold mb-6 text-primary-foreground">Verified <span className="text-accent italic">Active Members</span></h1>
-          <p className="text-xl opacity-80 max-w-2xl mx-auto text-lg mb-8 text-primary-foreground">
-            A dynamic ledger of our dedicated human rights defenders, updated in real-time by the central administration.
-          </p>
+          
+          <div className="max-w-2xl mx-auto space-y-4 mb-8">
+            <p className="text-xl opacity-80 text-lg text-primary-foreground">
+              A dynamic ledger of our dedicated human rights defenders, updated in real-time by the central administration.
+            </p>
+            <p className="text-accent font-bold italic tracking-wide text-sm md:text-base animate-in fade-in slide-in-from-bottom-2 duration-700">
+              The following list contains the names of all currently active members of the organization.
+            </p>
+          </div>
 
           {isAdmin && (
             <Dialog>
