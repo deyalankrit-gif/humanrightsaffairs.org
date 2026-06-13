@@ -293,7 +293,7 @@ export default function MembersPage() {
             <p className="text-xl opacity-80 text-lg text-primary-foreground">
               A dynamic ledger of our dedicated human rights defenders, updated in real-time by the central administration.
             </p>
-            <p className="text-secondary font-bold italic tracking-wide text-sm md:text-base animate-in fade-in slide-in-from-bottom-2 duration-700">
+            <p className="text-emerald-400 font-bold italic tracking-wide text-sm md:text-base animate-in fade-in slide-in-from-bottom-2 duration-700">
               The following list contains the names of all currently active members of the organization only
             </p>
           </div>
