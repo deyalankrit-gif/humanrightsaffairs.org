@@ -293,7 +293,7 @@ export default function MembersPage() {
             <p className="text-xl opacity-80 text-lg text-primary-foreground">
               A dynamic ledger of our dedicated human rights defenders, updated in real-time by the central administration.
             </p>
-            <p className="text-emerald-400 font-bold italic tracking-wide text-sm md:text-base animate-in fade-in slide-in-from-bottom-2 duration-700">
+            <p className="text-emerald-400 font-bold tracking-wide text-sm md:text-base animate-blink">
               The following list contains the names of all currently active members of the organization only
             </p>
           </div>
@@ -464,7 +464,7 @@ export default function MembersPage() {
                           <Label className="text-[10px] uppercase font-bold text-slate-400">Regional Chapter (State)</Label>
                           <Select value={newMember.stateName} onValueChange={val => setNewMember({...newMember, stateName: val, districtName: ''})}>
                             <SelectTrigger className="h-11 rounded-xl bg-white dark:bg-slate-900"><SelectValue placeholder="State" /></SelectTrigger>
-                            <SelectContent position="popper" className="max-h-60 z-[1000001] bg-white">{states.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+                            <SelectContent position="popper" className="z-[1000001] bg-white">{states.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
                           </Select>
                         </div>
                       )}
