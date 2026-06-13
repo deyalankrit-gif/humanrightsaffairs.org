@@ -60,7 +60,7 @@ export default function InternalMembersDirectory() {
   const [isDialogOpen, setIsAddingDialogOpen] = useState(false)
 
   // Deletion States
-  const [deleteDialogStep, setDeleteDialogStep] =<'warning' | 'verify' | null>(null)
+  const [deleteDialogStep, setDeleteDialogStep] = useState<'warning' | 'verify' | null>(null)
   const [memberToDelete, setMemberToDelete] = useState<any>(null)
   const [deleteInputText, setDeleteInputText] = useState('')
   const [isDeleting, setIsDeleting] = useState(false)
