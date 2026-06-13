@@ -24,7 +24,8 @@ import {
   Briefcase,
   Trash2,
   AlertTriangle,
-  ShieldAlert
+  ShieldAlert,
+  Hash
 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { 
@@ -59,7 +60,7 @@ export default function InternalMembersDirectory() {
   const [isDialogOpen, setIsAddingDialogOpen] = useState(false)
 
   // Deletion States
-  const [deleteDialogStep, setDeleteDialogStep] = useState<'warning' | 'verify' | null>(null)
+  const [deleteDialogStep, setDeleteDialogStep] =<'warning' | 'verify' | null>(null)
   const [memberToDelete, setMemberToDelete] = useState<any>(null)
   const [deleteInputText, setDeleteInputText] = useState('')
   const [isDeleting, setIsDeleting] = useState(false)
@@ -481,15 +482,17 @@ export default function InternalMembersDirectory() {
                          <span className="text-xl font-headline font-bold text-primary dark:text-white tracking-tighter">{member.memberId || 'PENDING'}</span>
                       </div>
                       <div className="flex-1 p-5 flex items-center justify-between">
-                        <div className="space-y-1">
+                        <div className="space-y-2">
                           <h3 className="text-lg font-bold text-primary dark:text-white leading-tight">{member.name}</h3>
-                          <div className="flex items-center gap-2 text-[10px] text-slate-500 font-bold uppercase">
+                          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[10px] text-slate-500 font-bold uppercase">
                              <span className="text-accent">{member.designation}</span>
-                             <span className="w-1 h-1 rounded-full bg-slate-300"></span>
                              <span className="flex items-center gap-1"><MapPin className="w-2.5 h-2.5" /> {member.stateName || 'National'}</span>
+                             <span className="flex items-center gap-1"><Phone className="w-2.5 h-2.5 text-accent" /> {member.phone || 'N/A'}</span>
+                             <span className="flex items-center gap-1 normal-case font-medium"><Mail className="w-2.5 h-2.5 text-accent" /> {member.email || 'N/A'}</span>
+                             <span className="flex items-center gap-1"><Hash className="w-2.5 h-2.5 text-accent" /> Aadhaar: {member.aadhaar || 'N/A'}</span>
                           </div>
                         </div>
-                        <div className="flex justify-end gap-2">
+                        <div className="flex justify-end gap-2 ml-4">
                           <Link href={`/internal/members/${member.id}`}>
                             <Button size="sm" className="h-8 rounded-lg text-[10px] px-3 font-bold hover:bg-secondary hover:text-white transition-colors">
                               Profile
