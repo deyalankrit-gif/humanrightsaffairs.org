@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { 
   ArrowLeft, 
   Printer, 
@@ -169,18 +170,27 @@ Enclosures:
                <div className="absolute top-0 left-0 w-1.5 h-full bg-accent print:hidden"></div>
                
                <CardContent className="p-8 md:p-16 space-y-10 text-slate-800 dark:text-slate-200 font-serif leading-relaxed text-sm md:text-base print:text-black print:p-12">
-                  {/* Letterhead */}
-                  <div className="space-y-1 border-b-2 border-primary pb-6 mb-10 font-sans print:border-black">
-                    <h2 className="text-2xl md:text-3xl font-bold text-primary dark:text-white uppercase tracking-tight print:text-black">Human Rights Affairs Trust</h2>
-                    <div className="flex flex-col space-y-0.5 text-xs text-slate-500 font-medium print:text-black">
-                      <div className="flex items-baseline gap-2">
-                        <Fillable name="stateOfficeAddress" placeholder="State Office Address" className="w-full" />
+                  {/* Letterhead with Logo */}
+                  <div className="flex flex-col md:flex-row md:items-center justify-between border-b-2 border-primary pb-6 mb-10 font-sans print:border-black gap-6">
+                    <div className="flex items-center gap-4">
+                      <div className="relative w-16 h-16 md:w-20 md:h-20 shrink-0">
+                        <Image src="/HRAT%20Logo.jpeg" alt="HRAT Logo" fill className="object-contain" />
                       </div>
-                      <div className="flex gap-4">
-                        <p>Phone: <Fillable name="phone" placeholder="Phone Number" className="w-40" /></p>
-                        <p>Email: <Fillable name="email" placeholder="Email Address" className="w-56" /></p>
+                      <div className="space-y-1">
+                        <h2 className="text-2xl md:text-3xl font-bold text-primary dark:text-white uppercase tracking-tight print:text-black leading-none">Human Rights Affairs Trust</h2>
+                        <p className="text-[10px] font-black text-accent uppercase tracking-[0.3em] print:text-black">Justice Shield</p>
                       </div>
-                      <p>Website: <Fillable name="website" placeholder="Website URL" className="w-56" /></p>
+                    </div>
+                    
+                    <div className="flex flex-col text-right space-y-0.5 text-xs text-slate-500 font-medium print:text-black">
+                      <div className="flex items-baseline justify-end gap-2">
+                        <Fillable name="stateOfficeAddress" placeholder="State Office Address" className="w-full text-right" />
+                      </div>
+                      <div className="flex justify-end gap-4">
+                        <p>Phone: <Fillable name="phone" placeholder="Phone Number" className="w-40 text-right" /></p>
+                        <p>Email: <Fillable name="email" placeholder="Email Address" className="w-56 text-right" /></p>
+                      </div>
+                      <p>Website: <Fillable name="website" placeholder="Website URL" className="w-56 text-right" /></p>
                     </div>
                   </div>
 
