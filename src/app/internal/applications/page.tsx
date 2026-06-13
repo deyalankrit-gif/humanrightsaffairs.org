@@ -387,119 +387,122 @@ export default function InternalApplicationsPage() {
             <div className="text-center py-20"><Loader2 className="w-10 h-10 animate-spin text-accent mx-auto" /></div>
           ) : (
             <div className="grid gap-4">
-              {filtered.map((a: any) => (
-                <Card key={a.id} className="border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 relative group">
-                  <CardContent className="p-0">
-                    <div className="flex flex-col md:flex-row items-stretch">
-                      <div className="p-6 bg-slate-50 dark:bg-slate-800 md:w-56 text-center border-r border-slate-100 flex flex-col items-center justify-center shrink-0">
-                         <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-white shadow-lg mb-3 bg-slate-200">
-                            {a.photoDataUri ? <Image src={a.photoDataUri} alt={a.name} fill className="object-cover" /> : <Camera className="w-6 h-6 text-slate-400" />}
-                         </div>
-                         <div className="mb-2">
-                            <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">REF ID</p>
-                            <p className="font-bold text-sm tracking-tighter text-primary dark:text-white leading-none">{a.referenceId || 'N/A'}</p>
-                         </div>
-                         <Badge className={cn("text-[8px] font-bold px-2.5 py-0.5 rounded-full uppercase border-none hover:text-white transition-colors", getStatusColor(a.status))}>
-                           {a.status}
-                         </Badge>
-                      </div>
-                      
-                      <div className="flex-1 p-6 grid lg:grid-cols-4 gap-6 items-start">
-                        <div className="lg:col-span-3 space-y-4">
-                          <div className="flex flex-col md:flex-row md:items-center gap-3">
-                            <h3 className="text-xl font-bold text-primary dark:text-white leading-tight">{a.name}</h3>
-                            <div className="flex gap-2">
-                              <Button 
-                                variant="outline" 
-                                size="sm" 
-                                onClick={() => setSelectedAppForDetails(a)}
-                                className="h-7 px-3 text-[10px] font-black uppercase tracking-widest text-primary hover:bg-slate-100 transition-all rounded-full"
-                              >
-                                <Eye className="w-3 h-3 mr-1.5" /> View Details
-                              </Button>
-                              {a.status === 'Approved' && (
+              {filtered.map((a: any) => {
+                const fallback = a.gender?.toLowerCase() === 'female' ? '/dummy w.png' : '/dummy m.png'
+                return (
+                  <Card key={a.id} className="border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 relative group">
+                    <CardContent className="p-0">
+                      <div className="flex flex-col md:flex-row items-stretch">
+                        <div className="p-6 bg-slate-50 dark:bg-slate-800 md:w-56 text-center border-r border-slate-100 flex flex-col items-center justify-center shrink-0">
+                           <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-white shadow-lg mb-3 bg-slate-200">
+                              <Image src={a.photoDataUri || fallback} alt={a.name} fill className="object-cover" />
+                           </div>
+                           <div className="mb-2">
+                              <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">REF ID</p>
+                              <p className="font-bold text-sm tracking-tighter text-primary dark:text-white leading-none">{a.referenceId || 'N/A'}</p>
+                           </div>
+                           <Badge className={cn("text-[8px] font-bold px-2.5 py-0.5 rounded-full uppercase border-none hover:text-white transition-colors", getStatusColor(a.status))}>
+                             {a.status}
+                           </Badge>
+                        </div>
+                        
+                        <div className="flex-1 p-6 grid lg:grid-cols-4 gap-6 items-start">
+                          <div className="lg:col-span-3 space-y-4">
+                            <div className="flex flex-col md:flex-row md:items-center gap-3">
+                              <h3 className="text-xl font-bold text-primary dark:text-white leading-tight">{a.name}</h3>
+                              <div className="flex gap-2">
                                 <Button 
                                   variant="outline" 
                                   size="sm" 
-                                  onClick={() => handleStartCommissioning(a)}
-                                  className="h-7 px-3 text-[10px] font-black uppercase tracking-widest text-emerald-600 border-emerald-100 bg-emerald-50/50 hover:bg-emerald-100 transition-all rounded-full"
+                                  onClick={() => setSelectedAppForDetails(a)}
+                                  className="h-7 px-3 text-[10px] font-black uppercase tracking-widest text-primary hover:bg-slate-100 transition-all rounded-full"
                                 >
-                                  <UserPlus className="w-3 h-3 mr-1.5" /> Convert to New Member
+                                  <Eye className="w-3 h-3 mr-1.5" /> View Details
                                 </Button>
-                              )}
+                                {a.status === 'Approved' && (
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    onClick={() => handleStartCommissioning(a)}
+                                    className="h-7 px-3 text-[10px] font-black uppercase tracking-widest text-emerald-600 border-emerald-100 bg-emerald-50/50 hover:bg-emerald-100 transition-all rounded-full"
+                                  >
+                                    <UserPlus className="w-3 h-3 mr-1.5" /> Convert to New Member
+                                  </Button>
+                                )}
+                              </div>
                             </div>
-                          </div>
-                          
-                          <div className="flex flex-wrap gap-3 text-[10px] font-bold text-slate-500 mt-1">
-                               <span className="flex items-center gap-1"><Mail className="w-2.5 h-2.5 text-accent" /> {a.email}</span>
-                               <span className="flex items-center gap-1"><Phone className="w-2.5 h-2.5 text-accent" /> {a.phone}</span>
-                               <span className="flex items-center gap-1"><ShieldCheck className="w-2.5 h-2.5 text-accent" /> {a.memberType}</span>
-                          </div>
-                          
-                          <div className="grid md:grid-cols-2 gap-4">
-                             <div className="bg-slate-50 dark:bg-slate-950 p-4 rounded-2xl border border-slate-100 space-y-2">
-                                <div>
-                                  <p className="text-[8px] font-bold text-slate-400 uppercase mb-0.5">Education</p>
-                                  <p className="text-[11px] font-bold text-slate-700 dark:text-slate-300">{a.education || 'N/A'}</p>
-                                </div>
-                                <div>
-                                  <p className="text-[8px] font-bold text-slate-400 uppercase mb-0.5">Experience</p>
-                                  <p className="text-[11px] font-bold text-slate-700 dark:text-slate-300">{a.experience || 'N/A'}</p>
-                                </div>
-                             </div>
-                             <div className="bg-slate-50 dark:bg-slate-950 p-4 rounded-2xl border border-slate-100 flex items-center justify-center">
-                                <p className="text-[10px] leading-relaxed text-slate-500 italic text-center">"{a.address}"</p>
-                             </div>
-                          </div>
-                          
-                          {a.statusUpdateReason && (
-                            <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 flex items-start gap-2">
-                              <MessageSquare className="w-3 h-3 text-slate-400 mt-0.5" />
-                              <p className="text-[10px] text-slate-500 font-medium">Log: {a.statusUpdateReason}</p>
+                            
+                            <div className="flex flex-wrap gap-3 text-[10px] font-bold text-slate-500 mt-1">
+                                 <span className="flex items-center gap-1"><Mail className="w-2.5 h-2.5 text-accent" /> {a.email}</span>
+                                 <span className="flex items-center gap-1"><Phone className="w-2.5 h-2.5 text-accent" /> {a.phone}</span>
+                                 <span className="flex items-center gap-1"><ShieldCheck className="w-2.5 h-2.5 text-accent" /> {a.memberType}</span>
                             </div>
-                          )}
-                        </div>
+                            
+                            <div className="grid md:grid-cols-2 gap-4">
+                               <div className="bg-slate-50 dark:bg-slate-950 p-4 rounded-2xl border border-slate-100 space-y-2">
+                                  <div>
+                                    <p className="text-[8px] font-bold text-slate-400 uppercase mb-0.5">Education</p>
+                                    <p className="text-[11px] font-bold text-slate-700 dark:text-slate-300">{a.education || 'N/A'}</p>
+                                  </div>
+                                  <div>
+                                    <p className="text-[8px] font-bold text-slate-400 uppercase mb-0.5">Experience</p>
+                                    <p className="text-[11px] font-bold text-slate-700 dark:text-slate-300">{a.experience || 'N/A'}</p>
+                                  </div>
+                               </div>
+                               <div className="bg-slate-50 dark:bg-slate-950 p-4 rounded-2xl border border-slate-100 flex items-center justify-center">
+                                  <p className="text-[10px] leading-relaxed text-slate-500 italic text-center">"{a.address}"</p>
+                               </div>
+                            </div>
+                            
+                            {a.statusUpdateReason && (
+                              <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 flex items-start gap-2">
+                                <MessageSquare className="w-3 h-3 text-slate-400 mt-0.5" />
+                                <p className="text-[10px] text-slate-500 font-medium">Log: {a.statusUpdateReason}</p>
+                              </div>
+                            )}
+                          </div>
 
-                        <div className="flex flex-col items-end gap-2 h-full justify-center">
-                          <div className="w-full space-y-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest text-center mb-1">Update Status</p>
-                            <div className="grid grid-cols-2 gap-2">
-                              <Button 
-                                size="sm" 
-                                onClick={() => setActionDialog({ open: true, status: 'Approved', applicationId: a.id, reason: '' })} 
-                                className="bg-emerald-500 text-white font-bold h-8 rounded-lg text-[9px] hover:bg-emerald-600 hover:text-white px-1"
-                              >
-                                <Check className="w-2.5 h-2.5 mr-1" /> Approve
-                              </Button>
-                              <Button 
-                                size="sm" 
-                                onClick={() => setActionDialog({ open: true, status: 'Rejected', applicationId: a.id, reason: '' })} 
-                                className="bg-red-500 text-white font-bold h-8 rounded-lg text-[9px] hover:bg-red-600 hover:text-white px-1"
-                              >
-                                <X className="w-2.5 h-2.5 mr-1" /> Reject
-                              </Button>
-                              <Button 
-                                size="sm" 
-                                onClick={() => setActionDialog({ open: true, status: 'Archived', applicationId: a.id, reason: '' })} 
-                                className="bg-blue-500 text-white font-bold h-8 rounded-lg text-[9px] hover:bg-blue-600 hover:text-white px-1"
-                              >
-                                <Archive className="w-2.5 h-2.5 mr-1" /> Archive
-                              </Button>
-                              <Button 
-                                size="sm" 
-                                onClick={() => setActionDialog({ open: true, status: 'Pending', applicationId: a.id, reason: '' })} 
-                                className="bg-amber-500 text-white font-bold h-8 rounded-lg text-[9px] hover:bg-amber-600 hover:text-white px-1"
-                              >
-                                <Clock className="w-2.5 h-2.5 mr-1" /> Pending
-                              </Button>
+                          <div className="flex flex-col items-end gap-2 h-full justify-center">
+                            <div className="w-full space-y-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest text-center mb-1">Update Status</p>
+                              <div className="grid grid-cols-2 gap-2">
+                                <Button 
+                                  size="sm" 
+                                  onClick={() => setActionDialog({ open: true, status: 'Approved', applicationId: a.id, reason: '' })} 
+                                  className="bg-emerald-500 text-white font-bold h-8 rounded-lg text-[9px] hover:bg-emerald-600 hover:text-white px-1"
+                                >
+                                  <Check className="w-2.5 h-2.5 mr-1" /> Approve
+                                </Button>
+                                <Button 
+                                  size="sm" 
+                                  onClick={() => setActionDialog({ open: true, status: 'Rejected', applicationId: a.id, reason: '' })} 
+                                  className="bg-red-500 text-white font-bold h-8 rounded-lg text-[9px] hover:bg-red-600 hover:text-white px-1"
+                                >
+                                  <X className="w-2.5 h-2.5 mr-1" /> Reject
+                                </Button>
+                                <Button 
+                                  size="sm" 
+                                  onClick={() => setActionDialog({ open: true, status: 'Archived', applicationId: a.id, reason: '' })} 
+                                  className="bg-blue-500 text-white font-bold h-8 rounded-lg text-[9px] hover:bg-blue-600 hover:text-white px-1"
+                                >
+                                  <Archive className="w-2.5 h-2.5 mr-1" /> Archive
+                                </Button>
+                                <Button 
+                                  size="sm" 
+                                  onClick={() => setActionDialog({ open: true, status: 'Pending', applicationId: a.id, reason: '' })} 
+                                  className="bg-amber-500 text-white font-bold h-8 rounded-lg text-[9px] hover:bg-amber-600 hover:text-white px-1"
+                                >
+                                  <Clock className="w-2.5 h-2.5 mr-1" /> Pending
+                                </Button>
+                              </div>
                             </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                    </CardContent>
+                  </Card>
+                )
+              })}
             </div>
           )}
         </div>
@@ -526,11 +529,12 @@ export default function InternalApplicationsPage() {
                   <div className="absolute top-0 right-0 opacity-10 pointer-events-none transform translate-x-12 translate-y-[-20px]"><ShieldCheck className="w-64 h-64 md:w-96 md:h-96" /></div>
                   <div className="relative z-10 flex flex-col md:flex-row items-center gap-8">
                     <div className="relative w-32 h-32 md:w-40 md:h-40 rounded-[2rem] overflow-hidden border-4 border-white/20 shadow-2xl bg-slate-800">
-                      {selectedAppForDetails.photoDataUri ? (
-                        <Image src={selectedAppForDetails.photoDataUri} alt={selectedAppForDetails.name} fill className="object-cover" />
-                      ) : (
-                        <div className="flex items-center justify-center h-full"><User className="w-16 h-16 text-slate-700" /></div>
-                      )}
+                      <Image 
+                        src={selectedAppForDetails.photoDataUri || (selectedAppForDetails.gender?.toLowerCase() === 'female' ? '/dummy w.png' : '/dummy m.png')} 
+                        alt={selectedAppForDetails.name} 
+                        fill 
+                        className="object-cover" 
+                      />
                     </div>
                     <div className="space-y-2 text-center md:text-left">
                       <div className="inline-flex items-center gap-2 bg-accent/20 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/10">
@@ -640,7 +644,7 @@ export default function InternalApplicationsPage() {
                               <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0 mt-1" />
                               <div className="space-y-1">
                                  <p className="text-xs font-bold">Institutional Declaration</p>
-                                 <p className="text-[10px] text-slate-400 leading-relaxed">The applicant has agreed to abide by organizational bylaws and accepts the Trust's suspension policy.</p>
+                                 <p className="text-[10px] text-slate-400 leading-relaxed">The applicant has agreed to abide by organizational rules and accepts the Trust's suspension policy.</p>
                               </div>
                            </div>
                         </div>
@@ -698,7 +702,7 @@ export default function InternalApplicationsPage() {
                     {newMember.imageId ? (
                       <Image src={newMember.imageId} alt="Preview" fill className="object-cover" />
                     ) : (
-                      <div className="flex items-center justify-center h-full"><User className="w-10 h-10 text-slate-300" /></div>
+                      <Image src={newMember.gender === 'female' ? '/dummy w.png' : '/dummy m.png'} alt="Dummy" fill className="object-cover" />
                     )}
                     <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={handleFileChange} />
                   </div>
