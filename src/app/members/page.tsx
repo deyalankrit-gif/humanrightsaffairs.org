@@ -293,8 +293,8 @@ export default function MembersPage() {
             <p className="text-xl opacity-80 text-lg text-primary-foreground">
               A dynamic ledger of our dedicated human rights defenders, updated in real-time by the central administration.
             </p>
-            <p className="text-accent font-bold italic tracking-wide text-sm md:text-base animate-in fade-in slide-in-from-bottom-2 duration-700">
-              The following list contains the names of all currently active members of the organization.
+            <p className="text-secondary font-bold italic tracking-wide text-sm md:text-base animate-in fade-in slide-in-from-bottom-2 duration-700">
+              The following list contains the names of all currently active members of the organization only
             </p>
           </div>
 
@@ -481,7 +481,7 @@ export default function MembersPage() {
                   </div>
                 </div>
                 <DialogFooter>
-                  <Button onClick={handleAddMember} disabled={isAdding} className="w-full h-12 rounded-xl bg-primary text-white font-bold hover:bg-secondary hover:text-white transition-all shadow-xl shadow-primary/20">
+                  <Button onClick={handleAddMember} disabled={isAdding} className="w-full h-12 rounded-xl bg-primary text-white font-bold text-lg shadow-xl shadow-primary/20 hover:bg-secondary hover:text-white transition-all">
                     {isAdding ? <Loader2 className="animate-spin mr-2" /> : <Plus className="w-4 h-4 mr-2" />}
                     Confirm Commissioning
                   </Button>
