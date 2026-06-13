@@ -8,7 +8,7 @@ export function Footer() {
   const donationFooterImg = PlaceHolderImages.find(img => img.id === 'donation-footer-image');
 
   return (
-    <footer className="bg-primary text-primary-foreground pt-20 pb-10">
+    <footer className="bg-primary text-primary-foreground pt-20 pb-10 print:hidden">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
           <div className="space-y-6">

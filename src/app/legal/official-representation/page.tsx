@@ -32,7 +32,10 @@ export default function OfficialRepresentationPage() {
     issueDescription: '',
     chairmanName: 'Moumita Saha',
     chairmanMobile: '+91 70631 11471',
-    chairmanEmail: 'hrat.wb.chairman@gmail.com'
+    chairmanEmail: 'hrat.wb.chairman@gmail.com',
+    enclosure1: 'Copy of supporting documents.',
+    enclosure2: 'Relevant representations/complaints.',
+    enclosure3: 'Any other relevant records.'
   })
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -87,9 +90,9 @@ ${formData.chairmanEmail}
 
 Enclosures:
 
-1. Copy of supporting documents.
-2. Relevant representations/complaints.
-3. Any other relevant records.
+1. ${formData.enclosure1}
+2. ${formData.enclosure2}
+3. ${formData.enclosure3}
     `
     navigator.clipboard.writeText(text)
     toast({
@@ -106,14 +109,15 @@ Enclosures:
       onChange={handleChange}
       placeholder={placeholder}
       className={cn(
-        "border-b border-dotted border-slate-400 bg-transparent focus:outline-none focus:border-accent focus:border-b-2 px-1 text-primary font-bold placeholder:text-slate-300 print:placeholder:text-transparent print:border-none",
+        "border-b border-dotted border-slate-400 bg-transparent focus:outline-none focus:border-accent focus:border-b-2 px-1 text-primary font-bold placeholder:text-slate-300 print:placeholder:text-transparent print:border-none print:text-black",
         className
       )}
     />
   )
 
   return (
-    <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
+    <main className="min-h-screen bg-slate-50 dark:bg-slate-950 print:bg-white print:p-0">
+      {/* Hero Section - Hidden on Print */}
       <section className="pt-32 pb-16 bg-gradient-to-br from-primary via-primary/95 to-accent text-primary-foreground relative overflow-hidden border-b-8 border-accent/20 print:hidden">
         <div className="absolute top-0 right-0 w-1/2 h-full bg-white/5 -skew-x-12"></div>
         <div className="container mx-auto px-4 relative z-10">
@@ -137,6 +141,7 @@ Enclosures:
         </div>
       </section>
 
+      {/* Editor Toolbar - Hidden on Print */}
       <section className="py-6 bg-white dark:bg-slate-900 border-b sticky top-[48px] md:top-[56px] z-30 shadow-sm print:hidden">
         <div className="container mx-auto px-4 flex flex-wrap justify-between items-center gap-4">
           <div className="flex items-center gap-2">
@@ -154,19 +159,20 @@ Enclosures:
         </div>
       </section>
 
-      <section className="py-16 md:py-24 px-4">
+      {/* Main Document Body */}
+      <section className="py-16 md:py-24 px-4 print:py-0 print:px-0">
         <div className="container mx-auto">
           <div className="max-w-4xl mx-auto">
             
-            <Card className="rounded-[2.5rem] border-none shadow-2xl overflow-hidden bg-white dark:bg-slate-900 relative">
+            <Card className="rounded-[2.5rem] border-none shadow-2xl overflow-hidden bg-white dark:bg-slate-900 relative print:shadow-none print:rounded-none print:bg-white print:text-black">
                <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-16 -mt-16 print:hidden"></div>
                <div className="absolute top-0 left-0 w-1.5 h-full bg-accent print:hidden"></div>
                
-               <CardContent className="p-8 md:p-16 space-y-10 text-slate-800 dark:text-slate-200 font-serif leading-relaxed text-sm md:text-base">
+               <CardContent className="p-8 md:p-16 space-y-10 text-slate-800 dark:text-slate-200 font-serif leading-relaxed text-sm md:text-base print:text-black print:p-12">
                   {/* Letterhead */}
-                  <div className="space-y-1 border-b-2 border-primary pb-6 mb-10 font-sans">
-                    <h2 className="text-2xl md:text-3xl font-bold text-primary dark:text-white uppercase tracking-tight">Human Rights Affairs Trust</h2>
-                    <div className="flex flex-col space-y-0.5 text-xs text-slate-500 font-medium">
+                  <div className="space-y-1 border-b-2 border-primary pb-6 mb-10 font-sans print:border-black">
+                    <h2 className="text-2xl md:text-3xl font-bold text-primary dark:text-white uppercase tracking-tight print:text-black">Human Rights Affairs Trust</h2>
+                    <div className="flex flex-col space-y-0.5 text-xs text-slate-500 font-medium print:text-black">
                       <div className="flex items-baseline gap-2">
                         <Fillable name="stateOfficeAddress" placeholder="State Office Address" className="w-full" />
                       </div>
@@ -199,7 +205,7 @@ Enclosures:
                     </div>
 
                     <div className="text-center pt-4">
-                       <p className="font-bold text-lg border-b-2 border-slate-900 inline-block px-4">Official Representation</p>
+                       <p className="font-bold text-lg border-b-2 border-slate-900 inline-block px-4 print:border-black">Official Representation</p>
                     </div>
 
                     <div className="space-y-6 text-justify">
@@ -216,7 +222,7 @@ Enclosures:
                           value={formData.issueDescription}
                           onChange={handleChange}
                           placeholder="Provide a detailed description of the issue here..."
-                          className="w-full mt-2 bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4 focus:outline-none focus:ring-2 focus:ring-accent border-none italic text-sm font-serif print:bg-transparent print:p-0 print:italic-none"
+                          className="w-full mt-2 bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4 focus:outline-none focus:ring-2 focus:ring-accent border-none italic text-sm font-serif print:bg-transparent print:p-0 print:italic-none print:text-black"
                           rows={4}
                         />
                       </p>
@@ -244,8 +250,8 @@ Enclosures:
                         <div className="border-b-2 border-slate-200 w-64 h-12 mb-2 print:border-slate-400"></div>
                         <div className="font-bold font-sans">
                            <Fillable name="chairmanName" placeholder="Name of State Chairman" className="w-64 block text-lg" />
-                           <p className="text-slate-600">State Chairman</p>
-                           <p className="text-slate-600">Human Rights Affairs Trust</p>
+                           <p className="text-slate-600 print:text-black">State Chairman</p>
+                           <p className="text-slate-600 print:text-black">Human Rights Affairs Trust</p>
                            <Fillable name="chairmanMobile" placeholder="Mobile Number" className="w-64 block mt-1" />
                            <Fillable name="chairmanEmail" placeholder="Email Address" className="w-64 block" />
                         </div>
@@ -253,12 +259,18 @@ Enclosures:
                     </div>
 
                     <div className="pt-10 space-y-3">
-                       <p className="font-bold underline uppercase text-xs tracking-widest text-slate-400">Enclosures:</p>
-                       <ol className="list-decimal pl-6 space-y-1 text-slate-500 italic text-sm">
-                         <li>Copy of supporting documents.</li>
-                         <li>Relevant representations/complaints.</li>
-                         <li>Any other relevant records.</li>
-                       </ol>
+                       <p className="font-bold underline uppercase text-xs tracking-widest text-slate-400 print:text-black">Enclosures:</p>
+                       <div className="space-y-2">
+                         <div className="flex gap-2 items-baseline text-slate-500 italic text-sm print:text-black">
+                           <span>1.</span> <Fillable name="enclosure1" placeholder="Enclosure 1" className="w-full italic" />
+                         </div>
+                         <div className="flex gap-2 items-baseline text-slate-500 italic text-sm print:text-black">
+                           <span>2.</span> <Fillable name="enclosure2" placeholder="Enclosure 2" className="w-full italic" />
+                         </div>
+                         <div className="flex gap-2 items-baseline text-slate-500 italic text-sm print:text-black">
+                           <span>3.</span> <Fillable name="enclosure3" placeholder="Enclosure 3" className="w-full italic" />
+                         </div>
+                       </div>
                     </div>
                   </div>
                </CardContent>
