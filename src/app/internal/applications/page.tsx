@@ -37,7 +37,10 @@ import {
   FileText,
   Gavel,
   GraduationCap,
-  Scale
+  Scale,
+  Hash,
+  CheckCircle2,
+  Home
 } from 'lucide-react'
 import {
   Dialog,
@@ -331,13 +334,13 @@ export default function InternalApplicationsPage() {
             <div className="flex gap-2">
                {[
                  { label: 'PND', count: stats.pending, color: 'text-amber-400' },
-                 { label: 'APR', count: stats.approved, color: 'text-emerald-400' },
-                 { label: 'REJ', count: stats.rejected, color: 'text-red-400' },
-                 { label: 'ARC', count: stats.archived, color: 'text-blue-400' },
+                 { label: 'APR', count: stats.approved, count_color: 'text-emerald-400' },
+                 { label: 'REJ', count: stats.rejected, count_color: 'text-red-400' },
+                 { label: 'ARC', count: stats.archived, count_color: 'text-blue-400' },
                ].map((s) => (
                  <div key={s.label} className="bg-white/5 px-4 py-2 rounded-xl border border-white/10 text-center min-w-[70px]">
                    <p className="text-[8px] text-slate-500 font-bold uppercase mb-0.5">{s.label}</p>
-                   <p className={cn("text-lg font-bold leading-none", s.color)}>{s.count}</p>
+                   <p className={cn("text-lg font-bold leading-none", s.color || s.count_color)}>{s.count}</p>
                  </div>
                ))}
             </div>
@@ -396,7 +399,7 @@ export default function InternalApplicationsPage() {
                             <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">REF ID</p>
                             <p className="font-bold text-sm tracking-tighter text-primary dark:text-white leading-none">{a.referenceId || 'N/A'}</p>
                          </div>
-                         <Badge className={cn("text-[8px] font-bold px-2.5 py-0.5 rounded-full uppercase border-none", getStatusColor(a.status))}>
+                         <Badge className={cn("text-[8px] font-bold px-2.5 py-0.5 rounded-full uppercase border-none hover:text-white transition-colors", getStatusColor(a.status))}>
                            {a.status}
                          </Badge>
                       </div>
