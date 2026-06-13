@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState } from 'react'
@@ -127,6 +126,7 @@ export function MembershipRegistrationDialog({ children }: { children: React.Rea
   const level = form.watch('level')
   const selectedState = form.watch('stateName')
   const memberType = form.watch('memberType')
+  const selectedGender = form.watch('gender')
   const states = Object.keys(INDIA_DATA).sort()
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -222,7 +222,7 @@ export function MembershipRegistrationDialog({ children }: { children: React.Rea
                 {photo ? (
                   <Image src={photo} alt="Preview" fill className="object-cover" />
                 ) : (
-                  <Camera className="w-10 h-10 text-slate-300 group-hover:text-accent transition-colors" />
+                  <Image src={selectedGender?.toLowerCase() === 'female' ? '/dummy w.png' : '/dummy m.png'} alt="Placeholder" fill className="object-cover" />
                 )}
                 <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={handleFileChange} />
               </div>

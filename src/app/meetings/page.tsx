@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useEffect } from 'react'
@@ -849,7 +848,7 @@ export default function MeetingsPage() {
             <div className="flex flex-col h-full">
               <div className="relative h-[340px] w-full shrink-0">
                  <Image 
-                   src={selectedLeaderProfile.imageId?.startsWith('data:') ? selectedLeaderProfile.imageId : (PlaceHolderImages.find(i => i.id === selectedLeaderProfile.imageId)?.imageUrl || (selectedLeaderProfile.gender === 'female' ? '/dummy w.png' : '/dummy m.png'))} 
+                   src={selectedLeaderProfile.imageId?.startsWith('data:') ? selectedLeaderProfile.imageId : (PlaceHolderImages.find(i => i.id === selectedLeaderProfile.imageId)?.imageUrl || (selectedLeaderProfile.gender.toLowerCase() === 'female' ? '/dummy w.png' : '/dummy m.png'))} 
                    alt={selectedLeaderProfile.name} 
                    fill 
                    className="object-cover object-top"

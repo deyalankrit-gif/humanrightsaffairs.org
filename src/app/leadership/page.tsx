@@ -35,7 +35,7 @@ type Leader = {
 }
 
 function LeaderCard({ leader, variant = "default", isAdmin, onEdit, onDelete }: { leader: Leader, variant?: "large" | "default" | "small", isAdmin?: boolean, onEdit?: (l: Leader) => void, onDelete?: (id: string) => void }) {
-  const fallback = leader.gender === 'female' ? '/dummy w.png' : '/dummy m.png'
+  const fallback = leader.gender.toLowerCase() === 'female' ? '/dummy w.png' : '/dummy m.png'
   const img = leader.imageId?.startsWith('data:') ? leader.imageId : (PlaceHolderImages.find(i => i.id === leader.imageId)?.imageUrl || fallback)
   
   const sizeClasses = {
@@ -186,7 +186,7 @@ export default function LeadershipPage() {
                 <div className="space-y-4 py-4">
                   <div className="flex flex-col items-center gap-4 p-4 border-2 border-dashed rounded-2xl">
                     <div className="relative w-32 h-40 bg-slate-100 dark:bg-slate-800 rounded-xl overflow-hidden border">
-                      <Image src={newLeader.imageId?.startsWith('data:') ? newLeader.imageId : (newLeader.gender === 'male' ? '/dummy m.png' : '/dummy w.png')} alt="Preview" fill className="object-cover" />
+                      <Image src={newLeader.imageId?.startsWith('data:') ? newLeader.imageId : (newLeader.gender.toLowerCase() === 'female' ? '/dummy w.png' : '/dummy m.png')} alt="Preview" fill className="object-cover" />
                     </div>
                     <Button variant="outline" className="w-full relative h-12 rounded-xl">
                       <Upload className="w-4 h-4 mr-2" /> Upload Photo
@@ -377,7 +377,7 @@ export default function LeadershipPage() {
             <div className="space-y-4 py-4">
               <div className="flex flex-col items-center gap-4 p-4 border-2 border-dashed rounded-2xl">
                 <div className="relative w-32 h-40 bg-slate-100 dark:bg-slate-800 rounded-xl overflow-hidden border">
-                  <Image src={editLeader.imageId?.startsWith('data:') ? editLeader.imageId : (editLeader.gender === 'male' ? '/dummy m.png' : '/dummy w.png')} alt="Preview" fill className="object-cover" />
+                  <Image src={editLeader.imageId?.startsWith('data:') ? editLeader.imageId : (editLeader.gender.toLowerCase() === 'female' ? '/dummy w.png' : '/dummy m.png')} alt="Preview" fill className="object-cover" />
                 </div>
                 <Button variant="outline" className="w-full relative h-12 rounded-xl"><Upload className="w-4 h-4 mr-2" /> Change Photo<input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => handleFileChange(e, true)} /></Button>
               </div>

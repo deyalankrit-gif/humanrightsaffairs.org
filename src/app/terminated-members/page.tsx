@@ -194,7 +194,7 @@ export default function TerminatedMembersPage() {
                     <div className="flex flex-col items-center gap-4 p-4 border-2 border-dashed rounded-2xl">
                       <div className="relative w-24 h-24 bg-slate-100 dark:bg-slate-800 rounded-2xl overflow-hidden grayscale">
                         <Image 
-                          src={newMember.imageId?.startsWith('data:') ? newMember.imageId : (newMember.gender === 'female' ? '/dummy w.png' : '/dummy m.png')} 
+                          src={newMember.imageId?.startsWith('data:') ? newMember.imageId : (newMember.gender.toLowerCase() === 'female' ? '/dummy w.png' : '/dummy m.png')} 
                           alt="Preview" 
                           fill 
                           className="object-cover"
@@ -335,7 +335,7 @@ export default function TerminatedMembersPage() {
               <div className="grid gap-6">
                 {filtered.length > 0 ? (
                   filtered.map((member) => {
-                    const fallback = member.gender === 'female' ? '/dummy w.png' : '/dummy m.png'
+                    const fallback = member.gender?.toLowerCase() === 'female' ? '/dummy w.png' : '/dummy m.png'
                     const displayImg = member.imageId?.startsWith('data:') ? member.imageId : (PlaceHolderImages.find(i => i.id === member.imageId)?.imageUrl || fallback)
                     return (
                       <Card key={member.id} className="group border-none shadow-sm hover:shadow-xl transition-all duration-500 rounded-[2.5rem] overflow-hidden bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 relative">
@@ -411,7 +411,7 @@ export default function TerminatedMembersPage() {
                                       <div className="flex flex-col items-center gap-4 p-4 border-2 border-dashed rounded-2xl">
                                         <div className="relative w-24 h-24 bg-slate-100 dark:bg-slate-800 rounded-2xl overflow-hidden grayscale">
                                           <Image 
-                                            src={editMember.imageId?.startsWith('data:') ? editMember.imageId : (editMember.gender === 'female' ? '/dummy w.png' : '/dummy m.png')} 
+                                            src={editMember.imageId?.startsWith('data:') ? editMember.imageId : (editMember.gender.toLowerCase() === 'female' ? '/dummy w.png' : '/dummy m.png')} 
                                             alt="Preview" 
                                             fill 
                                             className="object-cover"

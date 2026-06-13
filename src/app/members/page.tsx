@@ -310,7 +310,7 @@ export default function MembersPage() {
                         {newMember.imageId ? (
                           <Image src={newMember.imageId} alt="Preview" fill className="object-cover" />
                         ) : (
-                          <div className="flex items-center justify-center h-full"><User className="w-10 h-10 text-slate-300" /></div>
+                          <Image src={newMember.gender.toLowerCase() === 'female' ? '/dummy w.png' : '/dummy m.png'} alt="Placeholder" fill className="object-cover" />
                         )}
                         <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={handleFileChange} />
                       </div>
@@ -434,7 +434,7 @@ export default function MembersPage() {
                   <div className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                        <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">Official Email *</Label><Input type="email" placeholder="name@hrat.org" value={newMember.email} onChange={e => setNewMember({...newMember, email: e.target.value})} className="h-11 rounded-xl" /></div>
-                       <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">Phone Number *</Label><Input placeholder="+91" value={newMember.phone} onChange={e => setNewMember({...newMember, phone: e.target.value})} className="h-11 rounded-xl" /></div>
+                       <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">Phone Number *</Label><Input placeholder="+91 XXXXX XXXXX" value={newMember.phone} onChange={e => setNewMember({...newMember, phone: e.target.value})} className="h-11 rounded-xl" /></div>
                     </div>
                     <div className="space-y-1">
                       <Label className="text-[10px] uppercase font-bold text-slate-400">Verified Residential Address *</Label>
@@ -567,7 +567,7 @@ export default function MembersPage() {
             <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-3">
               {filteredMembers.length > 0 ? (
                 filteredMembers.map((member) => {
-                  const fallback = member.gender === 'female' ? '/dummy w.png' : '/dummy m.png'
+                  const fallback = member.gender?.toLowerCase() === 'female' ? '/dummy w.png' : '/dummy m.png'
                   const displayImg = member.imageId?.startsWith('data:') ? member.imageId : (PlaceHolderImages.find(i => i.id === member.imageId)?.imageUrl || fallback)
                   return (
                     <Card 
