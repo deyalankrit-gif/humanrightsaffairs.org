@@ -31,7 +31,13 @@ import {
   Sparkles,
   Heart,
   Calendar as CalendarIcon,
-  Briefcase
+  Briefcase,
+  Eye,
+  BadgeCheck,
+  FileText,
+  Gavel,
+  GraduationCap,
+  Scale
 } from 'lucide-react'
 import {
   Dialog,
@@ -40,6 +46,7 @@ import {
   DialogTitle,
   DialogFooter,
   DialogDescription,
+  DialogClose,
 } from "@/components/ui/dialog"
 import {
   Popover,
@@ -64,6 +71,7 @@ export default function InternalApplicationsPage() {
   const [search, setSearch] = useState('')
   const [activeFilter, setActiveFilter] = useState<AppStatus>('All')
   const [isActionLoading, setIsActionLoading] = useState(false)
+  const [selectedAppForDetails, setSelectedAppForDetails] = useState<any>(null)
   
   // Commissioning State
   const [isCommissioningOpen, setIsCommissioningOpen] = useState(false)
@@ -255,10 +263,10 @@ export default function InternalApplicationsPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'Approved': return 'bg-emerald-500 text-white hover:bg-emerald-600'
-      case 'Rejected': return 'bg-red-500 text-white hover:bg-red-600'
-      case 'Archived': return 'bg-blue-500 text-white hover:bg-blue-600'
-      default: return 'bg-amber-500 text-white hover:bg-amber-600'
+      case 'Approved': return 'bg-emerald-500 text-white hover:bg-emerald-600 hover:text-white'
+      case 'Rejected': return 'bg-red-500 text-white hover:bg-red-600 hover:text-white'
+      case 'Archived': return 'bg-blue-500 text-white hover:bg-blue-600 hover:text-white'
+      default: return 'bg-amber-500 text-white hover:bg-amber-600 hover:text-white'
     }
   }
 
@@ -348,7 +356,7 @@ export default function InternalApplicationsPage() {
                    className={cn(
                      "rounded-lg px-4 font-bold h-8 text-[11px] transition-all",
                      activeFilter === st 
-                       ? "bg-accent text-primary shadow-sm" 
+                       ? "bg-accent text-primary shadow-sm hover:text-primary" 
                        : "text-slate-500 hover:bg-slate-200"
                    )}
                  >
@@ -397,16 +405,26 @@ export default function InternalApplicationsPage() {
                         <div className="lg:col-span-3 space-y-4">
                           <div className="flex flex-col md:flex-row md:items-center gap-3">
                             <h3 className="text-xl font-bold text-primary dark:text-white leading-tight">{a.name}</h3>
-                            {a.status === 'Approved' && (
+                            <div className="flex gap-2">
                               <Button 
                                 variant="outline" 
                                 size="sm" 
-                                onClick={() => handleStartCommissioning(a)}
-                                className="h-7 px-3 text-[10px] font-black uppercase tracking-widest text-emerald-600 border-emerald-100 bg-emerald-50/50 hover:bg-emerald-100 transition-all rounded-full"
+                                onClick={() => setSelectedAppForDetails(a)}
+                                className="h-7 px-3 text-[10px] font-black uppercase tracking-widest text-primary hover:bg-slate-100 transition-all rounded-full"
                               >
-                                <UserPlus className="w-3 h-3 mr-1.5" /> Convert to New Member
+                                <Eye className="w-3 h-3 mr-1.5" /> View Details
                               </Button>
-                            )}
+                              {a.status === 'Approved' && (
+                                <Button 
+                                  variant="outline" 
+                                  size="sm" 
+                                  onClick={() => handleStartCommissioning(a)}
+                                  className="h-7 px-3 text-[10px] font-black uppercase tracking-widest text-emerald-600 border-emerald-100 bg-emerald-50/50 hover:bg-emerald-100 transition-all rounded-full"
+                                >
+                                  <UserPlus className="w-3 h-3 mr-1.5" /> Convert to New Member
+                                </Button>
+                              )}
+                            </div>
                           </div>
                           
                           <div className="flex flex-wrap gap-3 text-[10px] font-bold text-slate-500 mt-1">
@@ -446,28 +464,28 @@ export default function InternalApplicationsPage() {
                               <Button 
                                 size="sm" 
                                 onClick={() => setActionDialog({ open: true, status: 'Approved', applicationId: a.id, reason: '' })} 
-                                className="bg-emerald-500 text-white font-bold h-8 rounded-lg text-[9px] hover:bg-emerald-600 px-1"
+                                className="bg-emerald-500 text-white font-bold h-8 rounded-lg text-[9px] hover:bg-emerald-600 hover:text-white px-1"
                               >
                                 <Check className="w-2.5 h-2.5 mr-1" /> Approve
                               </Button>
                               <Button 
                                 size="sm" 
                                 onClick={() => setActionDialog({ open: true, status: 'Rejected', applicationId: a.id, reason: '' })} 
-                                className="bg-red-500 text-white font-bold h-8 rounded-lg text-[9px] hover:bg-red-600 px-1"
+                                className="bg-red-500 text-white font-bold h-8 rounded-lg text-[9px] hover:bg-red-600 hover:text-white px-1"
                               >
                                 <X className="w-2.5 h-2.5 mr-1" /> Reject
                               </Button>
                               <Button 
                                 size="sm" 
                                 onClick={() => setActionDialog({ open: true, status: 'Archived', applicationId: a.id, reason: '' })} 
-                                className="bg-blue-500 text-white font-bold h-8 rounded-lg text-[9px] hover:bg-blue-600 px-1"
+                                className="bg-blue-500 text-white font-bold h-8 rounded-lg text-[9px] hover:bg-blue-600 hover:text-white px-1"
                               >
                                 <Archive className="w-2.5 h-2.5 mr-1" /> Archive
                               </Button>
                               <Button 
                                 size="sm" 
                                 onClick={() => setActionDialog({ open: true, status: 'Pending', applicationId: a.id, reason: '' })} 
-                                className="bg-amber-500 text-white font-bold h-8 rounded-lg text-[9px] hover:bg-amber-600 px-1"
+                                className="bg-amber-500 text-white font-bold h-8 rounded-lg text-[9px] hover:bg-amber-600 hover:text-white px-1"
                               >
                                 <Clock className="w-2.5 h-2.5 mr-1" /> Pending
                               </Button>
@@ -483,6 +501,185 @@ export default function InternalApplicationsPage() {
           )}
         </div>
       </section>
+
+      {/* View Details Dialog */}
+      <Dialog open={!!selectedAppForDetails} onOpenChange={(open) => !open && setSelectedAppForDetails(null)}>
+        <DialogContent className="max-w-4xl p-0 border-none shadow-2xl rounded-[2.5rem] overflow-hidden bg-white dark:bg-slate-950 flex flex-col [&>button]:hidden max-h-[90vh]">
+          <DialogHeader className="sr-only">
+            <DialogTitle>Applicant Profile: {selectedAppForDetails?.name}</DialogTitle>
+            <DialogDescription>Full application data for vetting.</DialogDescription>
+          </DialogHeader>
+          <div className="absolute right-6 top-6 z-50">
+            <DialogClose asChild>
+              <Button variant="ghost" size="icon" className="rounded-full bg-blue-600 hover:bg-blue-500 text-white h-10 w-10 shadow-xl transition-all hover:scale-110 active:scale-95 duration-300">
+                <X className="w-6 h-6 text-white" />
+              </Button>
+            </DialogClose>
+          </div>
+          {selectedAppForDetails && (
+            <div className="flex-1 overflow-y-auto custom-scrollbar">
+              <div className="flex flex-col">
+                <div className="relative bg-slate-900 p-12 md:p-16 text-white overflow-hidden border-b-8 border-accent/20">
+                  <div className="absolute top-0 right-0 opacity-10 pointer-events-none transform translate-x-12 translate-y-[-20px]"><ShieldCheck className="w-64 h-64 md:w-96 md:h-96" /></div>
+                  <div className="relative z-10 flex flex-col md:flex-row items-center gap-8">
+                    <div className="relative w-32 h-32 md:w-40 md:h-40 rounded-[2rem] overflow-hidden border-4 border-white/20 shadow-2xl bg-slate-800">
+                      {selectedAppForDetails.photoDataUri ? (
+                        <Image src={selectedAppForDetails.photoDataUri} alt={selectedAppForDetails.name} fill className="object-cover" />
+                      ) : (
+                        <div className="flex items-center justify-center h-full"><User className="w-16 h-16 text-slate-700" /></div>
+                      )}
+                    </div>
+                    <div className="space-y-2 text-center md:text-left">
+                      <div className="inline-flex items-center gap-2 bg-accent/20 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/10">
+                        <BadgeCheck className="w-4 h-4 text-accent" />
+                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-accent">{selectedAppForDetails.memberType} Candidate</span>
+                      </div>
+                      <h2 className="text-4xl md:text-6xl font-headline font-bold drop-shadow-xl">{selectedAppForDetails.name}</h2>
+                      <p className="text-white/60 font-bold uppercase tracking-widest text-xs flex items-center justify-center md:justify-start gap-2">
+                        <Hash className="w-3.5 h-3.5" /> {selectedAppForDetails.referenceId}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-8 md:p-16 space-y-12 pb-24">
+                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                     <div className="space-y-4">
+                        <h4 className="text-[10px] font-black uppercase tracking-widest text-accent flex items-center gap-2"><Phone className="w-3 h-3" /> Contact Protocol</h4>
+                        <div className="space-y-3">
+                           <div className="p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800">
+                              <p className="text-[8px] font-bold text-slate-400 uppercase mb-1">Official Mobile</p>
+                              <p className="text-sm font-bold text-primary dark:text-white">{selectedAppForDetails.phone}</p>
+                           </div>
+                           <div className="p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800">
+                              <p className="text-[8px] font-bold text-slate-400 uppercase mb-1">Email ID</p>
+                              <p className="text-sm font-bold text-primary dark:text-white truncate">{selectedAppForDetails.email || 'Not Provided'}</p>
+                           </div>
+                        </div>
+                     </div>
+
+                     <div className="space-y-4">
+                        <h4 className="text-[10px] font-black uppercase tracking-widest text-accent flex items-center gap-2"><MapPin className="w-3 h-3" /> Jurisdictional Scope</h4>
+                        <div className="space-y-3">
+                           <div className="p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800">
+                              <p className="text-[8px] font-bold text-slate-400 uppercase mb-1">Operational Level</p>
+                              <p className="text-sm font-bold text-primary dark:text-white">{selectedAppForDetails.level} Council</p>
+                           </div>
+                           <div className="p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800">
+                              <p className="text-[8px] font-bold text-slate-400 uppercase mb-1">Assigned Region</p>
+                              <p className="text-sm font-bold text-primary dark:text-white">
+                                 {selectedAppForDetails.districtName ? `${selectedAppForDetails.districtName}, ` : ''}{selectedAppForDetails.stateName || 'National Center'}
+                              </p>
+                           </div>
+                        </div>
+                     </div>
+
+                     <div className="space-y-4">
+                        <h4 className="text-[10px] font-black uppercase tracking-widest text-accent flex items-center gap-2"><Briefcase className="w-3 h-3" /> Credentials</h4>
+                        <div className="space-y-3">
+                           <div className="p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800">
+                              <p className="text-[8px] font-bold text-slate-400 uppercase mb-1">Primary Aadhaar</p>
+                              <p className="text-sm font-bold text-primary dark:text-white font-mono tracking-tighter">{selectedAppForDetails.aadhaar || 'Pending Verification'}</p>
+                           </div>
+                           <div className="p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800">
+                              <p className="text-[8px] font-bold text-slate-400 uppercase mb-1">Permanent PAN</p>
+                              <p className="text-sm font-bold text-primary dark:text-white font-mono uppercase">{selectedAppForDetails.pan || 'N/A'}</p>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+
+                  <div className="grid md:grid-cols-2 gap-8">
+                     <div className="space-y-6">
+                        <h4 className="text-[10px] font-black uppercase tracking-widest text-primary dark:text-white flex items-center gap-2"><GraduationCap className="w-4 h-4 text-emerald-500" /> Education & Background</h4>
+                        <div className="bg-slate-50 dark:bg-slate-900 p-8 rounded-[2rem] border border-slate-100 dark:border-slate-800 space-y-6">
+                           <div>
+                              <p className="text-[9px] font-bold text-slate-400 uppercase mb-2">Academic Qualifications</p>
+                              <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed font-medium">"{selectedAppForDetails.education || 'Data missing from application profile.'}"</p>
+                           </div>
+                           <div className="h-px bg-slate-200 dark:bg-slate-800"></div>
+                           <div>
+                              <p className="text-[9px] font-bold text-slate-400 uppercase mb-2">Professional Experience</p>
+                              <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed font-medium">"{selectedAppForDetails.experience || 'No experience recorded.'}"</p>
+                           </div>
+                        </div>
+                     </div>
+
+                     <div className="space-y-6">
+                        <h4 className="text-[10px] font-black uppercase tracking-widest text-primary dark:text-white flex items-center gap-2"><Home className="w-4 h-4 text-indigo-500" /> Verified Residence</h4>
+                        <div className="bg-white dark:bg-slate-900 p-8 rounded-[2rem] border-2 border-slate-100 dark:border-slate-800 shadow-sm space-y-6">
+                           <div className="flex gap-4">
+                              <MapPin className="w-5 h-5 text-accent shrink-0 mt-1" />
+                              <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed italic">"{selectedAppForDetails.address}"</p>
+                           </div>
+                           <div className="grid grid-cols-3 gap-4 pt-4 border-t border-slate-100">
+                              <div><p className="text-[8px] font-bold text-slate-400 uppercase">Post Office</p><p className="text-xs font-bold">{selectedAppForDetails.postOffice}</p></div>
+                              <div><p className="text-[8px] font-bold text-slate-400 uppercase">Police Station</p><p className="text-xs font-bold">{selectedAppForDetails.policeStation}</p></div>
+                              <div><p className="text-[8px] font-bold text-slate-400 uppercase">PIN Code</p><p className="text-xs font-mono font-bold">{selectedAppForDetails.pinCode}</p></div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+
+                  <div className="bg-slate-950 p-10 rounded-[3rem] text-white space-y-8 relative overflow-hidden">
+                     <div className="absolute top-0 right-0 w-48 h-48 bg-accent/10 rounded-full -mr-24 -mt-24 blur-3xl"></div>
+                     <h4 className="text-[10px] font-black uppercase tracking-widest text-accent flex items-center gap-2"><Gavel className="w-4 h-4" /> Legal Affirmations & Metadata</h4>
+                     <div className="grid md:grid-cols-2 gap-10">
+                        <div className="space-y-4">
+                           <div className="flex items-start gap-4">
+                              <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0 mt-1" />
+                              <div className="space-y-1">
+                                 <p className="text-xs font-bold">Affidavit: No Criminal Record</p>
+                                 <p className="text-[10px] text-slate-400 leading-relaxed">The applicant has formally declared that they possess no prior criminal background or human rights violations.</p>
+                              </div>
+                           </div>
+                           <div className="flex items-start gap-4">
+                              <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0 mt-1" />
+                              <div className="space-y-1">
+                                 <p className="text-xs font-bold">Institutional Declaration</p>
+                                 <p className="text-[10px] text-slate-400 leading-relaxed">The applicant has agreed to abide by organizational bylaws and accepts the Trust's suspension policy.</p>
+                              </div>
+                           </div>
+                        </div>
+                        <div className="space-y-4 bg-white/5 p-6 rounded-2xl border border-white/10">
+                           <div className="flex justify-between items-center text-[10px] font-bold">
+                              <span className="text-slate-500 uppercase">Application Date</span>
+                              <span>{selectedAppForDetails.createdAt?.toDate ? selectedAppForDetails.createdAt.toDate().toLocaleDateString() : 'Real-time Entry'}</span>
+                           </div>
+                           <div className="flex justify-between items-center text-[10px] font-bold">
+                              <span className="text-slate-500 uppercase">Membership Term</span>
+                              <span className="text-accent">{selectedAppForDetails.membershipDuration}</span>
+                           </div>
+                           <div className="flex justify-between items-center text-[10px] font-bold">
+                              <span className="text-slate-500 uppercase">Gender</span>
+                              <span>{selectedAppForDetails.gender}</span>
+                           </div>
+                           <div className="flex justify-between items-center text-[10px] font-bold">
+                              <span className="text-slate-500 uppercase">Blood Group</span>
+                              <span className="text-red-400">{selectedAppForDetails.bloodGroup || 'N/A'}</span>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+
+                  <div className="pt-8 flex flex-col gap-4 items-center">
+                    <Button 
+                      size="lg" 
+                      onClick={() => setSelectedAppForDetails(null)}
+                      className="w-full bg-primary text-primary-foreground font-bold h-16 rounded-2xl text-lg hover:bg-secondary transition-all shadow-xl shadow-primary/20"
+                    >
+                      Close Profile
+                    </Button>
+                    <p className="text-center text-[10px] font-bold text-slate-400 uppercase tracking-[0.25em] mt-4">
+                      Official Personnel Application • Human Rights Affairs Trust
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Commissioning Dialog */}
       <Dialog open={isCommissioningOpen} onOpenChange={setIsCommissioningOpen}>
