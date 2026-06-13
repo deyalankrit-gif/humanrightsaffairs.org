@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useEffect } from 'react'
@@ -293,7 +294,7 @@ export default function MembersPage() {
             <p className="text-xl opacity-80 text-lg text-primary-foreground">
               A dynamic ledger of our dedicated human rights defenders, updated in real-time by the central administration.
             </p>
-            <p className="text-emerald-400 font-bold tracking-wide text-sm md:text-base animate-blink">
+            <p className="text-emerald-400 font-bold tracking-wide text-sm md:text-base animate-glow">
               The following list contains the names of all currently active members of the organization only
             </p>
           </div>
