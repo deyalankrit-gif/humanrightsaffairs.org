@@ -86,7 +86,7 @@ export function Footer() {
               <li><Link href="/legal/bail-procedure" className="hover:text-accent transition-colors font-medium">Bail Procedures</Link></li>
               <li><Link href="/legal/privacy-policy" className="hover:text-accent transition-colors font-medium">Privacy Policy</Link></li>
               <li>
-                <Link href="/legal/official-representation" className="text-emerald-400 hover:text-white transition-colors font-bold flex flex-col leading-tight">
+                <Link href="/legal/official-representation" className="text-emerald-400 hover:text-primary-foreground transition-colors font-bold flex flex-col leading-tight">
                   <span>Official Representation</span>
                   <span className="text-[10px] opacity-80">(For Organizational Use Only)</span>
                 </Link>
