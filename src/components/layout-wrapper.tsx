@@ -21,7 +21,9 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
 
   // Determine if we are in the administrative portal
   const isAdmin = pathname?.startsWith('/internal');
-  const isLoginPage = pathname === '/internal/login';
+  
+  // Both login pages should have the same clean layout without sidebar/header
+  const isLoginPage = pathname === '/internal/login' || pathname === '/internal/super-login';
 
   // Prevent hydration mismatch by waiting for client-side mount
   useEffect(() => {
