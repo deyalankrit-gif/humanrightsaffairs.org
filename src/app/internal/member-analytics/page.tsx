@@ -57,7 +57,12 @@ export default function MemberAnalyticsPage() {
       levelData: [], 
       genderData: [], 
       stateData: [],
-      activeChapters: 0
+      activeChapters: 0,
+      maleCount: 0,
+      femaleCount: 0,
+      otherCount: 0,
+      malePercent: 0,
+      femalePercent: 0
     };
 
     const total = members.length;
@@ -85,8 +90,26 @@ export default function MemberAnalyticsPage() {
       .slice(0, 8);
 
     const activeChapters = Object.keys(states).length;
+    
+    const maleCount = genders['Male'];
+    const femaleCount = genders['Female'];
+    const otherCount = genders['Other'];
+    const totalWithGender = maleCount + femaleCount + otherCount;
+    const malePercent = totalWithGender > 0 ? Math.round((maleCount / totalWithGender) * 100) : 0;
+    const femalePercent = totalWithGender > 0 ? Math.round((femaleCount / totalWithGender) * 100) : 0;
 
-    return { total, levelData, genderData, stateData, activeChapters };
+    return { 
+      total, 
+      levelData, 
+      genderData, 
+      stateData, 
+      activeChapters,
+      maleCount,
+      femaleCount,
+      otherCount,
+      malePercent,
+      femalePercent
+    };
   }, [members]);
 
   if (authLoading || !user) {
@@ -221,6 +244,23 @@ export default function MemberAnalyticsPage() {
                         </CardTitle>
                         <CardDescription className="text-[10px] uppercase font-bold text-slate-400">Diversity balance within official registry</CardDescription>
                       </div>
+                      <div className="flex gap-6 items-center">
+                         <div className="text-center">
+                            <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-1">Male</p>
+                            <div className="flex items-baseline gap-1.5 justify-center">
+                               <span className="text-lg font-bold text-primary dark:text-white">{stats.maleCount}</span>
+                               <span className="text-[10px] font-bold text-indigo-500">({stats.malePercent}%)</span>
+                            </div>
+                         </div>
+                         <div className="w-px h-6 bg-slate-100 dark:bg-slate-800"></div>
+                         <div className="text-center">
+                            <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-1">Female</p>
+                            <div className="flex items-baseline gap-1.5 justify-center">
+                               <span className="text-lg font-bold text-primary dark:text-white">{stats.femaleCount}</span>
+                               <span className="text-[10px] font-bold text-pink-500">({stats.femalePercent}%)</span>
+                            </div>
+                         </div>
+                      </div>
                    </div>
                    <div className="h-[120px]">
                       <ResponsiveContainer width="100%" height="100%">
@@ -228,7 +268,7 @@ export default function MemberAnalyticsPage() {
                           <XAxis dataKey="name" fontSize={10} axisLine={false} tickLine={false} />
                           <Bar dataKey="value" radius={[4, 4, 0, 0]}>
                             {stats.genderData.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={index === 0 ? '#001f54' : index === 1 ? '#c91010' : '#D4AF37'} />
+                              <Cell key={`cell-${index}`} fill={entry.name === 'Male' ? '#001f54' : entry.name === 'Female' ? '#c91010' : '#D4AF37'} />
                             ))}
                           </Bar>
                         </BarChart>
@@ -244,7 +284,14 @@ export default function MemberAnalyticsPage() {
                     <p className="text-sm text-slate-400 italic leading-relaxed">
                       "These analytics represent our commitment to a distributed and diverse human rights framework. We continuously monitor jurisdictional balance to ensure every citizen has access to a local HRAT cell."
                     </p>
-                    <p className="text-[8px] font-bold text-slate-500 mt-6 uppercase tracking-widest">National Oversight Cell • HRAT INDIA</p>
+                    <div className="mt-6 flex items-center justify-between">
+                       <p className="text-[8px] font-bold text-slate-500 uppercase tracking-widest">National Oversight Cell • HRAT INDIA</p>
+                       {stats.otherCount > 0 && (
+                         <Badge variant="outline" className="text-[7px] text-slate-500 border-slate-800">
+                           {stats.otherCount} Members identifying as Other
+                         </Badge>
+                       )}
+                    </div>
                  </div>
               </div>
             </div>
