@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useEffect, useState } from 'react'
@@ -42,6 +43,7 @@ import {
   CheckCircle2,
   Home
 } from 'lucide-react'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
   Dialog,
   DialogContent,
@@ -100,7 +102,9 @@ export default function InternalApplicationsPage() {
     joiningDate: '',
     expiryDate: '',
     membershipDuration: '1 Year',
-    imageId: ''
+    imageId: '',
+    isRenewed: false,
+    renewalCount: 0
   })
 
   const [actionDialog, setActionDialog] = useState<{ 
@@ -187,8 +191,10 @@ export default function InternalApplicationsPage() {
       districtName: app.districtName || '',
       joiningDate: format(new Date(), "PPP"),
       expiryDate: format(addYears(new Date(), 1), "PPP"),
-      membershipDuration: '1 Year',
-      imageId: app.photoDataUri || ''
+      membershipDuration: app.membershipDuration || '1 Year',
+      imageId: app.photoDataUri || '',
+      isRenewed: app.isRenewal || false,
+      renewalCount: app.isRenewal ? 1 : 0
     })
     setIsCommissioningOpen(true)
   }
@@ -409,7 +415,12 @@ export default function InternalApplicationsPage() {
                         <div className="flex-1 p-6 grid lg:grid-cols-4 gap-6 items-start">
                           <div className="lg:col-span-3 space-y-4">
                             <div className="flex flex-col md:flex-row md:items-center gap-3">
-                              <h3 className="text-xl font-bold text-primary dark:text-white leading-tight">{a.name}</h3>
+                              <div className="flex items-center gap-2">
+                                <h3 className="text-xl font-bold text-primary dark:text-white leading-tight">{a.name}</h3>
+                                {a.isRenewal && (
+                                  <Badge className="bg-emerald-500 text-white text-[7px] font-black uppercase tracking-tighter h-4">Renewal</Badge>
+                                )}
+                              </div>
                               <div className="flex gap-2">
                                 <Button 
                                   variant="outline" 
@@ -542,9 +553,14 @@ export default function InternalApplicationsPage() {
                         <span className="text-[10px] font-black uppercase tracking-[0.2em] text-accent">{selectedAppForDetails.memberType} Candidate</span>
                       </div>
                       <h2 className="text-4xl md:text-6xl font-headline font-bold drop-shadow-xl">{selectedAppForDetails.name}</h2>
-                      <p className="text-white/60 font-bold uppercase tracking-widest text-xs flex items-center justify-center md:justify-start gap-2">
-                        <Hash className="w-3.5 h-3.5" /> {selectedAppForDetails.referenceId}
-                      </p>
+                      <div className="flex items-center gap-4">
+                        <p className="text-white/60 font-bold uppercase tracking-widest text-xs flex items-center justify-center md:justify-start gap-2">
+                          <Hash className="w-3.5 h-3.5" /> {selectedAppForDetails.referenceId}
+                        </p>
+                        {selectedAppForDetails.isRenewal && (
+                          <Badge className="bg-emerald-500 text-white text-[8px] font-black h-5 px-3">TERM RENEWAL</Badge>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -766,7 +782,7 @@ export default function InternalApplicationsPage() {
               </div>
 
               <div className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-3xl space-y-4 border border-slate-100 dark:border-slate-800 shadow-inner">
-                <div className="grid grid-cols-1 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label className="text-[10px] uppercase font-bold text-slate-400">Commissioned Member ID <span className="text-red-500">*</span></Label>
                     <div className="flex gap-2">
@@ -786,6 +802,19 @@ export default function InternalApplicationsPage() {
                       >
                         <Sparkles className="w-4 h-4 text-accent" />
                       </Button>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-bold uppercase text-emerald-500">Term Governance</Label>
+                    <div className="flex items-center space-x-3 bg-white dark:bg-slate-900 h-11 px-4 rounded-xl border border-emerald-100">
+                       <Checkbox 
+                        id="isRenewed" 
+                        checked={newMember.isRenewed} 
+                        onCheckedChange={(val) => setNewMember({...newMember, isRenewed: !!val, renewalCount: val ? 1 : 0})} 
+                        className="border-emerald-500"
+                       />
+                       <Label htmlFor="isRenewed" className="text-xs font-bold text-emerald-600 cursor-pointer">Mark as Term Renewal</Label>
                     </div>
                   </div>
                 </div>

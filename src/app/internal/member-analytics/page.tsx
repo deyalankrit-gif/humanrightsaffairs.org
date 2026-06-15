@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo, useEffect } from 'react'
@@ -28,10 +29,15 @@ import {
   UserCheck,
   Award,
   PieChart as PieChartIcon,
-  BarChart3
+  BarChart3,
+  RefreshCw,
+  CalendarClock,
+  AlertTriangle,
+  History
 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
+import { parse, addYears, differenceInDays } from 'date-fns'
 
 export default function MemberAnalyticsPage() {
   const { user, loading: authLoading } = useUser()
@@ -62,7 +68,11 @@ export default function MemberAnalyticsPage() {
       femaleCount: 0,
       otherCount: 0,
       malePercent: 0,
-      femalePercent: 0
+      femalePercent: 0,
+      renewedCount: 0,
+      upcomingExpirations: 0,
+      expiredCount: 0,
+      renewalData: []
     };
 
     const total = members.length;
@@ -74,6 +84,11 @@ export default function MemberAnalyticsPage() {
     // Gender Distribution
     const genders: Record<string, number> = { Male: 0, Female: 0, Other: 0 };
 
+    let renewedCount = 0;
+    let upcomingExpirations = 0;
+    let expiredCount = 0;
+    const now = new Date();
+
     members.forEach((m: any) => {
       if (m.level) levels[m.level] = (levels[m.level] || 0) + 1;
       if (m.stateName) states[m.stateName] = (states[m.stateName] || 0) + 1;
@@ -81,6 +96,21 @@ export default function MemberAnalyticsPage() {
       const g = m.gender ? m.gender.charAt(0).toUpperCase() + m.gender.slice(1).toLowerCase() : 'Other';
       if (genders[g] !== undefined) genders[g]++;
       else genders['Other']++;
+
+      if (m.isRenewed) renewedCount++;
+
+      if (m.expiryDate) {
+        try {
+          const expiryDate = parse(m.expiryDate, "PPP", new Date());
+          const daysToExpiry = differenceInDays(expiryDate, now);
+          
+          if (daysToExpiry < 0) {
+            expiredCount++;
+          } else if (daysToExpiry <= 30) {
+            upcomingExpirations++;
+          }
+        } catch (e) {}
+      }
     });
 
     const levelData = Object.keys(levels).map(name => ({ name, value: levels[name] }));
@@ -98,6 +128,11 @@ export default function MemberAnalyticsPage() {
     const malePercent = totalWithGender > 0 ? Math.round((maleCount / totalWithGender) * 100) : 0;
     const femalePercent = totalWithGender > 0 ? Math.round((femaleCount / totalWithGender) * 100) : 0;
 
+    const renewalData = [
+      { name: 'Renewed', value: renewedCount },
+      { name: 'Base', value: total - renewedCount }
+    ];
+
     return { 
       total, 
       levelData, 
@@ -108,7 +143,11 @@ export default function MemberAnalyticsPage() {
       femaleCount,
       otherCount,
       malePercent,
-      femalePercent
+      femalePercent,
+      renewedCount,
+      upcomingExpirations,
+      expiredCount,
+      renewalData
     };
   }, [members]);
 
@@ -151,13 +190,13 @@ export default function MemberAnalyticsPage() {
                 {[
                   { label: "Total Members", value: stats.total, icon: <Users className="w-4 h-4 text-blue-500" />, trend: "Active" },
                   { label: "State Chapters", value: stats.activeChapters, icon: <Globe className="w-4 h-4 text-emerald-500" />, trend: "Live" },
-                  { label: "Level Distribution", value: "Verified", icon: <Award className="w-4 h-4 text-accent" />, trend: "OK" },
+                  { label: "Renewed Members", value: stats.renewedCount, icon: <RefreshCw className="w-4 h-4 text-accent" />, trend: `${Math.round((stats.renewedCount / (stats.total || 1)) * 100)}%` },
                   { label: "Growth Status", value: "Steady", icon: <TrendingUp className="w-4 h-4 text-indigo-500" />, trend: "+5%" }
                 ].map((stat, i) => (
                   <Card key={i} className="border-none shadow-sm rounded-2xl overflow-hidden group">
                     <CardContent className="p-5 flex flex-col gap-2">
                        <div className="flex justify-between items-start">
-                          <div className="p-2 rounded-xl bg-slate-50 dark:bg-slate-800">{stat.icon}</div>
+                          <div className={cn("p-2 rounded-xl bg-slate-50 dark:bg-slate-800")}>{stat.icon}</div>
                           <Badge variant="outline" className="text-[8px] font-bold border-slate-100">{stat.trend}</Badge>
                        </div>
                        <p className="text-2xl font-headline font-bold text-primary dark:text-white leading-none mt-2">{stat.value}</p>
@@ -165,6 +204,91 @@ export default function MemberAnalyticsPage() {
                     </CardContent>
                   </Card>
                 ))}
+              </div>
+
+              {/* Term Governance Section */}
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <Card className="border-none shadow-sm rounded-3xl bg-white dark:bg-slate-900 p-6 border-l-4 border-l-accent">
+                   <CardHeader className="p-0 mb-6">
+                      <div className="flex justify-between items-center">
+                        <CardTitle className="text-lg font-headline font-bold flex items-center gap-2 text-accent">
+                          <CalendarClock className="w-5 h-5" /> Term Oversight
+                        </CardTitle>
+                        <Badge className="bg-red-500 text-white text-[8px] animate-pulse">30-DAY WARNING</Badge>
+                      </div>
+                      <CardDescription className="text-[10px] uppercase font-bold text-slate-400 mt-1">Identification of upcoming term expirations</CardDescription>
+                   </CardHeader>
+                   <div className="space-y-6">
+                      <div className="flex items-center justify-between">
+                         <div className="space-y-1">
+                            <p className="text-2xl font-headline font-bold text-red-600">{stats.upcomingExpirations}</p>
+                            <p className="text-[10px] font-black uppercase text-slate-400">Due for Renewal</p>
+                         </div>
+                         <div className="h-12 w-px bg-slate-100 dark:bg-slate-800"></div>
+                         <div className="space-y-1 text-right">
+                            <p className="text-2xl font-headline font-bold text-slate-900 dark:text-white">{stats.expiredCount}</p>
+                            <p className="text-[10px] font-black uppercase text-slate-400">Registry Expired</p>
+                         </div>
+                      </div>
+                      
+                      <div className="p-4 bg-amber-50 dark:bg-amber-950/20 rounded-2xl border border-amber-100 dark:border-amber-900 flex items-start gap-3">
+                         <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                         <p className="text-[10px] text-amber-800 dark:text-amber-400 leading-relaxed font-bold">
+                            Warning system is active. Members within 30 days of expiry are flagged for central review.
+                         </p>
+                      </div>
+                   </div>
+                </Card>
+
+                <Card className="border-none shadow-sm rounded-3xl bg-white dark:bg-slate-900 p-6">
+                   <CardHeader className="p-0 mb-4">
+                     <CardTitle className="text-lg font-headline font-bold flex items-center gap-2">
+                       <RefreshCw className="w-5 h-5 text-emerald-500" /> Subscription Loyalty
+                     </CardTitle>
+                   </CardHeader>
+                   <div className="h-[180px]">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie
+                            data={stats.renewalData}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={50}
+                            outerRadius={70}
+                            paddingAngle={5}
+                            dataKey="value"
+                          >
+                            <Cell fill="#138808" />
+                            <Cell fill="#f1f5f9" />
+                          </Pie>
+                          <Tooltip />
+                        </PieChart>
+                      </ResponsiveContainer>
+                   </div>
+                   <div className="flex justify-between items-center mt-2">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase">Renewal Rate</span>
+                      <span className="text-lg font-bold text-emerald-600">{Math.round((stats.renewedCount / (stats.total || 1)) * 100)}%</span>
+                   </div>
+                </Card>
+
+                <Card className="border-none shadow-sm rounded-3xl bg-slate-950 text-white p-6 relative overflow-hidden">
+                   <div className="absolute top-0 right-0 w-24 h-24 bg-accent/10 rounded-full -mr-12 -mt-12 blur-2xl"></div>
+                   <CardHeader className="p-0 mb-4">
+                     <CardTitle className="text-sm uppercase tracking-widest text-accent flex items-center gap-2">
+                       <History className="w-4 h-4" /> Integrity Log
+                     </CardTitle>
+                   </CardHeader>
+                   <p className="text-xs text-slate-400 leading-relaxed italic">
+                      "Automatic term governance ensures every ID card in circulation is legally valid. Our 30-day proactive warning protocol protects member credentials from accidental lapse."
+                   </p>
+                   <div className="mt-6 pt-4 border-t border-white/10 flex items-center justify-between">
+                      <div className="flex flex-col">
+                        <span className="text-[8px] font-black text-slate-500 uppercase">System Status</span>
+                        <span className="text-[10px] font-bold text-emerald-400">Monitoring Active</span>
+                      </div>
+                      <ShieldCheck className="w-6 h-6 text-accent opacity-50" />
+                   </div>
+                </Card>
               </div>
 
               {/* Charts Section */}

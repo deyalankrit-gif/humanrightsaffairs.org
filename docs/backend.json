@@ -86,6 +86,8 @@
         "joiningDate": { "type": "string", "description": "Membership Date of Issue" },
         "expiryDate": { "type": "string", "description": "Membership Date of Expiry" },
         "membershipDuration": { "type": "string", "enum": ["1 Year", "2 Years", "3 Years"] },
+        "isRenewed": { "type": "boolean", "description": "Whether this is a renewed membership." },
+        "renewalCount": { "type": "number" },
         "createdAt": { "type": "string", "format": "date-time" }
       }
     },
@@ -115,6 +117,7 @@
         "districtName": { "type": "string" },
         "memberType": { "type": "string", "enum": ["Executive Designation", "Board Member", "General Member", "Volunteer"] },
         "membershipDuration": { "type": "string", "enum": ["1 Year", "2 Years", "3 Years"] },
+        "isRenewal": { "type": "boolean", "description": "Whether this is a renewal request." },
         "hasNoCriminalRecord": { "type": "boolean", "description": "Affidavit declaring no past criminal records." },
         "hasAcceptedDeclaration": { "type": "boolean", "description": "Agreement to organizational rules and suspension policy." },
         "status": { "type": "string", "enum": ["Pending", "Reviewed", "Approved", "Rejected", "Archived"] },
