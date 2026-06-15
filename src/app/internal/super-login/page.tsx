@@ -84,30 +84,25 @@ export default function RootLoginPage() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-slate-950 p-4 relative overflow-hidden">
-      <div className="absolute inset-0 opacity-20 pointer-events-none">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[900px] bg-red-600/10 rounded-full blur-[150px] animate-pulse"></div>
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
-      </div>
-
-      <div className="w-full max-w-md relative z-10 space-y-6">
+    <main className="min-h-screen flex items-center justify-center bg-white p-4">
+      <div className="w-full max-w-md space-y-6">
         <div className="text-center">
-          <Link href="/" className="inline-flex items-center gap-2 text-slate-600 hover:text-red-500 transition-colors text-xs font-bold uppercase tracking-widest">
+          <Link href="/" className="inline-flex items-center gap-2 text-slate-400 hover:text-red-500 transition-colors text-xs font-bold uppercase tracking-widest">
             <Home className="w-3 h-3" /> Abort Session
           </Link>
         </div>
         
-        <Card className="bg-slate-900/90 backdrop-blur-3xl border-red-900/50 shadow-[0_0_80px_rgba(220,38,38,0.2)] rounded-[2.5rem] overflow-hidden border-t-8 border-t-red-600">
+        <Card className="bg-slate-900 border-red-900/50 shadow-2xl rounded-[2.5rem] overflow-hidden border-t-8 border-t-red-600">
           <CardHeader className="text-center space-y-4 pb-2 pt-10">
             <div className="flex justify-center">
-              <div className="relative w-20 h-20 rounded-2xl overflow-hidden shadow-2xl border border-white/10 bg-white p-2 grayscale contrast-125">
+              <div className="relative w-20 h-20 rounded-2xl overflow-hidden shadow-2xl border border-white/10 bg-white p-2">
                 <Image src="/HRAT%20Logo.jpeg" alt="HRAT Logo" fill className="object-contain" />
               </div>
             </div>
             <div className="space-y-1">
               <CardTitle className="text-2xl font-headline font-bold text-white tracking-widest uppercase">Root Access</CardTitle>
               <CardDescription className="text-red-500 font-bold uppercase tracking-[0.4em] text-[10px] flex items-center justify-center gap-2">
-                <ShieldAlert className="w-3 h-3 animate-ping" /> LEVEL 5 CLEARANCE
+                <ShieldAlert className="w-3 h-3" /> LEVEL 5 CLEARANCE
               </CardDescription>
             </div>
           </CardHeader>
@@ -164,7 +159,7 @@ export default function RootLoginPage() {
         </Card>
 
         <div className="text-center">
-           <Link href="/internal/login" className="text-[10px] font-black uppercase text-slate-600 hover:text-primary tracking-[0.2em] transition-all">
+           <Link href="/internal/login" className="text-[10px] font-black uppercase text-slate-400 hover:text-primary tracking-[0.2em] transition-all">
              Return to Staff Access
            </Link>
         </div>
