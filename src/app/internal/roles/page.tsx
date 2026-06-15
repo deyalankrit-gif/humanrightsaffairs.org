@@ -78,20 +78,20 @@ export default function AccessRolesPage() {
     setIsSaving(`${userEmail}-${module}`)
     
     const userRef = doc(db, 'users', userEmail.toLowerCase())
-    const updatePath = `permissions.${module}`
     
-    try {
-      await setDoc(userRef, {
-        permissions: {
-          [module]: !currentVal
-        }
-      }, { merge: true })
-      toast({ title: "Permission Updated", description: `${module.toUpperCase()} access modified for ${userEmail}.` })
-    } catch (e) {
-      toast({ variant: "destructive", title: "Update Failed" })
-    } finally {
-      setIsSaving(null)
-    }
+    setDoc(userRef, {
+      permissions: {
+        [module]: !currentVal
+      }
+    }, { merge: true })
+      .then(() => {
+        toast({ title: "Permission Updated", description: `${module.toUpperCase()} access modified for ${userEmail}.` })
+        setIsSaving(null)
+      })
+      .catch(() => {
+        toast({ variant: "destructive", title: "Update Failed" })
+        setIsSaving(null)
+      })
   }
 
   const handleAddStaff = async (e: React.FormEvent) => {
@@ -102,32 +102,31 @@ export default function AccessRolesPage() {
     const initialPermissions = MODULES.reduce((acc, mod) => ({ ...acc, [mod.id]: false }), {})
     const userEmail = newEmail.toLowerCase().trim()
 
-    try {
-      await setDoc(doc(db, 'users', userEmail), {
-        email: userEmail,
-        name: newName || userEmail.split('@')[0],
-        role: 'staff',
-        permissions: initialPermissions,
-        createdAt: serverTimestamp()
+    setDoc(doc(db, 'users', userEmail), {
+      email: userEmail,
+      name: newName || userEmail.split('@')[0],
+      role: 'staff',
+      permissions: initialPermissions,
+      createdAt: serverTimestamp()
+    })
+      .then(() => {
+        toast({ title: "Staff Provisioned", description: `${userEmail} has been added to the registry.` })
+        setNewEmail('')
+        setNewName('')
+        setIsAdding(false)
       })
-      toast({ title: "Staff Provisioned", description: `${userEmail} has been added to the registry.` })
-      setNewEmail('')
-      setNewName('')
-    } catch (e) {
-      toast({ variant: "destructive", title: "Provisioning Failed" })
-    } finally {
-      setIsAdding(false)
-    }
+      .catch(() => {
+        toast({ variant: "destructive", title: "Provisioning Failed" })
+        setIsAdding(false)
+      })
   }
 
   const handleDeleteUser = async (userEmail: string) => {
     if (!db || !isRoot || userEmail === user?.email) return
-    try {
-      await deleteDoc(doc(db, 'users', userEmail.toLowerCase()))
-      toast({ title: "Access Revoked", description: `Record for ${userEmail} purged.` })
-    } catch (e) {
-      toast({ variant: "destructive", title: "Delete Failed" })
-    }
+    deleteDoc(doc(db, 'users', userEmail.toLowerCase()))
+      .then(() => {
+        toast({ title: "Access Revoked", description: `Record for ${userEmail} purged.` })
+      })
   }
 
   if (authLoading || !isRoot) {
@@ -219,7 +218,7 @@ export default function AccessRolesPage() {
                  <Lock className="w-10 h-10 text-red-600 mx-auto" />
                  <h4 className="text-sm font-black uppercase tracking-widest text-red-500">Security Mandate</h4>
                  <p className="text-[11px] text-slate-400 italic leading-relaxed">
-                   "Staff members can only log in once their official email is provisioned here. Upon first login, standard permissions are set to Restricted (False)."
+                   "Staff members can only access the portal once their email is provisioned here. Permissions are set to False (Restricted) by default for new accounts."
                  </p>
               </div>
             </div>

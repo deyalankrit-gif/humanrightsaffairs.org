@@ -5,7 +5,7 @@ import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { signInWithEmailAndPassword } from 'firebase/auth'
 import { useAuth, useUser, useFirestore } from '@/firebase'
-import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore'
+import { doc, getDoc, serverTimestamp, setDoc } from 'firebase/firestore'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
@@ -17,7 +17,6 @@ import Link from 'next/link'
 
 /**
  * Staff Access Login Page
- * Exclusively styled with the professional Deep Blue/Slate theme.
  */
 export default function StaffLoginPage() {
   const [email, setEmail] = useState('')
@@ -31,7 +30,7 @@ export default function StaffLoginPage() {
   const { toast } = useToast()
 
   useEffect(() => {
-    if (user) {
+    if (user && user.email?.toLowerCase() !== 'deydhritiman@gmail.com') {
       router.push('/internal/analytics')
     }
   }, [user, router])
@@ -40,29 +39,25 @@ export default function StaffLoginPage() {
     e.preventDefault()
     setIsLoading(true)
 
-    // Standard Staff Credentials
-    const isStaffEmail = email.toLowerCase() === 'deyalankrit@gmail.com'
-    const isStaffPass = password === 'Admin1234'
+    const inputEmail = email.toLowerCase().trim()
+    const isHardcodedStaff = inputEmail === 'deyalankrit@gmail.com' && password === 'Admin1234'
 
     try {
-      if (!isStaffEmail && !isStaffPass) {
-        // Only allow hardcoded staff or provisioned accounts
-        const userRef = doc(db, 'users', email.toLowerCase())
-        const userSnap = await getDoc(userRef)
-        if (!userSnap.exists()) {
-          throw new Error("Access Denied: Account not provisioned by Super Admin.")
-        }
-      } else if (isStaffEmail && !isStaffPass) {
-        throw new Error("Invalid Credentials.")
+      // Step 1: Ensure user is authorized in the Firestore registry
+      const userRef = doc(db, 'users', inputEmail)
+      const userSnap = await getDoc(userRef)
+
+      if (!userSnap.exists() && !isHardcodedStaff) {
+        throw new Error("Clearance Required: Your email is not registered in the personnel database.")
       }
 
-      const userCredential = await signInWithEmailAndPassword(auth, email.toLowerCase(), password)
+      // Step 2: Attempt Firebase Authentication
+      await signInWithEmailAndPassword(auth, inputEmail, password)
       
-      // Auto-provision hardcoded staff account with full standard permissions
-      if (isStaffEmail) {
-        const userRef = doc(db, 'users', 'deyalankrit@gmail.com')
-        await setDoc(userRef, {
-          email: 'deyalankrit@gmail.com',
+      // Step 3: Self-provision hardcoded staff if missing
+      if (isHardcodedStaff && !userSnap.exists()) {
+        setDoc(userRef, {
+          email: inputEmail,
           name: 'Staff Alankrit',
           role: 'staff',
           lastLogin: serverTimestamp(),
@@ -79,23 +74,18 @@ export default function StaffLoginPage() {
             meetings: true,
             events: true
           }
-        }, { merge: true })
-      } else {
-        // Update last login for provisioned accounts
-        await setDoc(doc(db, 'users', email.toLowerCase()), { 
-          lastLogin: serverTimestamp() 
-        }, { merge: true })
+        }, { merge: true });
       }
 
       toast({
         title: "Staff Access Granted",
-        description: "Entering operational dashboard.",
+        description: "Credentials verified. Loading operational module.",
       })
       router.push('/internal/analytics')
     } catch (error: any) {
       toast({
         variant: "destructive",
-        title: "Access Denied",
+        title: "Authentication Failed",
         description: error.message || "Invalid credentials.",
       })
     } finally {

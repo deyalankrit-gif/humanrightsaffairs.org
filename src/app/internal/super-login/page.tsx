@@ -17,7 +17,6 @@ import Link from 'next/link'
 
 /**
  * Root Access Login Page
- * High-security Crimson/Charcoal theme exclusively for the Super Admin.
  */
 export default function RootLoginPage() {
   const [email, setEmail] = useState('')
@@ -40,22 +39,23 @@ export default function RootLoginPage() {
     e.preventDefault()
     setIsLoading(true)
 
-    const isRootEmail = email.toLowerCase() === 'deydhritiman@gmail.com'
+    const inputEmail = email.toLowerCase().trim()
+    const isRootEmail = inputEmail === 'deydhritiman@gmail.com'
 
     try {
       if (!isRootEmail) {
         throw new Error("Access Denied: Insufficient authorization level for this terminal.")
       }
 
-      const userCredential = await signInWithEmailAndPassword(auth, email.toLowerCase(), password)
+      await signInWithEmailAndPassword(auth, inputEmail, password)
       
       // Ensure root document exists in the permission registry
-      const userRef = doc(db, 'users', 'deydhritiman@gmail.com')
+      const userRef = doc(db, 'users', inputEmail)
       const userSnap = await getDoc(userRef)
       
       if (!userSnap.exists()) {
-        await setDoc(userRef, {
-          email: 'deydhritiman@gmail.com',
+        setDoc(userRef, {
+          email: inputEmail,
           name: 'Root Administrator',
           role: 'admin',
           createdAt: serverTimestamp(),
@@ -64,7 +64,7 @@ export default function RootLoginPage() {
             expenses: true, applications: true, inventory: true, vendors: true,
             grievances: true, meetings: true, events: true
           }
-        })
+        });
       }
 
       toast({
@@ -85,7 +85,6 @@ export default function RootLoginPage() {
 
   return (
     <main className="min-h-screen flex items-center justify-center bg-slate-950 p-4 relative overflow-hidden">
-      {/* Root Visual Pulse */}
       <div className="absolute inset-0 opacity-20 pointer-events-none">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[900px] bg-red-600/10 rounded-full blur-[150px] animate-pulse"></div>
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
