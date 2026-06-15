@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -35,11 +36,15 @@ import {
   Wallet,
   Monitor,
   BarChart3,
-  BarChart
+  BarChart,
+  Settings,
+  Lock
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { DonationDialog } from "./donation-dialog"
+import { useFirestore, useDoc, useUser, useMemoFirebase } from '@/firebase'
+import { doc } from 'firebase/firestore'
 
 const publicLinks = [
   { name: 'Home', href: '/', icon: Home },
@@ -53,28 +58,50 @@ const publicLinks = [
   { name: 'Helpline', href: '/#helpline', icon: Phone },
 ]
 
-const adminLinks = [
-  { name: 'Donation Analytics', href: '/internal/analytics', icon: LayoutDashboard },
-  { name: 'Member Analytics', href: '/internal/member-analytics', icon: BarChart },
-  { name: 'Website Visitors', href: '/internal/visitors', icon: BarChart3 },
-  { name: 'Accounts', href: '/internal/accounts', icon: Wallet },
-  { name: 'Expenses', href: '/internal/expenses', icon: TrendingDown },
-  { name: 'Applications', href: '/internal/applications', icon: FileText },
-  { name: 'Members', href: '/internal/members', icon: Users },
-  { name: 'Renewals', href: '/internal/renewals', icon: RefreshCw },
-  { name: 'Inventory', href: '/internal/inventory', icon: Package },
-  { name: 'Vendors', href: '/internal/vendors', icon: Truck },
-  { name: 'Grievances', href: '/internal/grievances', icon: MessageSquareWarning },
-  { name: 'Meetings', href: '/internal/meetings', icon: Handshake },
-  { name: 'Events', href: '/internal/events', icon: Calendar },
-  { name: 'Public Site View', href: '/internal/public-view', icon: Monitor },
+const adminLinksConfig = [
+  { name: 'Donation Analytics', href: '/internal/analytics', icon: LayoutDashboard, permission: 'analytics' },
+  { name: 'Member Analytics', href: '/internal/member-analytics', icon: BarChart, permission: 'members' },
+  { name: 'Website Visitors', href: '/internal/visitors', icon: BarChart3, permission: 'visitors' },
+  { name: 'Accounts', href: '/internal/accounts', icon: Wallet, permission: 'accounts' },
+  { name: 'Expenses', href: '/internal/expenses', icon: TrendingDown, permission: 'expenses' },
+  { name: 'Applications', href: '/internal/applications', icon: FileText, permission: 'applications' },
+  { name: 'Members', href: '/internal/members', icon: Users, permission: 'members' },
+  { name: 'Renewals', href: '/internal/renewals', icon: RefreshCw, permission: 'members' },
+  { name: 'Inventory', href: '/internal/inventory', icon: Package, permission: 'inventory' },
+  { name: 'Vendors', href: '/internal/vendors', icon: Truck, permission: 'vendors' },
+  { name: 'Grievances', href: '/internal/grievances', icon: MessageSquareWarning, permission: 'grievances' },
+  { name: 'Meetings', href: '/internal/meetings', icon: Handshake, permission: 'meetings' },
+  { name: 'Events', href: '/internal/events', icon: Calendar, permission: 'events' },
+  { name: 'Access Roles', href: '/internal/roles', icon: Settings, rootOnly: true },
+  { name: 'Public Site View', href: '/internal/public-view', icon: Monitor, permission: 'visitors' },
 ]
 
 export function AppSidebar() {
   const pathname = usePathname()
   const [activeHash, setActiveHash] = React.useState('')
-  const isAdminPortal = pathname.startsWith('/internal')
-  const links = isAdminPortal ? adminLinks : publicLinks
+  const db = useFirestore()
+  const { user } = useUser()
+  const isAdminPortal = pathname?.startsWith('/internal')
+
+  const userDocRef = useMemoFirebase(() => {
+    if (!db || !user?.email) return null;
+    return doc(db, 'users', user.email.toLowerCase());
+  }, [db, user?.email]);
+
+  const { data: userPermissions } = useDoc(userDocRef);
+
+  const isRoot = user?.email?.toLowerCase() === 'deydhritiman@gmail.com'
+
+  const filteredAdminLinks = React.useMemo(() => {
+    if (!isAdminPortal) return []
+    return adminLinksConfig.filter(link => {
+      if (isRoot) return true;
+      if (link.rootOnly) return false;
+      return userPermissions?.permissions?.[link.permission || ''] === true;
+    })
+  }, [isAdminPortal, isRoot, userPermissions])
+
+  const links = isAdminPortal ? filteredAdminLinks : publicLinks
 
   React.useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -104,7 +131,7 @@ export function AppSidebar() {
       <SidebarContent className="py-6">
         <SidebarGroup>
           <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">
-            {isAdminPortal ? "Administrative Control" : "Navigation"}
+            {isAdminPortal ? (isRoot ? "ROOT GOVERNANCE" : "STAFF OPERATIONS") : "NAVIGATION"}
           </SidebarGroupLabel>
           <SidebarMenu>
             {links.map((link) => {
@@ -120,11 +147,7 @@ export function AppSidebar() {
                 if (isHashLink) {
                   isActive = pathname === linkPath && activeHash === linkHash
                 } else {
-                  if (link.href === '/') {
-                    isActive = pathname === '/' && activeHash === ''
-                  } else {
-                    isActive = pathname === link.href && activeHash === ''
-                  }
+                  isActive = pathname === link.href && activeHash === ''
                 }
               }
 
@@ -137,7 +160,7 @@ export function AppSidebar() {
                     className={cn(
                       "h-11 rounded-xl transition-all px-4",
                       isActive 
-                        ? "bg-accent text-white font-bold hover:bg-secondary hover:text-white shadow-md" 
+                        ? (isAdminPortal && isRoot ? "bg-red-600 text-white font-bold" : "bg-accent text-white font-bold")
                         : "hover:bg-secondary/10 hover:text-secondary group/btn"
                     )}
                   >
@@ -172,6 +195,15 @@ export function AppSidebar() {
               </Button>
             </DonationDialog>
           </div>
+        )}
+        {isAdminPortal && (
+           <div className="p-4 bg-white/5 rounded-xl border border-white/10 group-data-[collapsible=icon]:hidden">
+              <div className="flex items-center gap-2 mb-2">
+                 <div className={cn("w-2 h-2 rounded-full animate-pulse", isRoot ? "bg-red-600" : "bg-emerald-500")}></div>
+                 <span className="text-[10px] font-black uppercase text-slate-500">{isRoot ? "Root Terminal" : "Operational"}</span>
+              </div>
+              <p className="text-[9px] font-bold text-slate-400 truncate">{user?.email}</p>
+           </div>
         )}
       </SidebarFooter>
     </Sidebar>

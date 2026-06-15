@@ -90,7 +90,6 @@ export default function WebsiteVisitorsPage() {
       return !isIndia || !isWB;
     }).length;
 
-    // Group the 100 visitors by status to show current mix
     const chartData = [
       { name: 'New', count: newCount },
       { name: 'Returning', count: returning },

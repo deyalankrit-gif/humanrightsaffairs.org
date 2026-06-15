@@ -1,20 +1,25 @@
+
 "use client"
 
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth'
+import { signInWithEmailAndPassword } from 'firebase/auth'
 import { useAuth, useUser, useFirestore } from '@/firebase'
-import { doc, setDoc, getDoc } from 'firebase/firestore'
+import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
-import { ShieldAlert, Lock, ArrowRight, Loader2, Home, Eye, EyeOff } from 'lucide-react'
+import { ShieldCheck, Lock, ArrowRight, Loader2, Home, Eye, EyeOff, UserCircle } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import Image from 'next/image'
 import Link from 'next/link'
 
-export default function InternalLoginPage() {
+/**
+ * Staff Access Login Page
+ * Exclusively styled with the professional Deep Blue/Slate theme.
+ */
+export default function StaffLoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -35,125 +40,128 @@ export default function InternalLoginPage() {
     e.preventDefault()
     setIsLoading(true)
 
-    const isAdminEmail = email.toLowerCase() === 'deydhritiman@gmail.com'
-    const isAdminPass = password === 'Admin1234'
+    // Standard Staff Credentials
+    const isStaffEmail = email.toLowerCase() === 'deyalankrit@gmail.com'
+    const isStaffPass = password === 'Admin1234'
 
     try {
-      // 1. Try standard login first
-      const userCredential = await signInWithEmailAndPassword(auth, email, password)
-      
-      // If admin, ensure their record exists in Firestore
-      if (isAdminEmail) {
-        const userRef = doc(db, 'users', userCredential.user.uid)
+      if (!isStaffEmail && !isStaffPass) {
+        // Only allow hardcoded staff or provisioned accounts
+        const userRef = doc(db, 'users', email.toLowerCase())
         const userSnap = await getDoc(userRef)
         if (!userSnap.exists()) {
-          await setDoc(userRef, {
-            email: email,
-            role: 'admin',
-            name: 'Dhritiman Dey'
-          })
+          throw new Error("Access Denied: Account not provisioned by Super Admin.")
         }
+      } else if (isStaffEmail && !isStaffPass) {
+        throw new Error("Invalid Credentials.")
+      }
+
+      const userCredential = await signInWithEmailAndPassword(auth, email.toLowerCase(), password)
+      
+      // Auto-provision hardcoded staff account with full standard permissions
+      if (isStaffEmail) {
+        const userRef = doc(db, 'users', 'deyalankrit@gmail.com')
+        await setDoc(userRef, {
+          email: 'deyalankrit@gmail.com',
+          name: 'Staff Alankrit',
+          role: 'staff',
+          lastLogin: serverTimestamp(),
+          permissions: {
+            analytics: true,
+            members: true,
+            visitors: true,
+            accounts: true,
+            expenses: true,
+            applications: true,
+            inventory: true,
+            vendors: true,
+            grievances: true,
+            meetings: true,
+            events: true
+          }
+        }, { merge: true })
+      } else {
+        // Update last login for provisioned accounts
+        await setDoc(doc(db, 'users', email.toLowerCase()), { 
+          lastLogin: serverTimestamp() 
+        }, { merge: true })
       }
 
       toast({
-        title: "Access Granted",
-        description: "Credentials verified. Entering secure portal.",
+        title: "Staff Access Granted",
+        description: "Entering operational dashboard.",
       })
       router.push('/internal/analytics')
     } catch (error: any) {
-      // 2. Fallback: If it's the designated admin and login failed (e.g. account doesn't exist)
-      if (isAdminEmail && isAdminPass) {
-        try {
-          const userCredential = await createUserWithEmailAndPassword(auth, email, password)
-          // Create the admin user record immediately
-          await setDoc(doc(db, 'users', userCredential.user.uid), {
-            email: email,
-            role: 'admin',
-            name: 'Dhritiman Dey'
-          })
-          
-          toast({
-            title: "Admin Account Initialized",
-            description: "New administrative profile generated. Accessing portal.",
-          })
-          router.push('/internal/analytics')
-        } catch (createError: any) {
-          toast({
-            variant: "destructive",
-            title: "System Error",
-            description: createError.message || "Unable to establish administrative session.",
-          })
-        }
-      } else {
-        toast({
-          variant: "destructive",
-          title: "Access Denied",
-          description: "Invalid credentials or insufficient clearance.",
-        })
-      }
+      toast({
+        variant: "destructive",
+        title: "Access Denied",
+        description: error.message || "Invalid credentials.",
+      })
     } finally {
       setIsLoading(false)
     }
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-slate-950 p-4 relative overflow-hidden">
-      <div className="absolute inset-0 opacity-20 pointer-events-none">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-red-600/10 rounded-full blur-[120px] animate-pulse"></div>
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
+    <main className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950 p-4 relative overflow-hidden">
+      <div className="absolute inset-0 opacity-10 pointer-events-none">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/10 rounded-full blur-[120px]"></div>
       </div>
 
       <div className="w-full max-w-md relative z-10 space-y-6">
-        <Link href="/" className="inline-flex items-center gap-2 text-slate-500 hover:text-white transition-colors text-xs font-bold uppercase tracking-widest mx-auto">
-          <Home className="w-3 h-3" /> Return to Public Site
-        </Link>
+        <div className="text-center">
+          <Link href="/" className="inline-flex items-center gap-2 text-slate-400 hover:text-primary transition-colors text-xs font-bold uppercase tracking-widest">
+            <Home className="w-3 h-3" /> Public Portal
+          </Link>
+        </div>
         
-        <Card className="bg-slate-900/80 backdrop-blur-2xl border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)] overflow-hidden border-t-4 border-t-accent">
-          <CardHeader className="text-center space-y-4 pb-2">
+        <Card className="bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10 shadow-2xl rounded-[2.5rem] overflow-hidden border-t-8 border-t-primary">
+          <CardHeader className="text-center space-y-4 pb-2 pt-10">
             <div className="flex justify-center">
-              <div className="relative w-20 h-20 rounded-2xl overflow-hidden shadow-2xl border border-white/10 bg-white p-2">
+              <div className="relative w-20 h-20 rounded-2xl overflow-hidden shadow-lg border border-slate-100 bg-white p-2">
                 <Image src="/HRAT%20Logo.jpeg" alt="HRAT Logo" fill className="object-contain" />
               </div>
             </div>
             <div className="space-y-1">
-              <CardTitle className="text-2xl font-headline font-bold text-white tracking-tight">Personnel Portal</CardTitle>
-              <CardDescription className="text-red-500 font-bold uppercase tracking-[0.2em] text-[10px] flex items-center justify-center gap-2">
-                <ShieldAlert className="w-3 h-3" /> Restricted Entry
+              <CardTitle className="text-2xl font-headline font-bold text-primary dark:text-white">Staff Access</CardTitle>
+              <CardDescription className="text-primary/60 font-bold uppercase tracking-[0.2em] text-[10px] flex items-center justify-center gap-2">
+                <ShieldCheck className="w-3 h-3 text-emerald-500" /> Operational Clearance
               </CardDescription>
             </div>
           </CardHeader>
-          <CardContent className="pt-6">
+          <CardContent className="p-8">
             <form onSubmit={handleLogin} className="space-y-6">
               <div className="space-y-2">
                 <Label className="text-slate-400 text-[10px] font-bold uppercase tracking-wider">Official Email</Label>
                 <div className="relative">
                   <Input 
                     type="email" 
-                    placeholder="name@hrat-india.org" 
-                    className="bg-white/5 border-white/10 text-white pl-10 h-12 focus:ring-accent"
+                    placeholder="deyalankrit@gmail.com" 
+                    className="bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10 h-12 rounded-xl pl-10"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
                   />
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-600" />
+                  <UserCircle className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 </div>
               </div>
               <div className="space-y-2">
-                <Label className="text-slate-400 text-[10px] font-bold uppercase tracking-wider">Security Key</Label>
+                <Label className="text-slate-400 text-[10px] font-bold uppercase tracking-wider">Passphrase</Label>
                 <div className="relative">
                   <Input 
                     type={showPassword ? "text" : "password"} 
                     placeholder="••••••••" 
-                    className="bg-white/5 border-white/10 text-white pl-10 pr-10 h-12 focus:ring-accent"
+                    className="bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10 h-12 rounded-xl pl-10 pr-10"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
                   />
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-600" />
+                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-600 hover:text-slate-400 transition-colors"
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-primary transition-colors"
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -161,23 +169,29 @@ export default function InternalLoginPage() {
               </div>
               <Button 
                 type="submit" 
-                className="w-full bg-accent text-primary font-bold py-6 text-lg hover:bg-secondary hover:text-white shadow-xl shadow-accent/10 group transition-all" 
+                className="w-full bg-primary text-white font-bold h-14 text-lg rounded-xl hover:bg-secondary transition-all shadow-xl shadow-primary/20 group" 
                 disabled={isLoading}
               >
                 {isLoading ? (
                   <Loader2 className="w-5 h-5 animate-spin" />
                 ) : (
-                  <>Authenticate Access <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" /></>
+                  <>Authorize Entry <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" /></>
                 )}
               </Button>
             </form>
-            <div className="mt-8 pt-6 border-t border-white/5">
-              <p className="text-center text-[9px] text-slate-600 font-bold uppercase tracking-widest leading-relaxed">
-                Security clearance required for the Donation Analytics dashboard.
+            <div className="mt-8 pt-6 border-t border-slate-100 dark:border-white/5 text-center">
+              <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest leading-relaxed">
+                Administrative session is monitored for data integrity.
               </p>
             </div>
           </CardContent>
         </Card>
+
+        <div className="text-center">
+           <Link href="/internal/super-login" className="text-[10px] font-black uppercase text-slate-400 hover:text-accent tracking-[0.2em] transition-all">
+             Switch to Root Access
+           </Link>
+        </div>
       </div>
     </main>
   )

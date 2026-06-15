@@ -2,92 +2,100 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Helper function to check if the user is the designated Admin
-    function isAdmin() {
+    // Standardized authorization helper
+    function isRoot() {
       return request.auth != null && 
-             (request.auth.token.get('email', '').lower() == 'deydhritiman@gmail.com' || 
-              (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
-               get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('role', '') == 'admin'));
+             request.auth.token.get('email', '').lower() == 'deydhritiman@gmail.com';
     }
 
-    // Member profiles: Publicly readable for the directory, Admin write
+    // Permission-based authorization helper
+    function hasPermission(permission) {
+      let email = request.auth.token.get('email', '').lower();
+      return isRoot() || 
+             (exists(/databases/$(database)/documents/users/$(email)) && 
+              get(/databases/$(database)/documents/users/$(email)).data.permissions.get(permission, false) == true);
+    }
+
+    // User accounts / Roles: Root only write, Authenticated self read
+    match /users/{userEmail} {
+      allow read: if request.auth != null && (request.auth.token.get('email', '').lower() == userEmail.lower() || isRoot());
+      allow write: if isRoot();
+    }
+
+    // Member profiles: Public read, Permissioned write
     match /memberProfiles/{profileId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if hasPermission('members');
     }
     
-    // Membership applications: Public create, Admin read/write
+    // Membership applications: Public create, Permissioned read/write
     match /memberApplications/{appId} {
       allow create: if true;
-      allow read, write: if isAdmin();
+      allow read, write: if hasPermission('applications');
     }
     
-    // User roles collection for granular authorization
-    match /users/{userId} {
-      allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
-      allow write: if isAdmin();
-    }
-    
-    // Anyone can submit a donation for processing
+    // Anyone can submit a donation
     match /donations/{donationId} {
       allow create: if true;
-      allow read: if isAdmin();
+      allow read: if hasPermission('analytics');
+      allow delete: if isRoot();
     }
 
-    // Expenses management: Admin only
+    // Expenses management: Permissioned
     match /expenses/{expenseId} {
-      allow read, write: if isAdmin();
+      allow read, write: if hasPermission('expenses');
     }
 
-    // Account balances: Admin only
+    // Account balances: Permissioned
     match /accounts/{accountId} {
-      allow read, write: if isAdmin();
+      allow read, write: if hasPermission('accounts');
     }
 
-    // Organizational Events: Public read, Admin write
+    // Organizational Events: Public read, Permissioned write
     match /events/{eventId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if hasPermission('events');
     }
 
-    // Leadership Hierarchy: Public read, Admin write
+    // Leadership Hierarchy: Public read, Permissioned write
     match /leadership/{leaderId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if hasPermission('members');
     }
 
-    // Public Termination Notices: Public read, Admin write
+    // Public Termination Notices: Public read, Permissioned write
     match /terminatedMembers/{memberId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if hasPermission('members');
     }
 
-    // General Meetings: Public read, Admin write
+    // General Meetings: Public read, Permissioned write
     match /meetings/{meetingId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if hasPermission('meetings');
     }
 
-    // Member Grievances: Public create only, Admin full control
+    // Member Grievances: Public create, Permissioned oversight
     match /grievances/{grievanceId} {
       allow create: if true;
-      allow read, update, delete: if isAdmin();
+      allow read, write: if hasPermission('grievances');
     }
 
-    // Material Inventory: Admin only
+    // Material Inventory: Permissioned
     match /inventory/{itemId} {
-      allow read, write: if isAdmin();
+      allow read, write: if hasPermission('inventory');
     }
 
-    // Vendor Management: Admin only
+    // Vendor Management: Permissioned
     match /vendors/{vendorId} {
-      allow read, write: if isAdmin();
+      allow read, write: if hasPermission('vendors');
     }
 
-    // Visitor Analytics: Admin only read/write, Public create (for tracking)
+    // Visitor Analytics: Permissioned
     match /visitors/{visitorId} {
       allow create: if true;
-      allow read, update, delete: if isAdmin();
+      allow read: if hasPermission('visitors');
+      allow write: if hasPermission('visitors');
     }
   }
 }

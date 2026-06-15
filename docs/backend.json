@@ -1,6 +1,35 @@
 
 {
   "entities": {
+    "UserAccount": {
+      "title": "User Account",
+      "description": "Administrative account with specific permission toggles.",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string", "format": "email" },
+        "name": { "type": "string" },
+        "role": { "type": "string", "enum": ["admin", "staff"] },
+        "permissions": {
+          "type": "object",
+          "properties": {
+            "analytics": { "type": "boolean" },
+            "members": { "type": "boolean" },
+            "visitors": { "type": "boolean" },
+            "accounts": { "type": "boolean" },
+            "expenses": { "type": "boolean" },
+            "applications": { "type": "boolean" },
+            "inventory": { "type": "boolean" },
+            "vendors": { "type": "boolean" },
+            "grievances": { "type": "boolean" },
+            "meetings": { "type": "boolean" },
+            "events": { "type": "boolean" }
+          }
+        },
+        "lastLogin": { "type": "string", "format": "date-time" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["email", "permissions"]
+    },
     "Donation": {
       "title": "Donation",
       "description": "Details of a donation made to the Human Rights Affairs Trust.",
@@ -275,6 +304,7 @@
     "providers": ["google", "password"]
   },
   "firestore": {
+    "/users/{userEmail}": { "schema": "UserAccount", "description": "Permissions registry for staff and root admins." },
     "/donations/{donationId}": { "schema": "Donation" },
     "/expenses/{expenseId}": { "schema": "Expense" },
     "/accounts/{accountId}": { "schema": "AccountState" },

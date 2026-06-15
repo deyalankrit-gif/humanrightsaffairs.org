@@ -7,9 +7,8 @@ import { useFirestore, useUser } from '@/firebase';
 import { doc, setDoc, serverTimestamp, increment, arrayUnion } from 'firebase/firestore';
 
 /**
- * VisitorTracker silently logs visitor metadata to Firestore.
- * It identifies unique users via localStorage and updates activity in real-time
- * on every page navigation.
+ * VisitorTracker captures real-time technical and geographic metadata.
+ * Updated to monitor pathname changes for instant interaction logging.
  */
 export function VisitorTracker() {
   const db = useFirestore();
@@ -20,7 +19,7 @@ export function VisitorTracker() {
     if (!db) return;
 
     const trackVisit = async () => {
-      // 1. Identify or Create Visitor ID
+      // Identify unique user via localStorage
       let visitorId = localStorage.getItem('hrat_visitor_id');
       const isNewSession = !sessionStorage.getItem('hrat_session_active');
       
@@ -29,7 +28,7 @@ export function VisitorTracker() {
         localStorage.setItem('hrat_visitor_id', visitorId!);
       }
 
-      // 2. Gather Technical Profile
+      // Technical profile
       const userAgent = window.navigator.userAgent;
       const platform = window.navigator.platform;
       const isMobile = /iPhone|iPad|iPod|Android/i.test(userAgent);
@@ -40,7 +39,7 @@ export function VisitorTracker() {
       else if (userAgent.includes("Safari")) browser = "Safari";
       else if (userAgent.includes("Edge")) browser = "Edge";
 
-      // 3. Gather Geographic Profile (Silent Mock or Public API)
+      // Silent Geographic Mock (IP API)
       let geoData = { city: "Kolkata", country: "IN", state: "West Bengal", region: "Asia/Kolkata" };
       try {
         const response = await fetch('https://ipapi.co/json/');
@@ -53,11 +52,8 @@ export function VisitorTracker() {
             region: data.timezone || "Asia/Kolkata"
           };
         }
-      } catch (e) {
-        // Fallback to defaults if API fails
-      }
+      } catch (e) {}
 
-      // 4. Commit to Firestore
       const visitorRef = doc(db, 'visitors', visitorId!);
       
       const updatePayload: any = {
@@ -77,12 +73,10 @@ export function VisitorTracker() {
         pagesVisited: arrayUnion(pathname)
       };
 
-      // Handle first-time visitor or new session increment
       if (isNewSession) {
         updatePayload.totalVisits = increment(1);
         sessionStorage.setItem('hrat_session_active', 'true');
         
-        // If they don't even have a visitor record in storage, they are "New"
         if (!localStorage.getItem('hrat_visitor_exists')) {
           updatePayload.status = 'New';
           updatePayload.firstVisit = serverTimestamp();
@@ -92,7 +86,7 @@ export function VisitorTracker() {
       }
 
       setDoc(visitorRef, updatePayload, { merge: true }).catch(() => {
-        // Silent fail for tracking errors
+        // Silent fail for tracker
       });
     };
 
