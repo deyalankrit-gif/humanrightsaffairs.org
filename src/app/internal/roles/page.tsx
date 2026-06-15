@@ -152,8 +152,11 @@ export default function AccessRolesPage() {
 
   const handleDeleteUser = async (userEmail: string) => {
     if (!db || !isRoot || !userEmail) return
-    if (userEmail.toLowerCase() === user?.email?.toLowerCase()) {
-      toast({ variant: "destructive", title: "Action Restricted", description: "Root cannot delete self." });
+    
+    // Find the user to check role
+    const targetUser = users?.find(u => u.id.toLowerCase() === userEmail.toLowerCase())
+    if (targetUser?.role === 'admin') {
+      toast({ variant: "destructive", title: "Action Restricted", description: "Root administrative records cannot be deleted." });
       return
     }
 
@@ -304,7 +307,7 @@ export default function AccessRolesPage() {
                                {u.role === 'admin' ? "ROOT" : "STAFF"}
                             </Badge>
                             
-                            {u.id.toLowerCase() !== user?.email?.toLowerCase() && (
+                            {u.role === 'staff' && (
                               <AlertDialog>
                                 <AlertDialogTrigger asChild>
                                   <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-600 hover:text-red-500 rounded-full transition-colors">
