@@ -34,7 +34,8 @@ import {
   HeartHandshake,
   Wallet,
   Monitor,
-  BarChart3
+  BarChart3,
+  BarChart
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -53,7 +54,8 @@ const publicLinks = [
 ]
 
 const adminLinks = [
-  { name: 'Analytics', href: '/internal/analytics', icon: LayoutDashboard },
+  { name: 'Donation Analytics', href: '/internal/analytics', icon: LayoutDashboard },
+  { name: 'Member Analytics', href: '/internal/member-analytics', icon: BarChart },
   { name: 'Website Visitors', href: '/internal/visitors', icon: BarChart3 },
   { name: 'Accounts', href: '/internal/accounts', icon: Wallet },
   { name: 'Expenses', href: '/internal/expenses', icon: TrendingDown },
