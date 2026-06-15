@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useEffect, useState, useMemo } from 'react'
@@ -26,7 +27,8 @@ import {
   History,
   FileDown,
   Wifi,
-  Activity
+  Activity,
+  Circle
 } from 'lucide-react'
 import { 
   BarChart, 
@@ -75,14 +77,15 @@ export default function WebsiteVisitorsPage() {
 
     const total = visitors.length
     const unique = visitors.length
-    const returning = visitors.filter((v: any) => (v.totalVisits || 0) > 1).length
-    const newCount = visitors.filter((v: any) => (v.totalVisits || 0) <= 1).length
+    const returning = visitors.filter((v: any) => v.status === 'Returning').length
+    const newCount = visitors.filter((v: any) => v.status === 'New').length
 
-    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-    const chartData = days.map(day => ({
-      name: day,
-      visitors: Math.floor(Math.random() * 20) + 5
-    }))
+    // Real data for chart: Group the 100 visitors by status to show current mix
+    const chartData = [
+      { name: 'New', count: newCount },
+      { name: 'Returning', count: returning },
+      { name: 'Active', count: visitors.filter((v: any) => v.status === 'Active').length }
+    ]
 
     const deviceMap: Record<string, number> = {}
     visitors.forEach((v: any) => {
@@ -144,8 +147,8 @@ export default function WebsiteVisitorsPage() {
                  {[
                    { label: "Total Sessions", value: stats.total, icon: <Users className="w-4 h-4" />, color: "text-blue-500", trend: "Live" },
                    { label: "Unique Users", value: stats.unique, icon: <UserCheck className="w-4 h-4" />, color: "text-emerald-500", trend: "Steady" },
-                   { label: "Returning Rate", value: `${Math.round((stats.returning / (stats.total || 1)) * 100)}%`, icon: <History className="w-4 h-4" />, color: "text-accent", trend: "Updated" },
-                   { label: "Connection Status", value: "Active", icon: <Activity className="w-4 h-4" />, color: "text-indigo-500", trend: "OK" }
+                   { label: "New Rate", value: `${Math.round((stats.new / (stats.total || 1)) * 100)}%`, icon: <TrendingUp className="w-4 h-4" />, color: "text-accent", trend: "Active" },
+                   { label: "Connection", value: "Verified", icon: <Wifi className="w-4 h-4" />, color: "text-indigo-500", trend: "Stable" }
                  ].map((stat, i) => (
                    <Card key={i} className="border-none shadow-sm rounded-2xl overflow-hidden group">
                      <CardContent className="p-5 flex flex-col gap-2">
@@ -166,9 +169,9 @@ export default function WebsiteVisitorsPage() {
                 <Card className="lg:col-span-2 border-none shadow-sm rounded-3xl bg-white dark:bg-slate-900 p-6">
                    <CardHeader className="p-0 mb-6">
                      <CardTitle className="text-lg font-headline font-bold flex items-center gap-2">
-                       <TrendingUp className="w-5 h-5 text-accent" /> Live Traffic Flow
+                       <TrendingUp className="w-5 h-5 text-accent" /> Interaction Pulse
                      </CardTitle>
-                     <CardDescription className="text-[10px] uppercase font-bold text-slate-400">Visitor activity stream detected from national chapters</CardDescription>
+                     <CardDescription className="text-[10px] uppercase font-bold text-slate-400">Current mix of recent visitor statuses</CardDescription>
                    </CardHeader>
                    <div className="h-[250px]">
                       <ResponsiveContainer width="100%" height="100%">
@@ -180,7 +183,7 @@ export default function WebsiteVisitorsPage() {
                             contentStyle={{ borderRadius: '1rem', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)' }}
                             cursor={{ fill: 'currentColor', opacity: 0.05 }}
                           />
-                          <Bar dataKey="visitors" fill="#D4AF37" radius={[6, 6, 0, 0]} barSize={40} />
+                          <Bar dataKey="count" fill="#D4AF37" radius={[6, 6, 0, 0]} barSize={40} />
                         </BarChart>
                       </ResponsiveContainer>
                    </div>
@@ -230,10 +233,10 @@ export default function WebsiteVisitorsPage() {
                  <CardHeader className="p-6 border-b border-slate-50 dark:border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
                       <div className="flex items-center gap-2">
-                        <CardTitle className="text-lg font-headline font-bold">Intelligence Log</CardTitle>
-                        <Badge className="bg-emerald-500 text-white font-bold text-[8px] animate-pulse">LIVE FEED</Badge>
+                        <CardTitle className="text-lg font-headline font-bold">Live Interaction Log</CardTitle>
+                        <Badge className="bg-emerald-500 text-white font-bold text-[8px] animate-pulse">UPDATED INSTANTLY</Badge>
                       </div>
-                      <CardDescription className="text-[10px] font-bold uppercase text-slate-400">Real-time chronicle of recent portal interactions</CardDescription>
+                      <CardDescription className="text-[10px] font-bold uppercase text-slate-400">Chronicle of current portal sessions and navigations</CardDescription>
                     </div>
                     <div className="relative w-full md:w-64">
                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
@@ -250,15 +253,15 @@ export default function WebsiteVisitorsPage() {
                         <table className="w-full text-left">
                           <thead className="bg-slate-50 dark:bg-slate-800/50 text-[8px] font-black text-slate-400 uppercase tracking-widest border-b dark:border-slate-800">
                              <tr>
-                               <th className="px-6 py-4">Visitor/ID</th>
-                               <th className="px-6 py-4">Status</th>
-                               <th className="px-6 py-4">Technical Profile</th>
-                               <th className="px-6 py-4">Geographic Profile</th>
-                               <th className="px-6 py-4 text-right">Activity</th>
+                               <th className="px-6 py-4">Visitor/Session</th>
+                               <th className="px-6 py-4">Current Status</th>
+                               <th className="px-6 py-4">Platform Info</th>
+                               <th className="px-6 py-4">Geo Location</th>
+                               <th className="px-6 py-4 text-right">Latest Action</th>
                              </tr>
                           </thead>
                           <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
-                             {(visitors || []).filter(v => (v.id || '').includes(search) || (v.ipAddress || '').includes(search)).map((v: any) => (
+                             {(visitors || []).filter(v => (v.id || '').toLowerCase().includes(search.toLowerCase()) || (v.ipAddress || '').includes(search)).map((v: any) => (
                                <tr key={v.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
                                   <td className="px-6 py-4">
                                      <div className="flex items-center gap-3">
@@ -267,15 +270,15 @@ export default function WebsiteVisitorsPage() {
                                            <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-emerald-500 rounded-full border-2 border-white dark:border-slate-900 animate-pulse"></span>
                                         </div>
                                         <div>
-                                          <p className="text-xs font-bold text-primary dark:text-white leading-none">{v.name || 'Anonymous'}</p>
-                                          <p className="text-[8px] font-mono text-slate-400 mt-0.5">{v.id || '0x000'}</p>
+                                          <p className="text-xs font-bold text-primary dark:text-white leading-none">{v.name || 'Anonymous Guest'}</p>
+                                          <p className="text-[8px] font-mono text-slate-400 mt-0.5">{v.id}</p>
                                         </div>
                                      </div>
                                   </td>
                                   <td className="px-6 py-4">
                                      <Badge className={cn(
                                        "text-[8px] font-bold px-2 py-0 h-4 rounded-full uppercase",
-                                       v.status === 'New' ? "bg-blue-500" : "bg-emerald-500"
+                                       v.status === 'New' ? "bg-blue-500" : v.status === 'Returning' ? "bg-emerald-500" : "bg-accent"
                                      )}>
                                        {v.status || 'Active'}
                                      </Badge>
@@ -285,9 +288,9 @@ export default function WebsiteVisitorsPage() {
                                         <div className="flex flex-col">
                                            <span className="text-[9px] font-bold text-slate-600 dark:text-slate-300 flex items-center gap-1">
                                               {v.deviceType === 'Mobile' ? <Smartphone className="w-2.5 h-2.5" /> : <Laptop className="w-2.5 h-2.5" />}
-                                              {v.browser || 'Chrome'}
+                                              {v.browser}
                                            </span>
-                                           <span className="text-[7px] text-slate-400 uppercase font-black">{v.os || 'Verified'}</span>
+                                           <span className="text-[7px] text-slate-400 uppercase font-black">{v.os}</span>
                                         </div>
                                      </div>
                                   </td>
@@ -299,8 +302,13 @@ export default function WebsiteVisitorsPage() {
                                   </td>
                                   <td className="px-6 py-4 text-right">
                                      <div className="flex flex-col items-end">
-                                        <span className="text-xs font-bold text-primary dark:text-white">Active</span>
-                                        <span className="text-[7px] font-bold text-slate-400 uppercase tracking-widest">{v.lastActivity?.toDate ? v.lastActivity.toDate().toLocaleTimeString() : 'Just now'}</span>
+                                        <div className="flex items-center gap-1 text-emerald-500">
+                                          <Circle className="w-1 h-1 fill-current animate-ping" />
+                                          <span className="text-xs font-bold">Active</span>
+                                        </div>
+                                        <span className="text-[7px] font-bold text-slate-400 uppercase tracking-widest">
+                                          {v.lastActivity?.toDate ? v.lastActivity.toDate().toLocaleTimeString() : 'Just now'}
+                                        </span>
                                      </div>
                                   </td>
                                </tr>
@@ -313,9 +321,9 @@ export default function WebsiteVisitorsPage() {
 
               <div className="bg-white dark:bg-slate-900 p-8 rounded-[3rem] border border-slate-100 dark:border-slate-800 text-center space-y-4 shadow-sm">
                  <ShieldCheck className="w-10 h-10 text-emerald-500 mx-auto" />
-                 <h3 className="text-xl font-headline font-bold text-primary dark:text-white">Security & Real-Time Integrity</h3>
+                 <h3 className="text-xl font-headline font-bold text-primary dark:text-white">Live Intelligence Stream</h3>
                  <p className="text-sm text-slate-500 max-w-3xl mx-auto leading-relaxed italic">
-                   "This dashboard provides a real-time window into institutional engagement. All data is processed securely through end-to-end encrypted streams. Unauthorized tracking or session interception is strictly prohibited."
+                   "This dashboard provides a real-time window into institutional engagement across our national network. Navigations, sessions, and interactions are synchronized instantly to ensure a live oversight of portal traffic."
                  </p>
                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">National Data Security Cell • Human Rights Affairs Trust</p>
               </div>

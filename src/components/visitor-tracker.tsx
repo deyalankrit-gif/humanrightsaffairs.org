@@ -2,16 +2,19 @@
 'use client';
 
 import { useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import { useFirestore, useUser } from '@/firebase';
-import { doc, setDoc, serverTimestamp, increment } from 'firebase/firestore';
+import { doc, setDoc, serverTimestamp, increment, arrayUnion } from 'firebase/firestore';
 
 /**
  * VisitorTracker silently logs visitor metadata to Firestore.
- * It identifies unique users via localStorage and updates activity in real-time.
+ * It identifies unique users via localStorage and updates activity in real-time
+ * on every page navigation.
  */
 export function VisitorTracker() {
   const db = useFirestore();
   const { user } = useUser();
+  const pathname = usePathname();
 
   useEffect(() => {
     if (!db) return;
@@ -19,9 +22,9 @@ export function VisitorTracker() {
     const trackVisit = async () => {
       // 1. Identify or Create Visitor ID
       let visitorId = localStorage.getItem('hrat_visitor_id');
-      const isNewVisitor = !visitorId;
+      const isNewSession = !sessionStorage.getItem('hrat_session_active');
       
-      if (isNewVisitor) {
+      if (!visitorId) {
         visitorId = `VIS-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
         localStorage.setItem('hrat_visitor_id', visitorId!);
       }
@@ -69,25 +72,32 @@ export function VisitorTracker() {
         city: geoData.city,
         state: geoData.state,
         country: geoData.country,
-        status: isNewVisitor ? 'New' : 'Returning',
+        status: isNewSession ? 'Returning' : 'Active',
         userType: user ? 'Admin' : 'Guest',
-        totalVisits: increment(1),
-        pagesVisited: [window.location.pathname]
+        pagesVisited: arrayUnion(pathname)
       };
 
-      if (isNewVisitor) {
-        updatePayload.firstVisit = serverTimestamp();
-        updatePayload.createdAt = serverTimestamp();
-        updatePayload.totalVisits = 1;
+      // Handle first-time visitor or new session increment
+      if (isNewSession) {
+        updatePayload.totalVisits = increment(1);
+        sessionStorage.setItem('hrat_session_active', 'true');
+        
+        // If they don't even have a visitor record in storage, they are "New"
+        if (!localStorage.getItem('hrat_visitor_exists')) {
+          updatePayload.status = 'New';
+          updatePayload.firstVisit = serverTimestamp();
+          updatePayload.createdAt = serverTimestamp();
+          localStorage.setItem('hrat_visitor_exists', 'true');
+        }
       }
 
       setDoc(visitorRef, updatePayload, { merge: true }).catch(() => {
-        // Silent fail for tracking errors to avoid disrupting user experience
+        // Silent fail for tracking errors
       });
     };
 
     trackVisit();
-  }, [db, user]);
+  }, [db, user, pathname]);
 
   return null;
 }
