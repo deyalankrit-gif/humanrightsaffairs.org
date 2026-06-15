@@ -32,6 +32,8 @@ import {
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
+import { errorEmitter } from '@/firebase/error-emitter'
+import { FirestorePermissionError, type SecurityRuleContext } from '@/firebase/errors'
 
 const MODULES = [
   { id: 'analytics', label: 'Donation Analytics' },
@@ -78,19 +80,25 @@ export default function AccessRolesPage() {
     if (!db || !isRoot) return
     setIsSaving(`${userEmail}-${module}`)
     
-    const userRef = doc(db, 'users', userEmail.toLowerCase())
-    
-    setDoc(userRef, {
+    const userRef = doc(db, 'users', userEmail.toLowerCase().trim())
+    const updateData = {
       permissions: {
         [module]: !currentVal
       }
-    }, { merge: true })
+    }
+    
+    setDoc(userRef, updateData, { merge: true })
       .then(() => {
         toast({ title: "Permission Updated", description: `${module.toUpperCase()} access modified for ${userEmail}.` })
         setIsSaving(null)
       })
-      .catch(() => {
-        toast({ variant: "destructive", title: "Update Failed" })
+      .catch(async (serverError) => {
+        const permissionError = new FirestorePermissionError({
+          path: userRef.path,
+          operation: 'update',
+          requestResourceData: updateData,
+        } satisfies SecurityRuleContext);
+        errorEmitter.emit('permission-error', permissionError);
         setIsSaving(null)
       })
   }
@@ -102,31 +110,51 @@ export default function AccessRolesPage() {
 
     const initialPermissions = MODULES.reduce((acc, mod) => ({ ...acc, [mod.id]: false }), {})
     const userEmail = newEmail.toLowerCase().trim()
-
-    setDoc(doc(db, 'users', userEmail), {
+    const userRef = doc(db, 'users', userEmail)
+    const userData = {
       email: userEmail,
       name: newName || userEmail.split('@')[0],
       role: 'staff',
       permissions: initialPermissions,
       createdAt: serverTimestamp()
-    })
+    }
+
+    setDoc(userRef, userData)
       .then(() => {
         toast({ title: "Staff Provisioned", description: `${userEmail} has been added to the registry.` })
         setNewEmail('')
         setNewName('')
         setIsAdding(false)
       })
-      .catch(() => {
-        toast({ variant: "destructive", title: "Provisioning Failed" })
+      .catch(async (err) => {
+        const permissionError = new FirestorePermissionError({
+          path: userRef.path,
+          operation: 'create',
+          requestResourceData: userData,
+        } satisfies SecurityRuleContext);
+        errorEmitter.emit('permission-error', permissionError);
         setIsAdding(false)
       })
   }
 
   const handleDeleteUser = async (userEmail: string) => {
-    if (!db || !isRoot || userEmail === user?.email) return
-    deleteDoc(doc(db, 'users', userEmail.toLowerCase()))
+    if (!db || !isRoot || !userEmail || userEmail.toLowerCase() === user?.email?.toLowerCase()) {
+      toast({ variant: "destructive", title: "Action Restricted", description: "You cannot delete your own root account." });
+      return
+    }
+
+    const userRef = doc(db, 'users', userEmail.toLowerCase().trim())
+    
+    deleteDoc(userRef)
       .then(() => {
-        toast({ title: "Access Revoked", description: `Record for ${userEmail} purged.` })
+        toast({ title: "Access Revoked", description: `Record for ${userEmail} purged from national registry.` })
+      })
+      .catch(async (err) => {
+        const permissionError = new FirestorePermissionError({
+          path: userRef.path,
+          operation: 'delete',
+        } satisfies SecurityRuleContext);
+        errorEmitter.emit('permission-error', permissionError);
       })
   }
 
@@ -258,7 +286,7 @@ export default function AccessRolesPage() {
                             <Badge className={cn("text-[9px] font-black px-3 py-0.5 rounded-full uppercase border-none", u.role === 'admin' ? "bg-red-600" : "bg-slate-800")}>
                                {u.role === 'admin' ? "ROOT" : "STAFF"}
                             </Badge>
-                            {u.email !== user?.email && (
+                            {u.email?.toLowerCase() !== user?.email?.toLowerCase() && (
                               <Button variant="ghost" size="icon" onClick={() => handleDeleteUser(u.email)} className="h-8 w-8 text-slate-600 hover:text-red-500 rounded-full transition-colors">
                                 <Trash2 className="w-4 h-4" />
                               </Button>
