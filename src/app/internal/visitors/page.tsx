@@ -28,7 +28,8 @@ import {
   FileDown,
   Wifi,
   Activity,
-  Circle
+  Circle,
+  Navigation
 } from 'lucide-react'
 import { 
   BarChart, 
@@ -71,6 +72,7 @@ export default function WebsiteVisitorsPage() {
       unique: 0, 
       returning: 0, 
       new: 0, 
+      external: 0,
       chartData: [], 
       deviceData: [] 
     }
@@ -80,7 +82,15 @@ export default function WebsiteVisitorsPage() {
     const returning = visitors.filter((v: any) => v.status === 'Returning').length
     const newCount = visitors.filter((v: any) => v.status === 'New').length
 
-    // Real data for chart: Group the 100 visitors by status to show current mix
+    // Calculate external (Non-WB or Non-India)
+    const externalCount = visitors.filter((v: any) => {
+      const country = v.country || 'IN';
+      const isIndia = country === 'India' || country === 'IN';
+      const isWB = v.state === 'West Bengal';
+      return !isIndia || !isWB;
+    }).length;
+
+    // Group the 100 visitors by status to show current mix
     const chartData = [
       { name: 'New', count: newCount },
       { name: 'Returning', count: returning },
@@ -94,7 +104,7 @@ export default function WebsiteVisitorsPage() {
     })
     const deviceData = Object.keys(deviceMap).map(name => ({ name, value: deviceMap[name] }))
 
-    return { total, unique, returning, new: newCount, chartData, deviceData }
+    return { total, unique, returning, new: newCount, external: externalCount, chartData, deviceData }
   }, [visitors])
 
   const handleExport = (format: 'PDF' | 'Excel' | 'CSV') => {
@@ -147,7 +157,7 @@ export default function WebsiteVisitorsPage() {
                  {[
                    { label: "Total Sessions", value: stats.total, icon: <Users className="w-4 h-4" />, color: "text-blue-500", trend: "Live" },
                    { label: "Unique Users", value: stats.unique, icon: <UserCheck className="w-4 h-4" />, color: "text-emerald-500", trend: "Steady" },
-                   { label: "New Rate", value: `${Math.round((stats.new / (stats.total || 1)) * 100)}%`, icon: <TrendingUp className="w-4 h-4" />, color: "text-accent", trend: "Active" },
+                   { label: "External Reach", value: stats.external, icon: <Globe className="w-4 h-4" />, color: "text-amber-500", trend: "Global" },
                    { label: "Connection", value: "Verified", icon: <Wifi className="w-4 h-4" />, color: "text-indigo-500", trend: "Stable" }
                  ].map((stat, i) => (
                    <Card key={i} className="border-none shadow-sm rounded-2xl overflow-hidden group">
@@ -236,7 +246,7 @@ export default function WebsiteVisitorsPage() {
                         <CardTitle className="text-lg font-headline font-bold">Live Interaction Log</CardTitle>
                         <Badge className="bg-emerald-500 text-white font-bold text-[8px] animate-pulse">UPDATED INSTANTLY</Badge>
                       </div>
-                      <CardDescription className="text-[10px] font-bold uppercase text-slate-400">Chronicle of current portal sessions and navigations</CardDescription>
+                      <CardDescription className="text-[10px] font-bold uppercase text-slate-400">Geographic tracking with international & out-of-state flags</CardDescription>
                     </div>
                     <div className="relative w-full md:w-64">
                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
@@ -261,8 +271,17 @@ export default function WebsiteVisitorsPage() {
                              </tr>
                           </thead>
                           <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
-                             {(visitors || []).filter(v => (v.id || '').toLowerCase().includes(search.toLowerCase()) || (v.ipAddress || '').includes(search)).map((v: any) => (
-                               <tr key={v.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
+                             {(visitors || []).filter(v => (v.id || '').toLowerCase().includes(search.toLowerCase()) || (v.ipAddress || '').includes(search)).map((v: any) => {
+                               const country = v.country || 'IN';
+                               const state = v.state || 'Unknown';
+                               const isInternational = country !== 'India' && country !== 'IN';
+                               const isOutOfState = !isInternational && state !== 'West Bengal' && state !== 'Unknown';
+
+                               return (
+                               <tr key={v.id} className={cn(
+                                 "hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors",
+                                 isInternational ? "bg-red-50/20 dark:bg-red-950/10" : isOutOfState ? "bg-amber-50/20 dark:bg-amber-950/10" : ""
+                               )}>
                                   <td className="px-6 py-4">
                                      <div className="flex items-center gap-3">
                                         <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-accent relative">
@@ -295,9 +314,25 @@ export default function WebsiteVisitorsPage() {
                                      </div>
                                   </td>
                                   <td className="px-6 py-4">
-                                     <div className="flex items-center gap-1.5">
-                                        <MapPin className="w-3 h-3 text-accent" />
-                                        <span className="text-[10px] font-bold text-slate-700 dark:text-slate-300">{v.city || 'Kolkata'}, {v.country || 'IN'}</span>
+                                     <div className="flex flex-col">
+                                        <div className="flex items-center gap-1.5">
+                                           <MapPin className={cn(
+                                             "w-3 h-3 shrink-0", 
+                                             isInternational ? "text-red-500 animate-pulse" : isOutOfState ? "text-amber-500" : "text-accent"
+                                           )} />
+                                           <span className="text-[10px] font-bold text-slate-700 dark:text-slate-300">
+                                              {v.city || 'Unknown'}, {state}
+                                           </span>
+                                        </div>
+                                        <div className="flex items-center gap-1.5 mt-1">
+                                           <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">{country}</span>
+                                           {isInternational && (
+                                              <Badge className="bg-red-500 hover:bg-red-600 text-[6px] h-3 px-1 font-black border-none">INTERNATIONAL</Badge>
+                                           )}
+                                           {isOutOfState && (
+                                              <Badge className="bg-amber-500 hover:bg-amber-600 text-[6px] h-3 px-1 font-black border-none">OUT-OF-STATE</Badge>
+                                           )}
+                                        </div>
                                      </div>
                                   </td>
                                   <td className="px-6 py-4 text-right">
@@ -312,7 +347,7 @@ export default function WebsiteVisitorsPage() {
                                      </div>
                                   </td>
                                </tr>
-                             ))}
+                             )})}
                           </tbody>
                         </table>
                     </div>
@@ -321,9 +356,9 @@ export default function WebsiteVisitorsPage() {
 
               <div className="bg-white dark:bg-slate-900 p-8 rounded-[3rem] border border-slate-100 dark:border-slate-800 text-center space-y-4 shadow-sm">
                  <ShieldCheck className="w-10 h-10 text-emerald-500 mx-auto" />
-                 <h3 className="text-xl font-headline font-bold text-primary dark:text-white">Live Intelligence Stream</h3>
+                 <h3 className="text-xl font-headline font-bold text-primary dark:text-white">Regional Engagement Intelligence</h3>
                  <p className="text-sm text-slate-500 max-w-3xl mx-auto leading-relaxed italic">
-                   "This dashboard provides a real-time window into institutional engagement across our national network. Navigations, sessions, and interactions are synchronized instantly to ensure a live oversight of portal traffic."
+                   "Our tracking system automatically flags visitors from outside our core region to help the administration identify national and international interest. Highlights in amber indicate out-of-state Indian visitors, while red markers indicate international engagement."
                  </p>
                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">National Data Security Cell • Human Rights Affairs Trust</p>
               </div>
