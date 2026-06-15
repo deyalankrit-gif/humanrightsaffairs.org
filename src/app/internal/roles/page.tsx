@@ -27,8 +27,20 @@ import {
   CheckCircle2,
   XCircle,
   Activity,
-  History
+  History,
+  AlertTriangle
 } from 'lucide-react'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
@@ -60,6 +72,7 @@ export default function AccessRolesPage() {
   const [isAdding, setIsAdding] = useState(false)
   const [newEmail, setNewEmail] = useState('')
   const [newName, setNewName] = useState('')
+  const [isDeleting, setIsDeleting] = useState<string | null>(null)
 
   const isRoot = user?.email?.toLowerCase() === 'deydhritiman@gmail.com'
 
@@ -89,7 +102,7 @@ export default function AccessRolesPage() {
     
     setDoc(userRef, updateData, { merge: true })
       .then(() => {
-        toast({ title: "Permission Updated", description: `${module.toUpperCase()} access modified for ${userEmail}.` })
+        toast({ title: "Permission Updated", description: `${module.toUpperCase()} access modified.` })
         setIsSaving(null)
       })
       .catch(async (serverError) => {
@@ -121,7 +134,7 @@ export default function AccessRolesPage() {
 
     setDoc(userRef, userData)
       .then(() => {
-        toast({ title: "Staff Provisioned", description: `${userEmail} has been added to the registry.` })
+        toast({ title: "Staff Provisioned", description: `${userEmail} added to registry.` })
         setNewEmail('')
         setNewName('')
         setIsAdding(false)
@@ -138,16 +151,19 @@ export default function AccessRolesPage() {
   }
 
   const handleDeleteUser = async (userEmail: string) => {
-    if (!db || !isRoot || !userEmail || userEmail.toLowerCase() === user?.email?.toLowerCase()) {
-      toast({ variant: "destructive", title: "Action Restricted", description: "You cannot delete your own root account." });
+    if (!db || !isRoot || !userEmail) return
+    if (userEmail.toLowerCase() === user?.email?.toLowerCase()) {
+      toast({ variant: "destructive", title: "Action Restricted", description: "Root cannot delete self." });
       return
     }
 
+    setIsDeleting(userEmail)
     const userRef = doc(db, 'users', userEmail.toLowerCase().trim())
     
     deleteDoc(userRef)
       .then(() => {
-        toast({ title: "Access Revoked", description: `Record for ${userEmail} purged from national registry.` })
+        toast({ title: "Access Revoked", description: `Record for ${userEmail} purged.` })
+        setIsDeleting(null)
       })
       .catch(async (err) => {
         const permissionError = new FirestorePermissionError({
@@ -155,6 +171,7 @@ export default function AccessRolesPage() {
           operation: 'delete',
         } satisfies SecurityRuleContext);
         errorEmitter.emit('permission-error', permissionError);
+        setIsDeleting(null)
       })
   }
 
@@ -170,12 +187,12 @@ export default function AccessRolesPage() {
   }
 
   const filteredUsers = (users || []).filter(u => 
-    u.email.toLowerCase().includes(search.toLowerCase()) || 
-    u.name?.toLowerCase().includes(search.toLowerCase())
+    u.id.toLowerCase().includes(search.toLowerCase()) || 
+    (u.name || '').toLowerCase().includes(search.toLowerCase())
   )
 
   return (
-    <main className="min-h-screen bg-slate-950 text-slate-200">
+    <main className="min-h-screen bg-slate-950 text-slate-200 pb-20">
       <section className="pt-16 pb-8 bg-slate-900 border-b-8 border-red-600/20 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-1/3 h-full bg-red-600/5 -skew-x-12"></div>
         <div className="container mx-auto px-4 relative z-10">
@@ -243,11 +260,11 @@ export default function AccessRolesPage() {
                  </CardContent>
               </Card>
 
-              <div className="p-8 rounded-[2.5rem] bg-red-950/20 border border-red-900/30 text-center space-y-4">
+              <div className="p-8 rounded-[2.5rem] bg-red-950/20 border border-red-900/30 text-center space-y-4 shadow-inner">
                  <Lock className="w-10 h-10 text-red-600 mx-auto" />
                  <h4 className="text-sm font-black uppercase tracking-widest text-red-500">Security Mandate</h4>
                  <p className="text-[11px] text-slate-400 italic leading-relaxed">
-                   "Staff members can only access the portal once their email is provisioned here. Permissions are set to False (Restricted) by default for new accounts."
+                   "Staff members can only access the portal once their email is provisioned here. Permissions are set to Restricted by default."
                  </p>
               </div>
             </div>
@@ -268,17 +285,17 @@ export default function AccessRolesPage() {
               ) : (
                 <div className="grid gap-6">
                   {filteredUsers.map((u: any) => (
-                    <Card key={u.email} className="bg-slate-900 border-white/5 rounded-[2rem] overflow-hidden group">
+                    <Card key={u.id} className="bg-slate-900 border-white/5 rounded-[2rem] overflow-hidden group hover:border-red-900/30 transition-all">
                       <CardHeader className="p-6 pb-2 flex flex-row items-center justify-between">
                          <div className="flex items-center gap-4">
                             <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10 group-hover:border-red-600 transition-colors">
                                <User className="w-6 h-6 text-slate-400" />
                             </div>
                             <div>
-                               <CardTitle className="text-xl font-headline font-bold text-white">{u.name}</CardTitle>
+                               <CardTitle className="text-xl font-headline font-bold text-white">{u.name || u.id.split('@')[0]}</CardTitle>
                                <div className="flex items-center gap-2">
                                   <Mail className="w-3 h-3 text-red-500" />
-                                  <span className="text-[10px] font-mono text-slate-500">{u.email}</span>
+                                  <span className="text-[10px] font-mono text-slate-500">{u.id}</span>
                                </div>
                             </div>
                          </div>
@@ -286,10 +303,34 @@ export default function AccessRolesPage() {
                             <Badge className={cn("text-[9px] font-black px-3 py-0.5 rounded-full uppercase border-none", u.role === 'admin' ? "bg-red-600" : "bg-slate-800")}>
                                {u.role === 'admin' ? "ROOT" : "STAFF"}
                             </Badge>
-                            {u.email?.toLowerCase() !== user?.email?.toLowerCase() && (
-                              <Button variant="ghost" size="icon" onClick={() => handleDeleteUser(u.email)} className="h-8 w-8 text-slate-600 hover:text-red-500 rounded-full transition-colors">
-                                <Trash2 className="w-4 h-4" />
-                              </Button>
+                            
+                            {u.id.toLowerCase() !== user?.email?.toLowerCase() && (
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-600 hover:text-red-500 rounded-full transition-colors">
+                                    <Trash2 className="w-4 h-4" />
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent className="bg-slate-900 border-white/10 text-white rounded-[2rem] shadow-2xl">
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle className="flex items-center gap-2 text-red-500">
+                                      <AlertTriangle className="w-6 h-6" /> Revoke Access?
+                                    </AlertDialogTitle>
+                                    <AlertDialogDescription className="text-slate-400">
+                                      This will permanently purge the institutional permissions for <strong className="text-white">{u.id}</strong>. The user will be unable to access administrative modules immediately.
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel className="bg-white/5 border-white/10 text-white rounded-xl hover:bg-white/10">Cancel</AlertDialogCancel>
+                                    <AlertDialogAction 
+                                      onClick={() => handleDeleteUser(u.id)}
+                                      className="bg-red-600 hover:bg-red-700 rounded-xl font-bold"
+                                    >
+                                      {isDeleting === u.id ? <Loader2 className="animate-spin w-4 h-4" /> : "Revoke Clearance"}
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
                             )}
                          </div>
                       </CardHeader>
@@ -297,7 +338,7 @@ export default function AccessRolesPage() {
                          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                             {MODULES.map((mod) => {
                               const hasAccess = u.permissions?.[mod.id] === true;
-                              const loadingId = `${u.email}-${mod.id}`;
+                              const loadingId = `${u.id}-${mod.id}`;
                               
                               return (
                                 <div key={mod.id} className={cn(
@@ -310,7 +351,7 @@ export default function AccessRolesPage() {
                                   <Switch 
                                     checked={hasAccess} 
                                     disabled={isSaving === loadingId || u.role === 'admin'}
-                                    onCheckedChange={() => handleTogglePermission(u.email, mod.id, hasAccess)}
+                                    onCheckedChange={() => handleTogglePermission(u.id, mod.id, hasAccess)}
                                     className="data-[state=checked]:bg-emerald-500"
                                   />
                                 </div>
