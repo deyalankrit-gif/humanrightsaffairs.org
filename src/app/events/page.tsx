@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useEffect } from 'react'
@@ -301,6 +300,16 @@ export default function EventsPage() {
                     </div>
 
                     <div className="space-y-2">
+                      <Label className="text-xs font-black uppercase tracking-widest text-red-600">Record Title</Label>
+                      <Input 
+                        value={newEvent.title} 
+                        onChange={e => setNewEvent(prev => ({...prev, title: e.target.value}))} 
+                        placeholder="e.g. Constitutional Awareness Convention" 
+                        className="h-12 rounded-xl text-lg font-black text-red-600 border-red-100 focus:ring-red-500" 
+                      />
+                    </div>
+
+                    <div className="space-y-2">
                       <Label className="text-xs font-bold uppercase tracking-widest text-slate-400">Primary Event Picture (Max 150KB)</Label>
                       <div className="flex flex-col items-center gap-4 p-4 border-2 border-dashed rounded-2xl">
                         {newEvent.imageId && (
@@ -415,10 +424,6 @@ export default function EventsPage() {
                        </div>
                     </div>
 
-                    <div className="space-y-2">
-                      <Label>Record Title</Label>
-                      <Input value={newEvent.title} onChange={e => setNewEvent(prev => ({...prev, title: e.target.value}))} placeholder="e.g. Constitutional Awareness Convention" className="h-12 rounded-xl" />
-                    </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label>Date</Label>

@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useEffect, useState } from 'react'
@@ -249,6 +248,16 @@ export default function InternalEventsManagement() {
               <div className="space-y-6 py-2">
                 <div className="bg-red-50 dark:bg-red-950/20 p-4 rounded-2xl border border-red-200 flex gap-3"><FileWarning className="w-5 h-5 text-red-600 shrink-0 mt-1" /><div className="space-y-1"><p className="text-[10px] font-black uppercase text-red-600">Payload Enforcement (Firestore 1MB Limit)</p><p className="text-[9px] text-red-700 dark:text-red-400 font-bold">Base64 bloat is significant. Images MUST stay under **150KB**. For long videos, only use **Direct URL Links**.</p></div></div>
                 
+                <div className="space-y-1">
+                  <Label className="text-[10px] uppercase font-black text-red-600">Record Title</Label>
+                  <Input 
+                    value={newEvent.title} 
+                    onChange={e => setNewEvent(p => ({...p, title: e.target.value}))} 
+                    placeholder="Enter the event title..."
+                    className="h-11 rounded-xl text-base font-black text-red-600 border-red-100 focus:ring-red-500" 
+                  />
+                </div>
+
                 <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">Cover Image (Max 150KB)</Label><div className="flex flex-col items-center gap-3 p-3 border-2 border-dashed rounded-xl"><div className="relative w-full aspect-video rounded-lg overflow-hidden bg-slate-100"><Image src={newEvent.imageId.startsWith('data:') ? newEvent.imageId : (PlaceHolderImages.find(i => i.id === newEvent.imageId)?.imageUrl || 'https://picsum.photos/seed/event/800/600')} alt="Cover" fill className="object-cover" /></div><Button variant="outline" size="sm" className="w-full relative h-9 rounded-lg hover:bg-slate-100"><Upload className="w-3.5 h-3.5 mr-2" /> Select Image<input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => handleFileChange(e, false, 'imageId')} /></Button></div></div>
 
                 <div className="space-y-3"><Label className="text-[10px] uppercase font-bold text-accent">Gallery Photos (Max 100KB Each)</Label><div className="grid grid-cols-1 gap-4">{[0, 1, 2].map((idx) => (
@@ -264,7 +273,6 @@ export default function InternalEventsManagement() {
                     <div className="space-y-1"><Label className="text-[9px] font-bold text-indigo-400 uppercase">Video Description</Label><Input placeholder="Video label..." value={newEvent.videoCaption} onChange={e => setNewEvent(p => ({...p, videoCaption: e.target.value}))} className="h-9 text-xs rounded-lg border-indigo-100" /></div>
                   </div></div>
 
-                <div className="space-y-1"><Label className="text-[10px] uppercase font-bold">Title</Label><Input value={newEvent.title} onChange={e => setNewEvent(p => ({...p, title: e.target.value}))} className="h-10 rounded-lg text-sm" /></div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1"><Label className="text-[10px] uppercase font-bold">Date</Label><Popover><PopoverTrigger asChild><Button variant="outline" className={cn("w-full justify-start text-left font-normal h-10 rounded-lg text-sm hover:bg-slate-50", !newEvent.date && "text-muted-foreground")}><CalendarIcon className="mr-2 h-4 w-4" />{newEvent.date || "Pick Date"}</Button></PopoverTrigger><PopoverContent className="w-auto p-0 z-[1000001]" align="start"><Calendar mode="single" selected={parseEventDate(newEvent.date)} onSelect={(d) => setNewEvent(p => ({...p, date: d ? format(d, "PPP") : ''}))} initialFocus /></PopoverContent></Popover></div>
                   <div className="space-y-1"><Label className="text-[10px] uppercase font-bold">Category</Label><Select value={newEvent.category} onValueChange={(v: any) => setNewEvent(p => ({...p, category: v}))}><SelectTrigger className="h-10 rounded-lg text-xs"><SelectValue /></SelectTrigger><SelectContent position="popper" className="z-[1000001] bg-white">{categories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent></Select></div>
