@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useEffect, useState } from 'react'
@@ -264,6 +263,12 @@ export default function InternalEventsManagement() {
           {editEvent && (<div className="space-y-6 py-2">
               <div className="bg-amber-50 p-4 rounded-xl border border-amber-200"><p className="text-[10px] font-bold text-amber-700 uppercase">Warning: Ensure document stays under 1MB. Use External URLs for new high-res media.</p></div>
               
+              {/* Record Title Repositioned, Bold and Red */}
+              <div className="space-y-1">
+                <Label className="text-[10px] uppercase font-black text-red-600">Record Title</Label>
+                <Input value={editEvent.title} onChange={e => setEditEvent((p: any) => ({...p, title: e.target.value}))} className="h-11 rounded-xl text-base font-black text-red-600 border-red-100 focus:ring-red-500" />
+              </div>
+
               <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">Cover Image</Label><div className="flex flex-col items-center gap-3 p-3 border-2 border-dashed rounded-xl"><div className="relative w-full aspect-video rounded-lg overflow-hidden bg-slate-100"><Image src={editEvent.imageId?.startsWith('data:') ? editEvent.imageId : (PlaceHolderImages.find(i => i.id === editEvent.imageId)?.imageUrl || '')} alt="Preview" fill className="object-cover" /></div><Button variant="outline" size="sm" className="w-full relative h-9 rounded-lg hover:bg-slate-100"><Upload className="w-3.5 h-3.5 mr-2" /> Change Image<input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => handleFileChange(e, true, 'imageId')} /></Button></div></div>
 
               <div className="space-y-3"><Label className="text-[10px] uppercase font-bold text-accent">Gallery Photos (Max 100KB Each)</Label><div className="grid grid-cols-1 gap-4">{(editEvent.galleryImages || ['', '', '']).map((img: string, idx: number) => (
@@ -279,8 +284,6 @@ export default function InternalEventsManagement() {
                   <div className="space-y-1"><Label className="text-[9px] font-bold text-indigo-400 uppercase">Video Description</Label><Input placeholder="Video label..." value={editEvent.videoCaption || ''} onChange={e => setEditEvent((p: any) => ({...p, videoCaption: e.target.value}))} className="h-9 text-xs rounded-lg border-indigo-100" /></div>
                 </div></div>
 
-              <div className="space-y-1"><Label className="text-[10px] uppercase font-bold">Record Title</Label><Input value={editEvent.title} onChange={e => setEditEvent((p: any) => ({...p, title: e.target.value}))} className="h-10 rounded-lg text-sm" /></div>
-              
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1"><Label className="text-[10px] uppercase font-bold">Date</Label><Popover><PopoverTrigger asChild><Button variant="outline" className={cn("w-full justify-start text-left font-normal h-10 rounded-lg text-sm hover:bg-slate-50", !editEvent.date && "text-muted-foreground")}><CalendarIcon className="mr-2 h-4 w-4" />{editEvent.date || "Pick Date"}</Button></PopoverTrigger><PopoverContent className="w-auto p-0 z-[1000001]" align="start"><Calendar mode="single" selected={parseEventDate(editEvent.date)} onSelect={(d) => setEditEvent((p: any) => ({...p, date: d ? format(d, "PPP") : ''}))} initialFocus /></PopoverContent></Popover></div>
                 <div className="space-y-1"><Label className="text-[10px] uppercase font-bold">Category</Label><Select value={editEvent.category} onValueChange={(v: any) => setEditEvent((p: any) => ({...p, category: v}))}><SelectTrigger className="h-10 rounded-lg text-xs"><SelectValue /></SelectTrigger><SelectContent position="popper" className="z-[1000001] bg-white">{categories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent></Select></div>

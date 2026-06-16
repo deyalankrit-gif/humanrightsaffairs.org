@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useEffect } from 'react'
@@ -93,6 +92,7 @@ export default function EventsPage() {
   const [isMirror, setIsMirror] = useState(false)
   const [videoProgress, setVideoProgress] = useState<number>(0)
   const [isVideoProcessing, setIsVideoProcessing] = useState(false)
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   
   const { user } = useUser()
   const db = useFirestore()
@@ -230,12 +230,19 @@ export default function EventsPage() {
       .then(() => {
         toast({ title: "Registry Updated" })
         setEditEvent(null)
+        setIsEditDialogOpen(false)
         setIsActionLoading(false)
       })
       .catch(() => {
         toast({ variant: "destructive", title: "Sync Failed", description: "Check connection and file sizes." })
         setIsActionLoading(false)
       })
+  }
+
+  const handleDeleteEvent = (id: string) => {
+    if(!db) return
+    deleteDoc(doc(db, 'events', id))
+      .then(() => toast({ title: "Record Deleted" }))
   }
 
   const parseEventDate = (dateStr: string) => {
@@ -505,13 +512,24 @@ export default function EventsPage() {
 
                         {isAdmin && (
                           <div className="absolute top-4 left-4 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
-                            <Dialog>
-                              <DialogTrigger asChild><Button onClick={() => setEditEvent(event)} size="icon" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white hover:bg-secondary hover:text-white rounded-full shadow-lg border border-white/20 transition-all"><Edit className="w-4 h-4" /></Button></DialogTrigger>
+                            <Dialog open={isEditDialogOpen && editEvent?.id === event.id} onOpenChange={(open) => { if(!open) { setEditEvent(null); setIsEditDialogOpen(false); } }}>
+                              <DialogTrigger asChild><Button onClick={() => { setEditEvent(event); setIsEditDialogOpen(true); }} size="icon" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white hover:bg-secondary hover:text-white rounded-full shadow-lg border border-white/20 transition-all"><Edit className="w-4 h-4" /></Button></DialogTrigger>
                               <DialogContent className="max-w-2xl bg-white dark:bg-slate-900 rounded-[2rem] max-h-[90vh] overflow-y-auto border-none shadow-2xl">
-                                <DialogHeader><DialogTitle>Modify Event Record</DialogTitle></DialogHeader>
+                                <DialogHeader><DialogTitle>Comprehensive Event Update</DialogTitle></DialogHeader>
                                 {editEvent && (
                                   <div className="space-y-6 py-4">
                                     <div className="bg-amber-50 p-4 rounded-2xl border border-amber-200 flex gap-3"><AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" /><p className="text-[10px] text-amber-800 font-bold uppercase">Record size capped at 1MB. Use External Links for new videos.</p></div>
+                                    
+                                    {/* Record Title Repositioned, Bold and Red */}
+                                    <div className="space-y-2">
+                                      <Label className="text-xs font-black uppercase tracking-widest text-red-600">Record Title</Label>
+                                      <Input 
+                                        value={editEvent.title} 
+                                        onChange={e => setEditEvent({...editEvent, title: e.target.value})} 
+                                        className="h-12 rounded-xl text-lg font-black text-red-600 border-red-100 focus:ring-red-500" 
+                                      />
+                                    </div>
+
                                     <div className="space-y-2">
                                       <Label className="text-xs font-bold uppercase tracking-widest text-slate-400">Primary Picture</Label>
                                       <div className="flex flex-col items-center gap-4 p-4 border-2 border-dashed rounded-2xl">
@@ -521,6 +539,69 @@ export default function EventsPage() {
                                         <Button variant="outline" className="w-full relative h-12 rounded-xl"><Upload className="w-4 h-4 mr-2" /> Change Photo<input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => handleFileChange(e, true, 'imageId')} /></Button>
                                       </div>
                                     </div>
+
+                                    <div className="space-y-4">
+                                       <Label className="text-xs font-bold uppercase tracking-widest text-accent">Additional Still Photos</Label>
+                                       <div className="grid grid-cols-1 gap-6">
+                                          {[0, 1, 2].map((idx) => (
+                                            <div key={idx} className="flex flex-col md:flex-row gap-4 items-start p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100">
+                                               <div className="relative w-full md:w-32 aspect-[3/4] bg-slate-100 rounded-xl overflow-hidden border-2 border-dashed border-slate-200 shrink-0">
+                                                  {(editEvent.galleryImages || ['', '', ''])[idx] ? (
+                                                    <Image src={(editEvent.galleryImages || ['', '', ''])[idx]} alt={`Gallery ${idx}`} fill className="object-cover" />
+                                                  ) : (
+                                                    <div className="flex items-center justify-center h-full"><Camera className="w-6 h-6 text-slate-300" /></div>
+                                                  )}
+                                                  <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => handleFileChange(e, true, 'galleryImages', idx)} />
+                                               </div>
+                                               <div className="flex-1 w-full space-y-2">
+                                                  <Label className="text-[10px] font-black uppercase text-slate-400">Photo {idx + 1} Caption</Label>
+                                                  <Input placeholder="Caption..." value={(editEvent.galleryCaptions || ['', '', ''])[idx]} onChange={e => { const n = [...(editEvent.galleryCaptions || ['', '', ''])]; n[idx] = e.target.value; setEditEvent({...editEvent, galleryCaptions: n}) }} className="h-10 rounded-xl" />
+                                               </div>
+                                            </div>
+                                          ))}
+                                       </div>
+                                    </div>
+
+                                    <div className="space-y-4">
+                                       <Label className="text-xs font-bold uppercase tracking-widest text-indigo-500">Mission Highlight Video</Label>
+                                       <div className="p-4 border-2 border-dashed rounded-2xl bg-indigo-50/30 border-indigo-100 flex flex-col gap-4">
+                                          <div className="flex flex-col md:flex-row gap-4 items-center">
+                                            <div className="w-full md:w-32 aspect-video bg-slate-100 rounded-xl flex items-center justify-center shrink-0">
+                                               {editEvent.videoUrl?.startsWith('data:') ? <Video className="w-8 h-8 text-indigo-400 animate-pulse" /> : <Film className="w-6 h-6 text-indigo-200" />}
+                                            </div>
+                                            <div className="flex-1 w-full space-y-2">
+                                              <Button variant="outline" className="w-full relative h-10 rounded-xl border-indigo-200 text-indigo-600 text-xs" disabled={isVideoProcessing}>
+                                                <Film className="w-3.5 h-3.5 mr-2" /> {isVideoProcessing ? "Processing..." : "Change Mini Clip (<200KB)"}
+                                                <input type="file" accept="video/mp4,video/webm" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => handleFileChange(e, true, 'videoUrl')} />
+                                              </Button>
+                                              <div className="relative">
+                                                <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-400" />
+                                                <Input placeholder="YouTube/Drive URL" className="pl-8 h-10 rounded-xl border-indigo-50" value={editEvent.videoUrl?.startsWith('data:') ? '' : editEvent.videoUrl || ''} onChange={e => setEditEvent({...editEvent, videoUrl: e.target.value})} />
+                                              </div>
+                                            </div>
+                                          </div>
+                                          <Input placeholder="Video label..." value={editEvent.videoCaption || ''} onChange={e => setEditEvent({...editEvent, videoCaption: e.target.value})} className="h-10 rounded-xl border-indigo-100" />
+                                       </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-4">
+                                      <div className="space-y-2">
+                                        <Label>Date</Label>
+                                        <Popover>
+                                          <PopoverTrigger asChild>
+                                            <Button variant="outline" className="w-full justify-start text-left font-normal h-12 rounded-xl">{editEvent.date}</Button>
+                                          </PopoverTrigger>
+                                          <PopoverContent className="w-auto p-0 z-[1000001]"><Calendar mode="single" selected={parseEventDate(editEvent.date)} onSelect={(d) => setEditEvent({...editEvent, date: d ? format(d, "PPP") : ''})} initialFocus /></PopoverContent>
+                                        </Popover>
+                                      </div>
+                                      <div className="space-y-2">
+                                        <Label>Category</Label>
+                                        <Select value={editEvent.category} onValueChange={(v: any) => setEditEvent({...editEvent, category: v})}><SelectTrigger className="h-12 rounded-xl"><SelectValue /></SelectTrigger><SelectContent className="z-[1000001]">{categories.filter(c => c !== 'All').map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent></Select>
+                                      </div>
+                                    </div>
+                                    <div className="space-y-2"><Label>Venue</Label><Input value={editEvent.location || ''} onChange={e => setEditEvent({...editEvent, location: e.target.value})} className="h-12 rounded-xl" /></div>
+                                    <div className="space-y-2"><Label>Impact Narrative</Label><Textarea value={editEvent.description} onChange={e => setEditEvent({...editEvent, description: e.target.value})} className="rounded-xl min-h-[100px]" /></div>
+                                    
                                     <Button onClick={handleUpdateEvent} disabled={isActionLoading || isVideoProcessing} className="w-full mt-4 h-12 rounded-xl bg-accent text-white font-bold hover:bg-secondary transition-all">{isActionLoading ? <Loader2 className="animate-spin" /> : "Save Profile Changes"}</Button>
                                   </div>
                                 )}
@@ -592,7 +673,7 @@ export default function EventsPage() {
               </div>
             </div>
           )}
-        </DialogContent>
+        </div>
       </Dialog>
       <Footer />
     </main>
