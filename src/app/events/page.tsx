@@ -304,6 +304,7 @@ export default function EventsPage() {
                       <Input 
                         value={newEvent.title} 
                         onChange={e => setNewEvent(prev => ({...prev, title: e.target.value}))} 
+                        onFocus={(e) => e.target.setSelectionRange(e.target.value.length, e.target.value.length)}
                         placeholder="e.g. Constitutional Awareness Convention" 
                         className="h-12 rounded-xl text-lg font-black text-red-600 border-red-100 focus:ring-red-500" 
                       />
@@ -315,7 +316,7 @@ export default function EventsPage() {
                         {newEvent.imageId && (
                           <div className="relative w-full aspect-video rounded-xl overflow-hidden">
                             <Image 
-                              src={newEvent.imageId.startsWith('data:') ? newEvent.imageId : (PlaceHolderImages.find(i => i.id === newEvent.imageId)?.imageUrl || 'https://picsum.photos/seed/event/800/600')} 
+                              src={newEvent.imageId.startsWith('data:') ? newMember.imageId : (PlaceHolderImages.find(i => i.id === newEvent.imageId)?.imageUrl || 'https://picsum.photos/seed/event/800/600')} 
                               alt="Preview" 
                               fill 
                               className="object-cover"
@@ -535,12 +536,13 @@ export default function EventsPage() {
                                       <Input 
                                         value={editEvent.title} 
                                         onChange={e => setEditEvent({...editEvent, title: e.target.value})} 
+                                        onFocus={(e) => e.target.setSelectionRange(e.target.value.length, e.target.value.length)}
                                         className="h-12 rounded-xl text-lg font-black text-red-600 border-red-100 focus:ring-red-500" 
                                       />
                                     </div>
 
                                     <div className="space-y-2">
-                                      <Label className="text-xs font-bold uppercase tracking-widest text-slate-400">Primary Picture</Label>
+                                      <Label className="text-xs font-bold uppercase tracking-widest text-slate-400">Primary Picture (Max 150KB)</Label>
                                       <div className="flex flex-col items-center gap-4 p-4 border-2 border-dashed rounded-2xl">
                                         <div className="relative w-full aspect-video rounded-xl overflow-hidden">
                                           <Image src={editEvent.imageId?.startsWith('data:') ? editEvent.imageId : (PlaceHolderImages.find(i => i.id === editEvent.imageId)?.imageUrl || 'https://picsum.photos/seed/event/800/600')} alt="Preview" fill className="object-cover" />
@@ -550,7 +552,7 @@ export default function EventsPage() {
                                     </div>
 
                                     <div className="space-y-4">
-                                       <Label className="text-xs font-bold uppercase tracking-widest text-accent">Additional Still Photos</Label>
+                                       <Label className="text-xs font-bold uppercase tracking-widest text-accent">Additional Still Photos (Max 100KB Each)</Label>
                                        <div className="grid grid-cols-1 gap-6">
                                           {[0, 1, 2].map((idx) => (
                                             <div key={idx} className="flex flex-col md:flex-row gap-4 items-start p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100">

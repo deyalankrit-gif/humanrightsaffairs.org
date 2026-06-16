@@ -253,6 +253,7 @@ export default function InternalEventsManagement() {
                   <Input 
                     value={newEvent.title} 
                     onChange={e => setNewEvent(p => ({...p, title: e.target.value}))} 
+                    onFocus={(e) => e.target.setSelectionRange(e.target.value.length, e.target.value.length)}
                     placeholder="Enter the event title..."
                     className="h-11 rounded-xl text-base font-black text-red-600 border-red-100 focus:ring-red-500" 
                   />
@@ -298,10 +299,15 @@ export default function InternalEventsManagement() {
               
               <div className="space-y-1">
                 <Label className="text-[10px] uppercase font-black text-red-600">Record Title</Label>
-                <Input value={editEvent.title} onChange={e => setEditEvent((p: any) => ({...p, title: e.target.value}))} className="h-11 rounded-xl text-base font-black text-red-600 border-red-100 focus:ring-red-500" />
+                <Input 
+                  value={editEvent.title} 
+                  onChange={e => setEditEvent((p: any) => ({...p, title: e.target.value}))} 
+                  onFocus={(e) => e.target.setSelectionRange(e.target.value.length, e.target.value.length)}
+                  className="h-11 rounded-xl text-base font-black text-red-600 border-red-100 focus:ring-red-500" 
+                />
               </div>
 
-              <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">Cover Image</Label><div className="flex flex-col items-center gap-3 p-3 border-2 border-dashed rounded-xl"><div className="relative w-full aspect-video rounded-lg overflow-hidden bg-slate-100"><Image src={editEvent.imageId?.startsWith('data:') ? editEvent.imageId : (PlaceHolderImages.find(i => i.id === editEvent.imageId)?.imageUrl || 'https://picsum.photos/seed/event/800/600')} alt="Preview" fill className="object-cover" /></div><Button variant="outline" size="sm" className="w-full relative h-9 rounded-lg hover:bg-slate-100"><Upload className="w-3.5 h-3.5 mr-2" /> Change Image<input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => handleFileChange(e, true, 'imageId')} /></Button></div></div>
+              <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">Cover Image (Max 150KB)</Label><div className="flex flex-col items-center gap-3 p-3 border-2 border-dashed rounded-xl"><div className="relative w-full aspect-video rounded-lg overflow-hidden bg-slate-100"><Image src={editEvent.imageId?.startsWith('data:') ? editEvent.imageId : (PlaceHolderImages.find(i => i.id === editEvent.imageId)?.imageUrl || 'https://picsum.photos/seed/event/800/600')} alt="Preview" fill className="object-cover" /></div><Button variant="outline" size="sm" className="w-full relative h-9 rounded-lg hover:bg-slate-100"><Upload className="w-3.5 h-3.5 mr-2" /> Change Image<input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => handleFileChange(e, true, 'imageId')} /></Button></div></div>
 
               <div className="space-y-3"><Label className="text-[10px] uppercase font-bold text-accent">Gallery Photos (Max 100KB Each)</Label><div className="grid grid-cols-1 gap-4">{(editEvent.galleryImages || ['', '', '']).map((img: string, idx: number) => (
                     <div key={idx} className="flex flex-col md:flex-row gap-4 p-3 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-100">
