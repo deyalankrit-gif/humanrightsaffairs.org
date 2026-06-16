@@ -74,7 +74,7 @@ type Event = {
   title: string
   date: string
   location: string
-  category: "Campaign" | "Workshop" | "Convention" | "Relief" | "Social Projects"
+  category: "Campaign" | "Workshop" | "Convention" | "Relief" | "Social Projects" | "Public Welfare"
   imageId?: string
   galleryImages?: string[]
   galleryCaptions?: string[]
@@ -257,7 +257,7 @@ export default function EventsPage() {
     return matchesCategory && matchesSearch;
   })
 
-  const categories = ["All", "Campaign", "Workshop", "Convention", "Relief", "Social Projects"]
+  const categories = ["All", "Campaign", "Workshop", "Convention", "Relief", "Social Projects", "Public Welfare"]
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">

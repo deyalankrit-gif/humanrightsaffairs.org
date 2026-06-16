@@ -211,7 +211,7 @@ export default function InternalEventsManagement() {
     e.location.toLowerCase().includes(search.toLowerCase())
   )
 
-  const categories = ["Campaign", "Workshop", "Convention", "Relief", "Social Projects"]
+  const categories = ["Campaign", "Workshop", "Convention", "Relief", "Social Projects", "Public Welfare"]
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
@@ -279,7 +279,7 @@ export default function InternalEventsManagement() {
                   ))}</div></div>
 
               <div className="space-y-3 p-4 bg-indigo-50/50 dark:bg-indigo-900/10 rounded-2xl border border-indigo-100"><Label className="text-[10px] uppercase font-bold text-indigo-500">Mission Highlight Video</Label>
-                <div className="flex flex-col gap-3"><div className="space-y-4"><div className="grid grid-cols-1 gap-2"><Button variant="outline" className="w-full relative h-10 rounded-xl border-indigo-200 text-indigo-600 border-dashed bg-white text-[10px] hover:bg-indigo-50" disabled={isVideoProcessing}><Film className="w-3.5 h-3.5 mr-2" /> {isVideoProcessing ? "Archiving..." : "Change Mini Clip (<200KB)"}<input type="file" accept="video/mp4,video/webm" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => handleFileChange(e, true, 'videoUrl')} disabled={isVideoProcessing} /></Button><div className="relative"><LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-400" /><Input placeholder="Recommended: YouTube/Drive URL" className="pl-8 h-9 text-[10px] rounded-xl border-indigo-100 bg-white" value={editEvent.videoUrl?.startsWith('data:') ? '' : editEvent.videoUrl || ''} onChange={e => setEditEvent((p: any) => ({...p, videoUrl: e.target.value}))} /></div></div>
+                <div className="flex flex-col gap-3"><div className="space-y-4"><div className="grid grid-cols-1 gap-2"><Button variant="outline" className="w-full relative h-10 rounded-xl border-indigo-200 text-indigo-600 border-dashed bg-white text-[10px] hover:bg-indigo-50" disabled={isVideoProcessing}> Glad to see you!<Film className="w-3.5 h-3.5 mr-2" /> {isVideoProcessing ? "Archiving..." : "Change Mini Clip (<200KB)"}<input type="file" accept="video/mp4,video/webm" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => handleFileChange(e, true, 'videoUrl')} disabled={isVideoProcessing} /></Button><div className="relative"><LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-400" /><Input placeholder="Recommended: YouTube/Drive URL" className="pl-8 h-9 text-[10px] rounded-xl border-indigo-100 bg-white" value={editEvent.videoUrl?.startsWith('data:') ? '' : editEvent.videoUrl || ''} onChange={e => setEditEvent((p: any) => ({...p, videoUrl: e.target.value}))} /></div></div>
                     {isVideoProcessing && (<div className="space-y-2"><div className="flex justify-between items-center text-[9px] font-bold text-indigo-500 uppercase"><span>Streaming...</span><span>{videoProgress}%</span></div><Progress value={videoProgress} className="h-1 bg-indigo-100" /></div>)}</div>
                   <div className="space-y-1"><Label className="text-[9px] font-bold text-indigo-400 uppercase">Video Description</Label><Input placeholder="Video label..." value={editEvent.videoCaption || ''} onChange={e => setEditEvent((p: any) => ({...p, videoCaption: e.target.value}))} className="h-9 text-xs rounded-lg border-indigo-100" /></div>
                 </div></div>
