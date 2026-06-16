@@ -283,7 +283,7 @@ export default function EventsPage() {
                     <Plus className="w-6 h-6" /> Create New Event Entry
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-2xl bg-white dark:bg-slate-900 rounded-[2rem] max-h-[90vh] overflow-y-auto border-none shadow-2xl">
+                <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="max-w-2xl bg-white dark:bg-slate-900 rounded-[2rem] max-h-[90vh] overflow-y-auto border-none shadow-2xl">
                   <DialogHeader>
                     <DialogTitle>Project Profile Entry</DialogTitle>
                     <DialogDescription>Firestore limit is 1MB. Use External Links for high-res video.</DialogDescription>
@@ -304,7 +304,6 @@ export default function EventsPage() {
                       <Input 
                         value={newEvent.title} 
                         onChange={e => setNewEvent(prev => ({...prev, title: e.target.value}))} 
-                        onFocus={(e) => e.target.setSelectionRange(e.target.value.length, e.target.value.length)}
                         placeholder="e.g. Constitutional Awareness Convention" 
                         className="h-12 rounded-xl text-lg font-black text-red-600 border-red-100 focus:ring-red-500" 
                       />
@@ -316,7 +315,7 @@ export default function EventsPage() {
                         {newEvent.imageId && (
                           <div className="relative w-full aspect-video rounded-xl overflow-hidden">
                             <Image 
-                              src={newEvent.imageId.startsWith('data:') ? newMember.imageId : (PlaceHolderImages.find(i => i.id === newEvent.imageId)?.imageUrl || 'https://picsum.photos/seed/event/800/600')} 
+                              src={newEvent.imageId?.startsWith('data:') ? newEvent.imageId : (PlaceHolderImages.find(i => i.id === newEvent.imageId)?.imageUrl || 'https://picsum.photos/seed/event/800/600')} 
                               alt="Preview" 
                               fill 
                               className="object-cover"
@@ -525,7 +524,7 @@ export default function EventsPage() {
                           <div className="absolute top-4 left-4 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
                             <Dialog open={isEditDialogOpen && editEvent?.id === event.id} onOpenChange={(open) => { if(!open) { setEditEvent(null); setIsEditDialogOpen(false); } }}>
                               <DialogTrigger asChild><Button onClick={() => { setEditEvent(event); setIsEditDialogOpen(true); }} size="icon" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white hover:bg-secondary hover:text-white rounded-full shadow-lg border border-white/20 transition-all"><Edit className="w-4 h-4" /></Button></DialogTrigger>
-                              <DialogContent className="max-w-2xl bg-white dark:bg-slate-900 rounded-[2rem] max-h-[90vh] overflow-y-auto border-none shadow-2xl">
+                              <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="max-w-2xl bg-white dark:bg-slate-900 rounded-[2rem] max-h-[90vh] overflow-y-auto border-none shadow-2xl">
                                 <DialogHeader><DialogTitle>Comprehensive Event Update</DialogTitle></DialogHeader>
                                 {editEvent && (
                                   <div className="space-y-6 py-4">
@@ -536,7 +535,6 @@ export default function EventsPage() {
                                       <Input 
                                         value={editEvent.title} 
                                         onChange={e => setEditEvent({...editEvent, title: e.target.value})} 
-                                        onFocus={(e) => e.target.setSelectionRange(e.target.value.length, e.target.value.length)}
                                         className="h-12 rounded-xl text-lg font-black text-red-600 border-red-100 focus:ring-red-500" 
                                       />
                                     </div>
@@ -680,7 +678,7 @@ export default function EventsPage() {
                       <div className="absolute bottom-6 left-6 right-6 p-6 bg-primary/40 backdrop-blur-md rounded-2xl border border-white/10 flex items-center justify-between"><div className="flex items-center gap-3"><CheckCircle2 className="w-5 h-5 text-emerald-400" /><p className="text-xs font-bold text-white uppercase tracking-wider">{selectedEventDetails.videoCaption || `Documentary: ${selectedEventDetails.title}`}</p></div><ExternalLink className="w-4 h-4 text-white/60" /></div>
                     </div>
                   </div>
-                  <div className="pt-12 flex flex-col gap-4 items-center"><Button size="lg" onClick={() => setSelectedEventDetails(null)} className="w-full bg-primary text-primary-foreground font-bold h-16 rounded-2xl text-lg hover:bg-secondary transition-all shadow-xl shadow-primary/20">Close Profile</Button><p className="text-center text-[10px] font-bold text-slate-400 uppercase tracking-[0.25em] mt-4">Official Mission Record • Human Rights Affairs Trust</p></div>
+                  <div className="pt-12 flex flex-col gap-4 items-center"><Button size="lg" onClick={() => setSelectedEventDetails(null)} className="w-full bg-primary text-primary-foreground font-bold h-16 rounded-2xl text-lg hover:bg-secondary transition-all shadow-xl shadow-primary/20">Close Profile</Button><p className="text-center text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mt-4">Official Mission Record • Human Rights Affairs Trust</p></div>
                 </div>
               </div>
             </div>
