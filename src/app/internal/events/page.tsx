@@ -310,7 +310,7 @@ export default function InternalEventsManagement() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1"><Label className="text-[10px] uppercase font-bold">Date</Label><Popover><PopoverTrigger asChild><Button variant="outline" className={cn("w-full justify-start text-left font-normal h-10 rounded-lg text-sm hover:bg-slate-50", !editEvent.date && "text-muted-foreground")}><CalendarIcon className="mr-2 h-4 w-4" />{editEvent.date || "Pick Date"}</Button></PopoverTrigger><PopoverContent className="w-auto p-0 z-[1000001]" align="start"><Calendar mode="single" selected={parseEventDate(editEvent.date)} onSelect={(d) => setEditEvent((p: any) => ({...p, date: d ? format(d, "PPP") : ''}))} initialFocus /></PopoverContent></Popover></div>
-                <div className="space-y-1"><Label className="text-[10px] uppercase font-bold">Category</Label><Select value={editEvent.category} onValueChange={(v: any) => setEditEvent((p: any) => ({...p, category: v}))}><SelectTrigger className="h-10 rounded-lg text-xs"><SelectValue /></SelectTrigger><SelectContent position="popper" className="z-[1000001] bg-white">{categories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent></Select></div>
+                <div className="space-y-1"><Label className="text-[10px] uppercase font-bold">Category</Label><Select value={editEvent.category} onValueChange={(v: any) => setEditEvent((p: any) => ({...p, category: v}))}><SelectTrigger className="h-10 rounded-lg text-xs"><SelectValue /></SelectTrigger><SelectContent position="popper" className="z-[1000001] bg-white">{categories.filter(c => c !== 'All').map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent></Select></div>
               </div>
 
               <div className="space-y-1"><Label className="text-[10px] uppercase font-bold">Venue</Label><Input value={editEvent.location || ''} onChange={e => setEditEvent((p: any) => ({...p, location: e.target.value}))} className="h-10 rounded-lg" /></div>
@@ -383,7 +383,6 @@ export default function InternalEventsManagement() {
           )}
         </DialogContent>
       </Dialog>
-
       <Footer />
     </main>
   )
