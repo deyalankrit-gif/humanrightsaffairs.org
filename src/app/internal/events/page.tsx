@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useEffect, useState } from 'react'
@@ -28,7 +29,8 @@ import {
   Type,
   Link as LinkIcon,
   AlertTriangle,
-  FileWarning
+  FileWarning,
+  ShieldAlert
 } from 'lucide-react'
 import {
   Dialog,
@@ -37,6 +39,7 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogFooter,
+  DialogDescription,
 } from "@/components/ui/dialog"
 import {
   Popover,
@@ -63,6 +66,12 @@ export default function InternalEventsManagement() {
   const [editEvent, setEditEvent] = useState<any>(null)
   const [videoProgress, setVideoProgress] = useState<number>(0)
   const [isVideoProcessing, setIsVideoProcessing] = useState(false)
+
+  // Deletion States
+  const [deleteDialogStep, setDeleteDialogStep] = useState<'warning' | 'verify' | null>(null)
+  const [eventToDelete, setEventToDelete] = useState<any>(null)
+  const [deleteInputText, setDeleteInputText] = useState('')
+  const [isDeleting, setIsDeleting] = useState(false)
   
   const [newEvent, setNewEvent] = useState({
     title: '',
@@ -197,6 +206,22 @@ export default function InternalEventsManagement() {
       })
   }
 
+  const handleDeleteEvent = async () => {
+    if (!db || !eventToDelete) return
+    setIsDeleting(true)
+    try {
+      await deleteDoc(doc(db, 'events', eventToDelete.id))
+      toast({ title: "Record Purged", description: "Event has been removed from the archives." })
+      setDeleteDialogStep(null)
+      setEventToDelete(null)
+      setDeleteInputText('')
+    } catch (error: any) {
+      toast({ variant: "destructive", title: "System Error" })
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
   const parseEventDate = (dateStr: string) => {
     if (!dateStr) return undefined;
     try { return parse(dateStr, "PPP", new Date()); } catch { return undefined; }
@@ -255,7 +280,7 @@ export default function InternalEventsManagement() {
 
       <section className="py-6 border-b bg-white dark:bg-slate-900 sticky top-10 z-30 shadow-sm"><div className="container mx-auto px-4"><div className="relative max-w-lg"><Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" /><Input placeholder="Filter registry..." className="pl-9 h-11 rounded-xl border-slate-200 text-sm" value={search} onChange={(e) => setSearch(e.target.value)} /></div></div></section>
 
-      <section className="py-8"><div className="container mx-auto px-4">{eventsLoading ? (<div className="text-center py-20"><Loader2 className="w-8 h-8 animate-spin text-accent mx-auto" /></div>) : (<div className="grid gap-4">{filtered.map((e: any) => (<Card key={e.id} className="border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900 rounded-2xl border border-slate-100"><CardContent className="p-0"><div className="flex flex-col md:flex-row items-stretch"><div className="relative w-full md:w-48 aspect-video md:aspect-auto overflow-hidden shrink-0"><Image src={e.imageId?.startsWith('data:') ? e.imageId : (PlaceHolderImages.find(i => i.id === e.imageId)?.imageUrl || 'https://picsum.photos/seed/event/800/600')} alt="Thumb" fill className="object-cover" /></div><div className="flex-1 p-5 flex items-center justify-between"><div><Badge variant="outline" className="border-accent text-accent text-[8px] font-bold uppercase px-1.5 py-0">{e.category}</Badge><h3 className="text-lg font-bold leading-tight">{e.title}</h3><div className="text-[10px] font-bold text-slate-500 uppercase">{e.date}</div></div><div className="flex items-center gap-2"><Button onClick={() => { setEditEvent(e); setIsEditDialogOpen(true); }} variant="outline" size="icon" className="h-8 w-8 rounded-lg hover:bg-secondary hover:text-white transition-colors"><Edit className="w-3.5 h-3.5" /></Button><Button variant="destructive" size="icon" onClick={() => deleteDoc(doc(db, 'events', e.id))} className="h-8 w-8 rounded-lg hover:bg-red-600 transition-colors"><Trash2 className="w-3.5 h-3.5" /></Button></div></div></div></CardContent></Card>))}</div>)}</div></section>
+      <section className="py-8"><div className="container mx-auto px-4">{eventsLoading ? (<div className="text-center py-20"><Loader2 className="w-8 h-8 animate-spin text-accent mx-auto" /></div>) : (<div className="grid gap-4">{filtered.map((e: any) => (<Card key={e.id} className="border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900 rounded-2xl border border-slate-100"><CardContent className="p-0"><div className="flex flex-col md:flex-row items-stretch"><div className="relative w-full md:w-48 aspect-video md:aspect-auto overflow-hidden shrink-0"><Image src={e.imageId?.startsWith('data:') ? e.imageId : (PlaceHolderImages.find(i => i.id === e.imageId)?.imageUrl || 'https://picsum.photos/seed/event/800/600')} alt="Thumb" fill className="object-cover" /></div><div className="flex-1 p-5 flex items-center justify-between"><div><Badge variant="outline" className="border-accent text-accent text-[8px] font-bold uppercase px-1.5 py-0">{e.category}</Badge><h3 className="text-lg font-bold leading-tight">{e.title}</h3><div className="text-[10px] font-bold text-slate-500 uppercase">{e.date}</div></div><div className="flex items-center gap-2"><Button onClick={() => { setEditEvent(e); setIsEditDialogOpen(true); }} variant="outline" size="icon" className="h-8 w-8 rounded-lg hover:bg-secondary hover:text-white transition-colors"><Edit className="w-3.5 h-3.5" /></Button><Button variant="destructive" size="icon" onClick={() => { setEventToDelete(e); setDeleteDialogStep('warning'); }} className="h-8 w-8 rounded-lg hover:bg-red-600 transition-colors"><Trash2 className="w-3.5 h-3.5" /></Button></div></div></div></CardContent></Card>))}</div>)}</div></section>
 
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="max-w-2xl rounded-3xl overflow-y-auto max-h-[90vh] border-none shadow-2xl">
@@ -263,7 +288,6 @@ export default function InternalEventsManagement() {
           {editEvent && (<div className="space-y-6 py-2">
               <div className="bg-amber-50 p-4 rounded-xl border border-amber-200"><p className="text-[10px] font-bold text-amber-700 uppercase">Warning: Ensure document stays under 1MB. Use External URLs for new high-res media.</p></div>
               
-              {/* Record Title Repositioned, Bold and Red */}
               <div className="space-y-1">
                 <Label className="text-[10px] uppercase font-black text-red-600">Record Title</Label>
                 <Input value={editEvent.title} onChange={e => setEditEvent((p: any) => ({...p, title: e.target.value}))} className="h-11 rounded-xl text-base font-black text-red-600 border-red-100 focus:ring-red-500" />
@@ -279,7 +303,7 @@ export default function InternalEventsManagement() {
                   ))}</div></div>
 
               <div className="space-y-3 p-4 bg-indigo-50/50 dark:bg-indigo-900/10 rounded-2xl border border-indigo-100"><Label className="text-[10px] uppercase font-bold text-indigo-500">Mission Highlight Video</Label>
-                <div className="flex flex-col gap-3"><div className="space-y-4"><div className="grid grid-cols-1 gap-2"><Button variant="outline" className="w-full relative h-10 rounded-xl border-indigo-200 text-indigo-600 border-dashed bg-white text-[10px] hover:bg-indigo-50" disabled={isVideoProcessing}> Glad to see you!<Film className="w-3.5 h-3.5 mr-2" /> {isVideoProcessing ? "Archiving..." : "Change Mini Clip (<200KB)"}<input type="file" accept="video/mp4,video/webm" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => handleFileChange(e, true, 'videoUrl')} disabled={isVideoProcessing} /></Button><div className="relative"><LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-400" /><Input placeholder="Recommended: YouTube/Drive URL" className="pl-8 h-9 text-[10px] rounded-xl border-indigo-100 bg-white" value={editEvent.videoUrl?.startsWith('data:') ? '' : editEvent.videoUrl || ''} onChange={e => setEditEvent((p: any) => ({...p, videoUrl: e.target.value}))} /></div></div>
+                <div className="flex flex-col gap-3"><div className="space-y-4"><div className="grid grid-cols-1 gap-2"><Button variant="outline" className="w-full relative h-10 rounded-xl border-indigo-200 text-indigo-600 border-dashed bg-white text-[10px] hover:bg-indigo-50" disabled={isVideoProcessing}><Film className="w-3.5 h-3.5 mr-2" /> {isVideoProcessing ? "Archiving..." : "Change Mini Clip (<200KB)"}<input type="file" accept="video/mp4,video/webm" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => handleFileChange(e, true, 'videoUrl')} disabled={isVideoProcessing} /></Button><div className="relative"><LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-400" /><Input placeholder="Recommended: YouTube/Drive URL" className="pl-8 h-9 text-[10px] rounded-xl border-indigo-100 bg-white" value={editEvent.videoUrl?.startsWith('data:') ? '' : editEvent.videoUrl || ''} onChange={e => setEditEvent((p: any) => ({...p, videoUrl: e.target.value}))} /></div></div>
                     {isVideoProcessing && (<div className="space-y-2"><div className="flex justify-between items-center text-[9px] font-bold text-indigo-500 uppercase"><span>Streaming...</span><span>{videoProgress}%</span></div><Progress value={videoProgress} className="h-1 bg-indigo-100" /></div>)}</div>
                   <div className="space-y-1"><Label className="text-[9px] font-bold text-indigo-400 uppercase">Video Description</Label><Input placeholder="Video label..." value={editEvent.videoCaption || ''} onChange={e => setEditEvent((p: any) => ({...p, videoCaption: e.target.value}))} className="h-9 text-xs rounded-lg border-indigo-100" /></div>
                 </div></div>
@@ -298,6 +322,68 @@ export default function InternalEventsManagement() {
             </div>)}
         </DialogContent>
       </Dialog>
+
+      {/* Two-Stage Deletion Dialog */}
+      <Dialog open={!!deleteDialogStep} onOpenChange={(open) => { if(!open) { setDeleteDialogStep(null); setEventToDelete(null); setDeleteInputText(''); } }}>
+        <DialogContent className="max-w-md rounded-[2rem] border-none shadow-2xl p-0 overflow-hidden bg-white dark:bg-slate-900">
+          {deleteDialogStep === 'warning' && (
+            <div className="p-8 space-y-6">
+              <div className="flex flex-col items-center text-center space-y-4">
+                <div className="w-20 h-20 bg-red-50 dark:bg-red-950/30 text-red-500 rounded-full flex items-center justify-center animate-pulse">
+                  <ShieldAlert className="w-10 h-10" />
+                </div>
+                <div className="space-y-2">
+                  <DialogTitle className="text-2xl font-headline font-bold text-primary dark:text-white">Registry Warning</DialogTitle>
+                  <DialogDescription className="text-sm text-slate-500 leading-relaxed font-medium">
+                    You are attempting to permanently purge the mission record for <strong className="text-primary dark:text-white">{eventToDelete?.title}</strong>. This action will erase all documentation, gallery photos, and highlight videos from the archives.
+                  </DialogDescription>
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <Button variant="outline" onClick={() => { setDeleteDialogStep(null); setEventToDelete(null); }} className="flex-1 h-12 rounded-xl font-bold">No, Cancel</Button>
+                <Button variant="destructive" onClick={() => setDeleteDialogStep('verify')} className="flex-1 h-12 rounded-xl font-bold bg-red-600 hover:bg-red-700">Yes, Proceed</Button>
+              </div>
+            </div>
+          )}
+
+          {deleteDialogStep === 'verify' && (
+            <div className="p-8 space-y-6">
+              <div className="space-y-4">
+                <div className="inline-flex items-center gap-2 bg-amber-50 dark:bg-amber-950/30 text-amber-600 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border border-amber-100">
+                  <AlertTriangle className="w-3 h-3" /> Verification Protocol
+                </div>
+                <div className="space-y-1">
+                  <DialogTitle className="text-xl font-headline font-bold">Confirm Deletion</DialogTitle>
+                  <p className="text-sm text-slate-500">To prevent accidental data loss, please type the word <strong className="text-red-600 uppercase">delete</strong> in the field below to authorize this purge.</p>
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Authorization Text</Label>
+                <Input 
+                  placeholder="Type 'delete' here..." 
+                  value={deleteInputText} 
+                  onChange={(e) => setDeleteInputText(e.target.value)} 
+                  className="h-12 rounded-xl border-2 focus:ring-red-500 font-bold"
+                />
+              </div>
+
+              <div className="flex gap-3">
+                <Button variant="ghost" onClick={() => { setDeleteDialogStep(null); setEventToDelete(null); setDeleteInputText(''); }} className="flex-1 h-12 rounded-xl text-slate-400 font-bold">Abort</Button>
+                <Button 
+                  variant="destructive" 
+                  disabled={deleteInputText.toLowerCase() !== 'delete' || isDeleting} 
+                  onClick={handleDeleteEvent}
+                  className="flex-1 h-12 rounded-xl font-bold bg-red-600 hover:bg-red-700 shadow-xl shadow-red-600/20"
+                >
+                  {isDeleting ? <Loader2 className="animate-spin" /> : "Purge Record"}
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
       <Footer />
     </main>
   )

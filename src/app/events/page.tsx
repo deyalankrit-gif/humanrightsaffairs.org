@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useEffect } from 'react'
@@ -25,7 +26,8 @@ import {
   Video,
   Type,
   Link as LinkIcon,
-  AlertTriangle
+  AlertTriangle,
+  ShieldAlert
 } from 'lucide-react'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -46,16 +48,6 @@ import {
   DialogDescription,
   DialogClose,
 } from "@/components/ui/dialog"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
 import {
   Popover,
   PopoverContent,
@@ -93,6 +85,12 @@ export default function EventsPage() {
   const [videoProgress, setVideoProgress] = useState<number>(0)
   const [isVideoProcessing, setIsVideoProcessing] = useState(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+
+  // Deletion States
+  const [deleteDialogStep, setDeleteDialogStep] = useState<'warning' | 'verify' | null>(null)
+  const [eventToDelete, setEventToDelete] = useState<any>(null)
+  const [deleteInputText, setDeleteInputText] = useState('')
+  const [isDeleting, setIsDeleting] = useState(false)
   
   const { user } = useUser()
   const db = useFirestore()
@@ -127,8 +125,6 @@ export default function EventsPage() {
     videoCaption: ''
   })
 
-  // Critical Utility: Firestore limits individual docs to 1MB. 
-  // Base64 adds ~33% size. We cap stringified JSON at 750KB for safety.
   const validateProjectSize = (data: any) => {
     const size = new Blob([JSON.stringify(data)]).size;
     if (size > 800000) {
@@ -145,10 +141,9 @@ export default function EventsPage() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, isEdit: boolean, field: 'imageId' | 'videoUrl' | 'galleryImages', index?: number) => {
     const file = e.target.files?.[0]
     if (file) {
-      // Conservative limits for individual assets when stored as Base64
-      let cap = 153600; // 150KB default for images
-      if (field === 'videoUrl') cap = 204800; // 200KB for direct video
-      if (field === 'galleryImages') cap = 102400; // 100KB for gallery stills
+      let cap = 153600; 
+      if (field === 'videoUrl') cap = 204800; 
+      if (field === 'galleryImages') cap = 102400; 
       
       if (file.size > cap) {
         toast({
@@ -239,10 +234,20 @@ export default function EventsPage() {
       })
   }
 
-  const handleDeleteEvent = (id: string) => {
-    if(!db) return
-    deleteDoc(doc(db, 'events', id))
-      .then(() => toast({ title: "Record Deleted" }))
+  const handleDeleteEvent = async () => {
+    if (!db || !eventToDelete) return
+    setIsDeleting(true)
+    try {
+      await deleteDoc(doc(db, 'events', eventToDelete.id))
+      toast({ title: "Record Purged", description: "Event has been removed from the archives." })
+      setDeleteDialogStep(null)
+      setEventToDelete(null)
+      setDeleteInputText('')
+    } catch (error: any) {
+      toast({ variant: "destructive", title: "System Error" })
+    } finally {
+      setIsDeleting(false)
+    }
   }
 
   const parseEventDate = (dateStr: string) => {
@@ -284,7 +289,6 @@ export default function EventsPage() {
                     <DialogDescription>Firestore limit is 1MB. Use External Links for high-res video.</DialogDescription>
                   </DialogHeader>
                   <div className="space-y-6 py-4">
-                    {/* Size Warning */}
                     <div className="bg-amber-50 dark:bg-amber-950/20 p-4 rounded-2xl border border-amber-200 dark:border-amber-900 flex gap-3">
                        <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
                        <div className="space-y-1">
@@ -520,7 +524,6 @@ export default function EventsPage() {
                                   <div className="space-y-6 py-4">
                                     <div className="bg-amber-50 p-4 rounded-2xl border border-amber-200 flex gap-3"><AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" /><p className="text-[10px] text-amber-800 font-bold uppercase">Record size capped at 1MB. Use External Links for new videos.</p></div>
                                     
-                                    {/* Record Title Repositioned, Bold and Red */}
                                     <div className="space-y-2">
                                       <Label className="text-xs font-black uppercase tracking-widest text-red-600">Record Title</Label>
                                       <Input 
@@ -607,13 +610,14 @@ export default function EventsPage() {
                                 )}
                               </DialogContent>
                             </Dialog>
-                            <AlertDialog>
-                              <AlertDialogTrigger asChild><Button size="icon" className="bg-red-500/90 hover:bg-red-600 text-white rounded-full shadow-lg border border-white/20 transition-all"><Trash2 className="w-4 h-4" /></Button></AlertDialogTrigger>
-                              <AlertDialogContent className="rounded-[2rem] bg-white dark:bg-slate-900 border-none shadow-2xl">
-                                <AlertDialogHeader><AlertDialogTitle>Delete Record?</AlertDialogTitle><AlertDialogDescription>This will permanently remove the project profile from the gallery.</AlertDialogDescription></AlertDialogHeader>
-                                <div className="flex justify-end gap-3 mt-4"><AlertDialogAction onClick={() => handleDeleteEvent(event.id)} className="bg-red-500 hover:bg-red-600 rounded-xl border-none text-white font-bold transition-all">Delete</AlertDialogAction><AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel></div>
-                              </AlertDialogContent>
-                            </AlertDialog>
+                            
+                            <Button 
+                              size="icon" 
+                              className="bg-red-500/90 hover:bg-red-600 text-white rounded-full shadow-lg border border-white/20 transition-all"
+                              onClick={() => { setEventToDelete(event); setDeleteDialogStep('warning'); }}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
                           </div>
                         )}
                       </div>
@@ -670,6 +674,67 @@ export default function EventsPage() {
                   </div>
                   <div className="pt-12 flex flex-col gap-4 items-center"><Button size="lg" onClick={() => setSelectedEventDetails(null)} className="w-full bg-primary text-primary-foreground font-bold h-16 rounded-2xl text-lg hover:bg-secondary transition-all shadow-xl shadow-primary/20">Close Profile</Button><p className="text-center text-[10px] font-bold text-slate-400 uppercase tracking-[0.25em] mt-4">Official Mission Record • Human Rights Affairs Trust</p></div>
                 </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Two-Stage Deletion Dialog */}
+      <Dialog open={!!deleteDialogStep} onOpenChange={(open) => { if(!open) { setDeleteDialogStep(null); setEventToDelete(null); setDeleteInputText(''); } }}>
+        <DialogContent className="max-w-md rounded-[2rem] border-none shadow-2xl p-0 overflow-hidden bg-white dark:bg-slate-900">
+          {deleteDialogStep === 'warning' && (
+            <div className="p-8 space-y-6">
+              <div className="flex flex-col items-center text-center space-y-4">
+                <div className="w-20 h-20 bg-red-50 dark:bg-red-950/30 text-red-500 rounded-full flex items-center justify-center animate-pulse">
+                  <ShieldAlert className="w-10 h-10" />
+                </div>
+                <div className="space-y-2">
+                  <DialogTitle className="text-2xl font-headline font-bold text-primary dark:text-white">Registry Warning</DialogTitle>
+                  <DialogDescription className="text-sm text-slate-500 leading-relaxed font-medium">
+                    You are attempting to permanently purge the mission record for <strong className="text-primary dark:text-white">{eventToDelete?.title}</strong>. This action will erase all documentation, gallery photos, and highlight videos from the archives.
+                  </DialogDescription>
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <Button variant="outline" onClick={() => { setDeleteDialogStep(null); setEventToDelete(null); }} className="flex-1 h-12 rounded-xl font-bold">No, Cancel</Button>
+                <Button variant="destructive" onClick={() => setDeleteDialogStep('verify')} className="flex-1 h-12 rounded-xl font-bold bg-red-600 hover:bg-red-700">Yes, Proceed</Button>
+              </div>
+            </div>
+          )}
+
+          {deleteDialogStep === 'verify' && (
+            <div className="p-8 space-y-6">
+              <div className="space-y-4">
+                <div className="inline-flex items-center gap-2 bg-amber-50 dark:bg-amber-950/30 text-amber-600 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border border-amber-100">
+                  <AlertTriangle className="w-3 h-3" /> Verification Protocol
+                </div>
+                <div className="space-y-1">
+                  <DialogTitle className="text-xl font-headline font-bold">Confirm Deletion</DialogTitle>
+                  <p className="text-sm text-slate-500">To prevent accidental data loss, please type the word <strong className="text-red-600 uppercase">delete</strong> in the field below to authorize this purge.</p>
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Authorization Text</Label>
+                <Input 
+                  placeholder="Type 'delete' here..." 
+                  value={deleteInputText} 
+                  onChange={(e) => setDeleteInputText(e.target.value)} 
+                  className="h-12 rounded-xl border-2 focus:ring-red-500 font-bold"
+                />
+              </div>
+
+              <div className="flex gap-3">
+                <Button variant="ghost" onClick={() => { setDeleteDialogStep(null); setEventToDelete(null); setDeleteInputText(''); }} className="flex-1 h-12 rounded-xl text-slate-400 font-bold">Abort</Button>
+                <Button 
+                  variant="destructive" 
+                  disabled={deleteInputText.toLowerCase() !== 'delete' || isDeleting} 
+                  onClick={handleDeleteEvent}
+                  className="flex-1 h-12 rounded-xl font-bold bg-red-600 hover:bg-red-700 shadow-xl shadow-red-600/20"
+                >
+                  {isDeleting ? <Loader2 className="animate-spin" /> : "Purge Record"}
+                </Button>
               </div>
             </div>
           )}
