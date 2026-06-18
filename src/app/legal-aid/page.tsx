@@ -24,12 +24,14 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Footer } from '@/components/footer'
 import { Badge } from '@/components/ui/badge'
+import { cn } from '@/lib/utils'
 
 const services = [
   {
     id: 1,
     title: "Affordable and, in deserving cases, Free Initial Legal Consultation",
-    icon: <Users className="w-6 h-6 text-accent" />,
+    Icon: Users,
+    iconColor: "text-accent",
     bullets: [
       "Initial consultation with a legal professional.",
       "Explanation of the legal aspects and merits of the case.",
@@ -39,7 +41,8 @@ const services = [
   {
     id: 2,
     title: "Legal Documentation Assistance",
-    icon: <FileText className="w-6 h-6 text-emerald-500" />,
+    Icon: FileText,
+    iconColor: "text-emerald-500",
     bullets: [
       "Drafting of complaints and representations.",
       "Preparation of legal notices.",
@@ -51,7 +54,8 @@ const services = [
   {
     id: 3,
     title: "FIR and Police Assistance",
-    icon: <Gavel className="w-6 h-6 text-blue-500" />,
+    Icon: Gavel,
+    iconColor: "text-blue-500",
     bullets: [
       "Assistance in drafting FIRs and police complaints.",
       "Guidance on filing complaints with law enforcement authorities.",
@@ -62,7 +66,8 @@ const services = [
   {
     id: 4,
     title: "Human Rights Protection Services",
-    icon: <ShieldCheck className="w-6 h-6 text-indigo-500" />,
+    Icon: ShieldCheck,
+    iconColor: "text-indigo-500",
     bullets: [
       "Receiving and reviewing complaints relating to human rights violations.",
       "Fact-finding and information collection.",
@@ -73,7 +78,8 @@ const services = [
   {
     id: 5,
     title: "Women and Child Protection Cell",
-    icon: <HeartHandshake className="w-6 h-6 text-pink-500" />,
+    Icon: HeartHandshake,
+    iconColor: "text-pink-500",
     bullets: [
       "Assistance in cases of domestic violence.",
       "Support for victims of sexual harassment.",
@@ -85,7 +91,8 @@ const services = [
   {
     id: 6,
     title: "Senior Citizen Assistance",
-    icon: <UserCheck className="w-6 h-6 text-amber-600" />,
+    Icon: UserCheck,
+    iconColor: "text-amber-600",
     bullets: [
       "Guidance on property-related disputes.",
       "Support in cases of neglect, abuse, or mistreatment.",
@@ -95,7 +102,8 @@ const services = [
   {
     id: 7,
     title: "Cyber Crime Assistance",
-    icon: <Lock className="w-6 h-6 text-red-500" />,
+    Icon: Lock,
+    iconColor: "text-red-500",
     bullets: [
       "Guidance in cases of online fraud and cyber scams.",
       "Assistance regarding social media harassment.",
@@ -106,7 +114,8 @@ const services = [
   {
     id: 8,
     title: "Workers' and Employees' Rights Assistance",
-    icon: <Briefcase className="w-6 h-6 text-orange-500" />,
+    Icon: Briefcase,
+    iconColor: "text-orange-500",
     bullets: [
       "Assistance regarding unpaid wages and salary disputes.",
       "Guidance in cases of unlawful termination or workplace grievances.",
@@ -117,7 +126,8 @@ const services = [
   {
     id: 9,
     title: "Consumer Protection Assistance",
-    icon: <Scale className="w-6 h-6 text-cyan-500" />,
+    Icon: Scale,
+    iconColor: "text-cyan-500",
     bullets: [
       "Support in matters involving defective products or deficient services.",
       "Assistance in filing complaints before Consumer Commissions."
@@ -126,7 +136,8 @@ const services = [
   {
     id: 10,
     title: "Mediation and Dispute Resolution Services",
-    icon: <Globe className="w-6 h-6 text-teal-600" />,
+    Icon: Globe,
+    iconColor: "text-teal-600",
     bullets: [
       "Family dispute resolution.",
       "Neighborhood and community dispute mediation.",
@@ -137,7 +148,8 @@ const services = [
   {
     id: 11,
     title: "Legal Awareness Programmes",
-    icon: <GraduationCap className="w-6 h-6 text-violet-500" />,
+    Icon: GraduationCap,
+    iconColor: "text-violet-500",
     bullets: [
       "Legal awareness camps in urban and rural areas.",
       "Seminars and workshops on human rights, women's rights, child rights, and cyber safety.",
@@ -147,7 +159,8 @@ const services = [
   {
     id: 12,
     title: "Referral Panel Services",
-    icon: <Network className="w-6 h-6 text-slate-500" />,
+    Icon: Network,
+    iconColor: "text-slate-500",
     bullets: [
       "Referral of complex matters to experienced legal practitioners.",
       "Facilitation of access to Pro Bono (free legal) services wherever available."
@@ -156,7 +169,8 @@ const services = [
   {
     id: 13,
     title: "Assistance in Accessing Government Schemes and Benefits",
-    icon: <Building2 className="w-6 h-6 text-accent" />,
+    Icon: Building2,
+    iconColor: "text-accent",
     bullets: [
       "Information regarding government welfare schemes and entitlements.",
       "Guidance in application and documentation procedures.",
@@ -166,7 +180,8 @@ const services = [
   {
     id: 14,
     title: "Legal Aid Helpline",
-    icon: <PhoneCall className="w-6 h-6 text-emerald-600" />,
+    Icon: PhoneCall,
+    iconColor: "text-emerald-600",
     bullets: [
       "Assistance through phone, WhatsApp, and email.",
       "Online complaint registration and support.",
@@ -211,10 +226,9 @@ export default function LegalAidServicesPage() {
                 <CardHeader className="p-8 pb-4">
                    <div className="flex items-start gap-6">
                       <div className="w-14 h-14 rounded-2xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center shrink-0 group-hover:bg-accent group-hover:text-white transition-colors duration-500">
-                        {service.icon}
+                        <service.Icon className={cn("w-6 h-6 transition-colors", service.iconColor, "group-hover:text-white")} />
                       </div>
                       <div className="space-y-1">
-                        <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Service {service.id.toString().padStart(2, '0')}</span>
                         <CardTitle className="text-xl md:text-2xl font-headline font-bold text-primary dark:text-white group-hover:text-accent transition-colors leading-tight">
                           {service.title}
                         </CardTitle>

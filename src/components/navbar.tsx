@@ -87,13 +87,13 @@ export function Navbar() {
                 else setActiveHash('')
               }}
               className={cn(
-                "whitespace-nowrap flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[13px] font-bold transition-all",
+                "whitespace-nowrap flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[13px] font-bold transition-all group",
                 isActive 
                   ? "bg-accent text-white shadow-lg ring-1 ring-accent/20" 
                   : "text-muted-foreground hover:text-white hover:bg-secondary transition-colors"
               )}
             >
-              <link.icon className={cn("w-3.5 h-3.5", isActive ? "text-white" : "text-muted-foreground")} />
+              <link.icon className={cn("w-3.5 h-3.5 transition-colors", isActive ? "text-white" : "text-muted-foreground group-hover:text-white")} />
               <span>{link.name}</span>
             </Link>
           )
