@@ -130,11 +130,11 @@ export default function Home() {
             </p>
             
             <div className="flex flex-wrap gap-4 md:gap-6 pt-8 justify-center">
-              <DonationDialog>
+              <Link href="/legal-aid">
                 <Button size="lg" className="bg-accent text-white font-bold hover:bg-secondary hover:text-white px-6 py-5 md:px-10 md:py-7 rounded-xl text-sm md:text-lg shadow-xl shadow-accent/20 transition-all hover:-translate-y-1">
                   Affordable Legal Aid Services <ArrowRight className="ml-2 w-4 h-4 md:w-5 md:h-5" />
                 </Button>
-              </DonationDialog>
+              </Link>
               <Link href="/#knowledge">
                 <Button size="lg" className="bg-secondary text-white font-bold hover:bg-accent px-6 py-5 md:px-10 md:py-7 rounded-xl text-sm md:text-lg transition-all shadow-xl shadow-secondary/10 hover:scale-105 active:scale-95 hover:shadow-2xl hover:shadow-accent/20">
                   Explore Rights Library
