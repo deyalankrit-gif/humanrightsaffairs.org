@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useEffect } from 'react'
@@ -45,7 +44,6 @@ export default function StaffLoginPage() {
 
     try {
       // Step 1: Attempt Firebase Authentication first
-      // This is required so security rules allow the subsequent registry check
       await signInWithEmailAndPassword(auth, inputEmail, password)
 
       // Step 2: Ensure user is authorized in the Firestore registry
@@ -53,13 +51,11 @@ export default function StaffLoginPage() {
       const userSnap = await getDoc(userRef)
 
       if (!userSnap.exists() && !isHardcodedStaff) {
-        // If not registered and not hardcoded, sign out and reject
         await signOut(auth)
         throw new Error("Clearance Required: Your email is not registered in the personnel database.")
       }
 
       // Step 3: Secondary Governance Key Verification
-      // If a password is set in the database record, it must match the typed password
       if (userSnap.exists()) {
         const userData = userSnap.data();
         if (userData.password && userData.password !== password) {
@@ -86,7 +82,8 @@ export default function StaffLoginPage() {
             vendors: true,
             grievances: true,
             meetings: true,
-            events: true
+            events: true,
+            publicView: true
           }
         }, { merge: true });
       }

@@ -1,4 +1,3 @@
-
 {
   "entities": {
     "UserAccount": {
@@ -23,7 +22,8 @@
             "vendors": { "type": "boolean" },
             "grievances": { "type": "boolean" },
             "meetings": { "type": "boolean" },
-            "events": { "type": "boolean" }
+            "events": { "type": "boolean" },
+            "publicView": { "type": "boolean" }
           }
         },
         "lastLogin": { "type": "string", "format": "date-time" },

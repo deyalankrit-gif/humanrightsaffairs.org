@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useEffect, useState } from 'react'
@@ -62,6 +61,7 @@ const MODULES = [
   { id: 'grievances', label: 'Grievance Cell' },
   { id: 'meetings', label: 'General Meetings' },
   { id: 'events', label: 'Event Archives' },
+  { id: 'publicView', label: 'Public Site View' },
 ]
 
 export default function AccessRolesPage() {

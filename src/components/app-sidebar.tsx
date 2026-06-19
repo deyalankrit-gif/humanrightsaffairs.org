@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from "react"
@@ -73,7 +72,7 @@ const adminLinksConfig = [
   { name: 'Meetings', href: '/internal/meetings', icon: Handshake, permission: 'meetings' },
   { name: 'Events', href: '/internal/events', icon: Calendar, permission: 'events' },
   { name: 'Access Roles', href: '/internal/roles', icon: Settings, rootOnly: true },
-  { name: 'Public Site View', href: '/internal/public-view', icon: Monitor, permission: 'visitors' },
+  { name: 'Public Site View', href: '/internal/public-view', icon: Monitor, permission: 'publicView' },
 ]
 
 export function AppSidebar() {

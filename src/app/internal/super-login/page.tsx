@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useEffect } from 'react'
@@ -64,7 +63,7 @@ export default function RootLoginPage() {
           permissions: {
             analytics: true, members: true, visitors: true, accounts: true,
             expenses: true, applications: true, inventory: true, vendors: true,
-            grievances: true, meetings: true, events: true
+            grievances: true, meetings: true, events: true, publicView: true
           }
         });
       }
