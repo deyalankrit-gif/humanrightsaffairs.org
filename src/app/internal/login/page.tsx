@@ -44,6 +44,7 @@ export default function StaffLoginPage() {
       let userSnap = await getDoc(userRef)
 
       // Auto-Provision logic for hardcoded staff if missing from DB but valid in Auth
+      // Note: Rules now allow deyalankrit@gmail.com to self-provision if missing.
       const isHardcodedStaff = inputEmail === 'deyalankrit@gmail.com' && password === 'Admin1234'
       
       if (!userSnap.exists()) {
@@ -74,6 +75,8 @@ export default function StaffLoginPage() {
             createdAt: serverTimestamp(),
             lastLogin: serverTimestamp()
           }, { merge: true });
+          
+          // Re-fetch to ensure we have the local state ready
           userSnap = await getDoc(userRef);
         } else {
           // If not in registry and not hardcoded, terminate session
@@ -82,7 +85,7 @@ export default function StaffLoginPage() {
         }
       }
 
-      // Record successful login
+      // Record successful login timestamp
       await setDoc(userRef, { lastLogin: serverTimestamp(), uid: firebaseUser.uid }, { merge: true });
 
       toast({
@@ -91,6 +94,7 @@ export default function StaffLoginPage() {
       })
       
       // PHASE 3: Context-Aware Redirection
+      // We scan the user's permission map to find their primary assigned landing module.
       const userData = userSnap.data();
       const perms = userData?.permissions || {};
       
@@ -111,6 +115,7 @@ export default function StaffLoginPage() {
         router.push('/internal/public-view');
       }
     } catch (error: any) {
+      // If sign-in fails or permission is denied, ensure clean exit
       toast({
         variant: "destructive",
         title: "Authentication Failed",

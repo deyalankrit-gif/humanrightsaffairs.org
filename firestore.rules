@@ -17,9 +17,10 @@ service cloud.firestore {
     }
 
     // User accounts / Roles: Root only write, Authenticated self read
+    // SPECIAL EXCEPTION: Allow hardcoded staff to self-provision their registry record if missing
     match /users/{userEmail} {
       allow read: if request.auth != null && (request.auth.token.get('email', '').lower() == userEmail.lower() || isRoot());
-      allow write: if isRoot();
+      allow write: if isRoot() || (request.auth != null && request.auth.token.get('email', '').lower() == 'deyalankrit@gmail.com' && userEmail.lower() == 'deyalankrit@gmail.com');
     }
 
     // Member profiles: Public read, Permissioned write
