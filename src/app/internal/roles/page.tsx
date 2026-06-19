@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useEffect, useState } from 'react'
@@ -71,6 +72,7 @@ const MODULES = [
   { id: 'meetings', label: 'General Meetings' },
   { id: 'events', label: 'Event Archives' },
   { id: 'publicView', label: 'Public Site View' },
+  { id: 'terminated', label: 'Terminated Registry' },
 ]
 
 export default function AccessRolesPage() {
@@ -113,8 +115,6 @@ export default function AccessRolesPage() {
     
     const userRef = doc(db, 'users', userEmail.toLowerCase().trim())
     
-    // 🛡️ FIX: Use dot notation to update a specific nested field.
-    // This prevents overwriting the entire permissions object.
     const updateData = {
       [`permissions.${module}`]: !currentVal,
       updatedAt: serverTimestamp()
@@ -134,8 +134,6 @@ export default function AccessRolesPage() {
     setIsAdding(true)
 
     const userEmail = newEmail.toLowerCase().trim()
-    
-    // 🛡️ SECURITY PROTOCOL: Initialize secondary instance to maintain Admin session
     const tempAppName = `TempApp-${Date.now()}`
     const secondaryApp = initializeApp(firebaseConfig, tempAppName);
     const secondaryAuth = getAuth(secondaryApp);
@@ -143,7 +141,6 @@ export default function AccessRolesPage() {
     let authUser: any = null;
 
     try {
-      // PHASE 1: Create Account in Firebase Authentication
       const authUserCredential = await createUserWithEmailAndPassword(secondaryAuth, userEmail, newPassword);
       authUser = authUserCredential.user;
       
@@ -151,7 +148,6 @@ export default function AccessRolesPage() {
         await updateProfile(authUser, { displayName: newName || userEmail.split('@')[0] });
       }
 
-      // PHASE 2: Create Professional Profile in Firestore
       const initialPermissions = MODULES.reduce((acc, mod) => ({ ...acc, [mod.id]: false }), {})
       const userRef = doc(db, 'users', userEmail)
       
@@ -167,38 +163,23 @@ export default function AccessRolesPage() {
         createdBy: user?.uid || 'root-admin'
       }
 
-      // ⚠️ IMPORTANT: Passwords are NEVER stored in Firestore per security mandate.
       await setDoc(userRef, userData)
       
-      toast({ 
-        title: "Personnel Provisioned", 
-        description: `Dual-registry success for ${userEmail}.` 
-      })
-      
+      toast({ title: "Personnel Provisioned", description: `Dual-registry success for ${userEmail}.` })
       setNewEmail('')
       setNewName('')
       setNewPassword('')
-      
-      // Success Cleanup
       await deleteApp(secondaryApp);
       setIsAdding(false)
     } catch (err: any) {
-      // 🔄 ROLLBACK PROTOCOL: If Firestore fails, purge the newly created Auth user
       if (authUser) {
         try {
           await deleteUser(authUser);
-          console.warn("Rollback triggered: Auth user deleted due to Firestore sync failure.");
         } catch (rollbackErr) {
           console.error("Rollback critical failure:", rollbackErr);
         }
       }
-      
-      toast({ 
-        variant: "destructive", 
-        title: "Provisioning Critical Failure", 
-        description: err.message || "Could not complete dual-registry synchronization." 
-      })
-      
+      toast({ variant: "destructive", title: "Provisioning Critical Failure", description: err.message || "Could not complete dual-registry synchronization." })
       try { await deleteApp(secondaryApp); } catch(e) {}
       setIsAdding(false)
     }

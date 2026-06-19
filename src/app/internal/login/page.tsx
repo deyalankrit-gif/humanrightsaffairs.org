@@ -44,7 +44,6 @@ export default function StaffLoginPage() {
       let userSnap = await getDoc(userRef)
 
       // Auto-Provision logic for hardcoded staff if missing from DB but valid in Auth
-      // Note: Rules now allow deyalankrit@gmail.com to self-provision if missing.
       const isHardcodedStaff = inputEmail === 'deyalankrit@gmail.com' && password === 'Admin1234'
       
       if (!userSnap.exists()) {
@@ -62,7 +61,8 @@ export default function StaffLoginPage() {
             grievances: true,
             meetings: true,
             events: true,
-            publicView: true
+            publicView: true,
+            terminated: true
           }
           
           await setDoc(userRef, {
@@ -94,7 +94,6 @@ export default function StaffLoginPage() {
       })
       
       // PHASE 3: Context-Aware Redirection
-      // We scan the user's permission map to find their primary assigned landing module.
       const userData = userSnap.data();
       const perms = userData?.permissions || {};
       
@@ -103,6 +102,7 @@ export default function StaffLoginPage() {
         { id: 'analytics', path: 'analytics' },
         { id: 'memberAnalytics', path: 'member-analytics' },
         { id: 'members', path: 'members' },
+        { id: 'terminated', path: 'terminated-members' },
         { id: 'events', path: 'events' },
         { id: 'meetings', path: 'meetings' },
         { id: 'publicView', path: 'public-view' }
@@ -115,7 +115,6 @@ export default function StaffLoginPage() {
         router.push('/internal/public-view');
       }
     } catch (error: any) {
-      // If sign-in fails or permission is denied, ensure clean exit
       toast({
         variant: "destructive",
         title: "Authentication Failed",

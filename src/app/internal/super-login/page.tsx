@@ -69,7 +69,8 @@ export default function RootLoginPage() {
             grievances: true, 
             meetings: true, 
             events: true, 
-            publicView: true
+            publicView: true,
+            terminated: true
           }
         });
       } else {

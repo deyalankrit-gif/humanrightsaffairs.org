@@ -67,7 +67,7 @@ const adminLinksConfig = [
   { name: 'Applications', href: '/internal/applications', icon: FileText, permission: 'applications' },
   { name: 'Members', href: '/internal/members', icon: Users, permission: 'members' },
   { name: 'Renewals', href: '/internal/renewals', icon: RefreshCw, permission: 'members' },
-  { name: 'Terminated', href: '/internal/terminated-members', icon: UserX, permission: 'members' },
+  { name: 'Terminated', href: '/internal/terminated-members', icon: UserX, permission: 'terminated' },
   { name: 'Inventory', href: '/internal/inventory', icon: Package, permission: 'inventory' },
   { name: 'Vendors', href: '/internal/vendors', icon: Truck, permission: 'vendors' },
   { name: 'Grievances', href: '/internal/grievances', icon: MessageSquareWarning, permission: 'grievances' },

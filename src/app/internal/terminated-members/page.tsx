@@ -3,7 +3,7 @@
 
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useUser, useCollection, useFirestore, useMemoFirebase } from '@/firebase'
+import { useUser, useCollection, useFirestore, useMemoFirebase, useDoc } from '@/firebase'
 import { collection, query, orderBy, addDoc, deleteDoc, doc, updateDoc, serverTimestamp } from 'firebase/firestore'
 import { Footer } from '@/components/footer'
 import { Card, CardContent } from '@/components/ui/card'
@@ -43,7 +43,6 @@ import { format, parse } from 'date-fns'
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
 import Image from 'next/image'
-import { PlaceHolderImages } from '@/lib/placeholder-images'
 
 export default function InternalTerminatedMembers() {
   const { user, loading: authLoading } = useUser()
@@ -57,7 +56,15 @@ export default function InternalTerminatedMembers() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [editMember, setEditMember] = useState<any>(null)
 
+  const userRegistryRef = useMemoFirebase(() => {
+    if (!db || !user?.email) return null;
+    return doc(db, 'users', user.email.toLowerCase());
+  }, [db, user?.email]);
+
+  const { data: registry, loading: registryLoading } = useDoc(userRegistryRef);
+
   const isRoot = user?.email?.toLowerCase() === 'deydhritiman@gmail.com'
+  const hasAccess = isRoot || (registry?.permissions?.terminated === true);
 
   const [newMember, setNewMember] = useState({
     name: '',
@@ -73,13 +80,17 @@ export default function InternalTerminatedMembers() {
   useEffect(() => {
     if (!authLoading && !user) {
       router.push('/internal/login')
+      return;
     }
-  }, [user, authLoading, router])
+    if (user && !registryLoading && registry && !hasAccess) {
+      router.push('/internal/public-view');
+    }
+  }, [user, authLoading, registry, registryLoading, hasAccess, router])
 
   const terminatedQuery = useMemoFirebase(() => {
-    if (!db || !user) return null;
+    if (!db || !user || !hasAccess) return null;
     return query(collection(db, 'terminatedMembers'), orderBy('createdAt', 'desc'));
-  }, [db, user]);
+  }, [db, user, hasAccess]);
 
   const { data: terminated, loading: dataLoading } = useCollection(terminatedQuery);
 
@@ -150,8 +161,12 @@ export default function InternalTerminatedMembers() {
     try { return parse(dateStr, "PPP", new Date()); } catch { return undefined; }
   }
 
-  if (authLoading || !user) {
-    return <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950"><Loader2 className="w-10 h-10 animate-spin text-accent" /></div>
+  if (authLoading || !user || registryLoading || !hasAccess) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
+        <Loader2 className="w-10 h-10 animate-spin text-accent" />
+      </div>
+    )
   }
 
   const filtered = (terminated || []).filter((m: any) => 
