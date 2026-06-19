@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useEffect } from 'react'
@@ -79,7 +80,8 @@ export default function LeadershipPage() {
   const db = useFirestore()
   const { toast } = useToast()
 
-  const isAdmin = (user?.email === 'deydhritiman@gmail.com' || user?.email === 'deyalankrit@gmail.com') && isMirror
+  // Administrative actions in the mirror are strictly Root-only
+  const isAdmin = user?.email === 'deydhritiman@gmail.com' && isMirror
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -180,7 +182,7 @@ export default function LeadershipPage() {
           
           {isAdmin && (
             <Dialog>
-              <DialogTrigger asChild><Button className="bg-accent text-white font-bold rounded-2xl h-14 px-8 flex gap-2 hover:bg-secondary hover:text-white shadow-xl shadow-accent/20 mx-auto"><Plus className="w-5 h-5" /> Commission Leadership Member</Button></DialogTrigger>
+              <DialogTrigger asChild><Button className="bg-accent text-primary font-bold rounded-2xl h-14 px-8 flex gap-2 hover:bg-secondary hover:text-white shadow-xl shadow-accent/20 mx-auto"><Plus className="w-5 h-5" /> Commission Leadership Member</Button></DialogTrigger>
               <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="bg-white dark:bg-slate-900 rounded-[2rem] border-none shadow-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader><DialogTitle>New Leader Profile</DialogTitle></DialogHeader>
                 <div className="space-y-4 py-4">
@@ -228,7 +230,7 @@ export default function LeadershipPage() {
                     </div>
                   )}
                 </div>
-                <DialogFooter><Button onClick={handleAdd} disabled={isActionLoading} className="w-full h-12 rounded-xl bg-accent text-white font-bold hover:bg-secondary hover:text-white">Publish Profile</Button></DialogFooter>
+                <DialogFooter><Button onClick={handleAdd} disabled={isActionLoading} className="w-full h-12 rounded-xl bg-accent text-primary font-bold hover:bg-secondary hover:text-white">Publish Profile</Button></DialogFooter>
               </DialogContent>
             </Dialog>
           )}

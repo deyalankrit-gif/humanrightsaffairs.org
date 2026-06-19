@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useEffect } from 'react'
@@ -160,7 +161,8 @@ export default function MembersPage() {
 
   const { data: firestoreMembers, loading: membersLoading } = useCollection(membersQuery);
 
-  const isAdmin = (user?.email === 'deydhritiman@gmail.com' || user?.email === 'deyalankrit@gmail.com') && isMirror
+  // Administrative actions in the mirror are strictly Root-only
+  const isAdmin = user?.email === 'deydhritiman@gmail.com' && isMirror
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -301,7 +303,7 @@ export default function MembersPage() {
           {isAdmin && (
             <Dialog>
               <DialogTrigger asChild>
-                <Button className="bg-accent text-white font-bold rounded-2xl h-14 px-10 flex gap-2 hover:bg-secondary hover:text-white shadow-2xl shadow-accent/20 mx-auto transform hover:scale-105 transition-all">
+                <Button className="bg-accent text-primary-foreground font-bold rounded-2xl h-14 px-10 flex gap-2 hover:bg-secondary hover:text-white shadow-2xl shadow-accent/20 mx-auto transform hover:scale-105 transition-all">
                   <Plus className="w-6 h-6" /> Live Editor: Commission New Membership
                 </Button>
               </DialogTrigger>

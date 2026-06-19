@@ -30,8 +30,7 @@ export default function StaffLoginPage() {
   const { toast } = useToast()
 
   useEffect(() => {
-    const rootEmails = ['deydhritiman@gmail.com', 'deyalankrit@gmail.com'];
-    if (user && !rootEmails.includes(user.email?.toLowerCase() || '')) {
+    if (user) {
       router.push('/internal/analytics')
     }
   }, [user, router])

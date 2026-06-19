@@ -90,7 +90,7 @@ export function AppSidebar() {
 
   const { data: userPermissions } = useDoc(userDocRef);
 
-  const isRoot = user?.email?.toLowerCase() === 'deydhritiman@gmail.com' || user?.email?.toLowerCase() === 'deyalankrit@gmail.com'
+  const isRoot = user?.email?.toLowerCase() === 'deydhritiman@gmail.com'
 
   const filteredAdminLinks = React.useMemo(() => {
     if (!isAdminPortal) return []

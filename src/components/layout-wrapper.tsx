@@ -9,6 +9,8 @@ import { AppSidebar } from '@/components/app-sidebar';
 import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
 import { Separator } from '@/components/ui/separator';
 import { VisitorTracker } from '@/components/visitor-tracker';
+import { useUser } from '@/firebase';
+import { cn } from '@/lib/utils';
 
 /**
  * LayoutWrapper manages the global layout structure, switching between
@@ -17,10 +19,12 @@ import { VisitorTracker } from '@/components/visitor-tracker';
  */
 export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const { user } = useUser();
   const [mounted, setMounted] = useState(false);
 
   // Determine if we are in the administrative portal
   const isAdmin = pathname?.startsWith('/internal');
+  const isRoot = user?.email?.toLowerCase() === 'deydhritiman@gmail.com';
   
   // Both login pages should have the same clean layout without sidebar/header
   const isLoginPage = pathname === '/internal/login' || pathname === '/internal/super-login';
@@ -46,7 +50,9 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
               <Separator orientation="vertical" className="mr-2 h-4" />
               <div className="flex-1">
                  <h1 className="text-[9px] font-bold uppercase tracking-[0.2em] text-slate-400">
-                    Personnel Portal <span className="text-accent/50 ml-2">Secure Dashboard</span>
+                    Personnel Portal <span className={cn("ml-2", isRoot ? "text-red-500/50" : "text-emerald-500/50")}>
+                      {isRoot ? "Root Terminal" : "Staff Terminal"}
+                    </span>
                  </h1>
               </div>
               <div className="flex items-center gap-2">

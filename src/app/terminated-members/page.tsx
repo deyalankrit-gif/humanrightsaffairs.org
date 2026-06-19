@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useEffect } from 'react'
@@ -64,7 +65,8 @@ export default function TerminatedMembersPage() {
   const db = useFirestore()
   const { toast } = useToast()
 
-  const isAdmin = (user?.email === 'deydhritiman@gmail.com' || user?.email === 'deyalankrit@gmail.com') && isMirror
+  // Administrative actions in the mirror are strictly Root-only
+  const isAdmin = user?.email === 'deydhritiman@gmail.com' && isMirror
 
   useEffect(() => {
     if (typeof window !== 'undefined') {

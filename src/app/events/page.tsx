@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useEffect } from 'react'
@@ -96,7 +97,8 @@ export default function EventsPage() {
   const db = useFirestore()
   const { toast } = useToast()
   
-  const isAdmin = (user?.email === 'deydhritiman@gmail.com' || user?.email === 'deyalankrit@gmail.com') && isMirror
+  // Administrative actions in the mirror are strictly Root-only
+  const isAdmin = user?.email === 'deydhritiman@gmail.com' && isMirror
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -279,7 +281,7 @@ export default function EventsPage() {
             {isAdmin && (
               <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button className="bg-accent text-white font-bold rounded-2xl h-14 px-10 flex gap-2 hover:bg-secondary hover:text-white shadow-2xl shadow-accent/20 mx-auto transform hover:scale-105 transition-all">
+                  <Button className="bg-accent text-primary font-bold rounded-2xl h-14 px-10 flex gap-2 hover:bg-secondary hover:text-white shadow-2xl shadow-accent/20 mx-auto transform hover:scale-105 transition-all">
                     <Plus className="w-6 h-6" /> Create New Event Entry
                   </Button>
                 </DialogTrigger>
@@ -460,7 +462,7 @@ export default function EventsPage() {
                     </div>
                   </div>
                   <DialogFooter>
-                    <Button onClick={handleAddEvent} disabled={isActionLoading || isVideoProcessing} className="w-full h-12 rounded-xl bg-accent text-white font-bold hover:bg-secondary transition-all">
+                    <Button onClick={handleAddEvent} disabled={isActionLoading || isVideoProcessing} className="w-full h-12 rounded-xl bg-accent text-primary font-bold hover:bg-secondary transition-all">
                       {isActionLoading ? <Loader2 className="animate-spin" /> : "Verify & Publish Record"}
                     </Button>
                   </DialogFooter>
@@ -564,7 +566,7 @@ export default function EventsPage() {
                                                </div>
                                                <div className="flex-1 w-full space-y-2">
                                                   <Label className="text-[10px] font-black uppercase text-slate-400">Photo {idx + 1} Caption</Label>
-                                                  <Input placeholder="Caption..." value={(editEvent.galleryCaptions || ['', '', ''])[idx]} onChange={e => { const n = [...(editEvent.galleryCaptions || ['', '', ''])]; n[idx] = e.target.value; setEditEvent({...editEvent, galleryCaptions: n}) }} className="h-10 rounded-xl" />
+                                                  <Input placeholder="Caption..." value={(editEvent.galleryCaptions || ['', '', '']) [idx]} onChange={e => { const n = [...(editEvent.galleryCaptions || ['', '', ''])]; n[idx] = e.target.value; setEditEvent({...editEvent, galleryCaptions: n}) }} className="h-10 rounded-xl" />
                                                </div>
                                             </div>
                                           ))}
@@ -611,7 +613,7 @@ export default function EventsPage() {
                                     <div className="space-y-2"><Label>Venue</Label><Input value={editEvent.location || ''} onChange={e => setEditEvent({...editEvent, location: e.target.value})} className="h-12 rounded-xl" /></div>
                                     <div className="space-y-2"><Label>Impact Narrative</Label><Textarea value={editEvent.description} onChange={e => setEditEvent({...editEvent, description: e.target.value})} className="rounded-xl min-h-[100px]" /></div>
                                     
-                                    <Button onClick={handleUpdateEvent} disabled={isActionLoading || isVideoProcessing} className="w-full mt-4 h-12 rounded-xl bg-accent text-white font-bold hover:bg-secondary transition-all">{isActionLoading ? <Loader2 className="animate-spin" /> : "Save Profile Changes"}</Button>
+                                    <Button onClick={handleUpdateEvent} disabled={isActionLoading || isVideoProcessing} className="w-full mt-4 h-12 rounded-xl bg-primary text-primary-foreground font-bold hover:bg-secondary transition-all">{isActionLoading ? <Loader2 className="animate-spin" /> : "Save Profile Changes"}</Button>
                                   </div>
                                 )}
                               </DialogContent>

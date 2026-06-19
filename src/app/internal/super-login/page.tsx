@@ -30,7 +30,7 @@ export default function RootLoginPage() {
   const { toast } = useToast()
 
   useEffect(() => {
-    const rootEmails = ['deydhritiman@gmail.com', 'deyalankrit@gmail.com'];
+    const rootEmails = ['deydhritiman@gmail.com'];
     if (user && rootEmails.includes(user.email?.toLowerCase() || '')) {
       router.push('/internal/analytics')
     }
@@ -41,7 +41,7 @@ export default function RootLoginPage() {
     setIsLoading(true)
 
     const inputEmail = email.toLowerCase().trim()
-    const isRootEmail = ['deydhritiman@gmail.com', 'deyalankrit@gmail.com'].includes(inputEmail);
+    const isRootEmail = inputEmail === 'deydhritiman@gmail.com';
 
     try {
       if (!isRootEmail) {
@@ -58,13 +58,23 @@ export default function RootLoginPage() {
       if (!userSnap.exists()) {
         await setDoc(userRef, {
           email: inputEmail,
-          name: inputEmail === 'deyalankrit@gmail.com' ? 'Approved Staff Alankrit' : 'Root Administrator',
+          name: 'Root Administrator',
           role: 'admin',
           createdAt: serverTimestamp(),
           permissions: {
-            analytics: true, memberAnalytics: true, members: true, visitors: true, accounts: true,
-            expenses: true, applications: true, inventory: true, vendors: true,
-            grievances: true, meetings: true, events: true, publicView: true
+            analytics: true, 
+            memberAnalytics: true, 
+            members: true, 
+            visitors: true, 
+            accounts: true,
+            expenses: true, 
+            applications: true, 
+            inventory: true, 
+            vendors: true,
+            grievances: true, 
+            meetings: true, 
+            events: true, 
+            publicView: true
           }
         });
       }

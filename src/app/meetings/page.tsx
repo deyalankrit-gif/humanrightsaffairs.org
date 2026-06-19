@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useEffect } from 'react'
@@ -111,7 +112,8 @@ export default function MeetingsPage() {
   const { user } = useUser()
   const { toast } = useToast()
 
-  const isAdmin = (user?.email === 'deydhritiman@gmail.com' || user?.email === 'deyalankrit@gmail.com') && isMirror
+  // Administrative actions in the mirror are strictly Root-only
+  const isAdmin = user?.email === 'deydhritiman@gmail.com' && isMirror
 
   const [newMeeting, setNewMeeting] = useState({
     title: '',
@@ -331,7 +333,7 @@ export default function MeetingsPage() {
             {isAdmin && (
               <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button className="bg-accent text-white font-bold rounded-2xl h-14 px-10 flex gap-2 hover:bg-secondary hover:text-white shadow-2xl shadow-accent/20 mx-auto transform hover:scale-105 transition-all">
+                  <Button className="bg-accent text-primary font-bold rounded-2xl h-14 px-10 flex gap-2 hover:bg-secondary hover:text-white shadow-2xl shadow-accent/20 mx-auto transform hover:scale-105 transition-all">
                     <Plus className="w-6 h-6" /> Schedule New Assembly
                   </Button>
                 </DialogTrigger>
@@ -457,7 +459,7 @@ export default function MeetingsPage() {
                     </div>
                   </div>
                   <DialogFooter>
-                    <Button onClick={handleAddMeeting} disabled={isActionLoading} className="w-full bg-accent text-white font-bold h-12 rounded-xl text-lg shadow-xl shadow-accent/20 hover:bg-secondary hover:text-white transition-all">
+                    <Button onClick={handleAddMeeting} disabled={isActionLoading} className="w-full bg-accent text-primary font-bold h-12 rounded-xl text-lg shadow-xl shadow-accent/20 hover:bg-secondary hover:text-white transition-all">
                       {isActionLoading ? <Loader2 className="animate-spin" /> : "Publish Official Record"}
                     </Button>
                   </DialogFooter>
@@ -831,7 +833,9 @@ export default function MeetingsPage() {
             </div>
           )}
           <DialogFooter>
-            <Button onClick={handleUpdateMeeting} disabled={isActionLoading} className="w-full bg-primary text-primary-foreground h-12 rounded-xl font-bold hover:bg-secondary hover:text-white transition-all">Save Official Changes</Button>
+            <Button onClick={handleUpdateMeeting} disabled={isActionLoading} className="w-full bg-primary text-primary-foreground h-12 rounded-xl font-bold hover:bg-secondary hover:text-white transition-all">
+              {isActionLoading ? <Loader2 className="animate-spin mr-2" /> : "Commit Changes"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
