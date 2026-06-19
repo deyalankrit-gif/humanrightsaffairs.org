@@ -2,7 +2,7 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Standardized authorization helper
+    // Standardized authorization helper: Only the primary Root Admin has absolute control
     function isRoot() {
       return request.auth != null && 
              (request.auth.token.get('email', '').lower() == 'deydhritiman@gmail.com');

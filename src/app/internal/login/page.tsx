@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState } from 'react'
@@ -15,7 +16,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 
 /**
- * Staff Access Login Page
+ * Staff Access Login Page: Unified Auth-Firestore verification.
  */
 export default function StaffLoginPage() {
   const [email, setEmail] = useState('')
@@ -32,31 +33,23 @@ export default function StaffLoginPage() {
     setIsLoading(true)
 
     const inputEmail = email.toLowerCase().trim()
-    const isHardcodedStaff = inputEmail === 'deyalankrit@gmail.com' && password === 'Admin1234'
-
+    
     try {
-      // Step 1: Attempt Firebase Authentication first
-      await signInWithEmailAndPassword(auth, inputEmail, password)
+      // PHASE 1: Primary Authentication via Firebase Auth
+      const userCredential = await signInWithEmailAndPassword(auth, inputEmail, password)
+      const firebaseUser = userCredential.user;
 
-      // Step 2: Ensure user is authorized in the Firestore registry
+      // PHASE 2: Authorized Personnel Registry Verification
       const userRef = doc(db, 'users', inputEmail)
       let userSnap = await getDoc(userRef)
 
-      if (!userSnap.exists() && !isHardcodedStaff) {
-        await signOut(auth)
-        throw new Error("Clearance Required: Your email is not registered in the personnel database.")
-      }
-
-      // Step 3: Self-provision hardcoded staff if missing from registry
-      if (isHardcodedStaff && !userSnap.exists()) {
-        await setDoc(userRef, {
-          email: inputEmail,
-          name: 'Staff Alankrit',
-          role: 'staff',
-          lastLogin: serverTimestamp(),
-          password: password, // Store key for secondary verification
-          permissions: {
-            analytics: false, // Default to disabled to test hierarchy
+      // Auto-Provision logic for hardcoded staff if missing from DB but valid in Auth
+      const isHardcodedStaff = inputEmail === 'deyalankrit@gmail.com' && password === 'Admin1234'
+      
+      if (!userSnap.exists()) {
+        if (isHardcodedStaff) {
+          const initialPermissions = {
+            analytics: false,
             memberAnalytics: true,
             members: true,
             visitors: true,
@@ -70,60 +63,58 @@ export default function StaffLoginPage() {
             events: true,
             publicView: true
           }
-        }, { merge: true });
-        userSnap = await getDoc(userRef);
-      }
-
-      // Step 4: Secondary Governance Key Verification
-      if (userSnap.exists()) {
-        const userData = userSnap.data();
-        if (userData.password && userData.password !== password) {
-          await signOut(auth);
-          throw new Error("Access Denied: Stored governance key mismatch.");
+          
+          await setDoc(userRef, {
+            uid: firebaseUser.uid,
+            email: inputEmail,
+            name: 'Staff Alankrit',
+            role: 'staff',
+            status: 'active',
+            permissions: initialPermissions,
+            createdAt: serverTimestamp(),
+            lastLogin: serverTimestamp()
+          }, { merge: true });
+          userSnap = await getDoc(userRef);
+        } else {
+          // If not in registry and not hardcoded, terminate session
+          await signOut(auth)
+          throw new Error("Clearance Required: Your identity is not present in the institutional registry.")
         }
       }
+
+      // Record successful login
+      await setDoc(userRef, { lastLogin: serverTimestamp(), uid: firebaseUser.uid }, { merge: true });
 
       toast({
-        title: "Staff Access Granted",
-        description: "Credentials verified. Loading operational module.",
+        title: "Access Granted",
+        description: "Institutional clearance verified. Redirecting to operational module.",
       })
       
-      // Step 5: Intelligent Redirection Based on Permission Map
+      // PHASE 3: Context-Aware Redirection
       const userData = userSnap.data();
       const perms = userData?.permissions || {};
-      const isRoot = inputEmail === 'deydhritiman@gmail.com';
       
-      if (isRoot) {
-        router.push('/internal/analytics');
+      // Priority-based dashboard landing
+      const priority = [
+        { id: 'analytics', path: 'analytics' },
+        { id: 'memberAnalytics', path: 'member-analytics' },
+        { id: 'members', path: 'members' },
+        { id: 'events', path: 'events' },
+        { id: 'meetings', path: 'meetings' },
+        { id: 'publicView', path: 'public-view' }
+      ];
+      
+      const firstAvailable = priority.find(p => perms[p.id] === true);
+      if (firstAvailable) {
+        router.push(`/internal/${firstAvailable.path}`);
       } else {
-        // Priority map for landing pages
-        const priority = [
-          { id: 'analytics', path: 'analytics' },
-          { id: 'memberAnalytics', path: 'member-analytics' },
-          { id: 'members', path: 'members' },
-          { id: 'events', path: 'events' },
-          { id: 'meetings', path: 'meetings' },
-          { id: 'publicView', path: 'public-view' }
-        ];
-        
-        const firstAvailable = priority.find(p => perms[p.id] === true);
-        if (firstAvailable) {
-          router.push(`/internal/${firstAvailable.path}`);
-        } else {
-          // If no specific operational modules, check others or fallback
-          const anyPerm = Object.entries(perms).find(([k, v]) => v === true);
-          if (anyPerm) {
-            router.push(`/internal/${anyPerm[0] === 'memberAnalytics' ? 'member-analytics' : anyPerm[0]}`);
-          } else {
-            router.push('/internal/public-view');
-          }
-        }
+        router.push('/internal/public-view');
       }
     } catch (error: any) {
       toast({
         variant: "destructive",
         title: "Authentication Failed",
-        description: error.message || "Invalid credentials.",
+        description: error.message || "Invalid credentials or unauthorized terminal.",
       })
     } finally {
       setIsLoading(false)
@@ -160,7 +151,7 @@ export default function StaffLoginPage() {
                 <div className="relative">
                   <Input 
                     type="email" 
-                    placeholder="deyalankrit@gmail.com" 
+                    placeholder="name@hrat.org" 
                     className="bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10 h-12 rounded-xl pl-10"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -202,11 +193,6 @@ export default function StaffLoginPage() {
                 )}
               </Button>
             </form>
-            <div className="mt-8 pt-6 border-t border-slate-100 dark:border-white/5 text-center">
-              <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest leading-relaxed">
-                Administrative session is monitored for data integrity.
-              </p>
-            </div>
           </CardContent>
         </Card>
 

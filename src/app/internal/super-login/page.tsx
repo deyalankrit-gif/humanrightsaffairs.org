@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState } from 'react'
@@ -15,7 +16,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 
 /**
- * Root Access Login Page
+ * Root Access Login Page: Professional Terminal Entry.
  */
 export default function RootLoginPage() {
   const [email, setEmail] = useState('')
@@ -39,18 +40,21 @@ export default function RootLoginPage() {
         throw new Error("Access Denied: Insufficient authorization level for this terminal.")
       }
 
-      // Step 1: Sign in first
-      await signInWithEmailAndPassword(auth, inputEmail, password)
+      // Step 1: Authentication via Auth Service
+      const userCredential = await signInWithEmailAndPassword(auth, inputEmail, password)
+      const firebaseUser = userCredential.user;
       
-      // Step 2: Now authenticated, ensure root document exists in the permission registry
+      // Step 2: Ensure Root Profile exists in Registry
       const userRef = doc(db, 'users', inputEmail)
       const userSnap = await getDoc(userRef)
       
       if (!userSnap.exists()) {
         await setDoc(userRef, {
+          uid: firebaseUser.uid,
           email: inputEmail,
           name: 'Root Administrator',
           role: 'admin',
+          status: 'active',
           createdAt: serverTimestamp(),
           permissions: {
             analytics: true, 
@@ -68,20 +72,22 @@ export default function RootLoginPage() {
             publicView: true
           }
         });
+      } else {
+        // Sync UID if missing
+        await setDoc(userRef, { uid: firebaseUser.uid, lastLogin: serverTimestamp() }, { merge: true });
       }
 
       toast({
         title: "ROOT ACCESS GRANTED",
-        description: "Governance privileges unlocked.",
+        description: "Governance privileges unlocked. Accessing National Registry.",
       })
       
-      // Navigate only after all database operations are confirmed
       router.push('/internal/analytics')
     } catch (error: any) {
       toast({
         variant: "destructive",
         title: "SECURITY ALERT",
-        description: error.message || "Root authentication failed.",
+        description: error.message || "Root authentication protocol failed.",
       })
     } finally {
       setIsLoading(false)

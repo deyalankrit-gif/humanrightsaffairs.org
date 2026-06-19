@@ -1,15 +1,15 @@
-
 {
   "entities": {
     "UserAccount": {
       "title": "User Account",
-      "description": "Administrative account with specific permission toggles.",
+      "description": "Administrative account with specific permission toggles and linked Auth UID.",
       "type": "object",
       "properties": {
+        "uid": { "type": "string", "description": "Linked Firebase Authentication UID." },
         "email": { "type": "string", "format": "email" },
         "name": { "type": "string" },
-        "password": { "type": "string", "description": "Stored governance key for staff login." },
         "role": { "type": "string", "enum": ["admin", "staff"] },
+        "status": { "type": "string", "enum": ["active", "inactive"] },
         "permissions": {
           "type": "object",
           "properties": {
@@ -29,9 +29,11 @@
           }
         },
         "lastLogin": { "type": "string", "format": "date-time" },
-        "createdAt": { "type": "string", "format": "date-time" }
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" },
+        "createdBy": { "type": "string", "description": "UID of the administrator who provisioned this account." }
       },
-      "required": ["email", "permissions"]
+      "required": ["email", "permissions", "uid", "role"]
     },
     "Donation": {
       "title": "Donation",
