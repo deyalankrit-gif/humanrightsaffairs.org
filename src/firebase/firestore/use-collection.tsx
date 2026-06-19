@@ -36,7 +36,8 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
                              pathString.includes('expenses') || 
                              pathString.includes('accounts') || 
                              pathString.includes('inventory') || 
-                             pathString.includes('vendors');
+                             pathString.includes('vendors') ||
+                             pathString.includes('donations');
 
     if (isRestrictedPath && !auth.currentUser) {
       setLoading(false);
