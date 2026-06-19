@@ -1,7 +1,11 @@
+
 "use client"
 
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { initializeApp, deleteApp, getApps } from 'firebase/app'
+import { getAuth, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth'
+import { firebaseConfig } from '@/firebase/config'
 import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase'
 import { collection, query, orderBy, doc, setDoc, deleteDoc, serverTimestamp, updateDoc } from 'firebase/firestore'
 import { Footer } from '@/components/footer'
@@ -142,35 +146,60 @@ export default function AccessRolesPage() {
     if (!db || !isRoot || !newEmail.trim() || !newPassword.trim()) return
     setIsAdding(true)
 
-    const initialPermissions = MODULES.reduce((acc, mod) => ({ ...acc, [mod.id]: false }), {})
     const userEmail = newEmail.toLowerCase().trim()
-    const userRef = doc(db, 'users', userEmail)
-    const userData = {
-      email: userEmail,
-      name: newName || userEmail.split('@')[0],
-      password: newPassword,
-      role: 'staff',
-      permissions: initialPermissions,
-      createdAt: serverTimestamp()
-    }
+    
+    // Step 1: Create in Firebase Auth using a secondary app instance 
+    // to avoid signing out the current Root Admin session.
+    const tempAppName = `TempApp-${Date.now()}`
+    const secondaryApp = initializeApp(firebaseConfig, tempAppName);
+    const secondaryAuth = getAuth(secondaryApp);
 
-    setDoc(userRef, userData)
-      .then(() => {
-        toast({ title: "Staff Provisioned", description: `${userEmail} added with governance key.` })
-        setNewEmail('')
-        setNewName('')
-        setNewPassword('')
-        setIsAdding(false)
+    try {
+      // Provision user in Firebase Authentication
+      const authUserCredential = await createUserWithEmailAndPassword(secondaryAuth, userEmail, newPassword);
+      
+      if (authUserCredential.user) {
+        await updateProfile(authUserCredential.user, { displayName: newName || userEmail.split('@')[0] });
+      }
+
+      // Step 2: Provision in Firestore Registry
+      const initialPermissions = MODULES.reduce((acc, mod) => ({ ...acc, [mod.id]: false }), {})
+      const userRef = doc(db, 'users', userEmail)
+      const userData = {
+        email: userEmail,
+        name: newName || userEmail.split('@')[0],
+        password: newPassword,
+        role: 'staff',
+        permissions: initialPermissions,
+        createdAt: serverTimestamp()
+      }
+
+      await setDoc(userRef, userData)
+      
+      toast({ 
+        title: "Personnel Provisioned", 
+        description: `${userEmail} has been added to Auth & Database.` 
       })
-      .catch(async (err) => {
-        const permissionError = new FirestorePermissionError({
-          path: userRef.path,
-          operation: 'create',
-          requestResourceData: userData,
-        } satisfies SecurityRuleContext);
-        errorEmitter.emit('permission-error', permissionError);
-        setIsAdding(false)
+      
+      setNewEmail('')
+      setNewName('')
+      setNewPassword('')
+      
+      // Cleanup
+      await deleteApp(secondaryApp);
+      setIsAdding(false)
+    } catch (err: any) {
+      // Standard cleanup for failure
+      try { await deleteApp(secondaryApp); } catch(e) {}
+      
+      console.error("Provisioning Error:", err);
+      toast({ 
+        variant: "destructive", 
+        title: "Provisioning Protocol Failed", 
+        description: err.message || "Could not complete dual-registry synchronization." 
       })
+      setIsAdding(false)
+    }
   }
 
   const handleUpdateStaff = async (e: React.FormEvent) => {
