@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useEffect } from 'react'
@@ -161,7 +160,7 @@ export default function MembersPage() {
 
   const { data: firestoreMembers, loading: membersLoading } = useCollection(membersQuery);
 
-  const isAdmin = !!user && isMirror
+  const isAdmin = (user?.email === 'deydhritiman@gmail.com' || user?.email === 'deyalankrit@gmail.com') && isMirror
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -306,7 +305,7 @@ export default function MembersPage() {
                   <Plus className="w-6 h-6" /> Live Editor: Commission New Membership
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-2xl bg-white dark:bg-slate-900 rounded-[2rem] border-none shadow-2xl max-h-[90vh] overflow-y-auto">
+              <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="max-w-2xl bg-white dark:bg-slate-900 rounded-[2rem] border-none shadow-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle className="text-2xl font-headline font-bold text-primary dark:text-white">Personnel Commissioning</DialogTitle>
                 </DialogHeader>

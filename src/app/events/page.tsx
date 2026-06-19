@@ -96,7 +96,7 @@ export default function EventsPage() {
   const db = useFirestore()
   const { toast } = useToast()
   
-  const isAdmin = user?.email === 'deydhritiman@gmail.com' && isMirror
+  const isAdmin = (user?.email === 'deydhritiman@gmail.com' || user?.email === 'deyalankrit@gmail.com') && isMirror
 
   useEffect(() => {
     if (typeof window !== 'undefined') {

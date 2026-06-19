@@ -111,7 +111,7 @@ export default function MeetingsPage() {
   const { user } = useUser()
   const { toast } = useToast()
 
-  const isAdmin = user?.email === 'deydhritiman@gmail.com' && isMirror
+  const isAdmin = (user?.email === 'deydhritiman@gmail.com' || user?.email === 'deyalankrit@gmail.com') && isMirror
 
   const [newMeeting, setNewMeeting] = useState({
     title: '',
@@ -335,7 +335,7 @@ export default function MeetingsPage() {
                     <Plus className="w-6 h-6" /> Schedule New Assembly
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-xl bg-white dark:bg-slate-900 rounded-[2.5rem] border-none shadow-2xl max-h-[90vh] overflow-y-auto">
+                <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="max-w-xl bg-white dark:bg-slate-900 rounded-[2.5rem] border-none shadow-2xl max-h-[90vh] overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle className="text-2xl font-headline font-bold text-primary dark:text-white">Schedule New Assembly</DialogTitle>
                     <DialogDescription>Record a new meeting or event in the public archive.</DialogDescription>
@@ -716,7 +716,7 @@ export default function MeetingsPage() {
 
       {/* Unified Edit Dialog (Admin Only) */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="max-w-xl bg-white dark:bg-slate-900 rounded-[2.5rem] border-none shadow-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="max-w-xl bg-white dark:bg-slate-900 rounded-[2.5rem] border-none shadow-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-2xl font-headline font-bold text-primary dark:text-white">Modify Meeting Record</DialogTitle>
           </DialogHeader>

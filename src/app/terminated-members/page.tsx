@@ -64,7 +64,7 @@ export default function TerminatedMembersPage() {
   const db = useFirestore()
   const { toast } = useToast()
 
-  const isAdmin = user?.email === 'deydhritiman@gmail.com' && isMirror
+  const isAdmin = (user?.email === 'deydhritiman@gmail.com' || user?.email === 'deyalankrit@gmail.com') && isMirror
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -184,7 +184,7 @@ export default function TerminatedMembersPage() {
                   <Plus className="w-6 h-6" /> Add Termination Entry
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-md bg-white dark:bg-slate-900 rounded-[2rem] max-h-[90vh] overflow-y-auto">
+              <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="max-w-md bg-white dark:bg-slate-900 rounded-[2rem] max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>New Termination Notice</DialogTitle>
                 </DialogHeader>
@@ -400,7 +400,7 @@ export default function TerminatedMembersPage() {
                                   <Edit className="w-4 h-4" />
                                 </Button>
                               </DialogTrigger>
-                              <DialogContent className="max-w-md bg-white dark:bg-slate-900 rounded-[2rem] max-h-[90vh] overflow-y-auto">
+                              <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="max-w-md bg-white dark:bg-slate-900 rounded-[2rem] max-h-[90vh] overflow-y-auto">
                                 <DialogHeader>
                                   <DialogTitle>Edit Notice</DialogTitle>
                                 </DialogHeader>

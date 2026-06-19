@@ -79,7 +79,7 @@ export default function LeadershipPage() {
   const db = useFirestore()
   const { toast } = useToast()
 
-  const isAdmin = user?.email === 'deydhritiman@gmail.com' && isMirror
+  const isAdmin = (user?.email === 'deydhritiman@gmail.com' || user?.email === 'deyalankrit@gmail.com') && isMirror
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -181,7 +181,7 @@ export default function LeadershipPage() {
           {isAdmin && (
             <Dialog>
               <DialogTrigger asChild><Button className="bg-accent text-white font-bold rounded-2xl h-14 px-8 flex gap-2 hover:bg-secondary hover:text-white shadow-xl shadow-accent/20 mx-auto"><Plus className="w-5 h-5" /> Commission Leadership Member</Button></DialogTrigger>
-              <DialogContent className="bg-white dark:bg-slate-900 rounded-[2rem] border-none shadow-2xl max-h-[90vh] overflow-y-auto">
+              <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="bg-white dark:bg-slate-900 rounded-[2rem] border-none shadow-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader><DialogTitle>New Leader Profile</DialogTitle></DialogHeader>
                 <div className="space-y-4 py-4">
                   <div className="flex flex-col items-center gap-4 p-4 border-2 border-dashed rounded-2xl">
@@ -371,7 +371,7 @@ export default function LeadershipPage() {
 
       {/* Edit Dialog */}
       <Dialog open={!!editLeader} onOpenChange={(open) => !open && setEditLeader(null)}>
-        <DialogContent className="bg-white dark:bg-slate-900 rounded-[2rem] border-none shadow-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="bg-white dark:bg-slate-900 rounded-[2rem] border-none shadow-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader><DialogTitle>Edit Leader Profile</DialogTitle></DialogHeader>
           {editLeader && (
             <div className="space-y-4 py-4">
