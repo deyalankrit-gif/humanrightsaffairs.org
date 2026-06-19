@@ -66,7 +66,7 @@ const adminLinksConfig = [
   { name: 'Expenses', href: '/internal/expenses', icon: TrendingDown, permission: 'expenses' },
   { name: 'Applications', href: '/internal/applications', icon: FileText, permission: 'applications' },
   { name: 'Members', href: '/internal/members', icon: Users, permission: 'members' },
-  { name: 'Renewals', href: '/internal/renewals', icon: RefreshCw, permission: 'members' },
+  { name: 'Renewals', href: '/internal/renewals', icon: RefreshCw, permission: 'renewals' },
   { name: 'Terminated', href: '/internal/terminated-members', icon: UserX, permission: 'terminated' },
   { name: 'Inventory', href: '/internal/inventory', icon: Package, permission: 'inventory' },
   { name: 'Vendors', href: '/internal/vendors', icon: Truck, permission: 'vendors' },
@@ -201,9 +201,9 @@ export function AppSidebar() {
            <div className="p-4 bg-white/5 rounded-xl border border-white/10 group-data-[collapsible=icon]:hidden">
               <div className="flex items-center gap-2 mb-2">
                  <div className={cn("w-2 h-2 rounded-full animate-pulse", isRoot ? "bg-red-600" : "bg-emerald-500")}></div>
-                 <span className="text-[10px] font-black uppercase text-slate-500">{isRoot ? "Root Terminal" : "Operational"}</span>
+                 <span className="text-[10px] font-black uppercase text-sidebar-foreground/70">{isRoot ? "Root Terminal" : "Operational"}</span>
               </div>
-              <p className="text-[9px] font-bold text-slate-400 truncate">{user?.email}</p>
+              <p className="text-[9px] font-bold text-sidebar-foreground/50 truncate">{user?.email}</p>
            </div>
         )}
       </SidebarFooter>

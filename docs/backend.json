@@ -27,7 +27,8 @@
             "meetings": { "type": "boolean" },
             "events": { "type": "boolean" },
             "publicView": { "type": "boolean" },
-            "terminated": { "type": "boolean" }
+            "terminated": { "type": "boolean" },
+            "renewals": { "type": "boolean" }
           }
         },
         "lastLogin": { "type": "string", "format": "date-time" },

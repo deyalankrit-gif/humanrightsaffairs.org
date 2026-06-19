@@ -60,6 +60,7 @@ export default function RootLoginPage() {
             analytics: true, 
             memberAnalytics: true, 
             members: true, 
+            renewals: true,
             visitors: true, 
             accounts: true,
             expenses: true, 
@@ -74,8 +75,28 @@ export default function RootLoginPage() {
           }
         });
       } else {
-        // Sync UID if missing
-        await setDoc(userRef, { uid: firebaseUser.uid, lastLogin: serverTimestamp() }, { merge: true });
+        // Sync UID if missing and ensure all permissions are set for root
+        await setDoc(userRef, { 
+          uid: firebaseUser.uid, 
+          lastLogin: serverTimestamp(),
+          permissions: {
+            analytics: true, 
+            memberAnalytics: true, 
+            members: true, 
+            renewals: true,
+            visitors: true, 
+            accounts: true,
+            expenses: true, 
+            applications: true, 
+            inventory: true, 
+            vendors: true,
+            grievances: true, 
+            meetings: true, 
+            events: true, 
+            publicView: true,
+            terminated: true
+          }
+        }, { merge: true });
       }
 
       toast({

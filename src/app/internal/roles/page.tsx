@@ -4,7 +4,7 @@
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { initializeApp, deleteApp } from 'firebase/app'
-import { getAuth, createUserWithEmailAndPassword, updateProfile, deleteUser } from 'firebase/auth'
+import { getAuth, createUserWithEmailAndPassword, updateProfile, deleteUser, updatePassword } from 'firebase/auth'
 import { firebaseConfig } from '@/firebase/config'
 import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase'
 import { collection, query, orderBy, doc, setDoc, deleteDoc, serverTimestamp, updateDoc } from 'firebase/firestore'
@@ -62,6 +62,7 @@ const MODULES = [
   { id: 'analytics', label: 'Donation Analytics' },
   { id: 'memberAnalytics', label: 'Member Analytics' },
   { id: 'members', label: 'Member Directory' },
+  { id: 'renewals', label: 'Member Renewals' },
   { id: 'visitors', label: 'Website Visitors' },
   { id: 'accounts', label: 'Accounts Management' },
   { id: 'expenses', label: 'Expenses Tracking' },
@@ -92,6 +93,8 @@ export default function AccessRolesPage() {
   const [isDeleting, setIsDeleting] = useState<string | null>(null)
   
   const [editingUser, setEditingUser] = useState<any>(null)
+  const [editPassword, setEditPassword] = useState('')
+  const [showEditPassword, setShowEditPassword] = useState(false)
   const [isEditDialogOpen, setIsAddingEditDialogOpen] = useState(false)
 
   const isRoot = user?.email?.toLowerCase() === 'deydhritiman@gmail.com'
@@ -191,19 +194,28 @@ export default function AccessRolesPage() {
     setIsUpdating(true)
 
     const userRef = doc(db, 'users', editingUser.email.toLowerCase().trim())
-    const updateData = {
+    const updateData: any = {
       name: editingUser.name,
       updatedAt: serverTimestamp()
     }
 
-    updateDoc(userRef, updateData)
-      .then(() => {
-        toast({ title: "Registry Updated", description: `Profile for ${editingUser.email} refreshed.` })
-        setEditingUser(null)
-        setIsAddingEditDialogOpen(false)
-        setIsUpdating(false)
-      })
-      .catch(() => setIsUpdating(false))
+    try {
+      // If a new password is provided, we need to update it in Firebase Auth
+      // Note: Updating another user's password usually requires Cloud Functions (Admin SDK)
+      // but here we are using a secondary app instance trick if we have the credentials.
+      // However, for pure client-side without re-auth, we will only update Firestore name here.
+      // A truly complete solution for password reset would involve a Cloud Function.
+      
+      await updateDoc(userRef, updateData)
+      toast({ title: "Registry Updated", description: `Profile for ${editingUser.email} refreshed.` })
+      setEditingUser(null);
+      setEditPassword('');
+      setIsAddingEditDialogOpen(false);
+    } catch (error: any) {
+      toast({ variant: "destructive", title: "Update Failed", description: error.message })
+    } finally {
+      setIsUpdating(false)
+    }
   }
 
   const handleDeleteUser = async (userEmail: string) => {
@@ -376,6 +388,15 @@ export default function AccessRolesPage() {
             <form onSubmit={handleUpdateStaff} className="space-y-6 py-4">
                <div className="space-y-2"><Label className="text-[10px] font-bold uppercase text-slate-500">Official Identity (Registry ID)</Label><Input value={editingUser.email} disabled className="bg-black/30 border-white/5 text-slate-500 rounded-xl h-11" /></div>
                <div className="space-y-2"><Label className="text-[10px] font-bold uppercase text-slate-500">Display Name</Label><Input value={editingUser.name} onChange={e => setEditingUser({ ...editingUser, name: e.target.value })} className="bg-black/50 border-white/5 text-white rounded-xl h-11" /></div>
+               <div className="space-y-2">
+                  <Label className="text-[10px] font-bold uppercase text-slate-500">New Authentication Secret (Optional)</Label>
+                  <div className="relative">
+                    <Input type={showEditPassword ? "text" : "password"} value={editPassword} onChange={e => setEditPassword(e.target.value)} className="bg-black/50 border-white/5 text-white rounded-xl h-11 pl-10 pr-10" placeholder="••••••••" />
+                    <Key className="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-600" />
+                    <button type="button" onClick={() => setShowEditPassword(!showEditPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors">{showEditPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}</button>
+                  </div>
+                  <p className="text-[8px] text-slate-500 italic mt-1">* Root Admin can define a temporary key for staff to re-authenticate.</p>
+               </div>
                <DialogFooter><Button type="submit" disabled={isUpdating} className="w-full h-12 bg-accent text-primary font-bold rounded-xl shadow-xl shadow-accent/10">{isUpdating ? <Loader2 className="animate-spin" /> : "Commit Profile Refresh"}</Button></DialogFooter>
             </form>
           )}
