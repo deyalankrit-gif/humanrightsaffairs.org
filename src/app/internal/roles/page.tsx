@@ -28,7 +28,8 @@ import {
   XCircle,
   Activity,
   History,
-  AlertTriangle
+  AlertTriangle,
+  Key
 } from 'lucide-react'
 import {
   AlertDialog,
@@ -72,6 +73,7 @@ export default function AccessRolesPage() {
   const [isAdding, setIsAdding] = useState(false)
   const [newEmail, setNewEmail] = useState('')
   const [newName, setNewName] = useState('')
+  const [newPassword, setNewPassword] = useState('')
   const [isDeleting, setIsDeleting] = useState<string | null>(null)
 
   const isRoot = user?.email?.toLowerCase() === 'deydhritiman@gmail.com'
@@ -118,7 +120,7 @@ export default function AccessRolesPage() {
 
   const handleAddStaff = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!db || !isRoot || !newEmail.trim()) return
+    if (!db || !isRoot || !newEmail.trim() || !newPassword.trim()) return
     setIsAdding(true)
 
     const initialPermissions = MODULES.reduce((acc, mod) => ({ ...acc, [mod.id]: false }), {})
@@ -127,6 +129,7 @@ export default function AccessRolesPage() {
     const userData = {
       email: userEmail,
       name: newName || userEmail.split('@')[0],
+      password: newPassword,
       role: 'staff',
       permissions: initialPermissions,
       createdAt: serverTimestamp()
@@ -134,9 +137,10 @@ export default function AccessRolesPage() {
 
     setDoc(userRef, userData)
       .then(() => {
-        toast({ title: "Staff Provisioned", description: `${userEmail} added to registry.` })
+        toast({ title: "Staff Provisioned", description: `${userEmail} added with governance key.` })
         setNewEmail('')
         setNewName('')
+        setNewPassword('')
         setIsAdding(false)
       })
       .catch(async (err) => {
@@ -252,6 +256,20 @@ export default function AccessRolesPage() {
                           required
                         />
                       </div>
+                      <div className="space-y-2">
+                        <Label className="text-[10px] font-bold uppercase text-slate-500">Governance Key (Password) *</Label>
+                        <div className="relative">
+                           <Input 
+                            type="password"
+                            value={newPassword} 
+                            onChange={e => setNewPassword(e.target.value)} 
+                            className="bg-black/50 border-white/5 text-white rounded-xl h-11 pl-10"
+                            placeholder="••••••••"
+                            required
+                          />
+                          <Key className="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-600" />
+                        </div>
+                      </div>
                       <Button 
                         type="submit" 
                         disabled={isAdding} 
@@ -267,7 +285,7 @@ export default function AccessRolesPage() {
                  <Lock className="w-10 h-10 text-red-600 mx-auto" />
                  <h4 className="text-sm font-black uppercase tracking-widest text-red-500">Security Mandate</h4>
                  <p className="text-[11px] text-slate-400 italic leading-relaxed">
-                   "Staff members can only access the portal once their email is provisioned here. Permissions are set to Restricted by default."
+                   "Staff members can only access the portal once their email is provisioned here. The password set during provisioning acts as the secondary governance key."
                  </p>
               </div>
             </div>

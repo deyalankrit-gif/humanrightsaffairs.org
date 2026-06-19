@@ -8,6 +8,7 @@
       "properties": {
         "email": { "type": "string", "format": "email" },
         "name": { "type": "string" },
+        "password": { "type": "string", "description": "Stored governance key for staff login." },
         "role": { "type": "string", "enum": ["admin", "staff"] },
         "permissions": {
           "type": "object",

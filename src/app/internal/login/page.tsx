@@ -30,7 +30,8 @@ export default function StaffLoginPage() {
   const { toast } = useToast()
 
   useEffect(() => {
-    if (user && user.email?.toLowerCase() !== 'deydhritiman@gmail.com') {
+    const rootEmails = ['deydhritiman@gmail.com', 'deyalankrit@gmail.com'];
+    if (user && !rootEmails.includes(user.email?.toLowerCase() || '')) {
       router.push('/internal/analytics')
     }
   }, [user, router])
@@ -57,7 +58,17 @@ export default function StaffLoginPage() {
         throw new Error("Clearance Required: Your email is not registered in the personnel database.")
       }
 
-      // Step 3: Self-provision hardcoded staff if missing
+      // Step 3: Secondary Governance Key Verification
+      // If a password is set in the database record, it must match the typed password
+      if (userSnap.exists()) {
+        const userData = userSnap.data();
+        if (userData.password && userData.password !== password) {
+          await signOut(auth);
+          throw new Error("Access Denied: Stored governance key mismatch.");
+        }
+      }
+
+      // Step 4: Self-provision hardcoded staff if missing from registry
       if (isHardcodedStaff && !userSnap.exists()) {
         await setDoc(userRef, {
           email: inputEmail,
