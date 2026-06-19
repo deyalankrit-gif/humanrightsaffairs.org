@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -59,7 +60,7 @@ const publicLinks = [
 
 const adminLinksConfig = [
   { name: 'Donation Analytics', href: '/internal/analytics', icon: LayoutDashboard, permission: 'analytics' },
-  { name: 'Member Analytics', href: '/internal/member-analytics', icon: BarChart, permission: 'members' },
+  { name: 'Member Analytics', href: '/internal/member-analytics', icon: BarChart, permission: 'memberAnalytics' },
   { name: 'Website Visitors', href: '/internal/visitors', icon: BarChart3, permission: 'visitors' },
   { name: 'Accounts', href: '/internal/accounts', icon: Wallet, permission: 'accounts' },
   { name: 'Expenses', href: '/internal/expenses', icon: TrendingDown, permission: 'expenses' },
@@ -89,7 +90,7 @@ export function AppSidebar() {
 
   const { data: userPermissions } = useDoc(userDocRef);
 
-  const isRoot = user?.email?.toLowerCase() === 'deydhritiman@gmail.com'
+  const isRoot = user?.email?.toLowerCase() === 'deydhritiman@gmail.com' || user?.email?.toLowerCase() === 'deyalankrit@gmail.com'
 
   const filteredAdminLinks = React.useMemo(() => {
     if (!isAdminPortal) return []

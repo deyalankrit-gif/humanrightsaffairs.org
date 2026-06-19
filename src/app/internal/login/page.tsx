@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useEffect } from 'react'
@@ -73,6 +74,7 @@ export default function StaffLoginPage() {
           lastLogin: serverTimestamp(),
           permissions: {
             analytics: true,
+            memberAnalytics: true,
             members: true,
             visitors: true,
             accounts: true,

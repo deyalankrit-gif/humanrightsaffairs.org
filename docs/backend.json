@@ -1,3 +1,4 @@
+
 {
   "entities": {
     "UserAccount": {
@@ -13,6 +14,7 @@
           "type": "object",
           "properties": {
             "analytics": { "type": "boolean" },
+            "memberAnalytics": { "type": "boolean" },
             "members": { "type": "boolean" },
             "visitors": { "type": "boolean" },
             "accounts": { "type": "boolean" },

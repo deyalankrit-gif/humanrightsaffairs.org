@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useEffect, useState } from 'react'
@@ -23,8 +24,6 @@ import {
   Lock,
   ArrowLeft,
   Search,
-  CheckCircle2,
-  XCircle,
   Activity,
   History,
   AlertTriangle,
@@ -61,6 +60,7 @@ import { FirestorePermissionError, type SecurityRuleContext } from '@/firebase/e
 
 const MODULES = [
   { id: 'analytics', label: 'Donation Analytics' },
+  { id: 'memberAnalytics', label: 'Member Analytics' },
   { id: 'members', label: 'Member Directory' },
   { id: 'visitors', label: 'Website Visitors' },
   { id: 'accounts', label: 'Accounts Management' },
