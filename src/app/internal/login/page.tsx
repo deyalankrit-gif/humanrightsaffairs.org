@@ -1,7 +1,6 @@
-
 "use client"
 
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { signInWithEmailAndPassword, signOut } from 'firebase/auth'
 import { useAuth, useUser, useFirestore } from '@/firebase'
@@ -25,15 +24,8 @@ export default function StaffLoginPage() {
   const [isLoading, setIsLoading] = useState(false)
   const auth = useAuth()
   const db = useFirestore()
-  const { user } = useUser()
   const router = useRouter()
   const { toast } = useToast()
-
-  useEffect(() => {
-    if (user) {
-      router.push('/internal/analytics')
-    }
-  }, [user, router])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -93,6 +85,8 @@ export default function StaffLoginPage() {
         title: "Staff Access Granted",
         description: "Credentials verified. Loading operational module.",
       })
+      
+      // Navigate only after all database operations are confirmed
       router.push('/internal/analytics')
     } catch (error: any) {
       toast({

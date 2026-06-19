@@ -31,14 +31,19 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
     // 🛡️ COMPLETE SYSTEM SAFEGUARD:
     // If an unauthenticated or newly logging-in user attempts to touch protected collections,
     // intercept the request completely on the client side before it causes a backend snapshot crash.
-    const isRestrictedPath = pathString.includes('visitors') || 
-                             pathString.includes('users') || 
-                             pathString.includes('expenses') || 
-                             pathString.includes('accounts') || 
-                             pathString.includes('inventory') || 
-                             pathString.includes('vendors') ||
-                             pathString.includes('donations');
+    // We check for inclusions of restricted keywords in the collection path.
+    const path = pathString.toLowerCase();
+    const isRestrictedPath = path.includes('visitors') || 
+                             path.includes('users') || 
+                             path.includes('expenses') || 
+                             path.includes('accounts') || 
+                             path.includes('inventory') || 
+                             path.includes('vendors') ||
+                             path.includes('donations') ||
+                             path.includes('applications') ||
+                             path.includes('grievances');
 
+    // If the path is restricted and we don't have a stable Auth session, halt immediately.
     if (isRestrictedPath && !auth.currentUser) {
       setLoading(false);
       return;
@@ -52,19 +57,22 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
           id: doc.id,
         }));
         setData(docs);
-        setError(null); // Clear any lingering error state upon a successful stream fetch
+        setError(null);
         setLoading(false);
       },
       async (serverError) => {
-        // Safe Catch: Prevent internal collection streams from breaking global authentication screens
-        console.warn(`Firestore stream halted cleanly for path: ${pathString}`, serverError.message);
+        // Safe Catch: Prevent internal collection streams from breaking global navigation
+        console.warn(`Firestore stream halted for path: ${pathString}`, serverError.message);
         
         const permissionError = new FirestorePermissionError({
           path: pathString || 'unknown',
           operation: 'list',
         });
         
-        errorEmitter.emit('permission-error', permissionError);
+        // Only emit the error if we are genuinely logged in and denied
+        if (auth.currentUser) {
+          errorEmitter.emit('permission-error', permissionError);
+        }
         setError(permissionError);
         setLoading(false);
       }

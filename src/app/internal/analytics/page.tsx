@@ -2,7 +2,7 @@
 
 import React, { useMemo, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useUser, useCollection, useFirestore, useMemoFirebase } from '@/firebase'
+import { useUser, useCollection, useFirestore, useMemoFirebase, useDoc } from '@/firebase'
 import { collection, query, orderBy, deleteDoc, doc } from 'firebase/firestore'
 import { Footer } from '@/components/footer'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -51,10 +51,22 @@ export default function DonationAnalyticsPage() {
   const { toast } = useToast()
   const [isDeleting, setIsDeleting] = useState<string | null>(null)
 
+  // Wait for the registry doc to ensure permissions are synchronized before firing the list query
+  const userRegistryRef = useMemoFirebase(() => {
+    if (!db || !user?.email) return null;
+    return doc(db, 'users', user.email.toLowerCase());
+  }, [db, user?.email]);
+
+  const { data: permissions, loading: permissionsLoading } = useDoc(userRegistryRef);
+
   const donationsQuery = useMemoFirebase(() => {
-    if (!db || !user) return null;
+    // 🛡️ Guard: Only fire the query if the user is Root OR if we've confirmed they have the 'analytics' permission
+    const isRoot = user?.email?.toLowerCase() === 'deydhritiman@gmail.com';
+    const hasPermission = isRoot || permissions?.permissions?.analytics === true;
+
+    if (!db || !user || permissionsLoading || !hasPermission) return null;
     return query(collection(db, 'donations'), orderBy('createdAt', 'desc'));
-  }, [db, user]);
+  }, [db, user, permissions, permissionsLoading]);
 
   const { data: donations, loading: dataLoading } = useCollection(donationsQuery);
 
@@ -99,12 +111,12 @@ export default function DonationAnalyticsPage() {
     }
   }
 
-  if (authLoading || !user) {
+  if (authLoading || !user || permissionsLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
         <div className="text-center space-y-4">
           <Loader2 className="w-10 h-10 animate-spin text-accent mx-auto" />
-          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Validating Administrative Session...</p>
+          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Verifying Institutional Clearance...</p>
         </div>
       </div>
     )

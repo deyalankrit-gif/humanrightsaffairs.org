@@ -23,6 +23,8 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
 
   // Determine if we are in the administrative portal
   const isAdmin = pathname?.startsWith('/internal');
+  
+  // STRICT GOVERNANCE HIERARCHY
   const isRoot = user?.email?.toLowerCase() === 'deydhritiman@gmail.com';
   
   // Both login pages should have the same clean layout without sidebar/header
@@ -49,7 +51,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
               <Separator orientation="vertical" className="mr-2 h-4" />
               <div className="flex-1">
                  <h1 className="text-[9px] font-bold uppercase tracking-[0.2em] text-slate-400">
-                    Personnel Portal <span className={cn("ml-2", isRoot ? "text-red-500/50" : "text-emerald-500/50")}>
+                    Personnel Portal <span className={cn("ml-2 font-black", isRoot ? "text-red-500" : "text-emerald-500")}>
                       {isRoot ? "Root Terminal" : "Staff Terminal"}
                     </span>
                  </h1>
