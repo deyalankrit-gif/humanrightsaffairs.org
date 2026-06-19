@@ -59,22 +59,31 @@ export default function DonationAnalyticsPage() {
 
   const { data: permissions, loading: permissionsLoading } = useDoc(userRegistryRef);
 
-  const donationsQuery = useMemoFirebase(() => {
-    // 🛡️ Guard: Only fire the query if the user is Root OR if we've confirmed they have the 'analytics' permission
-    const isRoot = user?.email?.toLowerCase() === 'deydhritiman@gmail.com';
-    const hasPermission = isRoot || permissions?.permissions?.analytics === true;
-
-    if (!db || !user || permissionsLoading || !hasPermission) return null;
-    return query(collection(db, 'donations'), orderBy('createdAt', 'desc'));
-  }, [db, user, permissions, permissionsLoading]);
-
-  const { data: donations, loading: dataLoading } = useCollection(donationsQuery);
+  const isRoot = user?.email?.toLowerCase() === 'deydhritiman@gmail.com';
+  const hasAccess = isRoot || (permissions?.permissions?.analytics === true);
 
   useEffect(() => {
     if (!authLoading && !user) {
       router.push('/internal/login')
+      return;
     }
-  }, [user, authLoading, router])
+
+    // 🛡️ SECURITY REDIRECT: If staff lacks analytics permission, bounce them
+    if (!authLoading && user && !permissionsLoading && permissions) {
+      if (!isRoot && permissions.permissions?.analytics !== true) {
+        console.warn("Unauthorized access attempt to Analytics. Redirecting...");
+        // Bounce to public mirror or events as a safe operational page
+        router.push('/internal/public-view');
+      }
+    }
+  }, [user, authLoading, permissions, permissionsLoading, router, isRoot])
+
+  const donationsQuery = useMemoFirebase(() => {
+    if (!db || !user || permissionsLoading || !hasAccess) return null;
+    return query(collection(db, 'donations'), orderBy('createdAt', 'desc'));
+  }, [db, user, permissions, permissionsLoading, hasAccess]);
+
+  const { data: donations, loading: dataLoading } = useCollection(donationsQuery);
 
   const stats = useMemo(() => {
     if (!donations) return { total: 0, count: 0, chartData: [], methods: [] };
@@ -111,7 +120,7 @@ export default function DonationAnalyticsPage() {
     }
   }
 
-  if (authLoading || !user || permissionsLoading) {
+  if (authLoading || !user || permissionsLoading || !hasAccess) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
         <div className="text-center space-y-4">

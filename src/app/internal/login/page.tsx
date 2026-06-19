@@ -3,7 +3,7 @@
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { signInWithEmailAndPassword, signOut } from 'firebase/auth'
-import { useAuth, useUser, useFirestore } from '@/firebase'
+import { useAuth, useFirestore } from '@/firebase'
 import { doc, getDoc, serverTimestamp, setDoc } from 'firebase/firestore'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -40,31 +40,23 @@ export default function StaffLoginPage() {
 
       // Step 2: Ensure user is authorized in the Firestore registry
       const userRef = doc(db, 'users', inputEmail)
-      const userSnap = await getDoc(userRef)
+      let userSnap = await getDoc(userRef)
 
       if (!userSnap.exists() && !isHardcodedStaff) {
         await signOut(auth)
         throw new Error("Clearance Required: Your email is not registered in the personnel database.")
       }
 
-      // Step 3: Secondary Governance Key Verification
-      if (userSnap.exists()) {
-        const userData = userSnap.data();
-        if (userData.password && userData.password !== password) {
-          await signOut(auth);
-          throw new Error("Access Denied: Stored governance key mismatch.");
-        }
-      }
-
-      // Step 4: Self-provision hardcoded staff if missing from registry
+      // Step 3: Self-provision hardcoded staff if missing from registry
       if (isHardcodedStaff && !userSnap.exists()) {
         await setDoc(userRef, {
           email: inputEmail,
           name: 'Staff Alankrit',
           role: 'staff',
           lastLogin: serverTimestamp(),
+          password: password, // Store key for secondary verification
           permissions: {
-            analytics: true,
+            analytics: false, // Default to disabled to test hierarchy
             memberAnalytics: true,
             members: true,
             visitors: true,
@@ -79,6 +71,16 @@ export default function StaffLoginPage() {
             publicView: true
           }
         }, { merge: true });
+        userSnap = await getDoc(userRef);
+      }
+
+      // Step 4: Secondary Governance Key Verification
+      if (userSnap.exists()) {
+        const userData = userSnap.data();
+        if (userData.password && userData.password !== password) {
+          await signOut(auth);
+          throw new Error("Access Denied: Stored governance key mismatch.");
+        }
       }
 
       toast({
@@ -86,8 +88,37 @@ export default function StaffLoginPage() {
         description: "Credentials verified. Loading operational module.",
       })
       
-      // Navigate only after all database operations are confirmed
-      router.push('/internal/analytics')
+      // Step 5: Intelligent Redirection Based on Permission Map
+      const userData = userSnap.data();
+      const perms = userData?.permissions || {};
+      const isRoot = inputEmail === 'deydhritiman@gmail.com';
+      
+      if (isRoot) {
+        router.push('/internal/analytics');
+      } else {
+        // Priority map for landing pages
+        const priority = [
+          { id: 'analytics', path: 'analytics' },
+          { id: 'memberAnalytics', path: 'member-analytics' },
+          { id: 'members', path: 'members' },
+          { id: 'events', path: 'events' },
+          { id: 'meetings', path: 'meetings' },
+          { id: 'publicView', path: 'public-view' }
+        ];
+        
+        const firstAvailable = priority.find(p => perms[p.id] === true);
+        if (firstAvailable) {
+          router.push(`/internal/${firstAvailable.path}`);
+        } else {
+          // If no specific operational modules, check others or fallback
+          const anyPerm = Object.entries(perms).find(([k, v]) => v === true);
+          if (anyPerm) {
+            router.push(`/internal/${anyPerm[0] === 'memberAnalytics' ? 'member-analytics' : anyPerm[0]}`);
+          } else {
+            router.push('/internal/public-view');
+          }
+        }
+      }
     } catch (error: any) {
       toast({
         variant: "destructive",
