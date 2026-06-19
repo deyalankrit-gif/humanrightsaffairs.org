@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useEffect, useState } from 'react'
@@ -113,10 +112,11 @@ export default function AccessRolesPage() {
     setIsSaving(`${userEmail}-${module}`)
     
     const userRef = doc(db, 'users', userEmail.toLowerCase().trim())
+    
+    // 🛡️ FIX: Use dot notation to update a specific nested field.
+    // This prevents overwriting the entire permissions object.
     const updateData = {
-      permissions: {
-        [module]: !currentVal
-      },
+      [`permissions.${module}`]: !currentVal,
       updatedAt: serverTimestamp()
     }
     
@@ -349,7 +349,7 @@ export default function AccessRolesPage() {
                                 <AlertDialog>
                                   <AlertDialogTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8 text-slate-600 hover:text-red-500 rounded-full transition-colors"><Trash2 className="w-4 h-4" /></Button></AlertDialogTrigger>
                                   <AlertDialogContent className="bg-slate-900 border-white/10 text-white rounded-[2rem]">
-                                    <AlertDialogHeader><AlertDialogTitle className="flex items-center gap-2 text-red-500"><AlertTriangle className="w-6 h-6" /> Revoke Clearance?</AlertDialogTitle><AlertDialogDescription className="text-slate-400">Permanently purge the record for <strong className="text-white">{u.email || u.id}</strong>? Access will be terminated immediately.</AlertDialogDescription></AlertDialogHeader>
+                                    <AlertDialogHeader><AlertDialogTitle className="flex items-center gap-2 text-red-500"><AlertTriangle className="w-6 h-6" /> Revoke Clearance?</AlertDialogTitle><AlertDialogDescription className="text-slate-400 uppercase tracking-widest text-[10px]">Permanently purge the record for <strong className="text-white">{u.email || u.id}</strong>? Access will be terminated immediately.</AlertDialogDescription></AlertDialogHeader>
                                     <AlertDialogFooter><AlertDialogCancel className="bg-white/5 border-white/10 text-white rounded-xl">Cancel</AlertDialogCancel><AlertDialogAction onClick={() => handleDeleteUser(u.id)} className="bg-red-600 hover:bg-red-700 rounded-xl font-bold">{isDeleting === u.id ? <Loader2 className="animate-spin" /> : "Revoke Clearance"}</AlertDialogAction></AlertDialogFooter>
                                   </AlertDialogContent>
                                 </AlertDialog>
@@ -365,7 +365,12 @@ export default function AccessRolesPage() {
                               return (
                                 <div key={mod.id} className={cn("flex items-center justify-between p-3 rounded-2xl border transition-all duration-300", hasAccess ? "bg-emerald-500/5 border-emerald-900/30 text-emerald-400" : "bg-black/20 border-white/5 text-slate-500")}>
                                   <span className="text-[10px] font-bold uppercase tracking-tighter">{mod.label}</span>
-                                  <Switch checked={hasAccess} disabled={isSaving === loadingId || u.role === 'admin'} onCheckedChange={() => handleTogglePermission(u.id, mod.id, hasAccess)} className="data-[state=checked]:bg-emerald-500" />
+                                  <Switch 
+                                    checked={hasAccess} 
+                                    disabled={isSaving === loadingId || u.role === 'admin'} 
+                                    onCheckedChange={() => handleTogglePermission(u.id, mod.id, hasAccess)} 
+                                    className="data-[state=checked]:bg-emerald-500" 
+                                  />
                                 </div>
                               )
                             })}
@@ -382,7 +387,10 @@ export default function AccessRolesPage() {
 
       <Dialog open={isEditDialogOpen} onOpenChange={setIsAddingEditDialogOpen}>
         <DialogContent className="bg-slate-900 border-white/5 text-white rounded-[2.5rem] shadow-2xl">
-          <DialogHeader><DialogTitle className="text-2xl font-headline font-bold flex items-center gap-2"><Edit className="w-6 h-6 text-accent" /> Update Staff Profile</DialogTitle><DialogDescription className="text-slate-400 uppercase tracking-widest text-[10px]">Modify registry metadata for authorized official.</DialogDescription></DialogHeader>
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-headline font-bold flex items-center gap-2"><Edit className="w-6 h-6 text-accent" /> Update Staff Profile</DialogTitle>
+            <DialogDescription className="text-slate-400 uppercase tracking-widest text-[10px]">Modify registry metadata for authorized official.</DialogDescription>
+          </DialogHeader>
           {editingUser && (
             <form onSubmit={handleUpdateStaff} className="space-y-6 py-4">
                <div className="space-y-2"><Label className="text-[10px] font-bold uppercase text-slate-500">Official Identity (Registry ID)</Label><Input value={editingUser.email} disabled className="bg-black/30 border-white/5 text-slate-500 rounded-xl h-11" /></div>
