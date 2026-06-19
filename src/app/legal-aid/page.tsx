@@ -205,7 +205,9 @@ export default function LegalAidServicesPage() {
               <div className="p-3 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20">
                 <Gavel className="w-8 h-8 text-accent" />
               </div>
-              <Badge className="bg-accent text-primary font-bold px-3 py-1 uppercase tracking-tighter text-[10px]">Access to Justice</Badge>
+              <Badge className="bg-accent text-primary font-bold px-3 py-1 uppercase tracking-tighter text-[10px] hover:bg-accent hover:text-primary transition-colors border-none shadow-sm cursor-default">
+                Access to Justice
+              </Badge>
             </div>
             <h1 className="text-4xl md:text-6xl font-headline font-bold mb-6 leading-tight">
               Affordable <span className="text-accent italic">Legal Aid</span> Services
@@ -225,7 +227,7 @@ export default function LegalAidServicesPage() {
               <Card key={service.id} className="border-none shadow-sm hover:shadow-xl transition-all duration-500 rounded-[2.5rem] bg-white dark:bg-slate-900 group">
                 <CardHeader className="p-8 pb-4">
                    <div className="flex items-start gap-6">
-                      <div className="w-14 h-14 rounded-2xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center shrink-0 group-hover:bg-accent group-hover:text-white transition-colors duration-500">
+                      <div className="w-14 h-14 rounded-2xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center shrink-0 group-hover:bg-accent transition-colors duration-500">
                         <service.Icon className={cn("w-6 h-6 transition-colors", service.iconColor, "group-hover:text-white")} />
                       </div>
                       <div className="space-y-1">
