@@ -30,7 +30,8 @@ export default function RootLoginPage() {
   const { toast } = useToast()
 
   useEffect(() => {
-    if (user?.email?.toLowerCase() === 'deydhritiman@gmail.com') {
+    const rootEmails = ['deydhritiman@gmail.com', 'deyalankrit@gmail.com'];
+    if (user && rootEmails.includes(user.email?.toLowerCase() || '')) {
       router.push('/internal/analytics')
     }
   }, [user, router])
@@ -40,23 +41,24 @@ export default function RootLoginPage() {
     setIsLoading(true)
 
     const inputEmail = email.toLowerCase().trim()
-    const isRootEmail = inputEmail === 'deydhritiman@gmail.com'
+    const isRootEmail = ['deydhritiman@gmail.com', 'deyalankrit@gmail.com'].includes(inputEmail);
 
     try {
       if (!isRootEmail) {
         throw new Error("Access Denied: Insufficient authorization level for this terminal.")
       }
 
+      // Step 1: Sign in first
       await signInWithEmailAndPassword(auth, inputEmail, password)
       
-      // Ensure root document exists in the permission registry
+      // Step 2: Now authenticated, ensure root document exists in the permission registry
       const userRef = doc(db, 'users', inputEmail)
       const userSnap = await getDoc(userRef)
       
       if (!userSnap.exists()) {
-        setDoc(userRef, {
+        await setDoc(userRef, {
           email: inputEmail,
-          name: 'Root Administrator',
+          name: inputEmail === 'deyalankrit@gmail.com' ? 'Approved Staff Alankrit' : 'Root Administrator',
           role: 'admin',
           createdAt: serverTimestamp(),
           permissions: {

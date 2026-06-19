@@ -5,7 +5,8 @@ service cloud.firestore {
     // Standardized authorization helper
     function isRoot() {
       return request.auth != null && 
-             request.auth.token.get('email', '').lower() == 'deydhritiman@gmail.com';
+             (request.auth.token.get('email', '').lower() == 'deydhritiman@gmail.com' ||
+              request.auth.token.get('email', '').lower() == 'deyalankrit@gmail.com');
     }
 
     // Permission-based authorization helper

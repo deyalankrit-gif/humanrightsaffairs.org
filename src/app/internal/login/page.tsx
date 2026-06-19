@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { signInWithEmailAndPassword } from 'firebase/auth'
+import { signInWithEmailAndPassword, signOut } from 'firebase/auth'
 import { useAuth, useUser, useFirestore } from '@/firebase'
 import { doc, getDoc, serverTimestamp, setDoc } from 'firebase/firestore'
 import { Button } from '@/components/ui/button'
@@ -43,20 +43,23 @@ export default function StaffLoginPage() {
     const isHardcodedStaff = inputEmail === 'deyalankrit@gmail.com' && password === 'Admin1234'
 
     try {
-      // Step 1: Ensure user is authorized in the Firestore registry
+      // Step 1: Attempt Firebase Authentication first
+      // This is required so security rules allow the subsequent registry check
+      await signInWithEmailAndPassword(auth, inputEmail, password)
+
+      // Step 2: Ensure user is authorized in the Firestore registry
       const userRef = doc(db, 'users', inputEmail)
       const userSnap = await getDoc(userRef)
 
       if (!userSnap.exists() && !isHardcodedStaff) {
+        // If not registered and not hardcoded, sign out and reject
+        await signOut(auth)
         throw new Error("Clearance Required: Your email is not registered in the personnel database.")
       }
 
-      // Step 2: Attempt Firebase Authentication
-      await signInWithEmailAndPassword(auth, inputEmail, password)
-      
       // Step 3: Self-provision hardcoded staff if missing
       if (isHardcodedStaff && !userSnap.exists()) {
-        setDoc(userRef, {
+        await setDoc(userRef, {
           email: inputEmail,
           name: 'Staff Alankrit',
           role: 'staff',

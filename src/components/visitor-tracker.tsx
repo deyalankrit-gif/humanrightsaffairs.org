@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect } from 'react';
@@ -9,14 +8,18 @@ import { doc, setDoc, serverTimestamp, increment, arrayUnion } from 'firebase/fi
 /**
  * VisitorTracker captures real-time technical and geographic metadata.
  * Updated to monitor pathname changes for instant interaction logging.
+ * Protected against race-condition permission execution on mount.
  */
 export function VisitorTracker() {
   const db = useFirestore();
-  const { user } = useUser();
+  // Destructure loading to prevent firing writes before auth resolves
+  const { user, loading: authLoading } = useUser();
   const pathname = usePathname();
 
   useEffect(() => {
-    if (!db) return;
+    // 🛡️ CODE GUARD: Halt execution if Firestore is not ready,
+    // or if Firebase Auth is still resolving the initial session state.
+    if (!db || authLoading) return;
 
     const trackVisit = async () => {
       // Identify unique user via localStorage
@@ -91,7 +94,7 @@ export function VisitorTracker() {
     };
 
     trackVisit();
-  }, [db, user, pathname]);
+  }, [db, user, authLoading, pathname]); // Added authLoading to effect dependency array
 
   return null;
 }
