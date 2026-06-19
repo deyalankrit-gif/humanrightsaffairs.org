@@ -29,7 +29,9 @@ import {
   Activity,
   History,
   AlertTriangle,
-  Key
+  Key,
+  Eye,
+  EyeOff
 } from 'lucide-react'
 import {
   AlertDialog,
@@ -74,6 +76,8 @@ export default function AccessRolesPage() {
   const [newEmail, setNewEmail] = useState('')
   const [newName, setNewName] = useState('')
   const [newPassword, setNewPassword] = useState('')
+  const [showNewPassword, setShowNewPassword] = useState(false)
+  const [visiblePasswords, setVisiblePasswords] = useState<Record<string, boolean>>({})
   const [isDeleting, setIsDeleting] = useState<string | null>(null)
 
   const isRoot = user?.email?.toLowerCase() === 'deydhritiman@gmail.com'
@@ -182,6 +186,13 @@ export default function AccessRolesPage() {
       })
   }
 
+  const togglePasswordVisibility = (email: string) => {
+    setVisiblePasswords(prev => ({
+      ...prev,
+      [email]: !prev[email]
+    }))
+  }
+
   if (authLoading || !isRoot) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-950">
@@ -260,14 +271,21 @@ export default function AccessRolesPage() {
                         <Label className="text-[10px] font-bold uppercase text-slate-500">Governance Key (Password) *</Label>
                         <div className="relative">
                            <Input 
-                            type="password"
+                            type={showNewPassword ? "text" : "password"}
                             value={newPassword} 
                             onChange={e => setNewPassword(e.target.value)} 
-                            className="bg-black/50 border-white/5 text-white rounded-xl h-11 pl-10"
+                            className="bg-black/50 border-white/5 text-white rounded-xl h-11 pl-10 pr-10"
                             placeholder="••••••••"
                             required
                           />
                           <Key className="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-600" />
+                          <button
+                            type="button"
+                            onClick={() => setShowNewPassword(!showNewPassword)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors"
+                          >
+                            {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                          </button>
                         </div>
                       </div>
                       <Button 
@@ -314,9 +332,26 @@ export default function AccessRolesPage() {
                             </div>
                             <div>
                                <CardTitle className="text-xl font-headline font-bold text-white">{u.name || u.id.split('@')[0]}</CardTitle>
-                               <div className="flex items-center gap-2">
-                                  <Mail className="w-3 h-3 text-red-500" />
-                                  <span className="text-[10px] font-mono text-slate-500">{u.id}</span>
+                               <div className="flex flex-wrap items-center gap-3">
+                                  <div className="flex items-center gap-1.5">
+                                    <Mail className="w-3 h-3 text-red-500" />
+                                    <span className="text-[10px] font-mono text-slate-500">{u.id}</span>
+                                  </div>
+                                  
+                                  {u.password && (
+                                    <div className="flex items-center gap-2 bg-black/40 px-2.5 py-1 rounded-lg border border-white/5">
+                                       <span className="text-[8px] font-black text-slate-600 uppercase tracking-widest">Key:</span>
+                                       <span className="text-[10px] font-mono text-accent">
+                                          {visiblePasswords[u.id] ? u.password : "••••••••"}
+                                       </span>
+                                       <button 
+                                        onClick={() => togglePasswordVisibility(u.id)}
+                                        className="text-slate-500 hover:text-white transition-colors"
+                                       >
+                                          {visiblePasswords[u.id] ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+                                       </button>
+                                    </div>
+                                  )}
                                </div>
                             </div>
                          </div>
