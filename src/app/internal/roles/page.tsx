@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase'
-import { collection, query, orderBy, doc, setDoc, deleteDoc, serverTimestamp } from 'firebase/firestore'
+import { collection, query, orderBy, doc, setDoc, deleteDoc, serverTimestamp, updateDoc } from 'firebase/firestore'
 import { Footer } from '@/components/footer'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -30,7 +30,8 @@ import {
   AlertTriangle,
   Key,
   Eye,
-  EyeOff
+  EyeOff,
+  Edit
 } from 'lucide-react'
 import {
   AlertDialog,
@@ -43,6 +44,14 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from "@/components/ui/dialog"
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
@@ -73,12 +82,18 @@ export default function AccessRolesPage() {
   const [search, setSearch] = useState('')
   const [isSaving, setIsSaving] = useState<string | null>(null)
   const [isAdding, setIsAdding] = useState(false)
+  const [isUpdating, setIsUpdating] = useState(false)
   const [newEmail, setNewEmail] = useState('')
   const [newName, setNewName] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [showNewPassword, setShowNewPassword] = useState(false)
   const [visiblePasswords, setVisiblePasswords] = useState<Record<string, boolean>>({})
   const [isDeleting, setIsDeleting] = useState<string | null>(null)
+  
+  // Edit State
+  const [editingUser, setEditingUser] = useState<any>(null)
+  const [isEditDialogOpen, setIsAddingEditDialogOpen] = useState(false)
+  const [showEditPassword, setShowEditPassword] = useState(false)
 
   const isRoot = user?.email?.toLowerCase() === 'deydhritiman@gmail.com'
 
@@ -155,6 +170,36 @@ export default function AccessRolesPage() {
         } satisfies SecurityRuleContext);
         errorEmitter.emit('permission-error', permissionError);
         setIsAdding(false)
+      })
+  }
+
+  const handleUpdateStaff = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!db || !isRoot || !editingUser) return
+    setIsUpdating(true)
+
+    const userRef = doc(db, 'users', editingUser.email.toLowerCase().trim())
+    const updateData = {
+      name: editingUser.name,
+      password: editingUser.password,
+      updatedAt: serverTimestamp()
+    }
+
+    updateDoc(userRef, updateData)
+      .then(() => {
+        toast({ title: "Profile Updated", description: `Record for ${editingUser.email} has been refreshed.` })
+        setEditingUser(null)
+        setIsAddingEditDialogOpen(false)
+        setIsUpdating(false)
+      })
+      .catch(async (err) => {
+        const permissionError = new FirestorePermissionError({
+          path: userRef.path,
+          operation: 'update',
+          requestResourceData: updateData,
+        } satisfies SecurityRuleContext);
+        errorEmitter.emit('permission-error', permissionError);
+        setIsUpdating(false)
       })
   }
 
@@ -361,32 +406,42 @@ export default function AccessRolesPage() {
                             </Badge>
                             
                             {u.role === 'staff' && (
-                              <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                  <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-600 hover:text-red-500 rounded-full transition-colors">
-                                    <Trash2 className="w-4 h-4" />
-                                  </Button>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent className="bg-slate-900 border-white/10 text-white rounded-[2rem] shadow-2xl">
-                                  <AlertDialogHeader>
-                                    <AlertDialogTitle className="flex items-center gap-2 text-red-500">
-                                      <AlertTriangle className="w-6 h-6" /> Revoke Access?
-                                    </AlertDialogTitle>
-                                    <AlertDialogDescription className="text-slate-400">
-                                      This will permanently purge the institutional permissions for <strong className="text-white">{u.id}</strong>. The user will be unable to access administrative modules immediately.
-                                    </AlertDialogDescription>
-                                  </AlertDialogHeader>
-                                  <AlertDialogFooter>
-                                    <AlertDialogCancel className="bg-white/5 border-white/10 text-white rounded-xl hover:bg-white/10">Cancel</AlertDialogCancel>
-                                    <AlertDialogAction 
-                                      onClick={() => handleDeleteUser(u.id)}
-                                      className="bg-red-600 hover:bg-red-700 rounded-xl font-bold"
-                                    >
-                                      {isDeleting === u.id ? <Loader2 className="animate-spin w-4 h-4" /> : "Revoke Clearance"}
-                                    </AlertDialogAction>
-                                  </AlertDialogFooter>
-                                </AlertDialogContent>
-                              </AlertDialog>
+                              <div className="flex items-center gap-2">
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon" 
+                                  onClick={() => { setEditingUser({ ...u, email: u.id }); setIsAddingEditDialogOpen(true); }}
+                                  className="h-8 w-8 text-slate-600 hover:text-accent rounded-full transition-colors"
+                                >
+                                  <Edit className="w-4 h-4" />
+                                </Button>
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-600 hover:text-red-500 rounded-full transition-colors">
+                                      <Trash2 className="w-4 h-4" />
+                                    </Button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent className="bg-slate-900 border-white/10 text-white rounded-[2rem] shadow-2xl">
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle className="flex items-center gap-2 text-red-500">
+                                        <AlertTriangle className="w-6 h-6" /> Revoke Access?
+                                      </AlertDialogTitle>
+                                      <AlertDialogDescription className="text-slate-400">
+                                        This will permanently purge the institutional permissions for <strong className="text-white">{u.id}</strong>. The user will be unable to access administrative modules immediately.
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel className="bg-white/5 border-white/10 text-white rounded-xl hover:bg-white/10">Cancel</AlertDialogCancel>
+                                      <AlertDialogAction 
+                                        onClick={() => handleDeleteUser(u.id)}
+                                        className="bg-red-600 hover:bg-red-700 rounded-xl font-bold"
+                                      >
+                                        {isDeleting === u.id ? <Loader2 className="animate-spin w-4 h-4" /> : "Revoke Clearance"}
+                                      </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
+                              </div>
                             )}
                          </div>
                       </CardHeader>
@@ -424,6 +479,75 @@ export default function AccessRolesPage() {
           </div>
         </div>
       </section>
+
+      {/* Edit Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsAddingEditDialogOpen}>
+        <DialogContent className="bg-slate-900 border-white/5 text-white rounded-[2.5rem] shadow-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-headline font-bold flex items-center gap-2">
+               <Edit className="w-6 h-6 text-accent" /> Update Staff Profile
+            </DialogTitle>
+            <DialogDescription className="text-slate-400">
+               Modify institutional credentials for this authorized official.
+            </DialogDescription>
+          </DialogHeader>
+          {editingUser && (
+            <form onSubmit={handleUpdateStaff} className="space-y-6 py-4">
+               <div className="space-y-2">
+                  <Label className="text-[10px] font-bold uppercase text-slate-500">Official Email (Registry ID)</Label>
+                  <Input 
+                    value={editingUser.email} 
+                    disabled 
+                    className="bg-black/30 border-white/5 text-slate-500 rounded-xl h-11"
+                  />
+                  <p className="text-[8px] text-red-500 uppercase font-bold">* Primary identity key cannot be changed.</p>
+               </div>
+               
+               <div className="space-y-2">
+                  <Label className="text-[10px] font-bold uppercase text-slate-500">Official Name</Label>
+                  <Input 
+                    value={editingUser.name} 
+                    onChange={e => setEditingUser({ ...editingUser, name: e.target.value })} 
+                    className="bg-black/50 border-white/5 text-white rounded-xl h-11"
+                    placeholder="Full Name"
+                  />
+               </div>
+
+               <div className="space-y-2">
+                  <Label className="text-[10px] font-bold uppercase text-slate-500">Governance Key (Update)</Label>
+                  <div className="relative">
+                     <Input 
+                      type={showEditPassword ? "text" : "password"}
+                      value={editingUser.password} 
+                      onChange={e => setEditingUser({ ...editingUser, password: e.target.value })} 
+                      className="bg-black/50 border-white/5 text-white rounded-xl h-11 pl-10 pr-10 font-mono"
+                      placeholder="••••••••"
+                      required
+                    />
+                    <Key className="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-600" />
+                    <button
+                      type="button"
+                      onClick={() => setShowEditPassword(!showEditPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors"
+                    >
+                      {showEditPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+               </div>
+
+               <DialogFooter>
+                  <Button 
+                    type="submit" 
+                    disabled={isUpdating} 
+                    className="w-full h-12 bg-accent text-primary font-bold rounded-xl shadow-xl shadow-accent/10"
+                  >
+                    {isUpdating ? <Loader2 className="animate-spin w-5 h-5" /> : "Commit Profile Changes"}
+                  </Button>
+               </DialogFooter>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
 
       <Footer />
     </main>
