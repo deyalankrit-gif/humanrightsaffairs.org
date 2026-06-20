@@ -76,7 +76,7 @@ export function Footer() {
               </li>
               <li>
                 <Link href="/trust-responsibilities" className="hover:text-accent transition-colors font-medium leading-tight inline-block">
-                  <span className="text-emerald-400">Duties and Responsibilities of Trust</span> Staff, Volunteers, and Leaders
+                  <span className="text-emerald-400">Duties and Responsibilities of Trust Staff, Volunteers, and Leaders</span>
                 </Link>
               </li>
             </ul>
