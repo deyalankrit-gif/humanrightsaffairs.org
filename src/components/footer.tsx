@@ -75,8 +75,8 @@ export function Footer() {
                 </DonationDialog>
               </li>
               <li>
-                <Link href="/trust-responsibilities" className="hover:text-accent transition-colors font-medium leading-tight inline-block">
-                  <span className="text-emerald-400">Duties and Responsibilities of Trust Staff, Volunteers, and Leaders</span>
+                <Link href="/trust-responsibilities" className="text-emerald-400 hover:text-primary-foreground transition-colors font-medium leading-tight inline-block">
+                  Duties and Responsibilities of Trust Staff, Volunteers, and Leaders
                 </Link>
               </li>
             </ul>
