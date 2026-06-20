@@ -67,6 +67,95 @@ export default function TrustResponsibilitiesPage() {
     }
   ]
 
+  const bengaliGuidelines = [
+    {
+      title: "১. মানবিক সহায়তা ও সামাজিক দায়িত্ব",
+      items: [
+        "অসহায়, দুঃস্থ ও বিপদগ্রস্ত মানুষের পাশে দাঁড়ানো।",
+        "দুর্ঘটনা, অসুস্থতা বা জরুরি পরিস্থিতিতে যথাসম্ভব সহায়তা প্রদান।",
+        "প্রবীণ, বিধবা, প্রতিবন্ধী ও সমাজের অবহেলিত মানুষের কল্যাণে কাজ করা।",
+        "রক্তদান, স্বাস্থ্য শিবির ও জনসচেতনতামূলক কর্মসূচিতে অংশগ্রহণ করা।"
+      ]
+    },
+    {
+      title: "২. মানবাধিকার সুরক্ষা",
+      items: [
+        "মানবাধিকার লঙ্ঘনের ঘটনা সম্পর্কে সচেতন থাকা।",
+        "অন্যায়, বৈষম্য, নির্যাতন বা শোষণের বিরুদ্ধে প্রতিবাদ জানানো।",
+        "মানবাধিকার লঙ্ঘনের ঘটনা যথাযথ কর্তৃপক্ষ ও প্রশাসনের নজরে আনা।",
+        "ন্যায়বিচার প্রতিষ্ঠার লক্ষ্যে আইনসম্মত ও শান্তিপূর্ণ পদক্ষেপ গ্রহণ করা।"
+      ]
+    },
+    {
+      title: "৩. আইনি সহায়তা",
+      items: [
+        "দরিদ্র ও অসহায় মানুষকে প্রাথমিক আইনি পরামর্শ প্রদানে সহযোগিতা করা।",
+        "প্রয়োজনে আইনজীবী বা সংশ্লিষ্ট বিশেষজ্ঞের সাথে যোগাযোগ স্থাপনে সহায়তা করা।",
+        "আইন সম্পর্কে সাধারণ মানুষের মধ্যে সচেতনতা বৃদ্ধি করা।",
+        "ভুক্তভোগীদের অভিযোগ ও আবেদনপত্র প্রস্তুতে সহযোগিতা করা।"
+      ]
+    },
+    {
+      title: "৪. শিক্ষা ও শিশু কল্যাণ",
+      items: [
+        "সুবিধাবঞ্চিত শিশুদের শিক্ষার সুযোগ বৃদ্ধিতে কাজ করা।",
+        "স্কুলছুট শিশুদের পুনরায় শিক্ষার আওতায় আনতে উদ্যোগ নেওয়া।",
+        "শিক্ষাসামগ্রী, বই, খাতা ও অন্যান্য প্রয়োজনীয় সহায়তা প্রদানে সহযোগিতা করা।",
+        "শিশু অধিকার ও শিশু সুরক্ষা বিষয়ে সচেতনতা বৃদ্ধি করা।"
+      ]
+    },
+    {
+      title: "৫. নারী ও শিশু সুরক্ষা",
+      items: [
+        "নারী নির্যাতন, বাল্যবিবাহ, পাচার ও সহিংসতার বিরুদ্ধে সচেতনতা গড়ে তোলা।",
+        "নির্যাতিত নারী ও শিশুদের প্রয়োজনীয় সহায়তা ও পরামর্শ প্রদান করা।",
+        "নারীদের স্বনির্ভরতা ও দক্ষতা উন্নয়নে সহায়ক কর্মসূচি পরিচালনা করা।"
+      ]
+    },
+    {
+      title: "৬. কর্মসংস্থান ও স্বনির্ভরতা",
+      items: [
+        "বেকার ও আর্থিকভাবে পিছিয়ে পড়া মানুষের কর্মসংস্থানের সুযোগ তৈরিতে সহযোগিতা করা।",
+        "কারিগরি শিক্ষা, দক্ষতা উন্নয়ন ও প্রশিক্ষণমূলক কর্মসূচি আয়োজন করা।",
+        "ক্ষুদ্র উদ্যোক্তা ও স্বনির্ভর প্রকল্পকে উৎসাহিত করা।"
+      ]
+    },
+    {
+      title: "৭. দুর্যোগ ও ত্রাণ কার্যক্রম",
+      items: [
+        "বন্যা, ঘূর্ণিঝড়, ভূমিকম্প, অগ্নিকাণ্ডসহ প্রাকৃতিক ও মানবসৃষ্ট দুর্যোগে ক্ষতিগ্রস্ত মানুষের পাশে দাঁড়ানো।",
+        "ত্রাণ, খাদ্য, বস্ত্র, ওষুধ ও অন্যান্য জরুরি সামগ্রী বিতরণে অংশগ্রহণ করা।",
+        "পুনর্বাসন কার্যক্রমে সহযোগিতা করা।"
+      ]
+    },
+    {
+      title: "৮. সামাজিক সচেতনতা বৃদ্ধি",
+      items: [
+        "মাদকবিরোধী, পরিবেশ সচেতনতা ও স্বাস্থ্য সচেতনতা কর্মসূচি পরিচালনা করা।",
+        "সামাজিক কুসংস্কার, বৈষম্য ও অসহিষ্ণুতার বিরুদ্ধে সচেতনতা তৈরি করা।",
+        "নাগরিক অধিকার ও দায়িত্ব সম্পর্কে জনগণকে অবহিত করা।"
+      ]
+    },
+    {
+      title: "৯. পরিবেশ ও জনকল্যাণ",
+      items: [
+        "বৃক্ষরোপণ ও পরিবেশ সংরক্ষণ কার্যক্রমে অংশগ্রহণ করা।",
+        "পরিষ্কার-পরিচ্ছন্নতা ও জনস্বাস্থ্য উন্নয়নে কাজ করা।",
+        "নিরাপদ ও সুস্থ পরিবেশ গড়ে তুলতে জনসচেতনতা বৃদ্ধি করা।"
+      ]
+    },
+    {
+      title: "১০. সংগঠনের নৈতিক দায়িত্ব",
+      items: [
+        "সততা, নিরপেক্ষতা ও মানবিক মূল্যবোধ বজায় রাখা।",
+        "সকল মানুষের প্রতি সমান সম্মান ও মর্যাদা প্রদর্শন করা।",
+        "ধর্ম, বর্ণ, লিঙ্গ, ভাষা বা রাজনৈতিক মতাদর্শ নির্বিশেষে সেবা প্রদান করা।",
+        "সংগঠনের সুনাম ও মর্যাদা রক্ষা করা।",
+        "আইন, সংবিধান ও মানবাধিকারের মৌলিক নীতিমালা মেনে চলা।"
+      ]
+    }
+  ]
+
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
       {/* Hero Section */}
@@ -167,11 +256,56 @@ export default function TrustResponsibilitiesPage() {
                     </Button>
                  </Link>
                </div>
-               <div className="mt-12">
-                 <Link href="/" className="text-slate-400 hover:text-primary transition-colors font-bold text-sm flex items-center justify-center gap-2">
-                   <ArrowLeft className="w-4 h-4" /> Return to Homepage
-                 </Link>
-               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Bengali Guidelines Section */}
+      <section className="py-24 bg-white dark:bg-slate-900 border-t-8 border-emerald-500/20">
+        <div className="container mx-auto px-4 max-w-4xl">
+          <div className="space-y-16">
+            <div className="text-center space-y-4">
+              <h2 className="text-2xl md:text-4xl font-headline font-bold text-primary dark:text-white">Human Rights Affairs Trust</h2>
+              <h3 className="text-xl md:text-3xl font-bold text-emerald-600 dark:text-emerald-400">কর্মী, স্বেচ্ছাসেবক ও নেতৃবৃন্দের করণীয় ও দায়িত্বসমূহ</h3>
+              <div className="bg-emerald-50 dark:bg-emerald-900/20 p-6 rounded-[2rem] border-2 border-emerald-100 dark:border-emerald-900 inline-block shadow-sm">
+                <p className="font-bold text-emerald-800 dark:text-emerald-400 text-lg">আমাদের মূল আদর্শ: “মানবতার সেবা, ন্যায়ের প্রতিষ্ঠা এবং মানবাধিকারের সুরক্ষা।”</p>
+              </div>
+            </div>
+
+            <div className="grid gap-10">
+              {bengaliGuidelines.map((section, idx) => (
+                <div key={idx} className="space-y-6 group">
+                  <h4 className="text-xl md:text-2xl font-bold text-primary dark:text-white border-l-4 border-accent pl-4 group-hover:text-accent transition-colors">{section.title}</h4>
+                  <ul className="grid gap-3 pl-4">
+                    {section.items.map((item, i) => (
+                      <li key={i} className="flex items-start gap-3 text-slate-700 dark:text-slate-300 font-medium">
+                        <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
+                        <span className="leading-relaxed">{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-20 p-10 md:p-16 rounded-[3rem] bg-slate-950 text-white text-center relative overflow-hidden shadow-2xl">
+              <div className="absolute top-0 right-0 w-48 h-48 bg-emerald-500/10 rounded-full -mr-24 -mt-24 blur-3xl"></div>
+              <p className="text-xs font-black uppercase tracking-[0.4em] text-accent mb-6">সংগঠনের অঙ্গীকার</p>
+              <p className="text-xl md:text-3xl font-bold italic leading-relaxed text-slate-200">
+                “আমরা অন্যায়ের বিরুদ্ধে সোচ্চার হব, ন্যায়ের পক্ষে দৃঢ়ভাবে দাঁড়াব, মানবাধিকারের সুরক্ষায় কাজ করব এবং মানবতার কল্যাণে নিজেদের সর্বোচ্চ সামর্থ্য নিয়োজিত রাখব।”
+              </p>
+              <div className="mt-12 flex justify-center opacity-30">
+                 <div className="relative w-20 h-20">
+                    <img src="/HRAT Logo.jpeg" alt="Logo" className="object-contain grayscale" />
+                 </div>
+              </div>
+            </div>
+
+            <div className="text-center pt-12">
+               <Link href="/" className="text-slate-400 hover:text-primary transition-colors font-bold text-sm flex items-center justify-center gap-2">
+                 <ArrowLeft className="w-4 h-4" /> Return to Homepage
+               </Link>
             </div>
           </div>
         </div>
