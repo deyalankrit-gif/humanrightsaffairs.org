@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useEffect } from 'react'
@@ -625,7 +624,7 @@ export default function MembersPage() {
                           
                           {isOfficeBearer && (
                             <div className="absolute top-1 left-1 bg-white/50 backdrop-blur-sm rounded-full p-0.5 z-10">
-                              <Star className="w-3 h-3 text-amber-500 fill-amber-400" />
+                              <Star className="w-3 h-3 text-emerald-500 fill-emerald-400" />
                             </div>
                           )}
 
