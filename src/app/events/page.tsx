@@ -318,7 +318,7 @@ export default function EventsPage() {
                         {newEvent.imageId && (
                           <div className="relative w-full aspect-video rounded-xl overflow-hidden">
                             <Image 
-                              src={newEvent.imageId?.startsWith('data:') ? newEvent.imageId : (PlaceHolderImages.find(i => i.id === newEvent.imageId)?.imageUrl || 'https://picsum.photos/seed/event/800/600')} 
+                              src={newEvent.imageId?.startsWith('data:') ? newMember.imageId : (PlaceHolderImages.find(i => i.id === newEvent.imageId)?.imageUrl || 'https://picsum.photos/seed/event/800/600')} 
                               alt="Preview" 
                               fill 
                               className="object-cover"
@@ -703,6 +703,10 @@ export default function EventsPage() {
       {/* Expanded Photo View */}
       <Dialog open={!!zoomedImage} onOpenChange={(open) => !open && setZoomedImage(null)}>
         <DialogContent className="max-w-[90vw] md:max-w-4xl p-0 border-none bg-transparent shadow-none [&>button]:hidden z-[10000002]">
+           <DialogHeader className="sr-only">
+             <DialogTitle>Expanded View</DialogTitle>
+             <DialogDescription>Full-sized event photograph.</DialogDescription>
+           </DialogHeader>
            <div className="relative aspect-[3/2] w-full rounded-[2.5rem] overflow-hidden shadow-2xl border-8 border-white dark:border-slate-900 bg-black">
               <Image src={zoomedImage || ''} alt="Zoomed" fill className="object-contain" />
               <Button 
