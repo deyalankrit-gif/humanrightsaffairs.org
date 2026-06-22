@@ -341,7 +341,7 @@ export default function EventsPage() {
                        <div className="grid grid-cols-1 gap-6">
                           {[0, 1, 2].map((idx) => (
                             <div key={idx} className="flex flex-col md:flex-row gap-4 items-start p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-inner">
-                               <div className="relative w-full md:w-32 aspect-[3/4] bg-slate-100 dark:bg-slate-800 rounded-xl overflow-hidden border-2 border-dashed border-slate-200 shrink-0">
+                               <div className="relative w-full md:w-32 aspect-[3/2] bg-slate-100 dark:bg-slate-800 rounded-xl overflow-hidden border-2 border-dashed border-slate-200 shrink-0">
                                   {newEvent.galleryImages[idx] ? (
                                     <Image src={newEvent.galleryImages[idx]} alt={`Gallery ${idx}`} fill className="object-cover" />
                                   ) : (
@@ -556,7 +556,7 @@ export default function EventsPage() {
                                        <div className="grid grid-cols-1 gap-6">
                                           {[0, 1, 2].map((idx) => (
                                             <div key={idx} className="flex flex-col md:flex-row gap-4 items-start p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100">
-                                               <div className="relative w-full md:w-32 aspect-[3/4] bg-slate-100 rounded-xl overflow-hidden border-2 border-dashed border-slate-200 shrink-0">
+                                               <div className="relative w-full md:w-32 aspect-[3/2] bg-slate-100 rounded-xl overflow-hidden border-2 border-dashed border-slate-200 shrink-0">
                                                   {(editEvent.galleryImages || ['', '', ''])[idx] ? (
                                                     <Image src={(editEvent.galleryImages || ['', '', ''])[idx]} alt={`Gallery ${idx}`} fill className="object-cover" />
                                                   ) : (
@@ -671,7 +671,7 @@ export default function EventsPage() {
                     <div className="grid md:grid-cols-3 gap-6">{[0, 1, 2].map((idx) => {
                         const img = selectedEventDetails.galleryImages?.[idx] || `https://picsum.photos/seed/event-${selectedEventDetails.id}-${idx}/600/800`
                         const caption = selectedEventDetails.galleryCaptions?.[idx] || (idx === 0 ? "On-ground Engagement" : idx === 1 ? "Legal Literacy Workshop" : "Community Outreach Session")
-                        return (<div key={idx} className="group relative aspect-[4/5] rounded-[2rem] overflow-hidden shadow-xl border-4 border-white dark:border-slate-800 transition-all hover:scale-[1.02]"><Image src={img} alt="Gallery" fill className="object-cover" /><div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-6"><p className="text-white text-xs font-bold uppercase tracking-widest leading-tight">{caption}</p></div></div>)
+                        return (<div key={idx} className="group relative aspect-[3/2] rounded-[2rem] overflow-hidden shadow-xl border-4 border-white dark:border-slate-800 transition-all hover:scale-[1.02]"><Image src={img} alt="Gallery" fill className="object-cover" /><div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-6"><p className="text-white text-xs font-bold uppercase tracking-widest leading-tight">{caption}</p></div></div>)
                       })}</div>
                   </div>
                   <div className="space-y-8"><h3 className="text-xs font-black uppercase tracking-[0.3em] text-primary dark:text-white flex items-center gap-2"><Film className="w-4 h-4 text-red-500" /> Mission Highlights</h3>
