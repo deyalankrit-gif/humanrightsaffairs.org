@@ -26,6 +26,7 @@
             "grievances": { "type": "boolean" },
             "meetings": { "type": "boolean" },
             "events": { "type": "boolean" },
+            "gallery": { "type": "boolean" },
             "publicView": { "type": "boolean" },
             "terminated": { "type": "boolean" },
             "renewals": { "type": "boolean" }
@@ -182,6 +183,20 @@
         "createdAt": { "type": "string", "format": "date-time" }
       }
     },
+    "GalleryItem": {
+      "title": "Gallery Item",
+      "description": "Standalone visual archive item for the public gallery.",
+      "type": "object",
+      "properties": {
+        "url": { "type": "string", "description": "Image data URI or URL." },
+        "caption": { "type": "string" },
+        "category": { "type": "string" },
+        "date": { "type": "string" },
+        "location": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["url", "caption", "category"]
+    },
     "TerminatedMember": {
       "title": "Terminated Member",
       "description": "Public notice of revoked or cancelled memberships.",
@@ -319,6 +334,7 @@
     "/memberProfiles/{profileId}": { "schema": "MemberProfile" },
     "/memberApplications/{appId}": { "schema": "MemberApplication" },
     "/events/{eventId}": { "schema": "Event" },
+    "/gallery/{itemId}": { "schema": "GalleryItem" },
     "/terminatedMembers/{memberId}": { "schema": "TerminatedMember" },
     "/leadership/{leaderId}": { "schema": "LeadershipMember" },
     "/meetings/{meetingId}": { "schema": "GeneralMeeting" },

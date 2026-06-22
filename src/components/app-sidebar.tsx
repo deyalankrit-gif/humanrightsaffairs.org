@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -74,6 +75,7 @@ const adminLinksConfig = [
   { name: 'Grievances', href: '/internal/grievances', icon: MessageSquareWarning, permission: 'grievances' },
   { name: 'Meetings', href: '/internal/meetings', icon: Handshake, permission: 'meetings' },
   { name: 'Events', href: '/internal/events', icon: Calendar, permission: 'events' },
+  { name: 'Gallery Archive', href: '/internal/gallery', icon: ImageIcon, permission: 'gallery' },
   { name: 'Access Roles', href: '/internal/roles', icon: Settings, rootOnly: true },
   { name: 'Public Site View', href: '/internal/public-view', icon: Monitor, permission: 'publicView' },
 ]

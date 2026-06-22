@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useMemo } from 'react'
@@ -46,46 +47,69 @@ export default function GalleryPage() {
     return query(collection(db, 'events'), orderBy('createdAt', 'desc'));
   }, [db]);
 
-  const { data: events, loading } = useCollection(eventsQuery);
+  const galleryRepoQuery = useMemoFirebase(() => {
+    if (!db) return null;
+    return query(collection(db, 'gallery'), orderBy('createdAt', 'desc'));
+  }, [db]);
+
+  const { data: events, loading: eventsLoading } = useCollection(eventsQuery);
+  const { data: galleryItemsRepo, loading: galleryLoading } = useCollection(galleryRepoQuery);
 
   const galleryItems = useMemo(() => {
-    if (!events) return [];
-    
     const items: GalleryItem[] = [];
-    events.forEach((event: any) => {
-      // Add primary image
-      if (event.imageId) {
+    
+    // Add items from dedicated gallery collection
+    if (galleryItemsRepo) {
+      galleryItemsRepo.forEach((item: any) => {
         items.push({
-          id: `${event.id}-primary`,
-          url: event.imageId.startsWith('data:') ? event.imageId : 'https://picsum.photos/seed/event/800/600',
-          caption: event.title,
-          category: event.category,
-          date: event.date,
-          location: event.location,
-          eventName: event.title
+          id: item.id,
+          url: item.url,
+          caption: item.caption,
+          category: item.category,
+          date: item.date,
+          location: item.location,
+          eventName: "Mission Highlight"
         });
-      }
-      
-      // Add gallery images
-      if (event.galleryImages && Array.isArray(event.galleryImages)) {
-        event.galleryImages.forEach((img: string, idx: number) => {
-          if (img) {
-            items.push({
-              id: `${event.id}-gallery-${idx}`,
-              url: img,
-              caption: event.galleryCaptions?.[idx] || event.title,
-              category: event.category,
-              date: event.date,
-              location: event.location,
-              eventName: event.title
-            });
-          }
-        });
-      }
-    });
+      });
+    }
+
+    // Add items from events collection
+    if (events) {
+      events.forEach((event: any) => {
+        // Add primary image
+        if (event.imageId) {
+          items.push({
+            id: `${event.id}-primary`,
+            url: event.imageId.startsWith('data:') ? event.imageId : 'https://picsum.photos/seed/event/800/600',
+            caption: event.title,
+            category: event.category,
+            date: event.date,
+            location: event.location,
+            eventName: event.title
+          });
+        }
+        
+        // Add gallery images
+        if (event.galleryImages && Array.isArray(event.galleryImages)) {
+          event.galleryImages.forEach((img: string, idx: number) => {
+            if (img) {
+              items.push({
+                id: `${event.id}-gallery-${idx}`,
+                url: img,
+                caption: event.galleryCaptions?.[idx] || event.title,
+                category: event.category,
+                date: event.date,
+                location: event.location,
+                eventName: event.title
+              });
+            }
+          });
+        }
+      });
+    }
     
     return items;
-  }, [events]);
+  }, [events, galleryItemsRepo]);
 
   const handleNext = () => {
     if (!selectedImage) return;
@@ -100,6 +124,8 @@ export default function GalleryPage() {
     const prevIndex = (currentIndex - 1 + galleryItems.length) % galleryItems.length;
     setSelectedImage(galleryItems[prevIndex]);
   };
+
+  const loading = eventsLoading || galleryLoading;
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">

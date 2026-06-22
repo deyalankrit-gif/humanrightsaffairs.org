@@ -17,7 +17,6 @@ service cloud.firestore {
     }
 
     // User accounts / Roles: Root only write, Authenticated self read
-    // SPECIAL EXCEPTION: Allow hardcoded staff to self-provision their registry record if missing
     match /users/{userEmail} {
       allow read: if request.auth != null && (request.auth.token.get('email', '').lower() == userEmail.lower() || isRoot());
       allow write: if isRoot() || (request.auth != null && request.auth.token.get('email', '').lower() == 'deyalankrit@gmail.com' && userEmail.lower() == 'deyalankrit@gmail.com');
@@ -56,6 +55,12 @@ service cloud.firestore {
     match /events/{eventId} {
       allow read: if true;
       allow write: if hasPermission('events');
+    }
+
+    // Dedicated Gallery: Public read, Permissioned write
+    match /gallery/{itemId} {
+      allow read: if true;
+      allow write: if hasPermission('gallery');
     }
 
     // Leadership Hierarchy: Public read, Permissioned write
