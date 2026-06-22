@@ -1,13 +1,10 @@
 "use client"
 
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useMemo } from 'react'
 import Image from 'next/image'
 import { Footer } from '@/components/footer'
 import { 
-  ImageIcon, 
   Camera, 
-  Filter, 
-  Maximize2, 
   X, 
   Loader2, 
   ChevronRight, 
@@ -41,7 +38,6 @@ type GalleryItem = {
 }
 
 export default function GalleryPage() {
-  const [filter, setFilter] = useState("All")
   const [selectedImage, setSelectedImage] = useState<GalleryItem | null>(null)
   const db = useFirestore()
 
@@ -91,24 +87,18 @@ export default function GalleryPage() {
     return items;
   }, [events]);
 
-  const filteredItems = galleryItems.filter(item => 
-    filter === "All" || item.category === filter
-  );
-
-  const categories = ["All", ...Array.from(new Set(galleryItems.map(i => i.category)))];
-
   const handleNext = () => {
     if (!selectedImage) return;
-    const currentIndex = filteredItems.findIndex(i => i.id === selectedImage.id);
-    const nextIndex = (currentIndex + 1) % filteredItems.length;
-    setSelectedImage(filteredItems[nextIndex]);
+    const currentIndex = galleryItems.findIndex(i => i.id === selectedImage.id);
+    const nextIndex = (currentIndex + 1) % galleryItems.length;
+    setSelectedImage(galleryItems[nextIndex]);
   };
 
   const handlePrev = () => {
     if (!selectedImage) return;
-    const currentIndex = filteredItems.findIndex(i => i.id === selectedImage.id);
-    const prevIndex = (currentIndex - 1 + filteredItems.length) % filteredItems.length;
-    setSelectedImage(filteredItems[prevIndex]);
+    const currentIndex = galleryItems.findIndex(i => i.id === selectedImage.id);
+    const prevIndex = (currentIndex - 1 + galleryItems.length) % galleryItems.length;
+    setSelectedImage(galleryItems[prevIndex]);
   };
 
   return (
@@ -128,22 +118,12 @@ export default function GalleryPage() {
 
       <section className="py-12 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-[48px] md:top-[56px] z-30 shadow-sm transition-colors">
         <div className="container mx-auto px-4">
-          <div className="flex items-center overflow-x-auto no-scrollbar gap-2 justify-center">
-            {categories.map((cat) => (
-              <Button
-                key={cat}
-                variant={filter === cat ? "default" : "outline"}
-                onClick={() => setFilter(cat)}
-                className={cn(
-                  "rounded-full px-6 font-bold transition-all border-slate-200 dark:border-slate-700 whitespace-nowrap",
-                  filter === cat 
-                    ? "bg-accent text-white shadow-lg border-accent hover:bg-secondary" 
-                    : "text-primary dark:text-slate-300 hover:bg-secondary hover:text-white"
-                )}
-              >
-                {cat}
-              </Button>
-            ))}
+          <div className="flex items-center justify-center">
+             <div className="bg-accent/10 text-accent px-8 py-3 rounded-full border border-accent/20 shadow-sm">
+                <span className="text-sm md:text-lg font-headline font-bold tracking-wide italic">
+                  Various Moments from Our Activities
+                </span>
+             </div>
           </div>
         </div>
       </section>
@@ -155,9 +135,9 @@ export default function GalleryPage() {
               <Loader2 className="w-10 h-10 animate-spin text-accent mx-auto mb-4" />
               <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Accessing Digital Vault...</p>
             </div>
-          ) : filteredItems.length > 0 ? (
+          ) : galleryItems.length > 0 ? (
             <div className="columns-1 sm:grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {filteredItems.map((item) => (
+              {galleryItems.map((item) => (
                 <Card 
                   key={item.id} 
                   className="mb-6 break-inside-avoid group border-none shadow-sm hover:shadow-2xl transition-all duration-500 rounded-[2rem] overflow-hidden bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 cursor-zoom-in"
@@ -185,7 +165,7 @@ export default function GalleryPage() {
           ) : (
             <div className="text-center py-32 opacity-20">
               <Camera className="w-20 h-20 mx-auto mb-4" />
-              <h3 className="text-2xl font-headline font-bold">No images found for this category</h3>
+              <h3 className="text-2xl font-headline font-bold">No images found in the archive</h3>
             </div>
           )}
         </div>
