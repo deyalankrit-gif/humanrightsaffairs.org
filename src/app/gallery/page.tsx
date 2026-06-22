@@ -121,7 +121,7 @@ export default function GalleryPage() {
           <div className="flex items-center justify-center">
              <div className="bg-accent/10 text-accent px-8 py-3 rounded-full border border-accent/20 shadow-sm">
                 <span className="text-sm md:text-lg font-headline font-bold tracking-wide italic">
-                  Various Moments from Our Activities
+                  Various Moments of Our Activities
                 </span>
              </div>
           </div>
