@@ -318,7 +318,7 @@ export default function EventsPage() {
                         {newEvent.imageId && (
                           <div className="relative w-full aspect-video rounded-xl overflow-hidden">
                             <Image 
-                              src={newEvent.imageId?.startsWith('data:') ? newMember.imageId : (PlaceHolderImages.find(i => i.id === newEvent.imageId)?.imageUrl || 'https://picsum.photos/seed/event/800/600')} 
+                              src={newEvent.imageId?.startsWith('data:') ? newEvent.imageId : (PlaceHolderImages.find(i => i.id === newEvent.imageId)?.imageUrl || 'https://picsum.photos/seed/event/800/600')} 
                               alt="Preview" 
                               fill 
                               className="object-cover"
@@ -557,7 +557,7 @@ export default function EventsPage() {
                                        <div className="grid grid-cols-1 gap-6">
                                           {[0, 1, 2].map((idx) => (
                                             <div key={idx} className="flex flex-col md:flex-row gap-4 items-start p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100">
-                                               <div className="relative w-full md:w-32 aspect-[3/2] bg-slate-100 rounded-xl overflow-hidden border-2 border-dashed border-slate-200 shrink-0">
+                                               <div className="relative w-24 h-24 rounded-xl overflow-hidden border-2 border-dashed border-slate-200 shrink-0">
                                                   {(editEvent.galleryImages || ['', '', ''])[idx] ? (
                                                     <Image src={(editEvent.galleryImages || ['', '', ''])[idx]} alt={`Gallery ${idx}`} fill className="object-cover" />
                                                   ) : (
@@ -708,14 +708,14 @@ export default function EventsPage() {
              <DialogDescription>Full-sized event photograph.</DialogDescription>
            </DialogHeader>
            <div className="relative aspect-[3/2] w-full rounded-[2.5rem] overflow-hidden shadow-2xl border-8 border-white dark:border-slate-900 bg-black">
-              <Image src={zoomedImage || ''} alt="Zoomed" fill className="object-contain" />
+              {zoomedImage && <Image src={zoomedImage} alt="Zoomed" fill className="object-contain" />}
               <Button 
                 variant="ghost" 
                 size="icon" 
                 onClick={() => setZoomedImage(null)}
                 className="absolute top-4 right-4 rounded-full bg-blue-600 hover:bg-blue-500 text-white h-10 w-10 shadow-xl transition-all hover:scale-110"
               >
-                <X className="w-6 h-6" />
+                <X className="w-6 h-6 text-white" />
               </Button>
            </div>
         </DialogContent>
