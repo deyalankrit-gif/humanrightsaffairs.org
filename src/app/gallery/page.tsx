@@ -18,6 +18,7 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Card } from '@/components/ui/card'
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase'
 import { collection, query, orderBy } from 'firebase/firestore'
 import { cn } from '@/lib/utils'
