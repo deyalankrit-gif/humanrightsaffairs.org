@@ -24,7 +24,8 @@ import {
   Camera,
   Mail,
   Phone,
-  X
+  X,
+  Star
 } from 'lucide-react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -588,6 +589,13 @@ export default function MembersPage() {
                       <CardHeader className="p-0">
                         <div className="relative aspect-square overflow-hidden bg-slate-100 dark:bg-slate-800 rounded-t-2xl">
                           <Image src={displayImg} alt={member.name} fill className="object-cover transition-transform duration-500" />
+                          
+                          {isOfficeBearer && (
+                            <div className="absolute top-1 left-1 bg-white/50 backdrop-blur-sm rounded-full p-0.5 z-10">
+                              <Star className="w-3 h-3 text-amber-500 fill-amber-400" />
+                            </div>
+                          )}
+
                           <div className="absolute top-1 right-1">
                             <Badge className="bg-primary/80 backdrop-blur-md text-white font-bold border-none text-[6px] px-1 py-0 leading-none h-auto">
                               {member.level === 'National' ? 'Central' : member.level}
