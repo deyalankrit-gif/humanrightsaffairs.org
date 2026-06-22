@@ -13,7 +13,8 @@ import {
   UserX, 
   MessageSquareWarning, 
   Scale, 
-  Phone
+  Phone,
+  Image as ImageIcon
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { HeaderActions } from './header-actions'
@@ -22,6 +23,7 @@ const publicLinks = [
   { name: 'Home', href: '/', icon: Home },
   { name: 'Meetings', href: '/meetings', icon: Handshake },
   { name: 'Events', href: '/events', icon: Calendar },
+  { name: 'Gallery', href: '/gallery', icon: ImageIcon },
   { name: 'Leadership', href: '/leadership', icon: Users },
   { name: 'Members', href: '/members', icon: UserCheck },
   { name: 'Terminated', href: '/terminated-members', icon: UserX },

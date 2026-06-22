@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from "react"
@@ -38,7 +37,8 @@ import {
   BarChart3,
   BarChart,
   Settings,
-  Lock
+  Lock,
+  Image as ImageIcon
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -50,6 +50,7 @@ const publicLinks = [
   { name: 'Home', href: '/', icon: Home },
   { name: 'Meetings', href: '/meetings', icon: Handshake },
   { name: 'Events', href: '/events', icon: Calendar },
+  { name: 'Gallery', href: '/gallery', icon: ImageIcon },
   { name: 'Leadership', href: '/leadership', icon: Users },
   { name: 'Members', href: '/members', icon: UserCheck },
   { name: 'Terminated', href: '/terminated-members', icon: UserX },
