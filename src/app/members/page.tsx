@@ -284,8 +284,8 @@ export default function MembersPage() {
   const districts = selectedState ? INDIA_DATA[selectedState] : [];
 
   return (
-    <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
-      <section className="pt-28 md:pt-40 pb-20 bg-primary text-primary-foreground relative overflow-hidden">
+    <main className="min-h-screen bg-slate-50 dark:bg-slate-950" onClick={() => setEnlargedId(null)}>
+      <section className="pt-28 md:pt-40 pb-20 bg-primary text-primary-foreground relative overflow-hidden" onClick={(e) => e.stopPropagation()}>
         <div className="absolute top-0 right-0 w-1/2 h-full bg-accent/5 -skew-x-12"></div>
         <div className="container mx-auto px-4 relative z-10 text-center">
           <div className="inline-flex items-center gap-2 bg-accent/20 text-accent px-4 py-1.5 rounded-full text-sm font-bold border border-accent/30 mb-6">
@@ -497,7 +497,7 @@ export default function MembersPage() {
         </div>
       </section>
 
-      <section className="py-6 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-[48px] md:top-[56px] z-30 shadow-sm transition-colors">
+      <section className="py-6 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-[48px] md:top-[56px] z-30 shadow-sm transition-colors" onClick={(e) => e.stopPropagation()}>
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
             <div className="flex flex-wrap items-center gap-2">
@@ -585,6 +585,7 @@ export default function MembersPage() {
                   return (
                     <Card 
                       key={member.id} 
+                      onClick={(e) => e.stopPropagation()}
                       className={cn(
                         "group border-none shadow-sm hover:shadow-2xl transition-all duration-300 rounded-2xl overflow-visible bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 relative hover:scale-125 hover:z-50 cursor-pointer",
                         enlargedId === member.id && "scale-150 z-[100] shadow-2xl"
