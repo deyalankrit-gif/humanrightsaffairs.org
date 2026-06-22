@@ -86,6 +86,7 @@ export default function EventsPage() {
   const [videoProgress, setVideoProgress] = useState<number>(0)
   const [isVideoProcessing, setIsVideoProcessing] = useState(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+  const [zoomedImage, setZoomedImage] = useState<string | null>(null)
 
   // Deletion States
   const [deleteDialogStep, setDeleteDialogStep] = useState<'warning' | 'verify' | null>(null)
@@ -671,7 +672,18 @@ export default function EventsPage() {
                     <div className="grid md:grid-cols-3 gap-6">{[0, 1, 2].map((idx) => {
                         const img = selectedEventDetails.galleryImages?.[idx] || `https://picsum.photos/seed/event-${selectedEventDetails.id}-${idx}/600/800`
                         const caption = selectedEventDetails.galleryCaptions?.[idx] || (idx === 0 ? "On-ground Engagement" : idx === 1 ? "Legal Literacy Workshop" : "Community Outreach Session")
-                        return (<div key={idx} className="group relative aspect-[3/2] rounded-[2rem] overflow-hidden shadow-xl border-4 border-white dark:border-slate-800 transition-all hover:scale-[1.02]"><Image src={img} alt="Gallery" fill className="object-cover" /><div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-6"><p className="text-white text-xs font-bold uppercase tracking-widest leading-tight">{caption}</p></div></div>)
+                        return (
+                          <div 
+                            key={idx} 
+                            onClick={() => setZoomedImage(img)}
+                            className="group relative aspect-[3/2] rounded-[2rem] overflow-hidden shadow-xl border-4 border-white dark:border-slate-800 transition-all hover:scale-[1.02] cursor-zoom-in"
+                          >
+                            <Image src={img} alt="Gallery" fill className="object-cover" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-6">
+                              <p className="text-white text-xs font-bold uppercase tracking-widest leading-tight">{caption}</p>
+                            </div>
+                          </div>
+                        )
                       })}</div>
                   </div>
                   <div className="space-y-8"><h3 className="text-xs font-black uppercase tracking-[0.3em] text-primary dark:text-white flex items-center gap-2"><Film className="w-4 h-4 text-red-500" /> Mission Highlights</h3>
@@ -685,6 +697,23 @@ export default function EventsPage() {
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Expanded Photo View */}
+      <Dialog open={!!zoomedImage} onOpenChange={(open) => !open && setZoomedImage(null)}>
+        <DialogContent className="max-w-[90vw] md:max-w-4xl p-0 border-none bg-transparent shadow-none [&>button]:hidden z-[10000002]">
+           <div className="relative aspect-[3/2] w-full rounded-[2.5rem] overflow-hidden shadow-2xl border-8 border-white dark:border-slate-900 bg-black">
+              <Image src={zoomedImage || ''} alt="Zoomed" fill className="object-contain" />
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => setZoomedImage(null)}
+                className="absolute top-4 right-4 rounded-full bg-blue-600 hover:bg-blue-500 text-white h-10 w-10 shadow-xl transition-all hover:scale-110"
+              >
+                <X className="w-6 h-6" />
+              </Button>
+           </div>
         </DialogContent>
       </Dialog>
 
