@@ -35,7 +35,8 @@ import {
   Heart,
   Home,
   Upload,
-  Camera
+  Camera,
+  Hash
 } from 'lucide-react'
 import {
   Popover,
@@ -214,7 +215,7 @@ export default function MemberDetailsPage() {
           <div className="grid lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-8">
                <Card className="rounded-3xl p-6 md:p-8">
-                 <CardTitle className="text-lg mb-6 flex items-center gap-2">
+                 <CardTitle className="text-lg mb-6 flex items-center gap-2 text-primary dark:text-white">
                    <ShieldCheck className="w-5 h-5 text-accent" /> Personnel Credentials
                  </CardTitle>
                  
@@ -229,16 +230,16 @@ export default function MemberDetailsPage() {
                           )}
                           <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={handleFileChange} />
                         </div>
-                        <Label className="text-[10px] text-slate-400 uppercase font-bold tracking-[0.2em]">Change Profile Photo</Label>
+                        <Label className="text-[10px] text-slate-400 uppercase font-bold tracking-[0.2em]">Change Profile Photo <span className="text-slate-400/50">(Optional)</span></Label>
                      </div>
 
                      <div className="grid md:grid-cols-2 gap-4">
                        <div className="space-y-1">
-                         <Label className="text-[10px] uppercase font-bold text-slate-400">Full Name</Label>
+                         <Label className="text-[10px] uppercase font-bold text-slate-400">Full Legal Name <span className="text-red-500">*</span></Label>
                          <Input value={editForm.name} onChange={e => setEditForm({...editForm, name: e.target.value})} />
                        </div>
                        <div className="space-y-1">
-                         <Label className="text-[10px] uppercase font-bold text-slate-400">Member ID</Label>
+                         <Label className="text-[10px] uppercase font-bold text-slate-400">Member ID <span className="text-red-500">*</span></Label>
                          <Input 
                             value={editForm.memberId || ''} 
                             onChange={e => setEditForm({...editForm, memberId: e.target.value.toUpperCase()})} 
@@ -251,7 +252,7 @@ export default function MemberDetailsPage() {
 
                      <div className="grid md:grid-cols-2 gap-4">
                        <div className="space-y-1">
-                         <Label className="text-[10px] uppercase font-bold text-slate-400">Operational Level</Label>
+                         <Label className="text-[10px] uppercase font-bold text-slate-400">Operational Level <span className="text-red-500">*</span></Label>
                          <Select value={editForm.level} onValueChange={(val: any) => setEditForm({...editForm, level: val, stateName: '', districtName: ''})}>
                            <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
                            <SelectContent>
@@ -262,10 +263,13 @@ export default function MemberDetailsPage() {
                          </Select>
                        </div>
                        <div className="space-y-1">
-                         <Label className="text-[10px] uppercase font-bold text-slate-400">Gender</Label>
+                         <Label className="text-[10px] uppercase font-bold text-slate-400">Gender <span className="text-red-500">*</span></Label>
                          <Select value={editForm.gender} onValueChange={(val: any) => setEditForm({...editForm, gender: val})}>
                            <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
-                           <SelectContent><SelectItem value="Male">Male</SelectItem><SelectItem value="Female">Female</SelectItem></SelectContent>
+                           <SelectContent>
+                             <SelectItem value="Male">Male</SelectItem>
+                             <SelectItem value="Female">Female</SelectItem>
+                           </SelectContent>
                          </Select>
                        </div>
                      </div>
@@ -273,7 +277,7 @@ export default function MemberDetailsPage() {
                      {(editForm.level === 'State' || editForm.level === 'District') && (
                        <div className="grid md:grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-1">
                           <div className="space-y-1">
-                             <Label className="text-[10px] uppercase font-bold text-accent">Chapter State</Label>
+                             <Label className="text-[10px] uppercase font-bold text-accent">Chapter State <span className="text-red-500">*</span></Label>
                              <Select value={editForm.stateName} onValueChange={val => setEditForm({...editForm, stateName: val, districtName: ''})}>
                                 <SelectTrigger className="h-11 rounded-xl border-accent/20"><SelectValue placeholder="Select State" /></SelectTrigger>
                                 <SelectContent className="max-h-60">{states.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
@@ -281,7 +285,7 @@ export default function MemberDetailsPage() {
                           </div>
                           {editForm.level === 'District' && editForm.stateName && (
                              <div className="space-y-1 animate-in fade-in slide-in-from-top-1">
-                                <Label className="text-[10px] uppercase font-bold text-accent">Chapter District</Label>
+                                <Label className="text-[10px] uppercase font-bold text-accent">Chapter District <span className="text-red-500">*</span></Label>
                                 <Select value={editForm.districtName} onValueChange={val => setEditForm({...editForm, districtName: val})}>
                                    <SelectTrigger className="h-11 rounded-xl border-accent/20"><SelectValue placeholder="Select District" /></SelectTrigger>
                                    <SelectContent className="max-h-60">{(INDIA_DATA[editForm.stateName] || []).map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
@@ -293,7 +297,7 @@ export default function MemberDetailsPage() {
 
                      <div className="grid md:grid-cols-2 gap-4">
                        <div className="space-y-1">
-                         <Label className="text-[10px] uppercase font-bold text-slate-400">Blood Group</Label>
+                         <Label className="text-[10px] uppercase font-bold text-slate-400">Blood Group <span className="text-slate-400/50">(Optional)</span></Label>
                          <Select value={editForm.bloodGroup} onValueChange={val => setEditForm({...editForm, bloodGroup: val})}>
                             <SelectTrigger className="h-11 rounded-xl"><SelectValue placeholder="Select" /></SelectTrigger>
                             <SelectContent>
@@ -302,7 +306,7 @@ export default function MemberDetailsPage() {
                           </Select>
                        </div>
                        <div className="space-y-1">
-                         <Label className="text-[10px] uppercase font-bold text-slate-400">Current Profession</Label>
+                         <Label className="text-[10px] uppercase font-bold text-slate-400">Current Profession <span className="text-slate-400/50">(Optional)</span></Label>
                          <Input value={editForm.profession || ''} onChange={e => setEditForm({...editForm, profession: e.target.value})} placeholder="e.g. Advocate" className="h-11 rounded-xl" />
                        </div>
                      </div>
@@ -310,7 +314,7 @@ export default function MemberDetailsPage() {
                      <div className="bg-slate-50 dark:bg-slate-900 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 space-y-4 shadow-inner">
                         <div className="grid md:grid-cols-2 gap-4">
                           <div className="space-y-2">
-                            <Label className="text-accent font-bold text-[10px] uppercase">Membership Term</Label>
+                            <Label className="text-accent font-bold text-[10px] uppercase">Membership Term <span className="text-red-500">*</span></Label>
                             <Select value={editForm.membershipDuration || '1 Year'} onValueChange={(val) => setEditForm({...editForm, membershipDuration: val})}>
                               <SelectTrigger className="bg-white dark:bg-slate-800 border-accent/20">
                                 <SelectValue />
@@ -326,7 +330,7 @@ export default function MemberDetailsPage() {
 
                         <div className="grid md:grid-cols-2 gap-6 p-4 rounded-xl bg-white dark:bg-slate-950 border border-slate-100">
                           <div className="space-y-2">
-                            <Label className="text-[10px] uppercase font-bold text-accent">Designation Category</Label>
+                            <Label className="text-[10px] uppercase font-bold text-accent">Designation Category <span className="text-red-500">*</span></Label>
                             <Select value={editForm.designationCategory} onValueChange={(val: any) => {
                               const isFixed = val === 'General Member' || val === 'Volunteer';
                               setEditForm({
@@ -345,7 +349,7 @@ export default function MemberDetailsPage() {
                           </div>
                           {editForm.designationCategory === 'Office-bearing Member' && (
                             <div className="space-y-2 animate-in fade-in slide-in-from-left-2">
-                              <Label className="text-[10px] uppercase font-bold text-accent">Specific Designation</Label>
+                              <Label className="text-[10px] uppercase font-bold text-accent">Specific Designation <span className="text-red-500">*</span></Label>
                               <Input value={editForm.designation} onChange={e => setEditForm({...editForm, designation: e.target.value})} className="rounded-xl border-accent/20" />
                             </div>
                           )}
@@ -353,7 +357,7 @@ export default function MemberDetailsPage() {
 
                         <div className="grid md:grid-cols-2 gap-4">
                           <div className="space-y-1">
-                            <Label className="text-[10px] uppercase font-bold text-slate-400">Issue Date</Label>
+                            <Label className="text-[10px] uppercase font-bold text-slate-400">Issue Date <span className="text-red-500">*</span></Label>
                             <Popover>
                               <PopoverTrigger asChild>
                                 <Button variant="outline" className={cn("w-full justify-start text-left font-normal h-10 rounded-lg", !editForm.joiningDate && "text-muted-foreground")}>
@@ -374,16 +378,56 @@ export default function MemberDetailsPage() {
                      </div>
 
                      <div className="grid md:grid-cols-2 gap-4">
-                        <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">Email</Label><Input value={editForm.email} onChange={e => setEditForm({...editForm, email: e.target.value})} /></div>
-                        <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">Phone</Label><Input value={editForm.phone} onChange={e => setEditForm({...editForm, phone: e.target.value})} /></div>
+                        <div className="space-y-1">
+                          <Label className="text-[10px] uppercase font-bold text-slate-400">Email <span className="text-slate-400/50">(Optional)</span></Label>
+                          <Input value={editForm.email} onChange={e => setEditForm({...editForm, email: e.target.value})} />
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-[10px] uppercase font-bold text-slate-400">Phone <span className="text-red-500">*</span></Label>
+                          <Input value={editForm.phone} onChange={e => setEditForm({...editForm, phone: e.target.value})} />
+                        </div>
                      </div>
 
-                     <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">Residential Address</Label><Input value={editForm.address} onChange={e => setEditForm({...editForm, address: e.target.value})} /></div>
+                     <div className="grid md:grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                           <Label className="text-[10px] uppercase font-bold text-slate-400">Aadhaar Card Number <span className="text-red-500">*</span></Label>
+                           <Input 
+                              value={editForm.aadhaar || ''} 
+                              onChange={e => setEditForm({...editForm, aadhaar: e.target.value})} 
+                              placeholder="1234 5678 9012"
+                              maxLength={12}
+                              className="font-mono"
+                           />
+                        </div>
+                        <div className="space-y-1">
+                           <Label className="text-[10px] uppercase font-bold text-slate-400">PAN Number <span className="text-slate-400/50">(Optional)</span></Label>
+                           <Input 
+                              value={editForm.pan || ''} 
+                              onChange={e => setEditForm({...editForm, pan: e.target.value.toUpperCase()})} 
+                              placeholder="ABCDE1234F"
+                              className="font-mono"
+                           />
+                        </div>
+                     </div>
+
+                     <div className="space-y-1">
+                       <Label className="text-[10px] uppercase font-bold text-slate-400">Residential Address <span className="text-red-500">*</span></Label>
+                       <Input value={editForm.address} onChange={e => setEditForm({...editForm, address: e.target.value})} />
+                     </div>
                      
                      <div className="grid md:grid-cols-3 gap-4">
-                        <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">Post Office</Label><Input value={editForm.postOffice} onChange={e => setEditForm({...editForm, postOffice: e.target.value})} /></div>
-                        <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">Police Station</Label><Input value={editForm.policeStation} onChange={e => setEditForm({...editForm, policeStation: e.target.value})} /></div>
-                        <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">PIN Code</Label><Input value={editForm.pinCode} onChange={e => setEditForm({...editForm, pinCode: e.target.value})} /></div>
+                        <div className="space-y-1">
+                          <Label className="text-[10px] uppercase font-bold text-slate-400">Post Office <span className="text-red-500">*</span></Label>
+                          <Input value={editForm.postOffice} onChange={e => setEditForm({...editForm, postOffice: e.target.value})} />
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-[10px] uppercase font-bold text-slate-400">Police Station <span className="text-red-500">*</span></Label>
+                          <Input value={editForm.policeStation} onChange={e => setEditForm({...editForm, policeStation: e.target.value})} />
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-[10px] uppercase font-bold text-slate-400">PIN Code <span className="text-red-500">*</span></Label>
+                          <Input value={editForm.pinCode} onChange={e => setEditForm({...editForm, pinCode: e.target.value})} maxLength={6} className="font-mono" />
+                        </div>
                      </div>
                    </div>
                  ) : (
@@ -392,8 +436,15 @@ export default function MemberDetailsPage() {
                         <div>
                           <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Contact Protocol</p>
                           <div className="space-y-2">
-                            <p className="text-sm font-bold text-primary flex items-center gap-2"><Mail className="w-3.5 h-3.5 text-accent" /> {profile.email}</p>
+                            <p className="text-sm font-bold text-primary flex items-center gap-2"><Mail className="w-3.5 h-3.5 text-accent" /> {profile.email || 'N/A'}</p>
                             <p className="text-sm font-bold text-primary flex items-center gap-2"><Phone className="w-3.5 h-3.5 text-accent" /> {profile.phone}</p>
+                          </div>
+                        </div>
+                        <div>
+                          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Identification</p>
+                          <div className="space-y-2">
+                             <p className="text-sm font-bold text-primary flex items-center gap-2"><Hash className="w-3.5 h-3.5 text-accent" /> Aadhaar: <span className="font-mono">{profile.aadhaar || 'Pending'}</span></p>
+                             <p className="text-sm font-bold text-primary flex items-center gap-2"><Hash className="w-3.5 h-3.5 text-accent" /> PAN: <span className="font-mono uppercase">{profile.pan || 'N/A'}</span></p>
                           </div>
                         </div>
                         <div>
