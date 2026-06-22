@@ -23,7 +23,8 @@ import {
   Sparkles,
   Camera,
   Mail,
-  Phone
+  Phone,
+  X
 } from 'lucide-react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -577,6 +578,8 @@ export default function MembersPage() {
                 filteredMembers.map((member) => {
                   const fallback = member.gender?.toLowerCase() === 'female' ? '/dummy w.png' : '/dummy m.png'
                   const displayImg = member.imageId?.startsWith('data:') ? member.imageId : (PlaceHolderImages.find(i => i.id === member.imageId)?.imageUrl || fallback)
+                  const isOfficeBearer = member.designationCategory === 'Office-bearing Member';
+                  
                   return (
                     <Card 
                       key={member.id} 
@@ -597,7 +600,12 @@ export default function MembersPage() {
                            <BadgeCheck className="w-2.5 h-2.5 text-accent shrink-0 mt-0.5" />
                            <div className="min-w-0">
                              <h3 className="font-headline font-bold text-[10px] text-primary dark:text-white leading-tight truncate">{member.name}</h3>
-                             <p className="text-[8px] font-bold text-accent uppercase tracking-widest truncate">{member.designation}</p>
+                             <p className={cn(
+                               "text-[8px] uppercase tracking-widest truncate",
+                               isOfficeBearer ? "font-black text-accent" : "font-bold text-accent/80"
+                             )}>
+                               {member.designation}
+                             </p>
                            </div>
                         </div>
                         <div className="space-y-0.5 pt-1 border-t border-slate-100 dark:border-slate-800">
