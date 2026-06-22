@@ -33,7 +33,9 @@ import {
   CalendarClock,
   Clock,
   Heart,
-  Home
+  Home,
+  Upload,
+  Camera
 } from 'lucide-react'
 import {
   Popover,
@@ -100,6 +102,17 @@ export default function MemberDetailsPage() {
     }
   }, [isEditing, editForm?.joiningDate, editForm?.membershipDuration]);
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setEditForm((prev: any) => ({ ...prev, imageId: reader.result as string }))
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
   const handleSave = async () => {
     if (!docRef) return
     setIsSaving(true)
@@ -145,6 +158,8 @@ export default function MemberDetailsPage() {
 
   const fallback = profile.gender?.toLowerCase() === 'female' ? '/dummy w.png' : '/dummy m.png'
   const displayImg = profile.imageId?.startsWith('data:') ? profile.imageId : (PlaceHolderImages.find(i => i.id === profile.imageId)?.imageUrl || fallback)
+  
+  const states = Object.keys(INDIA_DATA).sort()
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
@@ -205,6 +220,18 @@ export default function MemberDetailsPage() {
                  
                  {isEditing ? (
                    <div className="space-y-6">
+                     <div className="flex flex-col items-center gap-4 mb-6">
+                        <div className="relative w-32 h-32 rounded-full bg-slate-50 dark:bg-slate-800 border-2 border-dashed border-slate-200 flex items-center justify-center overflow-hidden group cursor-pointer hover:border-accent transition-colors shadow-inner">
+                          {editForm.imageId ? (
+                            <Image src={editForm.imageId} alt="Preview" fill className="object-cover" />
+                          ) : (
+                            <div className="flex items-center justify-center h-full"><Camera className="w-10 h-10 text-slate-300" /></div>
+                          )}
+                          <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={handleFileChange} />
+                        </div>
+                        <Label className="text-[10px] text-slate-400 uppercase font-bold tracking-[0.2em]">Change Profile Photo</Label>
+                     </div>
+
                      <div className="grid md:grid-cols-2 gap-4">
                        <div className="space-y-1">
                          <Label className="text-[10px] uppercase font-bold text-slate-400">Full Name</Label>
@@ -224,20 +251,59 @@ export default function MemberDetailsPage() {
 
                      <div className="grid md:grid-cols-2 gap-4">
                        <div className="space-y-1">
-                         <Label className="text-[10px] uppercase font-bold text-slate-400">Gender</Label>
-                         <Select value={editForm.gender} onValueChange={(val: any) => setEditForm({...editForm, gender: val})}>
-                           <SelectTrigger><SelectValue /></SelectTrigger>
-                           <SelectContent><SelectItem value="Male">Male</SelectItem><SelectItem value="Female">Female</SelectItem></SelectContent>
+                         <Label className="text-[10px] uppercase font-bold text-slate-400">Operational Level</Label>
+                         <Select value={editForm.level} onValueChange={(val: any) => setEditForm({...editForm, level: val, stateName: '', districtName: ''})}>
+                           <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
+                           <SelectContent>
+                             <SelectItem value="National">Central Council</SelectItem>
+                             <SelectItem value="State">State Level</SelectItem>
+                             <SelectItem value="District">District Level</SelectItem>
+                           </SelectContent>
                          </Select>
                        </div>
                        <div className="space-y-1">
+                         <Label className="text-[10px] uppercase font-bold text-slate-400">Gender</Label>
+                         <Select value={editForm.gender} onValueChange={(val: any) => setEditForm({...editForm, gender: val})}>
+                           <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
+                           <SelectContent><SelectItem value="Male">Male</SelectItem><SelectItem value="Female">Female</SelectItem></SelectContent>
+                         </Select>
+                       </div>
+                     </div>
+
+                     {(editForm.level === 'State' || editForm.level === 'District') && (
+                       <div className="grid md:grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-1">
+                          <div className="space-y-1">
+                             <Label className="text-[10px] uppercase font-bold text-accent">Chapter State</Label>
+                             <Select value={editForm.stateName} onValueChange={val => setEditForm({...editForm, stateName: val, districtName: ''})}>
+                                <SelectTrigger className="h-11 rounded-xl border-accent/20"><SelectValue placeholder="Select State" /></SelectTrigger>
+                                <SelectContent className="max-h-60">{states.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+                             </Select>
+                          </div>
+                          {editForm.level === 'District' && editForm.stateName && (
+                             <div className="space-y-1 animate-in fade-in slide-in-from-top-1">
+                                <Label className="text-[10px] uppercase font-bold text-accent">Chapter District</Label>
+                                <Select value={editForm.districtName} onValueChange={val => setEditForm({...editForm, districtName: val})}>
+                                   <SelectTrigger className="h-11 rounded-xl border-accent/20"><SelectValue placeholder="Select District" /></SelectTrigger>
+                                   <SelectContent className="max-h-60">{(INDIA_DATA[editForm.stateName] || []).map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
+                                </Select>
+                             </div>
+                          )}
+                       </div>
+                     )}
+
+                     <div className="grid md:grid-cols-2 gap-4">
+                       <div className="space-y-1">
                          <Label className="text-[10px] uppercase font-bold text-slate-400">Blood Group</Label>
                          <Select value={editForm.bloodGroup} onValueChange={val => setEditForm({...editForm, bloodGroup: val})}>
-                            <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
+                            <SelectTrigger className="h-11 rounded-xl"><SelectValue placeholder="Select" /></SelectTrigger>
                             <SelectContent>
                               {["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].map(bg => <SelectItem key={bg} value={bg}>{bg}</SelectItem>)}
                             </SelectContent>
                           </Select>
+                       </div>
+                       <div className="space-y-1">
+                         <Label className="text-[10px] uppercase font-bold text-slate-400">Current Profession</Label>
+                         <Input value={editForm.profession || ''} onChange={e => setEditForm({...editForm, profession: e.target.value})} placeholder="e.g. Advocate" className="h-11 rounded-xl" />
                        </div>
                      </div>
 
