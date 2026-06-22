@@ -94,6 +94,7 @@ export default function MembersPage() {
   const [mounted, setMounted] = useState(false)
   const [isAdding, setIsAdding] = useState(false)
   const [isMirror, setIsMirror] = useState(false)
+  const [enlargedId, setEnlargedId] = useState<string | null>(null)
   const { user } = useUser()
   const db = useFirestore()
   const { toast } = useToast()
@@ -584,11 +585,36 @@ export default function MembersPage() {
                   return (
                     <Card 
                       key={member.id} 
-                      className="group border-none shadow-sm hover:shadow-2xl transition-all duration-300 rounded-2xl overflow-visible bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 relative hover:scale-125 hover:z-50 cursor-pointer"
+                      className={cn(
+                        "group border-none shadow-sm hover:shadow-2xl transition-all duration-300 rounded-2xl overflow-visible bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 relative hover:scale-125 hover:z-50 cursor-pointer",
+                        enlargedId === member.id && "scale-150 z-[100] shadow-2xl"
+                      )}
                     >
+                      <div className="p-2 pb-0 text-center">
+                         <p 
+                           onClick={(e) => {
+                             e.stopPropagation();
+                             setEnlargedId(enlargedId === member.id ? null : member.id);
+                           }}
+                           className={cn(
+                             "text-[7px] uppercase tracking-widest truncate cursor-pointer transition-colors hover:text-secondary",
+                             isOfficeBearer ? "font-black text-accent" : "font-bold text-accent/80"
+                           )}
+                         >
+                           {member.designation}
+                         </p>
+                      </div>
                       <CardHeader className="p-0">
                         <div className="relative aspect-square overflow-hidden bg-slate-100 dark:bg-slate-800 rounded-t-2xl">
-                          <Image src={displayImg} alt={member.name} fill className="object-cover transition-transform duration-500" />
+                          <Image 
+                            src={displayImg} 
+                            alt={member.name} 
+                            fill 
+                            className={cn(
+                              "object-cover transition-transform duration-500",
+                              enlargedId === member.id ? "scale-150" : ""
+                            )} 
+                          />
                           
                           {isOfficeBearer && (
                             <div className="absolute top-1 left-1 bg-white/50 backdrop-blur-sm rounded-full p-0.5 z-10">
@@ -608,12 +634,6 @@ export default function MembersPage() {
                            <BadgeCheck className="w-2.5 h-2.5 text-accent shrink-0 mt-0.5" />
                            <div className="min-w-0">
                              <h3 className="font-headline font-bold text-[10px] text-primary dark:text-white leading-tight truncate">{member.name}</h3>
-                             <p className={cn(
-                               "text-[8px] uppercase tracking-widest truncate",
-                               isOfficeBearer ? "font-black text-accent" : "font-bold text-accent/80"
-                             )}>
-                               {member.designation}
-                             </p>
                            </div>
                         </div>
                         <div className="space-y-0.5 pt-1 border-t border-slate-100 dark:border-slate-800">
