@@ -606,7 +606,13 @@ export default function MembersPage() {
                          </p>
                       </div>
                       <CardHeader className="p-0">
-                        <div className="relative aspect-square overflow-hidden bg-slate-100 dark:bg-slate-800 rounded-t-2xl">
+                        <div 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setEnlargedId(enlargedId === member.id ? null : member.id);
+                          }}
+                          className="relative aspect-square overflow-hidden bg-slate-100 dark:bg-slate-800 rounded-t-2xl"
+                        >
                           <Image 
                             src={displayImg} 
                             alt={member.name} 
