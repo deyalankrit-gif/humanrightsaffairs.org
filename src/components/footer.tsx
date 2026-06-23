@@ -74,6 +74,7 @@ export function Footer() {
                   <button className="hover:text-accent transition-colors font-medium text-left">Donate Now</button>
                 </DonationDialog>
               </li>
+              <li><Link href="/trust-credentials" className="hover:text-accent transition-colors font-medium">Credentials of the Trust</Link></li>
               <li>
                 <Link href="/trust-responsibilities" className="text-emerald-400 hover:text-primary-foreground transition-colors font-medium leading-tight inline-block">
                   Duties and Responsibilities of Trust Staff, Volunteers, and Leaders
