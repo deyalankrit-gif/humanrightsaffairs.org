@@ -3,43 +3,43 @@
     {
       "id": "chairman-photo",
       "description": "Central Chairman (INDIA) & Founder - Dhritiman Dey",
-      "imageUrl": "https://picsum.photos/seed/123/800/1000",
+      "imageUrl": "/Dhritiman.jpeg",
       "imageHint": "dhritiman dey portrait"
     },
     {
       "id": "moumita-photo",
       "description": "Chairman (West Bengal) & Founder - Moumita Saha",
-      "imageUrl": "https://picsum.photos/seed/456/800/1000",
+      "imageUrl": "/Moumita.jpeg",
       "imageHint": "moumita saha portrait"
     },
     {
       "id": "id-card-sample",
       "description": "Sample Member Identity Card for JusticeShield",
-      "imageUrl": "https://picsum.photos/seed/789/800/500",
+      "imageUrl": "/sample i card.jpeg",
       "imageHint": "identification card"
     },
     {
       "id": "hero-human-rights",
       "description": "Cinematic black and white image related to human rights",
-      "imageUrl": "https://picsum.photos/seed/rights/1920/1080",
+      "imageUrl": "/Human R2.jpeg",
       "imageHint": "human rights"
     },
     {
       "id": "donation-qr",
       "description": "Official UPI QR Code for Human Rights Affairs Trust",
-      "imageUrl": "https://picsum.photos/seed/qr/500/700",
+      "imageUrl": "/HRAT QR CODE.jpeg",
       "imageHint": "qr code"
     },
     {
       "id": "niti-logo",
       "description": "Official Niti Aayog Emblem",
-      "imageUrl": "https://picsum.photos/seed/gov/400/200",
+      "imageUrl": "/niti2.png",
       "imageHint": "logo"
     },
     {
       "id": "donation-footer-image",
       "description": "Donation call to action image for footer",
-      "imageUrl": "https://picsum.photos/seed/donate-footer/400/300",
+      "imageUrl": "/Human R2.jpeg",
       "imageHint": "charity"
     },
     {
@@ -51,13 +51,13 @@
     {
       "id": "donation-bg-1",
       "description": "Inspirational portrait for donation section",
-      "imageUrl": "https://picsum.photos/seed/female-indian/800/1000",
+      "imageUrl": "/female.jpeg",
       "imageHint": "indian female"
     },
     {
       "id": "donation-bg-2",
       "description": "Portrait of a child for donation section",
-      "imageUrl": "https://picsum.photos/seed/child-indian/800/1000",
+      "imageUrl": "/child.jpeg",
       "imageHint": "indian child"
     }
   ]
