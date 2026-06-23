@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useEffect, useState } from 'react'
@@ -235,14 +236,14 @@ export default function InternalEventsManagement() {
     e.location.toLowerCase().includes(search.toLowerCase())
   )
 
-  const categories = ["Campaign", "Workshop", "Convention", "Relief", "Social Projects", "Public Welfare"]
+  const categories = ["Campaign", "Workshop", "Convention", "Relief", "Social Projects", "Public Welfare", "Glimpse"]
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
       <section className="pt-16 pb-8 bg-slate-900 text-white border-b-8 border-accent/20">
         <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="space-y-1"><div className="inline-flex items-center gap-2 bg-accent/20 text-accent px-3 py-1 rounded-full text-[9px] font-bold uppercase border border-accent/30"><ShieldCheck className="w-2.5 h-2.5" /> Registry Control</div><h1 className="text-3xl md:text-4xl font-headline font-bold">Mission <span className="text-accent italic">Archives</span></h1></div>
-          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}><DialogTrigger asChild><Button size="sm" className="bg-accent text-primary font-bold rounded-xl h-11 px-6 flex gap-2 hover:bg-secondary hover:text-white transition-all"><Plus className="w-4 h-4" /> Publish Record</Button></DialogTrigger>
+          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}><DialogTrigger asChild><Button size="sm" className="bg-accent text-primary font-bold rounded-xl h-11 px-6 flex gap-2 shadow-lg hover:bg-secondary hover:text-white transition-all"><Plus className="w-4 h-4" /> Publish Record</Button></DialogTrigger>
             <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="max-w-2xl rounded-3xl overflow-y-auto max-h-[90vh] border-none shadow-2xl">
               <DialogHeader><DialogTitle>Registry Documentation</DialogTitle></DialogHeader>
               <div className="space-y-6 py-2">

@@ -20,14 +20,14 @@ import {
   Edit, 
   Trash2, 
   Loader2, 
-  ShieldCheck,
-  Upload,
-  Camera,
-  ImageIcon,
-  X,
-  CheckCircle2,
-  AlertTriangle,
-  FileWarning
+  ShieldCheck, 
+  Upload, 
+  Camera, 
+  ImageIcon, 
+  X, 
+  CheckCircle2, 
+  AlertTriangle, 
+  FileWarning 
 } from 'lucide-react'
 import {
   Dialog,
@@ -179,7 +179,7 @@ export default function InternalGalleryManagement() {
     item.category?.toLowerCase().includes(search.toLowerCase())
   )
 
-  const categories = ["Campaign", "Workshop", "Convention", "Relief", "Social Projects", "Public Welfare"]
+  const categories = ["Campaign", "Workshop", "Convention", "Relief", "Social Projects", "Public Welfare", "Glimpse"]
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
