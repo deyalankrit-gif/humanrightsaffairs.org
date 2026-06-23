@@ -45,7 +45,7 @@
     {
       "id": "ai-bot-avatar",
       "description": "AI Advocate Bot Avatar",
-      "imageUrl": "https://picsum.photos/seed/advocate/200/200",
+      "imageUrl": "/advocate.jpeg",
       "imageHint": "advocate avatar"
     },
     {
