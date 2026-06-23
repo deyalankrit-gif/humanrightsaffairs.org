@@ -110,6 +110,13 @@ export default function EventsPage() {
     }
   }, [])
 
+  // Reset language preference when a new event detail is opened
+  useEffect(() => {
+    if (selectedEventDetails) {
+      setNarrativeLang('en')
+    }
+  }, [selectedEventDetails])
+
   const eventsQuery = useMemoFirebase(() => {
     if (!db) return null;
     return query(collection(db, 'events'), orderBy('createdAt', 'desc'));
@@ -683,24 +690,15 @@ export default function EventsPage() {
                       </h3>
                       
                       {selectedEventDetails.descriptionBn && (
-                        <div className="bg-slate-100 dark:bg-slate-800 p-1 rounded-xl flex gap-1 animate-in fade-in zoom-in-95 duration-500">
-                          <Button 
-                            variant={narrativeLang === 'en' ? "default" : "ghost"} 
-                            size="sm" 
-                            onClick={() => setNarrativeLang('en')}
-                            className="h-8 rounded-lg text-[10px] font-bold uppercase gap-1.5"
-                          >
-                            <Languages className="w-3 h-3" /> English
-                          </Button>
-                          <Button 
-                            variant={narrativeLang === 'bn' ? "default" : "ghost"} 
-                            size="sm" 
-                            onClick={() => setNarrativeLang('bn')}
-                            className="h-8 rounded-lg text-[10px] font-bold uppercase gap-1.5"
-                          >
-                            <Languages className="w-3 h-3" /> Bengali
-                          </Button>
-                        </div>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => setNarrativeLang(narrativeLang === 'en' ? 'bn' : 'en')}
+                          className="h-8 rounded-lg text-[10px] font-bold uppercase gap-2 border-slate-200 hover:border-accent hover:bg-accent/5 transition-all"
+                        >
+                          <Languages className="w-3.5 h-3.5 text-accent" />
+                          {narrativeLang === 'en' ? "Switch to Bengali" : "Switch to English"}
+                        </Button>
                       )}
                     </div>
                     
