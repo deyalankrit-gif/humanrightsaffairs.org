@@ -254,9 +254,9 @@ export default function MembersPage() {
 
   const filteredMembers = members.filter(m => {
     const matchesSearch = 
-      m.name.toLowerCase().includes(search.toLowerCase()) || 
-      m.designation?.toLowerCase().includes(search.toLowerCase()) ||
-      m.memberId?.toLowerCase().includes(search.toLowerCase());
+      (m.name || '').toLowerCase().includes(search.toLowerCase()) || 
+      (m.designation || '').toLowerCase().includes(search.toLowerCase()) ||
+      (m.memberId || '').toLowerCase().includes(search.toLowerCase());
     
     let matchesLevel = levelFilter === "All" || m.level === levelFilter;
     if (selectedState) {
@@ -581,6 +581,15 @@ export default function MembersPage() {
                   const displayImg = member.imageId?.startsWith('data:') ? member.imageId : (PlaceHolderImages.find(i => i.id === member.imageId)?.imageUrl || fallback)
                   const isOfficeBearer = member.designationCategory === 'Office-bearing Member';
                   
+                  const getStarColor = (level: string) => {
+                    switch (level) {
+                      case 'National': return "text-red-600 fill-red-500";
+                      case 'State': return "text-emerald-500 fill-emerald-400";
+                      case 'District': return "text-blue-600 fill-blue-500";
+                      default: return "text-emerald-500 fill-emerald-400";
+                    }
+                  }
+
                   return (
                     <Card 
                       key={member.id} 
@@ -624,7 +633,7 @@ export default function MembersPage() {
                           
                           {isOfficeBearer && (
                             <div className="absolute top-1 left-1 bg-white/50 backdrop-blur-sm rounded-full p-0.5 z-10">
-                              <Star className="w-3 h-3 text-emerald-500 fill-emerald-400" />
+                              <Star className={cn("w-3 h-3", getStarColor(member.level))} />
                             </div>
                           )}
 
