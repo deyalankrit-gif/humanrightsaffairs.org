@@ -329,7 +329,7 @@ export default function EventsPage() {
                         {newEvent.imageId && (
                           <div className="relative w-full aspect-video rounded-xl overflow-hidden">
                             <Image 
-                              src={newEvent.imageId?.startsWith('data:') ? newEvent.imageId : (PlaceHolderImages.find(i => i.id === newEvent.imageId)?.imageUrl || 'https://picsum.photos/seed/event/800/600')} 
+                              src={newEvent.imageId?.startsWith('data:') ? newMember.imageId : (PlaceHolderImages.find(i => i.id === newEvent.imageId)?.imageUrl || 'https://picsum.photos/seed/event/800/600')} 
                               alt="Preview" 
                               fill 
                               className="object-cover"
@@ -536,7 +536,7 @@ export default function EventsPage() {
                     <Card key={event.id} className="group border-none shadow-sm hover:shadow-2xl transition-all duration-500 rounded-[2rem] overflow-hidden bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 relative flex flex-col">
                       <div className="relative aspect-[4/3] overflow-hidden">
                         <Image src={img || 'https://picsum.photos/seed/event/800/600'} alt={event.title} fill className="object-cover group-hover:scale-110 transition-transform duration-700" />
-                        <div className="absolute top-4 right-4"><Badge className="bg-white/90 backdrop-blur-md text-primary font-bold shadow-lg border-none">{event.category}</Badge></div>
+                        <div className="absolute top-4 right-4"><Badge className="bg-white/90 backdrop-blur-md text-primary font-bold shadow-lg border-none hover:bg-white hover:text-primary transition-colors">{event.category}</Badge></div>
 
                         {isAdmin && (
                           <div className="absolute top-4 left-4 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
@@ -736,7 +736,7 @@ export default function EventsPage() {
               </div>
             </div>
           )}
-        </DialogContent>
+        </div>
       </Dialog>
 
       {/* Expanded Photo View */}
