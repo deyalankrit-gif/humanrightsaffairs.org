@@ -34,9 +34,12 @@ export async function inquireLegalAssistant(
 
 const legalAssistantPrompt = ai.definePrompt({
   name: 'legalAssistantPrompt',
-  input: {schema: InquireLegalAssistantInputSchema},
-  // Removing output schema here to prevent validation failures on raw text
-  // and adding safety settings to prevent blocks on sensitive human rights topics.
+  // Using an object schema for input to ensure reliable Handlebars interpolation
+  input: {
+    schema: z.object({
+      query: z.string()
+    })
+  },
   config: {
     safetySettings: [
       { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
@@ -47,11 +50,12 @@ const legalAssistantPrompt = ai.definePrompt({
   },
   prompt: `You are an AI-powered legal assistant for the Human Rights Affairs Trust (JusticeShield).
 Your goal is to help users understand their constitutional rights and basic legal procedures in India.
-Respond to the user's query in a clear, concise, conversational, and easy-to-understand manner.
+
+Respond to the user's query provided below in a clear, concise, conversational, and easy-to-understand manner.
 Avoid complex legal jargon where simpler language can be used.
 If you cannot answer a question, politely state that you are unable to provide specific legal advice and recommend consulting a legal professional.
 
-User Query: {{{input}}}`,
+User Query: {{{query}}}`
 });
 
 const aiLegalAssistantChatbotFlow = ai.defineFlow(
@@ -61,10 +65,10 @@ const aiLegalAssistantChatbotFlow = ai.defineFlow(
     outputSchema: InquireLegalAssistantOutputSchema,
   },
   async (input) => {
-    // Firing the prompt without awaiting an output schema validation
-    const response = await legalAssistantPrompt(input);
+    // Pass the input as a structured object to match the prompt's input schema
+    const response = await legalAssistantPrompt({ query: input });
     
-    // Extract raw text instead of structured output
+    // Extract raw text response
     const finalOutput = response.text;
     
     if (!finalOutput || finalOutput.trim().length === 0) {
