@@ -35,7 +35,16 @@ export async function inquireLegalAssistant(
 const legalAssistantPrompt = ai.definePrompt({
   name: 'legalAssistantPrompt',
   input: {schema: InquireLegalAssistantInputSchema},
-  output: {schema: InquireLegalAssistantOutputSchema},
+  // Removing output schema here to prevent validation failures on raw text
+  // and adding safety settings to prevent blocks on sensitive human rights topics.
+  config: {
+    safetySettings: [
+      { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
+      { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
+      { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
+      { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
+    ],
+  },
   prompt: `You are an AI-powered legal assistant for the Human Rights Affairs Trust (JusticeShield).
 Your goal is to help users understand their constitutional rights and basic legal procedures in India.
 Respond to the user's query in a clear, concise, conversational, and easy-to-understand manner.
@@ -52,7 +61,16 @@ const aiLegalAssistantChatbotFlow = ai.defineFlow(
     outputSchema: InquireLegalAssistantOutputSchema,
   },
   async (input) => {
-    const {output} = await legalAssistantPrompt(input);
-    return output!;
+    // Firing the prompt without awaiting an output schema validation
+    const response = await legalAssistantPrompt(input);
+    
+    // Extract raw text instead of structured output
+    const finalOutput = response.text;
+    
+    if (!finalOutput || finalOutput.trim().length === 0) {
+      return "I apologize, but I am currently having trouble processing your query. Please try again shortly or contact our official helpline for urgent assistance.";
+    }
+    
+    return finalOutput;
   }
 );
