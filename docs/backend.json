@@ -175,6 +175,7 @@
         "location": { "type": "string" },
         "category": { "type": "string" },
         "description": { "type": "string" },
+        "descriptionBn": { "type": "string", "description": "Bengali translation of the mission narrative." },
         "imageId": { "type": "string" },
         "galleryImages": { "type": "array", "items": { "type": "string" }, "description": "Three additional still photos for the official project profile." },
         "galleryCaptions": { "type": "array", "items": { "type": "string" }, "description": "Captions for the three additional still photos." },

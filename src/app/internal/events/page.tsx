@@ -79,6 +79,7 @@ export default function InternalEventsManagement() {
     location: '',
     category: 'Campaign' as const,
     description: '',
+    descriptionBn: '',
     imageId: 'event-legal-aid',
     galleryImages: ['', '', ''],
     galleryCaptions: ['', '', ''],
@@ -177,7 +178,7 @@ export default function InternalEventsManagement() {
     addDoc(collection(db, 'events'), { ...newEvent, createdAt: serverTimestamp() })
       .then(() => {
         toast({ title: "Event Archived" })
-        setNewEvent({ title: '', date: '', location: '', category: 'Campaign', description: '', imageId: 'event-legal-aid', galleryImages: ['', '', ''], galleryCaptions: ['', '', ''], videoUrl: '', videoCaption: '' })
+        setNewEvent({ title: '', date: '', location: '', category: 'Campaign', description: '', descriptionBn: '', imageId: 'event-legal-aid', galleryImages: ['', '', ''], galleryCaptions: ['', '', ''], videoUrl: '', videoCaption: '' })
         setIsAddDialogOpen(false)
         setIsActionLoading(false)
       })
@@ -279,7 +280,8 @@ export default function InternalEventsManagement() {
                   <div className="space-y-1"><Label className="text-[10px] uppercase font-bold">Category</Label><Select value={newEvent.category} onValueChange={(v: any) => setNewEvent(p => ({...p, category: v}))}><SelectTrigger className="h-10 rounded-lg text-xs"><SelectValue /></SelectTrigger><SelectContent position="popper" className="z-[1000001] bg-white">{categories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent></Select></div>
                 </div>
                 <div className="space-y-1"><Label className="text-[10px] uppercase font-bold">Logistics Venue</Label><Input value={newEvent.location} onChange={e => setNewEvent(p => ({...p, location: e.target.value}))} className="h-10 rounded-lg" /></div>
-                <div className="space-y-1"><Label className="text-[10px] uppercase font-bold">Registry Narrative</Label><Textarea value={newEvent.description} onChange={e => setNewEvent(p => ({...p, description: e.target.value}))} className="rounded-xl min-h-[100px]" /></div>
+                <div className="space-y-1"><Label className="text-[10px] uppercase font-bold">Registry Narrative (English)</Label><Textarea value={newEvent.description} onChange={e => setNewEvent(p => ({...p, description: e.target.value}))} className="rounded-xl min-h-[100px]" /></div>
+                <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-emerald-600">Registry Narrative (Bengali)</Label><Textarea value={newEvent.descriptionBn} onChange={e => setNewEvent(p => ({...p, descriptionBn: e.target.value}))} className="rounded-xl min-h-[100px] border-emerald-100" /></div>
               </div>
               <DialogFooter><Button onClick={handleAddEvent} disabled={isActionLoading || isVideoProcessing} className="w-full h-11 rounded-xl bg-accent text-primary font-bold hover:bg-secondary hover:text-white transition-all">Establish Official Entry</Button></DialogFooter>
             </DialogContent>
@@ -328,7 +330,8 @@ export default function InternalEventsManagement() {
 
               <div className="space-y-1"><Label className="text-[10px] uppercase font-bold">Venue</Label><Input value={editEvent.location || ''} onChange={e => setEditEvent((p: any) => ({...p, location: e.target.value}))} className="h-10 rounded-lg" /></div>
               
-              <div className="space-y-1"><Label className="text-[10px] uppercase font-bold">Log Narrative</Label><Textarea value={editEvent.description} onChange={e => setEditEvent((p: any) => ({...p, description: e.target.value}))} className="rounded-xl min-h-[120px]" /></div>
+              <div className="space-y-1"><Label className="text-[10px] uppercase font-bold">Log Narrative (English)</Label><Textarea value={editEvent.description} onChange={e => setEditEvent((p: any) => ({...p, description: e.target.value}))} className="rounded-xl min-h-[120px]" /></div>
+              <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-emerald-600">Log Narrative (Bengali)</Label><Textarea value={editEvent.descriptionBn} onChange={e => setEditEvent((p: any) => ({...p, descriptionBn: e.target.value}))} className="rounded-xl min-h-[120px] border-emerald-100" /></div>
               <Button onClick={handleUpdateEvent} disabled={isActionLoading || isVideoProcessing} className="w-full h-11 rounded-xl bg-primary text-white font-bold transition-all hover:bg-secondary">
                 {isActionLoading ? <Loader2 className="animate-spin" /> : "Commit Changes to Registry"}
               </Button>

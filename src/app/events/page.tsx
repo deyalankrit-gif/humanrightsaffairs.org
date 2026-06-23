@@ -28,7 +28,8 @@ import {
   Link as LinkIcon,
   AlertTriangle,
   ShieldAlert,
-  FileWarning
+  FileWarning,
+  Languages
 } from 'lucide-react'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -74,6 +75,7 @@ type Event = {
   videoUrl?: string
   videoCaption?: string
   description: string
+  descriptionBn?: string
 }
 
 export default function EventsPage() {
@@ -87,6 +89,7 @@ export default function EventsPage() {
   const [isVideoProcessing, setIsVideoProcessing] = useState(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [zoomedImage, setZoomedImage] = useState<string | null>(null)
+  const [narrativeLang, setNarrativeLang] = useState<'en' | 'bn'>('en')
 
   // Deletion States
   const [deleteDialogStep, setDeleteDialogStep] = useState<'warning' | 'verify' | null>(null)
@@ -121,6 +124,7 @@ export default function EventsPage() {
     location: '',
     category: 'Campaign' as const,
     description: '',
+    descriptionBn: '',
     imageId: 'event-legal-aid',
     galleryImages: ['', '', ''],
     galleryCaptions: ['', '', ''],
@@ -208,7 +212,7 @@ export default function EventsPage() {
     addDoc(collection(db, 'events'), eventData)
       .then(() => {
         toast({ title: "Project Published", description: "Record committed to registry." })
-        setNewEvent({ title: '', date: '', location: '', category: 'Campaign', description: '', imageId: 'event-legal-aid', galleryImages: ['', '', ''], galleryCaptions: ['', '', ''], videoUrl: '', videoCaption: '' })
+        setNewEvent({ title: '', date: '', location: '', category: 'Campaign', description: '', descriptionBn: '', imageId: 'event-legal-aid', galleryImages: ['', '', ''], galleryCaptions: ['', '', ''], videoUrl: '', videoCaption: '' })
         setIsAddDialogOpen(false)
         setIsActionLoading(false)
       })
@@ -458,8 +462,12 @@ export default function EventsPage() {
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <Label>Impact Narrative</Label>
+                      <Label>Impact Narrative (English)</Label>
                       <Textarea value={newEvent.description} onChange={e => setNewEvent(prev => ({...prev, description: e.target.value}))} placeholder="Summarize the organizational footprint..." className="rounded-xl min-h-[100px]" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-emerald-600 font-bold">Impact Narrative (Bengali)</Label>
+                      <Textarea value={newEvent.descriptionBn} onChange={e => setNewEvent(prev => ({...prev, descriptionBn: e.target.value}))} placeholder="কার্যক্রমের বিবরণ বাংলা ভাষায় লিখুন..." className="rounded-xl min-h-[100px] border-emerald-100" />
                     </div>
                   </div>
                   <DialogFooter>
@@ -612,7 +620,8 @@ export default function EventsPage() {
                                       </div>
                                     </div>
                                     <div className="space-y-2"><Label>Venue</Label><Input value={editEvent.location || ''} onChange={e => setEditEvent({...editEvent, location: e.target.value})} className="h-12 rounded-xl" /></div>
-                                    <div className="space-y-2"><Label>Impact Narrative</Label><Textarea value={editEvent.description} onChange={e => setEditEvent({...editEvent, description: e.target.value})} className="rounded-xl min-h-[100px]" /></div>
+                                    <div className="space-y-2"><Label>Impact Narrative (English)</Label><Textarea value={editEvent.description} onChange={e => setEditEvent({...editEvent, description: e.target.value})} className="rounded-xl min-h-[100px]" /></div>
+                                    <div className="space-y-2"><Label className="text-emerald-600 font-bold">Impact Narrative (Bengali)</Label><Textarea value={editEvent.descriptionBn} onChange={e => setEditEvent({...editEvent, descriptionBn: e.target.value})} className="rounded-xl min-h-[100px] border-emerald-100" /></div>
                                     
                                     <Button onClick={handleUpdateEvent} disabled={isActionLoading || isVideoProcessing} className="w-full mt-4 h-12 rounded-xl bg-primary text-primary-foreground font-bold hover:bg-secondary transition-all">{isActionLoading ? <Loader2 className="animate-spin" /> : "Save Profile Changes"}</Button>
                                   </div>
@@ -667,7 +676,39 @@ export default function EventsPage() {
                   </div>
                 </div>
                 <div className="p-8 md:p-16 space-y-16 pb-24">
-                  <div className="space-y-6"><h3 className="text-xs font-black uppercase tracking-[0.3em] text-accent flex items-center gap-2"><span className="w-8 h-px bg-accent"></span> Mission Narrative</h3><p className="text-xl md:text-2xl text-slate-700 dark:text-slate-300 leading-relaxed font-body italic border-l-4 border-accent pl-6">"{selectedEventDetails.description}"</p></div>
+                  <div className="space-y-6">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                      <h3 className="text-xs font-black uppercase tracking-[0.3em] text-accent flex items-center gap-2">
+                        <span className="w-8 h-px bg-accent"></span> Mission Narrative
+                      </h3>
+                      
+                      {selectedEventDetails.descriptionBn && (
+                        <div className="bg-slate-100 dark:bg-slate-800 p-1 rounded-xl flex gap-1 animate-in fade-in zoom-in-95 duration-500">
+                          <Button 
+                            variant={narrativeLang === 'en' ? "default" : "ghost"} 
+                            size="sm" 
+                            onClick={() => setNarrativeLang('en')}
+                            className="h-8 rounded-lg text-[10px] font-bold uppercase gap-1.5"
+                          >
+                            <Languages className="w-3 h-3" /> English
+                          </Button>
+                          <Button 
+                            variant={narrativeLang === 'bn' ? "default" : "ghost"} 
+                            size="sm" 
+                            onClick={() => setNarrativeLang('bn')}
+                            className="h-8 rounded-lg text-[10px] font-bold uppercase gap-1.5"
+                          >
+                            <Languages className="w-3 h-3" /> Bengali
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                    
+                    <p className="text-xl md:text-2xl text-slate-700 dark:text-slate-300 leading-relaxed font-body italic border-l-4 border-accent pl-6 animate-in fade-in duration-500">
+                      "{narrativeLang === 'en' ? selectedEventDetails.description : (selectedEventDetails.descriptionBn || selectedEventDetails.description)}"
+                    </p>
+                  </div>
+
                   <div className="space-y-8"><h3 className="text-xs font-black uppercase tracking-[0.3em] text-primary dark:text-white flex items-center gap-2"><Camera className="w-4 h-4 text-emerald-500" /> Captured Moments</h3>
                     <div className="grid md:grid-cols-3 gap-6">{[0, 1, 2].map((idx) => {
                         const img = selectedEventDetails.galleryImages?.[idx] || `https://picsum.photos/seed/event-${selectedEventDetails.id}-${idx}/600/800`
