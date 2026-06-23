@@ -79,13 +79,13 @@ export default function Home() {
           <div className="absolute inset-0 bg-gradient-to-b from-primary/40 via-primary/20 to-primary/60 dark:from-slate-950/70 dark:via-slate-950/50 dark:to-slate-950/80"></div>
         </div>
 
-        {/* Transparent Logo in Top Left of Hero */}
-        <div className="absolute top-8 left-8 z-20 hidden xl:flex items-center gap-4 animate-in fade-in slide-in-from-left-4 duration-1000">
-          <div className="relative w-16 h-16">
+        {/* Transparent Logo in Top Left of Hero - ENLARGED */}
+        <div className="absolute top-8 left-8 z-20 hidden xl:flex items-center gap-6 animate-in fade-in slide-in-from-left-4 duration-1000">
+          <div className="relative w-24 h-24 transition-transform hover:scale-105">
             <Image src="/HRAT%20Logo.jpeg" alt="HRAT Logo" fill className="object-contain" />
           </div>
           <div className="flex flex-col text-white">
-            <span className="font-headline font-bold text-2xl leading-none tracking-tight">HRAT</span>
+            <span className="font-headline font-bold text-3xl leading-none tracking-tight">HRAT</span>
             <span className="text-[10px] font-bold text-accent uppercase tracking-[0.3em]">Justice Shield</span>
             <span className="text-[12px] font-bold text-white mt-1 border-t border-white/10 pt-1">মানবাধিকার সংগঠন</span>
           </div>
