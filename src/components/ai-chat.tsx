@@ -1,4 +1,3 @@
-
 "use client"
 
 import React from 'react'
@@ -43,11 +42,12 @@ export function AIChat() {
     }
 
     setMessages(prev => [...prev, userMsg])
+    const currentInput = input
     setInput('')
     setIsLoading(true)
 
     try {
-      const response = await inquireLegalAssistant(input)
+      const response = await inquireLegalAssistant({ query: currentInput })
       const aiMsg: Message = {
         id: (Date.now() + 1).toString(),
         text: response,
@@ -57,6 +57,13 @@ export function AIChat() {
       setMessages(prev => [...prev, aiMsg])
     } catch (error) {
       console.error(error)
+      const errorMsg: Message = {
+        id: (Date.now() + 1).toString(),
+        text: "I'm sorry, I encountered an error connecting to the secure registry. Please try again later.",
+        sender: 'ai',
+        timestamp: new Date()
+      }
+      setMessages(prev => [...prev, errorMsg])
     } finally {
       setIsLoading(false)
     }

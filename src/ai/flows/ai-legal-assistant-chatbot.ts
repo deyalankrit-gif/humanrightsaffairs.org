@@ -10,11 +10,9 @@
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
-const InquireLegalAssistantInputSchema = z
-  .string()
-  .describe(
-    'A user query about constitutional rights or basic legal procedures.'
-  );
+const InquireLegalAssistantInputSchema = z.object({
+  query: z.string().describe('A user query about constitutional rights or basic legal procedures.')
+});
 export type InquireLegalAssistantInput = z.infer<
   typeof InquireLegalAssistantInputSchema
 >;
@@ -42,7 +40,7 @@ Respond to the user's query in a clear, concise, conversational, and easy-to-und
 Avoid complex legal jargon where simpler language can be used.
 If you cannot answer a question, politely state that you are unable to provide specific legal advice and recommend consulting a legal professional.
 
-User Query: {{{input}}}`,
+User Query: {{{query}}}`,
 });
 
 const aiLegalAssistantChatbotFlow = ai.defineFlow(
