@@ -38,9 +38,9 @@
     },
     {
       "id": "donation-footer-image",
-      "description": "Donation call to action image for footer",
-      "imageUrl": "/Human R2.jpeg",
-      "imageHint": "charity"
+      "description": "Official Donation call to action image for footer",
+      "imageUrl": "/HRAT%20Donate.jpeg",
+      "imageHint": "donation support"
     },
     {
       "id": "ai-bot-avatar",
