@@ -1,4 +1,3 @@
-
 import Image from 'next/image'
 import { Mail, Phone, MapPin, Facebook, Twitter, Instagram, Youtube } from 'lucide-react'
 import Link from 'next/link'
@@ -33,7 +32,7 @@ export function Footer() {
             
             <div className="space-y-4">
               <DonationDialog initialStep="qr">
-                <button className="block w-40 h-28 relative group cursor-pointer overflow-hidden rounded-xl bg-transparent border-none p-0 outline-none transition-transform hover:scale-105 active:scale-95">
+                <button className="block w-40 h-28 relative group cursor-pointer overflow-hidden rounded-xl bg-transparent border-none p-0 outline-none transition-all duration-500 hover:scale-[2] hover:z-50 active:scale-95 origin-center">
                   <Image 
                     src={donationFooterImg?.imageUrl || "/HRAT%20Donate.jpeg"} 
                     alt="Donate to HRAT" 
