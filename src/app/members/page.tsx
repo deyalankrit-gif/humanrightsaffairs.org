@@ -342,7 +342,8 @@ export default function MembersPage() {
                    setEnlargedId(enlargedId === member.id ? null : member.id);
                  }}
                  className={cn(
-                   "text-[7px] uppercase tracking-widest truncate cursor-pointer transition-colors hover:text-secondary",
+                   "text-[7px] uppercase tracking-widest cursor-pointer transition-colors hover:text-secondary",
+                   enlargedId === member.id ? "whitespace-normal line-clamp-2" : "truncate",
                    isOfficeBearer ? "font-black text-accent" : "font-bold text-accent/80"
                  )}
                >
@@ -786,5 +787,117 @@ export default function MembersPage() {
 
       <Footer />
     </main>
+  )
+}
+
+function MemberGrid({ items }: { items: Member[] }) {
+  const [enlargedId, setEnlargedId] = useState<string | null>(null);
+
+  return (
+    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-3">
+      {items.map((member) => {
+        const fallback = member.gender?.toLowerCase() === 'female' ? '/dummy w.png' : '/dummy m.png'
+        const displayImg = member.imageId?.startsWith('data:') ? member.imageId : (PlaceHolderImages.find(i => i.id === member.imageId)?.imageUrl || fallback)
+        const isOfficeBearer = member.designationCategory === 'Office-bearing Member';
+        
+        const getStarColor = (level: string) => {
+          switch (level) {
+            case 'National': return "text-red-600 fill-red-500";
+            case 'State': return "text-emerald-500 fill-emerald-400";
+            case 'District': return "text-blue-600 fill-blue-500";
+            default: return "text-emerald-500 fill-emerald-400";
+          }
+        }
+
+        return (
+          <Card 
+            key={member.id} 
+            onClick={(e) => {
+              e.stopPropagation();
+              setEnlargedId(enlargedId === member.id ? null : member.id);
+            }}
+            className={cn(
+              "group border-none shadow-sm hover:shadow-2xl transition-all duration-300 rounded-2xl overflow-visible bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 relative hover:scale-125 hover:z-50 cursor-pointer",
+              enlargedId === member.id && "scale-150 z-[100] shadow-2xl"
+            )}
+          >
+            <div className="p-2 pb-0 text-center">
+               <p 
+                 onClick={(e) => {
+                   e.stopPropagation();
+                   setEnlargedId(enlargedId === member.id ? null : member.id);
+                 }}
+                 className={cn(
+                   "text-[7px] uppercase tracking-widest cursor-pointer transition-colors hover:text-secondary",
+                   enlargedId === member.id ? "whitespace-normal line-clamp-2" : "truncate",
+                   isOfficeBearer ? "font-black text-accent" : "font-bold text-accent/80"
+                 )}
+               >
+                 {member.designation}
+               </p>
+            </div>
+            <CardHeader className="p-0">
+              <div className="relative aspect-square overflow-hidden bg-slate-100 dark:bg-slate-800 rounded-t-2xl">
+                <Image 
+                  src={displayImg} 
+                  alt={member.name} 
+                  fill 
+                  className={cn(
+                    "object-cover transition-transform duration-500",
+                    enlargedId === member.id ? "scale-150" : ""
+                  )} 
+                />
+                
+                {isOfficeBearer && (
+                  <div className="absolute top-1 left-1 bg-white/50 backdrop-blur-sm rounded-full p-0.5 z-10">
+                    <Star className={cn("w-3 h-3", getStarColor(member.level))} />
+                  </div>
+                )}
+
+                <div className="absolute top-1 right-1">
+                  <Badge className="bg-primary/80 backdrop-blur-md text-white font-bold border-none text-[6px] px-1 py-0 leading-none h-auto">
+                    {member.level === 'National' ? 'Central' : member.level}
+                  </Badge>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="p-2 space-y-1">
+              <div className="flex items-start gap-1">
+                 <BadgeCheck className="w-2.5 h-2.5 text-accent shrink-0 mt-0.5" />
+                 <div className="min-w-0">
+                   <h3 className="font-headline font-bold text-[10px] text-primary dark:text-white leading-tight truncate">{member.name}</h3>
+                 </div>
+              </div>
+              <div className="space-y-0.5 pt-1 border-t border-slate-100 dark:border-slate-800">
+                <div className="flex items-center gap-1 text-[8px] text-muted-foreground">
+                  <MapPin className="w-2 h-2 text-slate-400 shrink-0" />
+                  <span className="truncate">{member.districtName ? `${member.districtName}, ` : ''}{member.stateName || 'National'}</span>
+                </div>
+                <div className="flex items-center gap-1 text-[8px] text-muted-foreground">
+                  <Briefcase className="w-2 h-2 text-slate-400 shrink-0" />
+                  <span className="truncate">ID: {member.memberId || 'N/A'}</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )
+      })}
+    </div>
+  )
+}
+
+function SectionHeading({ title, icon: Icon, color, subtitle }: { title: string, icon: any, color: string, subtitle?: string }) {
+  return (
+    <div className="flex items-center gap-4 mb-8 pb-4 border-b border-slate-100 dark:border-slate-800">
+      <div className={cn("p-3 rounded-2xl bg-white dark:bg-slate-900 shadow-sm border", color)}>
+        <Icon className="w-6 h-6" />
+      </div>
+      <div>
+        <h2 className="text-2xl md:text-3xl font-headline font-bold text-primary dark:text-white leading-none">{title}</h2>
+        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
+          {subtitle || "Official Organizational Tier"}
+        </p>
+      </div>
+    </div>
   )
 }
