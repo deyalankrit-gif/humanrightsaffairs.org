@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useMemo } from 'react'
@@ -75,7 +74,8 @@ export default function GalleryPage() {
           date: item.date,
           location: item.location,
           eventName: "Mission Highlight",
-          type: 'still'
+          type: item.type || 'still',
+          videoUrl: item.videoUrl
         });
       });
     }

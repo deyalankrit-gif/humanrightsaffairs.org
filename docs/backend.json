@@ -1,4 +1,3 @@
-
 {
   "entities": {
     "UserAccount": {
@@ -189,14 +188,16 @@
       "description": "Standalone visual archive item for the public gallery.",
       "type": "object",
       "properties": {
-        "url": { "type": "string", "description": "Image data URI or URL." },
+        "url": { "type": "string", "description": "Image data URI or URL (thumbnail for videos)." },
+        "type": { "type": "string", "enum": ["still", "video"], "description": "The type of media item." },
+        "videoUrl": { "type": "string", "description": "URL for the video (if type is video)." },
         "caption": { "type": "string" },
         "category": { "type": "string" },
         "date": { "type": "string" },
         "location": { "type": "string" },
         "createdAt": { "type": "string", "format": "date-time" }
       },
-      "required": ["url", "caption", "category"]
+      "required": ["url", "caption", "category", "type"]
     },
     "TerminatedMember": {
       "title": "Terminated Member",
