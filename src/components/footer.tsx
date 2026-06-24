@@ -1,3 +1,4 @@
+
 import Image from 'next/image'
 import { Mail, Phone, MapPin, Facebook, Twitter, Instagram, Youtube } from 'lucide-react'
 import Link from 'next/link'
@@ -31,11 +32,10 @@ export function Footer() {
             </p>
             
             <div className="space-y-4">
-              {/* Donation Photo integrated into footer column - Opens SBI QR Code directly */}
               <DonationDialog initialStep="qr">
                 <button className="block w-40 h-28 relative group cursor-pointer overflow-hidden rounded-xl bg-transparent border-none p-0 outline-none transition-transform hover:scale-105 active:scale-95">
                   <Image 
-                    src={donationFooterImg?.imageUrl || "https://picsum.photos/seed/donation/400/300"} 
+                    src={donationFooterImg?.imageUrl || "/HRAT%20Donate.jpeg"} 
                     alt="Donate to HRAT" 
                     fill 
                     className="object-contain"

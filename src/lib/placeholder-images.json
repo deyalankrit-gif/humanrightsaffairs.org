@@ -4,19 +4,19 @@
       "id": "chairman-photo",
       "description": "Central Chairman (INDIA) & Founder - Dhritiman Dey",
       "imageUrl": "/Dhritiman.jpeg",
-      "imageHint": "dhritiman dey portrait"
+      "imageHint": "dhritiman dey"
     },
     {
       "id": "moumita-photo",
       "description": "Chairman (West Bengal) & Founder - Moumita Saha",
       "imageUrl": "/Moumita.jpeg",
-      "imageHint": "moumita saha portrait"
+      "imageHint": "moumita saha"
     },
     {
       "id": "id-card-sample",
       "description": "Sample Member Identity Card for JusticeShield",
       "imageUrl": "/sample i card.jpeg",
-      "imageHint": "identification card"
+      "imageHint": "id card"
     },
     {
       "id": "hero-human-rights",
@@ -34,7 +34,7 @@
       "id": "niti-logo",
       "description": "Official Niti Aayog Emblem",
       "imageUrl": "/niti2.png",
-      "imageHint": "logo"
+      "imageHint": "niti aayog"
     },
     {
       "id": "donation-footer-image",
