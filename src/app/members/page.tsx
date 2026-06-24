@@ -26,7 +26,8 @@ import {
   X,
   Star,
   ShieldCheck,
-  Building2
+  Building2,
+  ChevronRight
 } from 'lucide-react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -272,8 +273,28 @@ export default function MembersPage() {
 
   // Hierarchical Grouping Logic
   const centralMembers = filteredMembers.filter(m => m.level === 'National')
-  const stateMembers = filteredMembers.filter(m => m.level === 'State')
-  const districtMembers = filteredMembers.filter(m => m.level === 'District')
+  
+  // Group state members by stateName
+  const stateGroups = filteredMembers
+    .filter(m => m.level === 'State')
+    .reduce((acc, m) => {
+      const state = m.stateName || 'Other';
+      if (!acc[state]) acc[state] = [];
+      acc[state].push(m);
+      return acc;
+    }, {} as Record<string, Member[]>);
+
+  // Group district members by stateName, then districtName
+  const districtGroups = filteredMembers
+    .filter(m => m.level === 'District')
+    .reduce((acc, m) => {
+      const state = m.stateName || 'Other';
+      const district = m.districtName || 'Other';
+      if (!acc[state]) acc[state] = {};
+      if (!acc[state][district]) acc[state][district] = [];
+      acc[state][district].push(m);
+      return acc;
+    }, {} as Record<string, Record<string, Member[]>>);
 
   const parseMemberDate = (dateStr: string) => {
     if (!dateStr) return undefined;
@@ -286,8 +307,8 @@ export default function MembersPage() {
 
   if (!mounted) return null
 
-  const states = Object.keys(INDIA_DATA).sort();
-  const districts = selectedState ? INDIA_DATA[selectedState] : [];
+  const statesList = Object.keys(INDIA_DATA).sort();
+  const districtsList = selectedState ? INDIA_DATA[selectedState] : [];
 
   const MemberGrid = ({ items }: { items: Member[] }) => (
     <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-3">
@@ -383,14 +404,16 @@ export default function MembersPage() {
     </div>
   )
 
-  const SectionHeading = ({ title, icon: Icon, color }: { title: string, icon: any, color: string }) => (
+  const SectionHeading = ({ title, icon: Icon, color, subtitle }: { title: string, icon: any, color: string, subtitle?: string }) => (
     <div className="flex items-center gap-4 mb-8 pb-4 border-b border-slate-100 dark:border-slate-800">
       <div className={cn("p-3 rounded-2xl bg-white dark:bg-slate-900 shadow-sm border", color)}>
         <Icon className="w-6 h-6" />
       </div>
       <div>
         <h2 className="text-2xl md:text-3xl font-headline font-bold text-primary dark:text-white leading-none">{title}</h2>
-        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Official Organizational Tier</p>
+        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
+          {subtitle || "Official Organizational Tier"}
+        </p>
       </div>
     </div>
   )
@@ -524,7 +547,7 @@ export default function MembersPage() {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div className="space-y-2">
                         <Label className="text-[10px] uppercase font-bold text-slate-400">Duration</Label>
-                        <Select value={newMember.membershipDuration} onValueChange={val => setNewMember({...newMember, membershipDuration: val})}>
+                        <Select value={newMember.membershipDuration} onValueChange={val => setNewMember({...newMember, membershipDuration: val as any})}>
                           <SelectTrigger className="h-11 rounded-xl bg-white dark:bg-slate-900"><SelectValue /></SelectTrigger>
                           <SelectContent position="popper" className="z-[1000001] bg-white">
                             <SelectItem value="1 Year">1 Year Term</SelectItem>
@@ -581,7 +604,7 @@ export default function MembersPage() {
                           <Label className="text-[10px] uppercase font-bold text-slate-400">Regional Chapter (State)</Label>
                           <Select value={newMember.stateName} onValueChange={val => setNewMember({...newMember, stateName: val, districtName: ''})}>
                             <SelectTrigger className="h-11 rounded-xl bg-white dark:bg-slate-900"><SelectValue placeholder="State" /></SelectTrigger>
-                            <SelectContent position="popper" className="z-[1000001] bg-white">{states.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+                            <SelectContent position="popper" className="z-[1000001] bg-white">{statesList.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
                           </Select>
                         </div>
                       )}
@@ -644,7 +667,7 @@ export default function MembersPage() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="max-h-80 overflow-y-auto w-56 bg-white z-[1000001]">
-                    {states.map((state) => (
+                    {statesList.map((state) => (
                       <DropdownMenuItem key={state} onClick={() => handleStateSelect(state)} className="font-bold">{state}</DropdownMenuItem>
                     ))}
                   </DropdownMenuContent>
@@ -661,7 +684,7 @@ export default function MembersPage() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent className="max-h-80 overflow-y-auto w-56 bg-white z-[1000001]">
-                      {districts.map((district) => (
+                      {districtsList.map((district) => (
                         <DropdownMenuItem key={district} onClick={() => handleDistrictSelect(district)} className="font-bold">{district}</DropdownMenuItem>
                       ))}
                     </DropdownMenuContent>
@@ -699,19 +722,55 @@ export default function MembersPage() {
                 </div>
               )}
 
-              {/* State Committee Section */}
-              {stateMembers.length > 0 && (
-                <div className="space-y-8">
+              {/* State Committee Section - Grouped by State */}
+              {Object.keys(stateGroups).length > 0 && (
+                <div className="space-y-12">
                   <SectionHeading title="State Committee" icon={Globe} color="text-emerald-500 border-emerald-100" />
-                  <MemberGrid items={stateMembers} />
+                  <div className="space-y-12 pl-4 border-l-2 border-emerald-50 dark:border-emerald-900/30">
+                    {Object.keys(stateGroups).sort().map(state => (
+                      <div key={state} className="space-y-6">
+                        <div className="flex items-center gap-3">
+                          <Badge className="bg-emerald-500 text-white font-black uppercase tracking-[0.2em] text-[10px] px-4 py-1 rounded-lg">
+                            {state}
+                          </Badge>
+                          <div className="h-px flex-1 bg-emerald-50 dark:bg-emerald-900/30"></div>
+                        </div>
+                        <MemberGrid items={stateGroups[state]} />
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
 
-              {/* District Committee Section */}
-              {districtMembers.length > 0 && (
-                <div className="space-y-8">
+              {/* District Committee Section - Grouped by State and District */}
+              {Object.keys(districtGroups).length > 0 && (
+                <div className="space-y-12">
                   <SectionHeading title="District Committee" icon={Building2} color="text-blue-600 border-blue-100" />
-                  <MemberGrid items={districtMembers} />
+                  <div className="space-y-16 pl-4 border-l-2 border-blue-50 dark:border-blue-900/30">
+                    {Object.keys(districtGroups).sort().map(state => (
+                      <div key={state} className="space-y-10">
+                        <div className="flex items-center gap-3">
+                           <div className="flex items-center gap-2 bg-slate-900 text-white px-4 py-1.5 rounded-xl shadow-lg border border-white/10">
+                              <Globe className="w-3.5 h-3.5 text-accent" />
+                              <span className="text-xs font-black uppercase tracking-widest">{state} Region</span>
+                           </div>
+                           <div className="h-px flex-1 bg-slate-200 dark:bg-slate-800"></div>
+                        </div>
+                        
+                        <div className="space-y-10 pl-6 border-l border-dashed border-slate-200 dark:border-slate-800">
+                          {Object.keys(districtGroups[state]).sort().map(district => (
+                            <div key={district} className="space-y-4">
+                              <div className="flex items-center gap-2 text-primary dark:text-accent font-black uppercase tracking-widest text-[10px]">
+                                <ChevronRight className="w-3 h-3" />
+                                <span>{district} District Council</span>
+                              </div>
+                              <MemberGrid items={districtGroups[state][district]} />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
             </>
