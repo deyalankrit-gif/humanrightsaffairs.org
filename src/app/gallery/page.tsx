@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useMemo } from 'react'
@@ -275,16 +276,16 @@ export default function GalleryPage() {
         </div>
       </section>
 
-      {/* Lightbox Modal */}
+      {/* Lightbox Modal - Optimized for Text Visibility */}
       <Dialog open={!!selectedImage} onOpenChange={(open) => !open && setSelectedImage(null)}>
-        <DialogContent className="max-w-[95vw] md:max-w-6xl p-0 border-none bg-black/95 shadow-none [&>button]:hidden flex flex-col h-[90vh]">
+        <DialogContent className="max-w-[95vw] md:max-w-6xl p-0 border-none bg-black/95 shadow-none [&>button]:hidden flex flex-col max-h-[95vh] overflow-hidden">
           <DialogHeader className="sr-only">
             <DialogTitle>Image Lightbox</DialogTitle>
             <DialogDescription>Full-sized mission photograph viewer.</DialogDescription>
           </DialogHeader>
 
           {selectedImage && (
-            <div className="flex-1 flex flex-col h-full relative">
+            <div className="flex-1 flex flex-col h-full relative overflow-y-auto custom-scrollbar">
               {/* Navigation Controls */}
               <div className="absolute top-6 right-6 z-50 flex gap-2">
                  <Button 
@@ -309,10 +310,10 @@ export default function GalleryPage() {
                  </Button>
               </div>
 
-              {/* Main Content Display */}
-              <div className="flex-1 relative flex items-center justify-center p-8">
+              {/* Main Content Display - Constrained to prevent pushing text */}
+              <div className="flex-none min-h-0 relative flex items-center justify-center p-4 md:p-8">
                  {selectedImage.type === 'video' && selectedImage.videoUrl ? (
-                   <div className="relative w-full h-full max-h-[70vh] aspect-video rounded-3xl overflow-hidden border-4 border-white/10 shadow-2xl bg-black">
+                   <div className="relative w-full max-w-5xl aspect-video rounded-3xl overflow-hidden border-4 border-white/10 shadow-2xl bg-black max-h-[55vh]">
                       {getYouTubeEmbedUrl(selectedImage.videoUrl) ? (
                         <iframe
                           src={getYouTubeEmbedUrl(selectedImage.videoUrl)!}
@@ -330,7 +331,7 @@ export default function GalleryPage() {
                       )}
                    </div>
                  ) : (
-                   <div className="relative w-full h-full max-h-[70vh]">
+                   <div className="relative w-full h-[60vh] max-w-5xl">
                       <Image 
                         src={selectedImage.url} 
                         alt={selectedImage.caption} 
@@ -342,18 +343,18 @@ export default function GalleryPage() {
                  )}
               </div>
 
-              {/* Info Panel */}
-              <div className="bg-white/5 backdrop-blur-xl p-8 md:p-12 border-t border-white/10 animate-in slide-in-from-bottom-4 duration-500">
-                <div className="max-w-4xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-3">
+              {/* Info Panel - Optimized visibility */}
+              <div className="flex-1 bg-white/5 backdrop-blur-xl p-6 md:p-10 border-t border-white/10 animate-in slide-in-from-bottom-4 duration-500">
+                <div className="max-w-4xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-6 md:gap-12">
+                  <div className="space-y-3 flex-1">
+                    <div className="flex flex-wrap items-center gap-3">
                       <Badge className="bg-accent text-primary font-black uppercase tracking-widest text-[10px]">{selectedImage.category}</Badge>
                       <Badge variant="outline" className="border-white/20 text-white/60 font-bold uppercase tracking-widest text-[8px]">
                         {selectedImage.type === 'video' ? 'Mission Highlight Video' : 'Official Still Photograph'}
                       </Badge>
                       <span className="text-white/40 text-[10px] font-bold uppercase tracking-[0.2em]">{selectedImage.eventName}</span>
                     </div>
-                    <h2 className="text-2xl md:text-4xl font-headline font-bold text-white leading-tight">
+                    <h2 className="text-xl md:text-3xl font-headline font-bold text-white leading-tight">
                       {selectedImage.caption}
                     </h2>
                     <div className="flex flex-wrap items-center gap-6 text-white/60 font-bold uppercase tracking-widest text-[10px]">
@@ -361,8 +362,8 @@ export default function GalleryPage() {
                       <span className="flex items-center gap-2"><MapPin className="w-4 h-4 text-accent" /> {selectedImage.location}</span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3 bg-emerald-500/20 text-emerald-400 px-6 py-2.5 rounded-full border border-emerald-500/30 text-xs font-bold uppercase tracking-widest shrink-0">
-                    <BadgeCheck className="w-5 h-5" />
+                  <div className="flex items-center gap-3 bg-emerald-500/20 text-emerald-400 px-6 py-2.5 rounded-full border border-emerald-500/30 text-[10px] font-bold uppercase tracking-widest shrink-0">
+                    <BadgeCheck className="w-4 h-4" />
                     Verified Mission Record
                   </div>
                 </div>
