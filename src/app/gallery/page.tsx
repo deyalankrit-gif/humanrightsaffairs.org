@@ -154,6 +154,13 @@ export default function GalleryPage() {
     setSelectedImage(filteredItems[prevIndex]);
   };
 
+  const getYouTubeEmbedUrl = (url: string) => {
+    if (!url) return null;
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? `https://www.youtube.com/embed/${match[2]}?autoplay=1` : null;
+  };
+
   const loading = eventsLoading || galleryLoading;
 
   return (
@@ -306,12 +313,21 @@ export default function GalleryPage() {
               <div className="flex-1 relative flex items-center justify-center p-8">
                  {selectedImage.type === 'video' && selectedImage.videoUrl ? (
                    <div className="relative w-full h-full max-h-[70vh] aspect-video rounded-3xl overflow-hidden border-4 border-white/10 shadow-2xl bg-black">
-                      <video 
-                        src={selectedImage.videoUrl} 
-                        controls 
-                        autoPlay 
-                        className="w-full h-full object-contain"
-                      />
+                      {getYouTubeEmbedUrl(selectedImage.videoUrl) ? (
+                        <iframe
+                          src={getYouTubeEmbedUrl(selectedImage.videoUrl)!}
+                          className="w-full h-full border-none"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                        />
+                      ) : (
+                        <video 
+                          src={selectedImage.videoUrl} 
+                          controls 
+                          autoPlay 
+                          className="w-full h-full object-contain"
+                        />
+                      )}
                    </div>
                  ) : (
                    <div className="relative w-full h-full max-h-[70vh]">

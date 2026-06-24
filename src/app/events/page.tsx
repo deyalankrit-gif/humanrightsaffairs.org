@@ -268,6 +268,13 @@ export default function EventsPage() {
     try { return parse(dateStr, "PPP", new Date()); } catch { return undefined; }
   }
 
+  const getYouTubeEmbedUrl = (url: string) => {
+    if (!url) return null;
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? `https://www.youtube.com/embed/${match[2]}?autoplay=1` : null;
+  };
+
   const filteredEvents = (firestoreEvents || []).filter(e => {
     const matchesCategory = filter === "All" || e.category === filter;
     const matchesSearch = (e.title || '').toLowerCase().includes(search.toLowerCase()) || 
@@ -726,7 +733,18 @@ export default function EventsPage() {
                   </div>
                   <div className="space-y-8"><h3 className="text-xs font-black uppercase tracking-[0.3em] text-primary dark:text-white flex items-center gap-2"><Film className="w-4 h-4 text-red-500" /> Mission Highlights</h3>
                     <div className="relative aspect-video rounded-[3rem] overflow-hidden shadow-2xl border-4 border-slate-100 dark:border-slate-800 bg-black group">
-                      {selectedEventDetails.videoUrl ? (<video controls className="w-full h-full object-cover"><source src={selectedEventDetails.videoUrl} />Your browser does not support the video tag.</video>) : (<><Image src={`https://picsum.photos/seed/event-vid-${selectedEventDetails.id}/1200/675`} alt="Video" fill className="object-cover opacity-60 grayscale group-hover:grayscale-0 transition-all duration-700" /><div className="absolute inset-0 flex flex-col items-center justify-center gap-6"><div className="w-24 h-24 bg-white/20 backdrop-blur-xl rounded-full flex items-center justify-center border-4 border-white/40 group-hover:scale-110 transition-transform cursor-pointer shadow-2xl"><Play className="w-10 h-10 text-white fill-white ml-1" /></div><p className="text-white font-black uppercase tracking-[0.3em] text-sm drop-shadow-lg">Watch Official Footage</p></div></>)}
+                      {selectedEventDetails.videoUrl ? (
+                         getYouTubeEmbedUrl(selectedEventDetails.videoUrl) ? (
+                           <iframe
+                             src={getYouTubeEmbedUrl(selectedEventDetails.videoUrl)!}
+                             className="w-full h-full border-none"
+                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                             allowFullScreen
+                           />
+                         ) : (
+                           <video controls className="w-full h-full object-cover"><source src={selectedEventDetails.videoUrl} />Your browser does not support the video tag.</video>
+                         )
+                      ) : (<><Image src={`https://picsum.photos/seed/event-vid-${selectedEventDetails.id}/1200/675`} alt="Video" fill className="object-cover opacity-60 grayscale group-hover:grayscale-0 transition-all duration-700" /><div className="absolute inset-0 flex flex-col items-center justify-center gap-6"><div className="w-24 h-24 bg-white/20 backdrop-blur-xl rounded-full flex items-center justify-center border-4 border-white/40 group-hover:scale-110 transition-transform cursor-pointer shadow-2xl"><Play className="w-10 h-10 text-white fill-white ml-1" /></div><p className="text-white font-black uppercase tracking-[0.3em] text-sm drop-shadow-lg">Watch Official Footage</p></div></>)}
                       <div className="absolute bottom-6 left-6 right-6 p-6 bg-primary/40 backdrop-blur-md rounded-2xl border border-white/10 flex items-center justify-between"><div className="flex items-center gap-3"><CheckCircle2 className="w-5 h-5 text-emerald-400" /><p className="text-xs font-bold text-white uppercase tracking-wider">{selectedEventDetails.videoCaption || `Documentary: ${selectedEventDetails.title}`}</p></div><ExternalLink className="w-4 h-4 text-white/60" /></div>
                     </div>
                   </div>
