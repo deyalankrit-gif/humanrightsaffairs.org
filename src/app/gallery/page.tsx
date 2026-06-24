@@ -12,7 +12,10 @@ import {
   ChevronLeft,
   Calendar,
   MapPin,
-  BadgeCheck
+  BadgeCheck,
+  Play,
+  Film,
+  Images
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -36,10 +39,13 @@ type GalleryItem = {
   date: string
   location: string
   eventName: string
+  type: 'still' | 'video'
+  videoUrl?: string
 }
 
 export default function GalleryPage() {
   const [selectedImage, setSelectedImage] = useState<GalleryItem | null>(null)
+  const [filterType, setFilterType] = useState<'All' | 'still' | 'video'>('All')
   const db = useFirestore()
 
   const eventsQuery = useMemoFirebase(() => {
@@ -68,7 +74,8 @@ export default function GalleryPage() {
           category: item.category,
           date: item.date,
           location: item.location,
-          eventName: "Mission Highlight"
+          eventName: "Mission Highlight",
+          type: 'still'
         });
       });
     }
@@ -85,7 +92,8 @@ export default function GalleryPage() {
             category: event.category,
             date: event.date,
             location: event.location,
-            eventName: event.title
+            eventName: event.title,
+            type: 'still'
           });
         }
         
@@ -100,9 +108,25 @@ export default function GalleryPage() {
                 category: event.category,
                 date: event.date,
                 location: event.location,
-                eventName: event.title
+                eventName: event.title,
+                type: 'still'
               });
             }
+          });
+        }
+
+        // Add videos as gallery items
+        if (event.videoUrl) {
+          items.push({
+            id: `${event.id}-video`,
+            url: event.imageId?.startsWith('data:') ? event.imageId : 'https://picsum.photos/seed/vid-thumb/800/600',
+            caption: event.videoCaption || `Cinematic: ${event.title}`,
+            category: event.category,
+            date: event.date,
+            location: event.location,
+            eventName: event.title,
+            type: 'video',
+            videoUrl: event.videoUrl
           });
         }
       });
@@ -111,18 +135,23 @@ export default function GalleryPage() {
     return items;
   }, [events, galleryItemsRepo]);
 
+  const filteredItems = useMemo(() => {
+    if (filterType === 'All') return galleryItems;
+    return galleryItems.filter(item => item.type === filterType);
+  }, [galleryItems, filterType]);
+
   const handleNext = () => {
     if (!selectedImage) return;
-    const currentIndex = galleryItems.findIndex(i => i.id === selectedImage.id);
-    const nextIndex = (currentIndex + 1) % galleryItems.length;
-    setSelectedImage(galleryItems[nextIndex]);
+    const currentIndex = filteredItems.findIndex(i => i.id === selectedImage.id);
+    const nextIndex = (currentIndex + 1) % filteredItems.length;
+    setSelectedImage(filteredItems[nextIndex]);
   };
 
   const handlePrev = () => {
     if (!selectedImage) return;
-    const currentIndex = galleryItems.findIndex(i => i.id === selectedImage.id);
-    const prevIndex = (currentIndex - 1 + galleryItems.length) % galleryItems.length;
-    setSelectedImage(galleryItems[prevIndex]);
+    const currentIndex = filteredItems.findIndex(i => i.id === selectedImage.id);
+    const prevIndex = (currentIndex - 1 + filteredItems.length) % filteredItems.length;
+    setSelectedImage(filteredItems[prevIndex]);
   };
 
   const loading = eventsLoading || galleryLoading;
@@ -136,7 +165,7 @@ export default function GalleryPage() {
             <Badge className="bg-accent text-white font-bold px-4 py-1.5 uppercase tracking-widest text-[10px] border-none">Mission Archive</Badge>
             <h1 className="text-5xl md:text-7xl font-headline font-bold mb-6">Mission <span className="text-accent italic">Gallery</span></h1>
             <p className="text-xl opacity-80 leading-relaxed max-w-2xl mx-auto text-primary-foreground">
-              A visual record of Human Rights Affairs Trust activities, documenting our on-ground impact across regional chapters.
+              A categorized visual record of Human Rights Affairs Trust activities, documented across regional chapters.
             </p>
           </div>
         </div>
@@ -144,11 +173,38 @@ export default function GalleryPage() {
 
       <section className="py-12 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-[48px] md:top-[56px] z-30 shadow-sm transition-colors">
         <div className="container mx-auto px-4">
-          <div className="flex items-center justify-center">
-             <div className="bg-accent/10 text-accent px-8 py-3 rounded-full border border-accent/20 shadow-sm">
-                <span className="text-sm md:text-lg font-headline font-bold tracking-wide italic">
-                  Various Moments of Our Activities
-                </span>
+          <div className="flex flex-col md:flex-row items-center justify-center gap-6">
+             <div className="bg-slate-100 dark:bg-slate-800 p-1.5 rounded-2xl flex items-center gap-2 border border-slate-200 dark:border-slate-700 shadow-inner">
+                <Button 
+                  variant={filterType === 'All' ? 'default' : 'ghost'} 
+                  onClick={() => setFilterType('All')}
+                  className={cn(
+                    "rounded-xl h-10 px-6 font-bold text-xs uppercase tracking-widest transition-all",
+                    filterType === 'All' ? "bg-accent text-white shadow-lg" : "text-slate-500 hover:text-accent"
+                  )}
+                >
+                  All Moments
+                </Button>
+                <Button 
+                  variant={filterType === 'still' ? 'default' : 'ghost'} 
+                  onClick={() => setFilterType('still')}
+                  className={cn(
+                    "rounded-xl h-10 px-6 font-bold text-xs uppercase tracking-widest transition-all flex gap-2",
+                    filterType === 'still' ? "bg-accent text-white shadow-lg" : "text-slate-500 hover:text-accent"
+                  )}
+                >
+                  <Camera className="w-4 h-4" /> Still Photography
+                </Button>
+                <Button 
+                  variant={filterType === 'video' ? 'default' : 'ghost'} 
+                  onClick={() => setFilterType('video')}
+                  className={cn(
+                    "rounded-xl h-10 px-6 font-bold text-xs uppercase tracking-widest transition-all flex gap-2",
+                    filterType === 'video' ? "bg-accent text-white shadow-lg" : "text-slate-500 hover:text-accent"
+                  )}
+                >
+                  <Film className="w-4 h-4" /> Video Photography
+                </Button>
              </div>
           </div>
         </div>
@@ -161,12 +217,12 @@ export default function GalleryPage() {
               <Loader2 className="w-10 h-10 animate-spin text-accent mx-auto mb-4" />
               <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Accessing Digital Vault...</p>
             </div>
-          ) : galleryItems.length > 0 ? (
+          ) : filteredItems.length > 0 ? (
             <div className="columns-1 sm:grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {galleryItems.map((item) => (
+              {filteredItems.map((item) => (
                 <Card 
                   key={item.id} 
-                  className="mb-6 break-inside-avoid group border-none shadow-sm hover:shadow-2xl transition-all duration-500 rounded-[2rem] overflow-hidden bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 cursor-zoom-in"
+                  className="mb-6 break-inside-avoid group border-none shadow-sm hover:shadow-2xl transition-all duration-500 rounded-[2rem] overflow-hidden bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 cursor-zoom-in relative"
                   onClick={() => setSelectedImage(item)}
                 >
                   <div className="relative aspect-[4/3] overflow-hidden">
@@ -176,8 +232,23 @@ export default function GalleryPage() {
                       fill 
                       className="object-cover transition-transform duration-700 group-hover:scale-110" 
                     />
+                    
+                    {item.type === 'video' && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/0 transition-colors">
+                         <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-xl border border-white/40 flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform">
+                            <Play className="w-8 h-8 text-white fill-white ml-1" />
+                         </div>
+                      </div>
+                    )}
+
                     <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-6">
-                      <Badge className="w-fit bg-accent text-white border-none mb-2 text-[8px] font-black uppercase">{item.category}</Badge>
+                      <div className="flex gap-2 mb-2">
+                        <Badge className="w-fit bg-accent text-white border-none text-[8px] font-black uppercase">{item.category}</Badge>
+                        <Badge variant="outline" className="border-white/40 text-white text-[8px] font-bold uppercase flex gap-1">
+                          {item.type === 'video' ? <Film className="w-2.5 h-2.5" /> : <Camera className="w-2.5 h-2.5" />}
+                          {item.type === 'video' ? 'Video' : 'Still'}
+                        </Badge>
+                      </div>
                       <h3 className="text-white font-headline font-bold text-lg leading-tight line-clamp-2">{item.caption}</h3>
                       <div className="flex items-center gap-4 mt-3 text-white/60 text-[8px] font-bold uppercase tracking-widest">
                         <span className="flex items-center gap-1"><Calendar className="w-2.5 h-2.5" /> {item.date}</span>
@@ -191,7 +262,7 @@ export default function GalleryPage() {
           ) : (
             <div className="text-center py-32 opacity-20">
               <Camera className="w-20 h-20 mx-auto mb-4" />
-              <h3 className="text-2xl font-headline font-bold">No images found in the archive</h3>
+              <h3 className="text-2xl font-headline font-bold">No items found in this category</h3>
             </div>
           )}
         </div>
@@ -231,17 +302,28 @@ export default function GalleryPage() {
                  </Button>
               </div>
 
-              {/* Main Image Display */}
+              {/* Main Content Display */}
               <div className="flex-1 relative flex items-center justify-center p-8">
-                 <div className="relative w-full h-full max-h-[70vh]">
-                    <Image 
-                      src={selectedImage.url} 
-                      alt={selectedImage.caption} 
-                      fill 
-                      className="object-contain" 
-                      priority
-                    />
-                 </div>
+                 {selectedImage.type === 'video' && selectedImage.videoUrl ? (
+                   <div className="relative w-full h-full max-h-[70vh] aspect-video rounded-3xl overflow-hidden border-4 border-white/10 shadow-2xl bg-black">
+                      <video 
+                        src={selectedImage.videoUrl} 
+                        controls 
+                        autoPlay 
+                        className="w-full h-full object-contain"
+                      />
+                   </div>
+                 ) : (
+                   <div className="relative w-full h-full max-h-[70vh]">
+                      <Image 
+                        src={selectedImage.url} 
+                        alt={selectedImage.caption} 
+                        fill 
+                        className="object-contain" 
+                        priority
+                      />
+                   </div>
+                 )}
               </div>
 
               {/* Info Panel */}
@@ -250,6 +332,9 @@ export default function GalleryPage() {
                   <div className="space-y-3">
                     <div className="flex items-center gap-3">
                       <Badge className="bg-accent text-primary font-black uppercase tracking-widest text-[10px]">{selectedImage.category}</Badge>
+                      <Badge variant="outline" className="border-white/20 text-white/60 font-bold uppercase tracking-widest text-[8px]">
+                        {selectedImage.type === 'video' ? 'Mission Highlight Video' : 'Official Still Photograph'}
+                      </Badge>
                       <span className="text-white/40 text-[10px] font-bold uppercase tracking-[0.2em]">{selectedImage.eventName}</span>
                     </div>
                     <h2 className="text-2xl md:text-4xl font-headline font-bold text-white leading-tight">
