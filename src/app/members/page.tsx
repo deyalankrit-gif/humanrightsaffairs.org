@@ -24,7 +24,9 @@ import {
   Mail,
   Phone,
   X,
-  Star
+  Star,
+  ShieldCheck,
+  Building2
 } from 'lucide-react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -268,6 +270,11 @@ export default function MembersPage() {
     return matchesSearch && matchesLevel;
   })
 
+  // Hierarchical Grouping Logic
+  const centralMembers = filteredMembers.filter(m => m.level === 'National')
+  const stateMembers = filteredMembers.filter(m => m.level === 'State')
+  const districtMembers = filteredMembers.filter(m => m.level === 'District')
+
   const parseMemberDate = (dateStr: string) => {
     if (!dateStr) return undefined;
     try {
@@ -281,6 +288,112 @@ export default function MembersPage() {
 
   const states = Object.keys(INDIA_DATA).sort();
   const districts = selectedState ? INDIA_DATA[selectedState] : [];
+
+  const MemberGrid = ({ items }: { items: Member[] }) => (
+    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-3">
+      {items.map((member) => {
+        const fallback = member.gender?.toLowerCase() === 'female' ? '/dummy w.png' : '/dummy m.png'
+        const displayImg = member.imageId?.startsWith('data:') ? member.imageId : (PlaceHolderImages.find(i => i.id === member.imageId)?.imageUrl || fallback)
+        const isOfficeBearer = member.designationCategory === 'Office-bearing Member';
+        
+        const getStarColor = (level: string) => {
+          switch (level) {
+            case 'National': return "text-red-600 fill-red-500";
+            case 'State': return "text-emerald-500 fill-emerald-400";
+            case 'District': return "text-blue-600 fill-blue-500";
+            default: return "text-emerald-500 fill-emerald-400";
+          }
+        }
+
+        return (
+          <Card 
+            key={member.id} 
+            onClick={(e) => e.stopPropagation()}
+            className={cn(
+              "group border-none shadow-sm hover:shadow-2xl transition-all duration-300 rounded-2xl overflow-visible bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 relative hover:scale-125 hover:z-50 cursor-pointer",
+              enlargedId === member.id && "scale-150 z-[100] shadow-2xl"
+            )}
+          >
+            <div className="p-2 pb-0 text-center">
+               <p 
+                 onClick={(e) => {
+                   e.stopPropagation();
+                   setEnlargedId(enlargedId === member.id ? null : member.id);
+                 }}
+                 className={cn(
+                   "text-[7px] uppercase tracking-widest truncate cursor-pointer transition-colors hover:text-secondary",
+                   isOfficeBearer ? "font-black text-accent" : "font-bold text-accent/80"
+                 )}
+               >
+                 {member.designation}
+               </p>
+            </div>
+            <CardHeader className="p-0">
+              <div 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setEnlargedId(enlargedId === member.id ? null : member.id);
+                }}
+                className="relative aspect-square overflow-hidden bg-slate-100 dark:bg-slate-800 rounded-t-2xl"
+              >
+                <Image 
+                  src={displayImg} 
+                  alt={member.name} 
+                  fill 
+                  className={cn(
+                    "object-cover transition-transform duration-500",
+                    enlargedId === member.id ? "scale-150" : ""
+                  )} 
+                />
+                
+                {isOfficeBearer && (
+                  <div className="absolute top-1 left-1 bg-white/50 backdrop-blur-sm rounded-full p-0.5 z-10">
+                    <Star className={cn("w-3 h-3", getStarColor(member.level))} />
+                  </div>
+                )}
+
+                <div className="absolute top-1 right-1">
+                  <Badge className="bg-primary/80 backdrop-blur-md text-white font-bold border-none text-[6px] px-1 py-0 leading-none h-auto">
+                    {member.level === 'National' ? 'Central' : member.level}
+                  </Badge>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="p-2 space-y-1">
+              <div className="flex items-start gap-1">
+                 <BadgeCheck className="w-2.5 h-2.5 text-accent shrink-0 mt-0.5" />
+                 <div className="min-w-0">
+                   <h3 className="font-headline font-bold text-[10px] text-primary dark:text-white leading-tight truncate">{member.name}</h3>
+                 </div>
+              </div>
+              <div className="space-y-0.5 pt-1 border-t border-slate-100 dark:border-slate-800">
+                <div className="flex items-center gap-1 text-[8px] text-muted-foreground">
+                  <MapPin className="w-2 h-2 text-slate-400 shrink-0" />
+                  <span className="truncate">{member.districtName ? `${member.districtName}, ` : ''}{member.stateName || 'National'}</span>
+                </div>
+                <div className="flex items-center gap-1 text-[8px] text-muted-foreground">
+                  <Briefcase className="w-2 h-2 text-slate-400 shrink-0" />
+                  <span className="truncate">ID: {member.memberId || 'N/A'}</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )
+      })}
+    </div>
+  )
+
+  const SectionHeading = ({ title, icon: Icon, color }: { title: string, icon: any, color: string }) => (
+    <div className="flex items-center gap-4 mb-8 pb-4 border-b border-slate-100 dark:border-slate-800">
+      <div className={cn("p-3 rounded-2xl bg-white dark:bg-slate-900 shadow-sm border", color)}>
+        <Icon className="w-6 h-6" />
+      </div>
+      <div>
+        <h2 className="text-2xl md:text-3xl font-headline font-bold text-primary dark:text-white leading-none">{title}</h2>
+        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Official Organizational Tier</p>
+      </div>
+    </div>
+  )
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950" onClick={() => setEnlargedId(null)}>
@@ -569,109 +682,44 @@ export default function MembersPage() {
         </div>
       </section>
 
-      <section className="py-12">
-        <div className="container mx-auto px-4">
+      <section className="py-16">
+        <div className="container mx-auto px-4 space-y-20">
           {membersLoading ? (
-            <div className="text-center py-20"><Loader2 className="w-10 h-10 animate-spin text-accent mx-auto mb-4" /><p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Fetching Live Directory...</p></div>
-          ) : (
-            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-3">
-              {filteredMembers.length > 0 ? (
-                filteredMembers.map((member) => {
-                  const fallback = member.gender?.toLowerCase() === 'female' ? '/dummy w.png' : '/dummy m.png'
-                  const displayImg = member.imageId?.startsWith('data:') ? member.imageId : (PlaceHolderImages.find(i => i.id === member.imageId)?.imageUrl || fallback)
-                  const isOfficeBearer = member.designationCategory === 'Office-bearing Member';
-                  
-                  const getStarColor = (level: string) => {
-                    switch (level) {
-                      case 'National': return "text-red-600 fill-red-500";
-                      case 'State': return "text-emerald-500 fill-emerald-400";
-                      case 'District': return "text-blue-600 fill-blue-500";
-                      default: return "text-emerald-500 fill-emerald-400";
-                    }
-                  }
-
-                  return (
-                    <Card 
-                      key={member.id} 
-                      onClick={(e) => e.stopPropagation()}
-                      className={cn(
-                        "group border-none shadow-sm hover:shadow-2xl transition-all duration-300 rounded-2xl overflow-visible bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 relative hover:scale-125 hover:z-50 cursor-pointer",
-                        enlargedId === member.id && "scale-150 z-[100] shadow-2xl"
-                      )}
-                    >
-                      <div className="p-2 pb-0 text-center">
-                         <p 
-                           onClick={(e) => {
-                             e.stopPropagation();
-                             setEnlargedId(enlargedId === member.id ? null : member.id);
-                           }}
-                           className={cn(
-                             "text-[7px] uppercase tracking-widest truncate cursor-pointer transition-colors hover:text-secondary",
-                             isOfficeBearer ? "font-black text-accent" : "font-bold text-accent/80"
-                           )}
-                         >
-                           {member.designation}
-                         </p>
-                      </div>
-                      <CardHeader className="p-0">
-                        <div 
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setEnlargedId(enlargedId === member.id ? null : member.id);
-                          }}
-                          className="relative aspect-square overflow-hidden bg-slate-100 dark:bg-slate-800 rounded-t-2xl"
-                        >
-                          <Image 
-                            src={displayImg} 
-                            alt={member.name} 
-                            fill 
-                            className={cn(
-                              "object-cover transition-transform duration-500",
-                              enlargedId === member.id ? "scale-150" : ""
-                            )} 
-                          />
-                          
-                          {isOfficeBearer && (
-                            <div className="absolute top-1 left-1 bg-white/50 backdrop-blur-sm rounded-full p-0.5 z-10">
-                              <Star className={cn("w-3 h-3", getStarColor(member.level))} />
-                            </div>
-                          )}
-
-                          <div className="absolute top-1 right-1">
-                            <Badge className="bg-primary/80 backdrop-blur-md text-white font-bold border-none text-[6px] px-1 py-0 leading-none h-auto">
-                              {member.level === 'National' ? 'Central' : member.level}
-                            </Badge>
-                          </div>
-                        </div>
-                      </CardHeader>
-                      <CardContent className="p-2 space-y-1">
-                        <div className="flex items-start gap-1">
-                           <BadgeCheck className="w-2.5 h-2.5 text-accent shrink-0 mt-0.5" />
-                           <div className="min-w-0">
-                             <h3 className="font-headline font-bold text-[10px] text-primary dark:text-white leading-tight truncate">{member.name}</h3>
-                           </div>
-                        </div>
-                        <div className="space-y-0.5 pt-1 border-t border-slate-100 dark:border-slate-800">
-                          <div className="flex items-center gap-1 text-[8px] text-muted-foreground">
-                            <MapPin className="w-2 h-2 text-slate-400 shrink-0" />
-                            <span className="truncate">{member.districtName ? `${member.districtName}, ` : ''}{member.stateName || 'National'}</span>
-                          </div>
-                          <div className="flex items-center gap-1 text-[8px] text-muted-foreground">
-                            <Briefcase className="w-2 h-2 text-slate-400 shrink-0" />
-                            <span className="truncate">ID: {member.memberId || 'N/A'}</span>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  )
-                })
-              ) : (
-                <div className="col-span-full py-32 text-center">
-                  <User className="w-16 h-16 text-slate-200 dark:text-slate-800 mx-auto mb-4" />
-                  <h3 className="text-xl font-headline font-bold text-primary dark:text-white">No records found</h3>
-                  <p className="text-slate-400 font-bold uppercase tracking-widest text-[9px] mt-2">Adjust your filters to broaden your search.</p>
+            <div className="text-center py-20">
+              <Loader2 className="w-10 h-10 animate-spin text-accent mx-auto mb-4" />
+              <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Fetching Live Directory...</p>
+            </div>
+          ) : filteredMembers.length > 0 ? (
+            <>
+              {/* Central Committee Section */}
+              {centralMembers.length > 0 && (
+                <div className="space-y-8">
+                  <SectionHeading title="Central Committee" icon={ShieldCheck} color="text-red-600 border-red-100" />
+                  <MemberGrid items={centralMembers} />
                 </div>
               )}
+
+              {/* State Committee Section */}
+              {stateMembers.length > 0 && (
+                <div className="space-y-8">
+                  <SectionHeading title="State Committee" icon={Globe} color="text-emerald-500 border-emerald-100" />
+                  <MemberGrid items={stateMembers} />
+                </div>
+              )}
+
+              {/* District Committee Section */}
+              {districtMembers.length > 0 && (
+                <div className="space-y-8">
+                  <SectionHeading title="District Committee" icon={Building2} color="text-blue-600 border-blue-100" />
+                  <MemberGrid items={districtMembers} />
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="col-span-full py-32 text-center">
+              <User className="w-16 h-16 text-slate-200 dark:text-slate-800 mx-auto mb-4" />
+              <h3 className="text-xl font-headline font-bold text-primary dark:text-white">No records found</h3>
+              <p className="text-slate-400 font-bold uppercase tracking-widest text-[9px] mt-2">Adjust your filters to broaden your search.</p>
             </div>
           )}
         </div>
