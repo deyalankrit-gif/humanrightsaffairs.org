@@ -32,7 +32,8 @@ export async function inquireLegalAssistant(
 
 const legalAssistantPrompt = ai.definePrompt({
   name: 'legalAssistantPrompt',
-  // Using an object schema for input to ensure reliable Handlebars interpolation
+  // Model belongs at the root level in Genkit 1.x, not inside config
+  model: 'googleai/gemini-1.5-flash',
   input: {
     schema: z.object({
       query: z.string()
