@@ -53,7 +53,7 @@ Respond to the user's query provided below in a clear, concise, conversational, 
 Avoid complex legal jargon where simpler language can be used.
 If you cannot answer a question, politely state that you are unable to provide specific legal advice and recommend consulting a legal professional.
 
-User Query: {{{input}}}`,
+User Query: {{{query}}}`,
 });
 
 const aiLegalAssistantChatbotFlow = ai.defineFlow(
@@ -63,8 +63,8 @@ const aiLegalAssistantChatbotFlow = ai.defineFlow(
     outputSchema: InquireLegalAssistantOutputSchema,
   },
   async (input) => {
-    // Pass the input as a structured object to match the prompt's input schema
-    const response = await legalAssistantPrompt({ query: input });
+    // Pass the input directly since it already matches the prompt's input schema { query: string }
+    const response = await legalAssistantPrompt(input);
     
     // Extract raw text response
     const finalOutput = response.text;
