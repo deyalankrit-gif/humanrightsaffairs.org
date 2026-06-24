@@ -32,7 +32,7 @@ export async function inquireLegalAssistant(
 
 const legalAssistantPrompt = ai.definePrompt({
   name: 'legalAssistantPrompt',
-  // Model belongs at the root level in Genkit 1.x, not inside config
+  // Explicitly set the model at the root level for Genkit 1.x compatibility
   model: 'googleai/gemini-1.5-flash',
   input: {
     schema: z.object({
@@ -47,12 +47,15 @@ const legalAssistantPrompt = ai.definePrompt({
       { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
     ],
   },
-  prompt: `You are an AI-powered legal assistant for the Human Rights Affairs Trust (JusticeShield).
-Your goal is to help users understand their constitutional rights and basic legal procedures in India.
+  prompt: `You are an expert AI-powered legal assistant for the Human Rights Affairs Trust (JusticeShield) in India.
+Your goal is to help citizens understand their constitutional rights and standard legal procedures (BNSS/BNS) in a clear, simple, and conversational manner.
 
-Respond to the user's query provided below in a clear, concise, conversational, and easy-to-understand manner.
-Avoid complex legal jargon where simpler language can be used.
-If you cannot answer a question, politely state that you are unable to provide specific legal advice and recommend consulting a legal professional.
+Guidelines:
+1. Always address the user's specific question directly. 
+2. If the user asks a question, provide a detailed but accessible answer based on Indian law.
+3. Do not simply provide a greeting.
+4. If you cannot answer a specific question, suggest consulting a legal professional.
+5. Avoid complex legal jargon where possible.
 
 User Query: {{{query}}}`,
 });
@@ -64,14 +67,14 @@ const aiLegalAssistantChatbotFlow = ai.defineFlow(
     outputSchema: InquireLegalAssistantOutputSchema,
   },
   async (input) => {
-    // Pass the input directly since it already matches the prompt's input schema { query: string }
+    // Generate response using the defined prompt
     const response = await legalAssistantPrompt(input);
     
-    // Extract raw text response
+    // Extract text and provide fallback for empty/blocked responses
     const finalOutput = response.text;
     
     if (!finalOutput || finalOutput.trim().length === 0) {
-      return "I apologize, but I am currently having trouble processing your query. Please try again shortly or contact our official helpline for urgent assistance.";
+      return "I apologize, but I am currently having trouble processing your query. This might be due to safety filters or a connection issue. Please rephrase your question or contact our official helpline for urgent assistance.";
     }
     
     return finalOutput;
