@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useEffect } from 'react'
@@ -321,7 +320,7 @@ export default function TerminatedMembersPage() {
                       Urgent  Public  Security  Disclaimer
                     </AlertTitle>
                     <AlertDescription className="text-secondary dark:text-emerald-400 font-black text-sm md:text-lg leading-relaxed max-w-5xl mx-auto">
-                      "The individuals listed below are no longer affiliated with Justice Shield. Any attempt to use organizational logos, car sticker, official designation plate for car, ID cards, or represent themselves as member/officials is a punishable offense. If any such misuse is observed, the police authorities or the administration may immediately take any appropriate legal action."
+                      "The individuals listed below are no longer affiliated with Human Rights Affairs Trust. Any attempt to use organizational logos, car sticker, official designation plate for car, ID cards, or represent themselves as member/officials is a punishable offense. If any such misuse is observed, the police authorities or the administration may immediately take any appropriate legal action."
                     </AlertDescription>
                   </div>
                 </div>
