@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState } from 'react'
@@ -17,6 +16,7 @@ import Link from 'next/link'
 
 /**
  * Root Access Login Page: Professional Terminal Entry.
+ * Optimized for full mobile responsiveness.
  */
 export default function RootLoginPage() {
   const [email, setEmail] = useState('')
@@ -40,11 +40,9 @@ export default function RootLoginPage() {
         throw new Error("Access Denied: Insufficient authorization level for this terminal.")
       }
 
-      // Step 1: Authentication via Auth Service
       const userCredential = await signInWithEmailAndPassword(auth, inputEmail, password)
       const firebaseUser = userCredential.user;
       
-      // Step 2: Ensure Root Profile exists in Registry
       const userRef = doc(db, 'users', inputEmail)
       const userSnap = await getDoc(userRef)
       
@@ -75,7 +73,6 @@ export default function RootLoginPage() {
           }
         });
       } else {
-        // Sync UID if missing and ensure all permissions are set for root
         await setDoc(userRef, { 
           uid: firebaseUser.uid, 
           lastLogin: serverTimestamp(),
@@ -117,37 +114,37 @@ export default function RootLoginPage() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-white p-4">
-      <div className="w-full max-w-md space-y-6">
+    <main className="min-h-screen flex items-center justify-center bg-slate-950 p-4 md:p-8">
+      <div className="w-full max-w-md space-y-6 md:space-y-8">
         <div className="text-center">
-          <Link href="/" className="inline-flex items-center gap-2 text-slate-400 hover:text-red-500 transition-colors text-xs font-bold uppercase tracking-widest">
+          <Link href="/" className="inline-flex items-center gap-2 text-slate-400 hover:text-red-500 transition-colors text-[10px] md:text-xs font-bold uppercase tracking-widest">
             <Home className="w-3 h-3" /> Abort Session
           </Link>
         </div>
         
-        <Card className="bg-slate-900 border-red-900/50 shadow-2xl rounded-[2.5rem] overflow-hidden border-t-8 border-t-red-600">
-          <CardHeader className="text-center space-y-4 pb-2 pt-10">
+        <Card className="bg-slate-900 border-red-900/50 shadow-2xl rounded-[2rem] md:rounded-[2.5rem] overflow-hidden border-t-8 border-t-red-600">
+          <CardHeader className="text-center space-y-4 pb-2 pt-8 md:pt-10">
             <div className="flex justify-center">
-              <div className="relative w-20 h-20 rounded-2xl overflow-hidden shadow-2xl border border-white/10 bg-white p-2">
+              <div className="relative w-16 h-16 md:w-20 md:h-20 rounded-2xl overflow-hidden shadow-2xl border border-white/10 bg-white p-2">
                 <Image src="/HRAT%20Logo.jpeg" alt="HRAT Logo" fill className="object-contain" />
               </div>
             </div>
-            <div className="space-y-1">
-              <CardTitle className="text-2xl font-headline font-bold text-white tracking-widest uppercase">Root Access</CardTitle>
-              <CardDescription className="text-red-500 font-bold uppercase tracking-[0.4em] text-[10px] flex items-center justify-center gap-2">
-                <ShieldAlert className="w-3 h-3" /> LEVEL 5 CLEARANCE
+            <div className="space-y-1 px-4">
+              <CardTitle className="text-xl md:text-2xl font-headline font-bold text-white tracking-widest uppercase">Root Access</CardTitle>
+              <CardDescription className="text-red-500 font-bold uppercase tracking-[0.3em] text-[8px] md:text-[10px] flex items-center justify-center gap-2">
+                <ShieldAlert className="w-2.5 h-2.5 md:w-3 md:h-3 text-red-500" /> LEVEL 5 CLEARANCE
               </CardDescription>
             </div>
           </CardHeader>
-          <CardContent className="p-8">
-            <form onSubmit={handleLogin} className="space-y-6">
+          <CardContent className="p-6 md:p-8">
+            <form onSubmit={handleLogin} className="space-y-5 md:space-y-6">
               <div className="space-y-2">
-                <Label className="text-slate-500 text-[10px] font-bold uppercase tracking-[0.2em]">Root Identity</Label>
+                <Label className="text-slate-500 text-[9px] md:text-[10px] font-bold uppercase tracking-[0.2em]">Root Identity</Label>
                 <div className="relative">
                   <Input 
                     type="email" 
                     placeholder="deydhritiman@gmail.com" 
-                    className="bg-black/50 border-red-900/30 text-red-500 h-12 rounded-xl pl-10 font-mono focus:ring-red-600"
+                    className="bg-black/50 border-red-900/30 text-red-500 h-11 md:h-12 rounded-xl pl-10 font-mono text-sm focus:ring-red-600"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
@@ -156,12 +153,12 @@ export default function RootLoginPage() {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label className="text-slate-500 text-[10px] font-bold uppercase tracking-[0.2em]">Governance Key</Label>
+                <Label className="text-slate-500 text-[9px] md:text-[10px] font-bold uppercase tracking-[0.2em]">Governance Key</Label>
                 <div className="relative">
                   <Input 
                     type={showPassword ? "text" : "password"} 
                     placeholder="••••••••" 
-                    className="bg-black/50 border-red-900/30 text-red-500 h-12 rounded-xl pl-10 pr-10 font-mono focus:ring-red-600"
+                    className="bg-black/50 border-red-900/30 text-red-500 h-11 md:h-12 rounded-xl pl-10 pr-10 font-mono text-sm focus:ring-red-600"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
@@ -178,13 +175,13 @@ export default function RootLoginPage() {
               </div>
               <Button 
                 type="submit" 
-                className="w-full bg-red-600 text-white font-bold h-14 text-lg rounded-xl hover:bg-red-700 transition-all shadow-[0_10px_40px_rgba(220,38,38,0.3)]" 
+                className="w-full bg-red-600 text-white font-bold h-12 md:h-14 text-sm md:text-lg rounded-xl hover:bg-red-700 transition-all shadow-[0_10px_40px_rgba(220,38,38,0.3)]" 
                 disabled={isLoading}
               >
                 {isLoading ? (
                   <Loader2 className="w-5 h-5 animate-spin" />
                 ) : (
-                  <>INITIALIZE ROOT SESSION <ArrowRight className="ml-2 w-5 h-5" /></>
+                  <>INITIALIZE ROOT SESSION <ArrowRight className="ml-2 w-4 h-4 md:w-5 md:h-5" /></>
                 )}
               </Button>
             </form>
@@ -192,7 +189,7 @@ export default function RootLoginPage() {
         </Card>
 
         <div className="text-center">
-           <Link href="/internal/login" className="text-[10px] font-black uppercase text-slate-400 hover:text-primary tracking-[0.2em] transition-all">
+           <Link href="/internal/login" className="text-[9px] md:text-[10px] font-black uppercase text-slate-400 hover:text-primary tracking-[0.2em] transition-all">
              Return to Staff Access
            </Link>
         </div>

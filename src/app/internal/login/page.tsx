@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState } from 'react'
@@ -17,6 +16,7 @@ import Link from 'next/link'
 
 /**
  * Staff Access Login Page: Unified Auth-Firestore verification.
+ * Optimized for full mobile responsiveness.
  */
 export default function StaffLoginPage() {
   const [email, setEmail] = useState('')
@@ -77,16 +77,13 @@ export default function StaffLoginPage() {
             lastLogin: serverTimestamp()
           }, { merge: true });
           
-          // Re-fetch to ensure we have the local state ready
           userSnap = await getDoc(userRef);
         } else {
-          // If not in registry and not hardcoded, terminate session
           await signOut(auth)
           throw new Error("Clearance Required: Your identity is not present in the institutional registry.")
         }
       }
 
-      // Record successful login timestamp
       await setDoc(userRef, { lastLogin: serverTimestamp(), uid: firebaseUser.uid }, { merge: true });
 
       toast({
@@ -94,11 +91,9 @@ export default function StaffLoginPage() {
         description: "Institutional clearance verified. Redirecting to operational module.",
       })
       
-      // PHASE 3: Context-Aware Redirection
       const userData = userSnap.data();
       const perms = userData?.permissions || {};
       
-      // Priority-based dashboard landing
       const priority = [
         { id: 'analytics', path: 'analytics' },
         { id: 'memberAnalytics', path: 'member-analytics' },
@@ -128,37 +123,37 @@ export default function StaffLoginPage() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-white p-4">
-      <div className="w-full max-w-md space-y-6">
+    <main className="min-h-screen flex items-center justify-center bg-slate-50 p-4 md:p-8">
+      <div className="w-full max-w-md space-y-6 md:space-y-8">
         <div className="text-center">
-          <Link href="/" className="inline-flex items-center gap-2 text-slate-400 hover:text-primary transition-colors text-xs font-bold uppercase tracking-widest">
-            <Home className="w-3 h-3" /> Public Portal
+          <Link href="/" className="inline-flex items-center gap-2 text-slate-400 hover:text-primary transition-colors text-[10px] md:text-xs font-bold uppercase tracking-widest">
+            <Home className="w-3 h-3 md:w-3.5 md:h-3.5" /> Public Portal
           </Link>
         </div>
         
-        <Card className="bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10 shadow-2xl rounded-[2.5rem] overflow-hidden border-t-8 border-t-primary">
-          <CardHeader className="text-center space-y-4 pb-2 pt-10">
+        <Card className="bg-white border-slate-200 shadow-2xl rounded-[2rem] md:rounded-[2.5rem] overflow-hidden border-t-8 border-t-primary">
+          <CardHeader className="text-center space-y-4 pb-2 pt-8 md:pt-10">
             <div className="flex justify-center">
-              <div className="relative w-20 h-20 rounded-2xl overflow-hidden shadow-lg border border-slate-100 bg-white p-2">
+              <div className="relative w-16 h-16 md:w-20 md:h-20 rounded-2xl overflow-hidden shadow-lg border border-slate-100 bg-white p-2">
                 <Image src="/HRAT%20Logo.jpeg" alt="HRAT Logo" fill className="object-contain" />
               </div>
             </div>
-            <div className="space-y-1">
-              <CardTitle className="text-2xl font-headline font-bold text-primary dark:text-white">Staff Access</CardTitle>
-              <CardDescription className="text-primary/60 font-bold uppercase tracking-[0.2em] text-[10px] flex items-center justify-center gap-2">
-                <ShieldCheck className="w-3 h-3 text-emerald-500" /> Operational Clearance
+            <div className="space-y-1 px-4">
+              <CardTitle className="text-xl md:text-2xl font-headline font-bold text-primary">Staff Access</CardTitle>
+              <CardDescription className="text-primary/60 font-bold uppercase tracking-[0.2em] text-[8px] md:text-[10px] flex items-center justify-center gap-2">
+                <ShieldCheck className="w-2.5 h-2.5 md:w-3 md:h-3 text-emerald-500" /> Operational Clearance
               </CardDescription>
             </div>
           </CardHeader>
-          <CardContent className="p-8">
-            <form onSubmit={handleLogin} className="space-y-6">
+          <CardContent className="p-6 md:p-8">
+            <form onSubmit={handleLogin} className="space-y-5 md:space-y-6">
               <div className="space-y-2">
-                <Label className="text-slate-400 text-[10px] font-bold uppercase tracking-wider">Official Email</Label>
+                <Label className="text-slate-400 text-[9px] md:text-[10px] font-bold uppercase tracking-wider">Official Email</Label>
                 <div className="relative">
                   <Input 
                     type="email" 
                     placeholder="name@hrat.org" 
-                    className="bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10 h-12 rounded-xl pl-10"
+                    className="bg-slate-50 border-slate-200 h-11 md:h-12 rounded-xl pl-10 text-sm"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
@@ -167,12 +162,12 @@ export default function StaffLoginPage() {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label className="text-slate-400 text-[10px] font-bold uppercase tracking-wider">Passphrase</Label>
+                <Label className="text-slate-400 text-[9px] md:text-[10px] font-bold uppercase tracking-wider">Passphrase</Label>
                 <div className="relative">
                   <Input 
                     type={showPassword ? "text" : "password"} 
                     placeholder="••••••••" 
-                    className="bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10 h-12 rounded-xl pl-10 pr-10"
+                    className="bg-slate-50 border-slate-200 h-11 md:h-12 rounded-xl pl-10 pr-10 text-sm"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
@@ -189,13 +184,13 @@ export default function StaffLoginPage() {
               </div>
               <Button 
                 type="submit" 
-                className="w-full bg-primary text-white font-bold h-14 text-lg rounded-xl hover:bg-secondary transition-all shadow-xl shadow-primary/20 group" 
+                className="w-full bg-primary text-white font-bold h-12 md:h-14 text-base md:text-lg rounded-xl hover:bg-secondary transition-all shadow-xl shadow-primary/20 group" 
                 disabled={isLoading}
               >
                 {isLoading ? (
                   <Loader2 className="w-5 h-5 animate-spin" />
                 ) : (
-                  <>Authorize Entry <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" /></>
+                  <>Authorize Entry <ArrowRight className="ml-2 w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-1 transition-transform" /></>
                 )}
               </Button>
             </form>
@@ -203,7 +198,7 @@ export default function StaffLoginPage() {
         </Card>
 
         <div className="text-center">
-           <Link href="/internal/super-login" className="text-[10px] font-black uppercase text-slate-400 hover:text-accent tracking-[0.2em] transition-all">
+           <Link href="/internal/super-login" className="text-[9px] md:text-[10px] font-black uppercase text-slate-400 hover:text-accent tracking-[0.2em] transition-all">
              Switch to Root Access
            </Link>
         </div>
