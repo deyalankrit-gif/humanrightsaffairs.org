@@ -113,18 +113,18 @@ export default function LeadershipPage() {
   const leaders = React.useMemo(() => {
     const base = (firestoreLeaders || []) as Leader[];
     
-    // Inject Demi Secretary for West Bengal
-    const demiSecretary: Leader = {
-      id: 'demi-sec-wb',
-      name: 'অনিকেত চট্টোপাধ্যায়', // Aniket Chattopadhyay
-      title: 'Demi Secretary',
+    // Inject Secretary for West Bengal
+    const secretary: Leader = {
+      id: 'sec-wb',
+      name: 'Aniket Chattopadhyay',
+      title: 'Secretary (West Bengal State Committee)',
       gender: 'male',
       level: 'State',
       parentRegion: 'West Bengal'
     };
 
-    if (base.some(l => l.id === demiSecretary.id)) return base;
-    return [...base, demiSecretary];
+    if (base.some(l => l.id === secretary.id)) return base;
+    return [...base, secretary];
   }, [firestoreLeaders]);
   
   const allStates = Object.keys(INDIA_DATA).sort()
