@@ -41,7 +41,7 @@ function LeaderCard({ leader, variant = "default", isAdmin, onEdit, onDelete }: 
   
   const sizeClasses = {
     xl: "w-64 h-80 md:w-80 md:h-[420px]", // Central Chairman
-    large: "w-48 h-64 md:w-64 md:h-80",   // State Chairman
+    large: "w-48 h-64 md:w-64 md:h-80",   // State Chairman / Senior Chapter
     default: "w-36 h-48 md:w-48 md:h-60",
     small: "w-24 h-32 md:w-32 md:h-40"
   }
@@ -302,7 +302,6 @@ export default function LeadershipPage() {
                         {activeStateLeaders.length > 0 ? (
                           <div className="flex flex-wrap justify-center gap-10">
                             {activeStateLeaders.map(leader => {
-                              // SPECIFIC HIERARCHY: Moumita Saha and Indraneel Adak are prioritizing chapter leaders (Large)
                               const isLarge = leader.name.includes("Moumita Saha") || 
                                               leader.name.includes("Indraneel Adak") || 
                                               leader.name.includes("Indranil Adak");
@@ -351,16 +350,21 @@ export default function LeadershipPage() {
                               </div>
                               {activeDistrictLeaders.length > 0 ? (
                                 <div className="flex flex-wrap justify-center gap-8">
-                                   {activeDistrictLeaders.map(dl => (
-                                     <LeaderCard 
-                                       key={dl.id} 
-                                       leader={dl} 
-                                       variant="small" 
-                                       isAdmin={isAdmin} 
-                                       onEdit={setEditLeader} 
-                                       onDelete={handleDelete} 
-                                     />
-                                   ))}
+                                   {activeDistrictLeaders.map(dl => {
+                                     // Refined hierarchy for specific district officials
+                                     const isPriority = dl.name.includes("Indraneel Adak") || dl.name.includes("Indranil Adak");
+                                     const variant = isPriority ? "default" : "small";
+                                     return (
+                                       <LeaderCard 
+                                         key={dl.id} 
+                                         leader={dl} 
+                                         variant={variant} 
+                                         isAdmin={isAdmin} 
+                                         onEdit={setEditLeader} 
+                                         onDelete={handleDelete} 
+                                       />
+                                     );
+                                   })}
                                 </div>
                               ) : (
                                 <p className="text-slate-400 font-bold uppercase tracking-widest text-[9px] animate-pulse">No commissioned district officials recorded for {activeDistrict}.</p>
