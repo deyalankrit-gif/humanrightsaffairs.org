@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useEffect } from 'react'
@@ -301,8 +302,11 @@ export default function LeadershipPage() {
                         {activeStateLeaders.length > 0 ? (
                           <div className="flex flex-wrap justify-center gap-10">
                             {activeStateLeaders.map(leader => {
-                              // SPECIFIC HIERARCHY: Moumita Saha is the Chapter Head (Large)
-                              const variant = leader.name.includes("Moumita Saha") ? "large" : "default";
+                              // SPECIFIC HIERARCHY: Moumita Saha and Indraneel Adak are prioritizing chapter leaders (Large)
+                              const isLarge = leader.name.includes("Moumita Saha") || 
+                                              leader.name.includes("Indraneel Adak") || 
+                                              leader.name.includes("Indranil Adak");
+                              const variant = isLarge ? "large" : "default";
                               
                               return (
                                 <LeaderCard 
