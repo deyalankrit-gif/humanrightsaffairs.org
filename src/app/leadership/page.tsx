@@ -110,10 +110,30 @@ export default function LeadershipPage() {
     imageId: ''
   })
 
-  const leaders = (firestoreLeaders || []) as Leader[]
+  const leaders = React.useMemo(() => {
+    const base = (firestoreLeaders || []) as Leader[];
+    
+    // Inject Demi Secretary for West Bengal
+    const demiSecretary: Leader = {
+      id: 'demi-sec-wb',
+      name: 'অনিকেত চট্টোপাধ্যায়', // Aniket Chattopadhyay
+      title: 'Demi Secretary',
+      gender: 'male',
+      level: 'State',
+      parentRegion: 'West Bengal'
+    };
+
+    if (base.some(l => l.id === demiSecretary.id)) return base;
+    return [...base, demiSecretary];
+  }, [firestoreLeaders]);
   
   const allStates = Object.keys(INDIA_DATA).sort()
   const allDistrictsInState = activeState ? INDIA_DATA[activeState] : []
+
+  const centralTeam = leaders.filter(l => l.level === 'Central')
+  
+  const activeStateLeaders = leaders.filter(l => l.level === 'State' && l.parentRegion === activeState)
+  const activeDistrictLeaders = leaders.filter(l => l.level === 'District' && l.parentRegion === activeState && l.districtName === activeDistrict)
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, isEdit: boolean) => {
     const file = e.target.files?.[0]
@@ -165,11 +185,6 @@ export default function LeadershipPage() {
       setIsActionLoading(false)
     }
   }
-
-  const centralTeam = leaders.filter(l => l.level === 'Central')
-  
-  const activeStateLeaders = leaders.filter(l => l.level === 'State' && l.parentRegion === activeState)
-  const activeDistrictLeaders = leaders.filter(l => l.level === 'District' && l.parentRegion === activeState && l.districtName === activeDistrict)
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
