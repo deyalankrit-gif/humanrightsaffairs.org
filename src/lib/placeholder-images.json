@@ -59,6 +59,12 @@
       "description": "Portrait of a child for donation section",
       "imageUrl": "/child.jpeg",
       "imageHint": "indian child"
+    },
+    {
+      "id": "donor-hero",
+      "description": "A group of people standing together in solidarity",
+      "imageUrl": "https://picsum.photos/seed/donorhero/1200/600",
+      "imageHint": "solidarity community"
     }
   ]
 }
