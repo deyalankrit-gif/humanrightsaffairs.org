@@ -1,4 +1,3 @@
-
 "use client"
 
 import React from 'react'
@@ -24,9 +23,9 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { DonationDialog } from '@/components/donation-dialog'
 import { PlaceHolderImages } from '@/lib/placeholder-images'
+import { cn } from '@/lib/utils'
 
 export default function DonorsPage() {
-  const heroImg = PlaceHolderImages.find(img => img.id === 'donor-hero');
   const impactImg1 = PlaceHolderImages.find(img => img.id === 'donation-bg-1');
   const impactImg2 = PlaceHolderImages.find(img => img.id === 'donation-bg-2');
 
