@@ -300,15 +300,22 @@ export default function LeadershipPage() {
                         
                         {activeStateLeaders.length > 0 ? (
                           <div className="flex flex-wrap justify-center gap-10">
-                            {activeStateLeaders.map(leader => (
-                              <LeaderCard 
-                                key={leader.id} 
-                                leader={leader} 
-                                isAdmin={isAdmin} 
-                                onEdit={setEditLeader} 
-                                onDelete={handleDelete} 
-                              />
-                            ))}
+                            {activeStateLeaders.map(leader => {
+                              // SPECIFIC HIERARCHY: Moumita Saha is the Chapter Head (Large)
+                              // Others like Bhaskar Mondal are default (slightly smaller)
+                              const variant = leader.name.includes("Moumita Saha") ? "large" : "default";
+                              
+                              return (
+                                <LeaderCard 
+                                  key={leader.id} 
+                                  leader={leader} 
+                                  variant={variant}
+                                  isAdmin={isAdmin} 
+                                  onEdit={setEditLeader} 
+                                  onDelete={handleDelete} 
+                                />
+                              );
+                            })}
                           </div>
                         ) : (
                           <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] animate-pulse">No commissioned chapter leaders recorded for this region.</p>
