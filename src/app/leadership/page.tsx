@@ -113,18 +113,41 @@ export default function LeadershipPage() {
   const leaders = React.useMemo(() => {
     const base = (firestoreLeaders || []) as Leader[];
     
-    // Inject Secretary for West Bengal
-    const secretary: Leader = {
-      id: 'sec-wb',
-      name: 'Aniket Chattopadhyay',
-      title: 'Secretary (West Bengal State Committee)',
-      gender: 'male',
-      level: 'State',
-      parentRegion: 'West Bengal'
-    };
+    // Inject institutional officials if not present in Firestore
+    const staticOfficials: Leader[] = [
+      {
+        id: 'sec-wb',
+        name: 'Aniket Chattopadhyay',
+        title: 'Secretary (West Bengal State Committee)',
+        gender: 'male',
+        level: 'State',
+        parentRegion: 'West Bengal'
+      },
+      {
+        id: 'treasurer-central',
+        name: 'Rahul Sharma',
+        title: 'Treasurer (Central Council)',
+        gender: 'male',
+        level: 'Central'
+      },
+      {
+        id: 'treasurer-wb',
+        name: 'Priyanka Das',
+        title: 'Treasurer (West Bengal State Committee)',
+        gender: 'female',
+        level: 'State',
+        parentRegion: 'West Bengal'
+      }
+    ];
 
-    if (base.some(l => l.id === secretary.id)) return base;
-    return [...base, secretary];
+    const result = [...base];
+    staticOfficials.forEach(official => {
+      if (!result.some(l => l.id === official.id)) {
+        result.push(official);
+      }
+    });
+    
+    return result;
   }, [firestoreLeaders]);
   
   const allStates = Object.keys(INDIA_DATA).sort()
