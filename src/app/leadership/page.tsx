@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useEffect } from 'react'
@@ -35,12 +34,13 @@ type Leader = {
   districtName?: string
 }
 
-function LeaderCard({ leader, variant = "default", isAdmin, onEdit, onDelete }: { leader: Leader, variant?: "large" | "default" | "small", isAdmin?: boolean, onEdit?: (l: Leader) => void, onDelete?: (id: string) => void }) {
+function LeaderCard({ leader, variant = "default", isAdmin, onEdit, onDelete }: { leader: Leader, variant?: "xl" | "large" | "default" | "small", isAdmin?: boolean, onEdit?: (l: Leader) => void, onDelete?: (id: string) => void }) {
   const fallback = leader.gender.toLowerCase() === 'female' ? '/dummy w.png' : '/dummy m.png'
   const img = leader.imageId?.startsWith('data:') ? leader.imageId : (PlaceHolderImages.find(i => i.id === leader.imageId)?.imageUrl || fallback)
   
   const sizeClasses = {
-    large: "w-48 h-60 md:w-64 md:h-80",
+    xl: "w-64 h-80 md:w-80 md:h-[420px]", // Central Chairman
+    large: "w-48 h-64 md:w-64 md:h-80",   // State Chairman
     default: "w-36 h-48 md:w-48 md:h-60",
     small: "w-24 h-32 md:w-32 md:h-40"
   }
@@ -65,8 +65,8 @@ function LeaderCard({ leader, variant = "default", isAdmin, onEdit, onDelete }: 
         </div>
       </div>
       <div className="mt-4 text-center px-2">
-        <h4 className={`font-headline font-bold text-primary dark:text-white ${variant === 'large' || isChairman ? 'text-lg md:text-xl lg:text-2xl' : 'text-sm md:text-base'}`}>{leader.name}</h4>
-        <p className={`text-accent font-bold uppercase tracking-widest ${variant === 'large' || leader.title.includes("Founder") ? 'text-[10px] md:text-xs' : 'text-[8px] md:text-[10px]'}`}>{leader.title}</p>
+        <h4 className={`font-headline font-bold text-primary dark:text-white ${variant === 'xl' || variant === 'large' || isChairman ? 'text-lg md:text-xl lg:text-2xl' : 'text-sm md:text-base'}`}>{leader.name}</h4>
+        <p className={`text-accent font-bold uppercase tracking-widest ${variant === 'xl' || variant === 'large' || leader.title.includes("Founder") ? 'text-[10px] md:text-xs' : 'text-[8px] md:text-[10px]'}`}>{leader.title}</p>
         {leader.level === 'District' && leader.districtName && <p className="text-[8px] text-slate-400 font-bold uppercase tracking-tighter mt-1">{leader.districtName}</p>}
       </div>
     </div>
@@ -254,7 +254,7 @@ export default function LeadershipPage() {
                     <LeaderCard 
                       key={leader.id} 
                       leader={leader} 
-                      variant={i === 0 ? "large" : "default"} 
+                      variant={i === 0 ? "xl" : "default"} 
                       isAdmin={isAdmin} 
                       onEdit={setEditLeader} 
                       onDelete={handleDelete} 
@@ -302,7 +302,6 @@ export default function LeadershipPage() {
                           <div className="flex flex-wrap justify-center gap-10">
                             {activeStateLeaders.map(leader => {
                               // SPECIFIC HIERARCHY: Moumita Saha is the Chapter Head (Large)
-                              // Others like Bhaskar Mondal are default (slightly smaller)
                               const variant = leader.name.includes("Moumita Saha") ? "large" : "default";
                               
                               return (
