@@ -9,7 +9,7 @@ import { cn } from '@/lib/utils'
 
 /**
  * ActivityCalendarPage provides a full-screen, high-fidelity viewer for the Trust's official schedule.
- * Features: Immersive scaling, one-handed panning (click/touch drag), and zero-margin layout.
+ * Features: Immersive scaling, one-handed panning (click/touch drag), mouse wheel zoom, and zero-margin layout.
  */
 export default function ActivityCalendarPage() {
   const [zoom, setZoom] = useState(1)
@@ -35,6 +35,29 @@ export default function ActivityCalendarPage() {
     setZoom(1)
     setPosition({ x: 0, y: 0 })
   }
+
+  // Mouse Wheel Zoom Implementation
+  useEffect(() => {
+    const container = containerRef.current
+    if (!container) return
+
+    const handleWheel = (e: WheelEvent) => {
+      e.preventDefault()
+      const zoomStep = 0.1 // Smooth scroll increment
+      if (e.deltaY < 0) {
+        setZoom(prev => Math.min(prev + zoomStep, 4))
+      } else {
+        setZoom(prev => {
+          const next = Math.max(prev - zoomStep, 0.5)
+          if (next <= 1) setPosition({ x: 0, y: 0 })
+          return next
+        })
+      }
+    }
+
+    container.addEventListener('wheel', handleWheel, { passive: false })
+    return () => container.removeEventListener('wheel', handleWheel)
+  }, [])
 
   // Drag Handlers
   const handleMouseDown = (e: React.MouseEvent) => {
