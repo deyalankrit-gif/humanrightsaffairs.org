@@ -22,6 +22,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Footer } from '@/components/footer'
 import { Badge } from '@/components/ui/badge'
+import { cn } from '@/lib/utils'
 
 export default function TrustResponsibilitiesPage() {
   const sections = [
@@ -83,7 +84,7 @@ export default function TrustResponsibilitiesPage() {
         "মানবাধিকার লঙ্ঘনের ঘটনা সম্পর্কে সচেতন থাকা।",
         "অন্যায়, বৈষম্য, নির্যাতন বা শোষণের বিরুদ্ধে প্রতিবাদ জানানো।",
         "মানবাধিকার লঙ্ঘনের ঘটনা যথাযথ কর্তৃপক্ষ ও প্রশাসনের নজরে আনা।",
-        "ন্যায়বিচার প্রতিষ্ঠার লক্ষ্যে আইনসম্মত ও শান্তিপূর্ণ পদক্ষেপ গ্রহণ করা।"
+        "ন্যায়বিচার প্রতিষ্ঠার লক্ষ্যে আইনসম্মত ও শান্তিপূর্ণ পদক্ষেপ গ্রহণ করা।"
       ]
     },
     {
@@ -152,6 +153,42 @@ export default function TrustResponsibilitiesPage() {
         "ধর্ম, বর্ণ, লিঙ্গ, ভাষা বা রাজনৈতিক মতাদর্শ নির্বিশেষে সেবা প্রদান করা।",
         "সংগঠনের সুনাম ও মর্যাদা রক্ষা করা।",
         "আইন, সংবিধান ও মানবাধিকারের মৌলিক নীতিমালা মেনে চলা।"
+      ]
+    },
+    {
+      title: "১১. সাংগঠনিক বাধ্যতামূলক রেকর্ড",
+      items: [
+        "Meeting Notice (সভার নোটিশ)",
+        "Agenda Sheet (আলোচ্যসূচি)",
+        "Attendance Register (উপস্থিতি রেজিস্টার ও স্বাক্ষর)",
+        "Minutes Book (সভার কার্যবিবরণী)",
+        "Resolution Register / Resolution Copy (গৃহীত সিদ্ধান্তের রেকর্ড)",
+        "Action Taken Report (ATR) (গত মাসের সিদ্ধান্ত কতটা বাস্তবায়িত হয়েছে তার রিপোর্ট)",
+        "উন্নয়নমূলক পরিকল্পনার জন্য:",
+        "Development Proposal Form (নতুন প্রস্তাব জমা দেওয়ার ফর্ম)",
+        "Project Planning Sheet (প্রকল্পের পরিকল্পনা)",
+        "Budget Approval Sheet (বাজেট অনুমোদন)",
+        "Responsibility Assignment Sheet (কে কোন কাজ করবেন তার তালিকা)",
+        "Timeline / Work Schedule (কাজ শেষ করার সময়সূচি)",
+        "প্রশাসনিক রেকর্ড:",
+        "Correspondence Register (আগত ও প্রেরিত চিঠির রেজিস্টার)",
+        "Visitor Register (দর্শনার্থী রেজিস্টার)",
+        "Complaint & Suggestion Register (অভিযোগ ও পরামর্শ)",
+        "Member Proposal Register (সদস্যদের প্রস্তাবের রেকর্ড)",
+        "Asset Register (অফিসের সম্পদের তালিকা)",
+        "আর্থিক রেকর্ড:",
+        "Cash Book",
+        "Voucher File (Receipt ও Payment Voucher)",
+        "Donation Register",
+        "Expense Register",
+        "Bank Transaction Register",
+        "আলাদা ফাইল:",
+        "Monthly Meeting File",
+        "Resolution File",
+        "Project File",
+        "Legal & Compliance File",
+        "Membership File",
+        "Photo & Activity Report File"
       ]
     }
   ]
@@ -269,7 +306,7 @@ export default function TrustResponsibilitiesPage() {
               <h2 className="text-2xl md:text-4xl font-headline font-bold text-primary dark:text-white">Human Rights Affairs Trust</h2>
               <h3 className="text-xl md:text-3xl font-bold text-emerald-600 dark:text-emerald-400">কর্মী, স্বেচ্ছাসেবক ও নেতৃবৃন্দের করণীয় ও দায়িত্বসমূহ</h3>
               <div className="bg-emerald-50 dark:bg-emerald-900/20 p-6 rounded-[2rem] border-2 border-emerald-100 dark:border-emerald-900 inline-block shadow-sm">
-                <p className="font-bold text-emerald-800 dark:text-emerald-400 text-lg">আমাদের মূল আদর্শ: “মানবতার সেবা, ন্যায়ের প্রতিষ্ঠা এবং মানবাধিকারের সুরক্ষা।”</p>
+                <p className="font-bold text-emerald-800 dark:text-emerald-400 text-lg">আমাদের মূল আদর্শ: “মানবতার সেবা, ন্যায়ের প্রতিষ্ঠা এবং মানবাধিকারের সুরক্ষা।”</p>
               </div>
             </div>
 
@@ -281,7 +318,7 @@ export default function TrustResponsibilitiesPage() {
                     {section.items.map((item, i) => (
                       <li key={i} className="flex items-start gap-3 text-slate-700 dark:text-slate-300 font-medium">
                         <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
-                        <span className="leading-relaxed">{item}</span>
+                        <span className={cn("leading-relaxed", item.endsWith(":") && "font-bold text-primary border-b border-accent/20 pb-1 mt-4 block w-fit")}>{item}</span>
                       </li>
                     ))}
                   </ul>
@@ -293,7 +330,7 @@ export default function TrustResponsibilitiesPage() {
               <div className="absolute top-0 right-0 w-48 h-48 bg-emerald-500/10 rounded-full -mr-24 -mt-24 blur-3xl"></div>
               <p className="text-xs font-black uppercase tracking-[0.4em] text-accent mb-6">সংগঠনের অঙ্গীকার</p>
               <p className="text-xl md:text-3xl font-bold italic leading-relaxed text-slate-200">
-                “আমরা অন্যায়ের বিরুদ্ধে সোচ্চার হব, ন্যায়ের পক্ষে দৃঢ়ভাবে দাঁড়াব, মানবাধিকারের সুরক্ষায় কাজ করব এবং মানবতার কল্যাণে নিজেদের সর্বোচ্চ সামর্থ্য নিয়োজিত রাখব।”
+                “আমরা অন্যায়ের বিরুদ্ধে সোচ্চার হব, ন্যায়ের পক্ষে দৃঢ়ভাবে দাঁড়াব, মানবাধিকারের সুরক্ষায় কাজ করব এবং মানবতার কল্যাণে নিজেদের সর্বোচ্চ সামর্থ্য নিয়োজিত রাখব।”
               </p>
               <div className="mt-12 flex justify-center opacity-30">
                  <div className="relative w-20 h-20">
