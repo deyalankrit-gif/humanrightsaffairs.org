@@ -80,7 +80,11 @@ export function Footer() {
                   Duties and Responsibilities of Trust Staff, Volunteers, and Leaders
                 </Link>
               </li>
-              <li><Link href="/activity-calendar" className="hover:text-accent transition-colors font-medium">Activity Calendar</Link></li>
+              <li>
+                <Link href="/activity-calendar" className="text-purple-400 hover:text-purple-300 transition-colors font-medium">
+                  Activity Calendar
+                </Link>
+              </li>
             </ul>
           </div>
 
