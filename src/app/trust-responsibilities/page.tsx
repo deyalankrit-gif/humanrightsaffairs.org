@@ -157,7 +157,7 @@ export default function TrustResponsibilitiesPage() {
       ]
     },
     {
-      title: "১১. সাংগঠনিক বাধ্যতামূলক রেকর্ড",
+      title: "১১. সাংগঠনিক বাধ্যতামূলক রেকর্ড (Monthly)",
       items: [
         "Meeting Notice (সভার নোটিশ)",
         "Agenda Sheet (আলোচ্যসূচি)",
@@ -170,7 +170,7 @@ export default function TrustResponsibilitiesPage() {
         "Project Planning Sheet (প্রকল্পের পরিকল্পনা)",
         "Budget Approval Sheet (বাজেট অনুমোদন)",
         "Responsibility Assignment Sheet (কে কোন কাজ করবেন তার তালিকা)",
-        "Timeline / Work Schedule (কাজ শেষ করার সময়সূচি)",
+        "Timeline / Work Schedule (কাজ শেষ করার সময়সীমা)",
         "প্রশাসনিক রেকর্ড:",
         "Correspondence Register (আগত ও প্রেরিত চিঠির রেজিস্টার)",
         "Visitor Register (দর্শনার্থী রেজিস্টার)",
