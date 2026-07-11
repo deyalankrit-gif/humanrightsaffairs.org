@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useRef, useEffect } from 'react'
@@ -6,6 +5,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { ArrowLeft, Calendar, Download, Printer, ShieldCheck, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 
 /**
  * ActivityCalendarPage provides a full-screen, high-fidelity viewer for the Trust's official schedule.
