@@ -197,7 +197,7 @@ export default function TrustResponsibilitiesPage() {
       titleHref: "/legal/annual-governance-checklist",
       titleColor: "text-blue-600 dark:text-blue-400",
       items: [
-        "বার্ষিক সাধারণ সভা (AGM)",
+        { isLink: true, label: "বার্ষিক সাধারণ সভা (AGM)", href: "/legal/agm-format", color: "text-blue-600 dark:text-blue-400" },
         "বার্ষিক প্রতিবেদন প্রকাশ",
         "অডিট রিপোর্ট উপস্থাপন",
         "শ্রেষ্ঠ স্বেচ্ছাসেবক ও সমাজসেবী সম্মাননা",
@@ -295,13 +295,13 @@ export default function TrustResponsibilitiesPage() {
                  These responsibilities ensure that our organization operates as a unified and effective shield for human rights across the nation. All personnel are expected to uphold these standards in every official interaction.
                </p>
                <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                 <Link href="/leadership">
-                    <Button variant="outline" className="rounded-xl px-10 h-14 font-bold border-primary text-primary hover:bg-secondary hover:text-white transition-all">
+                 <Link href="/leadership" className="w-full sm:w-auto">
+                    <Button variant="outline" className="w-full rounded-xl px-10 h-14 font-bold border-primary text-primary hover:bg-secondary hover:text-white transition-all">
                       View Leadership Hierarchy
                     </Button>
                  </Link>
-                 <Link href="/#membership">
-                    <Button className="rounded-xl px-10 h-14 font-bold bg-accent text-primary hover:bg-secondary hover:text-white shadow-xl shadow-accent/20 transition-all">
+                 <Link href="/#membership" className="w-full sm:w-auto">
+                    <Button className="w-full rounded-xl px-10 h-14 font-bold bg-accent text-primary hover:bg-secondary hover:text-white shadow-xl shadow-accent/20 transition-all">
                       Join the Mission
                     </Button>
                  </Link>
