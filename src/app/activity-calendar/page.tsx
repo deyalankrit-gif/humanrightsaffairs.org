@@ -1,15 +1,15 @@
+
 "use client"
 
 import React, { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { ArrowLeft, Calendar, Download, Printer, ShieldCheck, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react'
+import { ArrowLeft, Calendar, Download, Printer, ShieldCheck, ZoomIn, ZoomOut, RotateCcw, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Footer } from '@/components/footer'
 
 /**
- * ActivityCalendarPage provides a professional viewer for the Trust's official schedule.
- * Optimized for zero vertical scroll containers and maximum vertical efficiency.
+ * ActivityCalendarPage provides a full-screen, high-fidelity viewer for the Trust's official schedule.
+ * Optimized to fill the entire vertical viewport with zero empty space at the top or bottom.
  */
 export default function ActivityCalendarPage() {
   const [zoom, setZoom] = useState(1)
@@ -23,87 +23,83 @@ export default function ActivityCalendarPage() {
   const resetZoom = () => setZoom(1)
 
   return (
-    <main className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col">
-      {/* Header Section - Minimized to absolute limit */}
-      <section className="pt-14 pb-0.5 bg-primary text-primary-foreground relative overflow-hidden border-b border-accent/20 print:hidden">
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="max-w-5xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-1">
-            <div className="space-y-0">
-              <Link href="/" className="inline-flex items-center gap-1.5 text-accent font-bold text-[8px] uppercase tracking-widest hover:opacity-80 transition-opacity">
-                <ArrowLeft className="w-2.5 h-2.5" /> Home
-              </Link>
-              <div className="flex items-center gap-2">
-                <Calendar className="w-3.5 h-3.5 text-accent" />
-                <h1 className="text-lg md:text-xl font-headline font-bold leading-none">
-                  Activity <span className="text-accent italic">Calendar</span>
-                </h1>
-              </div>
-            </div>
-            
-            <div className="flex gap-2 mb-1">
-              <Button onClick={handlePrint} variant="outline" size="sm" className="rounded-lg font-bold gap-2 h-6 px-3 border-white/10 bg-white/5 hover:bg-white/10 text-white transition-all text-[8px]">
-                <Printer className="w-3 h-3" /> Print
-              </Button>
-              <Button asChild size="sm" className="bg-accent text-primary font-bold h-6 px-3 rounded-lg hover:bg-secondary hover:text-white transition-all shadow-lg shadow-accent/20 text-[8px]">
-                <a href="/Activity Calender.jpeg" download>
-                  <Download className="w-3 h-3 mr-1" /> Download
-                </a>
-              </Button>
+    <main className="h-screen w-screen bg-slate-950 overflow-hidden flex flex-col relative">
+      
+      {/* Floating Minimalist Control Bar - Overlays content to save space */}
+      <div className="absolute top-4 left-4 right-4 z-50 flex items-center justify-between pointer-events-none print:hidden">
+        <div className="flex items-center gap-2 pointer-events-auto">
+          <Button asChild variant="secondary" size="icon" className="h-10 w-10 rounded-full shadow-2xl bg-white/10 backdrop-blur-xl border border-white/20 hover:bg-accent hover:text-primary transition-all">
+            <Link href="/"><ArrowLeft className="w-5 h-5" /></Link>
+          </Button>
+          <div className="bg-white/10 backdrop-blur-xl px-4 py-2 rounded-full border border-white/20 shadow-2xl flex items-center gap-3">
+            <Calendar className="w-4 h-4 text-accent" />
+            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white hidden sm:inline">Activity Calendar 2025-26</span>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 pointer-events-auto">
+          <div className="bg-white/10 backdrop-blur-xl p-1 rounded-full border border-white/20 shadow-2xl flex items-center gap-1">
+             <Button variant="ghost" size="icon" onClick={zoomOut} className="h-8 w-8 rounded-full text-white hover:bg-white/20" disabled={zoom <= 0.5}>
+               <ZoomOut className="w-4 h-4" />
+             </Button>
+             <div className="w-10 text-center text-[9px] font-black text-white">
+               {Math.round(zoom * 100)}%
+             </div>
+             <Button variant="ghost" size="icon" onClick={zoomIn} className="h-8 w-8 rounded-full text-white hover:bg-white/20" disabled={zoom >= 3}>
+               <ZoomIn className="w-4 h-4" />
+             </Button>
+             <div className="w-px h-4 bg-white/20 mx-1"></div>
+             <Button variant="ghost" size="icon" onClick={resetZoom} className="h-8 w-8 rounded-full text-white hover:bg-white/20" title="Reset">
+               <RotateCcw className="w-4 h-4" />
+             </Button>
+          </div>
+          
+          <div className="flex gap-2">
+            <Button onClick={handlePrint} variant="secondary" size="icon" className="h-10 w-10 rounded-full shadow-2xl bg-white/10 backdrop-blur-xl border border-white/20 hover:bg-white/20 text-white transition-all">
+              <Printer className="w-5 h-5" />
+            </Button>
+            <Button asChild size="icon" className="h-10 w-10 rounded-full shadow-2xl bg-accent text-primary hover:bg-secondary hover:text-white transition-all">
+              <a href="/Activity Calender.jpeg" download>
+                <Download className="w-5 h-5" />
+              </a>
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Full-Screen Content Area */}
+      <div className="flex-1 w-full h-full relative overflow-hidden bg-slate-950">
+        {/* Dynamic Background Pattern */}
+        <div className="absolute inset-0 opacity-10 pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
+        
+        {/* The Calendar Viewer - Calculated to fill 100% of height with 0 gaps */}
+        <div className="w-full h-full flex items-center justify-center">
+          <div 
+            className="relative w-full h-full transition-transform duration-300 ease-out flex items-center justify-center"
+            style={{ transform: `scale(${zoom})` }}
+          >
+            <div className="relative w-full h-full max-h-screen">
+              <Image 
+                src="/Activity Calender.jpeg" 
+                alt="HRAT Official Activity Calendar" 
+                fill 
+                className="object-contain"
+                priority
+                sizes="100vw"
+              />
             </div>
           </div>
         </div>
-      </section>
+      </div>
 
-      {/* Calendar Viewer Section - No Card Frames, No Internal Scroll */}
-      <section className="py-1 px-4 flex-1">
-        <div className="container mx-auto">
-          <div className="max-w-5xl mx-auto space-y-1">
-            
-            {/* Zoom Control Strip - Compact and Sticky-ready */}
-            <div className="flex items-center justify-between bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm px-4 py-0.5 rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm print:hidden">
-              <div className="flex items-center gap-1.5">
-                <ShieldCheck className="w-2.5 h-2.5 text-emerald-500" />
-                <span className="text-[7px] font-black uppercase tracking-[0.2em] text-slate-400">Registry Log 2025-26</span>
-              </div>
-              
-              <div className="flex items-center gap-2">
-                <div className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800 p-0.5 rounded-md">
-                  <Button variant="ghost" size="icon" onClick={zoomOut} className="h-4 w-4 rounded-sm" disabled={zoom <= 0.5}>
-                    <ZoomOut className="w-2 h-2" />
-                  </Button>
-                  <div className="w-6 text-center text-[7px] font-black text-slate-500">
-                    {Math.round(zoom * 100)}%
-                  </div>
-                  <Button variant="ghost" size="icon" onClick={zoomIn} className="h-4 w-4 rounded-sm" disabled={zoom >= 3}>
-                    <ZoomIn className="w-2 h-2" />
-                  </Button>
-                </div>
-                <Button variant="ghost" size="icon" onClick={resetZoom} className="h-5 w-5 text-slate-400 hover:text-accent" title="Reset View">
-                  <RotateCcw className="w-2.5 h-2.5" />
-                </Button>
-              </div>
-            </div>
-            
-            {/* Direct Image Viewer - Removal of all internal scroll containers */}
-            <div className="relative w-full overflow-x-auto no-scrollbar">
-              <div 
-                className="relative w-full aspect-[1/1.414] transition-transform duration-200 origin-top"
-                style={{ transform: `scale(${zoom})`, minWidth: '100%' }}
-              >
-                <Image 
-                  src="/Activity Calender.jpeg" 
-                  alt="HRAT Official Activity Calendar" 
-                  fill 
-                  className="object-contain"
-                  priority
-                />
-              </div>
-            </div>
-          </div>
+      {/* Bottom Legal Tag - Slim and Non-intrusive */}
+      <div className="absolute bottom-4 left-0 right-0 z-50 flex justify-center pointer-events-none print:hidden">
+        <div className="bg-black/40 backdrop-blur-md px-6 py-1.5 rounded-full border border-white/5 flex items-center gap-3">
+          <ShieldCheck className="w-3 h-3 text-emerald-500" />
+          <p className="text-[8px] font-bold text-slate-400 uppercase tracking-[0.3em]">Official Mission Schedule • Human Rights Affairs Trust</p>
         </div>
-      </section>
+      </div>
 
-      <Footer />
     </main>
   )
 }
