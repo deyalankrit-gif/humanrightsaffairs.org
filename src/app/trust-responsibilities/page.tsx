@@ -194,6 +194,8 @@ export default function TrustResponsibilitiesPage() {
     },
     {
       title: "১২. বছরে একবার বাধ্যতামূলক করনীয়",
+      titleHref: "/legal/annual-governance-checklist",
+      titleColor: "text-blue-600 dark:text-blue-400",
       items: [
         "বার্ষিক সাধারণ সভা (AGM)",
         "বার্ষিক প্রতিবেদন প্রকাশ",
@@ -322,11 +324,24 @@ export default function TrustResponsibilitiesPage() {
             </div>
 
             <div className="grid gap-10">
-              {bengaliGuidelines.map((section, idx) => (
+              {bengaliGuidelines.map((section: any, idx) => (
                 <div key={idx} className="space-y-6 group">
-                  <h4 className="text-xl md:text-2xl font-bold text-primary dark:text-white border-l-4 border-accent pl-4 group-hover:text-accent transition-colors">{section.title}</h4>
+                  {section.titleHref ? (
+                    <Link href={section.titleHref} className="block group/title w-fit">
+                      <h4 className={cn(
+                        "text-xl md:text-2xl font-bold border-l-4 border-accent pl-4 hover:underline decoration-accent/30 underline-offset-8 flex items-center gap-2 transition-all",
+                        section.titleColor || "text-primary dark:text-white"
+                      )}>
+                        {section.title}
+                        <ExternalLink className="w-5 h-5 opacity-50 group-hover/title:opacity-100 transition-opacity" />
+                      </h4>
+                    </Link>
+                  ) : (
+                    <h4 className="text-xl md:text-2xl font-bold text-primary dark:text-white border-l-4 border-accent pl-4 group-hover:text-accent transition-colors">{section.title}</h4>
+                  )}
+                  
                   <ul className="grid gap-3 pl-4">
-                    {section.items.map((item, i) => (
+                    {section.items.map((item: any, i: number) => (
                       <li key={i} className="flex items-start gap-3 text-slate-700 dark:text-slate-300 font-medium">
                         <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
                         {typeof item === 'string' ? (
