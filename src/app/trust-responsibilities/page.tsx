@@ -1,4 +1,3 @@
-
 "use client"
 
 import React from 'react'
@@ -191,6 +190,16 @@ export default function TrustResponsibilitiesPage() {
         "Legal & Compliance File",
         "Membership File",
         "Photo & Activity Report File"
+      ]
+    },
+    {
+      title: "১২. বছরে একবার বাধ্যতামূলক করনীয়",
+      items: [
+        "বার্ষিক সাধারণ সভা (AGM)",
+        "বার্ষিক প্রতিবেদন প্রকাশ",
+        "অডিট রিপোর্ট উপস্থাপন",
+        "শ্রেষ্ঠ স্বেচ্ছাসেবক ও সমাজসেবী সম্মাননা",
+        "আগামী বছরের কর্মপরিকল্পনা অনুমোদন"
       ]
     }
   ]
