@@ -16,7 +16,8 @@ import {
   Award,
   BookOpen,
   Scale as ScaleIcon,
-  UserCheck
+  UserCheck,
+  ExternalLink
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -162,7 +163,7 @@ export default function TrustResponsibilitiesPage() {
         "Agenda Sheet (আলোচ্যসূচি)",
         "Attendance Register (উপস্থিতি রেজিস্টার ও স্বাক্ষর)",
         "Minutes Book (সভার কার্যবিবরণী)",
-        "Resolution Register / Resolution Copy (গৃহীত সিদ্ধান্তের রেকর্ড)",
+        { isLink: true, label: "Resolution Register / Resolution Copy (গৃহীত সিদ্ধান্তের রেকর্ড)", href: "/legal/resolution-format" },
         "Action Taken Report (ATR) (গত মাসের সিদ্ধান্ত কতটা বাস্তবায়িত হয়েছে তার রিপোর্ট)",
         "উন্নয়নমূলক পরিকল্পনার জন্য:",
         "Development Proposal Form (নতুন প্রস্তাব জমা দেওয়ার ফর্ম)",
@@ -277,7 +278,7 @@ export default function TrustResponsibilitiesPage() {
 
             {/* Bottom Actions */}
             <div className="text-center pt-8 border-t border-slate-200 dark:border-slate-800">
-               <h4 className="text-2xl font-headline font-bold text-primary dark:text-white mb-6">Commitment to Service</h4>
+               <h4 className="text-2xl font-headline font-bold text-primary dark:text-white mb-6">Transparency & Accountability</h4>
                <p className="max-w-3xl mx-auto text-slate-500 dark:text-slate-400 mb-12">
                  These responsibilities ensure that our organization operates as a unified and effective shield for human rights across the nation. All personnel are expected to uphold these standards in every official interaction.
                </p>
@@ -318,7 +319,14 @@ export default function TrustResponsibilitiesPage() {
                     {section.items.map((item, i) => (
                       <li key={i} className="flex items-start gap-3 text-slate-700 dark:text-slate-300 font-medium">
                         <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
-                        <span className={cn("leading-relaxed", item.endsWith(":") && "font-bold text-primary border-b border-accent/20 pb-1 mt-4 block w-fit")}>{item}</span>
+                        {typeof item === 'string' ? (
+                           <span className={cn("leading-relaxed", item.endsWith(":") && "font-bold text-primary border-b border-accent/20 pb-1 mt-4 block w-fit")}>{item}</span>
+                        ) : (
+                          <Link href={item.href} className="text-accent font-bold hover:underline decoration-accent/30 underline-offset-4 flex items-center gap-2 group/link">
+                             {item.label}
+                             <ExternalLink className="w-3 h-3 group-hover/link:translate-x-1 transition-transform" />
+                          </Link>
+                        )}
                       </li>
                     ))}
                   </ul>
@@ -334,7 +342,7 @@ export default function TrustResponsibilitiesPage() {
               </p>
               <div className="mt-12 flex justify-center opacity-30">
                  <div className="relative w-20 h-20">
-                    <img src="/HRAT Logo.jpeg" alt="Logo" className="object-contain grayscale" />
+                    <img src="/HRAT%20Logo.jpeg" alt="Logo" className="object-contain grayscale" />
                  </div>
               </div>
             </div>
