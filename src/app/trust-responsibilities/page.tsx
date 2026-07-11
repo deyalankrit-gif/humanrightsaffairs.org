@@ -1,3 +1,4 @@
+
 "use client"
 
 import React from 'react'
@@ -163,7 +164,7 @@ export default function TrustResponsibilitiesPage() {
         "Agenda Sheet (আলোচ্যসূচি)",
         "Attendance Register (উপস্থিতি রেজিস্টার ও স্বাক্ষর)",
         "Minutes Book (সভার কার্যবিবরণী)",
-        { isLink: true, label: "Resolution Register / Resolution Copy (গৃহীত সিদ্ধান্তের রেকর্ড)", href: "/legal/resolution-format" },
+        { isLink: true, label: "Resolution Register / Resolution Copy (গৃহীত সিদ্ধান্তের রেকর্ড)", href: "/legal/resolution-format", color: "text-blue-600 dark:text-blue-400" },
         "Action Taken Report (ATR) (গত মাসের সিদ্ধান্ত কতটা বাস্তবায়িত হয়েছে তার রিপোর্ট)",
         "উন্নয়নমূলক পরিকল্পনার জন্য:",
         "Development Proposal Form (নতুন প্রস্তাব জমা দেওয়ার ফর্ম)",
@@ -322,7 +323,13 @@ export default function TrustResponsibilitiesPage() {
                         {typeof item === 'string' ? (
                            <span className={cn("leading-relaxed", item.endsWith(":") && "font-bold text-primary border-b border-accent/20 pb-1 mt-4 block w-fit")}>{item}</span>
                         ) : (
-                          <Link href={item.href} className="text-accent font-bold hover:underline decoration-accent/30 underline-offset-4 flex items-center gap-2 group/link">
+                          <Link 
+                            href={item.href} 
+                            className={cn(
+                              "font-bold hover:underline decoration-accent/30 underline-offset-4 flex items-center gap-2 group/link",
+                              item.color || "text-accent"
+                            )}
+                          >
                              {item.label}
                              <ExternalLink className="w-3 h-3 group-hover/link:translate-x-1 transition-transform" />
                           </Link>
