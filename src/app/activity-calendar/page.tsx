@@ -1,29 +1,79 @@
 
 "use client"
 
-import React, { useState } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { ArrowLeft, Calendar, Download, Printer, ShieldCheck, ZoomIn, ZoomOut, RotateCcw, X } from 'lucide-react'
+import { ArrowLeft, Calendar, Download, Printer, ShieldCheck, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 /**
  * ActivityCalendarPage provides a full-screen, high-fidelity viewer for the Trust's official schedule.
- * Optimized to fill the entire vertical viewport with zero empty space at the top or bottom.
+ * Features: Immersive scaling, one-handed panning (click/touch drag), and zero-margin layout.
  */
 export default function ActivityCalendarPage() {
   const [zoom, setZoom] = useState(1)
+  const [position, setPosition] = useState({ x: 0, y: 0 })
+  const [isDragging, setIsDragging] = useState(false)
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
+  const containerRef = useRef<HTMLDivElement>(null)
   
   const handlePrint = () => {
     window.print()
   }
 
-  const zoomIn = () => setZoom(prev => Math.min(prev + 0.25, 3))
-  const zoomOut = () => setZoom(prev => Math.max(prev - 0.25, 0.5))
-  const resetZoom = () => setZoom(1)
+  const zoomIn = () => setZoom(prev => Math.min(prev + 0.25, 4))
+  const zoomOut = () => {
+    setZoom(prev => {
+      const next = Math.max(prev - 0.25, 0.5)
+      if (next <= 1) setPosition({ x: 0, y: 0 }) // Reset position if zoomed out to normal
+      return next
+    })
+  }
+
+  const resetZoom = () => {
+    setZoom(1)
+    setPosition({ x: 0, y: 0 })
+  }
+
+  // Drag Handlers
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (zoom <= 1) return
+    setIsDragging(true)
+    setDragStart({ x: e.clientX - position.x, y: e.clientY - position.y })
+  }
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging) return
+    setPosition({
+      x: e.clientX - dragStart.x,
+      y: e.clientY - dragStart.y
+    })
+  }
+
+  const handleMouseUp = () => {
+    setIsDragging(false)
+  }
+
+  // Touch Handlers for mobile
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (zoom <= 1) return
+    setIsDragging(true)
+    const touch = e.touches[0]
+    setDragStart({ x: touch.clientX - position.x, y: touch.clientY - position.y })
+  }
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isDragging) return
+    const touch = e.touches[0]
+    setPosition({
+      x: touch.clientX - dragStart.x,
+      y: touch.clientY - dragStart.y
+    })
+  }
 
   return (
-    <main className="h-screen w-screen bg-slate-950 overflow-hidden flex flex-col relative">
+    <main className="h-screen w-screen bg-slate-950 overflow-hidden flex flex-col relative select-none">
       
       {/* Floating Minimalist Control Bar - Overlays content to save space */}
       <div className="absolute top-4 left-4 right-4 z-50 flex items-center justify-between pointer-events-none print:hidden">
@@ -45,7 +95,7 @@ export default function ActivityCalendarPage() {
              <div className="w-10 text-center text-[9px] font-black text-white">
                {Math.round(zoom * 100)}%
              </div>
-             <Button variant="ghost" size="icon" onClick={zoomIn} className="h-8 w-8 rounded-full text-white hover:bg-white/20" disabled={zoom >= 3}>
+             <Button variant="ghost" size="icon" onClick={zoomIn} className="h-8 w-8 rounded-full text-white hover:bg-white/20" disabled={zoom >= 4}>
                <ZoomIn className="w-4 h-4" />
              </Button>
              <div className="w-px h-4 bg-white/20 mx-1"></div>
@@ -68,26 +118,40 @@ export default function ActivityCalendarPage() {
       </div>
 
       {/* Main Full-Screen Content Area */}
-      <div className="flex-1 w-full h-full relative overflow-hidden bg-slate-950">
+      <div 
+        ref={containerRef}
+        className={cn(
+          "flex-1 w-full h-full relative overflow-hidden bg-slate-950 flex items-center justify-center transition-colors",
+          isDragging ? "cursor-grabbing" : zoom > 1 ? "cursor-grab" : "cursor-default"
+        )}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleMouseUp}
+      >
         {/* Dynamic Background Pattern */}
         <div className="absolute inset-0 opacity-10 pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
         
         {/* The Calendar Viewer - Calculated to fill 100% of height with 0 gaps */}
-        <div className="w-full h-full flex items-center justify-center">
-          <div 
-            className="relative w-full h-full transition-transform duration-300 ease-out flex items-center justify-center"
-            style={{ transform: `scale(${zoom})` }}
-          >
-            <div className="relative w-full h-full max-h-screen">
-              <Image 
-                src="/Activity Calender.jpeg" 
-                alt="HRAT Official Activity Calendar" 
-                fill 
-                className="object-contain"
-                priority
-                sizes="100vw"
-              />
-            </div>
+        <div 
+          className="relative w-full h-full transition-transform duration-75 ease-out flex items-center justify-center will-change-transform"
+          style={{ 
+            transform: `translate(${position.x}px, ${position.y}px) scale(${zoom})`
+          }}
+        >
+          <div className="relative w-full h-full">
+            <Image 
+              src="/Activity Calender.jpeg" 
+              alt="HRAT Official Activity Calendar" 
+              fill 
+              className="object-contain"
+              priority
+              sizes="100vw"
+              draggable={false}
+            />
           </div>
         </div>
       </div>
