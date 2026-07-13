@@ -8,13 +8,15 @@ import { AppSidebar } from '@/components/app-sidebar';
 import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
 import { Separator } from '@/components/ui/separator';
 import { VisitorTracker } from '@/components/visitor-tracker';
+import { PublicFooter } from '@/components/public-footer';
+import { AdminFooter } from '@/components/admin-footer';
 import { useUser } from '@/firebase';
 import { cn } from '@/lib/utils';
 
 /**
  * LayoutWrapper manages the global layout structure, switching between
- * the public portal (with top navbar) and the administrative portal
- * (with left-hand sidebar).
+ * the public portal (with top navbar and PublicFooter) and the administrative 
+ * portal (with left-hand sidebar and AdminFooter).
  */
 export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -27,7 +29,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   // STRICT GOVERNANCE HIERARCHY
   const isRoot = user?.email?.toLowerCase() === 'deydhritiman@gmail.com';
   
-  // Both login pages should have the same clean layout without sidebar/header
+  // Both login pages should have the same clean layout without sidebar/header/footer
   const isLoginPage = pathname === '/internal/login' || pathname === '/internal/super-login';
 
   // Prevent hydration mismatch by waiting for client-side mount
@@ -39,7 +41,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
     return <div className="min-h-screen bg-background">{children}</div>;
   }
 
-  // Administrative Dashboard Layout (Sidebar + Action Bar)
+  // Administrative Dashboard Layout (Sidebar + Action Bar + AdminFooter)
   if (isAdmin && !isLoginPage) {
     return (
       <SidebarProvider defaultOpen={true}>
@@ -63,6 +65,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
             <main className="flex-1 overflow-x-hidden">
               {children}
             </main>
+            <AdminFooter />
           </SidebarInset>
         </div>
       </SidebarProvider>
@@ -77,6 +80,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
       <div className="flex-1">
         {children}
       </div>
+      {!isLoginPage && <PublicFooter />}
     </div>
   );
 }
