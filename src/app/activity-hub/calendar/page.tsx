@@ -7,27 +7,20 @@ import {
   ChevronLeft, 
   ChevronRight, 
   Plus, 
-  Search, 
-  Filter, 
   ArrowLeft,
   Calendar as CalendarIcon,
-  Download,
-  MoreVertical,
-  Edit,
+  Loader2,
+  FileDown,
   Trash2,
+  Edit,
   Bell,
   Clock,
-  MapPin,
-  Loader2,
-  ShieldCheck,
-  FileDown
+  MapPin
 } from 'lucide-react'
-import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Input } from '@/components/ui/input'
 import { useCollection, useFirestore, useUser, useDoc, useMemoFirebase } from '@/firebase'
-import { collection, query, orderBy, where, doc, deleteDoc } from 'firebase/firestore'
+import { collection, query, orderBy, doc, deleteDoc } from 'firebase/firestore'
 import { 
   format, 
   addMonths, 
@@ -40,9 +33,7 @@ import {
   isSameMonth, 
   isSameDay, 
   isToday, 
-  parseISO,
-  isAfter,
-  addDays
+  parseISO
 } from 'date-fns'
 import { BUILT_IN_OBSERVANCES, BUILT_IN_HOLIDAYS } from '@/lib/activity-hub-data'
 import { 
@@ -50,17 +41,10 @@ import {
   DialogContent, 
   DialogHeader, 
   DialogTitle, 
-  DialogTrigger,
-  DialogDescription
+  DialogTrigger
 } from '@/components/ui/dialog'
 import { ActivityForm } from '@/components/activity-hub/activity-form'
 import { ReminderForm } from '@/components/activity-hub/reminder-form'
-import { 
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
 
@@ -68,27 +52,32 @@ type ViewType = 'month' | 'week' | 'list'
 
 export default function ActivityCalendarView() {
   const [currentDate, setCurrentDate] = useState(new Date())
-  const [view, setView] = useState<ViewType>('month')
-  const [search, setSearch] = useState('')
   const [isAddOpen, setIsAddOpen] = useState(false)
   const [selectedEvent, setSelectedEvent] = useState<any>(null)
   
   const db = useFirestore()
-  const { user } = useUser()
+  const { user, loading: authLoading } = useUser()
   const { toast } = useToast()
 
   const userDocRef = useMemoFirebase(() => {
     if (!db || !user?.email) return null;
     return doc(db, 'users', user.email.toLowerCase());
   }, [db, user?.email]);
-  const { data: userData } = useDoc(userDocRef);
-  const isAdmin = userData?.role === 'admin' || user?.email === 'deydhritiman@gmail.com' || userData?.permissions?.activityHub === true;
+
+  const { data: userData, loading: userDataLoading } = useDoc(userDocRef);
+
+  // STRICT GATING: Only show if auth is resolved AND user has admin status
+  const isAdmin = !authLoading && !!user && (
+    userData?.role === 'admin' || 
+    user?.email === 'deydhritiman@gmail.com' || 
+    userData?.permissions?.activityHub === true
+  );
 
   const eventsQuery = useMemoFirebase(() => {
     if (!db) return null;
     return query(collection(db, 'activity_events'), orderBy('date', 'asc'));
   }, [db]);
-  const { data: events, loading } = useCollection(eventsQuery);
+  const { data: events, loading: eventsLoading } = useCollection(eventsQuery);
 
   const prevMonth = () => setCurrentDate(subMonths(currentDate, 1))
   const nextMonth = () => setCurrentDate(addMonths(currentDate, 1))
@@ -105,6 +94,7 @@ export default function ActivityCalendarView() {
     try {
       await deleteDoc(doc(db, 'activity_events', id))
       toast({ title: "Event Deleted" })
+      setSelectedEvent(null)
     } catch (e: any) {
       toast({ variant: "destructive", title: "Error", description: e.message })
     }
@@ -155,6 +145,8 @@ export default function ActivityCalendarView() {
               <Button onClick={exportData} variant="outline" className="h-10 rounded-xl bg-white/5 border-white/10 text-[10px] font-bold uppercase tracking-widest gap-2 hover:bg-white/10">
                 <FileDown className="w-4 h-4" /> Export CSV
               </Button>
+              
+              {/* ADMIN ONLY BUTTON */}
               {isAdmin && (
                 <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
                   <DialogTrigger asChild>
@@ -174,7 +166,7 @@ export default function ActivityCalendarView() {
 
       <section className="p-4 md:p-8">
         <div className="container mx-auto">
-          {loading ? (
+          {eventsLoading ? (
             <div className="flex items-center justify-center h-[60vh]"><Loader2 className="w-10 h-10 animate-spin text-accent" /></div>
           ) : (
             <div className="grid grid-cols-7 border-t border-l border-slate-100 dark:border-slate-800 rounded-2xl overflow-hidden shadow-2xl bg-white dark:bg-slate-900">
@@ -288,6 +280,7 @@ export default function ActivityCalendarView() {
                     </DialogContent>
                   </Dialog>
 
+                  {/* ADMIN ONLY CONTROLS */}
                   {isAdmin && (
                     <div className="flex gap-2">
                       <Button onClick={() => { setIsAddOpen(true); }} variant="outline" className="flex-1 h-12 rounded-xl font-bold">
