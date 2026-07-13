@@ -1,3 +1,4 @@
+
 import Image from 'next/image'
 import { Mail, Phone, MapPin, Facebook, Twitter, Instagram, Youtube } from 'lucide-react'
 import Link from 'next/link'
@@ -68,6 +69,7 @@ export function Footer() {
               <li><Link href="/#knowledge" className="hover:text-accent transition-colors font-medium">Rights Center</Link></li>
               <li><Link href="/#membership" className="hover:text-accent transition-colors font-medium">Be A Member</Link></li>
               <li><Link href="/#helpline" className="hover:text-accent transition-colors font-medium">Emergency Contacts</Link></li>
+              <li><Link href="/activity-hub" className="text-emerald-400 font-bold hover:text-white transition-colors">Activity Calendar Hub</Link></li>
               <li>
                 <DonationDialog>
                   <button className="hover:text-accent transition-colors font-medium text-left">Donate Now</button>

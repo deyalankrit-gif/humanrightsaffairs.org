@@ -1,3 +1,4 @@
+
 {
   "entities": {
     "UserAccount": {
@@ -28,7 +29,8 @@
             "gallery": { "type": "boolean" },
             "publicView": { "type": "boolean" },
             "terminated": { "type": "boolean" },
-            "renewals": { "type": "boolean" }
+            "renewals": { "type": "boolean" },
+            "activityHub": { "type": "boolean", "description": "Access to manage Activity Calendar Hub." }
           }
         },
         "lastLogin": { "type": "string", "format": "date-time" },
@@ -38,290 +40,53 @@
       },
       "required": ["email", "permissions", "uid", "role"]
     },
-    "Donation": {
-      "title": "Donation",
-      "description": "Details of a donation made to the Human Rights Affairs Trust.",
-      "type": "object",
-      "properties": {
-        "donorName": { "type": "string" },
-        "donorEmail": { "type": "string", "format": "email" },
-        "amount": { "type": "number" },
-        "pan": { "type": "string" },
-        "aadhaar": { "type": "string" },
-        "paymentMethod": { "type": "string" },
-        "paymentDetails": { "type": "string", "description": "Transaction reference or other details." },
-        "chequeNumber": { "type": "string" },
-        "bankName": { "type": "string" },
-        "branchName": { "type": "string" },
-        "transactionId": { "type": "string" },
-        "status": { "type": "string" },
-        "createdAt": { "type": "string", "format": "date-time" }
-      }
-    },
-    "Expense": {
-      "title": "Expense",
-      "description": "Organizational expenditure records with dynamic payment documentation.",
+    "ActivityEvent": {
+      "title": "Activity Event",
+      "description": "Organizational activity for the Hub.",
       "type": "object",
       "properties": {
         "title": { "type": "string" },
-        "category": { "type": "string", "enum": ["Salaries", "Rent", "Utility", "Legal Fees", "Logistics", "Printing", "Travel", "Relief Aid", "Other"] },
-        "amount": { "type": "number" },
+        "description": { "type": "string" },
+        "category": { "type": "string" },
         "date": { "type": "string", "format": "date" },
-        "payee": { "type": "string" },
-        "description": { "type": "string" },
-        "paymentMethod": { "type": "string", "enum": ["Cash", "Bank Transfer", "UPI", "Cheque", "Credit/Debit Card"] },
-        "status": { "type": "string", "enum": ["Paid", "Pending"] },
-        "referenceNumber": { "type": "string" },
-        "voucherNumber": { "type": "string" },
-        "bankTransferDetails": { "type": "string" },
-        "upiTransactionId": { "type": "string" },
-        "chequeNumber": { "type": "string" },
-        "bankName": { "type": "string" },
-        "branchName": { "type": "string" },
-        "cardReference": { "type": "string", "description": "Transaction reference for Card payments." },
+        "startTime": { "type": "string" },
+        "endTime": { "type": "string" },
+        "venue": { "type": "string" },
+        "organizer": { "type": "string" },
+        "responsiblePerson": { "type": "string" },
+        "budget": { "type": "number" },
+        "notes": { "type": "string" },
+        "status": { "type": "string", "enum": ["Planned", "Confirmed", "Completed", "Cancelled"] },
+        "priority": { "type": "string", "enum": ["High", "Medium", "Low"] },
         "createdAt": { "type": "string", "format": "date-time" },
-        "updatedAt": { "type": "string", "format": "date-time" }
+        "createdBy": { "type": "string" }
       },
-      "required": ["title", "category", "amount", "date", "payee", "status", "paymentMethod"]
+      "required": ["title", "date", "category", "status"]
     },
-    "AccountState": {
-      "title": "Account State",
-      "description": "Summary of current organizational liquid assets.",
+    "ActivityReminder": {
+      "title": "Personal Reminder",
+      "description": "Private reminder for an individual user.",
       "type": "object",
       "properties": {
-        "cashInHand": { "type": "number" },
-        "cashAtBank": { "type": "number" },
-        "totalBalance": { "type": "number" },
-        "lastUpdated": { "type": "string", "format": "date-time" },
-        "updatedBy": { "type": "string" },
-        "reconciliationNote": { "type": "string" }
-      },
-      "required": ["cashInHand", "cashAtBank"]
-    },
-    "MemberProfile": {
-      "title": "Member Profile",
-      "description": "Detailed profile information for verified members.",
-      "type": "object",
-      "properties": {
-        "name": { "type": "string" },
-        "designationCategory": { "type": "string", "enum": ["General Member", "Office-bearing Member", "Volunteer"] },
-        "designation": { "type": "string" },
-        "profession": { "type": "string" },
-        "gender": { "type": "string", "enum": ["Male", "Female", "Other"] },
-        "bloodGroup": { "type": "string", "enum": ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"] },
-        "email": { "type": "string" },
-        "phone": { "type": "string" },
-        "address": { "type": "string" },
-        "postOffice": { "type": "string" },
-        "policeStation": { "type": "string" },
-        "pinCode": { "type": "string" },
-        "level": { "type": "string", "enum": ["National", "State", "District"] },
-        "stateName": { "type": "string" },
-        "districtName": { "type": "string" },
-        "status": { "type": "string" },
-        "memberId": { "type": "string" },
-        "joiningDate": { "type": "string", "description": "Membership Date of Issue" },
-        "expiryDate": { "type": "string", "description": "Membership Date of Expiry" },
-        "membershipDuration": { "type": "string", "enum": ["1 Year", "2 Years", "3 Years"] },
-        "isRenewed": { "type": "boolean", "description": "Whether this is a renewed membership." },
-        "renewalCount": { "type": "number" },
+        "uid": { "type": "string" },
+        "title": { "type": "string" },
+        "eventId": { "type": "string" },
+        "daysBefore": { "type": "number" },
+        "remindAt": { "type": "string", "format": "date-time" },
+        "notified": { "type": "boolean" },
         "createdAt": { "type": "string", "format": "date-time" }
-      }
-    },
-    "MemberApplication": {
-      "title": "Member Application",
-      "description": "Registration requests from prospective members.",
-      "type": "object",
-      "properties": {
-        "referenceId": { "type": "string", "description": "Unique generated tracking ID for the application." },
-        "photoDataUri": { "type": "string", "description": "Applicant's profile picture as a data URI." },
-        "name": { "type": "string" },
-        "email": { "type": "string", "format": "email" },
-        "phone": { "type": "string" },
-        "address": { "type": "string" },
-        "postOffice": { "type": "string" },
-        "policeStation": { "type": "string" },
-        "pinCode": { "type": "string" },
-        "bloodGroup": { "type": "string", "enum": ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"] },
-        "pan": { "type": "string" },
-        "aadhaar": { "type": "string" },
-        "profession": { "type": "string" },
-        "gender": { "type": "string", "enum": ["Male", "Female", "Other"] },
-        "education": { "type": "string", "description": "Educational qualifications of the applicant." },
-        "experience": { "type": "string", "description": "Prior work or social service experience." },
-        "level": { "type": "string", "enum": ["National", "State", "District"] },
-        "stateName": { "type": "string" },
-        "districtName": { "type": "string" },
-        "memberType": { "type": "string", "enum": ["Executive Designation", "Board Member", "General Member", "Volunteer"] },
-        "membershipDuration": { "type": "string", "enum": ["1 Year", "2 Years", "3 Years"] },
-        "isRenewal": { "type": "boolean", "description": "Whether this is a renewal request." },
-        "hasNoCriminalRecord": { "type": "boolean", "description": "Affidavit declaring no past criminal records." },
-        "hasAcceptedDeclaration": { "type": "boolean", "description": "Agreement to organizational rules and suspension policy." },
-        "status": { "type": "string", "enum": ["Pending", "Reviewed", "Approved", "Rejected", "Archived"] },
-        "statusUpdateReason": { "type": "string", "description": "Reason for the current status (approval, rejection, or archival)." },
-        "createdAt": { "type": "string", "format": "date-time" },
-        "updatedAt": { "type": "string", "format": "date-time" }
       },
-      "required": ["name", "email", "phone", "memberType", "gender", "hasNoCriminalRecord", "hasAcceptedDeclaration", "membershipDuration", "referenceId"]
+      "required": ["uid", "title", "daysBefore"]
     },
-    "Event": {
-      "title": "Event",
-      "description": "Organizational events and mission highlights.",
+    "ObservanceDay": {
+      "title": "Observance Day",
+      "description": "Built-in important days (International/Legal).",
       "type": "object",
       "properties": {
         "title": { "type": "string" },
-        "date": { "type": "string" },
-        "location": { "type": "string" },
-        "category": { "type": "string" },
-        "description": { "type": "string" },
-        "descriptionBn": { "type": "string", "description": "Bengali translation of the mission narrative." },
-        "imageId": { "type": "string" },
-        "galleryImages": { "type": "array", "items": { "type": "string" }, "description": "Three additional still photos for the official project profile." },
-        "galleryCaptions": { "type": "array", "items": { "type": "string" }, "description": "Captions for the three additional still photos." },
-        "videoUrl": { "type": "string", "description": "Project highlight video data URI or URL." },
-        "videoCaption": { "type": "string", "description": "Caption for the project highlight video." },
-        "createdAt": { "type": "string", "format": "date-time" }
-      }
-    },
-    "GalleryItem": {
-      "title": "Gallery Item",
-      "description": "Standalone visual archive item for the public gallery.",
-      "type": "object",
-      "properties": {
-        "url": { "type": "string", "description": "Image data URI or URL (thumbnail for videos)." },
-        "type": { "type": "string", "enum": ["still", "video"], "description": "The type of media item." },
-        "videoUrl": { "type": "string", "description": "URL for the video (if type is video)." },
-        "caption": { "type": "string" },
-        "category": { "type": "string" },
-        "date": { "type": "string" },
-        "location": { "type": "string" },
-        "createdAt": { "type": "string", "format": "date-time" }
-      },
-      "required": ["url", "caption", "category", "type"]
-    },
-    "TerminatedMember": {
-      "title": "Terminated Member",
-      "description": "Public notice of revoked or cancelled memberships.",
-      "type": "object",
-      "properties": {
-        "name": { "type": "string" },
-        "designation": { "type": "string" },
-        "terminationDate": { "type": "string" },
-        "reason": { "type": "string" },
-        "status": { "type": "string" },
-        "createdAt": { "type": "string", "format": "date-time" }
-      }
-    },
-    "LeadershipMember": {
-      "title": "Leadership Member",
-      "description": "Personnel in the organizational hierarchy tree.",
-      "type": "object",
-      "properties": {
-        "name": { "type": "string" },
-        "title": { "type": "string" },
-        "level": { "type": "string" },
-        "parentRegion": { "type": "string" },
-        "districtName": { "type": "string" },
-        "gender": { "type": "string" },
-        "createdAt": { "type": "string", "format": "date-time" }
-      }
-    },
-    "GeneralMeeting": {
-      "title": "General Meeting",
-      "description": "Records of official organizational assemblies and meetings.",
-      "type": "object",
-      "properties": {
-        "title": { "type": "string" },
-        "date": { "type": "string" },
-        "time": { "type": "string" },
-        "location": { "type": "string" },
-        "agenda": { "type": "string" },
-        "minutes": { "type": "string" },
-        "level": { "type": "string", "enum": ["National", "State", "District"] },
-        "stateName": { "type": "string" },
-        "districtName": { "type": "string" },
-        "status": { "type": "string", "enum": ["Upcoming", "Completed", "Postponed"] },
-        "attendees": { "type": "array", "items": { "type": "string" }, "description": "Names of leadership members present at the meeting." },
-        "createdAt": { "type": "string", "format": "date-time" }
-      },
-      "required": ["title", "date", "level"]
-    },
-    "Grievance": {
-      "title": "Member Grievance",
-      "description": "Complaints and grievances submitted by members.",
-      "type": "object",
-      "properties": {
-        "token": { "type": "string" },
-        "memberId": { "type": "string" },
-        "name": { "type": "string" },
-        "email": { "type": "string" },
-        "phone": { "type": "string" },
-        "subject": { "type": "string" },
-        "description": { "type": "string" },
-        "status": { "type": "string", "enum": ["Pending", "Reviewed", "Resolved"] },
-        "createdAt": { "type": "string", "format": "date-time" }
-      }
-    },
-    "InventoryItem": {
-      "title": "Inventory Item",
-      "description": "Organizational materials and supplies tracking.",
-      "type": "object",
-      "properties": {
-        "name": { "type": "string" },
-        "category": { "type": "string" },
-        "unit": { "type": "string" },
-        "currentStock": { "type": "number" },
-        "totalInflow": { "type": "number" },
-        "totalOutflow": { "type": "number" },
-        "lowStockThreshold": { "type": "number" },
-        "lastUpdated": { "type": "string", "format": "date-time" },
-        "createdAt": { "type": "string", "format": "date-time" }
-      },
-      "required": ["name", "category", "unit", "currentStock"]
-    },
-    "Vendor": {
-      "title": "Vendor",
-      "description": "Information about external service providers and suppliers.",
-      "type": "object",
-      "properties": {
-        "companyName": { "type": "string" },
-        "vendorType": { "type": "string", "enum": ["Legal", "Logistics", "Printing", "IT Services", "Media", "Travel", "Stationery", "Other"] },
-        "particularFunction": { "type": "string", "description": "The specific service or role provided by the vendor." },
-        "contactPerson": { "type": "string" },
-        "email": { "type": "string", "format": "email" },
-        "phone": { "type": "string" },
-        "address": { "type": "string" },
-        "gstin": { "type": "string", "description": "GST Identification Number" },
-        "status": { "type": "string", "enum": ["Active", "Inactive"] },
-        "createdAt": { "type": "string", "format": "date-time" }
-      },
-      "required": ["companyName", "vendorType", "contactPerson", "email", "phone"]
-    },
-    "Visitor": {
-      "title": "Visitor",
-      "description": "Website visitor tracking and analytics data.",
-      "type": "object",
-      "properties": {
-        "name": { "type": "string" },
-        "email": { "type": "string" },
-        "ipAddress": { "type": "string" },
-        "deviceType": { "type": "string" },
-        "browser": { "type": "string" },
-        "os": { "type": "string" },
-        "firstVisit": { "type": "string", "format": "date-time" },
-        "lastVisit": { "type": "string", "format": "date-time" },
-        "lastActivity": { "type": "string", "format": "date-time" },
-        "sessionDuration": { "type": "number" },
-        "country": { "type": "string" },
-        "state": { "type": "string" },
-        "city": { "type": "string" },
-        "region": { "type": "string" },
-        "timeZone": { "type": "string" },
-        "totalVisits": { "type": "number" },
-        "pagesVisited": { "type": "array", "items": { "type": "string" } },
-        "userType": { "type": "string", "enum": ["Guest", "Member", "Admin"] },
-        "status": { "type": "string", "enum": ["New", "Returning"] },
-        "createdAt": { "type": "string", "format": "date-time" }
+        "month": { "type": "number" },
+        "day": { "type": "number" },
+        "type": { "type": "string", "enum": ["International", "Legal", "Social Justice", "Human Rights"] }
       }
     }
   },
@@ -329,20 +94,10 @@
     "providers": ["google", "password"]
   },
   "firestore": {
-    "/users/{userEmail}": { "schema": "UserAccount", "description": "Permissions registry for staff and root admins." },
-    "/donations/{donationId}": { "schema": "Donation" },
-    "/expenses/{expenseId}": { "schema": "Expense" },
-    "/accounts/{accountId}": { "schema": "AccountState" },
-    "/memberProfiles/{profileId}": { "schema": "MemberProfile" },
-    "/memberApplications/{appId}": { "schema": "MemberApplication" },
-    "/events/{eventId}": { "schema": "Event" },
-    "/gallery/{itemId}": { "schema": "GalleryItem" },
-    "/terminatedMembers/{memberId}": { "schema": "TerminatedMember" },
-    "/leadership/{leaderId}": { "schema": "LeadershipMember" },
-    "/meetings/{meetingId}": { "schema": "GeneralMeeting" },
-    "/grievances/{grievanceId}": { "schema": "Grievance" },
-    "/inventory/{itemId}": { "schema": "InventoryItem" },
-    "/vendors/{vendorId}": { "schema": "Vendor" },
-    "/visitors/{visitorId}": { "schema": "Visitor" }
+    "/users/{userEmail}": { "schema": "UserAccount", "description": "Permissions registry." },
+    "/activity_events/{eventId}": { "schema": "ActivityEvent" },
+    "/activity_reminders/{reminderId}": { "schema": "ActivityReminder" },
+    "/observance_days/{dayId}": { "schema": "ObservanceDay" },
+    "/national_holidays/{holidayId}": { "schema": "ObservanceDay" }
   }
 }
