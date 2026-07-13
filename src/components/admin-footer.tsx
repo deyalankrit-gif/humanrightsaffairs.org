@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -75,7 +76,7 @@ export function AdminFooter() {
               <li><Link href="/#knowledge" className="hover:text-accent transition-colors font-medium">Rights Center</Link></li>
               <li><Link href="/#membership" className="hover:text-accent transition-colors font-medium">Be A Member</Link></li>
               <li><Link href="/#helpline" className="hover:text-accent transition-colors font-medium">Emergency Contacts</Link></li>
-              <li><Link href="/activity-hub" className="text-emerald-400 font-bold hover:text-white transition-colors">Activity Calendar Hub</Link></li>
+              <li><Link href="/internal/activity-hub" className="text-emerald-400 font-bold hover:text-white transition-colors">Activity Hub Management</Link></li>
               <li>
                 <DonationDialog>
                   <button className="hover:text-accent transition-colors font-medium text-left">Donate Now</button>

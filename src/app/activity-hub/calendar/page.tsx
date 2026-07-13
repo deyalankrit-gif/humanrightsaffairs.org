@@ -6,21 +6,19 @@ import Link from 'next/link'
 import { 
   ChevronLeft, 
   ChevronRight, 
-  Plus, 
   ArrowLeft,
   Calendar as CalendarIcon,
   Loader2,
   FileDown,
-  Trash2,
-  Edit,
   Bell,
   Clock,
-  MapPin
+  MapPin,
+  Info
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { useCollection, useFirestore, useUser, useDoc, useMemoFirebase } from '@/firebase'
-import { collection, query, orderBy, doc, deleteDoc } from 'firebase/firestore'
+import { collection, query, orderBy, doc } from 'firebase/firestore'
 import { 
   format, 
   addMonths, 
@@ -43,37 +41,22 @@ import {
   DialogTitle, 
   DialogTrigger
 } from '@/components/ui/dialog'
-import { ActivityForm } from '@/components/activity-hub/activity-form'
 import { ReminderForm } from '@/components/activity-hub/reminder-form'
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
 
+/**
+ * PUBLIC ACTIVITY CALENDAR VIEW
+ * A high-fidelity, read-only schedule for organizational activities.
+ * Administrative controls are moved to the Internal Portal.
+ */
 export default function ActivityCalendarView() {
   const [currentDate, setCurrentDate] = useState(new Date())
-  const [isAddOpen, setIsAddOpen] = useState(false)
   const [selectedEvent, setSelectedEvent] = useState<any>(null)
   
   const db = useFirestore()
-  const { user, loading: authLoading } = useUser()
+  const { user } = useUser()
   const { toast } = useToast()
-
-  const userDocRef = useMemoFirebase(() => {
-    if (!db || !user?.email) return null;
-    return doc(db, 'users', user.email.toLowerCase());
-  }, [db, user?.email]);
-
-  const { data: userData, loading: userDataLoading } = useDoc(userDocRef);
-
-  /**
-   * ADMINISTRATIVE GATING LOGIC
-   * Only the Root Admin or personnel with explicit Activity Hub clearance
-   * can access the scheduling and modification tools.
-   */
-  const isAdmin = !authLoading && !userDataLoading && !!user && (
-    userData?.role === 'admin' || 
-    user?.email === 'deydhritiman@gmail.com' || 
-    userData?.permissions?.activityHub === true
-  );
 
   const eventsQuery = useMemoFirebase(() => {
     if (!db) return null;
@@ -90,17 +73,6 @@ export default function ActivityCalendarView() {
     const end = endOfWeek(endOfMonth(currentDate))
     return eachDayOfInterval({ start, end })
   }, [currentDate])
-
-  const handleDelete = async (id: string) => {
-    if (!db || !isAdmin) return
-    try {
-      await deleteDoc(doc(db, 'activity_events', id))
-      toast({ title: "Event Deleted" })
-      setSelectedEvent(null)
-    } catch (e: any) {
-      toast({ variant: "destructive", title: "Error", description: e.message })
-    }
-  }
 
   const exportData = () => {
     const csvContent = "data:text/csv;charset=utf-8,Title,Date,Category,Venue,Organizer\n" + 
@@ -147,21 +119,6 @@ export default function ActivityCalendarView() {
               <Button onClick={exportData} variant="outline" className="h-10 rounded-xl bg-white/5 border-white/10 text-[10px] font-bold uppercase tracking-widest gap-2 hover:bg-white/10">
                 <FileDown className="w-4 h-4" /> Export CSV
               </Button>
-              
-              {/* STRICT ADMIN GATING: The button only renders if a verified admin is logged in */}
-              {!authLoading && !userDataLoading && isAdmin && (
-                <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
-                  <DialogTrigger asChild>
-                    <Button className="bg-accent text-primary font-bold h-10 rounded-xl px-6 hover:bg-secondary hover:text-white transition-all shadow-lg">
-                      <Plus className="w-4 h-4 mr-2" /> Schedule Activity
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-xl rounded-3xl bg-white dark:bg-slate-900 border-none shadow-2xl overflow-y-auto max-h-[90vh]">
-                    <DialogHeader><DialogTitle>Institutional Entry</DialogTitle></DialogHeader>
-                    <ActivityForm onSuccess={() => setIsAddOpen(false)} />
-                  </DialogContent>
-                </Dialog>
-              )}
            </div>
         </div>
       </header>
@@ -226,7 +183,6 @@ export default function ActivityCalendarView() {
         </div>
       </section>
 
-      {/* Event Details Dialog */}
       <Dialog open={!!selectedEvent} onOpenChange={(val) => !val && setSelectedEvent(null)}>
         <DialogContent className="max-w-xl rounded-[2.5rem] bg-white dark:bg-slate-900 border-none shadow-2xl">
           {selectedEvent && (
@@ -270,27 +226,22 @@ export default function ActivityCalendarView() {
                </div>
 
                <div className="pt-4 border-t border-slate-100 flex flex-col gap-4">
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button variant="outline" className="w-full h-12 rounded-xl font-bold gap-2">
-                        <Bell className="w-4 h-4 text-purple-500" /> Set Personal Reminder
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-sm rounded-3xl bg-white">
-                      <DialogHeader><DialogTitle>Reminder Protocol</DialogTitle></DialogHeader>
-                      <ReminderForm event={selectedEvent} onSuccess={() => {}} />
-                    </DialogContent>
-                  </Dialog>
-
-                  {/* ADMIN ONLY CONTROLS */}
-                  {isAdmin && (
-                    <div className="flex gap-2">
-                      <Button onClick={() => { setIsAddOpen(true); }} variant="outline" className="flex-1 h-12 rounded-xl font-bold">
-                        <Edit className="w-4 h-4 mr-2" /> Modify
-                      </Button>
-                      <Button onClick={() => handleDelete(selectedEvent.id)} variant="destructive" className="flex-1 h-12 rounded-xl font-bold">
-                        <Trash2 className="w-4 h-4 mr-2" /> Delete
-                      </Button>
+                  {user ? (
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button variant="outline" className="w-full h-12 rounded-xl font-bold gap-2">
+                          <Bell className="w-4 h-4 text-purple-500" /> Set Personal Reminder
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-sm rounded-3xl bg-white">
+                        <DialogHeader><DialogTitle>Reminder Protocol</DialogTitle></DialogHeader>
+                        <ReminderForm event={selectedEvent} onSuccess={() => {}} />
+                      </DialogContent>
+                    </Dialog>
+                  ) : (
+                    <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-2xl border border-blue-100 dark:border-blue-900 flex items-center gap-3">
+                       <Info className="w-4 h-4 text-blue-500" />
+                       <p className="text-[10px] font-bold text-blue-600 uppercase">Log in to set personal reminders for this event.</p>
                     </div>
                   )}
                </div>

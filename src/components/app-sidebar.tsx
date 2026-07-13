@@ -76,6 +76,7 @@ const adminLinksConfig = [
   { name: 'Meetings', href: '/internal/meetings', icon: Handshake, permission: 'meetings' },
   { name: 'Events', href: '/internal/events', icon: Calendar, permission: 'events' },
   { name: 'Gallery Archive', href: '/internal/gallery', icon: ImageIcon, permission: 'gallery' },
+  { name: 'Activity Hub', href: '/internal/activity-hub', icon: LayoutDashboard, permission: 'activityHub' },
   { name: 'Access Roles', href: '/internal/roles', icon: Settings, rootOnly: true },
   { name: 'Public Site View', href: '/internal/public-view', icon: Monitor, permission: 'publicView' },
 ]
