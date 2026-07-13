@@ -27,7 +27,8 @@ import {
   Star,
   ShieldCheck,
   Building2,
-  ChevronRight
+  ChevronRight,
+  GraduationCap
 } from 'lucide-react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -87,6 +88,8 @@ type Member = {
   policeStation?: string
   pinCode?: string
   profession?: string
+  education?: string
+  experience?: string
 }
 
 export default function MembersPage() {
@@ -108,6 +111,8 @@ export default function MembersPage() {
     designationCategory: 'General Member',
     designation: 'General Member',
     profession: '',
+    education: '',
+    experience: '',
     gender: 'male' as 'male' | 'female',
     bloodGroup: '',
     email: '',
@@ -232,6 +237,8 @@ export default function MembersPage() {
         designationCategory: 'General Member',
         designation: 'General Member', 
         profession: '',
+        education: '',
+        experience: '',
         email: '', 
         phone: '', 
         level: 'National', 
@@ -510,6 +517,17 @@ export default function MembersPage() {
                       )}
                    </div>
 
+                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                        <Label className="text-[10px] uppercase font-bold text-slate-400 flex items-center gap-2"><GraduationCap className="w-3 h-3 text-accent" /> Educational Qualifications</Label>
+                        <Input placeholder="e.g. B.A. LLB, M.Sc" value={newMember.education} onChange={e => setNewMember({...newMember, education: e.target.value})} className="h-11 rounded-xl" />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-[10px] uppercase font-bold text-slate-400 flex items-center gap-2"><Briefcase className="w-3 h-3 text-accent" /> Work Experience</Label>
+                        <Input placeholder="e.g. 5 Years in Advocacy" value={newMember.experience} onChange={e => setNewMember({...newMember, experience: e.target.value})} className="h-11 rounded-xl" />
+                      </div>
+                   </div>
+
                    <div className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-3xl space-y-4 border border-slate-100 dark:border-slate-800 shadow-inner">
                       <div className="grid grid-cols-1 gap-4">
                         <div className="space-y-2">
@@ -611,11 +629,7 @@ export default function MembersPage() {
                       )}
                    </div>
                 </div>
-                <DialogFooter>
-                  <Button onClick={handleAddMember} disabled={isAdding} className="w-full h-12 rounded-xl bg-accent text-primary font-bold text-lg shadow-xl shadow-accent/20 hover:bg-secondary hover:text-white transition-all">
-                    {isAdding ? <Loader2 className="animate-spin" /> : "Establish Official Record"}
-                  </Button>
-                </DialogFooter>
+                <DialogFooter><Button onClick={handleAddMember} disabled={isAdding} className="w-full h-12 rounded-xl bg-accent text-primary font-bold text-lg shadow-xl shadow-accent/20 hover:bg-secondary hover:text-white transition-all">Establish Official Record</Button></DialogFooter>
               </DialogContent>
             </Dialog>
           )}
