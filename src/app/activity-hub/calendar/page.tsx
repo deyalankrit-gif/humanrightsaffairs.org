@@ -69,7 +69,7 @@ export default function ActivityCalendarView() {
    * Only the Root Admin or personnel with explicit Activity Hub clearance
    * can access the scheduling and modification tools.
    */
-  const isAdmin = !authLoading && !!user && (
+  const isAdmin = !authLoading && !userDataLoading && !!user && (
     userData?.role === 'admin' || 
     user?.email === 'deydhritiman@gmail.com' || 
     userData?.permissions?.activityHub === true
@@ -148,8 +148,8 @@ export default function ActivityCalendarView() {
                 <FileDown className="w-4 h-4" /> Export CSV
               </Button>
               
-              {/* ADMIN ONLY BUTTON: Only appears when an authorized admin is logged in */}
-              {isAdmin && (
+              {/* STRICT ADMIN GATING: The button only renders if a verified admin is logged in */}
+              {!authLoading && !userDataLoading && isAdmin && (
                 <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
                   <DialogTrigger asChild>
                     <Button className="bg-accent text-primary font-bold h-10 rounded-xl px-6 hover:bg-secondary hover:text-white transition-all shadow-lg">
