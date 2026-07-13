@@ -48,8 +48,6 @@ import { ReminderForm } from '@/components/activity-hub/reminder-form'
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
 
-type ViewType = 'month' | 'week' | 'list'
-
 export default function ActivityCalendarView() {
   const [currentDate, setCurrentDate] = useState(new Date())
   const [isAddOpen, setIsAddOpen] = useState(false)
@@ -66,7 +64,11 @@ export default function ActivityCalendarView() {
 
   const { data: userData, loading: userDataLoading } = useDoc(userDocRef);
 
-  // STRICT GATING: Only show if auth is resolved AND user has admin status
+  /**
+   * ADMINISTRATIVE GATING LOGIC
+   * Only the Root Admin or personnel with explicit Activity Hub clearance
+   * can access the scheduling and modification tools.
+   */
   const isAdmin = !authLoading && !!user && (
     userData?.role === 'admin' || 
     user?.email === 'deydhritiman@gmail.com' || 
@@ -146,7 +148,7 @@ export default function ActivityCalendarView() {
                 <FileDown className="w-4 h-4" /> Export CSV
               </Button>
               
-              {/* ADMIN ONLY BUTTON */}
+              {/* ADMIN ONLY BUTTON: Only appears when an authorized admin is logged in */}
               {isAdmin && (
                 <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
                   <DialogTrigger asChild>
