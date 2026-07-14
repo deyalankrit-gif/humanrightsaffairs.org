@@ -1,7 +1,22 @@
 "use client"
 
 import React, { useState } from 'react'
-import { BookOpen, Scale, FileText, UserCheck, ShieldCheck, Download, ExternalLink, Globe, CheckCircle2, X } from 'lucide-react'
+import { 
+  BookOpen, 
+  Scale, 
+  FileText, 
+  UserCheck, 
+  ShieldCheck, 
+  Download, 
+  ExternalLink, 
+  Globe, 
+  CheckCircle2, 
+  X, 
+  Baby, 
+  Shield, 
+  MessageCircle, 
+  EyeOff 
+} from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
@@ -55,6 +70,16 @@ const guides = [
     size: "md"
   },
   {
+    id: "child-labor",
+    title: "Child Labor Laws",
+    desc: "Protections against child exploitation and forced labor.",
+    overview: "The Child Labour (Prohibition and Regulation) Act, 1986, prohibits the engagement of children in certain employments and regulates the conditions of work of children in others. It is a vital safeguard for the future of our nation.",
+    features: ["Prohibition of Child Labor", "Regulation of Adolescent Work", "Rehabilitation Provisions", "Penalties for Violations"],
+    icon: <Baby className="w-8 h-8 text-red-500" />,
+    color: "bg-red-50 dark:bg-red-950/40",
+    size: "md"
+  },
+  {
     id: "manuals",
     title: "Manuals (PDF)",
     desc: "Download legal manuals in Hindi, English & Bengali.",
@@ -63,6 +88,36 @@ const guides = [
     icon: <BookOpen className="w-8 h-8 text-sky-500" />,
     color: "bg-sky-50 dark:bg-sky-950/40",
     size: "lg"
+  },
+  {
+    id: "juvenile-justice",
+    title: "Juvenile Justice Act",
+    desc: "Care and protection for children in conflict with law.",
+    overview: "The Juvenile Justice (Care and Protection of Children) Act, 2015, provides for the comprehensive care, protection, development, treatment, and rehabilitation of children in need of care and protection and those in conflict with law.",
+    features: ["Child Welfare Committees", "Juvenile Rehabilitation", "Observation Homes", "Adoption Procedures"],
+    icon: <Shield className="w-8 h-8 text-emerald-500" />,
+    color: "bg-emerald-50 dark:bg-emerald-950/40",
+    size: "md"
+  },
+  {
+    id: "speech",
+    title: "Freedom of Speech",
+    desc: "Understanding Article 19(1)(a) and your right to express.",
+    overview: "Freedom of speech and expression is a fundamental right under Article 19 of the Constitution. It allows citizens to express their views freely, subject to reasonable restrictions in the interest of national security and public order.",
+    features: ["Right to Expression", "Press Freedom", "Internet Rights", "Reasonable Restrictions"],
+    icon: <MessageCircle className="w-8 h-8 text-blue-500" />,
+    color: "bg-blue-50 dark:bg-blue-950/40",
+    size: "md"
+  },
+  {
+    id: "privacy",
+    title: "Right to Privacy",
+    desc: "Protection of individual dignity and personal data.",
+    overview: "The Supreme Court declared the right to privacy as a fundamental right under Article 21. It protects individual autonomy and prohibits unlawful state or private interference in personal matters.",
+    features: ["Informational Privacy", "Data Protection Rights", "Bodily Autonomy", "Digital Privacy Laws"],
+    icon: <EyeOff className="w-8 h-8 text-purple-500" />,
+    color: "bg-purple-50 dark:bg-purple-950/40",
+    size: "md"
   }
 ]
 
@@ -91,8 +146,20 @@ export function KnowledgeCenter() {
       case "rti":
         url = "https://rti.dopt.gov.in/";
         break;
+      case "child-labor":
+        url = "https://labour.gov.in/childlabour/about-child-labour";
+        break;
       case "manuals":
         url = "https://bprd.nic.in/uploads/pdf/BNS%20Book_After%20Correction.pdf";
+        break;
+      case "juvenile-justice":
+        url = "https://wcd.nic.in/acts/juvenile-justice-care-and-protection-children-act-2015";
+        break;
+      case "speech":
+        url = "https://www.constitutionofindia.net/articles/article-19-protection-of-certain-rights-regarding-freedom-of-speech-etc/";
+        break;
+      case "privacy":
+        url = "https://meity.gov.in/content/personal-data-protection-bill-2019";
         break;
       default:
         return;
@@ -121,11 +188,11 @@ export function KnowledgeCenter() {
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 auto-rows-auto md:auto-rows-[250px]">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 auto-rows-auto">
           {guides.map((guide) => (
             <Card 
               key={guide.id} 
-              className={`p-6 md:p-8 border-none flex flex-col justify-between group overflow-hidden relative shadow-sm hover:shadow-xl transition-all duration-500 ${guide.color} ${guide.size === 'lg' ? 'md:col-span-2' : ''}`}
+              className={`p-6 md:p-8 border-none flex flex-col justify-between group overflow-hidden relative shadow-sm hover:shadow-xl transition-all duration-500 ${guide.color} ${guide.size === 'lg' ? 'md:col-span-2' : ''} min-h-[250px]`}
             >
               <div className="absolute -right-4 -bottom-4 opacity-5 group-hover:scale-125 transition-transform duration-700 hidden md:block">
                 {React.cloneElement(guide.icon as React.ReactElement, { className: "w-32 h-32 md:w-48 md:h-48" })}
