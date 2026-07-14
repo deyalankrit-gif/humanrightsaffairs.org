@@ -3,7 +3,7 @@
 
 import React from 'react';
 import Image from 'next/image';
-import { Mail, Phone, MapPin, Facebook, Twitter, Instagram, Youtube } from 'lucide-react';
+import { Mail, Phone, MapPin, Facebook, Twitter, Instagram, Youtube, Bell } from 'lucide-react';
 import Link from 'next/link';
 import { DonationDialog } from './donation-dialog';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
@@ -93,10 +93,11 @@ export function PublicFooter() {
                 <Link 
                   href="/activity-hub" 
                   className={cn(
-                    "text-emerald-400 font-bold hover:text-white transition-colors",
+                    "text-emerald-400 font-bold hover:text-white transition-colors flex items-center gap-2",
                     hasReminders && "animate-pulsate"
                   )}
                 >
+                  {hasReminders && <Bell className="w-4 h-4 text-red-500 fill-red-500 animate-ring" />}
                   Activity Calendar Hub
                 </Link>
               </li>

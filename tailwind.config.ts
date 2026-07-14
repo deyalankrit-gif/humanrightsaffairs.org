@@ -1,5 +1,5 @@
 
-import type {Config} from 'tailwindcss';
+import type {Config} from 'tailwind-merge';
 
 export default {
   darkMode: ['class'],
@@ -94,6 +94,11 @@ export default {
           '0%, 100%': { opacity: '1', transform: 'scale(1)' },
           '50%': { opacity: '0.8', transform: 'scale(1.03)' },
         },
+        'ring': {
+          '0%, 100%': { transform: 'rotate(0deg)' },
+          '10%, 30%, 50%, 70%, 90%': { transform: 'rotate(-15deg)' },
+          '20%, 40%, 60%, 80%': { transform: 'rotate(15deg)' },
+        },
         'flag-wave': {
           '0%': { transform: 'perspective(1200px) rotateX(0deg) rotateY(0deg) rotateZ(0deg) skewX(0deg)' },
           '20%': { transform: 'perspective(1200px) rotateX(2deg) rotateY(12deg) rotateZ(-1deg) skewX(2deg)' },
@@ -124,6 +129,7 @@ export default {
         'glow': 'glow 2s ease-in-out infinite',
         'blink': 'blink 1s step-end infinite',
         'pulsate': 'pulsate 1.5s ease-in-out infinite',
+        'ring': 'ring 2s ease-in-out infinite',
         'flag-wave': 'flag-wave 6s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite',
         'flag-ripple': 'flag-ripple 5s linear infinite',
         'flag-ripple-alt': 'flag-ripple-alt 4s linear infinite',
