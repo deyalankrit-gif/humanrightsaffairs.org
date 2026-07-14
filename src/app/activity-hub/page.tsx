@@ -1,7 +1,7 @@
 
 "use client"
 
-import React, { useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import Link from 'next/link'
 import { 
   Calendar as CalendarIcon, 
@@ -40,6 +40,11 @@ import { cn } from '@/lib/utils'
 export default function ActivityHubDashboard() {
   const db = useFirestore()
   const { user } = useUser()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
   
   const userDocRef = useMemoFirebase(() => {
     if (!db || !user?.email) return null;
@@ -176,7 +181,7 @@ export default function ActivityHubDashboard() {
                  </CardHeader>
                  <CardContent className="p-0">
                     <div className="divide-y divide-slate-50 dark:divide-slate-800">
-                      {stats.upcoming.length > 0 ? stats.upcoming.map((e: any) => {
+                      {mounted && stats.upcoming.length > 0 ? stats.upcoming.map((e: any) => {
                         const countdown = getCountdownText(e.date);
                         return (
                           <div key={e.id} className="p-6 hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors flex flex-col md:flex-row items-center justify-between gap-4">
@@ -232,7 +237,9 @@ export default function ActivityHubDashboard() {
                       }) : (
                         <div className="py-20 text-center text-slate-300">
                            <CalendarIcon className="w-12 h-12 mx-auto mb-4 opacity-20" />
-                           <p className="font-bold uppercase tracking-widest text-xs">No programs scheduled for the next 30 days.</p>
+                           <p className="font-bold uppercase tracking-widest text-xs">
+                             {mounted ? "No programs scheduled for the next 30 days." : "Synchronizing Schedule..."}
+                           </p>
                         </div>
                       )}
                     </div>
@@ -247,11 +254,11 @@ export default function ActivityHubDashboard() {
                     <CardTitle className="text-lg font-headline font-bold flex items-center gap-2">
                       <ShieldCheck className="w-5 h-5 text-emerald-500" /> Current Month Observances
                     </CardTitle>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{format(new Date(), 'MMMM yyyy')}</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{mounted ? format(new Date(), 'MMMM yyyy') : 'Loading...'}</p>
                   </CardHeader>
                   <div className="space-y-4">
                      {currentMonthObservances.map((o, idx) => {
-                       const countdown = getObservanceCountdown(o.day, o.month);
+                       const countdown = mounted ? getObservanceCountdown(o.day, o.month) : null;
                        return (
                         <div key={idx} className="flex gap-4 group">
                            <div className="w-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center shrink-0 border border-slate-100 group-hover:border-accent transition-colors">
@@ -260,7 +267,7 @@ export default function ActivityHubDashboard() {
                            <div className="flex-1">
                               <p className="text-[8px] font-black uppercase text-accent leading-none mb-1">{o.type}</p>
                               <p className="font-bold text-sm leading-tight text-slate-700 dark:text-slate-300">{o.title}</p>
-                              {countdown && (
+                              {mounted && countdown && (
                                 <div className="mt-1.5 flex items-center gap-1.5">
                                    <Hourglass className="w-2.5 h-2.5 text-accent opacity-50" />
                                    <span className={cn(
