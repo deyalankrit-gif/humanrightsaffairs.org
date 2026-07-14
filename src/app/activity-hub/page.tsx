@@ -105,6 +105,20 @@ export default function ActivityHubDashboard() {
     return null;
   }
 
+  const getObservanceCountdown = (obsDay: number, obsMonth: number) => {
+    const today = startOfDay(new Date());
+    const year = today.getFullYear();
+    const observanceDate = startOfDay(new Date(year, obsMonth - 1, obsDay));
+    
+    if (isToday(observanceDate)) return "Today";
+    if (isTomorrow(observanceDate)) return "Tomorrow";
+    
+    const diff = differenceInDays(observanceDate, today);
+    if (diff > 1) return `In ${diff} Days`;
+    if (diff < 0) return "Completed";
+    return null;
+  }
+
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
       <section className="pt-32 pb-12 bg-primary text-primary-foreground border-b-8 border-accent/20 relative overflow-hidden">
@@ -236,17 +250,31 @@ export default function ActivityHubDashboard() {
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{format(new Date(), 'MMMM yyyy')}</p>
                   </CardHeader>
                   <div className="space-y-4">
-                     {currentMonthObservances.map((o, idx) => (
-                       <div key={idx} className="flex gap-4 group">
-                          <div className="w-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center shrink-0 border border-slate-100 group-hover:border-accent transition-colors">
-                             <span className="font-bold text-sm text-primary dark:text-white">{o.day}</span>
-                          </div>
-                          <div>
-                             <p className="text-[8px] font-black uppercase text-accent leading-none mb-1">{o.type}</p>
-                             <p className="font-bold text-sm leading-tight text-slate-700 dark:text-slate-300">{o.title}</p>
-                          </div>
-                       </div>
-                     ))}
+                     {currentMonthObservances.map((o, idx) => {
+                       const countdown = getObservanceCountdown(o.day, o.month);
+                       return (
+                        <div key={idx} className="flex gap-4 group">
+                           <div className="w-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center shrink-0 border border-slate-100 group-hover:border-accent transition-colors">
+                              <span className="font-bold text-sm text-primary dark:text-white">{o.day}</span>
+                           </div>
+                           <div className="flex-1">
+                              <p className="text-[8px] font-black uppercase text-accent leading-none mb-1">{o.type}</p>
+                              <p className="font-bold text-sm leading-tight text-slate-700 dark:text-slate-300">{o.title}</p>
+                              {countdown && (
+                                <div className="mt-1.5 flex items-center gap-1.5">
+                                   <Hourglass className="w-2.5 h-2.5 text-accent opacity-50" />
+                                   <span className={cn(
+                                     "text-[9px] font-black uppercase tracking-widest",
+                                     countdown === 'Today' ? "text-emerald-500" : "text-slate-400"
+                                   )}>
+                                      {countdown}
+                                   </span>
+                                </div>
+                              )}
+                           </div>
+                        </div>
+                       );
+                     })}
                   </div>
                </Card>
 
