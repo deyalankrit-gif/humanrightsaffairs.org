@@ -107,6 +107,7 @@ export default function MembersPage() {
   const { toast } = useToast()
 
   const [newMember, setNewMember] = useState({
+    honorific: '',
     name: '',
     designationCategory: 'General Member',
     designation: 'General Member',
@@ -225,14 +226,19 @@ export default function MembersPage() {
 
     setIsAdding(true)
     try {
+      const { honorific, ...data } = newMember;
+      const finalName = honorific ? `${honorific} ${data.name}` : data.name;
+
       await addDoc(collection(db, 'memberProfiles'), {
-        ...newMember,
+        ...data,
+        name: finalName,
         createdAt: serverTimestamp(),
       })
       toast({ title: "Success", description: "New member record established." })
       setIsAdding(false)
       setIsAddingDialogOpen(false)
       setNewMember({ 
+        honorific: '',
         name: '', 
         designationCategory: 'General Member',
         designation: 'General Member', 
@@ -463,7 +469,22 @@ export default function MembersPage() {
                       <div className="md:col-span-2 space-y-4">
                         <div className="space-y-1">
                           <Label className="text-[10px] uppercase font-bold text-slate-400">Full Name <span className="text-red-500">*</span></Label>
-                          <Input placeholder="Full Legal Name" value={newMember.name} onChange={e => setNewMember({...newMember, name: e.target.value})} className="h-11 rounded-xl" />
+                          <div className="flex gap-2">
+                             <Select value={newMember.honorific} onValueChange={val => setNewMember({...newMember, honorific: val})}>
+                                <SelectTrigger className="w-24 h-11 rounded-xl bg-white dark:bg-slate-900 border-slate-200"><SelectValue placeholder="Title" /></SelectTrigger>
+                                <SelectContent position="popper" className="z-[1000001] bg-white">
+                                  <SelectItem value="Mr.">Mr.</SelectItem>
+                                  <SelectItem value="Ms.">Ms.</SelectItem>
+                                  <SelectItem value="Mrs.">Mrs.</SelectItem>
+                                  <SelectItem value="Dr.">Dr.</SelectItem>
+                                  <SelectItem value="Adv.">Adv.</SelectItem>
+                                  <SelectItem value="Prof.">Prof.</SelectItem>
+                                  <SelectItem value="Hon.">Hon.</SelectItem>
+                                  <SelectItem value="Rev.">Rev.</SelectItem>
+                                </SelectContent>
+                             </Select>
+                             <Input placeholder="Full Legal Name" value={newMember.name} onChange={e => setNewMember({...newMember, name: e.target.value})} className="h-11 rounded-xl flex-1" />
+                          </div>
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                           <div className="space-y-1">
