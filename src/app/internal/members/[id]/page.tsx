@@ -81,7 +81,7 @@ export default function MemberDetailsPage() {
     if (profile) {
       setEditForm({
         ...profile,
-        designationCategory: profile.designationCategory || (profile.designation === 'General Member' ? 'General Member' : profile.designation === 'Volunteer' ? 'Volunteer' : 'Office-bearing Member')
+        designationCategory: profile.designationCategory || (profile.designation === 'General Member' ? 'General Member' : profile.designation === 'Board Member' ? 'Board Member' : profile.designation === 'Volunteer' ? 'Volunteer' : 'Office-bearing Member')
       })
     }
   }, [profile])
@@ -275,7 +275,7 @@ export default function MemberDetailsPage() {
                      </div>
 
                      {(editForm.level === 'State' || editForm.level === 'District') && (
-                       <div className="grid md:grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-1">
+                       <div className="grid md:grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-1 duration-300">
                           <div className="space-y-1">
                              <Label className="text-[10px] uppercase font-bold text-accent">Chapter State <span className="text-red-500">*</span></Label>
                              <Select value={editForm.stateName} onValueChange={val => setEditForm({...editForm, stateName: val, districtName: ''})}>
@@ -284,7 +284,7 @@ export default function MemberDetailsPage() {
                              </Select>
                           </div>
                           {editForm.level === 'District' && editForm.stateName && (
-                             <div className="space-y-1 animate-in fade-in slide-in-from-top-1">
+                             <div className="space-y-1 animate-in fade-in slide-in-from-top-1 duration-300">
                                 <Label className="text-[10px] uppercase font-bold text-accent">Chapter District <span className="text-red-500">*</span></Label>
                                 <Select value={editForm.districtName} onValueChange={val => setEditForm({...editForm, districtName: val})}>
                                    <SelectTrigger className="h-11 rounded-xl border-accent/20"><SelectValue placeholder="Select District" /></SelectTrigger>
@@ -332,7 +332,7 @@ export default function MemberDetailsPage() {
                           <div className="space-y-2">
                             <Label className="text-[10px] uppercase font-bold text-accent">Designation Category <span className="text-red-500">*</span></Label>
                             <Select value={editForm.designationCategory} onValueChange={(val: any) => {
-                              const isFixed = val === 'General Member' || val === 'Volunteer';
+                              const isFixed = val === 'General Member' || val === 'Board Member' || val === 'Volunteer';
                               setEditForm({
                                 ...editForm, 
                                 designationCategory: val, 
@@ -342,6 +342,7 @@ export default function MemberDetailsPage() {
                               <SelectTrigger className="rounded-xl border-accent/20"><SelectValue /></SelectTrigger>
                               <SelectContent>
                                 <SelectItem value="General Member">General Member</SelectItem>
+                                <SelectItem value="Board Member">Board Member</SelectItem>
                                 <SelectItem value="Office-bearing Member">Office-bearing Member</SelectItem>
                                 <SelectItem value="Volunteer">Volunteer</SelectItem>
                               </SelectContent>

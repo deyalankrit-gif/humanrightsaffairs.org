@@ -216,7 +216,6 @@ export function MembershipRegistrationDialog({ children }: { children: React.Rea
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 pt-4">
-            {/* Profile Picture */}
             <div className="flex flex-col items-center gap-4 mb-8">
               <div className="relative w-32 h-32 rounded-full bg-slate-50 border-2 border-dashed border-slate-200 flex items-center justify-center overflow-hidden group cursor-pointer hover:border-accent transition-colors shadow-inner">
                 {photo ? (
@@ -229,12 +228,11 @@ export function MembershipRegistrationDialog({ children }: { children: React.Rea
               <Label className="text-[10px] text-slate-400 uppercase font-bold tracking-[0.2em]">Upload Profile Photo</Label>
             </div>
 
-            {/* Capacity & Term */}
             <div className="bg-accent/5 p-6 rounded-3xl border border-accent/20 mb-4 grid grid-cols-1 md:grid-cols-2 gap-6">
                <FormField control={form.control} name="memberType" render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-accent mb-2 flex items-center gap-2">
-                    <Users className="w-3 h-3" /> Preferred Capacity <span className="text-red-500">*</span>
+                    <Users className="w-3 h-3" /> Preferred Capacity
                   </FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl><SelectTrigger className="h-12 rounded-xl border-accent/30 bg-white dark:bg-slate-900 font-bold"><SelectValue /></SelectTrigger></FormControl>
@@ -252,7 +250,7 @@ export function MembershipRegistrationDialog({ children }: { children: React.Rea
               <FormField control={form.control} name="membershipDuration" render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-accent mb-2 flex items-center gap-2">
-                    <CalendarClock className="w-3 h-3" /> Term Duration <span className="text-red-500">*</span>
+                    <CalendarClock className="w-3 h-3" /> Term Duration
                   </FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl><SelectTrigger className="h-12 rounded-xl border-accent/30 bg-white dark:bg-slate-900 font-bold"><SelectValue /></SelectTrigger></FormControl>
@@ -275,12 +273,11 @@ export function MembershipRegistrationDialog({ children }: { children: React.Rea
               )}
             </div>
 
-            {/* Personal Details */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <FormField control={form.control} name="name" render={({ field }) => (
                 <FormItem className="md:col-span-2">
-                  <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Full Legal Name <span className="text-red-500">*</span></FormLabel>
-                  <FormControl><Input placeholder="Sanchita Banerjee" className="h-11 rounded-xl" {...field} /></FormControl>
+                  <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Full Legal Name</FormLabel>
+                  <FormControl><Input placeholder="Legal Identity Name" className="h-11 rounded-xl" {...field} /></FormControl>
                   <FormMessage />
                 </FormItem>
               )} />
@@ -310,7 +307,7 @@ export function MembershipRegistrationDialog({ children }: { children: React.Rea
               )} />
               <FormField control={form.control} name="phone" render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Contact Number <span className="text-red-500">*</span></FormLabel>
+                  <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Contact Number</FormLabel>
                   <FormControl><Input placeholder="+91 XXXXX XXXXX" className="h-11 rounded-xl" {...field} /></FormControl>
                   <FormMessage />
                 </FormItem>
@@ -327,7 +324,7 @@ export function MembershipRegistrationDialog({ children }: { children: React.Rea
               )} />
               <FormField control={form.control} name="gender" render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Gender <span className="text-red-500">*</span></FormLabel>
+                  <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Gender</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl><SelectTrigger className="h-11 rounded-xl"><SelectValue placeholder="Select" /></SelectTrigger></FormControl>
                     <SelectContent position="popper" className="z-[1000000] bg-white"><SelectItem value="Male">Male</SelectItem><SelectItem value="Female">Female</SelectItem></SelectContent>
@@ -337,16 +334,15 @@ export function MembershipRegistrationDialog({ children }: { children: React.Rea
               )} />
             </div>
 
-            {/* Jurisdictional Address */}
             <div className="space-y-4 pt-2 border-t border-slate-100 dark:border-slate-800">
                <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-primary dark:text-white flex items-center gap-2">
-                 <MapPin className="w-3.5 h-3.5 text-accent" /> Verified Residential Address <span className="text-red-500">*</span>
+                 <MapPin className="w-3.5 h-3.5 text-accent" /> Verified Residential Address
                </h4>
 
                <FormField control={form.control} name="address" render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Street / Village / House No <span className="text-red-500">*</span></FormLabel>
-                  <FormControl><Input placeholder="123, Azad Market Lane" className="h-11 rounded-xl" {...field} /></FormControl>
+                  <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Street / Village / House No</FormLabel>
+                  <FormControl><Input placeholder="Detailed Location" className="h-11 rounded-xl" {...field} /></FormControl>
                   <FormMessage />
                 </FormItem>
               )} />
@@ -354,33 +350,32 @@ export function MembershipRegistrationDialog({ children }: { children: React.Rea
               <div className="grid grid-cols-3 gap-4">
                 <FormField control={form.control} name="postOffice" render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Post Office <span className="text-red-500">*</span></FormLabel>
-                    <FormControl><Input placeholder="e.g. Deganga" className="h-11 rounded-xl" {...field} /></FormControl>
+                    <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Post Office</FormLabel>
+                    <FormControl><Input placeholder="PO Name" className="h-11 rounded-xl" {...field} /></FormControl>
                     <FormMessage />
                   </FormItem>
                 )} />
                 <FormField control={form.control} name="policeStation" render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Police Station <span className="text-red-500">*</span></FormLabel>
-                    <FormControl><Input placeholder="e.g. Basirhat" className="h-11 rounded-xl" {...field} /></FormControl>
+                    <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Police Station</FormLabel>
+                    <FormControl><Input placeholder="PS Name" className="h-11 rounded-xl" {...field} /></FormControl>
                     <FormMessage />
                   </FormItem>
                 )} />
                 <FormField control={form.control} name="pinCode" render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">PIN Code <span className="text-red-500">*</span></FormLabel>
-                    <FormControl><Input placeholder="700001" maxLength={6} className="h-11 rounded-xl font-mono" {...field} /></FormControl>
+                    <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">PIN Code</FormLabel>
+                    <FormControl><Input placeholder="6 digits" maxLength={6} className="h-11 rounded-xl font-mono" {...field} /></FormControl>
                     <FormMessage />
                   </FormItem>
                 )} />
               </div>
             </div>
 
-            {/* Level & Region */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField control={form.control} name="level" render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Operational Level <span className="text-red-500">*</span></FormLabel>
+                  <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Operational Level</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl><SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger></FormControl>
                     <SelectContent position="popper" className="z-[1000000] bg-white">
@@ -419,19 +414,18 @@ export function MembershipRegistrationDialog({ children }: { children: React.Rea
               )} />
             )}
 
-            {/* Credentials & Identification */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField control={form.control} name="education" render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400 flex items-center gap-2"><GraduationCap className="w-3 h-3 text-accent" /> Education</FormLabel>
-                  <FormControl><Input placeholder="B.A. LLB" className="h-11 rounded-xl" {...field} /></FormControl>
+                  <FormControl><Input placeholder="Academic Qualifications" className="h-11 rounded-xl" {...field} /></FormControl>
                   <FormMessage />
                 </FormItem>
               )} />
               <FormField control={form.control} name="experience" render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400 flex items-center gap-2"><Briefcase className="w-3 h-3 text-accent" /> Experience</FormLabel>
-                  <FormControl><Input placeholder="5 Years in Social Service" className="h-11 rounded-xl" {...field} /></FormControl>
+                  <FormControl><Input placeholder="Years in Service" className="h-11 rounded-xl" {...field} /></FormControl>
                   <FormMessage />
                 </FormItem>
               )} />
@@ -447,17 +441,16 @@ export function MembershipRegistrationDialog({ children }: { children: React.Rea
               )} />
               <FormField control={form.control} name="aadhaar" render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Aadhaar Number <span className="text-red-500">*</span></FormLabel>
+                  <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Aadhaar Number</FormLabel>
                   <FormControl><Input placeholder="12-digit number" className="h-11 rounded-xl font-mono" {...field} /></FormControl>
                   <FormMessage />
                 </FormItem>
               )} />
             </div>
 
-            {/* Affirmations */}
             <div className="space-y-4 pt-4 border-t border-slate-100 dark:border-slate-800">
                <h4 className="text-xs font-bold uppercase tracking-[0.2em] text-primary dark:text-white flex items-center gap-2 mb-4">
-                 <ShieldCheck className="w-4 h-4 text-accent" /> Legal Affirmations (Mandatory) <span className="text-red-500">*</span>
+                 <ShieldCheck className="w-4 h-4 text-accent" /> Legal Affirmations (Mandatory)
                </h4>
                
                <FormField control={form.control} name="hasNoCriminalRecord" render={({ field }) => (

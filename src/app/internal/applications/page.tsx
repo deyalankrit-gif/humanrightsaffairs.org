@@ -781,7 +781,7 @@ export default function InternalApplicationsPage() {
                 <div className="space-y-1">
                   <Label className="text-[10px] uppercase font-bold text-accent">Designation Category <span className="text-red-500">*</span></Label>
                   <Select value={newMember.designationCategory} onValueChange={(val: any) => {
-                    const isFixed = val === 'General Member' || val === 'Volunteer';
+                    const isFixed = val === 'General Member' || val === 'Board Member' || val === 'Volunteer';
                     setNewMember({
                       ...newMember, 
                       designationCategory: val, 
@@ -791,6 +791,7 @@ export default function InternalApplicationsPage() {
                     <SelectTrigger className="rounded-xl border-accent/20 bg-white dark:bg-slate-800"><SelectValue /></SelectTrigger>
                     <SelectContent position="popper" className="z-[1000001] bg-white">
                       <SelectItem value="General Member">General Member</SelectItem>
+                      <SelectItem value="Board Member">Board Member</SelectItem>
                       <SelectItem value="Office-bearing Member">Office-bearing Member</SelectItem>
                       <SelectItem value="Volunteer">Volunteer</SelectItem>
                     </SelectContent>

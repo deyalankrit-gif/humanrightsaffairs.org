@@ -515,7 +515,7 @@ export default function MembersPage() {
                       <div className="space-y-1">
                         <Label className="text-[10px] uppercase font-bold text-accent">Designation Category <span className="text-red-500">*</span></Label>
                         <Select value={newMember.designationCategory} onValueChange={(val: any) => {
-                          const isFixed = val === 'General Member' || val === 'Volunteer';
+                          const isFixed = val === 'General Member' || val === 'Board Member' || val === 'Volunteer';
                           setNewMember({
                             ...newMember, 
                             designationCategory: val, 
@@ -525,6 +525,7 @@ export default function MembersPage() {
                           <SelectTrigger className="rounded-xl border-accent/20 bg-white dark:bg-slate-800"><SelectValue /></SelectTrigger>
                           <SelectContent position="popper" className="z-[1000001] bg-white">
                             <SelectItem value="General Member">General Member</SelectItem>
+                            <SelectItem value="Board Member">Board Member</SelectItem>
                             <SelectItem value="Office-bearing Member">Office-bearing Member</SelectItem>
                             <SelectItem value="Volunteer">Volunteer</SelectItem>
                           </SelectContent>
@@ -545,7 +546,7 @@ export default function MembersPage() {
                       </div>
                       <div className="space-y-1">
                         <Label className="text-[10px] uppercase font-bold text-slate-400 flex items-center gap-2"><Briefcase className="w-3 h-3 text-accent" /> Work Experience</Label>
-                        <Input placeholder="e.g. 5 Years in Advocacy" value={newMember.experience} onChange={e => setNewMember({...newMember, experience: e.target.value})} className="h-11 rounded-xl" />
+                        <Input placeholder="e.g. 5 Years in Social Service" value={newMember.experience} onChange={e => setNewMember({...newMember, experience: e.target.value})} className="h-11 rounded-xl" />
                       </div>
                    </div>
 
@@ -657,7 +658,7 @@ export default function MembersPage() {
         </div>
       </section>
 
-      <section className="py-4 md:py-6 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-[48px] md:top-[56px] z-30 shadow-sm transition-colors" onClick={(e) => e.stopPropagation()}>
+      <section className="py-4 md:py-6 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 sticky top-[48px] md:top-[56px] z-30 shadow-sm transition-colors" onClick={(e) => e.stopPropagation()}>
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
             <div className="flex flex-wrap items-center gap-2 justify-center">
