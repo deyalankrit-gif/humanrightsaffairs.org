@@ -92,13 +92,10 @@ export function AdminFooter() {
               <li>
                 <Link 
                   href="/internal/activity-hub" 
-                  className={cn(
-                    "text-emerald-400 font-bold hover:text-white transition-colors flex items-center gap-2",
-                    hasReminders && "animate-pulsate"
-                  )}
+                  className="text-emerald-400 font-bold hover:text-white transition-colors flex items-center gap-2"
                 >
                   {hasReminders && <Bell className="w-4 h-4 text-red-500 fill-red-500 animate-ring" />}
-                  Activity Calendar Hub
+                  <span className={cn(hasReminders && "animate-pulsate")}>Activity Calendar Hub</span>
                 </Link>
               </li>
               <li>

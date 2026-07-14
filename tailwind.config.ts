@@ -96,8 +96,9 @@ export default {
         },
         'ring': {
           '0%, 100%': { transform: 'rotate(0deg)' },
-          '10%, 30%, 50%, 70%, 90%': { transform: 'rotate(-15deg)' },
-          '20%, 40%, 60%, 80%': { transform: 'rotate(15deg)' },
+          '5%, 15%, 25%': { transform: 'rotate(15deg)' },
+          '10%, 20%, 30%': { transform: 'rotate(-15deg)' },
+          '35%': { transform: 'rotate(0deg)' },
         },
         'flag-wave': {
           '0%': { transform: 'perspective(1200px) rotateX(0deg) rotateY(0deg) rotateZ(0deg) skewX(0deg)' },
