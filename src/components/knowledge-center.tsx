@@ -15,7 +15,8 @@ import {
   Baby, 
   Shield, 
   MessageCircle, 
-  EyeOff 
+  EyeOff,
+  Navigation
 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -118,6 +119,16 @@ const guides = [
     icon: <EyeOff className="w-8 h-8 text-purple-500" />,
     color: "bg-purple-50 dark:bg-purple-950/40",
     size: "md"
+  },
+  {
+    id: "traffic-law",
+    title: "Indian Traffic Law",
+    desc: "Essential rules, penalties and road safety norms.",
+    overview: "The Motor Vehicles Act governs all aspects of road transport in India. Understanding traffic signals, licensing requirements, and penalty frameworks is essential for ensuring road safety and legal compliance.",
+    features: ["Motor Vehicles Act (1988/2019)", "Traffic Rules & Violations", "Driving License Procedures", "Penalty & Fine Structures"],
+    icon: <Navigation className="w-8 h-8 text-red-600" />,
+    color: "bg-red-50 dark:bg-red-950/40",
+    size: "md"
   }
 ]
 
@@ -160,6 +171,9 @@ export function KnowledgeCenter() {
         break;
       case "privacy":
         url = "https://meity.gov.in/content/personal-data-protection-bill-2019";
+        break;
+      case "traffic-law":
+        url = "https://morth.nic.in/motor-vehicles-act-1988";
         break;
       default:
         return;
