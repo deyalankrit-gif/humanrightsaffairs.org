@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -6,6 +7,9 @@ import { Mail, Phone, MapPin, Facebook, Twitter, Instagram, Youtube } from 'luci
 import Link from 'next/link';
 import { DonationDialog } from './donation-dialog';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
+import { collection, query, where } from 'firebase/firestore';
+import { cn } from '@/lib/utils';
 
 /**
  * PublicFooter: Independent component for visitor-facing pages.
@@ -13,6 +17,16 @@ import { PlaceHolderImages } from '@/lib/placeholder-images';
  */
 export function PublicFooter() {
   const donationFooterImg = PlaceHolderImages.find(img => img.id === 'donation-footer-image');
+  const { user } = useUser();
+  const db = useFirestore();
+
+  const remindersQuery = useMemoFirebase(() => {
+    if (!db || !user) return null;
+    return query(collection(db, 'activity_reminders'), where('uid', '==', user.uid));
+  }, [db, user]);
+
+  const { data: reminders } = useCollection(remindersQuery);
+  const hasReminders = reminders && reminders.length > 0;
 
   return (
     <footer className="bg-primary text-primary-foreground pt-20 pb-10 print:hidden border-t border-white/5">
@@ -75,7 +89,17 @@ export function PublicFooter() {
               <li><Link href="/#knowledge" className="hover:text-accent transition-colors font-medium">Rights Center</Link></li>
               <li><Link href="/#membership" className="hover:text-accent transition-colors font-medium">Be A Member</Link></li>
               <li><Link href="/#helpline" className="hover:text-accent transition-colors font-medium">Emergency Contacts</Link></li>
-              <li><Link href="/activity-hub" className="text-emerald-400 font-bold hover:text-white transition-colors">Activity Calendar Hub</Link></li>
+              <li>
+                <Link 
+                  href="/activity-hub" 
+                  className={cn(
+                    "text-emerald-400 font-bold hover:text-white transition-colors",
+                    hasReminders && "animate-pulsate"
+                  )}
+                >
+                  Activity Calendar Hub
+                </Link>
+              </li>
               <li>
                 <DonationDialog>
                   <button className="hover:text-accent transition-colors font-medium text-left">Donate Now</button>
