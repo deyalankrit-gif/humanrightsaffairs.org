@@ -164,6 +164,9 @@ export default function ActivityHubDashboard() {
                                    )}>
                                      {e.priority} Priority
                                    </Badge>
+                                   <Badge variant="outline" className="text-[8px] font-bold uppercase h-4 border-slate-200 text-slate-500 dark:border-slate-800 dark:text-slate-400">
+                                     {e.status}
+                                   </Badge>
                                  </div>
                                  <h4 className="font-bold text-lg leading-tight mb-1">{e.title}</h4>
                                  
