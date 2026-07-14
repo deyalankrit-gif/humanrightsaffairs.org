@@ -117,6 +117,15 @@ export default function ActivityHubAdmin() {
     return { holidays: dayHolidays, observances: dayObservances, events: dayEvents }
   }
 
+  const getPriorityClasses = (priority: string) => {
+    switch (priority) {
+      case 'High': return "bg-red-500/10 dark:bg-red-950 text-red-600 dark:text-red-400 border-red-500/20 hover:bg-red-600 hover:text-white"
+      case 'Medium': return "bg-emerald-500/10 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 hover:bg-emerald-600 hover:text-white"
+      case 'Low': return "bg-blue-500/10 dark:bg-blue-950 text-blue-600 dark:text-blue-400 border-blue-500/20 hover:bg-blue-600 hover:text-white"
+      default: return "bg-accent/10 dark:bg-accent/20 text-accent border-accent/20 hover:bg-accent hover:text-primary"
+    }
+  }
+
   if (authLoading || (user && userDataLoading)) {
     return <div className="min-h-screen flex items-center justify-center bg-slate-950"><Loader2 className="w-10 h-10 animate-spin text-accent" /></div>
   }
@@ -205,7 +214,10 @@ export default function ActivityHubAdmin() {
                           <button 
                             key={i} 
                             onClick={() => setSelectedEvent(e)}
-                            className="w-full text-left px-1.5 py-0.5 rounded-md bg-accent/10 dark:bg-accent/20 text-accent text-[8px] font-black uppercase truncate border border-accent/20 hover:bg-accent hover:text-primary transition-all"
+                            className={cn(
+                              "w-full text-left px-1.5 py-0.5 rounded-md text-[8px] font-black uppercase truncate border transition-all mb-0.5",
+                              getPriorityClasses(e.priority)
+                            )}
                           >
                              {e.title}
                           </button>
@@ -226,6 +238,14 @@ export default function ActivityHubAdmin() {
                <DialogHeader>
                   <div className="flex items-center gap-2 mb-2">
                     <Badge className="bg-accent text-primary font-black text-[8px] uppercase tracking-widest">{selectedEvent.category}</Badge>
+                    <Badge className={cn(
+                      "font-black text-[8px] uppercase tracking-widest border-none text-white",
+                      selectedEvent.priority === 'High' ? "bg-red-600" :
+                      selectedEvent.priority === 'Medium' ? "bg-emerald-600" :
+                      "bg-blue-600"
+                    )}>
+                      {selectedEvent.priority} Priority
+                    </Badge>
                     <Badge variant="outline" className="border-slate-100 text-[8px] uppercase font-bold">{selectedEvent.status}</Badge>
                   </div>
                   <DialogTitle className="text-3xl font-headline font-bold">{selectedEvent.title}</DialogTitle>

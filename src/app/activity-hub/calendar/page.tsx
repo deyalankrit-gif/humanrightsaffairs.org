@@ -93,6 +93,15 @@ export default function ActivityCalendarView() {
     return { holidays: dayHolidays, observances: dayObservances, events: dayEvents }
   }
 
+  const getPriorityClasses = (priority: string) => {
+    switch (priority) {
+      case 'High': return "bg-red-500/10 dark:bg-red-950 text-red-600 dark:text-red-400 border-red-500/20 hover:bg-red-600 hover:text-white"
+      case 'Medium': return "bg-emerald-500/10 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 hover:bg-emerald-600 hover:text-white"
+      case 'Low': return "bg-blue-500/10 dark:bg-blue-950 text-blue-600 dark:text-blue-400 border-blue-500/20 hover:bg-blue-600 hover:text-white"
+      default: return "bg-accent/10 dark:bg-accent/20 text-accent border-accent/20 hover:bg-accent hover:text-primary"
+    }
+  }
+
   return (
     <main className="min-h-screen bg-white dark:bg-slate-950">
       <header className="pt-24 pb-6 bg-slate-900 text-white border-b-8 border-accent/20 sticky top-0 z-40 px-4">
@@ -169,7 +178,10 @@ export default function ActivityCalendarView() {
                           <button 
                             key={i} 
                             onClick={() => setSelectedEvent(e)}
-                            className="w-full text-left px-1.5 py-0.5 rounded-md bg-accent/10 dark:bg-accent/20 text-accent text-[8px] font-black uppercase truncate border border-accent/20 hover:bg-accent hover:text-primary transition-all"
+                            className={cn(
+                              "w-full text-left px-1.5 py-0.5 rounded-md text-[8px] font-black uppercase truncate border transition-all mb-0.5",
+                              getPriorityClasses(e.priority)
+                            )}
                           >
                              {e.title}
                           </button>
@@ -190,6 +202,14 @@ export default function ActivityCalendarView() {
                <DialogHeader>
                   <div className="flex items-center gap-2 mb-2">
                     <Badge className="bg-accent text-primary font-black text-[8px] uppercase tracking-widest">{selectedEvent.category}</Badge>
+                    <Badge className={cn(
+                      "font-black text-[8px] uppercase tracking-widest border-none text-white",
+                      selectedEvent.priority === 'High' ? "bg-red-600" :
+                      selectedEvent.priority === 'Medium' ? "bg-emerald-600" :
+                      "bg-blue-600"
+                    )}>
+                      {selectedEvent.priority} Priority
+                    </Badge>
                     <Badge variant="outline" className="border-slate-100 text-[8px] uppercase font-bold">{selectedEvent.status}</Badge>
                   </div>
                   <DialogTitle className="text-3xl font-headline font-bold">{selectedEvent.title}</DialogTitle>
@@ -252,3 +272,4 @@ export default function ActivityCalendarView() {
     </main>
   )
 }
+

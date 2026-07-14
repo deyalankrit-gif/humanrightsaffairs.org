@@ -145,7 +145,17 @@ export default function ActivityHubDashboard() {
                                  <span className="text-xl font-headline font-bold leading-none">{format(parseISO(e.date), 'dd')}</span>
                               </div>
                               <div>
-                                 <Badge variant="outline" className="border-accent text-accent text-[8px] font-black uppercase mb-1">{e.category}</Badge>
+                                 <div className="flex gap-2 mb-1">
+                                   <Badge variant="outline" className="border-accent text-accent text-[8px] font-black uppercase">{e.category}</Badge>
+                                   <Badge className={cn(
+                                     "text-white text-[8px] font-black uppercase border-none",
+                                     e.priority === 'High' ? "bg-red-600" :
+                                     e.priority === 'Medium' ? "bg-emerald-600" :
+                                     "bg-blue-600"
+                                   )}>
+                                     {e.priority}
+                                   </Badge>
+                                 </div>
                                  <h4 className="font-bold text-lg leading-tight">{e.title}</h4>
                                  <div className="flex items-center gap-3 text-[10px] font-bold text-slate-400 uppercase mt-1">
                                     <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {e.startTime || 'All Day'}</span>
