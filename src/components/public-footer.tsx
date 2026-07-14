@@ -1,14 +1,14 @@
 
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import Image from 'next/image';
 import { Mail, Phone, MapPin, Facebook, Twitter, Instagram, Youtube, Bell } from 'lucide-react';
 import Link from 'next/link';
 import { DonationDialog } from './donation-dialog';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, query, where } from 'firebase/firestore';
+import { collection, query, where, orderBy } from 'firebase/firestore';
 import { cn } from '@/lib/utils';
 
 /**
@@ -20,13 +20,27 @@ export function PublicFooter() {
   const { user } = useUser();
   const db = useFirestore();
 
+  // Reminders Listener
   const remindersQuery = useMemoFirebase(() => {
     if (!db || !user) return null;
     return query(collection(db, 'activity_reminders'), where('uid', '==', user.uid));
   }, [db, user]);
-
   const { data: reminders } = useCollection(remindersQuery);
-  const hasReminders = reminders && reminders.length > 0;
+
+  // Events Listener for cross-referencing (same logic as Activity Hub Dashboard)
+  const eventsQuery = useMemoFirebase(() => {
+    if (!db) return null;
+    return query(collection(db, 'activity_events'), orderBy('date', 'asc'));
+  }, [db]);
+  const { data: events } = useCollection(eventsQuery);
+
+  // Determine if there are valid active reminders
+  const hasReminders = useMemo(() => {
+    if (!reminders || reminders.length === 0) return false;
+    if (!events) return reminders.length > 0; // Fallback during events load
+    const eventIds = new Set(events.map((e: any) => e.id));
+    return reminders.some((r: any) => eventIds.has(r.eventId));
+  }, [reminders, events]);
 
   return (
     <footer className="bg-primary text-primary-foreground pt-20 pb-10 print:hidden border-t border-white/5">
@@ -94,7 +108,7 @@ export function PublicFooter() {
                   href="/activity-hub" 
                   className="text-emerald-400 font-bold hover:text-white transition-colors flex items-center gap-2"
                 >
-                  {hasReminders && <Bell className="w-4 h-4 text-red-500 fill-red-500 animate-ring" />}
+                  <Bell className={cn("w-4 h-4 text-red-500 fill-red-500", hasReminders && "animate-ring")} />
                   <span className={cn(hasReminders && "animate-pulsate")}>Activity Calendar Hub</span>
                 </Link>
               </li>
