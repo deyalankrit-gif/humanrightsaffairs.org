@@ -5,26 +5,35 @@ import React, { useMemo } from 'react'
 import Link from 'next/link'
 import { 
   Calendar as CalendarIcon, 
-  Plus, 
   ChevronRight, 
   Clock, 
   MapPin, 
   ShieldCheck, 
   AlertCircle,
   Bell,
-  Search,
-  Filter,
-  ArrowRight,
-  TrendingUp,
   LayoutDashboard,
-  Info
+  Info,
+  TrendingUp,
+  Hourglass
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { useCollection, useFirestore, useUser, useDoc, useMemoFirebase } from '@/firebase'
 import { collection, query, orderBy, where, doc } from 'firebase/firestore'
-import { format, isToday, isAfter, isBefore, addDays, startOfMonth, endOfMonth, parseISO } from 'date-fns'
+import { 
+  format, 
+  isToday, 
+  isAfter, 
+  isBefore, 
+  addDays, 
+  startOfMonth, 
+  endOfMonth, 
+  parseISO,
+  differenceInDays,
+  startOfDay,
+  isTomorrow
+} from 'date-fns'
 import { BUILT_IN_OBSERVANCES, BUILT_IN_HOLIDAYS } from '@/lib/activity-hub-data'
 import { cn } from '@/lib/utils'
 import { PublicFooter } from '@/components/public-footer'
@@ -38,7 +47,6 @@ export default function ActivityHubDashboard() {
     return doc(db, 'users', user.email.toLowerCase());
   }, [db, user?.email]);
   const { data: userData } = useDoc(userDocRef);
-  const isAdmin = userData?.role === 'admin' || user?.email === 'deydhritiman@gmail.com' || userData?.permissions?.activityHub === true;
 
   const eventsQuery = useMemoFirebase(() => {
     if (!db) return null;
@@ -80,13 +88,23 @@ export default function ActivityHubDashboard() {
     ].sort((a, b) => a.day - b.day);
   }, []);
 
-  // Defensive Filter: Ensure reminders correspond to existing events
   const validReminders = useMemo(() => {
     if (!reminders) return [];
-    if (!events) return reminders; // Still loading events
+    if (!events) return reminders;
     const eventIds = new Set(events.map((e: any) => e.id));
     return reminders.filter((r: any) => eventIds.has(r.eventId));
   }, [reminders, events]);
+
+  const getCountdownText = (dateStr: string) => {
+    const eventDate = parseISO(dateStr);
+    if (isToday(eventDate)) return "Starting Today";
+    if (isTomorrow(eventDate)) return "Tomorrow";
+    
+    const diff = differenceInDays(startOfDay(eventDate), startOfDay(new Date()));
+    if (diff > 1) return `In ${diff} Days`;
+    if (diff < 0) return "In Progress / Past";
+    return null;
+  }
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
@@ -116,13 +134,12 @@ export default function ActivityHubDashboard() {
         <div className="container mx-auto px-4">
           <div className="grid lg:grid-cols-3 gap-8">
             
-            {/* Quick Stats */}
             <div className="lg:col-span-2 space-y-8">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                  {[
-                   { label: "Today's Agenda", value: stats.today.length, icon: <Clock className="text-accent" />, detail: "Active missions" },
-                   { label: "Next 30 Days", value: stats.upcoming.length, icon: <TrendingUp className="text-emerald-500" />, detail: "Scheduled events" },
-                   { label: "Monthly Program", value: stats.month.length, icon: <CalendarIcon className="text-indigo-500" />, detail: "Institutional planning" }
+                   { label: "Today's Agenda", value: stats.today.length, icon: <Clock className="text-accent" /> },
+                   { label: "Next 30 Days", value: stats.upcoming.length, icon: <TrendingUp className="text-emerald-500" /> },
+                   { label: "Monthly Program", value: stats.month.length, icon: <CalendarIcon className="text-indigo-500" /> }
                  ].map((s, i) => (
                    <Card key={i} className="border-none shadow-sm rounded-2xl group overflow-hidden">
                      <CardContent className="p-6">
@@ -146,52 +163,60 @@ export default function ActivityHubDashboard() {
                  </CardHeader>
                  <CardContent className="p-0">
                     <div className="divide-y divide-slate-50 dark:divide-slate-800">
-                      {stats.upcoming.length > 0 ? stats.upcoming.map((e: any) => (
-                        <div key={e.id} className="p-6 hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors flex flex-col md:flex-row items-center justify-between gap-4">
-                           <div className="flex items-start gap-6">
-                              <div className="w-14 h-14 rounded-2xl bg-primary text-white flex flex-col items-center justify-center shrink-0 shadow-lg mt-1">
-                                 <span className="text-[10px] font-black uppercase">{format(parseISO(e.date), 'MMM')}</span>
-                                 <span className="text-xl font-headline font-bold leading-none">{format(parseISO(e.date), 'dd')}</span>
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                 <div className="flex flex-wrap gap-2 mb-1.5">
-                                   <Badge variant="outline" className="border-accent text-accent text-[8px] font-black uppercase h-4">{e.category}</Badge>
-                                   <Badge className={cn(
-                                     "text-white text-[8px] font-black uppercase border-none h-4",
-                                     e.priority === 'High' ? "bg-red-600" :
-                                     e.priority === 'Medium' ? "bg-emerald-600" :
-                                     "bg-blue-600"
-                                   )}>
-                                     {e.priority} Priority
-                                   </Badge>
-                                   <Badge variant="outline" className="text-[8px] font-bold uppercase h-4 border-slate-200 text-slate-500 dark:border-slate-800 dark:text-slate-400">
-                                     {e.status}
-                                   </Badge>
-                                 </div>
-                                 <h4 className="font-bold text-lg leading-tight mb-1">{e.title}</h4>
-                                 
-                                 <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[10px] font-bold text-slate-400 uppercase mb-3">
-                                    <span className="flex items-center gap-1"><Clock className="w-3 h-3 text-accent" /> {e.startTime || 'All Day'}</span>
-                                    <span className="flex items-center gap-1"><MapPin className="w-3 h-3 text-accent" /> {e.venue || 'TBD'}</span>
-                                 </div>
-
-                                 {e.description && (
-                                   <div className="flex gap-2 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800 max-w-xl">
-                                      <Info className="w-3.5 h-3.5 text-accent shrink-0 mt-0.5" />
-                                      <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed italic line-clamp-2">
-                                        "{e.description}"
-                                      </p>
+                      {stats.upcoming.length > 0 ? stats.upcoming.map((e: any) => {
+                        const countdown = getCountdownText(e.date);
+                        return (
+                          <div key={e.id} className="p-6 hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors flex flex-col md:flex-row items-center justify-between gap-4">
+                             <div className="flex items-start gap-6">
+                                <div className="w-14 h-14 rounded-2xl bg-primary text-white flex flex-col items-center justify-center shrink-0 shadow-lg mt-1">
+                                   <span className="text-[10px] font-black uppercase">{format(parseISO(e.date), 'MMM')}</span>
+                                   <span className="text-xl font-headline font-bold leading-none">{format(parseISO(e.date), 'dd')}</span>
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                   <div className="flex flex-wrap gap-2 mb-1.5">
+                                     <Badge variant="outline" className="border-accent text-accent text-[8px] font-black uppercase h-4">{e.category}</Badge>
+                                     <Badge className={cn(
+                                       "text-white text-[8px] font-black uppercase border-none h-4",
+                                       e.priority === 'High' ? "bg-red-600" :
+                                       e.priority === 'Medium' ? "bg-emerald-600" :
+                                       "bg-blue-600"
+                                     )}>
+                                       {e.priority} Priority
+                                     </Badge>
+                                     <Badge variant="outline" className="text-[8px] font-bold uppercase h-4 border-slate-200 text-slate-500 dark:border-slate-800 dark:text-slate-400">
+                                       {e.status}
+                                     </Badge>
                                    </div>
-                                 )}
-                              </div>
-                           </div>
-                           <Link href="/activity-hub/calendar" className="shrink-0">
-                             <Button variant="ghost" size="sm" className="rounded-full hover:bg-accent hover:text-white group/btn h-10 px-4">
-                               Details <ChevronRight className="w-4 h-4 ml-2 group-hover/btn:translate-x-1 transition-transform" />
-                             </Button>
-                           </Link>
-                        </div>
-                      )) : (
+                                   <h4 className="font-bold text-lg leading-tight mb-1">{e.title}</h4>
+                                   
+                                   <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[10px] font-bold text-slate-400 uppercase mb-3">
+                                      <span className="flex items-center gap-1"><Clock className="w-3 h-3 text-accent" /> {e.startTime || 'All Day'}</span>
+                                      <span className="flex items-center gap-1"><MapPin className="w-3 h-3 text-accent" /> {e.venue || 'TBD'}</span>
+                                      {countdown && (
+                                        <span className="flex items-center gap-1 text-accent font-black">
+                                          <Hourglass className="w-3 h-3 animate-pulse" /> {countdown}
+                                        </span>
+                                      )}
+                                   </div>
+
+                                   {e.description && (
+                                     <div className="flex gap-2 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800 max-w-xl">
+                                        <Info className="w-3.5 h-3.5 text-accent shrink-0 mt-0.5" />
+                                        <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed italic line-clamp-2">
+                                          "{e.description}"
+                                        </p>
+                                     </div>
+                                   )}
+                                </div>
+                             </div>
+                             <Link href="/activity-hub/calendar" className="shrink-0">
+                               <Button variant="ghost" size="sm" className="rounded-full hover:bg-accent hover:text-white group/btn h-10 px-4">
+                                 Details <ChevronRight className="w-4 h-4 ml-2 group-hover/btn:translate-x-1 transition-transform" />
+                               </Button>
+                             </Link>
+                          </div>
+                        );
+                      }) : (
                         <div className="py-20 text-center text-slate-300">
                            <CalendarIcon className="w-12 h-12 mx-auto mb-4 opacity-20" />
                            <p className="font-bold uppercase tracking-widest text-xs">No programs scheduled for the next 30 days.</p>
@@ -202,7 +227,6 @@ export default function ActivityHubDashboard() {
               </Card>
             </div>
 
-            {/* Sidebar Alerts */}
             <div className="space-y-8">
                <Card className="rounded-[2rem] border-none shadow-sm bg-white dark:bg-slate-900 p-6 overflow-hidden relative">
                   <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 rounded-full -mr-12 -mt-12"></div>
