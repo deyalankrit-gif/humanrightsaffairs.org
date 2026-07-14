@@ -16,7 +16,8 @@ import {
   Filter,
   ArrowRight,
   TrendingUp,
-  LayoutDashboard
+  LayoutDashboard,
+  Info
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -26,7 +27,7 @@ import { collection, query, orderBy, where, doc } from 'firebase/firestore'
 import { format, isToday, isAfter, isBefore, addDays, startOfMonth, endOfMonth, parseISO } from 'date-fns'
 import { BUILT_IN_OBSERVANCES, BUILT_IN_HOLIDAYS } from '@/lib/activity-hub-data'
 import { cn } from '@/lib/utils'
-import { Footer } from '@/components/footer'
+import { PublicFooter } from '@/components/public-footer'
 
 export default function ActivityHubDashboard() {
   const db = useFirestore()
@@ -147,32 +148,42 @@ export default function ActivityHubDashboard() {
                     <div className="divide-y divide-slate-50 dark:divide-slate-800">
                       {stats.upcoming.length > 0 ? stats.upcoming.map((e: any) => (
                         <div key={e.id} className="p-6 hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors flex flex-col md:flex-row items-center justify-between gap-4">
-                           <div className="flex items-center gap-6">
-                              <div className="w-14 h-14 rounded-2xl bg-primary text-white flex flex-col items-center justify-center shrink-0 shadow-lg">
+                           <div className="flex items-start gap-6">
+                              <div className="w-14 h-14 rounded-2xl bg-primary text-white flex flex-col items-center justify-center shrink-0 shadow-lg mt-1">
                                  <span className="text-[10px] font-black uppercase">{format(parseISO(e.date), 'MMM')}</span>
                                  <span className="text-xl font-headline font-bold leading-none">{format(parseISO(e.date), 'dd')}</span>
                               </div>
-                              <div>
-                                 <div className="flex gap-2 mb-1">
-                                   <Badge variant="outline" className="border-accent text-accent text-[8px] font-black uppercase">{e.category}</Badge>
+                              <div className="flex-1 min-w-0">
+                                 <div className="flex flex-wrap gap-2 mb-1.5">
+                                   <Badge variant="outline" className="border-accent text-accent text-[8px] font-black uppercase h-4">{e.category}</Badge>
                                    <Badge className={cn(
-                                     "text-white text-[8px] font-black uppercase border-none",
+                                     "text-white text-[8px] font-black uppercase border-none h-4",
                                      e.priority === 'High' ? "bg-red-600" :
                                      e.priority === 'Medium' ? "bg-emerald-600" :
                                      "bg-blue-600"
                                    )}>
-                                     {e.priority}
+                                     {e.priority} Priority
                                    </Badge>
                                  </div>
-                                 <h4 className="font-bold text-lg leading-tight">{e.title}</h4>
-                                 <div className="flex items-center gap-3 text-[10px] font-bold text-slate-400 uppercase mt-1">
-                                    <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {e.startTime || 'All Day'}</span>
-                                    <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> {e.venue || 'TBD'}</span>
+                                 <h4 className="font-bold text-lg leading-tight mb-1">{e.title}</h4>
+                                 
+                                 <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[10px] font-bold text-slate-400 uppercase mb-3">
+                                    <span className="flex items-center gap-1"><Clock className="w-3 h-3 text-accent" /> {e.startTime || 'All Day'}</span>
+                                    <span className="flex items-center gap-1"><MapPin className="w-3 h-3 text-accent" /> {e.venue || 'TBD'}</span>
                                  </div>
+
+                                 {e.description && (
+                                   <div className="flex gap-2 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800 max-w-xl">
+                                      <Info className="w-3.5 h-3.5 text-accent shrink-0 mt-0.5" />
+                                      <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed italic line-clamp-2">
+                                        "{e.description}"
+                                      </p>
+                                   </div>
+                                 )}
                               </div>
                            </div>
-                           <Link href="/activity-hub/calendar">
-                             <Button variant="ghost" size="sm" className="rounded-full hover:bg-accent hover:text-white group/btn">
+                           <Link href="/activity-hub/calendar" className="shrink-0">
+                             <Button variant="ghost" size="sm" className="rounded-full hover:bg-accent hover:text-white group/btn h-10 px-4">
                                Details <ChevronRight className="w-4 h-4 ml-2 group-hover/btn:translate-x-1 transition-transform" />
                              </Button>
                            </Link>
@@ -250,8 +261,6 @@ export default function ActivityHubDashboard() {
           </div>
         </div>
       </section>
-
-      <Footer />
     </main>
   )
 }
