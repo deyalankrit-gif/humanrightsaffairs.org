@@ -20,7 +20,9 @@ import {
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { useCollection, useFirestore, useUser, useDoc, useMemoFirebase } from '@/firebase'
-import { collection, query, orderBy, doc, deleteDoc } from 'firebase/firestore'
+import { collection, query, orderBy, doc, deleteDoc, where, getDocs } from 'firebase/firestore'
+import { errorEmitter } from '@/firebase/error-emitter'
+import { FirestorePermissionError, type SecurityRuleContext } from '@/firebase/errors'
 import { 
   format, 
   addMonths, 
@@ -100,12 +102,39 @@ export default function ActivityHubAdmin() {
 
   const handleDelete = async (id: string) => {
     if (!db || !isAdmin) return
+    
+    const eventRef = doc(db, 'activity_events', id);
+
+    // 1. Delete main event
+    deleteDoc(eventRef).catch(async (serverError) => {
+      const permissionError = new FirestorePermissionError({
+        path: eventRef.path,
+        operation: 'delete',
+      } satisfies SecurityRuleContext);
+      errorEmitter.emit('permission-error', permissionError);
+    });
+
+    // 2. Cascade delete orphaned reminders across all users
+    const remindersRef = collection(db, 'activity_reminders');
+    const q = query(remindersRef, where('eventId', '==', id));
+    
     try {
-      await deleteDoc(doc(db, 'activity_events', id))
-      toast({ title: "Record Purged" })
+      const snapshot = await getDocs(q);
+      snapshot.docs.forEach(reminderDoc => {
+        deleteDoc(reminderDoc.ref).catch(async (serverError) => {
+          const permissionError = new FirestorePermissionError({
+            path: reminderDoc.ref.path,
+            operation: 'delete',
+          } satisfies SecurityRuleContext);
+          errorEmitter.emit('permission-error', permissionError);
+        });
+      });
+
+      toast({ title: "Mission Purged", description: "Record and associated reminders removed." })
       setSelectedEvent(null)
     } catch (e: any) {
-      toast({ variant: "destructive", title: "Access Denied" })
+      console.error("Cleanup error:", e);
+      toast({ variant: "destructive", title: "Partial Purge", description: "Event deleted, but reminders might remain." })
     }
   }
 

@@ -79,6 +79,14 @@ export default function ActivityHubDashboard() {
     ].sort((a, b) => a.day - b.day);
   }, []);
 
+  // Defensive Filter: Ensure reminders correspond to existing events
+  const validReminders = useMemo(() => {
+    if (!reminders) return [];
+    if (!events) return reminders; // Still loading events
+    const eventIds = new Set(events.map((e: any) => e.id));
+    return reminders.filter((r: any) => eventIds.has(r.eventId));
+  }, [reminders, events]);
+
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
       <section className="pt-32 pb-12 bg-primary text-primary-foreground border-b-8 border-accent/20 relative overflow-hidden">
@@ -213,7 +221,7 @@ export default function ActivityHubDashboard() {
                     </CardTitle>
                   </CardHeader>
                   <div className="space-y-4">
-                     {reminders && reminders.length > 0 ? reminders.slice(0, 3).map((r: any) => (
+                     {validReminders.length > 0 ? validReminders.slice(0, 3).map((r: any) => (
                        <div key={r.id} className="p-4 bg-white/5 rounded-2xl border border-white/10 hover:bg-white/10 transition-colors">
                           <p className="text-[8px] font-black uppercase text-slate-400">Trigger: {r.daysBefore} Days Prior</p>
                           <p className="font-bold text-sm mt-1">{r.title}</p>
