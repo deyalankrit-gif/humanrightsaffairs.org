@@ -193,8 +193,8 @@ export default function ActivityHubDashboard() {
                                       <span className="flex items-center gap-1"><Clock className="w-3 h-3 text-accent" /> {e.startTime || 'All Day'}</span>
                                       <span className="flex items-center gap-1"><MapPin className="w-3 h-3 text-accent" /> {e.venue || 'TBD'}</span>
                                       {countdown && (
-                                        <span className="flex items-center gap-1 text-accent font-black">
-                                          <Hourglass className="w-3 h-3 animate-pulse" /> {countdown}
+                                        <span className="flex items-center gap-1 text-accent font-black animate-pulse">
+                                          <Hourglass className="w-3 h-3" /> {countdown}
                                         </span>
                                       )}
                                    </div>
