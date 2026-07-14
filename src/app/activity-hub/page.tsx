@@ -36,7 +36,6 @@ import {
 } from 'date-fns'
 import { BUILT_IN_OBSERVANCES, BUILT_IN_HOLIDAYS } from '@/lib/activity-hub-data'
 import { cn } from '@/lib/utils'
-import { PublicFooter } from '@/components/public-footer'
 
 export default function ActivityHubDashboard() {
   const db = useFirestore()
@@ -183,7 +182,7 @@ export default function ActivityHubDashboard() {
                                      )}>
                                        {e.priority} Priority
                                      </Badge>
-                                     <Badge variant="outline" className="text-[8px] font-bold uppercase h-4 border-slate-200 text-slate-500 dark:border-slate-800 dark:text-slate-400">
+                                     <Badge variant="outline" className="text-[8px] font-bold uppercase h-4 border-slate-200 text-slate-500 dark:border-slate-800 dark:text-slate-400 animate-flicker">
                                        {e.status}
                                      </Badge>
                                    </div>
