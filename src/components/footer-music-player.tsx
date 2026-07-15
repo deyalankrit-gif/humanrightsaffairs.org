@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Play, Pause, Volume2, VolumeX, Music, Repeat, Activity, SkipBack, SkipForward } from 'lucide-react';
+import { Play, Pause, Volume2, VolumeX, Music, Repeat, Activity, SkipBack, SkipForward, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { 
@@ -14,13 +14,13 @@ import { cn } from '@/lib/utils';
 
 /**
  * FooterMusicPlayer: A high-fidelity, feature-rich audio component for the institutional footer.
- * Enhancements: Playlist support with Prev/Next, Loop toggle, animated equalizer, and persistent session memory.
+ * Features: Playlist support, Persistent session memory, Visual equalizer, and Precise volume/seek controls.
  */
 
 const PLAYLIST = [
   { title: "Institutional Anthem", src: "/HRAT SONG.mp3" },
-  { title: "Mission Theme (Alt)", src: "/HRAT SONG.mp3" }, // Using same file as placeholder for demo
-  { title: "Advocacy Call", src: "/HRAT SONG.mp3" }        // Using same file as placeholder for demo
+  { title: "Mission Theme (Alt)", src: "/HRAT SONG.mp3" }, 
+  { title: "Advocacy Call", src: "/HRAT SONG.mp3" }
 ];
 
 interface FooterMusicPlayerProps {
@@ -47,6 +47,7 @@ export function FooterMusicPlayer({
     const audio = audioRef.current;
     if (!audio) return;
 
+    // Load saved states
     const savedTrack = localStorage.getItem('hrat_footer_music_index');
     if (savedTrack) {
       setCurrentTrackIndex(parseInt(savedTrack));
@@ -62,6 +63,13 @@ export function FooterMusicPlayer({
     if (savedLoop === 'true') {
       setIsLooping(true);
       audio.loop = true;
+    }
+
+    const savedVolume = localStorage.getItem('hrat_footer_music_vol');
+    if (savedVolume) {
+      const vol = parseFloat(savedVolume);
+      setVolume(vol);
+      audio.volume = vol;
     }
 
     const handleLoadedMetadata = () => {
@@ -83,31 +91,34 @@ export function FooterMusicPlayer({
       handleNext();
     };
 
-    const handleError = () => {
+    const handleAudioError = () => {
       setError(true);
+      setIsPlaying(false);
     };
 
     audio.addEventListener('loadedmetadata', handleLoadedMetadata);
     audio.addEventListener('timeupdate', handleTimeUpdate);
     audio.addEventListener('ended', handleEnded);
-    audio.addEventListener('error', handleError);
+    audio.addEventListener('error', handleAudioError);
 
     return () => {
       audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
       audio.removeEventListener('timeupdate', handleTimeUpdate);
       audio.removeEventListener('ended', handleEnded);
-      audio.removeEventListener('error', handleError);
+      audio.removeEventListener('error', handleAudioError);
     };
   }, [isLooping]);
 
-  // Effect to handle track changes and auto-play if it was already playing
+  // Handle track changes
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
 
     localStorage.setItem('hrat_footer_music_index', currentTrackIndex.toString());
     
+    // If it was playing, play the new track automatically
     if (isPlaying) {
+      audio.load();
       audio.play().catch(() => setError(true));
     }
   }, [currentTrackIndex]);
@@ -129,12 +140,18 @@ export function FooterMusicPlayer({
     const nextIndex = (currentTrackIndex + 1) % PLAYLIST.length;
     setCurrentTrackIndex(nextIndex);
     localStorage.setItem('hrat_footer_music_pos', '0');
+    if (audioRef.current) {
+        audioRef.current.currentTime = 0;
+    }
   };
 
   const handlePrevious = () => {
     const prevIndex = (currentTrackIndex - 1 + PLAYLIST.length) % PLAYLIST.length;
     setCurrentTrackIndex(prevIndex);
     localStorage.setItem('hrat_footer_music_pos', '0');
+    if (audioRef.current) {
+        audioRef.current.currentTime = 0;
+    }
   };
 
   const toggleLoop = () => {
@@ -161,6 +178,7 @@ export function FooterMusicPlayer({
       audioRef.current.muted = newVol === 0;
     }
     setIsMuted(newVol === 0);
+    localStorage.setItem('hrat_footer_music_vol', newVol.toString());
   };
 
   const toggleMute = () => {
@@ -171,8 +189,10 @@ export function FooterMusicPlayer({
       if (nextMuted) {
         setVolume(0);
       } else {
-        setVolume(0.5);
-        audioRef.current.volume = 0.5;
+        const savedVol = localStorage.getItem('hrat_footer_music_vol');
+        const restoredVol = savedVol ? parseFloat(savedVol) : 0.5;
+        setVolume(restoredVol);
+        audioRef.current.volume = restoredVol;
       }
     }
   };
@@ -192,11 +212,11 @@ export function FooterMusicPlayer({
         preload="metadata" 
       />
       
-      <div className="relative p-5 bg-white/5 backdrop-blur-2xl rounded-[2.5rem] border border-white/10 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] space-y-4 group transition-all hover:border-accent/30 hover:bg-white/10">
+      <div className="relative p-5 bg-white/5 backdrop-blur-3xl rounded-[2.5rem] border border-white/10 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] space-y-4 group transition-all hover:border-accent/30 hover:bg-white/10">
         
         {/* Playback Control Bar */}
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1 shrink-0">
             <Button 
               variant="ghost" 
               size="icon" 
@@ -317,10 +337,19 @@ export function FooterMusicPlayer({
               <div className="h-4 w-px bg-white/10 mx-1"></div>
 
               <div className="flex items-center gap-1.5 px-3 py-1 bg-black/40 rounded-full border border-white/5">
-                 <Activity className={cn("w-3 h-3 transition-colors", isPlaying ? "text-emerald-500" : "text-slate-600")} />
-                 <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest">
-                   {isPlaying ? "Live" : "Idle"}
-                 </span>
+                 {error ? (
+                   <>
+                     <AlertCircle className="w-3 h-3 text-red-500" />
+                     <span className="text-[8px] font-black text-red-400 uppercase tracking-widest">Error</span>
+                   </>
+                 ) : (
+                   <>
+                     <Activity className={cn("w-3 h-3 transition-colors", isPlaying ? "text-emerald-500" : "text-slate-600")} />
+                     <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest">
+                       {isPlaying ? "Live" : "Idle"}
+                     </span>
+                   </>
+                 )}
               </div>
            </div>
         </div>
