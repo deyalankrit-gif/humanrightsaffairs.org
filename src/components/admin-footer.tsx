@@ -117,8 +117,8 @@ export function AdminFooter() {
                 </DonationDialog>
               </li>
               <li><Link href="/donors" className="hover:text-accent transition-colors font-medium">Thank You to Our Donors</Link></li>
-              <li><Link href="/internal/login" className="text-[#CEFF00] font-bold text-lg hover:text-white transition-colors block">Link for Office Use Only</Link></li>
               <li><Link href="/trust-credentials" className="hover:text-accent transition-colors font-medium">Credentials of the Trust</Link></li>
+              <li><Link href="/internal/login" className="text-[#CEFF00] font-bold text-lg hover:text-white transition-colors block">Link for Office Use Only</Link></li>
               <li>
                 <Link href="/trust-responsibilities" className="text-[#CEFF00] hover:text-primary-foreground transition-colors font-medium leading-tight inline-block">
                   Duties and Responsibilities of Trust Staff, Volunteers, and Leaders
