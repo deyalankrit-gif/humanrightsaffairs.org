@@ -13,7 +13,8 @@ import {
   SkipForward, 
   AlertCircle,
   ListMusic,
-  Check
+  Check,
+  Radio
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
@@ -32,8 +33,8 @@ import {
 import { cn } from '@/lib/utils';
 
 /**
- * HRAT Audio Station: A premium audio component for the institutional footer.
- * Enhanced with elongated layout and refined volume control mechanism.
+ * HRAT Audio Station: A premium, highly-organized audio component for the institutional footer.
+ * Features structured control zones and refined visual hierarchy.
  */
 
 const PLAYLIST = [
@@ -61,16 +62,12 @@ export function FooterMusicPlayer({
   
   const audioRef = useRef<HTMLAudioElement>(null);
 
-  // Initialize and load saved position/loop/track preference from session memory
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
 
-    // Load saved states
     const savedTrack = localStorage.getItem('hrat_footer_music_index');
-    if (savedTrack) {
-      setCurrentTrackIndex(parseInt(savedTrack));
-    }
+    if (savedTrack) setCurrentTrackIndex(parseInt(savedTrack));
 
     const savedTime = localStorage.getItem('hrat_footer_music_pos');
     if (savedTime) {
@@ -99,7 +96,6 @@ export function FooterMusicPlayer({
 
     const handleTimeUpdate = () => {
       setCurrentTime(audio.currentTime);
-      // Persist state periodically
       if (Math.floor(audio.currentTime) % 2 === 0) {
         localStorage.setItem('hrat_footer_music_pos', audio.currentTime.toString());
       }
@@ -128,14 +124,10 @@ export function FooterMusicPlayer({
     };
   }, [isLooping]);
 
-  // Handle track changes
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
-
     localStorage.setItem('hrat_footer_music_index', currentTrackIndex.toString());
-    
-    // If it was playing, play the new track automatically
     if (isPlaying) {
       audio.load();
       audio.play().catch(() => setError(true));
@@ -144,26 +136,13 @@ export function FooterMusicPlayer({
 
   const togglePlay = () => {
     if (!audioRef.current) return;
-
-    if (isPlaying) {
-      audioRef.current.pause();
-    } else {
-      audioRef.current.play().catch(() => {
-        setError(true);
-      });
-    }
+    if (isPlaying) audioRef.current.pause();
+    else audioRef.current.play().catch(() => setError(true));
     setIsPlaying(!isPlaying);
   };
 
-  const handleNext = () => {
-    const nextIndex = (currentTrackIndex + 1) % PLAYLIST.length;
-    selectTrack(nextIndex);
-  };
-
-  const handlePrevious = () => {
-    const prevIndex = (currentTrackIndex - 1 + PLAYLIST.length) % PLAYLIST.length;
-    selectTrack(prevIndex);
-  };
+  const handleNext = () => selectTrack((currentTrackIndex + 1) % PLAYLIST.length);
+  const handlePrevious = () => selectTrack((currentTrackIndex - 1 + PLAYLIST.length) % PLAYLIST.length);
 
   const selectTrack = (index: number) => {
     setCurrentTrackIndex(index);
@@ -206,9 +185,8 @@ export function FooterMusicPlayer({
       const nextMuted = !isMuted;
       audioRef.current.muted = nextMuted;
       setIsMuted(nextMuted);
-      if (nextMuted) {
-        setVolume(0);
-      } else {
+      if (nextMuted) setVolume(0);
+      else {
         const savedVol = localStorage.getItem('hrat_footer_music_vol');
         const restoredVol = savedVol ? parseFloat(savedVol) : 0.5;
         setVolume(restoredVol);
@@ -225,193 +203,137 @@ export function FooterMusicPlayer({
   };
 
   return (
-    <div className={cn("mt-8 w-full max-w-[380px] animate-in fade-in slide-in-from-bottom-4 duration-1000", className)}>
-      <audio 
-        ref={audioRef} 
-        src={PLAYLIST[currentTrackIndex].src} 
-        preload="metadata" 
-      />
+    <div className={cn("mt-10 w-full max-w-[380px] group/player", className)}>
+      <audio ref={audioRef} src={PLAYLIST[currentTrackIndex].src} preload="metadata" />
       
-      <div className="relative p-6 bg-white/5 backdrop-blur-3xl rounded-[2.5rem] border border-white/10 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] space-y-5 group transition-all hover:border-orange-500/30 hover:bg-white/10">
+      <div className="relative p-5 bg-black/40 backdrop-blur-3xl rounded-[2.5rem] border border-white/10 shadow-[0_30px_60px_-12px_rgba(0,0,0,0.6)] space-y-4 transition-all duration-500 hover:border-orange-500/40 hover:shadow-orange-500/10">
         
-        {/* Playback Control Bar */}
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-1.5 shrink-0">
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={handlePrevious}
-              disabled={error}
-              className="h-9 w-9 rounded-full text-slate-400 hover:text-orange-500 transition-colors"
-            >
-              <SkipBack className="w-5 h-5 fill-current" />
+        {/* Upper Zone: Information & Visualizer */}
+        <div className="flex items-center justify-between gap-4 px-2">
+          <div className="flex flex-col min-w-0">
+            <div className="flex items-center gap-2 mb-1">
+              <Radio className={cn("w-3 h-3 text-orange-500", isPlaying && "animate-pulse")} />
+              <span className="text-[9px] font-black uppercase tracking-[0.3em] text-orange-500/70">Mission Broadcast</span>
+            </div>
+            <h4 className="text-[12px] font-black uppercase tracking-wider text-orange-500 truncate">
+              {error ? "Broadcast Offline" : PLAYLIST[currentTrackIndex].title}
+            </h4>
+          </div>
+
+          <div className="flex items-end gap-0.5 h-6 shrink-0 bg-black/30 px-3 rounded-full border border-white/5 items-center">
+            {[1, 2, 3, 4, 5].map(i => (
+              <div 
+                key={i} 
+                className={cn(
+                  "w-0.5 bg-orange-500 rounded-full transition-all duration-300", 
+                  isPlaying ? "animate-bounce" : "h-1 opacity-30"
+                )} 
+                style={{ 
+                  animationDuration: `${0.4 + i * 0.1}s`,
+                  height: isPlaying ? '70%' : '20%' 
+                }}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Middle Zone: Progress & Time */}
+        <div className="space-y-2 px-1">
+          <Slider 
+            value={[currentTime]} 
+            max={duration || 100} 
+            step={0.1}
+            onValueChange={handleSeek}
+            disabled={error || !isLoaded}
+            className="cursor-pointer"
+          />
+          <div className="flex justify-between items-center text-[9px] font-bold font-mono text-orange-500/60 tracking-widest px-1">
+            <span>{formatTime(currentTime)}</span>
+            <span>{formatTime(duration)}</span>
+          </div>
+        </div>
+
+        {/* Lower Zone: Primary Command Bar */}
+        <div className="flex items-center justify-between gap-3 pt-2">
+          {/* Main Controls Group */}
+          <div className="flex items-center gap-1 bg-white/5 p-1 rounded-full border border-white/5">
+            <Button variant="ghost" size="icon" onClick={handlePrevious} disabled={error} className="h-8 w-8 rounded-full text-slate-400 hover:text-orange-500 transition-colors">
+              <SkipBack className="w-4 h-4 fill-current" />
             </Button>
 
             <Button 
-              variant="ghost" 
-              size="icon" 
               onClick={togglePlay}
               disabled={error}
               className={cn(
-                "h-14 w-14 rounded-full shrink-0 shadow-2xl transition-all border border-white/10 relative overflow-hidden group/play",
-                isPlaying ? "bg-orange-500 text-primary scale-110 shadow-orange-500/20" : "bg-white/5 text-white hover:bg-orange-500 hover:text-primary"
+                "h-12 w-12 rounded-full shrink-0 shadow-2xl transition-all border border-white/10 relative overflow-hidden group/play",
+                isPlaying ? "bg-orange-500 text-primary scale-105 shadow-orange-500/30" : "bg-white/10 text-white hover:bg-orange-500 hover:text-primary"
               )}
             >
-              {isPlaying && (
-                <span className="absolute inset-0 bg-white/20 animate-ping rounded-full pointer-events-none"></span>
-              )}
-              {isPlaying ? <Pause className="w-7 h-7 fill-current relative z-10" /> : <Play className="w-7 h-7 fill-current ml-1 relative z-10" />}
+              {isPlaying && <span className="absolute inset-0 bg-white/20 animate-ping rounded-full"></span>}
+              {isPlaying ? <Pause className="w-6 h-6 fill-current relative z-10" /> : <Play className="w-6 h-6 fill-current ml-1 relative z-10" />}
             </Button>
 
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={handleNext}
-              disabled={error}
-              className="h-9 w-9 rounded-full text-slate-400 hover:text-orange-500 transition-colors"
-            >
-              <SkipForward className="w-5 h-5 fill-current" />
+            <Button variant="ghost" size="icon" onClick={handleNext} disabled={error} className="h-8 w-8 rounded-full text-slate-400 hover:text-orange-500 transition-colors">
+              <SkipForward className="w-4 h-4 fill-current" />
             </Button>
           </div>
 
-          <div className="flex-1 min-w-0 space-y-2.5">
-            <div className="flex justify-between items-center">
-               <div className="flex items-center gap-2 overflow-hidden">
-                 <div className="flex gap-0.5 items-end h-4 w-5 shrink-0">
-                    {[1, 2, 3, 4, 5].map(i => (
-                      <div 
-                        key={i} 
-                        className={cn(
-                          "w-0.5 bg-orange-500 rounded-full transition-all duration-300", 
-                          isPlaying ? "animate-bounce" : "h-1"
-                        )} 
-                        style={{ 
-                          animationDuration: `${0.4 + i * 0.1}s`,
-                          height: isPlaying ? '100%' : '20%' 
-                        }}
-                      />
-                    ))}
-                 </div>
-                 <span className="text-[11px] font-black uppercase tracking-[0.2em] text-orange-500 truncate transition-colors">
-                   {error ? "File Unavailable" : PLAYLIST[currentTrackIndex].title}
-                 </span>
-               </div>
-               <span className="text-[10px] font-mono text-orange-500 bg-black/30 px-2.5 py-1 rounded-md border border-white/5">
-                 {formatTime(currentTime)}
-               </span>
+          {/* Volume Command Pod */}
+          <div className="flex-1 flex items-center gap-2 bg-black/40 p-1.5 rounded-full border border-white/5 transition-all hover:bg-black/60 group/vol">
+            <Button variant="ghost" size="icon" onClick={toggleMute} className="h-7 w-7 text-orange-500 hover:text-white transition-colors shrink-0">
+              {isMuted || volume === 0 ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
+            </Button>
+            <div className="flex-1 h-1.5">
+              <Slider value={[volume]} max={1} step={0.01} onValueChange={handleVolumeChange} className="cursor-pointer" />
             </div>
-            
-            <Slider 
-              value={[currentTime]} 
-              max={duration || 100} 
-              step={0.1}
-              onValueChange={handleSeek}
-              disabled={error || !isLoaded}
-              className="cursor-pointer"
-            />
+            <span className="text-[8px] font-black text-orange-500/80 w-7 text-center tabular-nums mr-1">
+              {Math.round(volume * 100)}%
+            </span>
           </div>
-        </div>
 
-        {/* Action Controls */}
-        <div className="flex items-center justify-between gap-6 pt-3 border-t border-white/5">
-           {/* Enhanced Volume Control Mechanism */}
-           <div className="flex items-center gap-3 flex-1 min-w-0 bg-black/20 p-2 rounded-2xl border border-white/5 group/vol transition-all hover:bg-black/40">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={toggleMute}
-                className="h-8 w-8 text-orange-500 hover:text-white transition-colors shrink-0"
-              >
-                {isMuted || volume === 0 ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-              </Button>
-              <div className="flex-1 flex flex-col gap-1">
-                 <Slider 
-                    value={[volume]} 
-                    max={1} 
-                    step={0.01} 
-                    onValueChange={handleVolumeChange}
-                    className="cursor-pointer"
-                 />
-              </div>
-              <span className="text-[9px] font-black text-orange-500 w-8 text-right tabular-nums">
-                {Math.round(volume * 100)}%
-              </span>
-           </div>
-           
-           <div className="flex items-center gap-2.5 shrink-0">
-              {/* Track Selector Dropdown */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button 
-                    variant="ghost" 
-                    size="icon"
-                    className="h-9 w-9 rounded-xl text-orange-500 hover:text-white hover:bg-white/10 transition-all border border-transparent hover:border-white/10"
-                  >
-                    <ListMusic className="w-4.5 h-4.5" />
+          {/* Utility Toggles */}
+          <div className="flex items-center gap-1 bg-white/5 p-1 rounded-full border border-white/5">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-orange-500 hover:text-white hover:bg-white/10">
+                  <ListMusic className="w-4 h-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56 bg-slate-900/98 backdrop-blur-3xl border-white/10 text-white rounded-[1.5rem] shadow-2xl p-2 z-[999999]">
+                 <p className="px-3 py-2 text-[8px] font-black uppercase tracking-widest text-slate-500 border-b border-white/5 mb-1">Select Track</p>
+                 {PLAYLIST.map((track, idx) => (
+                   <DropdownMenuItem key={idx} onClick={() => selectTrack(idx)} className={cn("rounded-xl focus:bg-orange-500 focus:text-white cursor-pointer transition-all flex items-center justify-between", currentTrackIndex === idx ? "bg-orange-500/20 text-orange-500 font-bold" : "text-slate-300")}>
+                     <span className="text-[10px] uppercase tracking-wide truncate">{track.title}</span>
+                     {currentTrackIndex === idx && <Check className="w-3 h-3" />}
+                   </DropdownMenuItem>
+                 ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <TooltipProvider>
+              <Tooltip delayDuration={300}>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="icon" onClick={toggleLoop} className={cn("h-8 w-8 rounded-full transition-all", isLooping ? "bg-orange-500/20 text-orange-500 border border-orange-500/30 shadow-[0_0_10px_rgba(249,115,22,0.2)]" : "text-orange-500 hover:text-white")}>
+                    <Repeat className={cn("w-4 h-4", isLooping && "animate-spin-slow")} />
                   </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56 bg-slate-900/95 backdrop-blur-xl border-white/10 text-white rounded-2xl shadow-2xl p-2 z-[999999]">
-                   <p className="px-3 py-2 text-[8px] font-black uppercase tracking-widest text-slate-500 border-b border-white/5 mb-1">Select Track</p>
-                   {PLAYLIST.map((track, idx) => (
-                     <DropdownMenuItem 
-                       key={idx}
-                       onClick={() => selectTrack(idx)}
-                       className={cn(
-                         "rounded-xl focus:bg-orange-500 focus:text-white cursor-pointer transition-all flex items-center justify-between",
-                         currentTrackIndex === idx ? "bg-orange-500/20 text-orange-500 font-bold" : "text-slate-300"
-                       )}
-                     >
-                       <span className="text-[10px] uppercase tracking-wide truncate">{track.title}</span>
-                       {currentTrackIndex === idx && <Check className="w-3 h-3" />}
-                     </DropdownMenuItem>
-                   ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      onClick={toggleLoop}
-                      className={cn(
-                        "h-9 w-9 rounded-xl transition-all border border-transparent hover:border-white/10",
-                        isLooping ? "bg-orange-500/20 text-orange-500 border-orange-500/30" : "text-orange-500 hover:text-white"
-                      )}
-                    >
-                      <Repeat className={cn("w-4.5 h-4.5", isLooping && "animate-spin-slow")} />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent side="top" className="bg-primary text-white border-none text-[10px] font-bold uppercase">
-                    {isLooping ? "Disable Loop" : "Enable Loop"}
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-
-              <div className="h-4 w-px bg-white/10 mx-1"></div>
-
-              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-black/40 rounded-full border border-white/5">
-                 {error ? (
-                   <>
-                     <AlertCircle className="w-3 h-3 text-red-500" />
-                     <span className="text-[8px] font-black text-red-400 uppercase tracking-widest">Error</span>
-                   </>
-                 ) : (
-                   <>
-                     <Activity className={cn("w-3 h-3 transition-colors", isPlaying ? "text-emerald-500" : "text-orange-500")} />
-                     <span className="text-[8px] font-black text-orange-500 uppercase tracking-widest">
-                       {isPlaying ? "Live" : "Idle"}
-                     </span>
-                   </>
-                 )}
-              </div>
-           </div>
+                </TooltipTrigger>
+                <TooltipContent side="top" className="bg-primary text-white border-none text-[9px] font-black uppercase tracking-widest">
+                  {isLooping ? "Loop Active" : "No Loop"}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
         </div>
       </div>
-      <p className="mt-4 text-[10px] font-black text-orange-500 uppercase tracking-[0.4em] text-center opacity-80 group-hover:opacity-100 transition-opacity">
-        HRAT Audio Station
-      </p>
+      
+      {/* Station ID Tag */}
+      <div className="mt-4 flex items-center justify-center gap-3 opacity-60 group-hover/player:opacity-100 transition-opacity">
+        <div className="h-px w-6 bg-orange-500/30"></div>
+        <p className="text-[10px] font-black text-orange-500 uppercase tracking-[0.4em] text-center">
+          HRAT Audio Station
+        </p>
+        <div className="h-px w-6 bg-orange-500/30"></div>
+      </div>
     </div>
   );
 }
