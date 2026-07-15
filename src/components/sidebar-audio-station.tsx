@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
@@ -83,12 +82,19 @@ export function SidebarAudioStation() {
       }
     };
 
+    const handlePlayState = () => setIsPlaying(true);
+    const handlePauseState = () => setIsPlaying(false);
+
+    audio.addEventListener('play', handlePlayState);
+    audio.addEventListener('pause', handlePauseState);
     audio.addEventListener('loadedmetadata', handleLoadedMetadata);
     audio.addEventListener('timeupdate', handleTimeUpdate);
     audio.addEventListener('ended', handleNext);
     audio.addEventListener('error', () => setError(true));
 
     return () => {
+      audio.removeEventListener('play', handlePlayState);
+      audio.removeEventListener('pause', handlePauseState);
       audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
       audio.removeEventListener('timeupdate', handleTimeUpdate);
       audio.removeEventListener('ended', handleNext);
@@ -107,9 +113,11 @@ export function SidebarAudioStation() {
 
   const togglePlay = () => {
     if (!audioRef.current) return;
-    if (isPlaying) audioRef.current.pause();
-    else audioRef.current.play().catch(() => setError(true));
-    setIsPlaying(!isPlaying);
+    if (isPlaying) {
+      audioRef.current.pause();
+    } else {
+      audioRef.current.play().catch(() => setError(true));
+    }
   };
 
   const handleNext = () => selectTrack((currentTrackIndex + 1) % PLAYLIST.length);
@@ -180,7 +188,7 @@ export function SidebarAudioStation() {
             onClick={togglePlay}
             className="h-9 w-9 rounded-full bg-orange-500 text-primary shadow-lg hover:scale-105 transition-all border-none"
           >
-            {isPlaying ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current ml-0.5" />}
+            {isPlaying ? <Play className="w-5 h-5 fill-current ml-0.5" /> : <Pause className="w-5 h-5 fill-current" />}
           </Button>
 
           <Button variant="ghost" size="icon" onClick={handleNext} className="h-7 w-7 text-orange-500/40 hover:text-orange-500">

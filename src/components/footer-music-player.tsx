@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
@@ -91,12 +90,19 @@ export function FooterMusicPlayer({ className }: { className?: string }) {
       if (!isLooping) handleNext();
     };
 
+    const handlePlayState = () => setIsPlaying(true);
+    const handlePauseState = () => setIsPlaying(false);
+
+    audio.addEventListener('play', handlePlayState);
+    audio.addEventListener('pause', handlePauseState);
     audio.addEventListener('loadedmetadata', handleLoadedMetadata);
     audio.addEventListener('timeupdate', handleTimeUpdate);
     audio.addEventListener('ended', handleEnded);
     audio.addEventListener('error', () => setError(true));
 
     return () => {
+      audio.removeEventListener('play', handlePlayState);
+      audio.removeEventListener('pause', handlePauseState);
       audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
       audio.removeEventListener('timeupdate', handleTimeUpdate);
       audio.removeEventListener('ended', handleEnded);
@@ -115,9 +121,11 @@ export function FooterMusicPlayer({ className }: { className?: string }) {
 
   const togglePlay = () => {
     if (!audioRef.current) return;
-    if (isPlaying) audioRef.current.pause();
-    else audioRef.current.play().catch(() => setError(true));
-    setIsPlaying(!isPlaying);
+    if (isPlaying) {
+      audioRef.current.pause();
+    } else {
+      audioRef.current.play().catch(() => setError(true));
+    }
   };
 
   const handleNext = () => selectTrack((currentTrackIndex + 1) % PLAYLIST.length);
@@ -210,7 +218,7 @@ export function FooterMusicPlayer({ className }: { className?: string }) {
             disabled={error}
             className="h-14 w-14 rounded-full bg-orange-500 text-primary shadow-xl shadow-orange-500/20 hover:scale-105 hover:bg-orange-400 transition-all border-none relative overflow-hidden"
           >
-            {isPlaying ? <Pause className="w-7 h-7 fill-current" /> : <Play className="w-7 h-7 fill-current ml-1" />}
+            {isPlaying ? <Play className="w-7 h-7 fill-current ml-1" /> : <Pause className="w-7 h-7 fill-current" />}
           </Button>
 
           <Button variant="ghost" size="icon" onClick={handleNext} className="h-10 w-10 text-orange-500/40 hover:text-orange-500 transition-colors">
