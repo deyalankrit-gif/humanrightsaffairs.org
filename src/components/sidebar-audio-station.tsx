@@ -64,22 +64,30 @@ export function SidebarAudioStation() {
   return (
     <div className="px-3 py-4 space-y-6 animate-in fade-in duration-500">
       {/* File Selection Facility */}
-      <div className="bg-slate-900/50 rounded-2xl p-4 border border-white/5 space-y-4 shadow-xl">
+      <div className="bg-slate-900/80 rounded-2xl p-5 border border-orange-500/20 space-y-4 shadow-[0_0_30px_rgba(249,115,22,0.05)]">
         <div className="space-y-1.5">
-          <p className="text-[10px] font-black text-orange-500 uppercase tracking-[0.2em]">Broadast Controller</p>
-          <p className="text-[9px] text-slate-500 font-medium leading-relaxed italic">
-            Select local MP3 files to insert into the organizational broadcast stream.
+          <p className="text-[10px] font-black text-orange-500 uppercase tracking-[0.25em] drop-shadow-sm">Broadcast Node</p>
+          <p className="text-[9px] text-slate-400 font-bold leading-relaxed italic opacity-80">
+            Select local MP3 assets for institutional queue.
           </p>
         </div>
 
         <div className="space-y-3">
           <div className="relative group/input">
             <div className={cn(
-              "flex flex-col items-center justify-center p-4 rounded-xl border-2 border-dashed transition-all cursor-pointer",
-              selectedFile ? "border-orange-500/50 bg-orange-500/5" : "border-white/10 hover:border-white/20 bg-black/20"
+              "flex flex-col items-center justify-center p-6 rounded-2xl border-2 border-dashed transition-all duration-300 cursor-pointer overflow-hidden",
+              selectedFile 
+                ? "border-orange-500 bg-orange-500/10 shadow-[0_0_15px_rgba(249,115,22,0.2)]" 
+                : "border-orange-500/40 hover:border-orange-500 bg-black/40 hover:bg-black/60"
             )}>
-              <UploadCloud className={cn("w-6 h-6 mb-2 transition-transform duration-300", selectedFile ? "text-orange-500 scale-110" : "text-slate-500")} />
-              <p className="text-[10px] font-bold text-center text-slate-400 line-clamp-1">
+              <UploadCloud className={cn(
+                "w-8 h-8 mb-3 transition-all duration-500", 
+                selectedFile ? "text-orange-500 scale-110 drop-shadow-[0_0_10px_rgba(249,115,22,0.8)]" : "text-orange-500 animate-pulse"
+              )} />
+              <p className={cn(
+                "text-[11px] font-black text-center uppercase tracking-widest leading-tight transition-colors",
+                selectedFile ? "text-orange-400" : "text-white"
+              )}>
                 {selectedFile ? selectedFile.name : "Select MP3 File"}
               </p>
               <Input 
@@ -94,9 +102,9 @@ export function SidebarAudioStation() {
           <Button 
             onClick={handleInsert}
             disabled={!selectedFile}
-            className="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold h-10 rounded-xl shadow-xl shadow-orange-900/20 gap-2 transition-all active:scale-95"
+            className="w-full bg-orange-600 hover:bg-orange-500 text-primary font-black h-12 rounded-xl shadow-xl shadow-orange-900/20 gap-2 transition-all active:scale-95 text-xs uppercase tracking-widest border-none"
           >
-            <Plus className="w-4 h-4" /> Insert File
+            <Plus className="w-5 h-5" /> Insert Asset
           </Button>
         </div>
       </div>
@@ -104,41 +112,41 @@ export function SidebarAudioStation() {
       {/* Inserted Files Log */}
       <div className="space-y-3">
         <div className="flex items-center justify-between px-1">
-          <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Active Queue</p>
-          <BadgeCheck className="w-3.5 h-3.5 text-emerald-500" />
+          <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Deployment Queue</p>
+          <BadgeCheck className="w-4 h-4 text-emerald-500 drop-shadow-[0_0_5px_rgba(16,185,129,0.5)]" />
         </div>
 
         <div className="space-y-2 max-h-48 overflow-y-auto custom-scrollbar pr-1">
           {insertedFiles.length > 0 ? insertedFiles.map((file, idx) => (
-            <div key={idx} className="flex items-center justify-between p-3 bg-black/20 border border-white/5 rounded-xl group hover:border-orange-500/30 transition-all animate-in slide-in-from-left-2">
+            <div key={idx} className="flex items-center justify-between p-3 bg-white/5 border border-white/5 rounded-xl group hover:border-orange-500/40 transition-all animate-in slide-in-from-left-2">
               <div className="flex items-center gap-3 overflow-hidden">
-                <div className="p-1.5 bg-orange-500/10 rounded-lg">
-                  <Music className="w-3 h-3 text-orange-500 shrink-0" />
+                <div className="p-2 bg-orange-500/20 rounded-lg">
+                  <Music className="w-3.5 h-3.5 text-orange-500 shrink-0" />
                 </div>
                 <div className="flex flex-col overflow-hidden">
-                  <span className="text-[10px] font-bold text-slate-300 truncate tracking-tight">{file.name}</span>
-                  <span className="text-[8px] text-slate-600 font-mono uppercase font-bold">{file.size}</span>
+                  <span className="text-[10px] font-bold text-slate-200 truncate tracking-tight">{file.name}</span>
+                  <span className="text-[8px] text-slate-500 font-mono uppercase font-black">{file.size}</span>
                 </div>
               </div>
               <button 
                 onClick={() => removeFile(idx)}
-                className="text-slate-700 hover:text-red-500 transition-colors ml-2 shrink-0"
+                className="text-slate-700 hover:text-red-500 transition-colors ml-2 shrink-0 p-1.5"
                 title="Purge"
               >
-                <Trash2 className="w-3.5 h-3.5" />
+                <Trash2 className="w-4 h-4" />
               </button>
             </div>
           )) : (
-            <div className="text-center py-10 bg-black/10 rounded-[2rem] border border-dashed border-white/5 opacity-40">
-              <FileAudio className="w-6 h-6 text-slate-700 mx-auto mb-2" />
-              <p className="text-[9px] text-slate-700 font-bold uppercase tracking-widest">Registry Empty</p>
+            <div className="text-center py-10 bg-black/20 rounded-[2.5rem] border border-dashed border-white/5 opacity-40">
+              <FileAudio className="w-8 h-8 text-slate-700 mx-auto mb-2" />
+              <p className="text-[9px] text-slate-700 font-black uppercase tracking-[0.2em]">Queue Empty</p>
             </div>
           )}
         </div>
       </div>
 
       <div className="text-center pt-2 opacity-50">
-        <p className="text-[7px] font-black text-slate-600 uppercase tracking-[0.4em]">Broadcast Node: Verified</p>
+        <p className="text-[8px] font-black text-slate-600 uppercase tracking-[0.4em]">Node ID: HRAT-BROADCAST-ALPHA</p>
       </div>
     </div>
   );
