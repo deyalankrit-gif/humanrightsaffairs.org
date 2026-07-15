@@ -32,9 +32,8 @@ import {
 import { cn } from '@/lib/utils';
 
 /**
- * FooterMusicPlayer: A high-fidelity, feature-rich audio component for the institutional footer.
- * Features: Playlist support, Persistent session memory, Visual equalizer, and Precise volume/seek controls.
- * Updated: Added track selection dropdown.
+ * HRAT Audio Station: A premium audio component for the institutional footer.
+ * Enhanced with elongated layout and refined volume control mechanism.
  */
 
 const PLAYLIST = [
@@ -226,26 +225,26 @@ export function FooterMusicPlayer({
   };
 
   return (
-    <div className={cn("mt-8 w-full max-w-[320px] animate-in fade-in slide-in-from-bottom-4 duration-1000", className)}>
+    <div className={cn("mt-8 w-full max-w-[380px] animate-in fade-in slide-in-from-bottom-4 duration-1000", className)}>
       <audio 
         ref={audioRef} 
         src={PLAYLIST[currentTrackIndex].src} 
         preload="metadata" 
       />
       
-      <div className="relative p-5 bg-white/5 backdrop-blur-3xl rounded-[2.5rem] border border-white/10 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] space-y-4 group transition-all hover:border-accent/30 hover:bg-white/10">
+      <div className="relative p-6 bg-white/5 backdrop-blur-3xl rounded-[2.5rem] border border-white/10 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] space-y-5 group transition-all hover:border-orange-500/30 hover:bg-white/10">
         
         {/* Playback Control Bar */}
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1 shrink-0">
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-1.5 shrink-0">
             <Button 
               variant="ghost" 
               size="icon" 
               onClick={handlePrevious}
               disabled={error}
-              className="h-8 w-8 rounded-full text-slate-400 hover:text-accent transition-colors"
+              className="h-9 w-9 rounded-full text-slate-400 hover:text-orange-500 transition-colors"
             >
-              <SkipBack className="w-4 h-4 fill-current" />
+              <SkipBack className="w-5 h-5 fill-current" />
             </Button>
 
             <Button 
@@ -254,14 +253,14 @@ export function FooterMusicPlayer({
               onClick={togglePlay}
               disabled={error}
               className={cn(
-                "h-12 w-12 rounded-full shrink-0 shadow-2xl transition-all border border-white/10 relative overflow-hidden group/play",
-                isPlaying ? "bg-accent text-primary scale-110 shadow-accent/20" : "bg-white/5 text-white hover:bg-accent hover:text-primary"
+                "h-14 w-14 rounded-full shrink-0 shadow-2xl transition-all border border-white/10 relative overflow-hidden group/play",
+                isPlaying ? "bg-orange-500 text-primary scale-110 shadow-orange-500/20" : "bg-white/5 text-white hover:bg-orange-500 hover:text-primary"
               )}
             >
               {isPlaying && (
                 <span className="absolute inset-0 bg-white/20 animate-ping rounded-full pointer-events-none"></span>
               )}
-              {isPlaying ? <Pause className="w-6 h-6 fill-current relative z-10" /> : <Play className="w-6 h-6 fill-current ml-1 relative z-10" />}
+              {isPlaying ? <Pause className="w-7 h-7 fill-current relative z-10" /> : <Play className="w-7 h-7 fill-current ml-1 relative z-10" />}
             </Button>
 
             <Button 
@@ -269,17 +268,17 @@ export function FooterMusicPlayer({
               size="icon" 
               onClick={handleNext}
               disabled={error}
-              className="h-8 w-8 rounded-full text-slate-400 hover:text-accent transition-colors"
+              className="h-9 w-9 rounded-full text-slate-400 hover:text-orange-500 transition-colors"
             >
-              <SkipForward className="w-4 h-4 fill-current" />
+              <SkipForward className="w-5 h-5 fill-current" />
             </Button>
           </div>
 
-          <div className="flex-1 min-w-0 space-y-2">
+          <div className="flex-1 min-w-0 space-y-2.5">
             <div className="flex justify-between items-center">
                <div className="flex items-center gap-2 overflow-hidden">
-                 <div className="flex gap-0.5 items-end h-3 w-4 shrink-0">
-                    {[1, 2, 3, 4].map(i => (
+                 <div className="flex gap-0.5 items-end h-4 w-5 shrink-0">
+                    {[1, 2, 3, 4, 5].map(i => (
                       <div 
                         key={i} 
                         className={cn(
@@ -287,17 +286,17 @@ export function FooterMusicPlayer({
                           isPlaying ? "animate-bounce" : "h-1"
                         )} 
                         style={{ 
-                          animationDuration: `${0.5 + i * 0.1}s`,
+                          animationDuration: `${0.4 + i * 0.1}s`,
                           height: isPlaying ? '100%' : '20%' 
                         }}
                       />
                     ))}
                  </div>
-                 <span className="text-[10px] font-black uppercase tracking-[0.2em] text-orange-500 truncate transition-colors">
+                 <span className="text-[11px] font-black uppercase tracking-[0.2em] text-orange-500 truncate transition-colors">
                    {error ? "File Unavailable" : PLAYLIST[currentTrackIndex].title}
                  </span>
                </div>
-               <span className="text-[9px] font-mono text-orange-500 bg-black/20 px-2 py-0.5 rounded-md border border-white/5">
+               <span className="text-[10px] font-mono text-orange-500 bg-black/30 px-2.5 py-1 rounded-md border border-white/5">
                  {formatTime(currentTime)}
                </span>
             </div>
@@ -314,8 +313,9 @@ export function FooterMusicPlayer({
         </div>
 
         {/* Action Controls */}
-        <div className="flex items-center justify-between gap-6 pt-1 border-t border-white/5">
-           <div className="flex items-center gap-3 flex-1">
+        <div className="flex items-center justify-between gap-6 pt-3 border-t border-white/5">
+           {/* Enhanced Volume Control Mechanism */}
+           <div className="flex items-center gap-3 flex-1 min-w-0 bg-black/20 p-2 rounded-2xl border border-white/5 group/vol transition-all hover:bg-black/40">
               <Button 
                 variant="ghost" 
                 size="icon" 
@@ -324,25 +324,30 @@ export function FooterMusicPlayer({
               >
                 {isMuted || volume === 0 ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
               </Button>
-              <Slider 
-                value={[volume]} 
-                max={1} 
-                step={0.01} 
-                onValueChange={handleVolumeChange}
-                className="w-full max-w-[80px] cursor-pointer"
-              />
+              <div className="flex-1 flex flex-col gap-1">
+                 <Slider 
+                    value={[volume]} 
+                    max={1} 
+                    step={0.01} 
+                    onValueChange={handleVolumeChange}
+                    className="cursor-pointer"
+                 />
+              </div>
+              <span className="text-[9px] font-black text-orange-500 w-8 text-right tabular-nums">
+                {Math.round(volume * 100)}%
+              </span>
            </div>
            
-           <div className="flex items-center gap-2">
+           <div className="flex items-center gap-2.5 shrink-0">
               {/* Track Selector Dropdown */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button 
                     variant="ghost" 
                     size="icon"
-                    className="h-8 w-8 rounded-lg text-orange-500 hover:text-white hover:bg-white/10 transition-all"
+                    className="h-9 w-9 rounded-xl text-orange-500 hover:text-white hover:bg-white/10 transition-all border border-transparent hover:border-white/10"
                   >
-                    <ListMusic className="w-4 h-4" />
+                    <ListMusic className="w-4.5 h-4.5" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56 bg-slate-900/95 backdrop-blur-xl border-white/10 text-white rounded-2xl shadow-2xl p-2 z-[999999]">
@@ -371,11 +376,11 @@ export function FooterMusicPlayer({
                       size="icon" 
                       onClick={toggleLoop}
                       className={cn(
-                        "h-8 w-8 rounded-lg transition-all",
-                        isLooping ? "bg-orange-500/20 text-orange-500" : "text-orange-500 hover:text-white"
+                        "h-9 w-9 rounded-xl transition-all border border-transparent hover:border-white/10",
+                        isLooping ? "bg-orange-500/20 text-orange-500 border-orange-500/30" : "text-orange-500 hover:text-white"
                       )}
                     >
-                      <Repeat className={cn("w-4 h-4", isLooping && "animate-spin-slow")} />
+                      <Repeat className={cn("w-4.5 h-4.5", isLooping && "animate-spin-slow")} />
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent side="top" className="bg-primary text-white border-none text-[10px] font-bold uppercase">
@@ -386,7 +391,7 @@ export function FooterMusicPlayer({
 
               <div className="h-4 w-px bg-white/10 mx-1"></div>
 
-              <div className="flex items-center gap-1.5 px-3 py-1 bg-black/40 rounded-full border border-white/5">
+              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-black/40 rounded-full border border-white/5">
                  {error ? (
                    <>
                      <AlertCircle className="w-3 h-3 text-red-500" />
@@ -404,7 +409,7 @@ export function FooterMusicPlayer({
            </div>
         </div>
       </div>
-      <p className="mt-3 text-[9px] font-black text-orange-500 uppercase tracking-[0.3em] text-center opacity-80 group-hover:opacity-100 transition-opacity">
+      <p className="mt-4 text-[10px] font-black text-orange-500 uppercase tracking-[0.4em] text-center opacity-80 group-hover:opacity-100 transition-opacity">
         HRAT Audio Station
       </p>
     </div>
