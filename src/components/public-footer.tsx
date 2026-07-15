@@ -8,6 +8,7 @@ import { DonationDialog } from './donation-dialog';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, query, where, orderBy } from 'firebase/firestore';
+import { FooterMusicPlayer } from './footer-music-player';
 import { cn } from '@/lib/utils';
 
 /**
@@ -148,6 +149,7 @@ export function PublicFooter() {
                 </Link>
               </li>
             </ul>
+            <FooterMusicPlayer />
           </div>
 
           <div>
