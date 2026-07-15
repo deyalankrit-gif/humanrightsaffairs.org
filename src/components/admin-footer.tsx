@@ -118,7 +118,7 @@ export function AdminFooter() {
               </li>
               <li><Link href="/donors" className="hover:text-accent transition-colors font-medium">Thank You to Our Donors</Link></li>
               <li><Link href="/trust-credentials" className="hover:text-accent transition-colors font-medium">Credentials of the Trust</Link></li>
-              <li><Link href="/internal/login" className="text-[#CEFF00] font-bold text-lg hover:text-white transition-colors block">Link for Office Use Only</Link></li>
+              <li><span className="text-[#CEFF00] font-bold text-lg underline block">Link for Office Use Only</span></li>
               <li>
                 <Link href="/legal/official-representation" className="text-[#CEFF00] hover:text-primary-foreground transition-colors font-bold flex flex-col leading-tight">
                   <span>Official Representation</span>
