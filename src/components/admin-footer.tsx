@@ -103,6 +103,13 @@ export function AdminFooter() {
               <li><Link href="/#membership" className="hover:text-accent transition-colors font-medium">Be A Member</Link></li>
               <li><Link href="/#helpline" className="hover:text-accent transition-colors font-medium">Emergency Contacts</Link></li>
               <li>
+                <DonationDialog>
+                  <button className="hover:text-accent transition-colors font-medium text-left">Donate Now</button>
+                </DonationDialog>
+              </li>
+              <li><Link href="/donors" className="hover:text-accent transition-colors font-medium">Thank You to Our Donors</Link></li>
+              <li><Link href="/trust-credentials" className="hover:text-accent transition-colors font-medium">Credentials of the Trust</Link></li>
+              <li>
                 <Link 
                   href="/internal/activity-hub" 
                   className="text-emerald-400 font-bold hover:text-white transition-colors flex items-center gap-2"
@@ -111,13 +118,6 @@ export function AdminFooter() {
                   <span className={cn(hasReminders && "animate-pulsate")}>Activity Calendar Hub</span>
                 </Link>
               </li>
-              <li>
-                <DonationDialog>
-                  <button className="hover:text-accent transition-colors font-medium text-left">Donate Now</button>
-                </DonationDialog>
-              </li>
-              <li><Link href="/donors" className="hover:text-accent transition-colors font-medium">Thank You to Our Donors</Link></li>
-              <li><Link href="/trust-credentials" className="hover:text-accent transition-colors font-medium">Credentials of the Trust</Link></li>
               <li><span className="text-[#CEFF00] font-bold text-lg underline block">Link for Office Use Only</span></li>
               <li>
                 <Link href="/legal/official-representation" className="text-[#CEFF00] hover:text-primary-foreground transition-colors font-bold flex flex-col leading-tight">
