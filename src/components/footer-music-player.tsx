@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Play, Pause, Volume2, VolumeX, Music, Repeat, Activity } from 'lucide-react';
+import { Play, Pause, Volume2, VolumeX, Music, Repeat, Activity, SkipBack, SkipForward } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { 
@@ -14,19 +14,25 @@ import { cn } from '@/lib/utils';
 
 /**
  * FooterMusicPlayer: A high-fidelity, feature-rich audio component for the institutional footer.
- * Enhancements: Loop toggle, animated equalizer, refined glassmorphism, and persistent session memory.
+ * Enhancements: Playlist support with Prev/Next, Loop toggle, animated equalizer, and persistent session memory.
  */
+
+const PLAYLIST = [
+  { title: "Institutional Anthem", src: "/HRAT SONG.mp3" },
+  { title: "Mission Theme (Alt)", src: "/HRAT SONG.mp3" }, // Using same file as placeholder for demo
+  { title: "Advocacy Call", src: "/HRAT SONG.mp3" }        // Using same file as placeholder for demo
+];
+
 interface FooterMusicPlayerProps {
-  src?: string;
   className?: string;
 }
 
 export function FooterMusicPlayer({ 
-  src = "/HRAT SONG.mp3", 
   className 
 }: FooterMusicPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLooping, setIsLooping] = useState(false);
+  const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
   const [volume, setVolume] = useState(0.5);
@@ -36,10 +42,15 @@ export function FooterMusicPlayer({
   
   const audioRef = useRef<HTMLAudioElement>(null);
 
-  // Initialize and load saved position/loop preference from session memory
+  // Initialize and load saved position/loop/track preference from session memory
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
+
+    const savedTrack = localStorage.getItem('hrat_footer_music_index');
+    if (savedTrack) {
+      setCurrentTrackIndex(parseInt(savedTrack));
+    }
 
     const savedTime = localStorage.getItem('hrat_footer_music_pos');
     if (savedTime) {
@@ -56,6 +67,7 @@ export function FooterMusicPlayer({
     const handleLoadedMetadata = () => {
       setDuration(audio.duration);
       setIsLoaded(true);
+      setError(false);
     };
 
     const handleTimeUpdate = () => {
@@ -67,10 +79,8 @@ export function FooterMusicPlayer({
     };
 
     const handleEnded = () => {
-      if (!isLooping) {
-        setIsPlaying(false);
-        localStorage.setItem('hrat_footer_music_pos', '0');
-      }
+      if (isLooping) return;
+      handleNext();
     };
 
     const handleError = () => {
@@ -88,7 +98,19 @@ export function FooterMusicPlayer({
       audio.removeEventListener('ended', handleEnded);
       audio.removeEventListener('error', handleError);
     };
-  }, [src, isLooping]);
+  }, [isLooping]);
+
+  // Effect to handle track changes and auto-play if it was already playing
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    localStorage.setItem('hrat_footer_music_index', currentTrackIndex.toString());
+    
+    if (isPlaying) {
+      audio.play().catch(() => setError(true));
+    }
+  }, [currentTrackIndex]);
 
   const togglePlay = () => {
     if (!audioRef.current) return;
@@ -101,6 +123,18 @@ export function FooterMusicPlayer({
       });
     }
     setIsPlaying(!isPlaying);
+  };
+
+  const handleNext = () => {
+    const nextIndex = (currentTrackIndex + 1) % PLAYLIST.length;
+    setCurrentTrackIndex(nextIndex);
+    localStorage.setItem('hrat_footer_music_pos', '0');
+  };
+
+  const handlePrevious = () => {
+    const prevIndex = (currentTrackIndex - 1 + PLAYLIST.length) % PLAYLIST.length;
+    setCurrentTrackIndex(prevIndex);
+    localStorage.setItem('hrat_footer_music_pos', '0');
   };
 
   const toggleLoop = () => {
@@ -152,26 +186,53 @@ export function FooterMusicPlayer({
 
   return (
     <div className={cn("mt-8 w-full max-w-[320px] animate-in fade-in slide-in-from-bottom-4 duration-1000", className)}>
-      <audio ref={audioRef} src={src} preload="metadata" />
+      <audio 
+        ref={audioRef} 
+        src={PLAYLIST[currentTrackIndex].src} 
+        preload="metadata" 
+      />
       
       <div className="relative p-5 bg-white/5 backdrop-blur-2xl rounded-[2.5rem] border border-white/10 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] space-y-4 group transition-all hover:border-accent/30 hover:bg-white/10">
+        
         {/* Playback Control Bar */}
-        <div className="flex items-center gap-4">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={togglePlay}
-            disabled={error}
-            className={cn(
-              "h-12 w-12 rounded-full shrink-0 shadow-2xl transition-all border border-white/10 relative overflow-hidden group/play",
-              isPlaying ? "bg-accent text-primary scale-110 shadow-accent/20" : "bg-white/5 text-white hover:bg-accent hover:text-primary"
-            )}
-          >
-            {isPlaying && (
-              <span className="absolute inset-0 bg-white/20 animate-ping rounded-full pointer-events-none"></span>
-            )}
-            {isPlaying ? <Pause className="w-6 h-6 fill-current relative z-10" /> : <Play className="w-6 h-6 fill-current ml-1 relative z-10" />}
-          </Button>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={handlePrevious}
+              disabled={error}
+              className="h-8 w-8 rounded-full text-slate-400 hover:text-accent transition-colors"
+            >
+              <SkipBack className="w-4 h-4 fill-current" />
+            </Button>
+
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={togglePlay}
+              disabled={error}
+              className={cn(
+                "h-12 w-12 rounded-full shrink-0 shadow-2xl transition-all border border-white/10 relative overflow-hidden group/play",
+                isPlaying ? "bg-accent text-primary scale-110 shadow-accent/20" : "bg-white/5 text-white hover:bg-accent hover:text-primary"
+              )}
+            >
+              {isPlaying && (
+                <span className="absolute inset-0 bg-white/20 animate-ping rounded-full pointer-events-none"></span>
+              )}
+              {isPlaying ? <Pause className="w-6 h-6 fill-current relative z-10" /> : <Play className="w-6 h-6 fill-current ml-1 relative z-10" />}
+            </Button>
+
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={handleNext}
+              disabled={error}
+              className="h-8 w-8 rounded-full text-slate-400 hover:text-accent transition-colors"
+            >
+              <SkipForward className="w-4 h-4 fill-current" />
+            </Button>
+          </div>
 
           <div className="flex-1 min-w-0 space-y-2">
             <div className="flex justify-between items-center">
@@ -192,7 +253,7 @@ export function FooterMusicPlayer({
                     ))}
                  </div>
                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 truncate group-hover:text-white transition-colors">
-                   {error ? "File Unavailable" : "Institutional Anthem"}
+                   {error ? "File Unavailable" : PLAYLIST[currentTrackIndex].title}
                  </span>
                </div>
                <span className="text-[9px] font-mono text-slate-500 bg-black/20 px-2 py-0.5 rounded-md border border-white/5">
@@ -265,9 +326,8 @@ export function FooterMusicPlayer({
         </div>
       </div>
       <p className="mt-3 text-[9px] font-black text-slate-500 uppercase tracking-[0.3em] text-center opacity-40 group-hover:opacity-100 transition-opacity">
-        Official HRAT Audio Stream
+        Official HRAT Mission Radio
       </p>
     </div>
   );
 }
-
