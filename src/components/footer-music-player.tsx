@@ -1,15 +1,20 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Play, Pause, Volume2, VolumeX, Music } from 'lucide-react';
+import { Play, Pause, Volume2, VolumeX, Music, Repeat, Activity } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
+import { 
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 
 /**
- * FooterMusicPlayer: A premium, minimalist audio component designed for the institutional footer.
- * Features: Persists through navigation, remembers playback position via localStorage, 
- * and utilizes custom Radix-based controls for a seamless aesthetic fit.
+ * FooterMusicPlayer: A high-fidelity, feature-rich audio component for the institutional footer.
+ * Enhancements: Loop toggle, animated equalizer, refined glassmorphism, and persistent session memory.
  */
 interface FooterMusicPlayerProps {
   src?: string;
@@ -21,6 +26,7 @@ export function FooterMusicPlayer({
   className 
 }: FooterMusicPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isLooping, setIsLooping] = useState(false);
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
   const [volume, setVolume] = useState(0.5);
@@ -30,7 +36,7 @@ export function FooterMusicPlayer({
   
   const audioRef = useRef<HTMLAudioElement>(null);
 
-  // Initialize and load saved position from session memory
+  // Initialize and load saved position/loop preference from session memory
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -41,6 +47,12 @@ export function FooterMusicPlayer({
       setCurrentTime(parseFloat(savedTime));
     }
 
+    const savedLoop = localStorage.getItem('hrat_footer_music_loop');
+    if (savedLoop === 'true') {
+      setIsLooping(true);
+      audio.loop = true;
+    }
+
     const handleLoadedMetadata = () => {
       setDuration(audio.duration);
       setIsLoaded(true);
@@ -48,15 +60,17 @@ export function FooterMusicPlayer({
 
     const handleTimeUpdate = () => {
       setCurrentTime(audio.currentTime);
-      // Persist state to prevent loss on refresh
+      // Persist state periodically
       if (Math.floor(audio.currentTime) % 2 === 0) {
         localStorage.setItem('hrat_footer_music_pos', audio.currentTime.toString());
       }
     };
 
     const handleEnded = () => {
-      setIsPlaying(false);
-      localStorage.setItem('hrat_footer_music_pos', '0');
+      if (!isLooping) {
+        setIsPlaying(false);
+        localStorage.setItem('hrat_footer_music_pos', '0');
+      }
     };
 
     const handleError = () => {
@@ -74,7 +88,7 @@ export function FooterMusicPlayer({
       audio.removeEventListener('ended', handleEnded);
       audio.removeEventListener('error', handleError);
     };
-  }, [src]);
+  }, [src, isLooping]);
 
   const togglePlay = () => {
     if (!audioRef.current) return;
@@ -87,6 +101,15 @@ export function FooterMusicPlayer({
       });
     }
     setIsPlaying(!isPlaying);
+  };
+
+  const toggleLoop = () => {
+    if (audioRef.current) {
+      const nextLoop = !isLooping;
+      audioRef.current.loop = nextLoop;
+      setIsLooping(nextLoop);
+      localStorage.setItem('hrat_footer_music_loop', nextLoop.toString());
+    }
   };
 
   const handleSeek = (value: number[]) => {
@@ -121,40 +144,62 @@ export function FooterMusicPlayer({
   };
 
   const formatTime = (time: number) => {
+    if (isNaN(time)) return "00:00";
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
     return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
   };
 
   return (
-    <div className={cn("mt-6 w-full max-w-[280px] animate-in fade-in slide-in-from-bottom-2 duration-700", className)}>
+    <div className={cn("mt-8 w-full max-w-[320px] animate-in fade-in slide-in-from-bottom-4 duration-1000", className)}>
       <audio ref={audioRef} src={src} preload="metadata" />
       
-      <div className="p-4 bg-white/5 backdrop-blur-xl rounded-[2rem] border border-white/10 shadow-2xl space-y-4 transition-all hover:bg-white/10 group">
-        <div className="flex items-center gap-3">
+      <div className="relative p-5 bg-white/5 backdrop-blur-2xl rounded-[2.5rem] border border-white/10 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] space-y-4 group transition-all hover:border-accent/30 hover:bg-white/10">
+        {/* Playback Control Bar */}
+        <div className="flex items-center gap-4">
           <Button 
             variant="ghost" 
             size="icon" 
             onClick={togglePlay}
             disabled={error}
             className={cn(
-              "h-10 w-10 rounded-full shrink-0 shadow-lg transition-all border border-white/10",
-              isPlaying ? "bg-accent text-primary" : "bg-white/10 text-white hover:bg-accent hover:text-primary"
+              "h-12 w-12 rounded-full shrink-0 shadow-2xl transition-all border border-white/10 relative overflow-hidden group/play",
+              isPlaying ? "bg-accent text-primary scale-110 shadow-accent/20" : "bg-white/5 text-white hover:bg-accent hover:text-primary"
             )}
           >
-            {isPlaying ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current ml-0.5" />}
+            {isPlaying && (
+              <span className="absolute inset-0 bg-white/20 animate-ping rounded-full pointer-events-none"></span>
+            )}
+            {isPlaying ? <Pause className="w-6 h-6 fill-current relative z-10" /> : <Play className="w-6 h-6 fill-current ml-1 relative z-10" />}
           </Button>
 
-          <div className="flex-1 min-w-0 flex flex-col gap-1.5">
-            <div className="flex justify-between items-center text-[9px] font-black uppercase tracking-[0.2em] text-slate-500">
-               <span className="flex items-center gap-2">
-                 <Music className="w-3 h-3 text-accent" />
-                 {error ? "File Missing" : "Trust Melody"}
-               </span>
-               <span className="text-slate-400 font-mono">
-                 {formatTime(currentTime)} / {formatTime(duration)}
+          <div className="flex-1 min-w-0 space-y-2">
+            <div className="flex justify-between items-center">
+               <div className="flex items-center gap-2 overflow-hidden">
+                 <div className="flex gap-0.5 items-end h-3 w-4 shrink-0">
+                    {[1, 2, 3, 4].map(i => (
+                      <div 
+                        key={i} 
+                        className={cn(
+                          "w-0.5 bg-accent rounded-full transition-all duration-300", 
+                          isPlaying ? "animate-bounce" : "h-1"
+                        )} 
+                        style={{ 
+                          animationDuration: `${0.5 + i * 0.1}s`,
+                          height: isPlaying ? '100%' : '20%' 
+                        }}
+                      />
+                    ))}
+                 </div>
+                 <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 truncate group-hover:text-white transition-colors">
+                   {error ? "File Unavailable" : "Institutional Anthem"}
+                 </span>
+               </div>
+               <span className="text-[9px] font-mono text-slate-500 bg-black/20 px-2 py-0.5 rounded-md border border-white/5">
+                 {formatTime(currentTime)}
                </span>
             </div>
+            
             <Slider 
               value={[currentTime]} 
               max={duration || 100} 
@@ -166,13 +211,14 @@ export function FooterMusicPlayer({
           </div>
         </div>
 
-        <div className="flex items-center justify-between gap-4 pt-1">
+        {/* Action Controls */}
+        <div className="flex items-center justify-between gap-6 pt-1 border-t border-white/5">
            <div className="flex items-center gap-3 flex-1">
               <Button 
                 variant="ghost" 
                 size="icon" 
                 onClick={toggleMute}
-                className="h-6 w-6 p-0 text-slate-500 hover:text-accent transition-colors"
+                className="h-8 w-8 text-slate-500 hover:text-white transition-colors shrink-0"
               >
                 {isMuted || volume === 0 ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
               </Button>
@@ -181,29 +227,47 @@ export function FooterMusicPlayer({
                 max={1} 
                 step={0.01} 
                 onValueChange={handleVolumeChange}
-                className="w-full max-w-[100px] cursor-pointer"
+                className="w-full max-w-[80px] cursor-pointer"
               />
            </div>
            
-           {isPlaying && (
-             <div className="flex gap-1 items-end h-4 pr-1">
-                {[1, 2, 3].map(i => (
-                  <div 
-                    key={i} 
-                    className={cn(
-                      "w-1 bg-accent rounded-full animate-pulse", 
-                      i === 1 ? "h-2" : i === 2 ? "h-4" : "h-3"
-                    )} 
-                    style={{ animationDelay: `${i * 150}ms` }}
-                  />
-                ))}
-             </div>
-           )}
+           <div className="flex items-center gap-2">
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      onClick={toggleLoop}
+                      className={cn(
+                        "h-8 w-8 rounded-lg transition-all",
+                        isLooping ? "bg-accent/20 text-accent" : "text-slate-500 hover:text-white"
+                      )}
+                    >
+                      <Repeat className={cn("w-4 h-4", isLooping && "animate-spin-slow")} />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" className="bg-primary text-white border-none text-[10px] font-bold uppercase">
+                    {isLooping ? "Disable Loop" : "Enable Loop"}
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+
+              <div className="h-4 w-px bg-white/10 mx-1"></div>
+
+              <div className="flex items-center gap-1.5 px-3 py-1 bg-black/40 rounded-full border border-white/5">
+                 <Activity className={cn("w-3 h-3 transition-colors", isPlaying ? "text-emerald-500" : "text-slate-600")} />
+                 <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest">
+                   {isPlaying ? "Live" : "Idle"}
+                 </span>
+              </div>
+           </div>
         </div>
       </div>
-      <p className="mt-2 text-[8px] font-bold text-slate-500 uppercase tracking-widest text-center opacity-50 group-hover:opacity-100 transition-opacity">
-        Institutional Audio Stream
+      <p className="mt-3 text-[9px] font-black text-slate-500 uppercase tracking-[0.3em] text-center opacity-40 group-hover:opacity-100 transition-opacity">
+        Official HRAT Audio Stream
       </p>
     </div>
   );
 }
+
