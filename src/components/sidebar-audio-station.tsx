@@ -73,9 +73,9 @@ export function SidebarAudioStation() {
         </div>
 
         <div className="space-y-3">
-          <div className="relative group/input">
+          <div className="group/input">
             <div className={cn(
-              "flex flex-col items-center justify-center p-6 rounded-2xl border-2 border-dashed transition-all duration-300 cursor-pointer overflow-hidden",
+              "relative flex flex-col items-center justify-center p-6 rounded-2xl border-2 border-dashed transition-all duration-300 cursor-pointer overflow-hidden",
               selectedFile 
                 ? "border-orange-500 bg-orange-500/10 shadow-[0_0_15px_rgba(249,115,22,0.2)]" 
                 : "border-orange-500/40 hover:border-orange-500 bg-black/40 hover:bg-black/60"
@@ -94,7 +94,7 @@ export function SidebarAudioStation() {
                 type="file" 
                 accept=".mp3,audio/mpeg" 
                 onChange={handleFileChange}
-                className="absolute inset-0 opacity-0 cursor-pointer z-10"
+                className="absolute inset-0 opacity-0 cursor-pointer z-10 w-full h-full"
               />
             </div>
           </div>
