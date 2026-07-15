@@ -110,7 +110,7 @@ export default {
         'flag-wave': {
           '0%': { transform: 'perspective(1200px) rotateX(0deg) rotateY(0deg) rotateZ(0deg) skewX(0deg)' },
           '20%': { transform: 'perspective(1200px) rotateX(2deg) rotateY(12deg) rotateZ(-1deg) skewX(2deg)' },
-          '40%': { transform: 'perspective(1200px) rotateX(-3deg) rotateY(20deg) rotateZ(1deg) skewX(-2deg)' },
+          '40%': { transform: 'perspective(1200px) rotateX(-3deg) rotateY(20deg) rotateZ(12deg) skewX(-2deg)' },
           '60%': { transform: 'perspective(1200px) rotateX(4deg) rotateY(15deg) rotateZ(-0.5deg) skewX(1deg)' },
           '80%': { transform: 'perspective(1200px) rotateX(-1deg) rotateY(8deg) rotateZ(0.5deg) skewX(-1deg)' },
           '100%': { transform: 'perspective(1200px) rotateX(0deg) rotateY(0deg) rotateZ(0deg) skewX(0deg)' },
@@ -126,6 +126,10 @@ export default {
         'gradient-x': {
           '0%, 100%': { 'background-position': 'left center' },
           '50%': { 'background-position': 'right center' },
+        },
+        'marquee': {
+          '0%': { transform: 'translateX(100%)' },
+          '100%': { transform: 'translateX(-100%)' },
         }
       },
       animation: {
@@ -143,6 +147,7 @@ export default {
         'flag-ripple': 'flag-ripple 5s linear infinite',
         'flag-ripple-alt': 'flag-ripple-alt 4s linear infinite',
         'gradient-x': 'gradient-x 5s ease infinite',
+        'marquee': 'marquee 12s linear infinite',
       },
     },
   },

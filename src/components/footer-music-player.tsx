@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
@@ -25,7 +26,7 @@ import { cn } from '@/lib/utils';
 
 /**
  * HRAT Audio Station: Premium institutional audio component.
- * Layout: Metadata -> Playback Commands -> Timeline -> Volume/Utilities.
+ * Features: Neon scrolling title, tactical playback order, session memory.
  */
 
 const PLAYLIST = [
@@ -170,18 +171,24 @@ export function FooterMusicPlayer({ className }: { className?: string }) {
       <div className="relative p-6 bg-black/40 backdrop-blur-3xl rounded-[2.5rem] border border-white/10 shadow-2xl space-y-5 transition-all duration-500 hover:border-orange-500/40">
         
         {/* Track Info & Visualizer */}
-        <div className="flex items-center justify-between gap-4 px-2">
-          <div className="flex flex-col min-w-0">
-            <div className="flex items-center gap-2 mb-1">
+        <div className="flex items-center justify-between gap-4 px-2 overflow-hidden">
+          <div className="flex flex-col min-w-0 overflow-hidden flex-1">
+            <div className="flex items-center gap-2 mb-1 shrink-0">
               <Radio className={cn("w-3 h-3 text-orange-500", isPlaying && "animate-pulse")} />
               <span className="text-[9px] font-black uppercase tracking-[0.3em] text-orange-500/70">Mission Broadcast</span>
             </div>
-            <h4 className="text-[12px] font-black uppercase tracking-wider text-orange-500 truncate">
-              {error ? "Broadcast Offline" : PLAYLIST[currentTrackIndex].title}
-            </h4>
+            {/* Scrolling Title Container */}
+            <div className="overflow-hidden w-full whitespace-nowrap">
+              <h4 className={cn(
+                "text-[12px] font-black uppercase tracking-wider text-orange-400 drop-shadow-[0_0_8px_rgba(251,146,60,0.8)] inline-block animate-marquee",
+                error && "animate-none"
+              )}>
+                {error ? "Broadcast Offline" : PLAYLIST[currentTrackIndex].title}
+              </h4>
+            </div>
           </div>
 
-          <div className="flex items-end gap-0.5 h-4 shrink-0 px-2 bg-black/30 rounded-full border border-white/5 items-center">
+          <div className="flex items-center gap-0.5 h-4 shrink-0 px-2 bg-black/30 rounded-full border border-white/5">
             {[1, 2, 3, 4].map(i => (
               <div 
                 key={i} 
@@ -192,7 +199,7 @@ export function FooterMusicPlayer({ className }: { className?: string }) {
           </div>
         </div>
 
-        {/* PRIMARY CONTROLS (Positioned above timeline as requested) */}
+        {/* PRIMARY CONTROLS (Above Timeline) */}
         <div className="flex items-center justify-center gap-6 py-1">
           <Button variant="ghost" size="icon" onClick={handlePrevious} className="h-10 w-10 text-orange-500/40 hover:text-orange-500 transition-colors">
             <SkipBack className="w-5 h-5 fill-current" />
