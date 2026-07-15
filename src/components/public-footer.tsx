@@ -120,6 +120,12 @@ export function PublicFooter() {
               <li><Link href="/trust-credentials" className="hover:text-accent transition-colors font-medium">Credentials of the Trust</Link></li>
               <li><Link href="/internal/login" className="text-[#CEFF00] font-bold text-lg hover:text-white transition-colors block">Link for Office Use Only</Link></li>
               <li>
+                <Link href="/legal/official-representation" className="text-[#CEFF00] hover:text-primary-foreground transition-colors font-bold flex flex-col leading-tight">
+                  <span>Official Representation</span>
+                  <span className="text-[10px] opacity-80">(For Organizational Use Only)</span>
+                </Link>
+              </li>
+              <li>
                 <Link href="/trust-responsibilities" className="text-[#CEFF00] hover:text-primary-foreground transition-colors font-medium leading-tight inline-block">
                   Duties and Responsibilities of Trust Staff, Volunteers, and Leaders
                 </Link>
@@ -135,12 +141,6 @@ export function PublicFooter() {
               <li><Link href="/legal/rti-assistant" className="hover:text-accent transition-colors font-medium">RTI Assistant</Link></li>
               <li><Link href="/legal/bail-procedure" className="hover:text-accent transition-colors font-medium">Bail Procedures</Link></li>
               <li><Link href="/legal/privacy-policy" className="hover:text-accent transition-colors font-medium">Privacy Policy</Link></li>
-              <li>
-                <Link href="/legal/official-representation" className="text-[#CEFF00] hover:text-primary-foreground transition-colors font-bold flex flex-col leading-tight">
-                  <span>Official Representation</span>
-                  <span className="text-[10px] opacity-80">(For Organizational Use Only)</span>
-                </Link>
-              </li>
               <li>
                 <Link href="/complaint-form" className="text-[#CEFF00] hover:text-primary-foreground transition-colors font-bold flex flex-col leading-tight">
                   <span>Complaint Submission Form</span>
