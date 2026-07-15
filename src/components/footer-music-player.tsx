@@ -17,7 +17,7 @@ interface FooterMusicPlayerProps {
 }
 
 export function FooterMusicPlayer({ 
-  src = "/audio/footer-music.mp3", 
+  src = "/HRAT SONG.mp3", 
   className 
 }: FooterMusicPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false);
