@@ -272,11 +272,11 @@ export function FooterMusicPlayer({
                       />
                     ))}
                  </div>
-                 <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 truncate group-hover:text-white transition-colors">
+                 <span className="text-[10px] font-black uppercase tracking-[0.2em] text-orange-500 truncate transition-colors">
                    {error ? "File Unavailable" : PLAYLIST[currentTrackIndex].title}
                  </span>
                </div>
-               <span className="text-[9px] font-mono text-slate-500 bg-black/20 px-2 py-0.5 rounded-md border border-white/5">
+               <span className="text-[9px] font-mono text-orange-500 bg-black/20 px-2 py-0.5 rounded-md border border-white/5">
                  {formatTime(currentTime)}
                </span>
             </div>
@@ -299,7 +299,7 @@ export function FooterMusicPlayer({
                 variant="ghost" 
                 size="icon" 
                 onClick={toggleMute}
-                className="h-8 w-8 text-slate-500 hover:text-white transition-colors shrink-0"
+                className="h-8 w-8 text-orange-500 hover:text-white transition-colors shrink-0"
               >
                 {isMuted || volume === 0 ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
               </Button>
@@ -322,7 +322,7 @@ export function FooterMusicPlayer({
                       onClick={toggleLoop}
                       className={cn(
                         "h-8 w-8 rounded-lg transition-all",
-                        isLooping ? "bg-accent/20 text-accent" : "text-slate-500 hover:text-white"
+                        isLooping ? "bg-accent/20 text-accent" : "text-orange-500 hover:text-white"
                       )}
                     >
                       <Repeat className={cn("w-4 h-4", isLooping && "animate-spin-slow")} />
@@ -344,8 +344,8 @@ export function FooterMusicPlayer({
                    </>
                  ) : (
                    <>
-                     <Activity className={cn("w-3 h-3 transition-colors", isPlaying ? "text-emerald-500" : "text-slate-600")} />
-                     <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest">
+                     <Activity className={cn("w-3 h-3 transition-colors", isPlaying ? "text-emerald-500" : "text-orange-500")} />
+                     <span className="text-[8px] font-black text-orange-500 uppercase tracking-widest">
                        {isPlaying ? "Live" : "Idle"}
                      </span>
                    </>
@@ -354,8 +354,8 @@ export function FooterMusicPlayer({
            </div>
         </div>
       </div>
-      <p className="mt-3 text-[9px] font-black text-slate-500 uppercase tracking-[0.3em] text-center opacity-40 group-hover:opacity-100 transition-opacity">
-        Official HRAT Mission Radio
+      <p className="mt-3 text-[9px] font-black text-orange-500 uppercase tracking-[0.3em] text-center opacity-80 group-hover:opacity-100 transition-opacity">
+        HRAT Audio Station
       </p>
     </div>
   );
