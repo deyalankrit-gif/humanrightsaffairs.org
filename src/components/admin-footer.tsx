@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useMemo } from 'react';
@@ -141,10 +142,10 @@ export function AdminFooter() {
                 </Link>
               </li>
               <li>
-                <a href="/HRAT COMPL.jpeg" target="_blank" rel="noopener noreferrer" className="text-[#FFFF00] hover:text-primary-foreground transition-colors font-bold flex flex-col leading-tight">
+                <Link href="/complaint-form" className="text-[#FFFF00] hover:text-primary-foreground transition-colors font-bold flex flex-col leading-tight">
                   <span>Complaint Submission Form</span>
                   <span className="text-[10px] opacity-80">(অভিযোগ জমা দেওয়ার ফরম)</span>
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
