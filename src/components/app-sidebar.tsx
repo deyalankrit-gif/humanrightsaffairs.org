@@ -15,6 +15,7 @@ import {
   SidebarMenuItem,
   SidebarGroup,
   SidebarGroupLabel,
+  SidebarGroupContent,
 } from "@/components/ui/sidebar"
 import {
   Home,
@@ -39,13 +40,15 @@ import {
   BarChart,
   Settings,
   Lock,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Radio
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { DonationDialog } from "./donation-dialog"
 import { useFirestore, useDoc, useUser, useMemoFirebase } from '@/firebase'
 import { doc } from 'firebase/firestore'
+import { SidebarAudioStation } from "./sidebar-audio-station"
 
 const publicLinks = [
   { name: 'Home', href: '/', icon: Home },
@@ -133,7 +136,7 @@ export function AppSidebar() {
         </Link>
       </SidebarHeader>
       
-      <SidebarContent className="py-6">
+      <SidebarContent className="py-6 no-scrollbar">
         <SidebarGroup>
           <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">
             {isAdminPortal ? (isRoot ? "ROOT GOVERNANCE" : "STAFF OPERATIONS") : "NAVIGATION"}
@@ -189,6 +192,19 @@ export function AppSidebar() {
             })}
           </SidebarMenu>
         </SidebarGroup>
+
+        {/* TACTICAL AUDIO SYSTEM - ROOT EXCLUSIVE */}
+        {isAdminPortal && isRoot && (
+          <SidebarGroup className="mt-4 border-t border-white/5 pt-6 group-data-[collapsible=icon]:hidden">
+            <SidebarGroupLabel className="flex items-center gap-2">
+              <Radio className="w-3 h-3 text-orange-500 animate-pulse" />
+              TACTICAL BROADCAST
+            </SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarAudioStation />
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
       </SidebarContent>
 
       <SidebarFooter className="border-t p-4 space-y-4">
