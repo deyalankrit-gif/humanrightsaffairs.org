@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from "react"
@@ -193,12 +192,12 @@ export function AppSidebar() {
           </SidebarMenu>
         </SidebarGroup>
 
-        {/* TACTICAL AUDIO SYSTEM - ROOT EXCLUSIVE */}
+        {/* TECHNICAL BROADCAST - ROOT EXCLUSIVE */}
         {isAdminPortal && isRoot && (
           <SidebarGroup className="mt-4 border-t border-white/5 pt-6 group-data-[collapsible=icon]:hidden">
             <SidebarGroupLabel className="flex items-center gap-2">
               <Radio className="w-3 h-3 text-orange-500 animate-pulse" />
-              TACTICAL BROADCAST
+              TECHNICAL BROADCAST
             </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarAudioStation />
