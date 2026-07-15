@@ -1,7 +1,20 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Play, Pause, Volume2, VolumeX, Music, Repeat, Activity, SkipBack, SkipForward, AlertCircle } from 'lucide-react';
+import { 
+  Play, 
+  Pause, 
+  Volume2, 
+  VolumeX, 
+  Music, 
+  Repeat, 
+  Activity, 
+  SkipBack, 
+  SkipForward, 
+  AlertCircle,
+  ListMusic,
+  Check
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { 
@@ -10,11 +23,18 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { cn } from '@/lib/utils';
 
 /**
  * FooterMusicPlayer: A high-fidelity, feature-rich audio component for the institutional footer.
  * Features: Playlist support, Persistent session memory, Visual equalizer, and Precise volume/seek controls.
+ * Updated: Added track selection dropdown.
  */
 
 const PLAYLIST = [
@@ -138,19 +158,20 @@ export function FooterMusicPlayer({
 
   const handleNext = () => {
     const nextIndex = (currentTrackIndex + 1) % PLAYLIST.length;
-    setCurrentTrackIndex(nextIndex);
-    localStorage.setItem('hrat_footer_music_pos', '0');
-    if (audioRef.current) {
-        audioRef.current.currentTime = 0;
-    }
+    selectTrack(nextIndex);
   };
 
   const handlePrevious = () => {
     const prevIndex = (currentTrackIndex - 1 + PLAYLIST.length) % PLAYLIST.length;
-    setCurrentTrackIndex(prevIndex);
+    selectTrack(prevIndex);
+  };
+
+  const selectTrack = (index: number) => {
+    setCurrentTrackIndex(index);
     localStorage.setItem('hrat_footer_music_pos', '0');
     if (audioRef.current) {
         audioRef.current.currentTime = 0;
+        setCurrentTime(0);
     }
   };
 
@@ -262,7 +283,7 @@ export function FooterMusicPlayer({
                       <div 
                         key={i} 
                         className={cn(
-                          "w-0.5 bg-accent rounded-full transition-all duration-300", 
+                          "w-0.5 bg-orange-500 rounded-full transition-all duration-300", 
                           isPlaying ? "animate-bounce" : "h-1"
                         )} 
                         style={{ 
@@ -313,6 +334,35 @@ export function FooterMusicPlayer({
            </div>
            
            <div className="flex items-center gap-2">
+              {/* Track Selector Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    className="h-8 w-8 rounded-lg text-orange-500 hover:text-white hover:bg-white/10 transition-all"
+                  >
+                    <ListMusic className="w-4 h-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56 bg-slate-900/95 backdrop-blur-xl border-white/10 text-white rounded-2xl shadow-2xl p-2 z-[999999]">
+                   <p className="px-3 py-2 text-[8px] font-black uppercase tracking-widest text-slate-500 border-b border-white/5 mb-1">Select Track</p>
+                   {PLAYLIST.map((track, idx) => (
+                     <DropdownMenuItem 
+                       key={idx}
+                       onClick={() => selectTrack(idx)}
+                       className={cn(
+                         "rounded-xl focus:bg-orange-500 focus:text-white cursor-pointer transition-all flex items-center justify-between",
+                         currentTrackIndex === idx ? "bg-orange-500/20 text-orange-500 font-bold" : "text-slate-300"
+                       )}
+                     >
+                       <span className="text-[10px] uppercase tracking-wide truncate">{track.title}</span>
+                       {currentTrackIndex === idx && <Check className="w-3 h-3" />}
+                     </DropdownMenuItem>
+                   ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -322,7 +372,7 @@ export function FooterMusicPlayer({
                       onClick={toggleLoop}
                       className={cn(
                         "h-8 w-8 rounded-lg transition-all",
-                        isLooping ? "bg-accent/20 text-accent" : "text-orange-500 hover:text-white"
+                        isLooping ? "bg-orange-500/20 text-orange-500" : "text-orange-500 hover:text-white"
                       )}
                     >
                       <Repeat className={cn("w-4 h-4", isLooping && "animate-spin-slow")} />
