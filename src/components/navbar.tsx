@@ -50,7 +50,7 @@ export function Navbar() {
 
   return (
     <header className="flex h-14 md:h-16 shrink-0 items-center border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 md:px-10 sticky top-0 z-[100] transition-all duration-300 w-full overflow-visible">
-      <Link href="/" className="flex items-center gap-3 mr-6 md:mr-10 shrink-0 group">
+      <Link href="/" className="flex items-center gap-3 mr-4 md:mr-10 shrink-0 group">
         <div className="relative w-8 h-8 md:w-11 md:h-11 transition-transform group-hover:scale-110 duration-500">
           <Image src="/HRAT%20Logo.jpeg" alt="HRAT Logo" fill className="object-contain" />
         </div>
@@ -60,7 +60,7 @@ export function Navbar() {
         </div>
       </Link>
 
-      <nav className="flex-1 flex items-center overflow-x-auto md:overflow-visible no-scrollbar gap-1.5 md:gap-3 px-2 touch-pan-x scroll-smooth h-full">
+      <nav className="flex-1 min-w-0 flex items-center overflow-x-auto no-scrollbar gap-1.5 md:gap-3 px-2 touch-pan-x scroll-smooth h-full">
         {publicLinks.map((link) => {
           const isHashLink = link.href.includes('#')
           const linkPath = isHashLink ? link.href.split('#')[0] || '/' : link.href
@@ -96,9 +96,8 @@ export function Navbar() {
         })}
       </nav>
 
-      <div className="ml-4 flex items-center gap-3 shrink-0 relative overflow-visible">
+      <div className="ml-auto flex items-center gap-3 shrink-0 relative overflow-visible">
         <HeaderActions />
-        {/* Institutional Occasion Display Hanging Below Right-Side Actions */}
         <OccasionBanner />
       </div>
     </header>

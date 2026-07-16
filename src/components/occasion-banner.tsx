@@ -12,7 +12,7 @@ import { cn } from '@/lib/utils';
 /**
  * OccasionBanner: High-fidelity festive display area.
  * Features real-time synchronization with the admin 'Occasion Greetings' terminal.
- * Updated to use client-side filtering to avoid Firestore composite index requirements.
+ * Updated to use client-side filtering and robust responsive width constraints.
  */
 export function OccasionBanner() {
   const db = useFirestore();
@@ -29,20 +29,16 @@ export function OccasionBanner() {
 
   const occasionsQuery = useMemoFirebase(() => {
     if (!db) return null;
-    // We fetch the collection without filters/ordering to avoid index dependency
     return collection(db, 'occasions');
   }, [db]);
 
   const { data: occasions, loading } = useCollection(occasionsQuery);
 
   const activeOccasion = useMemo(() => {
-    // Show default banner during load or if collection is empty
     if (loading || !occasions || occasions.length === 0) return DEFAULT_BANNER;
     
     const now = new Date();
     
-    // Perform filtering and sorting client-side to ensure zero-latency visibility 
-    // without requiring manual index creation in the Firebase console.
     const validOccasions = (occasions as any[])
       .filter((occ) => {
         if (!occ.isActive) return false;
@@ -59,11 +55,10 @@ export function OccasionBanner() {
     return validOccasions[0] || DEFAULT_BANNER;
   }, [occasions, loading]);
 
-  // The banner is visible on the Home Page header only
   if (!isHome) return null;
 
   return (
-    <div className="absolute top-full right-0 mt-3 z-[110] animate-in fade-in slide-in-from-top-4 duration-1000 pointer-events-auto min-w-[300px] md:min-w-[400px]">
+    <div className="absolute top-full right-0 mt-3 z-[110] animate-in fade-in slide-in-from-top-4 duration-1000 pointer-events-auto w-[calc(100vw-2rem)] sm:w-auto sm:min-w-[320px] md:min-w-[400px]">
       <div className={cn(
         "bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl p-4 md:p-5 rounded-[2rem] border-2 border-white/20 dark:border-white/5 shadow-[0_30px_70px_-15px_rgba(0,0,0,0.3)] flex items-center gap-5 group hover:border-accent/40 transition-all duration-700",
         loading && "animate-pulse opacity-80"
