@@ -21,9 +21,11 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
+    // Reset state when query changes or becomes null
     if (!query) {
       setLoading(false);
       setData(null);
+      setError(null);
       return;
     }
 
@@ -41,10 +43,17 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
         setLoading(false);
       },
       async (serverError) => {
-        // Enhanced path detection for query objects
-        const pathString = (query as any).path || 
-                           (query as any)._query?.path?.toString() || 
-                           'restricted_path';
+        // Robust path extraction for both CollectionReference and Query objects
+        let pathString = 'restricted_path';
+        try {
+          if ('path' in query) {
+            pathString = (query as any).path;
+          } else if ('_query' in query && (query as any)._query.path) {
+            pathString = (query as any)._query.path.toString();
+          }
+        } catch (e) {
+          pathString = 'unknown_path';
+        }
         
         const permissionError = new FirestorePermissionError({
           path: pathString,
@@ -52,21 +61,22 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
         });
         
         const auth = getAuth();
-        const path = pathString.toLowerCase();
+        const lowerPath = pathString.toLowerCase();
         
-        // Ensure public-facing paths never trigger admin error overlays
-        const isPublicPath = path.includes('occasions') || 
-                           path.includes('events') || 
-                           path.includes('memberprofiles') ||
-                           path.includes('leadership') ||
-                           path.includes('gallery') ||
-                           path.includes('terminatedmembers');
+        // Define public-facing paths that should never trigger administrative blocking overlays
+        const isPublicPath = lowerPath.includes('occasions') || 
+                           lowerPath.includes('events') || 
+                           lowerPath.includes('memberprofiles') ||
+                           lowerPath.includes('leadership') ||
+                           lowerPath.includes('gallery') ||
+                           lowerPath.includes('terminatedmembers');
 
+        // Only emit to the global listener if a user is authenticated and the path is restricted
         if (auth.currentUser && !isPublicPath) {
           errorEmitter.emit('permission-error', permissionError);
         }
         
-        setData([]); // Fallback to empty to allow default states to render
+        setData([]); 
         setError(permissionError);
         setLoading(false);
       }
