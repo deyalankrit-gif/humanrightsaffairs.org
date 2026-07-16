@@ -81,7 +81,7 @@ export function OccasionBanner() {
           <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/5 to-white/0 pointer-events-none"></div>
         </div>
 
-        {/* Narrative Context - Updated with user-requested colors */}
+        {/* Narrative Context - Updated with user-requested colors and sizing */}
         <div className="flex flex-col min-w-0 flex-1">
           <div className="flex items-center gap-2 mb-2 shrink-0">
              <div className={cn(
@@ -101,7 +101,7 @@ export function OccasionBanner() {
              )}
           </div>
           
-          <p className="text-[#CFFF04] font-headline font-bold text-xs md:text-lg lg:text-xl leading-tight md:leading-snug transition-colors drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">
+          <p className="text-[#CFFF04] font-headline font-bold text-[10px] md:text-sm lg:text-base leading-tight md:leading-snug transition-colors drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">
             {activeOccasion.message}
           </p>
           
