@@ -30,7 +30,8 @@
             "publicView": { "type": "boolean" },
             "terminated": { "type": "boolean" },
             "renewals": { "type": "boolean" },
-            "activityHub": { "type": "boolean", "description": "Access to manage Activity Calendar Hub." }
+            "activityHub": { "type": "boolean", "description": "Access to manage Activity Calendar Hub." },
+            "occasions": { "type": "boolean", "description": "Access to manage Festival & Occasion greetings." }
           }
         },
         "lastLogin": { "type": "string", "format": "date-time" },
@@ -78,16 +79,21 @@
       },
       "required": ["uid", "title", "daysBefore"]
     },
-    "ObservanceDay": {
-      "title": "Observance Day",
-      "description": "Built-in important days (International/Legal).",
+    "Occasion": {
+      "title": "Occasion Greeting",
+      "description": "Banner and message for festivals or special events on the homepage.",
       "type": "object",
       "properties": {
         "title": { "type": "string" },
-        "month": { "type": "number" },
-        "day": { "type": "number" },
-        "type": { "type": "string", "enum": ["International", "Legal", "Social Justice", "Human Rights"] }
-      }
+        "message": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "startDate": { "type": "string", "format": "date" },
+        "endDate": { "type": "string", "format": "date" },
+        "isActive": { "type": "boolean" },
+        "priority": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "imageUrl", "startDate", "endDate", "isActive"]
     }
   },
   "auth": {
@@ -97,7 +103,6 @@
     "/users/{userEmail}": { "schema": "UserAccount", "description": "Permissions registry." },
     "/activity_events/{eventId}": { "schema": "ActivityEvent" },
     "/activity_reminders/{reminderId}": { "schema": "ActivityReminder" },
-    "/observance_days/{dayId}": { "schema": "ObservanceDay" },
-    "/national_holidays/{holidayId}": { "schema": "ObservanceDay" }
+    "/occasions/{occasionId}": { "schema": "Occasion", "description": "Festival and special occasion banner registry." }
   }
 }

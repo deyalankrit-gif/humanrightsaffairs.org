@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -40,7 +41,8 @@ import {
   Settings,
   Lock,
   Image as ImageIcon,
-  Radio
+  Radio,
+  Sparkles
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -72,6 +74,7 @@ const adminLinksConfig = [
   { name: 'Members', href: '/internal/members', icon: Users, permission: 'members' },
   { name: 'Renewals', href: '/internal/renewals', icon: RefreshCw, permission: 'renewals' },
   { name: 'Terminated', href: '/internal/terminated-members', icon: UserX, permission: 'terminated' },
+  { name: 'Occasion Greetings', href: '/internal/occasions', icon: Sparkles, permission: 'occasions' },
   { name: 'Inventory', href: '/internal/inventory', icon: Package, permission: 'inventory' },
   { name: 'Vendors', href: '/internal/vendors', icon: Truck, permission: 'vendors' },
   { name: 'Grievances', href: '/internal/grievances', icon: MessageSquareWarning, permission: 'grievances' },

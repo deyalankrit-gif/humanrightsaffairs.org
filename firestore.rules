@@ -22,6 +22,12 @@ service cloud.firestore {
       allow write: if isRoot() || (request.auth != null && request.auth.token.get('email', '').lower() == 'deyalankrit@gmail.com' && userEmail.lower() == 'deyalankrit@gmail.com');
     }
 
+    // Occasions: Public read, Permissioned write
+    match /occasions/{occasionId} {
+      allow read: if true;
+      allow write: if hasPermission('occasions');
+    }
+
     // Member profiles: Public read, Permissioned write
     match /memberProfiles/{profileId} {
       allow read: if true;
@@ -115,16 +121,6 @@ service cloud.firestore {
       allow read: if request.auth != null && (request.auth.uid == resource.data.uid || hasPermission('activityHub'));
       allow write: if request.auth != null && (request.auth.uid == resource.data.uid || hasPermission('activityHub'));
       allow create: if request.auth != null && request.auth.uid == request.resource.data.uid;
-    }
-
-    match /observance_days/{dayId} {
-      allow read: if true;
-      allow write: if isRoot();
-    }
-
-    match /national_holidays/{holidayId} {
-      allow read: if true;
-      allow write: if isRoot();
     }
   }
 }

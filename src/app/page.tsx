@@ -1,3 +1,4 @@
+
 import Image from 'next/image'
 import Link from 'next/link'
 import { ChairmanMessage } from '@/components/chairman-message'
@@ -14,6 +15,7 @@ import { Shield, Scale, Users, HeartHandshake, ArrowRight, Gavel, CheckCircle2, 
 import { DonationDialog } from '@/components/donation-dialog'
 import { Typewriter } from '@/components/typewriter'
 import { PlaceHolderImages } from '@/lib/placeholder-images'
+import { OccasionBanner } from '@/components/occasion-banner'
 
 function BackgroundDecor() {
   return (
@@ -79,6 +81,7 @@ export default function Home() {
           <div className="absolute inset-0 bg-gradient-to-b from-primary/40 via-primary/20 to-primary/60 dark:from-slate-950/70 dark:via-slate-950/50 dark:to-slate-950/80"></div>
         </div>
 
+        {/* Institutional Brandingmirrors OccasionBanner */}
         <div className="absolute top-8 left-8 z-20 hidden xl:flex items-center gap-6 animate-in fade-in slide-in-from-left-4 duration-1000">
           <div className="relative w-24 h-24 transition-transform hover:scale-105">
             <Image src="/HRAT%20Logo.jpeg" alt="HRAT Logo" fill className="object-contain" />
@@ -89,6 +92,9 @@ export default function Home() {
             <span className="text-[12px] font-bold text-white mt-1 border-t border-white/10 pt-1">মানবাধিকার সংগঠন</span>
           </div>
         </div>
+
+        {/* Dynamic Occasion Greeting Banner */}
+        <OccasionBanner />
 
         <div className="container mx-auto px-0 md:px-4 relative z-10 text-white text-center">
           <div className="max-w-5xl mx-auto space-y-4 md:space-y-6 flex flex-col items-center">
