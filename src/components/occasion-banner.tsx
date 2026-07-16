@@ -12,18 +12,17 @@ import { cn } from '@/lib/utils';
 /**
  * OccasionBanner: High-fidelity festive display area.
  * Features: Fully transparent background, #CFFF04 primary typography, and #FF00FF for "Welcome to HRAT".
- * Real-time synchronization is established via the optimized useCollection listener.
+ * Fixed for robust real-time synchronization with the admin terminal.
  */
 export function OccasionBanner() {
   const db = useFirestore();
   const pathname = usePathname();
   const isHome = pathname === '/';
 
-  // Default institutional banner if no occasion is active in the database
   const DEFAULT_BANNER = {
     title: 'Welcome to HRAT',
     message: 'Human Rights Affairs Trust (Justice Shield) — Standing for your constitutional rights.',
-    imageUrl: '/HRAT Logo.jpeg',
+    imageUrl: '/HRAT%20Logo.jpeg',
     isDefault: true
   };
 
@@ -35,7 +34,7 @@ export function OccasionBanner() {
   const { data: occasions, loading } = useCollection(occasionsQuery);
 
   const activeOccasion = useMemo(() => {
-    // Return default banner immediately if no data is available
+    // If loading or collection empty, fallback to default branding
     if (!occasions || (occasions as any[]).length === 0) return DEFAULT_BANNER;
     
     const now = new Date();
@@ -44,7 +43,7 @@ export function OccasionBanner() {
       .filter((occ) => {
         if (!occ.isActive) return false;
         try {
-          // Robust date range validation to ensure instant reflection of newly posted occasions
+          // Parse dates stored as strings YYYY-MM-DD from the admin terminal
           const start = startOfDay(parseISO(occ.startDate));
           const end = endOfDay(parseISO(occ.endDate));
           return isWithinInterval(now, { start, end });
@@ -54,11 +53,10 @@ export function OccasionBanner() {
       })
       .sort((a, b) => (b.priority || 0) - (a.priority || 0));
 
-    // Return the highest priority valid occasion, or fallback to default
     return validOccasions[0] || DEFAULT_BANNER;
   }, [occasions]);
 
-  // Restrict visibility to the Homepage landing experience
+  // Only display on the landing experience
   if (!isHome) return null;
 
   const isDefault = activeOccasion.isDefault === true;
@@ -70,10 +68,10 @@ export function OccasionBanner() {
         loading && "opacity-50"
       )}>
         
-        {/* Visual Focus: Large High-Impact Container */}
+        {/* Visual Focus: Enlarged Image Container */}
         <div className="relative w-24 h-24 md:w-32 md:h-32 rounded-2xl md:rounded-[1.5rem] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.3)] border-2 border-white/20 shrink-0 group-hover:scale-105 transition-transform duration-700 bg-slate-900/50">
           <Image 
-            src={activeOccasion.imageUrl || '/HRAT Logo.jpeg'} 
+            src={activeOccasion.imageUrl || '/HRAT%20Logo.jpeg'} 
             alt={activeOccasion.title} 
             fill 
             className="object-cover" 
@@ -82,7 +80,7 @@ export function OccasionBanner() {
           <div className="absolute inset-0 bg-gradient-to-tr from-black/20 via-transparent to-white/5 pointer-events-none"></div>
         </div>
 
-        {/* Narrative Context: High-Visibility Neon Typography */}
+        {/* Narrative Context: High-Visibility Chrome Typography */}
         <div className="flex flex-col min-w-0 flex-1">
           <div className="flex items-center gap-2 mb-2 shrink-0">
              <div className={cn(
@@ -100,7 +98,7 @@ export function OccasionBanner() {
              )}
           </div>
           
-          <p className="text-[#CFFF04] font-headline font-bold text-[10px] md:text-sm lg:text-[15px] leading-tight md:leading-snug transition-colors drop-shadow-[0_2px_10px_rgba(0,0,0,0.6)]">
+          <p className="text-[#CFFF04] font-headline font-bold text-[11px] md:text-sm lg:text-[14px] leading-tight md:leading-snug transition-colors drop-shadow-[0_2px_10px_rgba(0,0,0,0.6)]">
             {activeOccasion.message}
           </p>
           
