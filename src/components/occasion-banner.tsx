@@ -12,6 +12,7 @@ import { cn } from '@/lib/utils';
 /**
  * OccasionBanner: High-fidelity festive display area.
  * Positions itself relative to its parent (the 'Helpline' link in Navbar).
+ * Updated with mt-8 to provide a gap from the header bar as requested.
  */
 export function OccasionBanner() {
   const db = useFirestore();
@@ -58,7 +59,7 @@ export function OccasionBanner() {
   if (!isHome) return null;
 
   return (
-    <div className="absolute top-full right-0 mt-2 z-[110] animate-in fade-in slide-in-from-top-2 duration-700 pointer-events-auto w-[calc(100vw-2rem)] sm:w-80 md:w-96 lg:w-[420px]">
+    <div className="absolute top-full right-0 mt-8 z-[110] animate-in fade-in slide-in-from-top-2 duration-700 pointer-events-auto w-[calc(100vw-2rem)] sm:w-80 md:w-96 lg:w-[420px]">
       <div className={cn(
         "bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl p-4 md:p-5 rounded-[2rem] border-2 border-white/20 dark:border-white/5 shadow-[0_30px_70px_-15px_rgba(0,0,0,0.3)] flex items-center gap-4 group hover:border-accent/40 transition-all duration-700",
         loading && "animate-pulse opacity-80"
