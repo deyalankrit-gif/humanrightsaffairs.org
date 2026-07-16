@@ -25,7 +25,10 @@ import {
   AlertCircle,
   Clock,
   Camera,
-  ArrowLeft
+  ArrowLeft,
+  FileText,
+  Scale,
+  ChevronRight
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { errorEmitter } from '@/firebase/error-emitter'
