@@ -69,7 +69,6 @@ export function Navbar() {
           const isHashLink = link.href.includes('#')
           const linkPath = isHashLink ? link.href.split('#')[0] || '/' : link.href
           const linkHash = isHashLink ? '#' + link.href.split('#')[1] : ''
-          const isHelpline = link.name === 'Helpline'
           
           let isActive = false
           if (isHashLink) {
@@ -96,16 +95,15 @@ export function Navbar() {
                 <link.icon className={cn("w-3.5 h-3.5 md:w-4 md:h-4 transition-colors", isActive ? "text-white" : "text-muted-foreground group-hover:text-white")} />
                 <span>{link.name}</span>
               </Link>
-              
-              {/* Institutional Occasion Display Hanging Below Helpline */}
-              {isHelpline && <OccasionBanner />}
             </div>
           )
         })}
       </nav>
 
-      <div className="ml-4 flex items-center gap-3 shrink-0">
+      <div className="ml-4 flex items-center gap-3 shrink-0 relative overflow-visible">
         <HeaderActions />
+        {/* Institutional Occasion Display Hanging Below Right-Side Actions */}
+        <OccasionBanner />
       </div>
     </header>
   )

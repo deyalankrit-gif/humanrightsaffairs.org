@@ -12,7 +12,7 @@ import { cn } from '@/lib/utils';
 /**
  * OccasionBanner: High-fidelity festive display area.
  * Features real-time synchronization with the admin 'Occasion Greetings' terminal.
- * Positioned to hang directly below the 'Helpline' link in the header.
+ * Positioned to hang directly below the header actions.
  */
 export function OccasionBanner() {
   const db = useFirestore();
@@ -39,7 +39,8 @@ export function OccasionBanner() {
   const { data: occasions, loading } = useCollection(occasionsQuery);
 
   const activeOccasion = useMemo(() => {
-    if (!occasions || occasions.length === 0) return DEFAULT_BANNER;
+    // Show default banner during load or if collection is empty
+    if (loading || !occasions || occasions.length === 0) return DEFAULT_BANNER;
     
     const now = new Date();
     
@@ -55,14 +56,17 @@ export function OccasionBanner() {
     });
 
     return found || DEFAULT_BANNER;
-  }, [occasions]);
+  }, [occasions, loading]);
 
-  // Per institutional guidelines, the banner is a core feature of the landing experience
-  if (!isHome || loading) return null;
+  // The banner is visible on the Home Page header only
+  if (!isHome) return null;
 
   return (
-    <div className="absolute top-full right-0 mt-3 z-[110] animate-in fade-in slide-in-from-top-4 duration-1000 pointer-events-auto min-w-[300px] md:min-w-[380px]">
-      <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-2xl p-4 md:p-5 rounded-[2rem] border-2 border-white/20 dark:border-white/5 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.3)] flex items-center gap-5 group hover:border-accent/40 transition-all duration-700">
+    <div className="absolute top-full right-0 mt-3 z-[110] animate-in fade-in slide-in-from-top-4 duration-1000 pointer-events-auto min-w-[300px] md:min-w-[400px]">
+      <div className={cn(
+        "bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl p-4 md:p-5 rounded-[2rem] border-2 border-white/20 dark:border-white/5 shadow-[0_30px_70px_-15px_rgba(0,0,0,0.3)] flex items-center gap-5 group hover:border-accent/40 transition-all duration-700",
+        loading && "animate-pulse opacity-80"
+      )}>
         
         {/* Visual Focus: Thumbnail with Tactical Accent */}
         <div className="relative w-14 h-14 md:w-20 md:h-20 rounded-2xl md:rounded-[1.5rem] overflow-hidden shadow-2xl border-2 border-white dark:border-slate-800 shrink-0 group-hover:scale-110 transition-transform duration-700 bg-slate-100">
@@ -108,7 +112,7 @@ export function OccasionBanner() {
       </div>
       
       {/* Visual Connector Line */}
-      <div className="absolute -top-3 right-8 w-px h-3 bg-white/20 hidden md:block"></div>
+      <div className="absolute -top-3 right-10 w-px h-3 bg-white/20 hidden md:block"></div>
     </div>
   );
 }
