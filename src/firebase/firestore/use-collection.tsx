@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -31,8 +32,9 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
     // 🛡️ COMPLETE SYSTEM SAFEGUARD:
     // If an unauthenticated or newly logging-in user attempts to touch protected collections,
     // intercept the request completely on the client side before it causes a backend snapshot crash.
-    // We check for inclusions of restricted keywords in the collection path.
     const path = pathString.toLowerCase();
+    
+    // Define paths that are strictly for authorized personnel only
     const isRestrictedPath = path.includes('visitors') || 
                              path.includes('users') || 
                              path.includes('expenses') || 
@@ -62,17 +64,25 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
       },
       async (serverError) => {
         // Safe Catch: Prevent internal collection streams from breaking global navigation
-        console.warn(`Firestore stream halted for path: ${pathString}`, serverError.message);
+        // especially for public paths like 'occasions' during auth handshakes.
+        const isPublicPath = path.includes('occasions') || 
+                           path.includes('events') || 
+                           path.includes('memberprofiles');
+
+        if (!isPublicPath) {
+          console.warn(`Firestore stream halted for path: ${pathString}`, serverError.message);
+        }
         
         const permissionError = new FirestorePermissionError({
           path: pathString || 'unknown',
           operation: 'list',
         });
         
-        // Only emit the error if we are genuinely logged in and denied
-        if (auth.currentUser) {
+        // Only emit the error if we are genuinely logged in and denied for a non-public path
+        if (auth.currentUser && !isPublicPath) {
           errorEmitter.emit('permission-error', permissionError);
         }
+        
         setError(permissionError);
         setLoading(false);
       }

@@ -2,13 +2,48 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Standardized authorization helper: Only the primary Root Admin has absolute control
+    // 1. PUBLIC READ ACCESS: High-priority paths readable by everyone
+    match /occasions/{occasionId} {
+      allow read: if true;
+      allow write: if hasPermission('occasions');
+    }
+    
+    match /memberProfiles/{profileId} {
+      allow read: if true;
+      allow write: if hasPermission('members');
+    }
+    
+    match /events/{eventId} {
+      allow read: if true;
+      allow write: if hasPermission('events');
+    }
+
+    match /gallery/{itemId} {
+      allow read: if true;
+      allow write: if hasPermission('gallery');
+    }
+
+    match /leadership/{leaderId} {
+      allow read: if true;
+      allow write: if hasPermission('members');
+    }
+
+    match /terminatedMembers/{memberId} {
+      allow read: if true;
+      allow write: if hasPermission('members');
+    }
+
+    match /meetings/{meetingId} {
+      allow read: if true;
+      allow write: if hasPermission('meetings');
+    }
+
+    // 2. AUTHORIZATION HELPERS
     function isRoot() {
       return request.auth != null && 
              (request.auth.token.get('email', '').lower() == 'deydhritiman@gmail.com');
     }
 
-    // Permission-based authorization helper
     function hasPermission(permission) {
       let email = request.auth.token.get('email', '').lower();
       return isRoot() || 
@@ -16,102 +51,51 @@ service cloud.firestore {
               get(/databases/$(database)/documents/users/$(email)).data.permissions.get(permission, false) == true);
     }
 
-    // User accounts / Roles: Root only write, Authenticated self read
+    // 3. PROTECTED ACCESS: Internal registry and administrative logs
     match /users/{userEmail} {
       allow read: if request.auth != null && (request.auth.token.get('email', '').lower() == userEmail.lower() || isRoot());
       allow write: if isRoot() || (request.auth != null && request.auth.token.get('email', '').lower() == 'deyalankrit@gmail.com' && userEmail.lower() == 'deyalankrit@gmail.com');
     }
 
-    // Occasions: Public read, Permissioned write
-    match /occasions/{occasionId} {
-      allow read: if true;
-      allow write: if hasPermission('occasions');
-    }
-
-    // Member profiles: Public read, Permissioned write
-    match /memberProfiles/{profileId} {
-      allow read: if true;
-      allow write: if hasPermission('members');
-    }
-    
-    // Membership applications: Public create, Permissioned read/write
     match /memberApplications/{appId} {
       allow create: if true;
       allow read, write: if hasPermission('applications');
     }
     
-    // Anyone can submit a donation
     match /donations/{donationId} {
       allow create: if true;
       allow read: if hasPermission('analytics');
       allow delete: if isRoot();
     }
 
-    // Expenses management: Permissioned
     match /expenses/{expenseId} {
       allow read, write: if hasPermission('expenses');
     }
 
-    // Account balances: Permissioned
     match /accounts/{accountId} {
       allow read, write: if hasPermission('accounts');
     }
 
-    // Organizational Events: Public read, Permissioned write
-    match /events/{eventId} {
-      allow read: if true;
-      allow write: if hasPermission('events');
-    }
-
-    // Dedicated Gallery: Public read, Permissioned write
-    match /gallery/{itemId} {
-      allow read: if true;
-      allow write: if hasPermission('gallery');
-    }
-
-    // Leadership Hierarchy: Public read, Permissioned write
-    match /leadership/{leaderId} {
-      allow read: if true;
-      allow write: if hasPermission('members');
-    }
-
-    // Public Termination Notices: Public read, Permissioned write
-    match /terminatedMembers/{memberId} {
-      allow read: if true;
-      allow write: if hasPermission('members');
-    }
-
-    // General Meetings: Public read, Permissioned write
-    match /meetings/{meetingId} {
-      allow read: if true;
-      allow write: if hasPermission('meetings');
-    }
-
-    // Member Grievances: Public create, Permissioned oversight
     match /grievances/{grievanceId} {
       allow create: if true;
       allow read, write: if hasPermission('grievances');
     }
 
-    // Material Inventory: Permissioned
     match /inventory/{itemId} {
       allow read, write: if hasPermission('inventory');
     }
 
-    // Vendor Management: Permissioned
     match /vendors/{vendorId} {
       allow read, write: if hasPermission('vendors');
     }
 
-    // Visitor Analytics: Permissioned
     match /visitors/{visitorId} {
       allow create: if true;
       allow read: if hasPermission('visitors');
       allow write: if hasPermission('visitors');
     }
 
-    // --- ACTIVITY CALENDAR HUB (Standalone) ---
-    
+    // 4. ACTIVITY CALENDAR HUB (Standalone)
     match /activity_events/{eventId} {
       allow read: if request.auth != null;
       allow write: if hasPermission('activityHub');
