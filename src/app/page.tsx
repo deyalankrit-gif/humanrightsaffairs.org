@@ -67,7 +67,7 @@ export default function Home() {
     <main className="min-h-screen relative overflow-x-hidden">
       <BackgroundDecor />
       
-      <section className="relative min-h-[90vh] md:min-h-screen flex flex-col items-center pt-24 md:pt-28 pb-20">
+      <section className="relative min-h-[90vh] md:min-h-screen flex flex-col items-center pt-24 md:pt-28 pb-20 px-4">
         <div className="absolute inset-0 z-0">
           <Image 
             src="/Human%20R2.jpeg" 
@@ -91,12 +91,12 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="container mx-auto px-4 relative z-10 text-white text-center">
+        <div className="container mx-auto px-0 md:px-4 relative z-10 text-white text-center">
           <div className="max-w-5xl mx-auto space-y-4 md:space-y-6 flex flex-col items-center">
             
             <div className="flex flex-col items-center gap-4">
               <IndianFlag />
-              <div className="relative w-full max-w-[200px] h-[100px] md:max-w-[500px] md:h-[250px] transition-all duration-700">
+              <div className="relative w-full max-w-[150px] h-[80px] sm:max-w-[200px] sm:h-[100px] md:max-w-[500px] md:h-[250px] transition-all duration-700">
                 <Image 
                   src="/niti2.png" 
                   alt="Niti Aayog" 
@@ -107,11 +107,11 @@ export default function Home() {
             </div>
 
             <div className="flex flex-col items-center gap-2 w-full mt-2 md:mt-4">
-              <p className="text-[#D4AF37] font-bold text-[8px] sm:text-sm md:text-base uppercase tracking-[0.25em] drop-shadow-lg animate-fade-in">
+              <p className="text-[#D4AF37] font-bold text-[8px] sm:text-xs md:text-base uppercase tracking-[0.2em] md:tracking-[0.25em] drop-shadow-lg animate-fade-in">
                 Government of India ( Niti Aayog Registered )
               </p>
               <div className="font-headline font-bold text-lg sm:text-3xl md:text-5xl lg:text-6xl tracking-tight leading-tight min-h-[1.5em] flex justify-center items-center overflow-visible w-full">
-                <span className="bg-gradient-to-r from-[#FF9933] via-white to-[#138808] bg-clip-text text-transparent italic block drop-shadow-sm px-2 pb-4">
+                <span className="bg-gradient-to-r from-[#FF9933] via-white to-[#138808] bg-clip-text text-transparent italic block drop-shadow-sm px-2 pb-4 text-center">
                   <Typewriter 
                     text="Human Rights Affairs Trust" 
                     speed={80} 
@@ -125,18 +125,18 @@ export default function Home() {
               Upholding Justice. Empowering Citizens.
             </h1>
             
-            <p className="text-[10px] sm:text-base md:text-lg text-slate-300 font-body max-w-2xl leading-relaxed mx-auto px-4 opacity-90">
+            <p className="text-[10px] sm:text-sm md:text-lg text-slate-300 font-body max-w-2xl leading-relaxed mx-auto px-4 opacity-90">
               Providing a robust shield against injustice through expert legal guidance, community support, and constitutional transparency.
             </p>
             
             <div className="flex flex-wrap gap-3 md:gap-6 pt-6 md:pt-8 justify-center">
-              <Link href="/legal-aid">
-                <Button size="lg" className="bg-accent text-white font-bold hover:bg-secondary hover:text-white px-5 py-4 md:px-10 md:py-7 rounded-xl text-xs md:text-lg shadow-xl shadow-accent/20 transition-all hover:-translate-y-1 h-auto whitespace-normal max-w-[280px]">
+              <Link href="/legal-aid" className="w-full sm:w-auto">
+                <Button size="lg" className="bg-accent text-white font-bold hover:bg-secondary hover:text-white px-5 py-4 md:px-10 md:py-7 rounded-xl text-xs md:text-lg shadow-xl shadow-accent/20 transition-all hover:-translate-y-1 h-auto whitespace-normal w-full max-w-xs mx-auto">
                   Affordable Legal Aid Services <ArrowRight className="ml-2 w-3 h-3 md:w-5 md:h-5 shrink-0" />
                 </Button>
               </Link>
-              <Link href="/#knowledge">
-                <Button size="lg" className="bg-secondary text-white font-bold hover:bg-accent px-5 py-4 md:px-10 md:py-7 rounded-xl text-xs md:text-lg transition-all shadow-xl shadow-secondary/10 hover:scale-105 active:scale-95 hover:shadow-2xl hover:shadow-accent/20 h-auto">
+              <Link href="/#knowledge" className="w-full sm:w-auto">
+                <Button size="lg" className="bg-secondary text-white font-bold hover:bg-accent px-5 py-4 md:px-10 md:py-7 rounded-xl text-xs md:text-lg transition-all shadow-xl shadow-secondary/10 hover:scale-105 active:scale-95 hover:shadow-2xl hover:shadow-accent/20 h-auto w-full max-w-xs mx-auto">
                   Explore Rights Library
                 </Button>
               </Link>
@@ -150,9 +150,9 @@ export default function Home() {
                   { icon: <Shield className="w-4 h-4 md:w-5 md:h-5 text-indigo-400" />, count: "100%", label: "Secure Data Handling" },
                   { icon: <HeartHandshake className="w-4 h-4 md:w-5 md:h-5 text-pink-400" />, count: "20+", label: "National Centers" }
                 ].map((stat, i) => (
-                  <div className="flex flex-col sm:flex-row items-center gap-2 md:gap-3 text-white hover:opacity-80 transition-opacity cursor-default justify-center" key={i}>
+                  <div className="flex flex-col items-center gap-1.5 md:gap-3 text-white hover:opacity-80 transition-opacity cursor-default justify-center" key={i}>
                     <div className="p-1.5 md:p-3 bg-white/5 rounded-lg md:rounded-xl shrink-0">{stat.icon}</div>
-                    <div className="space-y-0 text-center sm:text-left">
+                    <div className="space-y-0 text-center">
                       <p className="text-[10px] md:text-sm font-bold font-headline leading-none">{stat.count}</p>
                       <p className="text-[6px] md:text-[8px] font-bold uppercase tracking-[0.1em] text-slate-400 leading-tight">
                         {stat.label}
@@ -321,7 +321,7 @@ export default function Home() {
                   </div>
                 </div>
 
-                <div className="flex flex-col md:flex-row gap-4 md:gap-8 justify-center items-center w-full">
+                <div className="flex flex-col md:flex-row gap-4 md:gap-8 justify-center items-center w-full px-4">
                   <DonationDialog>
                     <Button className="bg-accent text-white font-bold hover:bg-secondary hover:text-white hover:scale-105 active:scale-95 transition-all px-6 py-5 md:px-14 md:py-8 rounded-xl text-sm md:text-2xl shadow-xl shadow-accent/20 w-full md:w-auto h-auto">
                       Donate Securely Now

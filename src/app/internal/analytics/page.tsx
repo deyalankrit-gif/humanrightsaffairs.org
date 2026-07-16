@@ -179,12 +179,12 @@ export default function DonationAnalyticsPage() {
                 ))}
               </div>
 
-              <div className="grid lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <Card className="lg:col-span-2 border-none shadow-sm rounded-3xl bg-card dark:bg-slate-900 overflow-hidden">
                   <CardHeader className="pb-2">
                     <CardTitle className="text-base md:text-lg font-headline font-bold">Revenue Timeline</CardTitle>
                   </CardHeader>
-                  <CardContent className="h-[250px] pb-6">
+                  <CardContent className="h-[250px] md:h-[300px] pb-6">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={stats.chartData}>
                         <CartesianGrid strokeDasharray="3 3" stroke="currentColor" opacity={0.1} vertical={false} />
@@ -204,7 +204,7 @@ export default function DonationAnalyticsPage() {
                   <CardHeader className="pb-0">
                     <CardTitle className="text-base md:text-lg font-headline font-bold">Channels</CardTitle>
                   </CardHeader>
-                  <CardContent className="h-[220px]">
+                  <CardContent className="h-[220px] md:h-[280px]">
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
                         <Pie
@@ -241,48 +241,50 @@ export default function DonationAnalyticsPage() {
                     <FileText className="w-4 h-4 text-accent" /> Contribution Ledger
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="p-0">
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left min-w-[600px]">
-                      <thead className="bg-muted/30 dark:bg-slate-800/50 text-[8px] md:text-[9px] font-bold text-muted-foreground uppercase tracking-widest border-b dark:border-slate-700">
-                        <tr>
-                          <th className="px-6 py-4">Donor Name</th>
-                          <th className="px-6 py-4">Amount</th>
-                          <th className="px-6 py-4">Method</th>
-                          <th className="px-6 py-4">Ref/PAN</th>
-                          <th className="px-6 py-4">Action</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-border dark:divide-slate-800">
-                        {donations && donations.map((d: any) => (
-                          <tr key={d.id} className="hover:bg-muted/20 dark:hover:bg-slate-800/30 transition-colors">
-                            <td className="px-6 py-4 font-bold text-[11px] md:text-xs">{d.donorName || d.name}</td>
-                            <td className="px-6 py-4 text-emerald-600 dark:text-emerald-400 font-bold text-[11px] md:text-xs">₹{d.amount}</td>
-                            <td className="px-6 py-4 text-[9px] md:text-[10px] font-bold text-muted-foreground uppercase">{d.paymentMethod}</td>
-                            <td className="px-6 py-4 font-mono text-[9px] md:text-[10px] text-slate-400">{d.pan || d.transactionId?.slice(-6)}</td>
-                            <td className="px-6 py-4">
-                              <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                  <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-300 hover:text-red-500 rounded-full">
-                                    <Trash2 className="w-3.5 h-3.5" />
-                                  </Button>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent className="rounded-3xl max-w-sm">
-                                  <AlertDialogHeader>
-                                    <AlertDialogTitle className="text-lg">Delete Record?</AlertDialogTitle>
-                                    <AlertDialogDescription className="text-xs">Permanent deletion from the master ledger.</AlertDialogDescription>
-                                  </AlertDialogHeader>
-                                  <AlertDialogFooter>
-                                    <AlertDialogCancel className="rounded-xl h-9 text-xs">Cancel</AlertDialogCancel>
-                                    <AlertDialogAction onClick={() => handleDelete(d.id)} className="bg-red-500 hover:bg-red-600 border-none rounded-xl h-9 text-xs text-white">Confirm</AlertDialogAction>
-                                  </AlertDialogFooter>
-                                </AlertDialogContent>
-                              </AlertDialog>
-                            </td>
+                <CardContent className="p-0 overflow-x-auto">
+                  <div className="min-w-full inline-block align-middle">
+                    <div className="overflow-hidden">
+                      <table className="w-full text-left min-w-[600px]">
+                        <thead className="bg-muted/30 dark:bg-slate-800/50 text-[8px] md:text-[9px] font-bold text-muted-foreground uppercase tracking-widest border-b dark:border-slate-700">
+                          <tr>
+                            <th className="px-6 py-4">Donor Name</th>
+                            <th className="px-6 py-4">Amount</th>
+                            <th className="px-6 py-4">Method</th>
+                            <th className="px-6 py-4">Ref/PAN</th>
+                            <th className="px-6 py-4 text-right">Action</th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                        </thead>
+                        <tbody className="divide-y divide-border dark:divide-slate-800">
+                          {donations && donations.map((d: any) => (
+                            <tr key={d.id} className="hover:bg-muted/20 dark:hover:bg-slate-800/30 transition-colors">
+                              <td className="px-6 py-4 font-bold text-[11px] md:text-xs">{d.donorName || d.name}</td>
+                              <td className="px-6 py-4 text-emerald-600 dark:text-emerald-400 font-bold text-[11px] md:text-xs">₹{d.amount}</td>
+                              <td className="px-6 py-4 text-[9px] md:text-[10px] font-bold text-muted-foreground uppercase">{d.paymentMethod}</td>
+                              <td className="px-6 py-4 font-mono text-[9px] md:text-[10px] text-slate-400">{d.pan || d.transactionId?.slice(-6)}</td>
+                              <td className="px-6 py-4 text-right">
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-300 hover:text-red-500 rounded-full">
+                                      <Trash2 className="w-3.5 h-3.5" />
+                                    </Button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent className="rounded-3xl max-w-[90vw] md:max-w-sm">
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle className="text-lg">Delete Record?</AlertDialogTitle>
+                                      <AlertDialogDescription className="text-xs">Permanent deletion from the master ledger.</AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter className="flex-row gap-2 mt-4">
+                                      <AlertDialogCancel className="rounded-xl h-9 text-xs flex-1 mt-0">Cancel</AlertDialogCancel>
+                                      <AlertDialogAction onClick={() => handleDelete(d.id)} className="bg-red-500 hover:bg-red-600 border-none rounded-xl h-9 text-xs text-white flex-1">Confirm</AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                 </CardContent>
               </Card>

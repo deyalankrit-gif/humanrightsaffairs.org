@@ -79,33 +79,33 @@ export function MemberGrievances() {
 
   if (token) {
     return (
-      <div className="max-w-2xl mx-auto py-12 px-4">
-        <Card className="border-2 border-emerald-500 bg-emerald-50/50 dark:bg-emerald-950/20 rounded-[2.5rem] overflow-hidden shadow-2xl text-center p-8 md:p-16">
+      <div className="max-w-2xl mx-auto py-8 md:py-12 px-4">
+        <Card className="border-2 border-emerald-500 bg-emerald-50/50 dark:bg-emerald-950/20 rounded-[2rem] md:rounded-[2.5rem] overflow-hidden shadow-2xl text-center p-6 md:p-16">
           <div className="flex flex-col items-center gap-6">
-            <div className="w-20 h-20 bg-emerald-100 dark:bg-emerald-900/50 rounded-full flex items-center justify-center text-emerald-600 dark:text-emerald-400 animate-bounce">
-              <CheckCircle2 className="w-12 h-12" />
+            <div className="w-16 h-16 md:w-20 md:h-20 bg-emerald-100 dark:bg-emerald-900/50 rounded-full flex items-center justify-center text-emerald-600 dark:text-emerald-400 animate-bounce">
+              <CheckCircle2 className="w-10 h-10 md:w-12 md:h-12" />
             </div>
             <div className="space-y-2">
-              <h2 className="text-3xl font-headline font-bold text-primary dark:text-white">Grievance Registered</h2>
-              <p className="text-slate-600 dark:text-slate-400 font-medium">Your complaint has been submitted to the Central Council Grievance Cell.</p>
+              <h2 className="text-2xl md:text-3xl font-headline font-bold text-primary dark:text-white">Grievance Registered</h2>
+              <p className="text-xs md:text-base text-slate-600 dark:text-slate-400 font-medium">Your complaint has been submitted to the Central Council Grievance Cell.</p>
             </div>
             
-            <div className="w-full bg-white dark:bg-slate-900 p-8 rounded-3xl border-2 border-dashed border-emerald-200 dark:border-emerald-900 shadow-inner">
+            <div className="w-full bg-white dark:bg-slate-900 p-6 rounded-2xl border-2 border-dashed border-emerald-200 dark:border-emerald-900 shadow-inner">
                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-3">Secure Tracking Token</p>
                <div className="flex items-center justify-center gap-3">
-                 <Hash className="w-6 h-6 text-accent" />
-                 <span className="text-4xl font-headline font-bold text-primary dark:text-white tracking-tighter">{token}</span>
+                 <Hash className="w-4 h-4 md:w-6 md:h-6 text-accent" />
+                 <span className="text-2xl md:text-4xl font-headline font-bold text-primary dark:text-white tracking-tighter">{token}</span>
                </div>
             </div>
 
             <div className="space-y-4 pt-4">
-              <p className="text-xs text-slate-500 leading-relaxed italic">
+              <p className="text-[10px] md:text-xs text-slate-500 leading-relaxed italic">
                 "Please keep this token for future reference. Our cell will contact you via email or phone within 7-10 working days."
               </p>
               <Button 
                 onClick={() => setToken(null)}
                 variant="outline" 
-                className="rounded-xl px-8 font-bold border-emerald-200 text-emerald-700 hover:bg-emerald-50"
+                className="w-full sm:w-auto rounded-xl px-8 font-bold border-emerald-200 text-emerald-700 hover:bg-emerald-50 h-11"
               >
                 File Another Grievance
               </Button>
@@ -118,23 +118,23 @@ export function MemberGrievances() {
 
   return (
     <div className="max-w-4xl mx-auto px-4">
-      <Card className="border-none shadow-2xl rounded-[2.5rem] overflow-hidden bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
-        <div className="grid md:grid-cols-5 h-full">
+      <Card className="border-none shadow-2xl rounded-[2rem] md:rounded-[2.5rem] overflow-hidden bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
+        <div className="grid grid-cols-1 md:grid-cols-5 h-full">
           <div className="md:col-span-2 bg-primary dark:bg-slate-800 p-8 md:p-12 text-primary-foreground flex flex-col justify-between relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-accent/10 rounded-full -mr-16 -mt-16 blur-2xl"></div>
             <div className="relative z-10 space-y-8">
-              <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center border border-white/10">
-                <ShieldAlert className="w-8 h-8 text-accent" />
+              <div className="w-12 h-12 md:w-16 md:h-16 bg-white/10 rounded-2xl flex items-center justify-center border border-white/10">
+                <ShieldAlert className="w-6 h-6 md:w-8 md:h-8 text-accent" />
               </div>
               <div className="space-y-4">
-                <h3 className="text-3xl font-headline font-bold text-white">Central <span className="text-accent italic">Council</span> Grievance Cell</h3>
-                <p className="text-slate-300 text-sm leading-relaxed">
+                <h3 className="text-2xl md:text-3xl font-headline font-bold text-white leading-tight">Central <span className="text-accent italic">Council</span> Grievance Cell</h3>
+                <p className="text-slate-300 text-xs md:text-sm leading-relaxed">
                   We are committed to maintaining the highest ethical standards. Use this portal to report organizational misconduct, member violations, or personal grievances.
                 </p>
               </div>
-              <div className="space-y-4 pt-8 border-t border-white/10">
+              <div className="hidden md:block space-y-4 pt-8 border-t border-white/10">
                 <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.8)]"></div>
+                  <div className="w-2 h-2 rounded-full bg-emerald-400"></div>
                   <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Secure Protocol</span>
                 </div>
                 <div className="flex items-center gap-3">
@@ -143,13 +143,13 @@ export function MemberGrievances() {
                 </div>
               </div>
             </div>
-            <p className="text-[9px] text-slate-500 uppercase font-bold mt-12">Authorized by JusticeShield Central Governance</p>
+            <p className="hidden md:block text-[9px] text-slate-500 uppercase font-bold mt-12">Authorized by JusticeShield Central Governance</p>
           </div>
 
           <div className="md:col-span-3 p-8 md:p-12 bg-white dark:bg-slate-950">
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <FormField control={form.control} name="name" render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-[10px] font-bold uppercase text-slate-400">Full Name</FormLabel>
@@ -166,7 +166,7 @@ export function MemberGrievances() {
                   )} />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <FormField control={form.control} name="email" render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-[10px] font-bold uppercase text-slate-400">Email Address</FormLabel>

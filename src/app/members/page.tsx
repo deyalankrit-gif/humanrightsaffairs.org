@@ -322,7 +322,7 @@ export default function MembersPage() {
   const districtsList = selectedState ? INDIA_DATA[selectedState] : [];
 
   const MemberGrid = ({ items }: { items: Member[] }) => (
-    <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-2 md:gap-3">
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3 sm:gap-4">
       {items.map((member) => {
         const fallback = member.gender?.toLowerCase() === 'female' ? '/dummy w.png' : '/dummy m.png'
         const displayImg = member.imageId?.startsWith('data:') ? member.imageId : (PlaceHolderImages.find(i => i.id === member.imageId)?.imageUrl || fallback)
@@ -345,13 +345,13 @@ export default function MembersPage() {
               setEnlargedId(enlargedId === member.id ? null : member.id);
             }}
             className={cn(
-              "group border-none shadow-sm hover:shadow-2xl transition-all duration-300 rounded-2xl overflow-visible bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 relative hover:scale-110 md:hover:scale-125 hover:z-50 cursor-pointer",
-              enlargedId === member.id && "scale-125 md:scale-150 z-[100] shadow-2xl"
+              "group border-none shadow-sm hover:shadow-2xl transition-all duration-300 rounded-2xl overflow-visible bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 relative hover:scale-105 md:hover:scale-110 hover:z-50 cursor-pointer",
+              enlargedId === member.id && "scale-110 md:scale-125 z-[100] shadow-2xl"
             )}
           >
-            <div className="p-1 md:p-2 pb-0 text-center">
+            <div className="p-1.5 md:p-2 pb-0 text-center">
                <p className={cn(
-                   "text-[6px] md:text-[7px] uppercase tracking-widest transition-colors hover:text-secondary",
+                   "text-[6px] md:text-[8px] uppercase tracking-widest transition-colors hover:text-secondary",
                    enlargedId === member.id ? "whitespace-normal line-clamp-2" : "truncate",
                    isOfficeBearer ? "font-black text-accent" : "font-bold text-accent/80"
                  )}
@@ -367,37 +367,37 @@ export default function MembersPage() {
                   fill 
                   className={cn(
                     "object-cover transition-transform duration-500",
-                    enlargedId === member.id ? "scale-125" : ""
+                    enlargedId === member.id ? "scale-110" : ""
                   )} 
                 />
                 
                 {isOfficeBearer && (
                   <div className="absolute top-1 left-1 bg-white/50 backdrop-blur-sm rounded-full p-0.5 z-10">
-                    <Star className={cn("w-2 h-2 md:w-3 md:h-3", getStarColor(member.level))} />
+                    <Star className={cn("w-2.5 h-2.5 md:w-3.5 md:h-3.5", getStarColor(member.level))} />
                   </div>
                 )}
 
                 <div className="absolute top-1 right-1">
-                  <Badge className="bg-primary/80 backdrop-blur-md text-white font-bold border-none text-[5px] md:text-[6px] px-1 py-0 leading-none h-auto">
+                  <Badge className="bg-primary/80 backdrop-blur-md text-white font-bold border-none text-[5px] md:text-[7px] px-1.5 py-0 leading-none h-auto">
                     {member.level === 'National' ? 'Central' : member.level}
                   </Badge>
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="p-1.5 md:p-2 space-y-1">
+            <CardContent className="p-2 md:p-3 space-y-1.5">
               <div className="flex items-start gap-1">
-                 <BadgeCheck className="w-2 md:w-2.5 h-2 md:h-2.5 text-accent shrink-0 mt-0.5" />
+                 <BadgeCheck className="w-2.5 md:w-3 h-2.5 md:h-3 text-accent shrink-0 mt-0.5" />
                  <div className="min-w-0">
-                   <h3 className="font-headline font-bold text-[8px] md:text-[10px] text-primary dark:text-white leading-tight truncate">{member.name}</h3>
+                   <h3 className="font-headline font-bold text-[9px] md:text-[11px] text-primary dark:text-white leading-tight truncate">{member.name}</h3>
                  </div>
               </div>
-              <div className="space-y-0.5 pt-1 border-t border-slate-100 dark:border-slate-800">
-                <div className="flex items-center gap-1 text-[6px] md:text-[8px] text-muted-foreground">
-                  <MapPin className="w-1.5 md:w-2 h-1.5 md:h-2 text-slate-400 shrink-0" />
+              <div className="space-y-0.5 pt-1.5 border-t border-slate-100 dark:border-slate-800">
+                <div className="flex items-center gap-1.5 text-[7px] md:text-[9px] text-muted-foreground">
+                  <MapPin className="w-2 md:w-2.5 h-2 md:h-2.5 text-slate-400 shrink-0" />
                   <span className="truncate">{member.districtName ? `${member.districtName}, ` : ''}{member.stateName || 'National'}</span>
                 </div>
-                <div className="flex items-center gap-1 text-[6px] md:text-[8px] text-muted-foreground">
-                  <Briefcase className="w-1.5 md:w-2 h-1.5 md:h-2 text-slate-400 shrink-0" />
+                <div className="flex items-center gap-1.5 text-[7px] md:text-[9px] text-muted-foreground">
+                  <Briefcase className="w-2 md:w-2.5 h-2 md:h-2.5 text-slate-400 shrink-0" />
                   <span className="truncate">ID: {member.memberId || 'N/A'}</span>
                 </div>
               </div>
@@ -409,13 +409,13 @@ export default function MembersPage() {
   )
 
   const SectionHeading = ({ title, icon: Icon, color, subtitle }: { title: string, icon: any, color: string, subtitle?: string }) => (
-    <div className="flex items-center gap-3 md:gap-4 mb-6 md:mb-8 pb-3 md:pb-4 border-b border-slate-100 dark:border-slate-800">
-      <div className={cn("p-2 md:p-3 rounded-xl md:rounded-2xl bg-white dark:bg-slate-900 shadow-sm border", color)}>
-        <Icon className="w-4 h-4 md:w-6 md:h-6" />
+    <div className="flex items-center gap-3 md:gap-5 mb-8 md:mb-10 pb-4 md:pb-5 border-b border-slate-100 dark:border-slate-800">
+      <div className={cn("p-2.5 md:p-4 rounded-xl md:rounded-[1.5rem] bg-white dark:bg-slate-900 shadow-sm border", color)}>
+        <Icon className="w-5 h-5 md:w-8 md:h-8" />
       </div>
       <div>
-        <h2 className="text-xl md:text-3xl font-headline font-bold text-primary dark:text-white leading-none">{title}</h2>
-        <p className="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
+        <h2 className="text-xl md:text-4xl font-headline font-bold text-primary dark:text-white leading-none">{title}</h2>
+        <p className="text-[9px] md:text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-1.5">
           {subtitle || "Official Organizational Tier"}
         </p>
       </div>
@@ -424,20 +424,20 @@ export default function MembersPage() {
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950" onClick={() => setEnlargedId(null)}>
-      <section className="pt-24 md:pt-40 pb-16 md:pb-20 bg-primary text-primary-foreground relative overflow-hidden" onClick={(e) => e.stopPropagation()}>
+      <section className="pt-24 md:pt-40 pb-16 md:pb-24 bg-primary text-primary-foreground relative overflow-hidden" onClick={(e) => e.stopPropagation()}>
         <div className="absolute top-0 right-0 w-1/2 h-full bg-accent/5 -skew-x-12"></div>
         <div className="container mx-auto px-4 relative z-10 text-center">
-          <div className="inline-flex items-center gap-2 bg-accent/20 text-accent px-3 md:px-4 py-1 rounded-full text-[10px] md:text-sm font-bold border border-accent/30 mb-4 md:mb-6">
-            <Users className="w-3.5 h-3.5 md:w-4 md:h-4" />
+          <div className="inline-flex items-center gap-2 bg-accent/20 text-accent px-4 py-1.5 rounded-full text-[10px] md:text-sm font-bold border border-accent/30 mb-6 uppercase tracking-widest">
+            <Users className="w-4 h-4 md:w-5 md:h-5" />
             <span>Official Member Records</span>
           </div>
-          <h1 className="text-3xl sm:text-5xl md:text-7xl font-headline font-bold mb-4 md:mb-6 text-primary-foreground">Verified <span className="text-accent italic">Active Members</span></h1>
+          <h1 className="text-3xl sm:text-5xl md:text-7xl font-headline font-bold mb-6 text-primary-foreground leading-tight">Verified <span className="text-accent italic">Active Members</span></h1>
           
-          <div className="max-w-2xl mx-auto space-y-4 mb-6 md:mb-8">
-            <p className="text-sm md:text-xl opacity-80 text-primary-foreground leading-relaxed">
+          <div className="max-w-2xl mx-auto space-y-4 mb-10">
+            <p className="text-sm md:text-xl opacity-80 text-primary-foreground leading-relaxed px-2">
               A dynamic ledger of our dedicated human rights defenders, updated in real-time by the central administration.
             </p>
-            <p className="text-emerald-400 font-bold tracking-wide text-[10px] sm:text-sm md:text-base animate-glow">
+            <p className="text-emerald-400 font-bold tracking-wide text-[10px] sm:text-sm md:text-base animate-glow bg-emerald-500/10 py-2 px-4 rounded-xl border border-emerald-500/20 inline-block">
               The following list contains the names of all currently active members of the organization only
             </p>
           </div>
@@ -445,11 +445,11 @@ export default function MembersPage() {
           {isAdmin && (
             <Dialog open={isDialogOpen} onOpenChange={setIsAddingDialogOpen}>
               <DialogTrigger asChild>
-                <Button className="bg-accent text-primary-foreground font-bold rounded-xl md:rounded-2xl h-11 md:h-14 px-6 md:px-10 flex gap-2 hover:bg-secondary hover:text-white shadow-2xl shadow-accent/20 mx-auto transform hover:scale-105 transition-all text-xs md:text-base h-auto py-3">
-                  <Plus className="w-4 h-4 md:w-6 md:h-6" /> Live Editor: Commission New Membership
+                <Button className="bg-accent text-primary-foreground font-bold rounded-2xl h-14 md:h-16 px-8 md:px-12 flex gap-3 hover:bg-secondary hover:text-white shadow-2xl shadow-accent/20 mx-auto transform hover:scale-105 transition-all text-xs md:text-lg">
+                  <Plus className="w-5 h-5 md:w-7 md:h-7" /> Live Editor: Commission New Membership
                 </Button>
               </DialogTrigger>
-              <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="max-w-2xl bg-white dark:bg-slate-900 rounded-[2rem] border-none shadow-2xl max-h-[90vh] overflow-y-auto">
+              <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="max-w-2xl bg-white dark:bg-slate-900 rounded-[2.5rem] border-none shadow-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle className="text-xl md:text-2xl font-headline font-bold text-primary dark:text-white">Personnel Commissioning</DialogTitle>
                 </DialogHeader>
@@ -660,8 +660,8 @@ export default function MembersPage() {
 
       <section className="py-4 md:py-6 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 sticky top-[48px] md:top-[56px] z-30 shadow-sm transition-colors" onClick={(e) => e.stopPropagation()}>
         <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-            <div className="flex flex-wrap items-center gap-2 justify-center">
+          <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
+            <div className="flex flex-wrap items-center gap-2 justify-center w-full lg:w-auto">
               <div className="flex flex-wrap justify-center gap-1.5">
                 {["All", "National", "State", "District"].map((level) => (
                   <Button 
@@ -675,12 +675,12 @@ export default function MembersPage() {
                         : "text-primary dark:text-slate-300 hover:bg-secondary hover:text-white hover:border-secondary transition-colors"
                     )}
                   >
-                    {level === 'All' ? 'All Levels' : level === 'National' ? 'Central Council' : `${level} Level`}
+                    {level === 'All' ? 'All Levels' : level === 'National' ? 'Central' : `${level}`}
                   </Button>
                 ))}
               </div>
 
-              <div className="h-4 w-px bg-slate-200 dark:bg-slate-800 mx-1 hidden lg:block"></div>
+              <div className="hidden sm:block h-4 w-px bg-slate-200 dark:bg-slate-800 mx-1"></div>
 
               <div className="flex flex-wrap gap-1.5 justify-center">
                 <DropdownMenu>
