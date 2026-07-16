@@ -14,7 +14,8 @@ import {
   MessageSquareWarning, 
   Scale, 
   Phone,
-  Image as ImageIcon
+  Image as ImageIcon,
+  ShieldAlert
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { HeaderActions } from './header-actions'
@@ -28,6 +29,7 @@ const publicLinks = [
   { name: 'Leadership', href: '/leadership', icon: Users },
   { name: 'Members', href: '/members', icon: UserCheck },
   { name: 'Terminated', href: '/terminated-members', icon: UserX },
+  { name: 'Report a complaint', href: '/report-a-complaint', icon: ShieldAlert },
   { name: 'Grievance', href: '/#grievances', icon: MessageSquareWarning },
   { name: 'Rights', href: '/#knowledge', icon: Scale },
   { name: 'Helpline', href: '/#helpline', icon: Phone },
@@ -48,10 +50,6 @@ export function Navbar() {
     }
   }, [])
 
-  // Split links: Scrolling nav links and stable action links
-  const scrollingLinks = publicLinks.filter(l => l.name !== 'Rights' && l.name !== 'Helpline');
-  const stableLinks = publicLinks.filter(l => l.name === 'Rights' || l.name === 'Helpline');
-
   return (
     <header className="flex h-14 md:h-16 shrink-0 items-center border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-2 md:px-4 sticky top-0 z-[100] transition-all duration-300 w-full overflow-visible">
       {/* Brand Section */}
@@ -65,9 +63,9 @@ export function Navbar() {
         </div>
       </Link>
 
-      {/* Scrolled Navigation (Middle) */}
-      <nav className="flex-1 min-w-0 flex items-center overflow-x-auto no-scrollbar gap-1 px-1 touch-pan-x scroll-smooth h-full">
-        {scrollingLinks.map((link) => {
+      {/* Unified Uniform Navigation (Middle) */}
+      <nav className="flex-1 min-w-0 flex items-center justify-center overflow-x-auto no-scrollbar gap-1 px-1 touch-pan-x scroll-smooth h-full">
+        {publicLinks.map((link) => {
           const isHashLink = link.href.includes('#')
           const linkPath = isHashLink ? link.href.split('#')[0] || '/' : link.href
           const linkHash = isHashLink ? '#' + link.href.split('#')[1] : ''
@@ -80,43 +78,7 @@ export function Navbar() {
           }
 
           return (
-            <Link 
-              key={link.name}
-              href={link.href}
-              onClick={() => {
-                if (isHashLink) setActiveHash(linkHash)
-                else setActiveHash('')
-              }}
-              className={cn(
-                "whitespace-nowrap flex items-center gap-1 px-2 md:px-3 py-1 rounded-full text-[9px] md:text-[11px] font-bold transition-all group shrink-0",
-                isActive 
-                  ? "bg-accent text-white shadow-sm" 
-                  : "text-muted-foreground hover:text-white hover:bg-secondary transition-all"
-              )}
-            >
-              <link.icon className={cn("w-3 h-3 md:w-3.5 md:h-3.5 transition-colors", isActive ? "text-white" : "text-muted-foreground group-hover:text-white")} />
-              <span>{link.name}</span>
-            </Link>
-          )
-        })}
-      </nav>
-
-      {/* Stable Actions (Right) */}
-      <div className="ml-auto flex items-center gap-1 md:gap-2 shrink-0 relative overflow-visible h-full pl-2 md:pl-4 border-l border-slate-100 dark:border-slate-800">
-        {stableLinks.map((link) => {
-          const isHashLink = link.href.includes('#')
-          const linkPath = isHashLink ? link.href.split('#')[0] || '/' : link.href
-          const linkHash = isHashLink ? '#' + link.href.split('#')[1] : ''
-          
-          let isActive = false
-          if (isHashLink) {
-            isActive = pathname === linkPath && activeHash === linkHash
-          } else {
-            isActive = pathname === link.href && activeHash === ''
-          }
-
-          return (
-            <div key={link.name} className="relative h-full flex items-center group/action overflow-visible">
+            <div key={link.name} className="relative h-full flex items-center shrink-0">
               <Link 
                 href={link.href}
                 onClick={() => {
@@ -124,7 +86,7 @@ export function Navbar() {
                   else setActiveHash('')
                 }}
                 className={cn(
-                  "whitespace-nowrap flex items-center gap-1 px-2 md:px-3 py-1 rounded-full text-[9px] md:text-[11px] font-bold transition-all group shrink-0",
+                  "whitespace-nowrap flex items-center gap-1 px-1.5 md:px-2 py-1 rounded-full text-[8px] md:text-[10px] font-bold transition-all group",
                   isActive 
                     ? "bg-accent text-white shadow-sm" 
                     : "text-muted-foreground hover:text-white hover:bg-secondary transition-all"
@@ -139,8 +101,10 @@ export function Navbar() {
             </div>
           )
         })}
-        
-        <div className="h-4 w-px bg-slate-200 dark:bg-slate-800 mx-0.5 hidden sm:block" />
+      </nav>
+
+      {/* Stable Header Actions (Right) */}
+      <div className="ml-2 md:ml-4 flex items-center gap-1 md:gap-2 shrink-0 h-full pl-2 md:pl-4 border-l border-slate-100 dark:border-slate-800">
         <HeaderActions />
       </div>
     </header>
