@@ -11,9 +11,8 @@ import { cn } from '@/lib/utils';
 
 /**
  * OccasionBanner: High-fidelity festive display area.
- * Positions itself relative to its parent (the 'Helpline' link in Navbar).
- * Features: Transparent background with high-visibility #CFFF04 typography.
- * The default 'Welcome to HRAT' title is specifically set to #FF00FF.
+ * Features: Fully transparent background, #CFFF04 typography, and #FF00FF default title.
+ * Real-time synchronization is established via the root useCollection listener.
  */
 export function OccasionBanner() {
   const db = useFirestore();
@@ -30,6 +29,7 @@ export function OccasionBanner() {
 
   const occasionsQuery = useMemoFirebase(() => {
     if (!db) return null;
+    // We fetch the full collection to handle real-time sync without index requirements
     return collection(db, 'occasions');
   }, [db]);
 
@@ -37,7 +37,7 @@ export function OccasionBanner() {
 
   const activeOccasion = useMemo(() => {
     // If we're loading or have no data yet, show the default welcome banner
-    if (loading || !occasions || occasions.length === 0) return DEFAULT_BANNER;
+    if (loading || !occasions || (occasions as any[]).length === 0) return DEFAULT_BANNER;
     
     const now = new Date();
     
@@ -45,7 +45,7 @@ export function OccasionBanner() {
       .filter((occ) => {
         if (!occ.isActive) return false;
         try {
-          // Normalize dates to ensure the banner shows for the full duration of the dates specified
+          // Robust date range validation
           const start = startOfDay(parseISO(occ.startDate));
           const end = endOfDay(parseISO(occ.endDate));
           return isWithinInterval(now, { start, end });
@@ -59,18 +59,18 @@ export function OccasionBanner() {
     return validOccasions[0] || DEFAULT_BANNER;
   }, [occasions, loading]);
 
-  // The occasional display area is restricted to the Home Page landing experience
+  // Restrict visibility to the Homepage landing experience
   if (!isHome) return null;
 
   return (
-    <div className="absolute top-full right-0 mt-10 z-[110] animate-in fade-in slide-in-from-top-4 duration-700 pointer-events-auto w-[calc(100vw-2rem)] sm:w-96 md:w-[450px] lg:w-[500px]">
+    <div className="absolute top-full right-0 mt-10 z-[110] animate-in fade-in slide-in-from-top-4 duration-700 pointer-events-auto w-[calc(100vw-2rem)] sm:w-[400px] md:w-[450px] lg:w-[500px]">
       <div className={cn(
-        "bg-transparent p-5 md:p-6 rounded-[2.5rem] border-2 border-white/10 dark:border-white/5 flex items-center gap-5 md:gap-6 group hover:border-[#CFFF04]/40 transition-all duration-700",
+        "bg-transparent p-5 md:p-6 flex items-center gap-5 md:gap-7 group transition-all duration-700",
         loading && "animate-pulse opacity-80"
       )}>
         
-        {/* Visual Focus - Enlarged per institutional request */}
-        <div className="relative w-24 h-24 md:w-32 md:h-32 rounded-2xl md:rounded-[1.5rem] overflow-hidden shadow-2xl border-2 border-white dark:border-slate-800 shrink-0 group-hover:scale-105 transition-transform duration-700 bg-slate-100 dark:bg-slate-800">
+        {/* Visual Focus: Enlarged High-Impact Container */}
+        <div className="relative w-24 h-24 md:w-32 md:h-32 rounded-2xl md:rounded-[1.5rem] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.3)] border-2 border-white/20 dark:border-white/5 shrink-0 group-hover:scale-105 transition-transform duration-700 bg-slate-900/50">
           <Image 
             src={activeOccasion.imageUrl || '/HRAT Logo.jpeg'} 
             alt={activeOccasion.title} 
@@ -78,10 +78,10 @@ export function OccasionBanner() {
             className="object-cover" 
             priority
           />
-          <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/5 to-white/0 pointer-events-none"></div>
+          <div className="absolute inset-0 bg-gradient-to-tr from-black/20 via-transparent to-white/5 pointer-events-none"></div>
         </div>
 
-        {/* Narrative Context - Updated with user-requested colors and sizing */}
+        {/* Narrative Context: High-Visibility Neon Typography */}
         <div className="flex flex-col min-w-0 flex-1">
           <div className="flex items-center gap-2 mb-2 shrink-0">
              <div className={cn(
@@ -89,30 +89,28 @@ export function OccasionBanner() {
                activeOccasion.isDefault ? "bg-[#FF00FF]" : "bg-[#CFFF04]"
              )}></div>
              <span className={cn(
-               "text-[8px] md:text-[10px] font-black uppercase tracking-[0.25em] truncate",
+               "text-[9px] md:text-[11px] font-black uppercase tracking-[0.25em] truncate",
                activeOccasion.isDefault ? "text-[#FF00FF]" : "text-[#CFFF04]"
              )}>
                {activeOccasion.title}
              </span>
-             {activeOccasion.isDefault ? (
-               <ShieldCheck className="w-3 h-3 text-emerald-500 ml-auto opacity-50" />
-             ) : (
-               <Sparkles className="w-3 h-3 text-[#CFFF04] animate-float ml-auto" />
+             {!activeOccasion.isDefault && (
+               <Sparkles className="w-3.5 h-3.5 text-[#CFFF04] animate-float ml-auto shrink-0" />
              )}
           </div>
           
-          <p className="text-[#CFFF04] font-headline font-bold text-[10px] md:text-sm lg:text-base leading-tight md:leading-snug transition-colors drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">
+          <p className="text-[#CFFF04] font-headline font-bold text-[11px] md:text-sm lg:text-base leading-tight md:leading-snug transition-colors drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)]">
             {activeOccasion.message}
           </p>
           
-          <div className="flex items-center gap-2 mt-3 opacity-80">
+          <div className="flex items-center gap-2 mt-4 opacity-60">
              {activeOccasion.isDefault ? (
-               <Info className="w-2.5 h-2.5 text-[#CFFF04]" />
+               <ShieldCheck className="w-3 h-3 text-[#CFFF04]" />
              ) : (
-               <PartyPopper className="w-2.5 h-2.5 text-emerald-500" />
+               <PartyPopper className="w-3 h-3 text-emerald-400" />
              )}
-             <span className="text-[7px] md:text-[8px] font-bold text-[#CFFF04] uppercase tracking-widest">
-               {activeOccasion.isDefault ? 'Mission Update' : 'Special Greeting'}
+             <span className="text-[7px] md:text-[9px] font-black text-[#CFFF04] uppercase tracking-[0.2em]">
+               {activeOccasion.isDefault ? 'Institutional Mission' : 'Active Occasion'}
              </span>
           </div>
         </div>

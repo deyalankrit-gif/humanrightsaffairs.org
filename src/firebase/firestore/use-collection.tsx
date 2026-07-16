@@ -14,25 +14,32 @@ import { useFirestore } from '../provider';
 import { errorEmitter } from '../error-emitter';
 import { FirestorePermissionError } from '../errors';
 
+/**
+ * useCollection Hook: Provides real-time data from a Firestore collection or query.
+ * Updated to handle public vs. restricted paths and ensure stable loading state transitions.
+ */
 export function useCollection<T = DocumentData>(query: Query<T> | null) {
   const [data, setData] = useState<T[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
+    // If no query is provided (e.g. database not yet initialized), halt and signal ready
     if (!query) {
       setLoading(false);
       return;
     }
 
-    // Capture the path from the query object, handling different SDK internal structures
+    // Reset loading state for new query initialization
+    setLoading(true);
+
+    // Extract path for security intercept logic
     const pathString = (query as any).path || (query as any)._query?.path?.toString() || '';
     const auth = getAuth();
     const path = pathString.toLowerCase();
     
     // 🛡️ SECURITY INTERCEPT:
-    // Define paths that are strictly for authorized personnel only.
-    // Public paths are exempted to prevent hangs during auth resolution for general site visitors.
+    // Ensure public paths are readable without auth to prevent synchronization hangs for guests.
     const isPublicPath = path.includes('occasions') || 
                        path.includes('events') || 
                        path.includes('memberprofiles') ||
@@ -51,12 +58,13 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
                              path.includes('applications') ||
                              path.includes('grievances'));
 
-    // If the path is restricted and we don't have a stable Auth session, halt immediately.
+    // Block restricted paths if no active authenticated session exists
     if (isRestrictedPath && !auth.currentUser) {
       setLoading(false);
       return;
     }
 
+    // Establish real-time listener
     const unsubscribe = onSnapshot(
       query,
       (snapshot: QuerySnapshot<T>) => {
@@ -74,7 +82,7 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
           operation: 'list',
         });
         
-        // Only emit the error if it's a genuine permission failure on a sensitive path
+        // Emit error only for genuine permission failures on non-public data
         if (auth.currentUser && !isPublicPath) {
           errorEmitter.emit('permission-error', permissionError);
         }
