@@ -2,7 +2,7 @@
 
 import React, { useMemo } from 'react';
 import Image from 'next/image';
-import { Mail, Phone, MapPin, Facebook, Twitter, Instagram, Youtube, Bell } from 'lucide-react';
+import { Mail, Phone, MapPin, Facebook, Twitter, Instagram, Youtube, Bell, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import { DonationDialog } from './donation-dialog';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
@@ -13,28 +13,25 @@ import { cn } from '@/lib/utils';
 
 /**
  * AdminFooter: Independent component for protected dashboard pages.
- * Replicates design but managed as a separate logical entity for future admin-specific scaling.
+ * Responsive design with compact grid for mobile admin view.
  */
 export function AdminFooter() {
   const donationFooterImg = PlaceHolderImages.find(img => img.id === 'donation-footer-image');
   const { user } = useUser();
   const db = useFirestore();
 
-  // Reminders Listener
   const remindersQuery = useMemoFirebase(() => {
     if (!db || !user) return null;
     return query(collection(db, 'activity_reminders'), where('uid', '==', user.uid));
   }, [db, user]);
   const { data: reminders } = useCollection(remindersQuery);
 
-  // Events Listener for cross-referencing
   const eventsQuery = useMemoFirebase(() => {
     if (!db) return null;
     return query(collection(db, 'activity_events'), orderBy('date', 'asc'));
   }, [db]);
   const { data: events } = useCollection(eventsQuery);
 
-  // Determine if there are valid active reminders
   const hasReminders = useMemo(() => {
     if (!reminders || reminders.length === 0) return false;
     if (!events) return reminders.length > 0;
@@ -43,162 +40,66 @@ export function AdminFooter() {
   }, [reminders, events]);
 
   return (
-    <footer className="bg-primary text-primary-foreground pt-20 pb-10 print:hidden border-t border-white/5 mt-auto">
+    <footer className="bg-primary text-primary-foreground pt-12 md:pt-20 pb-6 md:pb-10 print:hidden border-t border-white/5 mt-auto w-full">
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 md:gap-12 mb-12">
           <div className="space-y-6">
-            <Link href="/" className="flex items-center gap-2 group">
-              <div className="relative w-10 h-10">
-                <Image 
-                  src="/HRAT%20Logo.jpeg" 
-                  alt="HRAT Logo" 
-                  fill 
-                  className="object-contain"
-                />
+            <div className="flex items-center gap-2">
+              <div className="relative w-8 h-8">
+                <Image src="/HRAT%20Logo.jpeg" alt="Logo" fill className="object-contain" />
               </div>
               <div className="flex flex-col">
-                <span className="font-headline font-bold text-xl leading-none">HRAT</span>
-                <span className="text-[10px] font-bold tracking-widest text-accent uppercase">Justice Shield</span>
+                <span className="font-headline font-bold text-lg leading-none">HRAT</span>
+                <span className="text-[8px] font-bold tracking-widest text-accent uppercase">Personnel Terminal</span>
               </div>
-            </Link>
-            <p className="text-primary-foreground/80 text-sm leading-relaxed">
-              Human Rights Affairs Trust (Justice Shield) is a Central Government Registered Human Rights Organization in India <a href="https://ngodarpan.gov.in/#/search-ngo" target="_blank" rel="noopener noreferrer" className="font-bold text-accent hover:underline decoration-accent/50 underline-offset-4">(Reg. No. WB/2025/0762605)</a>. Dedicated to constitutional literacy & legal aid & Social Justice.
+            </div>
+            <p className="text-primary-foreground/70 text-xs leading-relaxed">
+              Official Governance Portal for the Human Rights Affairs Trust. Access restricted to authorized officials and commissioned members only.
             </p>
-            
-            <div className="space-y-4">
-              <DonationDialog initialStep="qr">
-                <button className="block w-40 h-28 relative group cursor-pointer overflow-hidden rounded-xl bg-transparent border-none p-0 outline-none transition-all duration-500 hover:scale-[2] hover:z-50 active:scale-95 origin-center">
-                  <Image 
-                    src={donationFooterImg?.imageUrl || "/HRAT%20Donate.jpeg"} 
-                    alt="Donate to HRAT" 
-                    fill 
-                    className="object-contain"
-                    data-ai-hint={donationFooterImg?.imageHint || "donation support"}
-                  />
-                  <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                </button>
-              </DonationDialog>
-            </div>
-
             <div className="flex gap-4">
-              <a href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-accent transition-colors">
-                <Facebook className="w-5 h-5" />
-              </a>
-              <a href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-accent transition-colors">
-                <Twitter className="w-5 h-5" />
-              </a>
-              <a href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-accent transition-colors">
-                <Instagram className="w-5 h-5" />
-              </a>
-              <a href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-accent transition-colors">
-                <Youtube className="w-5 h-5" />
-              </a>
+              <ShieldCheck className="w-8 h-8 text-emerald-500 opacity-50" />
+              <div className="scale-75 origin-left opacity-80">
+                <FooterMusicPlayer />
+              </div>
             </div>
           </div>
 
-          <div>
-            <h4 className="text-lg font-headline font-bold mb-6 text-accent">Quick Links</h4>
-            <ul className="space-y-4 text-primary-foreground/80">
-              <li><Link href="/#leadership" className="hover:text-accent transition-colors font-medium">Chairman's Message</Link></li>
-              <li><Link href="/#knowledge" className="hover:text-accent transition-colors font-medium">Rights Center</Link></li>
-              <li><Link href="/#membership" className="hover:text-accent transition-colors font-medium">Be A Member</Link></li>
-              <li><Link href="/#helpline" className="hover:text-accent transition-colors font-medium">Emergency Contacts</Link></li>
-              <li>
-                <DonationDialog>
-                  <button className="hover:text-accent transition-colors font-medium text-left">Donate Now</button>
-                </DonationDialog>
-              </li>
-              <li><Link href="/donors" className="hover:text-accent transition-colors font-medium">Thank You to Our Donors</Link></li>
-              <li><Link href="/trust-credentials" className="hover:text-accent transition-colors font-medium">Credentials of the Trust</Link></li>
-              <li>
-                <Link 
-                  href="/internal/activity-hub" 
-                  className="text-emerald-400 font-bold hover:text-white transition-colors flex items-center gap-2"
-                >
-                  <Bell className={cn("w-4 h-4 text-red-500 fill-red-500", hasReminders && "animate-ring")} />
-                  <span className={cn(hasReminders && "animate-pulsate")}>Activity Calendar Hub</span>
-                </Link>
-              </li>
-              <li><span className="text-[#CEFF00] font-bold text-lg underline block">Link for Office Use Only</span></li>
-              <li>
-                <Link href="/legal/official-representation" className="text-[#CEFF00] hover:text-primary-foreground transition-colors font-bold flex flex-col leading-tight">
-                  <span>Official Representation</span>
-                  <span className="text-[10px] opacity-80">(For Organizational Use Only)</span>
-                </Link>
-              </li>
-              <li>
-                <Link href="/trust-responsibilities" className="text-[#CEFF00] hover:text-primary-foreground transition-colors font-medium leading-tight inline-block">
-                  Duties and Responsibilities of Trust Staff, Volunteers, and Leaders
-                </Link>
-              </li>
+          <div className="space-y-4">
+            <h4 className="text-sm font-black uppercase tracking-widest text-accent">Active Modules</h4>
+            <ul className="space-y-2 text-primary-foreground/60 text-xs">
+              <li><Link href="/internal/analytics" className="hover:text-accent">Financial Analytics</Link></li>
+              <li><Link href="/internal/members" className="hover:text-accent">Member Registry</Link></li>
+              <li><Link href="/internal/applications" className="hover:text-accent">Applications Cell</Link></li>
+              <li><Link href="/internal/activity-hub" className="hover:text-accent flex items-center gap-2">Activity Calendar {hasReminders && <Bell className="w-3 h-3 text-red-500 animate-ring" />}</Link></li>
             </ul>
           </div>
 
-          <div>
-            <h4 className="text-lg font-headline font-bold mb-6 text-accent">Legal Support</h4>
-            <ul className="space-y-4 text-primary-foreground/80">
-              <li><Link href="/legal/pro-bono" className="hover:text-accent transition-colors font-medium">Pro-Bono Services</Link></li>
-              <li><Link href="/legal/fir-format" className="hover:text-accent transition-colors font-medium">Filing an FIR</Link></li>
-              <li><Link href="/legal/rti-assistant" className="hover:text-accent transition-colors font-medium">RTI Assistant</Link></li>
-              <li><Link href="/legal/bail-procedure" className="hover:text-accent transition-colors font-medium">Bail Procedures</Link></li>
-              <li><Link href="/legal/privacy-policy" className="hover:text-accent transition-colors font-medium">Privacy Policy</Link></li>
-              <li>
-                <Link href="/complaint-form" className="text-[#FF00FF] hover:text-primary-foreground transition-colors font-bold flex flex-col leading-tight">
-                  <span>Complaint Submission Form</span>
-                  <span className="text-[10px] opacity-80">(অভিযোগ জমা দেওয়ার ফরম)</span>
-                </Link>
-              </li>
-            </ul>
-            <FooterMusicPlayer />
-          </div>
-
-          <div>
-            <div className="mb-10">
-              <h4 className="text-lg font-headline font-bold mb-6 text-accent">National Head Office</h4>
-              <ul className="space-y-4 text-primary-foreground/80">
-                <li className="flex gap-3">
-                  <MapPin className="w-5 h-5 text-accent shrink-0" />
-                  <span className="text-sm">9567, Tokri Walan Azad Market, Delhi. Pin - 110006</span>
-                </li>
-                <li className="flex gap-3">
-                  <Phone className="w-5 h-5 text-accent shrink-0" />
-                  <span className="text-sm">+91 89811 52748</span>
-                </li>
-                <li className="flex gap-3">
-                  <Mail className="w-5 h-5 text-accent shrink-0" />
-                  <a href="mailto:humanrightsaffairstrust@gmail.com" className="text-sm hover:text-accent transition-colors font-bold">humanrightsaffairstrust@gmail.com</a>
-                </li>
-              </ul>
+          <div className="space-y-4">
+            <h4 className="text-sm font-black uppercase tracking-widest text-accent">System Status</h4>
+            <div className="space-y-3 bg-white/5 p-4 rounded-2xl border border-white/10">
+               <div className="flex justify-between items-center text-[10px]">
+                 <span className="text-slate-500 uppercase">Database</span>
+                 <span className="text-emerald-400 font-bold">Synchronized</span>
+               </div>
+               <div className="flex justify-between items-center text-[10px]">
+                 <span className="text-slate-500 uppercase">Encryption</span>
+                 <span className="text-emerald-400 font-bold">AES-256 Active</span>
+               </div>
             </div>
+          </div>
 
-            <div>
-              <h4 className="text-lg font-headline font-bold mb-6 text-accent">West Bengal State Office</h4>
-              <ul className="space-y-4 text-primary-foreground/80">
-                <li className="flex gap-3">
-                  <MapPin className="w-5 h-5 text-accent shrink-0" />
-                  <span className="text-sm">Vill. - Biswanathpur, P.O. - Ramnathpur, P.S. - Deganga, Dist. - North 24 Parganas, West Bengal - 743423</span>
-                </li>
-                <li className="flex gap-3">
-                  <Phone className="w-5 h-5 text-accent shrink-0" />
-                  <span className="text-sm">+91 70631 11471</span>
-                </li>
-                <li className="flex gap-3">
-                  <Mail className="w-5 h-5 text-accent shrink-0" />
-                  <a href="mailto:hrat.wb.chairman@gmail.com" className="text-sm hover:text-accent transition-colors font-bold">hrat.wb.chairman@gmail.com</a>
-                </li>
-              </ul>
+          <div className="space-y-4">
+            <h4 className="text-sm font-black uppercase tracking-widest text-accent">Support Hub</h4>
+            <div className="space-y-3 text-primary-foreground/60 text-xs">
+               <p>National Tech Cell: <span className="text-white font-bold">+91 89811 52748</span></p>
+               <p>Official HQ: <span className="text-white">New Delhi, India</span></p>
             </div>
           </div>
         </div>
 
-        <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-primary-foreground/60 text-xs">© 2024 Human Rights Affairs Trust (Justice Shield). Registered with Central Government of India.</p>
-          <div className="flex items-center gap-6">
-             <div className="bg-white/5 px-4 py-2 rounded-lg border border-white/10 flex items-center gap-2">
-               <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
-               <span className="text-[10px] font-bold uppercase tracking-widest text-primary-foreground/70">System Secure</span>
-             </div>
-          </div>
+        <div className="pt-6 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4 text-[9px] md:text-[10px] text-primary-foreground/40 font-bold uppercase tracking-widest">
+          <p>© 2024 HRAT Institutional Governance System</p>
+          <p>Personnel Session: {user?.email || 'N/A'}</p>
         </div>
       </div>
     </footer>

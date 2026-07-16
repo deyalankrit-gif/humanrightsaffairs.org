@@ -121,7 +121,7 @@ export default function Home() {
               </div>
             </div>
             
-            <h1 className="text-base sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-headline font-bold leading-tight bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-cyan-400 bg-[length:200%_auto] bg-clip-text text-transparent animate-gradient-x py-2 w-full drop-shadow-md">
+            <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-headline font-bold leading-tight bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-cyan-400 bg-[length:200%_auto] bg-clip-text text-transparent animate-gradient-x py-2 w-full drop-shadow-md">
               Upholding Justice. Empowering Citizens.
             </h1>
             
@@ -129,15 +129,15 @@ export default function Home() {
               Providing a robust shield against injustice through expert legal guidance, community support, and constitutional transparency.
             </p>
             
-            <div className="flex flex-wrap gap-3 md:gap-6 pt-6 md:pt-8 justify-center">
+            <div className="flex flex-col sm:flex-row gap-3 md:gap-6 pt-6 md:pt-8 justify-center w-full sm:w-auto px-4">
               <Link href="/legal-aid" className="w-full sm:w-auto">
-                <Button size="lg" className="bg-accent text-white font-bold hover:bg-secondary hover:text-white px-5 py-4 md:px-10 md:py-7 rounded-xl text-xs md:text-lg shadow-xl shadow-accent/20 transition-all hover:-translate-y-1 h-auto whitespace-normal w-full max-w-xs mx-auto">
-                  Affordable Legal Aid Services <ArrowRight className="ml-2 w-3 h-3 md:w-5 md:h-5 shrink-0" />
+                <Button size="lg" className="bg-accent text-white font-bold hover:bg-secondary hover:text-white px-5 py-4 md:px-10 md:py-7 rounded-xl text-xs md:text-lg shadow-xl shadow-accent/20 transition-all hover:-translate-y-1 h-auto w-full sm:w-auto">
+                  Legal Aid Cell <ArrowRight className="ml-2 w-3 h-3 md:w-5 md:h-5 shrink-0" />
                 </Button>
               </Link>
               <Link href="/#knowledge" className="w-full sm:w-auto">
-                <Button size="lg" className="bg-secondary text-white font-bold hover:bg-accent px-5 py-4 md:px-10 md:py-7 rounded-xl text-xs md:text-lg transition-all shadow-xl shadow-secondary/10 hover:scale-105 active:scale-95 hover:shadow-2xl hover:shadow-accent/20 h-auto w-full max-w-xs mx-auto">
-                  Explore Rights Library
+                <Button size="lg" className="bg-secondary text-white font-bold hover:bg-accent px-5 py-4 md:px-10 md:py-7 rounded-xl text-xs md:text-lg transition-all shadow-xl shadow-secondary/10 hover:scale-105 active:scale-95 hover:shadow-2xl hover:shadow-accent/20 h-auto w-full sm:w-auto">
+                  Rights Library
                 </Button>
               </Link>
             </div>
@@ -145,10 +145,10 @@ export default function Home() {
             <div className="w-full pt-10 md:pt-20 max-w-4xl mx-auto">
               <div className="glass-dark rounded-[1.5rem] md:rounded-[2.5rem] p-4 md:p-6 grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 border-white/5">
                 {[
-                  { icon: <Scale className="w-4 h-4 md:w-5 md:h-5 text-accent" />, count: "2k+", label: "Legal Cases Resolved" },
-                  { icon: <Users className="w-4 h-4 md:w-5 md:h-5 text-emerald-400" />, count: "50+", label: "Expert Advocates" },
-                  { icon: <Shield className="w-4 h-4 md:w-5 md:h-5 text-indigo-400" />, count: "100%", label: "Secure Data Handling" },
-                  { icon: <HeartHandshake className="w-4 h-4 md:w-5 md:h-5 text-pink-400" />, count: "20+", label: "National Centers" }
+                  { icon: <Scale className="w-4 h-4 md:w-5 md:h-5 text-accent" />, count: "2k+", label: "Cases Resolved" },
+                  { icon: <Users className="w-4 h-4 md:w-5 md:h-5 text-emerald-400" />, count: "50+", label: "Advocates" },
+                  { icon: <Shield className="w-4 h-4 md:w-5 md:h-5 text-indigo-400" />, count: "100%", label: "Secure Vault" },
+                  { icon: <HeartHandshake className="w-4 h-4 md:w-5 md:h-5 text-pink-400" />, count: "20+", label: "Centers" }
                 ].map((stat, i) => (
                   <div className="flex flex-col items-center gap-1.5 md:gap-3 text-white hover:opacity-80 transition-opacity cursor-default justify-center" key={i}>
                     <div className="p-1.5 md:p-3 bg-white/5 rounded-lg md:rounded-xl shrink-0">{stat.icon}</div>
@@ -189,7 +189,7 @@ export default function Home() {
 
       <section id="grievances" className="py-16 md:py-32 bg-slate-50 dark:bg-slate-950 relative overflow-hidden">
         <div className="container mx-auto px-4">
-          <div className="text-center max-w-3xl mx-auto mb-12 md:mb-16">
+          <div className="text-center max-w-3xl mx-auto mb-12 md:mb-16 px-4">
             <div className="inline-flex items-center gap-2 bg-accent/20 text-accent px-4 py-1.5 rounded-full text-[10px] md:text-xs font-bold uppercase tracking-widest border border-accent/30 mb-4 md:mb-6">
               <MessageSquareText className="w-3.5 h-3.5 md:w-4 md:h-4" />
               <span>Institutional Oversight</span>
@@ -280,17 +280,17 @@ export default function Home() {
                   </h3>
                   <div className="w-full space-y-3 md:space-y-4 font-body">
                     <div className="text-center pb-3 md:pb-4 border-b border-white/5">
-                      <p className="text-lg md:text-xl font-bold text-white leading-tight">State Bank of India</p>
-                      <p className="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">(64519) Mangal Deep Island Khaki Estate Branch</p>
+                      <p className="text-base md:text-xl font-bold text-white leading-tight">State Bank of India</p>
+                      <p className="text-[7px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Mangal Deep Island Khaki Estate Branch</p>
                     </div>
                     <div className="grid grid-cols-1 gap-2 md:gap-3">
                       <div className="flex justify-between items-center bg-black/20 p-3 md:p-4 rounded-xl md:rounded-2xl border border-white/5">
                          <span className="text-[8px] md:text-[10px] font-bold text-slate-500 uppercase tracking-widest">IFS Code</span>
-                         <span className="font-mono text-sm md:text-lg font-bold text-accent">SBIN0064519</span>
+                         <span className="font-mono text-xs md:text-lg font-bold text-accent">SBIN0064519</span>
                       </div>
                       <div className="flex justify-between items-center bg-black/20 p-3 md:p-4 rounded-xl md:rounded-2xl border border-white/5">
                          <span className="text-[8px] md:text-[10px] font-bold text-slate-500 uppercase tracking-widest">Account No</span>
-                         <span className="font-mono text-sm md:text-lg font-bold text-accent">44784606147</span>
+                         <span className="font-mono text-xs md:text-lg font-bold text-accent">44784606147</span>
                       </div>
                     </div>
                   </div>
@@ -304,17 +304,17 @@ export default function Home() {
                   </div>
                   <div className="flex flex-wrap justify-center gap-2 md:gap-4">
                     <DonationDialog defaultAmount="100" initialStep="qr">
-                      <Button variant="outline" className="border-accent/30 text-white hover:bg-secondary hover:text-white rounded-full px-5 md:px-8 font-bold h-9 md:h-12 transition-all hover:scale-105 active:scale-95 bg-white/5 backdrop-blur-sm text-xs">
+                      <Button variant="outline" className="border-accent/30 text-white hover:bg-secondary hover:text-white rounded-full px-5 md:px-8 font-bold h-9 md:h-12 transition-all hover:scale-105 active:scale-95 bg-white/5 backdrop-blur-sm text-[10px] md:text-xs">
                         ₹100
                       </Button>
                     </DonationDialog>
                     <DonationDialog defaultAmount="500" initialStep="qr">
-                      <Button variant="outline" className="border-accent/30 text-white hover:bg-secondary hover:text-white rounded-full px-5 md:px-8 font-bold h-9 md:h-12 transition-all hover:scale-105 active:scale-95 bg-white/5 backdrop-blur-sm text-xs">
+                      <Button variant="outline" className="border-accent/30 text-white hover:bg-secondary hover:text-white rounded-full px-5 md:px-8 font-bold h-9 md:h-12 transition-all hover:scale-105 active:scale-95 bg-white/5 backdrop-blur-sm text-[10px] md:text-xs">
                         ₹500
                       </Button>
                     </DonationDialog>
                     <DonationDialog defaultAmount="1000" initialStep="qr">
-                      <Button variant="outline" className="border-accent/30 text-white hover:bg-secondary hover:text-white rounded-full px-5 md:px-8 font-bold h-9 md:h-12 transition-all hover:scale-105 active:scale-95 bg-white/5 backdrop-blur-sm text-xs">
+                      <Button variant="outline" className="border-accent/30 text-white hover:bg-secondary hover:text-white rounded-full px-5 md:px-8 font-bold h-9 md:h-12 transition-all hover:scale-105 active:scale-95 bg-white/5 backdrop-blur-sm text-[10px] md:text-xs">
                         ₹1,000
                       </Button>
                     </DonationDialog>

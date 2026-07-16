@@ -47,22 +47,22 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
       <SidebarProvider defaultOpen={true}>
         <div className="flex min-h-screen bg-background w-full">
           <AppSidebar />
-          <SidebarInset className="flex flex-col">
-            <header className="flex h-10 shrink-0 items-center gap-2 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 px-4 transition-all duration-300 print:hidden">
+          <SidebarInset className="flex flex-col min-w-0">
+            <header className="flex h-12 md:h-10 shrink-0 items-center gap-2 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 px-4 transition-all duration-300 print:hidden">
               <SidebarTrigger className="-ml-1 scale-90" />
               <Separator orientation="vertical" className="mr-2 h-4" />
-              <div className="flex-1">
-                 <h1 className="text-[9px] font-bold uppercase tracking-[0.2em] text-slate-400">
-                    Personnel Portal <span className={cn("ml-2 font-black", isRoot ? "text-red-500" : "text-emerald-500")}>
+              <div className="flex-1 min-w-0">
+                 <h1 className="text-[8px] md:text-[9px] font-bold uppercase tracking-[0.15em] md:tracking-[0.2em] text-slate-400 truncate">
+                    Personnel Portal <span className={cn("ml-1 md:ml-2 font-black", isRoot ? "text-red-500" : "text-emerald-500")}>
                       {isRoot ? "Root Terminal" : "Staff Terminal"}
                     </span>
                  </h1>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 shrink-0">
                 <HeaderActions />
               </div>
             </header>
-            <main className="flex-1 overflow-x-hidden">
+            <main className="flex-1 overflow-x-hidden w-full">
               {children}
             </main>
             <AdminFooter />
@@ -74,10 +74,10 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
 
   // Public Portal Layout or Admin Login Page
   return (
-    <div className="flex flex-col min-h-screen relative bg-background">
+    <div className="flex flex-col min-h-screen relative bg-background w-full overflow-x-hidden">
       <VisitorTracker />
       {!isAdmin && <Navbar />}
-      <div className="flex-1">
+      <div className="flex-1 w-full">
         {children}
       </div>
       {!isLoginPage && <PublicFooter />}
