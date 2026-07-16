@@ -12,7 +12,7 @@ import { cn } from '@/lib/utils';
 /**
  * OccasionBanner: High-fidelity festive display area.
  * Positions itself relative to its parent (the 'Helpline' link in Navbar).
- * Provides a clean gap from the header to match the logo spacing.
+ * Updated with a transparent background for seamless integration.
  */
 export function OccasionBanner() {
   const db = useFirestore();
@@ -64,12 +64,12 @@ export function OccasionBanner() {
   return (
     <div className="absolute top-full right-0 mt-10 z-[110] animate-in fade-in slide-in-from-top-4 duration-700 pointer-events-auto w-[calc(100vw-2rem)] sm:w-96 md:w-[450px] lg:w-[500px]">
       <div className={cn(
-        "bg-white/95 dark:bg-slate-900/95 backdrop-blur-3xl p-5 md:p-6 rounded-[2.5rem] border-2 border-white/20 dark:border-white/5 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.4)] flex items-center gap-5 md:gap-6 group hover:border-accent/40 transition-all duration-700",
+        "bg-transparent p-5 md:p-6 rounded-[2.5rem] border-2 border-white/10 dark:border-white/5 flex items-center gap-5 md:gap-6 group hover:border-accent/40 transition-all duration-700",
         loading && "animate-pulse opacity-80"
       )}>
         
         {/* Visual Focus - Enlarged per institutional request */}
-        <div className="relative w-24 h-24 md:w-32 md:h-32 rounded-2xl md:rounded-[1.5rem] overflow-hidden shadow-xl border-2 border-white dark:border-slate-800 shrink-0 group-hover:scale-105 transition-transform duration-700 bg-slate-100 dark:bg-slate-800">
+        <div className="relative w-24 h-24 md:w-32 md:h-32 rounded-2xl md:rounded-[1.5rem] overflow-hidden shadow-2xl border-2 border-white dark:border-slate-800 shrink-0 group-hover:scale-105 transition-transform duration-700 bg-slate-100 dark:bg-slate-800">
           <Image 
             src={activeOccasion.imageUrl || '/HRAT Logo.jpeg'} 
             alt={activeOccasion.title} 
@@ -94,7 +94,7 @@ export function OccasionBanner() {
              )}
           </div>
           
-          <p className="text-primary dark:text-white font-headline font-bold text-xs md:text-lg leading-tight md:leading-snug group-hover:text-accent transition-colors">
+          <p className="text-primary dark:text-white font-headline font-bold text-xs md:text-lg lg:text-xl leading-tight md:leading-snug group-hover:text-accent transition-colors drop-shadow-md">
             {activeOccasion.message}
           </p>
           
