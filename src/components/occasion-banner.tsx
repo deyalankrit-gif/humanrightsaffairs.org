@@ -13,6 +13,7 @@ import { cn } from '@/lib/utils';
  * OccasionBanner: High-fidelity festive display area.
  * Positions itself relative to its parent (the 'Helpline' link in Navbar).
  * Features: Transparent background with high-visibility #CFFF04 typography.
+ * The default 'Welcome to HRAT' title is specifically set to #FF00FF.
  */
 export function OccasionBanner() {
   const db = useFirestore();
@@ -80,11 +81,17 @@ export function OccasionBanner() {
           <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/5 to-white/0 pointer-events-none"></div>
         </div>
 
-        {/* Narrative Context - Updated with user-requested #CFFF04 color */}
+        {/* Narrative Context - Updated with user-requested colors */}
         <div className="flex flex-col min-w-0 flex-1">
           <div className="flex items-center gap-2 mb-2 shrink-0">
-             <div className="h-1.5 w-1.5 rounded-full bg-[#CFFF04] animate-pulse"></div>
-             <span className="text-[8px] md:text-[10px] font-black text-[#CFFF04] uppercase tracking-[0.25em] truncate">
+             <div className={cn(
+               "h-1.5 w-1.5 rounded-full animate-pulse",
+               activeOccasion.isDefault ? "bg-[#FF00FF]" : "bg-[#CFFF04]"
+             )}></div>
+             <span className={cn(
+               "text-[8px] md:text-[10px] font-black uppercase tracking-[0.25em] truncate",
+               activeOccasion.isDefault ? "text-[#FF00FF]" : "text-[#CFFF04]"
+             )}>
                {activeOccasion.title}
              </span>
              {activeOccasion.isDefault ? (
