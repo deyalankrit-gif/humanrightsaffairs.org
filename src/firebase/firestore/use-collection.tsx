@@ -25,13 +25,14 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
       return;
     }
 
-    const pathString = (query as any)._query?.path?.toString() || '';
+    // Capture the path from the query object, handling different SDK internal structures
+    const pathString = (query as any).path || (query as any)._query?.path?.toString() || '';
     const auth = getAuth();
     const path = pathString.toLowerCase();
     
     // 🛡️ SECURITY INTERCEPT:
     // Define paths that are strictly for authorized personnel only.
-    // Public paths like 'occasions' are exempted to prevent hangs during auth resolution.
+    // Public paths are exempted to prevent hangs during auth resolution for general site visitors.
     const isPublicPath = path.includes('occasions') || 
                        path.includes('events') || 
                        path.includes('memberprofiles') ||

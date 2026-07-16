@@ -12,7 +12,7 @@ import { cn } from '@/lib/utils';
 /**
  * OccasionBanner: High-fidelity festive display area.
  * Positions itself relative to its parent (the 'Helpline' link in Navbar).
- * Updated with mt-8 to provide a gap from the header bar as requested.
+ * Provides a clean gap from the header to match the logo spacing.
  */
 export function OccasionBanner() {
   const db = useFirestore();
@@ -35,6 +35,7 @@ export function OccasionBanner() {
   const { data: occasions, loading } = useCollection(occasionsQuery);
 
   const activeOccasion = useMemo(() => {
+    // If we're loading or have no data yet, show the default welcome banner
     if (loading || !occasions || occasions.length === 0) return DEFAULT_BANNER;
     
     const now = new Date();
@@ -43,6 +44,7 @@ export function OccasionBanner() {
       .filter((occ) => {
         if (!occ.isActive) return false;
         try {
+          // Normalize dates to ensure the banner shows for the full duration of the dates specified
           const start = startOfDay(parseISO(occ.startDate));
           const end = endOfDay(parseISO(occ.endDate));
           return isWithinInterval(now, { start, end });
@@ -52,21 +54,22 @@ export function OccasionBanner() {
       })
       .sort((a, b) => (b.priority || 0) - (a.priority || 0));
 
+    // Return the highest priority valid occasion, or fallback to default
     return validOccasions[0] || DEFAULT_BANNER;
   }, [occasions, loading]);
 
-  // Only visible on Home Page
+  // The occasional display area is restricted to the Home Page landing experience
   if (!isHome) return null;
 
   return (
-    <div className="absolute top-full right-0 mt-8 z-[110] animate-in fade-in slide-in-from-top-2 duration-700 pointer-events-auto w-[calc(100vw-2rem)] sm:w-80 md:w-96 lg:w-[420px]">
+    <div className="absolute top-full right-0 mt-10 z-[110] animate-in fade-in slide-in-from-top-4 duration-700 pointer-events-auto w-[calc(100vw-2rem)] sm:w-96 md:w-[450px] lg:w-[500px]">
       <div className={cn(
-        "bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl p-4 md:p-5 rounded-[2rem] border-2 border-white/20 dark:border-white/5 shadow-[0_30px_70px_-15px_rgba(0,0,0,0.3)] flex items-center gap-4 group hover:border-accent/40 transition-all duration-700",
+        "bg-white/95 dark:bg-slate-900/95 backdrop-blur-3xl p-5 md:p-6 rounded-[2.5rem] border-2 border-white/20 dark:border-white/5 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.4)] flex items-center gap-5 md:gap-6 group hover:border-accent/40 transition-all duration-700",
         loading && "animate-pulse opacity-80"
       )}>
         
-        {/* Visual Focus */}
-        <div className="relative w-12 h-12 md:w-20 md:h-20 rounded-2xl md:rounded-[1.5rem] overflow-hidden shadow-xl border-2 border-white dark:border-slate-800 shrink-0 group-hover:scale-105 transition-transform duration-700 bg-slate-100">
+        {/* Visual Focus - Enlarged per institutional request */}
+        <div className="relative w-24 h-24 md:w-32 md:h-32 rounded-2xl md:rounded-[1.5rem] overflow-hidden shadow-xl border-2 border-white dark:border-slate-800 shrink-0 group-hover:scale-105 transition-transform duration-700 bg-slate-100 dark:bg-slate-800">
           <Image 
             src={activeOccasion.imageUrl || '/HRAT Logo.jpeg'} 
             alt={activeOccasion.title} 
@@ -74,34 +77,35 @@ export function OccasionBanner() {
             className="object-cover" 
             priority
           />
+          <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/5 to-white/0 pointer-events-none"></div>
         </div>
 
         {/* Narrative Context */}
         <div className="flex flex-col min-w-0 flex-1">
-          <div className="flex items-center gap-2 mb-1 shrink-0">
-             <div className="h-1 w-1 rounded-full bg-accent animate-pulse"></div>
-             <span className="text-[7px] md:text-[9px] font-black text-accent uppercase tracking-[0.2em] truncate">
+          <div className="flex items-center gap-2 mb-2 shrink-0">
+             <div className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse"></div>
+             <span className="text-[8px] md:text-[10px] font-black text-accent uppercase tracking-[0.25em] truncate">
                {activeOccasion.title}
              </span>
              {activeOccasion.isDefault ? (
-               <ShieldCheck className="w-2.5 h-2.5 text-emerald-500 ml-auto opacity-50" />
+               <ShieldCheck className="w-3 h-3 text-emerald-500 ml-auto opacity-50" />
              ) : (
-               <Sparkles className="w-2.5 h-2.5 text-accent animate-float ml-auto" />
+               <Sparkles className="w-3 h-3 text-accent animate-float ml-auto" />
              )}
           </div>
           
-          <p className="text-primary dark:text-white font-headline font-bold text-[10px] md:text-[13px] leading-tight group-hover:text-accent transition-colors">
+          <p className="text-primary dark:text-white font-headline font-bold text-xs md:text-lg leading-tight md:leading-snug group-hover:text-accent transition-colors">
             {activeOccasion.message}
           </p>
           
-          <div className="flex items-center gap-1.5 mt-1.5 opacity-50">
+          <div className="flex items-center gap-2 mt-3 opacity-60">
              {activeOccasion.isDefault ? (
-               <Info className="w-2 h-2 text-slate-400" />
+               <Info className="w-2.5 h-2.5 text-slate-400" />
              ) : (
-               <PartyPopper className="w-2 h-2 text-emerald-500" />
+               <PartyPopper className="w-2.5 h-2.5 text-emerald-500" />
              )}
-             <span className="text-[6px] md:text-[7px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
-               {activeOccasion.isDefault ? 'Mission Update' : 'Seasonal Greeting'}
+             <span className="text-[7px] md:text-[8px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
+               {activeOccasion.isDefault ? 'Mission Update' : 'Special Greeting'}
              </span>
           </div>
         </div>
