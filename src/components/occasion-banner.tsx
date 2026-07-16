@@ -50,11 +50,11 @@ export function OccasionBanner() {
   if (!isHome || loading || !activeOccasion) return null;
 
   return (
-    <div className="absolute top-full right-4 md:right-8 mt-1 z-[110] animate-in fade-in slide-in-from-top-2 duration-700 pointer-events-auto">
-      <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl p-3 md:p-4 rounded-2xl md:rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl flex items-center gap-4 group hover:border-accent/40 transition-all duration-500 max-w-[280px] md:max-w-md">
+    <div className="absolute top-full right-0 mt-2 z-[110] animate-in fade-in slide-in-from-top-2 duration-700 pointer-events-auto min-w-[280px] md:min-w-[320px]">
+      <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl p-3 md:p-4 rounded-2xl md:rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl flex items-center gap-4 group hover:border-accent/40 transition-all duration-500">
         
         {/* Visual Focus: Thumbnail */}
-        <div className="relative w-12 h-12 md:w-20 md:h-20 rounded-xl md:rounded-2xl overflow-hidden shadow-lg border-2 border-white dark:border-slate-700 shrink-0 group-hover:scale-105 transition-transform duration-500 bg-slate-100">
+        <div className="relative w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl overflow-hidden shadow-lg border-2 border-white dark:border-slate-700 shrink-0 group-hover:scale-105 transition-transform duration-500 bg-slate-100">
           <Image 
             src={activeOccasion.imageUrl} 
             alt={activeOccasion.title} 
@@ -67,15 +67,15 @@ export function OccasionBanner() {
         {/* Narrative Context */}
         <div className="flex flex-col min-w-0">
           <div className="flex items-center gap-1.5 mb-0.5">
-             <span className="text-[7px] md:text-[9px] font-black text-accent uppercase tracking-[0.2em] truncate">{activeOccasion.title}</span>
+             <span className="text-[7px] md:text-[8px] font-black text-accent uppercase tracking-[0.2em] truncate">{activeOccasion.title}</span>
              <Sparkles className="w-2 h-2 md:w-3 md:h-3 text-accent animate-pulse shrink-0" />
           </div>
-          <p className="text-primary dark:text-white font-headline font-bold text-[10px] md:text-base leading-tight line-clamp-2 md:line-clamp-3">
+          <p className="text-primary dark:text-white font-headline font-bold text-[10px] md:text-sm leading-tight line-clamp-2">
             {activeOccasion.message}
           </p>
           <div className="flex items-center gap-1 mt-1 opacity-60">
              <PartyPopper className="w-2 h-2 text-emerald-500" />
-             <span className="text-[6px] md:text-[8px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Greetings</span>
+             <span className="text-[6px] md:text-[7px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Greetings</span>
           </div>
         </div>
       </div>

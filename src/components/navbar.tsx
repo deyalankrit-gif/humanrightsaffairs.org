@@ -53,7 +53,7 @@ export function Navbar() {
   if (isIframe) return null
 
   return (
-    <header className="flex h-14 shrink-0 items-center border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-3 md:px-8 sticky top-0 z-[100] transition-all duration-300 w-full relative">
+    <header className="flex h-14 shrink-0 items-center border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-3 md:px-8 sticky top-0 z-[100] transition-all duration-300 w-full relative overflow-visible">
       <Link href="/" className="flex items-center gap-2 md:gap-3 mr-3 md:mr-8 shrink-0 group">
         <div className="relative w-7 h-7 md:w-10 md:h-10 transition-transform group-hover:scale-110">
           <Image src="/HRAT%20Logo.jpeg" alt="HRAT Logo" fill className="object-contain" />
@@ -64,11 +64,12 @@ export function Navbar() {
         </div>
       </Link>
 
-      <nav className="flex-1 flex items-center overflow-x-auto no-scrollbar gap-1 md:gap-2 px-1 md:px-2 touch-pan-x scroll-smooth">
+      <nav className="flex-1 flex items-center overflow-x-auto md:overflow-visible no-scrollbar gap-1 md:gap-2 px-1 md:px-2 touch-pan-x scroll-smooth">
         {publicLinks.map((link) => {
           const isHashLink = link.href.includes('#')
           const linkPath = isHashLink ? link.href.split('#')[0] || '/' : link.href
           const linkHash = isHashLink ? '#' + link.href.split('#')[1] : ''
+          const isHelpline = link.name === 'Helpline'
           
           let isActive = false
           if (isHashLink) {
@@ -78,23 +79,25 @@ export function Navbar() {
           }
 
           return (
-            <Link 
-              key={link.name} 
-              href={link.href}
-              onClick={() => {
-                if (isHashLink) setActiveHash(linkHash)
-                else setActiveHash('')
-              }}
-              className={cn(
-                "whitespace-nowrap flex items-center gap-1 md:gap-1.5 px-2 md:px-4 py-1.5 rounded-full text-[10px] md:text-[13px] font-bold transition-all group shrink-0",
-                isActive 
-                  ? "bg-accent text-white shadow-lg ring-1 ring-accent/20" 
-                  : "text-muted-foreground hover:text-white hover:bg-secondary transition-colors"
-              )}
-            >
-              <link.icon className={cn("w-3 md:w-3.5 h-3 md:h-3.5 transition-colors", isActive ? "text-white" : "text-muted-foreground group-hover:text-white")} />
-              <span>{link.name}</span>
-            </Link>
+            <div key={link.name} className="relative shrink-0 group/link">
+              <Link 
+                href={link.href}
+                onClick={() => {
+                  if (isHashLink) setActiveHash(linkHash)
+                  else setActiveHash('')
+                }}
+                className={cn(
+                  "whitespace-nowrap flex items-center gap-1 md:gap-1.5 px-2 md:px-4 py-1.5 rounded-full text-[10px] md:text-[13px] font-bold transition-all group shrink-0",
+                  isActive 
+                    ? "bg-accent text-white shadow-lg ring-1 ring-accent/20" 
+                    : "text-muted-foreground hover:text-white hover:bg-secondary transition-colors"
+                )}
+              >
+                <link.icon className={cn("w-3 md:w-3.5 h-3 md:h-3.5 transition-colors", isActive ? "text-white" : "text-muted-foreground group-hover:text-white")} />
+                <span>{link.name}</span>
+              </Link>
+              {isHelpline && <OccasionBanner />}
+            </div>
           )
         })}
       </nav>
@@ -102,9 +105,6 @@ export function Navbar() {
       <div className="ml-2 md:ml-4 flex items-center gap-1 md:gap-2 shrink-0">
         <HeaderActions />
       </div>
-
-      {/* Occasional Display Area - Positioned below 'Helpline' at top-right */}
-      <OccasionBanner />
     </header>
   )
 }

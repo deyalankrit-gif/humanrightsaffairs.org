@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -28,14 +27,20 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
 
     const pathString = (query as any)._query?.path?.toString() || '';
     const auth = getAuth();
-    
-    // 🛡️ COMPLETE SYSTEM SAFEGUARD:
-    // If an unauthenticated or newly logging-in user attempts to touch protected collections,
-    // intercept the request completely on the client side before it causes a backend snapshot crash.
     const path = pathString.toLowerCase();
     
-    // Define paths that are strictly for authorized personnel only
-    const isRestrictedPath = path.includes('visitors') || 
+    // 🛡️ SECURITY INTERCEPT:
+    // Define paths that are strictly for authorized personnel only.
+    // Public paths like 'occasions' are exempted to prevent hangs during auth resolution.
+    const isPublicPath = path.includes('occasions') || 
+                       path.includes('events') || 
+                       path.includes('memberprofiles') ||
+                       path.includes('leadership') ||
+                       path.includes('gallery') ||
+                       path.includes('terminatedmembers');
+
+    const isRestrictedPath = !isPublicPath && (
+                             path.includes('visitors') || 
                              path.includes('users') || 
                              path.includes('expenses') || 
                              path.includes('accounts') || 
@@ -43,7 +48,7 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
                              path.includes('vendors') ||
                              path.includes('donations') ||
                              path.includes('applications') ||
-                             path.includes('grievances');
+                             path.includes('grievances'));
 
     // If the path is restricted and we don't have a stable Auth session, halt immediately.
     if (isRestrictedPath && !auth.currentUser) {
@@ -63,22 +68,12 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
         setLoading(false);
       },
       async (serverError) => {
-        // Safe Catch: Prevent internal collection streams from breaking global navigation
-        // especially for public paths like 'occasions' during auth handshakes.
-        const isPublicPath = path.includes('occasions') || 
-                           path.includes('events') || 
-                           path.includes('memberprofiles');
-
-        if (!isPublicPath) {
-          console.warn(`Firestore stream halted for path: ${pathString}`, serverError.message);
-        }
-        
         const permissionError = new FirestorePermissionError({
           path: pathString || 'unknown',
           operation: 'list',
         });
         
-        // Only emit the error if we are genuinely logged in and denied for a non-public path
+        // Only emit the error if it's a genuine permission failure on a sensitive path
         if (auth.currentUser && !isPublicPath) {
           errorEmitter.emit('permission-error', permissionError);
         }
