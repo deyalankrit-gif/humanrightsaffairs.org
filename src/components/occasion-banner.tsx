@@ -4,7 +4,7 @@ import React, { useMemo } from 'react';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
-import { collection, query, where, orderBy } from 'firebase/firestore';
+import { collection } from 'firebase/firestore';
 import { isWithinInterval, parseISO, startOfDay, endOfDay } from 'date-fns';
 import { Sparkles, PartyPopper, ShieldCheck, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -12,7 +12,7 @@ import { cn } from '@/lib/utils';
 /**
  * OccasionBanner: High-fidelity festive display area.
  * Features real-time synchronization with the admin 'Occasion Greetings' terminal.
- * Positioned to hang directly below the header actions.
+ * Updated to use client-side filtering to avoid Firestore composite index requirements.
  */
 export function OccasionBanner() {
   const db = useFirestore();
@@ -29,11 +29,8 @@ export function OccasionBanner() {
 
   const occasionsQuery = useMemoFirebase(() => {
     if (!db) return null;
-    return query(
-      collection(db, 'occasions'),
-      where('isActive', '==', true),
-      orderBy('priority', 'desc')
-    );
+    // We fetch the collection without filters/ordering to avoid index dependency
+    return collection(db, 'occasions');
   }, [db]);
 
   const { data: occasions, loading } = useCollection(occasionsQuery);
@@ -44,18 +41,22 @@ export function OccasionBanner() {
     
     const now = new Date();
     
-    // Find the highest priority occasion valid for the current date
-    const found = occasions.find((occ: any) => {
-      try {
-        const start = startOfDay(parseISO(occ.startDate));
-        const end = endOfDay(parseISO(occ.endDate));
-        return isWithinInterval(now, { start, end });
-      } catch (e) {
-        return false;
-      }
-    });
+    // Perform filtering and sorting client-side to ensure zero-latency visibility 
+    // without requiring manual index creation in the Firebase console.
+    const validOccasions = (occasions as any[])
+      .filter((occ) => {
+        if (!occ.isActive) return false;
+        try {
+          const start = startOfDay(parseISO(occ.startDate));
+          const end = endOfDay(parseISO(occ.endDate));
+          return isWithinInterval(now, { start, end });
+        } catch (e) {
+          return false;
+        }
+      })
+      .sort((a, b) => (b.priority || 0) - (a.priority || 0));
 
-    return found || DEFAULT_BANNER;
+    return validOccasions[0] || DEFAULT_BANNER;
   }, [occasions, loading]);
 
   // The banner is visible on the Home Page header only

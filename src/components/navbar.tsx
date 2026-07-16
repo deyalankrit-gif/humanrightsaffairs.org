@@ -35,12 +35,10 @@ const publicLinks = [
 
 export function Navbar() {
   const pathname = usePathname()
-  const [isIframe, setIsIframe] = useState(false)
   const [activeHash, setActiveHash] = useState('')
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      setIsIframe(window.self !== window.top)
       const handleHashChange = () => {
         setActiveHash(window.location.hash || '')
       }
@@ -49,8 +47,6 @@ export function Navbar() {
       return () => window.removeEventListener('hashchange', handleHashChange)
     }
   }, [])
-
-  if (isIframe) return null
 
   return (
     <header className="flex h-14 md:h-16 shrink-0 items-center border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 md:px-10 sticky top-0 z-[100] transition-all duration-300 w-full overflow-visible">
