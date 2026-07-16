@@ -6,13 +6,13 @@ import { usePathname } from 'next/navigation';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { collection } from 'firebase/firestore';
 import { isWithinInterval, parseISO, startOfDay, endOfDay } from 'date-fns';
-import { Sparkles, PartyPopper, ShieldCheck, Info } from 'lucide-react';
+import { Sparkles, PartyPopper, ShieldCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 /**
  * OccasionBanner: High-fidelity festive display area.
- * Features: Fully transparent background, #CFFF04 typography, and #FF00FF default title.
- * Real-time synchronization is established via the root useCollection listener.
+ * Features: Fully transparent background, #CFFF04 typography, and #FF00FF for "Welcome to HRAT".
+ * Real-time synchronization is established via the optimized useCollection listener.
  */
 export function OccasionBanner() {
   const db = useFirestore();
@@ -29,15 +29,14 @@ export function OccasionBanner() {
 
   const occasionsQuery = useMemoFirebase(() => {
     if (!db) return null;
-    // We fetch the full collection to handle real-time sync without index requirements
     return collection(db, 'occasions');
   }, [db]);
 
   const { data: occasions, loading } = useCollection(occasionsQuery);
 
   const activeOccasion = useMemo(() => {
-    // If we're loading or have no data yet, show the default welcome banner
-    if (loading || !occasions || (occasions as any[]).length === 0) return DEFAULT_BANNER;
+    // If we have no data yet, show the default welcome banner
+    if (!occasions || (occasions as any[]).length === 0) return DEFAULT_BANNER;
     
     const now = new Date();
     
@@ -57,20 +56,22 @@ export function OccasionBanner() {
 
     // Return the highest priority valid occasion, or fallback to default
     return validOccasions[0] || DEFAULT_BANNER;
-  }, [occasions, loading]);
+  }, [occasions]);
 
   // Restrict visibility to the Homepage landing experience
   if (!isHome) return null;
 
+  const isDefault = activeOccasion.isDefault === true;
+
   return (
-    <div className="absolute top-full right-0 mt-10 z-[110] animate-in fade-in slide-in-from-top-4 duration-700 pointer-events-auto w-[calc(100vw-2rem)] sm:w-[400px] md:w-[450px] lg:w-[500px]">
+    <div className="absolute top-full right-0 mt-8 z-[110] animate-in fade-in slide-in-from-top-4 duration-700 pointer-events-auto w-[calc(100vw-2rem)] sm:w-[450px] lg:w-[500px]">
       <div className={cn(
         "bg-transparent p-5 md:p-6 flex items-center gap-5 md:gap-7 group transition-all duration-700",
-        loading && "animate-pulse opacity-80"
+        loading && "opacity-50"
       )}>
         
         {/* Visual Focus: Enlarged High-Impact Container */}
-        <div className="relative w-24 h-24 md:w-32 md:h-32 rounded-2xl md:rounded-[1.5rem] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.3)] border-2 border-white/20 dark:border-white/5 shrink-0 group-hover:scale-105 transition-transform duration-700 bg-slate-900/50">
+        <div className="relative w-24 h-24 md:w-32 md:h-32 rounded-2xl md:rounded-[1.5rem] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.3)] border-2 border-white/20 shrink-0 group-hover:scale-105 transition-transform duration-700 bg-slate-900/50">
           <Image 
             src={activeOccasion.imageUrl || '/HRAT Logo.jpeg'} 
             alt={activeOccasion.title} 
@@ -86,15 +87,15 @@ export function OccasionBanner() {
           <div className="flex items-center gap-2 mb-2 shrink-0">
              <div className={cn(
                "h-1.5 w-1.5 rounded-full animate-pulse",
-               activeOccasion.isDefault ? "bg-[#FF00FF]" : "bg-[#CFFF04]"
+               isDefault ? "bg-[#FF00FF]" : "bg-[#CFFF04]"
              )}></div>
              <span className={cn(
                "text-[9px] md:text-[11px] font-black uppercase tracking-[0.25em] truncate",
-               activeOccasion.isDefault ? "text-[#FF00FF]" : "text-[#CFFF04]"
+               isDefault ? "text-[#FF00FF]" : "text-[#CFFF04]"
              )}>
                {activeOccasion.title}
              </span>
-             {!activeOccasion.isDefault && (
+             {!isDefault && (
                <Sparkles className="w-3.5 h-3.5 text-[#CFFF04] animate-float ml-auto shrink-0" />
              )}
           </div>
@@ -104,13 +105,13 @@ export function OccasionBanner() {
           </p>
           
           <div className="flex items-center gap-2 mt-4 opacity-60">
-             {activeOccasion.isDefault ? (
+             {isDefault ? (
                <ShieldCheck className="w-3 h-3 text-[#CFFF04]" />
              ) : (
                <PartyPopper className="w-3 h-3 text-emerald-400" />
              )}
              <span className="text-[7px] md:text-[9px] font-black text-[#CFFF04] uppercase tracking-[0.2em]">
-               {activeOccasion.isDefault ? 'Institutional Mission' : 'Active Occasion'}
+               {isDefault ? 'Institutional Mission' : 'Active Occasion'}
              </span>
           </div>
         </div>
