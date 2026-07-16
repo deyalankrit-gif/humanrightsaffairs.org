@@ -13,7 +13,7 @@ import { FirestorePermissionError } from '../errors';
 
 /**
  * useCollection Hook: Provides real-time data from a Firestore collection or query.
- * Simplified for robust real-time synchronization across public and administrative views.
+ * Updated for extreme robustness in real-time synchronization across public and administrative views.
  */
 export function useCollection<T = DocumentData>(query: Query<T> | null) {
   const [data, setData] = useState<T[] | null>(null);
@@ -24,6 +24,7 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
     // If no query is provided, signal that we are not loading but have no data
     if (!query) {
       setLoading(false);
+      setData(null);
       return;
     }
 
@@ -34,7 +35,7 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
       query,
       (snapshot: QuerySnapshot<T>) => {
         const docs = snapshot.docs.map((doc) => ({
-          ...doc.data(),
+          ...(doc.data() as any),
           id: doc.id,
         }));
         setData(docs);
@@ -42,6 +43,7 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
         setLoading(false);
       },
       async (serverError) => {
+        // Robust path identification for error suppression on public collections
         const pathString = (query as any).path || (query as any)._query?.path?.toString() || 'unknown';
         const permissionError = new FirestorePermissionError({
           path: pathString,
@@ -51,7 +53,7 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
         const auth = getAuth();
         const path = pathString.toLowerCase();
         
-        // Ensure occasions and other public collections don't trigger intrusive error overlays
+        // Public collections should never trigger the administrative error overlay
         const isPublicPath = path.includes('occasions') || 
                            path.includes('events') || 
                            path.includes('memberprofiles') ||
@@ -59,11 +61,12 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
                            path.includes('gallery') ||
                            path.includes('terminatedmembers');
 
-        // Only emit to the global listener if we are authenticated and it's a genuine restricted path failure
+        // Only emit to the global listener for restricted administrative failures
         if (auth.currentUser && !isPublicPath) {
           errorEmitter.emit('permission-error', permissionError);
         }
         
+        setData([]); // Clear data on error to prevent stale displays
         setError(permissionError);
         setLoading(false);
       }
