@@ -13,6 +13,7 @@ import { useFirestore } from '@/firebase'
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
 import { 
   ShieldAlert, 
+  ShieldCheck,
   CheckCircle2, 
   Loader2, 
   ArrowRight, 
@@ -311,7 +312,7 @@ export default function ReportAComplaintPage() {
 
                     <div className="pt-10 border-t border-slate-100 dark:border-slate-800">
                       <div className="bg-slate-950 rounded-3xl p-8 text-white relative overflow-hidden mb-10">
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-accent/10 rounded-full -mr-16 -mt-16 blur-2xl"></div>
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-accent/10 rounded-full -mr-16 -mt-16 blur-3xl"></div>
                         <div className="flex items-start gap-4 relative z-10">
                            <ShieldCheck className="w-8 h-8 text-emerald-400 shrink-0 mt-1" />
                            <div className="space-y-2">
