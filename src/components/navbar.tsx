@@ -64,7 +64,7 @@ export function Navbar() {
         </div>
       </Link>
 
-      <nav className="flex-1 flex items-center overflow-x-auto md:overflow-visible no-scrollbar gap-1 md:gap-2 px-1 md:px-2 touch-pan-x scroll-smooth">
+      <nav className="flex-1 flex items-center overflow-x-auto md:overflow-visible no-scrollbar gap-1 md:gap-2 px-1 md:px-2 touch-pan-x scroll-smooth h-full">
         {publicLinks.map((link) => {
           const isHashLink = link.href.includes('#')
           const linkPath = isHashLink ? link.href.split('#')[0] || '/' : link.href
@@ -79,7 +79,7 @@ export function Navbar() {
           }
 
           return (
-            <div key={link.name} className="relative shrink-0 group/link">
+            <div key={link.name} className="relative shrink-0 group/link h-full flex items-center">
               <Link 
                 href={link.href}
                 onClick={() => {
