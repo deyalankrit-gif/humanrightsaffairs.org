@@ -18,6 +18,7 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { HeaderActions } from './header-actions'
+import { OccasionBanner } from './occasion-banner'
 
 const publicLinks = [
   { name: 'Home', href: '/', icon: Home },
@@ -52,7 +53,7 @@ export function Navbar() {
   if (isIframe) return null
 
   return (
-    <header className="flex h-14 shrink-0 items-center border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-3 md:px-8 sticky top-0 z-[100] transition-all duration-300 w-full overflow-hidden">
+    <header className="flex h-14 shrink-0 items-center border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-3 md:px-8 sticky top-0 z-[100] transition-all duration-300 w-full relative">
       <Link href="/" className="flex items-center gap-2 md:gap-3 mr-3 md:mr-8 shrink-0 group">
         <div className="relative w-7 h-7 md:w-10 md:h-10 transition-transform group-hover:scale-110">
           <Image src="/HRAT%20Logo.jpeg" alt="HRAT Logo" fill className="object-contain" />
@@ -101,6 +102,9 @@ export function Navbar() {
       <div className="ml-2 md:ml-4 flex items-center gap-1 md:gap-2 shrink-0">
         <HeaderActions />
       </div>
+
+      {/* Occasional Display Area - Positioned below 'Helpline' at top-right */}
+      <OccasionBanner />
     </header>
   )
 }

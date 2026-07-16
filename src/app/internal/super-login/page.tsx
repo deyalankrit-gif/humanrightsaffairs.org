@@ -69,7 +69,10 @@ export default function RootLoginPage() {
             meetings: true, 
             events: true, 
             publicView: true,
-            terminated: true
+            terminated: true,
+            occasions: true,
+            activityHub: true,
+            gallery: true
           }
         });
       } else {
@@ -91,7 +94,10 @@ export default function RootLoginPage() {
             meetings: true, 
             events: true, 
             publicView: true,
-            terminated: true
+            terminated: true,
+            occasions: true,
+            activityHub: true,
+            gallery: true
           }
         }, { merge: true });
       }

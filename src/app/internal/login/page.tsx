@@ -63,7 +63,8 @@ export default function StaffLoginPage() {
             meetings: true,
             events: true,
             publicView: true,
-            terminated: true
+            terminated: true,
+            occasions: true
           }
           
           await setDoc(userRef, {
