@@ -468,7 +468,7 @@ export default function MembersPage() {
                              <Select value={newMember.honorific} onValueChange={val => setNewMember({...newMember, honorific: val})}>
                                 <SelectTrigger className="w-20 sm:w-24 h-11 rounded-xl bg-white dark:bg-slate-900 border-slate-200"><SelectValue placeholder="Title" /></SelectTrigger>
                                 <SelectContent position="popper" className="z-[1000001] bg-white">
-                                  {["Mr.", "Ms.", "Mrs.", "Dr.", "Adv.", "Prof.", "Hon.", "Rev."].map(h => <SelectItem key={bg} value={bg}>{bg}</SelectItem>)}
+                                  {["Mr.", "Ms.", "Mrs.", "Dr.", "Adv.", "Prof.", "Hon.", "Rev."].map(h => <SelectItem key={h} value={h}>{h}</SelectItem>)}
                                 </SelectContent>
                              </Select>
                              <Input placeholder="Full Legal Name" value={newMember.name} onChange={e => setNewMember({...newMember, name: e.target.value})} className="h-11 rounded-xl flex-1" />
@@ -494,7 +494,6 @@ export default function MembersPage() {
                         </div>
                       </div>
                    </div>
-                   {/* Rest of the form remains similar but optimized for grid-cols-1 on mobile */}
                 </div>
                 <DialogFooter><Button onClick={handleAddMember} disabled={isAdding} className="w-full h-12 rounded-xl bg-accent text-primary font-bold text-lg shadow-xl shadow-accent/20">Establish Record</Button></DialogFooter>
               </DialogContent>

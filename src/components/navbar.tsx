@@ -14,14 +14,10 @@ import {
   MessageSquareWarning, 
   Scale, 
   Phone,
-  Image as ImageIcon,
-  Menu,
-  X
+  Image as ImageIcon
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { HeaderActions } from './header-actions'
-import { Button } from './ui/button'
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from './ui/sheet'
 
 const publicLinks = [
   { name: 'Home', href: '/', icon: Home },
@@ -40,7 +36,6 @@ export function Navbar() {
   const pathname = usePathname()
   const [isIframe, setIsIframe] = useState(false)
   const [activeHash, setActiveHash] = useState('')
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   useEffect(() => {
     if (typeof window !== 'undefined') {

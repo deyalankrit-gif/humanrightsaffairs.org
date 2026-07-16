@@ -79,7 +79,6 @@ export default function Home() {
           <div className="absolute inset-0 bg-gradient-to-b from-primary/40 via-primary/20 to-primary/60 dark:from-slate-950/70 dark:via-slate-950/50 dark:to-slate-950/80"></div>
         </div>
 
-        {/* Logo in Top Left for desktop */}
         <div className="absolute top-8 left-8 z-20 hidden xl:flex items-center gap-6 animate-in fade-in slide-in-from-left-4 duration-1000">
           <div className="relative w-24 h-24 transition-transform hover:scale-105">
             <Image src="/HRAT%20Logo.jpeg" alt="HRAT Logo" fill className="object-contain" />
@@ -129,9 +128,9 @@ export default function Home() {
               Providing a robust shield against injustice through expert legal guidance, community support, and constitutional transparency.
             </p>
             
-            <div className="flex flex-col sm:flex-row gap-3 md:gap-6 pt-6 md:pt-8 justify-center w-full sm:w-auto px-4">
+            <div className="flex flex-wrap gap-3 md:gap-6 pt-6 md:pt-8 justify-center">
               <Link href="/legal-aid" className="w-full sm:w-auto">
-                <Button size="lg" className="bg-accent text-white font-bold hover:bg-secondary hover:text-white px-5 py-4 md:px-10 md:py-7 rounded-xl text-xs md:text-lg shadow-xl shadow-accent/20 transition-all hover:-translate-y-1 h-auto w-full sm:w-auto">
+                <Button size="lg" className="bg-accent text-white font-bold hover:bg-secondary hover:text-white px-5 py-4 md:px-10 md:py-7 rounded-xl text-xs md:text-lg shadow-xl shadow-accent/20 transition-all hover:-translate-y-1 h-auto whitespace-normal w-full max-w-xs mx-auto">
                   Legal Aid Cell <ArrowRight className="ml-2 w-3 h-3 md:w-5 md:h-5 shrink-0" />
                 </Button>
               </Link>
@@ -268,7 +267,6 @@ export default function Home() {
                 Your contributions help us provide free legal aid to the marginalized and run awareness campaigns across rural India. All donations are tax-exempt under 80G.
               </p>
 
-              {/* Official Bank Account Details Box */}
               <div className="mt-6 md:mt-10 bg-white/5 backdrop-blur-md p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] border border-white/10 max-w-md mx-auto shadow-2xl relative group overflow-hidden">
                 <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/10 rounded-full -mr-12 -mt-12 blur-2xl"></div>
                 <div className="relative z-10 flex flex-col items-center">

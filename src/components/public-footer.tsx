@@ -33,9 +33,7 @@ export function PublicFooter() {
 
   const hasReminders = useMemo(() => {
     if (!reminders || reminders.length === 0) return false;
-    if (!events) return reminders.length > 0;
-    if (!events) return reminders.length > 0;
-    const eventIds = new Set(events.map((e: any) => e.id));
+    const eventIds = new Set((events || []).map((e: any) => e.id));
     return reminders.some((r: any) => eventIds.has(r.eventId));
   }, [reminders, events]);
 
@@ -90,7 +88,7 @@ export function PublicFooter() {
                   <span>Activity Hub</span>
                 </Link>
               </li>
-              <li className="pt-2"><span className="text-[#CEFF00] font-black text-sm md:text-lg underline uppercase tracking-tighter">Office Use Only</span></li>
+              <li className="pt-2"><span className="text-[#CEFF00] font-black text-sm md:text-lg uppercase tracking-tighter">Office Use Only</span></li>
               <li>
                 <Link href="/legal/official-representation" className="text-[#CEFF00] hover:text-white transition-colors font-bold flex flex-col leading-tight">
                   <span>Official Representation</span>
