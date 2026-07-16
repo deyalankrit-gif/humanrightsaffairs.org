@@ -12,7 +12,7 @@ import { cn } from '@/lib/utils';
 /**
  * OccasionBanner: High-fidelity festive display area.
  * Positions itself relative to its parent (the 'Helpline' link in Navbar).
- * Updated with a transparent background for seamless integration.
+ * Features: Transparent background with high-visibility #CFFF04 typography.
  */
 export function OccasionBanner() {
   const db = useFirestore();
@@ -64,7 +64,7 @@ export function OccasionBanner() {
   return (
     <div className="absolute top-full right-0 mt-10 z-[110] animate-in fade-in slide-in-from-top-4 duration-700 pointer-events-auto w-[calc(100vw-2rem)] sm:w-96 md:w-[450px] lg:w-[500px]">
       <div className={cn(
-        "bg-transparent p-5 md:p-6 rounded-[2.5rem] border-2 border-white/10 dark:border-white/5 flex items-center gap-5 md:gap-6 group hover:border-accent/40 transition-all duration-700",
+        "bg-transparent p-5 md:p-6 rounded-[2.5rem] border-2 border-white/10 dark:border-white/5 flex items-center gap-5 md:gap-6 group hover:border-[#CFFF04]/40 transition-all duration-700",
         loading && "animate-pulse opacity-80"
       )}>
         
@@ -80,31 +80,31 @@ export function OccasionBanner() {
           <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/5 to-white/0 pointer-events-none"></div>
         </div>
 
-        {/* Narrative Context */}
+        {/* Narrative Context - Updated with user-requested #CFFF04 color */}
         <div className="flex flex-col min-w-0 flex-1">
           <div className="flex items-center gap-2 mb-2 shrink-0">
-             <div className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse"></div>
-             <span className="text-[8px] md:text-[10px] font-black text-accent uppercase tracking-[0.25em] truncate">
+             <div className="h-1.5 w-1.5 rounded-full bg-[#CFFF04] animate-pulse"></div>
+             <span className="text-[8px] md:text-[10px] font-black text-[#CFFF04] uppercase tracking-[0.25em] truncate">
                {activeOccasion.title}
              </span>
              {activeOccasion.isDefault ? (
                <ShieldCheck className="w-3 h-3 text-emerald-500 ml-auto opacity-50" />
              ) : (
-               <Sparkles className="w-3 h-3 text-accent animate-float ml-auto" />
+               <Sparkles className="w-3 h-3 text-[#CFFF04] animate-float ml-auto" />
              )}
           </div>
           
-          <p className="text-primary dark:text-white font-headline font-bold text-xs md:text-lg lg:text-xl leading-tight md:leading-snug group-hover:text-accent transition-colors drop-shadow-md">
+          <p className="text-[#CFFF04] font-headline font-bold text-xs md:text-lg lg:text-xl leading-tight md:leading-snug transition-colors drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">
             {activeOccasion.message}
           </p>
           
-          <div className="flex items-center gap-2 mt-3 opacity-60">
+          <div className="flex items-center gap-2 mt-3 opacity-80">
              {activeOccasion.isDefault ? (
-               <Info className="w-2.5 h-2.5 text-slate-400" />
+               <Info className="w-2.5 h-2.5 text-[#CFFF04]" />
              ) : (
                <PartyPopper className="w-2.5 h-2.5 text-emerald-500" />
              )}
-             <span className="text-[7px] md:text-[8px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
+             <span className="text-[7px] md:text-[8px] font-bold text-[#CFFF04] uppercase tracking-widest">
                {activeOccasion.isDefault ? 'Mission Update' : 'Special Greeting'}
              </span>
           </div>
