@@ -4,7 +4,7 @@ import React, { useMemo } from 'react';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
-import { collection } from 'firebase/firestore';
+import { collection, query, where } from 'firebase/firestore';
 import { isWithinInterval, parseISO, startOfDay, endOfDay } from 'date-fns';
 import { Sparkles, PartyPopper, ShieldCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -28,23 +28,21 @@ export function OccasionBanner() {
 
   const occasionsQuery = useMemoFirebase(() => {
     if (!db) return null;
+    // We fetch all and filter client-side to ensure instant updates without complex indexing
     return collection(db, 'occasions');
   }, [db]);
 
   const { data: occasions, loading } = useCollection(occasionsQuery);
 
   const activeOccasion = useMemo(() => {
-    // Return default if loading or no data yet
-    if (!occasions || (occasions as any[]).length === 0) return DEFAULT_BANNER;
+    if (!occasions || occasions.length === 0) return DEFAULT_BANNER;
     
     const now = new Date();
     
-    // Process live data from Firestore with date-window validation
     const validOccasions = (occasions as any[])
       .filter((occ) => {
         if (!occ.isActive) return false;
         try {
-          // Parse YYYY-MM-DD strings from admin terminal
           const start = startOfDay(parseISO(occ.startDate));
           const end = endOfDay(parseISO(occ.endDate));
           return isWithinInterval(now, { start, end });
@@ -57,19 +55,18 @@ export function OccasionBanner() {
     return validOccasions[0] || DEFAULT_BANNER;
   }, [occasions]);
 
-  // Only render on the root landing page
   if (!isHome) return null;
 
   const isDefault = activeOccasion.isDefault === true;
 
   return (
-    <div className="absolute top-full right-0 mt-8 z-[110] animate-in fade-in slide-in-from-top-4 duration-700 pointer-events-auto w-[calc(100vw-2rem)] sm:w-[450px] lg:w-[500px]">
+    <div className="absolute top-full right-0 mt-4 md:mt-8 z-[110] animate-in fade-in slide-in-from-top-4 duration-700 pointer-events-auto w-[320px] sm:w-[450px] lg:w-[500px]">
       <div className={cn(
-        "bg-transparent p-5 md:p-6 flex items-center gap-5 md:gap-7 group transition-all duration-700",
+        "bg-transparent p-4 md:p-6 flex items-center gap-4 md:gap-7 group transition-all duration-700",
         loading && "opacity-80"
       )}>
         
-        {/* Visual Focus: Prominent High-Impact Image Container */}
+        {/* Visual Focus: Enlarged High-Impact Image Container */}
         <div className="relative w-24 h-24 md:w-32 md:h-32 rounded-2xl md:rounded-[1.5rem] overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.4)] border-2 border-white/20 shrink-0 group-hover:scale-105 transition-transform duration-700 bg-slate-900/40">
           <Image 
             src={activeOccasion.imageUrl || '/HRAT%20Logo.jpeg'} 
@@ -99,19 +96,18 @@ export function OccasionBanner() {
              )}
           </div>
           
-          {/* Narrative Message: Refined scale for professional balance */}
-          <p className="text-[#CFFF04] font-headline font-bold text-[11px] md:text-sm lg:text-[13px] leading-tight md:leading-snug transition-colors drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)]">
+          <p className="text-[#CFFF04] font-headline font-bold text-[10px] md:text-sm leading-tight md:leading-snug transition-colors drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)]">
             {activeOccasion.message}
           </p>
           
-          <div className="flex items-center gap-2 mt-4 opacity-60">
+          <div className="flex items-center gap-2 mt-3 opacity-60">
              {isDefault ? (
                <ShieldCheck className="w-3 h-3 text-[#FF00FF]" />
              ) : (
                <PartyPopper className="w-3 h-3 text-[#CFFF04]" />
              )}
              <span className={cn(
-               "text-[7px] md:text-[8px] font-black uppercase tracking-[0.2em]",
+               "text-[6px] md:text-[8px] font-black uppercase tracking-[0.2em]",
                isDefault ? "text-[#FF00FF]" : "text-[#CFFF04]"
              )}>
                {isDefault ? 'Institutional Registry' : 'Live Official Broadcast'}

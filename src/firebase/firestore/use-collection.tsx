@@ -69,6 +69,7 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
                            lowerPath.includes('memberprofiles') ||
                            lowerPath.includes('leadership') ||
                            lowerPath.includes('gallery') ||
+                           lowerPath.includes('public_complaints') ||
                            lowerPath.includes('terminatedmembers');
 
         // Only emit to the global listener if a user is authenticated and the path is restricted

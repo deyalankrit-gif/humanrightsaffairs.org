@@ -64,44 +64,46 @@ export function Navbar() {
       </Link>
 
       {/* Unified Uniform Navigation (Middle) */}
-      <nav className="flex-1 min-w-0 flex items-center justify-center overflow-x-auto no-scrollbar gap-1 px-1 touch-pan-x scroll-smooth h-full">
-        {publicLinks.map((link) => {
-          const isHashLink = link.href.includes('#')
-          const linkPath = isHashLink ? link.href.split('#')[0] || '/' : link.href
-          const linkHash = isHashLink ? '#' + link.href.split('#')[1] : ''
-          
-          let isActive = false
-          if (isHashLink) {
-            isActive = pathname === linkPath && activeHash === linkHash
-          } else {
-            isActive = pathname === link.href && activeHash === ''
-          }
+      <div className="flex-1 min-w-0 h-full relative">
+        <nav className="w-full flex items-center justify-center overflow-x-auto no-scrollbar gap-1 px-1 touch-pan-x scroll-smooth h-full">
+          {publicLinks.map((link) => {
+            const isHashLink = link.href.includes('#')
+            const linkPath = isHashLink ? link.href.split('#')[0] || '/' : link.href
+            const linkHash = isHashLink ? '#' + link.href.split('#')[1] : ''
+            
+            let isActive = false
+            if (isHashLink) {
+              isActive = pathname === linkPath && activeHash === linkHash
+            } else {
+              isActive = pathname === link.href && activeHash === ''
+            }
 
-          return (
-            <div key={link.name} className="relative h-full flex items-center shrink-0">
-              <Link 
-                href={link.href}
-                onClick={() => {
-                  if (isHashLink) setActiveHash(linkHash)
-                  else setActiveHash('')
-                }}
-                className={cn(
-                  "whitespace-nowrap flex items-center gap-1 px-1.5 md:px-2 py-1 rounded-full text-[8px] md:text-[10px] font-bold transition-all group",
-                  isActive 
-                    ? "bg-accent text-white shadow-sm" 
-                    : "text-muted-foreground hover:text-white hover:bg-secondary transition-all"
-                )}
-              >
-                <link.icon className={cn("w-3 h-3 md:w-3.5 md:h-3.5 transition-colors", isActive ? "text-white" : "text-muted-foreground group-hover:text-white")} />
-                <span>{link.name}</span>
-              </Link>
-              
-              {/* Occasion Banner Anchored to Helpline */}
-              {link.name === 'Helpline' && <OccasionBanner />}
-            </div>
-          )
-        })}
-      </nav>
+            return (
+              <div key={link.name} className="relative h-full flex items-center shrink-0">
+                <Link 
+                  href={link.href}
+                  onClick={() => {
+                    if (isHashLink) setActiveHash(linkHash)
+                    else setActiveHash('')
+                  }}
+                  className={cn(
+                    "whitespace-nowrap flex items-center gap-1 px-1.5 md:px-2 py-1 rounded-full text-[8px] md:text-[10px] font-bold transition-all group",
+                    isActive 
+                      ? "bg-accent text-white shadow-sm" 
+                      : "text-muted-foreground hover:text-white hover:bg-secondary transition-all"
+                  )}
+                >
+                  <link.icon className={cn("w-3 h-3 md:w-3.5 md:h-3.5 transition-colors", isActive ? "text-white" : "text-muted-foreground group-hover:text-white")} />
+                  <span>{link.name}</span>
+                </Link>
+              </div>
+            )
+          })}
+        </nav>
+        
+        {/* Occasion Banner: Positioned outside the scrollable nav to prevent clipping */}
+        <OccasionBanner />
+      </div>
 
       {/* Stable Header Actions (Right) */}
       <div className="ml-2 md:ml-4 flex items-center gap-1 md:gap-2 shrink-0 h-full pl-2 md:pl-4 border-l border-slate-100 dark:border-slate-800">
