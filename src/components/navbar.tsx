@@ -101,8 +101,8 @@ export function Navbar() {
         })}
       </nav>
 
-      {/* Stable Actions (Right) */}
-      <div className="ml-auto flex items-center gap-1 md:gap-3 shrink-0 relative overflow-visible h-full">
+      {/* Stable Actions (Right) - Added padding and margin to separate from scrolling links */}
+      <div className="ml-auto flex items-center gap-1 md:gap-3 shrink-0 relative overflow-visible h-full pl-4 md:pl-8 border-l border-transparent">
         {stableLinks.map((link) => {
           const isHashLink = link.href.includes('#')
           const linkPath = isHashLink ? link.href.split('#')[0] || '/' : link.href
