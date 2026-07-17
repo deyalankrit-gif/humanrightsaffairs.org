@@ -49,7 +49,7 @@ export function Navbar() {
   return (
     <header className="flex h-14 md:h-16 shrink-0 items-center border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-2 md:px-4 sticky top-0 z-[100] transition-all duration-300 w-full overflow-visible">
       {/* Brand Section */}
-      <Link href="/" className="flex items-center gap-2 mr-2 md:mr-4 shrink-0 group">
+      <Link href="/" className="flex items-center gap-2 mr-4 md:mr-8 shrink-0 group">
         <div className="relative w-7 h-7 md:w-9 md:h-9 transition-transform group-hover:scale-110 duration-500">
           <Image src="/HRAT%20Logo.jpeg" alt="HRAT Logo" fill className="object-contain" />
         </div>
@@ -61,7 +61,7 @@ export function Navbar() {
 
       {/* Unified Uniform Navigation (Middle) */}
       <div className="flex-1 min-w-0 h-full relative">
-        <nav className="w-full flex items-center justify-center overflow-x-auto no-scrollbar gap-1 px-1 touch-pan-x scroll-smooth h-full">
+        <nav className="w-full flex items-center justify-center overflow-x-auto no-scrollbar gap-1.5 md:gap-2 px-1 touch-pan-x scroll-smooth h-full">
           {publicLinks.map((link) => {
             const isHashLink = link.href.includes('#')
             const linkPath = isHashLink ? link.href.split('#')[0] || '/' : link.href
@@ -83,7 +83,7 @@ export function Navbar() {
                     else setActiveHash('')
                   }}
                   className={cn(
-                    "whitespace-nowrap flex items-center gap-1 px-1.5 md:px-2 py-1 rounded-full text-[10px] md:text-[12px] font-bold transition-all group",
+                    "whitespace-nowrap flex items-center gap-1.5 px-2 md:px-3 py-1 rounded-full text-[10px] md:text-[12px] font-bold transition-all group",
                     isActive 
                       ? "bg-accent text-white shadow-sm" 
                       : "text-muted-foreground hover:text-white hover:bg-secondary transition-all"
@@ -102,7 +102,7 @@ export function Navbar() {
       </div>
 
       {/* Stable Header Actions (Right) */}
-      <div className="ml-2 md:ml-4 flex items-center gap-1 md:gap-2 shrink-0 h-full pl-2 md:pl-4 border-l border-slate-100 dark:border-slate-800">
+      <div className="ml-4 md:ml-8 flex items-center gap-1 md:gap-2 shrink-0 h-full pl-4 md:pl-6 border-l border-slate-100 dark:border-slate-800">
         <HeaderActions />
       </div>
     </header>

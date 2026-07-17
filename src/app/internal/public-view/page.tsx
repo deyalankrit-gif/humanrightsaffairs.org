@@ -97,19 +97,19 @@ export default function PublicViewPage() {
         </div>
 
         {/* Scrollable Navigation Area with Visible Scrollbar */}
-        <nav className="flex items-center overflow-x-auto admin-scrollbar px-4 py-1.5 gap-1.5 bg-slate-50/50 dark:bg-slate-900/50 scroll-smooth">
+        <nav className="flex items-center overflow-x-auto admin-scrollbar px-4 py-2.5 gap-3 bg-slate-50/50 dark:bg-slate-900/50 scroll-smooth">
           {publicLinks.map((link) => (
             <button
               key={link.name}
               onClick={() => navigateMirror(link.href)}
               className={cn(
-                "whitespace-nowrap flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-[11px] font-bold uppercase tracking-wider transition-all border shrink-0",
+                "whitespace-nowrap flex items-center gap-2 px-4 py-1.5 rounded-md text-[11px] font-bold uppercase tracking-wider transition-all border shrink-0",
                 currentUrl === link.href
                   ? "bg-accent text-primary border-accent shadow-sm"
                   : "bg-white dark:bg-slate-800 text-slate-500 border-slate-100 dark:border-slate-700 hover:border-accent hover:text-accent"
               )}
             >
-              <link.icon className="w-3 h-3" />
+              <link.icon className="w-3.5 h-3.5" />
               {link.name}
             </button>
           ))}
