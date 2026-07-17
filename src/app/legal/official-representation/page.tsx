@@ -14,7 +14,7 @@ import {
   Building2
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Footer } from '@/components/footer'
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
@@ -22,7 +22,7 @@ import { cn } from '@/lib/utils'
 export default function OfficialRepresentationPage() {
   const { toast } = useToast()
   const [formData, setFormData] = useState({
-    stateOfficeAddress: 'Vill. - Biswanathpur, P.O. - Ramnathpur, P.S. - Deganga, Dist. - North 24 Parganas, West Bengal - 743423',
+    stateOfficeAddress: 'Vill. - Biswanathpur, P.O. - Ramnathpur, P.S. - Deganga, Dist. - 24 Parganas (N), WB - 743423',
     phone: '+91 70631 11471',
     email: 'hrat.wb.chairman@gmail.com',
     website: 'www.humanrightsaffairs.org',

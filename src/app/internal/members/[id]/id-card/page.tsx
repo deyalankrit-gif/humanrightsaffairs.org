@@ -261,7 +261,7 @@ export default function IDCardGenerator() {
                   </div>
                   <div className="p-5 bg-white border border-slate-100 rounded-2xl text-[13px] font-bold">
                      <p className="text-accent uppercase mb-1">State Office (WB)</p>
-                     <p className="text-slate-700">Biswanathpur, PO-Ramnathpur, P.S. Deganga, North 24 Parganas, WB - 743423</p>
+                     <p className="text-slate-700">Biswanathpur, PO-Ramnathpur, P.S. Deganga, 24 Parganas (N), WB - 743423</p>
                   </div>
                </div>
 
