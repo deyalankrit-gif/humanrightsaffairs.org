@@ -103,7 +103,7 @@ export default function PublicViewPage() {
               key={link.name}
               onClick={() => navigateMirror(link.href)}
               className={cn(
-                "whitespace-nowrap flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-[9px] font-bold uppercase tracking-wider transition-all border shrink-0",
+                "whitespace-nowrap flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-[11px] font-bold uppercase tracking-wider transition-all border shrink-0",
                 currentUrl === link.href
                   ? "bg-accent text-primary border-accent shadow-sm"
                   : "bg-white dark:bg-slate-800 text-slate-500 border-slate-100 dark:border-slate-700 hover:border-accent hover:text-accent"

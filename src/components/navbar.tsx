@@ -83,7 +83,7 @@ export function Navbar() {
                     else setActiveHash('')
                   }}
                   className={cn(
-                    "whitespace-nowrap flex items-center gap-1 px-1.5 md:px-2 py-1 rounded-full text-[8px] md:text-[10px] font-bold transition-all group",
+                    "whitespace-nowrap flex items-center gap-1 px-1.5 md:px-2 py-1 rounded-full text-[10px] md:text-[12px] font-bold transition-all group",
                     isActive 
                       ? "bg-accent text-white shadow-sm" 
                       : "text-muted-foreground hover:text-white hover:bg-secondary transition-all"
