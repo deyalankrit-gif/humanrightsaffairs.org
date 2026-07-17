@@ -2,7 +2,7 @@
 
 import React, { useMemo } from 'react';
 import Image from 'next/image';
-import { Mail, Phone, MapPin, Facebook, Twitter, Instagram, Youtube, Bell } from 'lucide-react';
+import { Mail, Phone, MapPin, Facebook, Twitter, Instagram, Youtube, Bell, Crown } from 'lucide-react';
 import Link from 'next/link';
 import { DonationDialog } from './donation-dialog';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
@@ -81,7 +81,11 @@ export function PublicFooter() {
               <li><Link href="/#membership" className="hover:text-accent transition-colors font-medium">Be A Member</Link></li>
               <li><Link href="/#helpline" className="hover:text-accent transition-colors font-medium">Emergency Contacts</Link></li>
               <li><Link href="/donors" className="hover:text-accent transition-colors font-medium">Wall of Donors</Link></li>
-              <li><Link href="/trust-credentials" className="hover:text-accent transition-colors font-medium">Trust Credentials</Link></li>
+              <li>
+                <Link href="/trust-credentials" className="hover:text-accent transition-colors font-medium flex items-center gap-2">
+                  Trust Credentials <Crown className="w-3.5 h-3.5 text-[#D4AF37] fill-[#D4AF37]/20" />
+                </Link>
+              </li>
               <li>
                 <Link href="/activity-hub" className="text-emerald-400 font-bold hover:text-white transition-colors flex items-center gap-2">
                   <Bell className={cn("w-3 h-3 md:w-4 md:h-4 text-red-500", hasReminders && "animate-ring")} />
