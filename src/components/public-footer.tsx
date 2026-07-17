@@ -142,6 +142,7 @@ export function PublicFooter() {
               <div className="space-y-3 text-primary-foreground/80 text-xs md:text-sm">
                 <div className="flex gap-3"><MapPin className="w-4 h-4 text-accent shrink-0 mt-0.5" /><span>Azad Market, Delhi - 110006</span></div>
                 <div className="flex gap-3"><Phone className="w-4 h-4 text-accent shrink-0 mt-0.5" /><span>+91 89811 52748</span></div>
+                <div className="flex gap-3"><Mail className="w-4 h-4 text-accent shrink-0 mt-0.5" /><a href="mailto:humanrightsaffairstrust@gmail.com" className="hover:text-accent font-bold truncate">humanrightsaffairstrust@gmail.com</a></div>
               </div>
             </div>
             <div>
