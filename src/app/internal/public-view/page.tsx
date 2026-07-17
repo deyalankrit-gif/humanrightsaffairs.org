@@ -9,12 +9,10 @@ import {
   RefreshCw,
   Info,
   Home,
-  Handshake,
   Calendar,
   Users,
   UserCheck,
   UserX,
-  MessageSquareWarning,
   Scale,
   Phone,
   Image as ImageIcon,
@@ -25,14 +23,12 @@ import { cn } from '@/lib/utils'
 
 const publicLinks = [
   { name: 'Home', href: '/', icon: Home },
-  { name: 'Meetings', href: '/meetings', icon: Handshake },
   { name: 'Events', href: '/events', icon: Calendar },
   { name: 'Gallery', href: '/gallery', icon: ImageIcon },
   { name: 'Leadership', href: '/leadership', icon: Users },
   { name: 'Members', href: '/members', icon: UserCheck },
   { name: 'Terminated', href: '/terminated-members', icon: UserX },
   { name: 'Report', href: '/report-a-complaint', icon: ShieldAlert },
-  { name: 'Grievance', href: '/#grievances', icon: MessageSquareWarning },
   { name: 'Rights', href: '/#knowledge', icon: Scale },
   { name: 'Helpline', href: '/#helpline', icon: Phone },
 ]

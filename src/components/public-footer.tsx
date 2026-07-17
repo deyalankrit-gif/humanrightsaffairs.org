@@ -104,6 +104,16 @@ export function PublicFooter() {
                   Required Documents
                 </Link>
               </li>
+              <li>
+                <Link href="/meetings" className="text-[#CEFF00] hover:text-white transition-colors font-medium leading-tight">
+                  Meetings
+                </Link>
+              </li>
+              <li>
+                <Link href="/#grievances" className="text-[#CEFF00] hover:text-white transition-colors font-medium leading-tight">
+                  Grievances
+                </Link>
+              </li>
             </ul>
           </div>
 
