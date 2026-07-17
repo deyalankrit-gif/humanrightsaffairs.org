@@ -99,6 +99,11 @@ export function PublicFooter() {
                   Duties & Responsibilities
                 </Link>
               </li>
+              <li>
+                <Link href="/legal/required-documents" className="text-[#CEFF00] hover:text-white transition-colors font-medium leading-tight">
+                  Required Documents
+                </Link>
+              </li>
             </ul>
           </div>
 
