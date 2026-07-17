@@ -214,7 +214,7 @@ export default function InternalGalleryManagement() {
     item.category?.toLowerCase().includes(search.toLowerCase())
   )
 
-  const categories = ["Campaign", "Workshop", "Convention", "Relief", "Social Projects", "Public Welfare", "Glimpse"]
+  const categories = ["Campaign", "Workshop", "Convention", "Relief", "Social Projects", "Public Welfare", "Glimpse", "New Office Inauguration"]
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
@@ -271,7 +271,7 @@ export default function InternalGalleryManagement() {
                 <div className="bg-amber-50 dark:bg-amber-950/20 p-4 rounded-2xl border border-amber-200 flex gap-3">
                    <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
                    <p className="text-[10px] text-amber-800 dark:text-amber-400 font-bold uppercase leading-relaxed">
-                     Base64 bloat is significant. Images/Thumbnails MUST stay under **150KB**. For videos, use **Direct URL Links** (YouTube/Drive).
+                     Base64 bloat is significant. Documents/Thumbnails MUST stay under **150KB**. For videos, use **Direct URL Links** (YouTube/Drive).
                    </p>
                 </div>
 

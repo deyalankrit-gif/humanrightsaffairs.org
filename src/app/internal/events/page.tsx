@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useEffect, useState } from 'react'
@@ -237,7 +236,7 @@ export default function InternalEventsManagement() {
     e.location.toLowerCase().includes(search.toLowerCase())
   )
 
-  const categories = ["Campaign", "Workshop", "Convention", "Relief", "Social Projects", "Public Welfare", "Glimpse"]
+  const categories = ["Campaign", "Workshop", "Convention", "Relief", "Social Projects", "Public Welfare", "Glimpse", "New Office Inauguration"]
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
@@ -248,7 +247,7 @@ export default function InternalEventsManagement() {
             <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="max-w-2xl rounded-3xl overflow-y-auto max-h-[90vh] border-none shadow-2xl">
               <DialogHeader><DialogTitle>Registry Documentation</DialogTitle></DialogHeader>
               <div className="space-y-6 py-2">
-                <div className="bg-red-50 dark:bg-red-950/20 p-4 rounded-2xl border border-red-200 flex gap-3"><FileWarning className="w-5 h-5 text-red-600 shrink-0 mt-1" /><div className="space-y-1"><p className="text-[10px] font-black uppercase text-red-600">Payload Enforcement (Firestore 1MB Limit)</p><p className="text-[9px] text-red-700 dark:text-red-400 font-bold">Base64 bloat is significant. Images MUST stay under **150KB**. For long videos, only use **Direct URL Links**.</p></div></div>
+                <div className="bg-red-50 dark:bg-red-950/20 p-4 rounded-2xl border border-red-200 flex gap-3"><FileWarning className="w-5 h-5 text-red-600 shrink-0 mt-1" /><div className="space-y-1"><p className="text-[10px] font-black uppercase text-red-600">Payload Enforcement (Firestore 1MB Limit)</p><p className="text-[9px] text-red-700 dark:text-red-400 font-bold">Base64 bloat is significant. Documents MUST stay under **150KB**. For long videos, only use **Direct URL Links**.</p></div></div>
                 
                 <div className="space-y-1">
                   <Label className="text-[10px] uppercase font-black text-red-600">Record Title</Label>
@@ -324,7 +323,7 @@ export default function InternalEventsManagement() {
                 </div></div>
 
               <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1"><Label className="text-[10px] uppercase font-bold">Date</Label><Popover><PopoverTrigger asChild><Button variant="outline" className={cn("w-full justify-start text-left font-normal h-10 rounded-lg text-sm hover:bg-slate-50", !editEvent.date && "text-muted-foreground")}><CalendarIcon className="mr-2 h-4 w-4" />{editEvent.date || "Pick Date"}</Button></PopoverTrigger><PopoverContent className="w-auto p-0 z-[1000001]" align="start"><Calendar mode="single" selected={parseEventDate(editEvent.date)} onSelect={(d) => setEditEvent((p: any) => ({...p, date: d ? format(d, "PPP") : ''}))} initialFocus /></PopoverContent></Popover></div>
+                <div className="space-y-1"><Label className="text-[10px] uppercase font-bold">Date</Label><Popover><PopoverTrigger asChild><Button variant="outline" className={cn("w-full justify-start text-left font-normal h-10 rounded-lg text-sm hover:bg-slate-50", !editEvent.date && "text-muted-foreground")}>{editEvent.date || "Pick Date"}</Button></PopoverTrigger><PopoverContent className="w-auto p-0 z-[1000001]" align="start"><Calendar mode="single" selected={parseEventDate(editEvent.date)} onSelect={(d) => setEditEvent((p: any) => ({...p, date: d ? format(d, "PPP") : ''}))} initialFocus /></PopoverContent></Popover></div>
                 <div className="space-y-1"><Label className="text-[10px] uppercase font-bold">Category</Label><Select value={editEvent.category} onValueChange={(v: any) => setEditEvent((p: any) => ({...p, category: v}))}><SelectTrigger className="h-10 rounded-lg text-xs"><SelectValue /></SelectTrigger><SelectContent position="popper" className="z-[1000001] bg-white">{categories.filter(c => c !== 'All').map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent></Select></div>
               </div>
 

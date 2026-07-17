@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useMemo, useEffect } from 'react'
@@ -281,7 +280,7 @@ export default function GalleryPage() {
 
   const loading = eventsLoading || galleryLoading;
 
-  const categories = ["Campaign", "Workshop", "Convention", "Relief", "Social Projects", "Public Welfare", "Glimpse"]
+  const categories = ["Campaign", "Workshop", "Convention", "Relief", "Social Projects", "Public Welfare", "Glimpse", "New Office Inauguration"]
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
@@ -352,7 +351,7 @@ export default function GalleryPage() {
                         )}
                         <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => handleFileChange(e, 'url')} />
                       </div>
-                      <Button variant="outline" size="sm" className="w-full relative h-9 rounded-lg">
+                      <Button variant="outline" size="sm" className="w-full relative h-9 rounded-lg hover:bg-slate-100">
                         <Upload className="w-3.5 h-3.5 mr-2" /> {newItem.type === 'still' ? 'Select Photograph' : 'Select Video Cover'}
                       </Button>
                     </div>

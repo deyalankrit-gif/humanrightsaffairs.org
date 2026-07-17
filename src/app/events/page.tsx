@@ -67,7 +67,7 @@ type Event = {
   title: string
   date: string
   location: string
-  category: "Campaign" | "Workshop" | "Convention" | "Relief" | "Social Projects" | "Public Welfare" | "Glimpse"
+  category: "Campaign" | "Workshop" | "Convention" | "Relief" | "Social Projects" | "Public Welfare" | "Glimpse" | "New Office Inauguration"
   imageId?: string
   galleryImages?: string[]
   galleryCaptions?: string[]
@@ -282,7 +282,7 @@ export default function EventsPage() {
     return matchesCategory && matchesSearch;
   })
 
-  const categories = ["All", "Campaign", "Workshop", "Convention", "Relief", "Social Projects", "Public Welfare", "Glimpse"]
+  const categories = ["All", "Campaign", "Workshop", "Convention", "Relief", "Social Projects", "Public Welfare", "Glimpse", "New Office Inauguration"]
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
@@ -314,7 +314,7 @@ export default function EventsPage() {
                        <div className="space-y-1">
                           <p className="text-xs font-bold text-amber-900 dark:text-amber-400 uppercase tracking-wider">Database Payload Warning</p>
                           <p className="text-[10px] text-amber-800 dark:text-amber-500 leading-relaxed font-bold">
-                            Storing files as Base64 consumes massive database space. Please prioritize **YouTube/Drive URLs** for videos. Images MUST be under **150KB** each.
+                            Storing files as Base64 consumes massive database space. Please prioritize **YouTube/Drive URLs** for videos. Documents MUST be under **150KB** each.
                           </p>
                        </div>
                     </div>
