@@ -165,7 +165,7 @@ export function PublicFooter() {
               </li>
               <li>
                 <Link href="/meetings" className="text-[#CEFF00] hover:text-white transition-colors font-medium leading-tight">
-                  Meetings
+                  Organizations Meeting
                 </Link>
               </li>
               <li>
