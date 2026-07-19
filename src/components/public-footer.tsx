@@ -24,7 +24,7 @@ import { Button } from '@/components/ui/button';
 
 /**
  * PublicFooter: Optimized for all screen sizes with responsive grids and fluid spacing.
- * Includes a secure OTP gate for the Required Documents section.
+ * Includes a secure email OTP gate for the Required Documents section.
  */
 export function PublicFooter() {
   const donationFooterImg = PlaceHolderImages.find(img => img.id === 'donation-footer-image');
@@ -38,7 +38,7 @@ export function PublicFooter() {
   const [isVerifying, setIsVerifying] = useState(false);
   const [otpStep, setOtpStep] = useState<'send' | 'verify'>('send');
 
-  const TARGET_NUMBER = "9830983392";
+  const TARGET_EMAIL = "humanrightsaffairstrust@gmail.com";
   const DEMO_OTP = "123456";
 
   const handleOpenGate = (e: React.MouseEvent) => {
@@ -64,7 +64,6 @@ export function PublicFooter() {
         setIsOtpOpen(false);
         router.push('/legal/required-documents');
       } else {
-        // Simple alert for prototype; in prod this would be a specialized error state
         alert("Invalid Security Code. Access Denied.");
       }
       setIsVerifying(false);
@@ -224,7 +223,7 @@ export function PublicFooter() {
         </div>
       </div>
 
-      {/* OTP GATE DIALOG */}
+      {/* EMAIL OTP GATE DIALOG */}
       <Dialog open={isOtpOpen} onOpenChange={setIsOtpOpen}>
         <DialogContent className="max-w-md rounded-[2rem] border-none shadow-2xl bg-white dark:bg-slate-900 p-8">
            <DialogHeader className="items-center text-center space-y-4">
@@ -233,7 +232,7 @@ export function PublicFooter() {
               </div>
               <DialogTitle className="text-2xl font-headline font-bold">Secure Document Access</DialogTitle>
               <DialogDescription className="text-xs font-bold uppercase tracking-widest text-slate-400">
-                 Authorized Personnel Only
+                 Authorized Personnel Email Verification
               </DialogDescription>
            </DialogHeader>
 
@@ -241,18 +240,18 @@ export function PublicFooter() {
               {otpStep === 'send' ? (
                 <div className="space-y-6 text-center">
                    <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-800">
-                      <p className="text-[10px] font-black uppercase text-slate-400 mb-2">Registered Mobile</p>
-                      <p className="text-xl font-bold text-primary dark:text-white">+91 98309 83392</p>
+                      <p className="text-[10px] font-black uppercase text-slate-400 mb-2">Registered Official Email</p>
+                      <p className="text-sm font-bold text-primary dark:text-white break-all">{TARGET_EMAIL}</p>
                    </div>
                    <p className="text-xs text-slate-500 leading-relaxed italic">
-                      "An encrypted authentication code will be sent to the registered mobile device of the authorized official to permit entry."
+                      "An encrypted authentication code will be sent to the registered email address of the authorized official to permit entry."
                    </p>
                    <Button 
                     onClick={handleSendOtp} 
                     disabled={isVerifying}
                     className="w-full h-12 bg-primary text-white font-bold rounded-xl hover:bg-secondary transition-all shadow-xl shadow-primary/20"
                    >
-                     {isVerifying ? <Loader2 className="animate-spin w-5 h-5" /> : <>Request OTP <ArrowRight className="ml-2 w-4 h-4" /></>}
+                     {isVerifying ? <Loader2 className="animate-spin w-5 h-5" /> : <>Request Email OTP <ArrowRight className="ml-2 w-4 h-4" /></>}
                    </Button>
                 </div>
               ) : (
@@ -269,7 +268,7 @@ export function PublicFooter() {
                    </div>
                    <div className="bg-emerald-50 dark:bg-emerald-900/20 p-3 rounded-xl border border-emerald-100 dark:border-emerald-900 flex items-center gap-3">
                       <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                      <p className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 uppercase">OTP Sent Successfully</p>
+                      <p className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 uppercase">OTP Sent to Email</p>
                    </div>
                    <Button 
                     onClick={handleVerifyOtp} 
