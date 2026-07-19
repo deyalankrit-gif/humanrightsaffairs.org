@@ -21,6 +21,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
 
 /**
  * PublicFooter: Optimized for all screen sizes with responsive grids and fluid spacing.
@@ -31,6 +32,7 @@ export function PublicFooter() {
   const { user } = useUser();
   const db = useFirestore();
   const router = useRouter();
+  const { toast } = useToast();
 
   // OTP Gate States
   const [isOtpOpen, setIsOtpOpen] = useState(false);
@@ -63,6 +65,10 @@ export function PublicFooter() {
     setTimeout(() => {
       setOtpStep('verify');
       setIsVerifying(false);
+      toast({
+        title: "Security Code Dispatched",
+        description: `A code has been sent to ${maskedEmail}. For prototype testing, use: 123456`,
+      });
     }, 1500);
   };
 
@@ -72,8 +78,16 @@ export function PublicFooter() {
       if (otpValue === DEMO_OTP) {
         setIsOtpOpen(false);
         router.push('/legal/required-documents');
+        toast({
+          title: "Access Granted",
+          description: "Institutional clearance verified.",
+        });
       } else {
-        alert("Invalid Security Code. Access Denied.");
+        toast({
+          variant: "destructive",
+          title: "Verification Failed",
+          description: "The security code you entered is invalid.",
+        });
       }
       setIsVerifying(false);
     }, 1000);
@@ -252,9 +266,16 @@ export function PublicFooter() {
                       <p className="text-[10px] font-black uppercase text-slate-400 mb-2">Registered Official Email</p>
                       <p className="text-sm font-bold text-primary dark:text-white break-all">{maskedEmail}</p>
                    </div>
-                   <p className="text-xs text-slate-500 leading-relaxed italic">
-                      "An encrypted authentication code will be sent to the registered email address of the authorized official to permit entry."
-                   </p>
+                   <div className="space-y-2">
+                      <p className="text-xs text-slate-500 leading-relaxed italic">
+                        "An encrypted authentication code will be sent to the registered email address of the authorized official to permit entry."
+                      </p>
+                      <div className="bg-amber-50 dark:bg-amber-950/20 p-3 rounded-xl border border-amber-100 dark:border-amber-900">
+                        <p className="text-[10px] font-bold text-amber-700 dark:text-amber-400 uppercase">
+                          Prototype Mode: Click below to simulate sending.
+                        </p>
+                      </div>
+                   </div>
                    <Button 
                     onClick={handleSendOtp} 
                     disabled={isVerifying}
@@ -274,6 +295,9 @@ export function PublicFooter() {
                         onChange={(e) => setOtpValue(e.target.value)}
                         className="h-14 text-center text-3xl font-bold tracking-[0.5em] rounded-xl border-2 focus:ring-accent"
                       />
+                      <p className="text-[10px] text-center text-accent font-black uppercase tracking-widest mt-2">
+                        Testing Code: 123456
+                      </p>
                    </div>
                    <div className="bg-emerald-50 dark:bg-emerald-900/20 p-3 rounded-xl border border-emerald-100 dark:border-emerald-900 flex items-center gap-3">
                       <CheckCircle2 className="w-4 h-4 text-emerald-500" />
