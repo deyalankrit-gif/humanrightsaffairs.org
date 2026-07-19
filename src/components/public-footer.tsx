@@ -1,23 +1,74 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import Image from 'next/image';
-import { Mail, Phone, MapPin, Facebook, Twitter, Instagram, Youtube, Bell, Crown } from 'lucide-react';
+import { Mail, Phone, MapPin, Facebook, Twitter, Instagram, Youtube, Bell, Crown, ShieldCheck, Lock, ArrowRight, Loader2, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { DonationDialog } from './donation-dialog';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, query, where, orderBy } from 'firebase/firestore';
 import { FooterMusicPlayer } from './footer-music-player';
 import { cn } from '@/lib/utils';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 /**
  * PublicFooter: Optimized for all screen sizes with responsive grids and fluid spacing.
+ * Includes a secure OTP gate for the Required Documents section.
  */
 export function PublicFooter() {
   const donationFooterImg = PlaceHolderImages.find(img => img.id === 'donation-footer-image');
   const { user } = useUser();
   const db = useFirestore();
+  const router = useRouter();
+
+  // OTP Gate States
+  const [isOtpOpen, setIsOtpOpen] = useState(false);
+  const [otpValue, setOtpValue] = useState('');
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [otpStep, setOtpStep] = useState<'send' | 'verify'>('send');
+
+  const TARGET_NUMBER = "9830983392";
+  const DEMO_OTP = "123456";
+
+  const handleOpenGate = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsOtpOpen(true);
+    setOtpStep('send');
+    setOtpValue('');
+  };
+
+  const handleSendOtp = () => {
+    setIsVerifying(true);
+    // Simulate API delay
+    setTimeout(() => {
+      setOtpStep('verify');
+      setIsVerifying(false);
+    }, 1500);
+  };
+
+  const handleVerifyOtp = () => {
+    setIsVerifying(true);
+    setTimeout(() => {
+      if (otpValue === DEMO_OTP) {
+        setIsOtpOpen(false);
+        router.push('/legal/required-documents');
+      } else {
+        // Simple alert for prototype; in prod this would be a specialized error state
+        alert("Invalid Security Code. Access Denied.");
+      }
+      setIsVerifying(false);
+    }, 1000);
+  };
 
   const remindersQuery = useMemoFirebase(() => {
     if (!db || !user) return null;
@@ -104,9 +155,12 @@ export function PublicFooter() {
                 </Link>
               </li>
               <li>
-                <Link href="/legal/required-documents" className="text-[#CEFF00] hover:text-white transition-colors font-medium leading-tight">
+                <button 
+                  onClick={handleOpenGate}
+                  className="text-[#CEFF00] hover:text-white transition-colors font-medium leading-tight text-left"
+                >
                   Required Documents
-                </Link>
+                </button>
               </li>
               <li>
                 <Link href="/meetings" className="text-[#CEFF00] hover:text-white transition-colors font-medium leading-tight">
@@ -168,6 +222,72 @@ export function PublicFooter() {
           </div>
         </div>
       </div>
+
+      {/* OTP GATE DIALOG */}
+      <Dialog open={isOtpOpen} onOpenChange={setIsOtpOpen}>
+        <DialogContent className="max-w-md rounded-[2rem] border-none shadow-2xl bg-white dark:bg-slate-900 p-8">
+           <DialogHeader className="items-center text-center space-y-4">
+              <div className="w-16 h-16 bg-accent/10 rounded-2xl flex items-center justify-center text-accent">
+                 <Lock className="w-8 h-8" />
+              </div>
+              <DialogTitle className="text-2xl font-headline font-bold">Secure Document Access</DialogTitle>
+              <DialogDescription className="text-xs font-bold uppercase tracking-widest text-slate-400">
+                 Authorized Personnel Only
+              </DialogDescription>
+           </DialogHeader>
+
+           <div className="py-6 space-y-6">
+              {otpStep === 'send' ? (
+                <div className="space-y-6 text-center">
+                   <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-800">
+                      <p className="text-[10px] font-black uppercase text-slate-400 mb-2">Registered Mobile</p>
+                      <p className="text-xl font-bold text-primary dark:text-white">+91 98309 83392</p>
+                   </div>
+                   <p className="text-xs text-slate-500 leading-relaxed italic">
+                      "An encrypted authentication code will be sent to the registered mobile device of the authorized official to permit entry."
+                   </p>
+                   <Button 
+                    onClick={handleSendOtp} 
+                    disabled={isVerifying}
+                    className="w-full h-12 bg-primary text-white font-bold rounded-xl hover:bg-secondary transition-all shadow-xl shadow-primary/20"
+                   >
+                     {isVerifying ? <Loader2 className="animate-spin w-5 h-5" /> : <>Request OTP <ArrowRight className="ml-2 w-4 h-4" /></>}
+                   </Button>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                   <div className="space-y-2">
+                      <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Enter Security Code</Label>
+                      <Input 
+                        placeholder="••••••" 
+                        maxLength={6}
+                        value={otpValue}
+                        onChange={(e) => setOtpValue(e.target.value)}
+                        className="h-14 text-center text-3xl font-bold tracking-[0.5em] rounded-xl border-2 focus:ring-accent"
+                      />
+                   </div>
+                   <div className="bg-emerald-50 dark:bg-emerald-900/20 p-3 rounded-xl border border-emerald-100 dark:border-emerald-900 flex items-center gap-3">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                      <p className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 uppercase">OTP Sent Successfully</p>
+                   </div>
+                   <Button 
+                    onClick={handleVerifyOtp} 
+                    disabled={isVerifying || otpValue.length < 6}
+                    className="w-full h-12 bg-accent text-primary font-bold rounded-xl hover:bg-secondary hover:text-white transition-all shadow-xl shadow-accent/20"
+                   >
+                     {isVerifying ? <Loader2 className="animate-spin w-5 h-5" /> : "Verify Identity"}
+                   </Button>
+                </div>
+              )}
+           </div>
+
+           <div className="pt-4 border-t border-slate-100 dark:border-slate-800 text-center">
+              <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">
+                 National Security Cell • Human Rights Affairs Trust
+              </p>
+           </div>
+        </DialogContent>
+      </Dialog>
     </footer>
   );
 }
