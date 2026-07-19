@@ -91,7 +91,7 @@ export function AdminFooter() {
           <div className="space-y-4">
             <h4 className="text-sm font-black uppercase tracking-widest text-accent">Support Hub</h4>
             <div className="space-y-3 text-primary-foreground/60 text-xs">
-               <p>National Tech Cell: <span className="text-white font-bold">+91 89811 52748</span></p>
+               <p>National Tech Cell: <a href="tel:+918981152748" className="text-white font-bold hover:text-accent transition-colors">+91 89811 52748</a></p>
                <p>Official HQ: <span className="text-white">New Delhi, India</span></p>
             </div>
           </div>

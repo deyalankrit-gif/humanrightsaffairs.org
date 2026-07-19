@@ -222,16 +222,28 @@ export function PublicFooter() {
               <h4 className="text-base md:text-lg font-headline font-bold mb-4 text-accent">National Head Office</h4>
               <div className="space-y-3 text-primary-foreground/80 text-xs md:text-sm">
                 <div className="flex gap-3"><MapPin className="w-4 h-4 text-accent shrink-0 mt-0.5" /><span>Azad Market, Delhi - 110006</span></div>
-                <div className="flex gap-3"><Phone className="w-4 h-4 text-accent shrink-0 mt-0.5" /><span>+91 89811 52748</span></div>
-                <div className="flex gap-3"><Mail className="w-4 h-4 text-accent shrink-0 mt-0.5" /><a href="mailto:humanrightsaffairstrust@gmail.com" className="hover:text-accent font-bold truncate">humanrightsaffairstrust@gmail.com</a></div>
+                <div className="flex gap-3">
+                  <Phone className="w-4 h-4 text-accent shrink-0 mt-0.5" />
+                  <a href="tel:+918981152748" className="hover:text-accent transition-colors">+91 89811 52748</a>
+                </div>
+                <div className="flex gap-3">
+                  <Mail className="w-4 h-4 text-accent shrink-0 mt-0.5" />
+                  <a href="mailto:humanrightsaffairstrust@gmail.com" className="hover:text-accent font-bold truncate">humanrightsaffairstrust@gmail.com</a>
+                </div>
               </div>
             </div>
             <div>
               <h4 className="text-base md:text-lg font-headline font-bold mb-4 text-accent">State Office (WB)</h4>
               <div className="space-y-3 text-primary-foreground/80 text-xs md:text-sm">
                 <div className="flex gap-3"><MapPin className="w-4 h-4 text-accent shrink-0 mt-0.5" /><span>Biswanathpur, Deganga, 24 Parganas (N), WB</span></div>
-                <div className="flex gap-3"><Phone className="w-4 h-4 text-accent shrink-0 mt-0.5" /><span>+91 70631 11471</span></div>
-                <div className="flex gap-3"><Mail className="w-4 h-4 text-accent shrink-0 mt-0.5" /><a href="mailto:hrat.wb.chairman@gmail.com" className="hover:text-accent font-bold truncate">hrat.wb.chairman@gmail.com</a></div>
+                <div className="flex gap-3">
+                  <Phone className="w-4 h-4 text-accent shrink-0 mt-0.5" />
+                  <a href="tel:+917063111471" className="hover:text-accent transition-colors">+91 70631 11471</a>
+                </div>
+                <div className="flex gap-3">
+                  <Mail className="w-4 h-4 text-accent shrink-0 mt-0.5" />
+                  <a href="mailto:hrat.wb.chairman@gmail.com" className="hover:text-accent font-bold truncate">hrat.wb.chairman@gmail.com</a>
+                </div>
               </div>
             </div>
           </div>
