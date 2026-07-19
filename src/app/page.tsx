@@ -194,7 +194,8 @@ export default function Home() {
               <MessageSquareText className="w-3.5 h-3.5 md:w-4 md:h-4" />
               <span>Institutional Oversight</span>
             </div>
-            <h2 className="text-3xl md:text-6xl font-headline font-bold text-primary dark:text-white mb-4 md:mb-6">File a Formal <span className="text-accent italic">Grievance</span></h2>
+            <h2 className="text-3xl md:text-6xl font-headline font-bold text-primary dark:text-white mb-2 md:mb-4">File a Formal <span className="text-accent italic">Grievance</span></h2>
+            <p className="text-primary dark:text-white font-bold text-sm md:text-base mb-6">কেবলমাত্র অর্গানাইজেশনের সদস্যদের অভিযোগ জানানোর নিজস্ব ব্যবস্থা</p>
             <p className="text-slate-500 dark:text-slate-400 text-sm md:text-lg">
               Submit your concerns directly to our governance cell. Your submission is protected by strict privacy protocols and will be reviewed by the central administration.
             </p>
