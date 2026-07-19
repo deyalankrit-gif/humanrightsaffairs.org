@@ -41,11 +41,13 @@ export function PublicFooter() {
   const TARGET_EMAIL = "humanrightsaffairstrust@gmail.com";
   const DEMO_OTP = "123456";
 
-  // Email Masking Logic: hu...st@gmail.com
+  // Email Masking Logic: hu[exact count of X]st@gmail.com
   const maskedEmail = useMemo(() => {
     const [userPart, domain] = TARGET_EMAIL.split('@');
     if (userPart.length <= 4) return TARGET_EMAIL;
-    return `${userPart.slice(0, 2)}xxx${userPart.slice(-2)}@${domain}`;
+    const middleCount = userPart.length - 4;
+    const xMask = 'X'.repeat(middleCount);
+    return `${userPart.slice(0, 2)}${xMask}${userPart.slice(-2)}@${domain}`;
   }, [TARGET_EMAIL]);
 
   const handleOpenGate = (e: React.MouseEvent) => {
