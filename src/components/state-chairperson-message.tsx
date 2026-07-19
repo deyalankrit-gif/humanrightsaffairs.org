@@ -34,7 +34,7 @@ export function StateChairpersonMessage() {
                </div>
                <div className="text-left">
                  <p className="font-bold text-lg md:text-3xl lg:text-4xl text-emerald-600 leading-none">Moumita Saha</p>
-                 <p className="text-muted-foreground text-[10px] md:text-xl font-bold mt-1 md:mt-2">Chairman (West Bengal)</p>
+                 <p className="text-muted-foreground text-[10px] md:text-xl font-bold mt-1 md:mt-2">Founder & Chairman (West Bengal)</p>
                </div>
             </div>
           </div>
