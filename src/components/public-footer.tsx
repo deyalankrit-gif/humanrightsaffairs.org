@@ -41,6 +41,13 @@ export function PublicFooter() {
   const TARGET_EMAIL = "humanrightsaffairstrust@gmail.com";
   const DEMO_OTP = "123456";
 
+  // Email Masking Logic: hu...st@gmail.com
+  const maskedEmail = useMemo(() => {
+    const [userPart, domain] = TARGET_EMAIL.split('@');
+    if (userPart.length <= 4) return TARGET_EMAIL;
+    return `${userPart.slice(0, 2)}xxx${userPart.slice(-2)}@${domain}`;
+  }, [TARGET_EMAIL]);
+
   const handleOpenGate = (e: React.MouseEvent) => {
     e.preventDefault();
     setIsOtpOpen(true);
@@ -241,7 +248,7 @@ export function PublicFooter() {
                 <div className="space-y-6 text-center">
                    <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-800">
                       <p className="text-[10px] font-black uppercase text-slate-400 mb-2">Registered Official Email</p>
-                      <p className="text-sm font-bold text-primary dark:text-white break-all">{TARGET_EMAIL}</p>
+                      <p className="text-sm font-bold text-primary dark:text-white break-all">{maskedEmail}</p>
                    </div>
                    <p className="text-xs text-slate-500 leading-relaxed italic">
                       "An encrypted authentication code will be sent to the registered email address of the authorized official to permit entry."
