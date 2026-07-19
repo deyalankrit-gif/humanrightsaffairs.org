@@ -61,7 +61,7 @@ export function Navbar() {
 
       {/* Unified Uniform Navigation (Middle) */}
       <div className="flex-1 min-w-0 h-full relative">
-        <nav className="w-full flex items-center justify-center overflow-x-auto no-scrollbar gap-1.5 md:gap-2 px-1 touch-pan-x scroll-smooth h-full">
+        <nav className="w-full flex items-center justify-start md:justify-center overflow-x-auto no-scrollbar gap-1.5 md:gap-2 px-1 touch-pan-x scroll-smooth h-full">
           {publicLinks.map((link) => {
             const isHashLink = link.href.includes('#')
             const linkPath = isHashLink ? link.href.split('#')[0] || '/' : link.href
