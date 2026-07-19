@@ -183,7 +183,7 @@ export function FooterMusicPlayer({ className }: { className?: string }) {
           <div className="flex flex-col min-w-0 overflow-hidden flex-1">
             <div className="flex items-center gap-2 mb-1 shrink-0">
               <Radio className={cn("w-3 h-3 text-orange-500", isPlaying && "animate-pulse")} />
-              <span className="text-[9px] font-black uppercase tracking-[0.3em] text-orange-500/70">Mission Broadcast</span>
+              <span className="text-[9px] font-black uppercase tracking-[0.2em] text-orange-500/70">Mission Broadcast</span>
             </div>
             {/* Scrolling Title Container */}
             <div className="overflow-hidden w-full whitespace-nowrap">
@@ -218,7 +218,7 @@ export function FooterMusicPlayer({ className }: { className?: string }) {
             disabled={error}
             className="h-14 w-14 rounded-full bg-orange-500 text-primary shadow-xl shadow-orange-500/20 hover:scale-105 hover:bg-orange-400 transition-all border-none relative overflow-hidden"
           >
-            {isPlaying ? <Play className="w-7 h-7 fill-current ml-1" /> : <Pause className="w-7 h-7 fill-current" />}
+            {isPlaying ? <Pause className="w-7 h-7 fill-current" /> : <Play className="w-7 h-7 fill-current ml-1" />}
           </Button>
 
           <Button variant="ghost" size="icon" onClick={handleNext} className="h-10 w-10 text-orange-500/40 hover:text-orange-500 transition-colors">
