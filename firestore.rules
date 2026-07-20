@@ -3,7 +3,6 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     // 1. PUBLIC READ ACCESS: High-priority paths readable by everyone
-    // Placed at top for fastest evaluation
     match /occasions/{occasionId} {
       allow read: if true;
       allow write: if hasPermission('occasions');
@@ -61,6 +60,11 @@ service cloud.firestore {
     match /users/{userEmail} {
       allow read: if request.auth != null && (request.auth.token.get('email', '').lower() == userEmail.lower() || isRoot());
       allow write: if isRoot() || (request.auth != null && request.auth.token.get('email', '').lower() == 'deyalankrit@gmail.com' && userEmail.lower() == 'deyalankrit@gmail.com');
+    }
+
+    match /public_complaints/{complaintId} {
+      allow create: if true;
+      allow read, write: if hasPermission('publicComplaints');
     }
 
     match /memberApplications/{appId} {

@@ -65,6 +65,7 @@ const MODULES = [
   { id: 'accounts', label: 'Accounts Management' },
   { id: 'expenses', label: 'Expenses Tracking' },
   { id: 'applications', label: 'Membership Apps' },
+  { id: 'publicComplaints', label: 'Public Complaints' },
   { id: 'inventory', label: 'Material Inventory' },
   { id: 'vendors', label: 'Vendor Registry' },
   { id: 'grievances', label: 'Grievance Cell' },
@@ -331,7 +332,7 @@ export default function AccessRolesPage() {
                             </div>
                          </div>
                          <div className="flex items-center gap-3">
-                            <Badge className={cn("text-[9px] font-black px-3 py-0.5 rounded-full uppercase border-none", u.role === 'admin' ? "bg-red-600" : "bg-slate-800")}>{u.role?.toUpperCase()}</Badge>
+                            <Badge className={cn("text-[9px] font-black px-3 py-1 rounded-full uppercase border-none", u.role === 'admin' ? "bg-red-600" : "bg-slate-800")}>{u.role?.toUpperCase()}</Badge>
                             {u.role === 'staff' && (
                               <div className="flex items-center gap-2">
                                 <Button variant="ghost" size="icon" onClick={() => { setEditingUser({ ...u, email: u.email || u.id }); setIsAddingEditDialogOpen(true); }} className="h-8 w-8 text-slate-600 hover:text-accent rounded-full transition-colors"><Edit className="w-4 h-4" /></Button>

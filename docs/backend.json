@@ -32,7 +32,8 @@
             "renewals": { "type": "boolean" },
             "activityHub": { "type": "boolean", "description": "Access to manage Activity Calendar Hub." },
             "occasions": { "type": "boolean", "description": "Access to manage Festival & Occasion greetings." },
-            "donorWall": { "type": "boolean", "description": "Access to manage Wall of Donors recognition." }
+            "donorWall": { "type": "boolean", "description": "Access to manage Wall of Donors recognition." },
+            "publicComplaints": { "type": "boolean", "description": "Access to review public human rights complaints." }
           }
         },
         "lastLogin": { "type": "string", "format": "date-time" },
@@ -65,51 +66,26 @@
       },
       "required": ["title", "date", "category", "status"]
     },
-    "ActivityReminder": {
-      "title": "Personal Reminder",
-      "description": "Private reminder for an individual user.",
+    "PublicComplaint": {
+      "title": "Public Complaint",
+      "description": "A formal human rights violation report submitted by a citizen.",
       "type": "object",
       "properties": {
-        "uid": { "type": "string" },
-        "title": { "type": "string" },
-        "eventId": { "type": "string" },
-        "daysBefore": { "type": "number" },
-        "remindAt": { "type": "string", "format": "date-time" },
-        "notified": { "type": "boolean" },
-        "createdAt": { "type": "string", "format": "date-time" }
-      },
-      "required": ["uid", "title", "daysBefore"]
-    },
-    "Occasion": {
-      "title": "Occasion Greeting",
-      "description": "Banner and message for festivals or special events on the homepage.",
-      "type": "object",
-      "properties": {
-        "title": { "type": "string" },
-        "message": { "type": "string" },
-        "imageUrl": { "type": "string" },
-        "startDate": { "type": "string", "format": "date" },
-        "endDate": { "type": "string", "format": "date" },
-        "isActive": { "type": "boolean" },
-        "priority": { "type": "number" },
-        "createdAt": { "type": "string", "format": "date-time" }
-      },
-      "required": ["title", "imageUrl", "startDate", "endDate", "isActive"]
-    },
-    "DonorTier": {
-      "title": "Donor Tier",
-      "description": "Recognition level for benefactors on the Wall of Donors.",
-      "type": "object",
-      "properties": {
-        "title": { "type": "string" },
+        "token": { "type": "string" },
+        "fullName": { "type": "string" },
+        "relationName": { "type": "string" },
+        "email": { "type": "string" },
+        "phone": { "type": "string" },
+        "aadhaar": { "type": "string" },
+        "address": { "type": "string" },
+        "incidentDate": { "type": "string" },
+        "incidentLocation": { "type": "string" },
+        "subject": { "type": "string" },
         "description": { "type": "string" },
-        "color": { "type": "string", "description": "Tailwind CSS gradient classes." },
-        "iconName": { "type": "string", "description": "Lucide icon identifier." },
-        "members": { "type": "array", "items": { "type": "string" } },
-        "priority": { "type": "number" },
+        "status": { "type": "string", "enum": ["Pending", "In Progress", "Resolved"] },
+        "incidentPhotos": { "type": "array", "items": { "type": "string" } },
         "createdAt": { "type": "string", "format": "date-time" }
-      },
-      "required": ["title", "members", "priority"]
+      }
     }
   },
   "auth": {
@@ -118,8 +94,6 @@
   "firestore": {
     "/users/{userEmail}": { "schema": "UserAccount", "description": "Permissions registry." },
     "/activity_events/{eventId}": { "schema": "ActivityEvent" },
-    "/activity_reminders/{reminderId}": { "schema": "ActivityReminder" },
-    "/occasions/{occasionId}": { "schema": "Occasion", "description": "Festival and special occasion banner registry." },
-    "/donor_tiers/{tierId}": { "schema": "DonorTier", "description": "Wall of Donors recognition levels." }
+    "/public_complaints/{complaintId}": { "schema": "PublicComplaint", "description": "Public human rights reports." }
   }
 }
