@@ -357,11 +357,12 @@ export default function WebsiteVisitorsPage() {
                                            {(() => {
                                              if (v.lastActivity?.toDate && v.firstVisit?.toDate) {
                                                const diff = v.lastActivity.toDate().getTime() - v.firstVisit.toDate().getTime();
-                                               const minutes = Math.floor(diff / 60000);
-                                               const seconds = Math.floor((diff % 60000) / 1000);
-                                               return `${minutes}m ${seconds}s`;
+                                               const hours = Math.floor(diff / (1000 * 60 * 60));
+                                               const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                                               const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+                                               return `${hours}h ${minutes}m ${seconds}s`;
                                              }
-                                             return '0m 0s';
+                                             return '0h 0m 0s';
                                            })()}
                                         </span>
                                      </div>
