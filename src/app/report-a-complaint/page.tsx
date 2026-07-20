@@ -32,7 +32,12 @@ import {
   Home,
   UserRoundX,
   Baby,
-  Users
+  Users,
+  Upload,
+  Camera,
+  X,
+  ImageIcon,
+  Trash2
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { errorEmitter } from '@/firebase/error-emitter'
@@ -42,6 +47,7 @@ import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import Image from 'next/image'
 
 const complaintSchema = z.object({
   // Complainant Info
@@ -74,6 +80,8 @@ const complaintSchema = z.object({
   description: z.string().min(30, "Please describe the incident in detail (min 30 chars)"),
   accusedDetails: z.string().optional(),
   witnesses: z.string().optional(),
+  
+  // Procedural Details
   otherAuthorities: z.string().optional(),
   isSubJudice: z.string().optional(),
 })
@@ -83,6 +91,7 @@ export default function ReportAComplaintPage() {
   const { toast } = useToast()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [token, setToken] = useState<string | null>(null)
+  const [incidentPhotos, setIncidentPhotos] = useState<string[]>([])
 
   const form = useForm<z.infer<typeof complaintSchema>>({
     resolver: zodResolver(complaintSchema),
@@ -118,6 +127,42 @@ export default function ReportAComplaintPage() {
   const isThirdParty = form.watch('isThirdParty')
   const victimIsMinor = form.watch('victimIsMinor')
 
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (!files) return
+
+    const newFiles = Array.from(files)
+    if (incidentPhotos.length + newFiles.length > 3) {
+      toast({
+        variant: "destructive",
+        title: "Limit Exceeded",
+        description: "You can only upload a maximum of 3 photos."
+      })
+      return
+    }
+
+    newFiles.forEach(file => {
+      if (file.size > 102400) { // 100KB limit
+        toast({
+          variant: "destructive",
+          title: "File Too Large",
+          description: `${file.name} exceeds the 100KB limit. Please compress and try again.`
+        })
+        return
+      }
+
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setIncidentPhotos(prev => [...prev, reader.result as string])
+      }
+      reader.readAsDataURL(file)
+    })
+  }
+
+  const removePhoto = (index: number) => {
+    setIncidentPhotos(prev => prev.filter((_, i) => i !== index))
+  }
+
   const onSubmit = async (values: z.infer<typeof complaintSchema>) => {
     if (!db) return
     setIsSubmitting(true)
@@ -125,6 +170,7 @@ export default function ReportAComplaintPage() {
     const submissionToken = `CMP-${Math.random().toString(36).substr(2, 6).toUpperCase()}-${Date.now().toString().slice(-4)}`
     const complaintData = {
       ...values,
+      incidentPhotos,
       token: submissionToken,
       status: 'Pending',
       type: 'Public Complaint',
@@ -135,6 +181,7 @@ export default function ReportAComplaintPage() {
       .then(() => {
         setToken(submissionToken)
         form.reset()
+        setIncidentPhotos([])
         toast({
           title: "Complaint Lodged",
           description: "Your official report has been recorded in the national registry."
@@ -470,7 +517,71 @@ export default function ReportAComplaintPage() {
                       </div>
                     </div>
 
-                    {/* Part 4: Procedural Status */}
+                    {/* Part 4: Evidence Upload Section */}
+                    <div className="space-y-6">
+                      <h3 className="text-xs font-black uppercase tracking-[0.3em] text-accent flex items-center gap-2">
+                        <span className="w-8 h-px bg-accent"></span> Evidence Upload / প্রমাণ আপলোড
+                      </h3>
+                      <div className="p-6 md:p-8 rounded-[2.5rem] bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 space-y-6">
+                        <div className="flex flex-col md:flex-row items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-700 pb-6">
+                          <div className="space-y-1 text-center md:text-left">
+                            <FormLabel className="text-sm font-black text-primary dark:text-white uppercase tracking-tight">Upload Incident Photos / ঘটনার ছবি আপলোড করুন</FormLabel>
+                            <p className="text-[10px] text-slate-500 font-bold uppercase">Maximum 3 photos. Max size 100KB per photo. / সর্বোচ্চ ৩টি ছবি। প্রতি ছবির আকার ১০০ কেবি-র মধ্যে হতে হবে।</p>
+                          </div>
+                          <div className="relative shrink-0">
+                            <Button 
+                              type="button" 
+                              variant="outline" 
+                              className="h-12 rounded-xl border-accent/30 text-accent font-bold px-6 gap-2 hover:bg-accent hover:text-white transition-all disabled:opacity-30"
+                              disabled={incidentPhotos.length >= 3}
+                            >
+                              <Upload className="w-4 h-4" /> Select Photos
+                              <input 
+                                type="file" 
+                                accept="image/*" 
+                                multiple 
+                                className="absolute inset-0 opacity-0 cursor-pointer disabled:cursor-not-allowed"
+                                onChange={handlePhotoUpload}
+                                disabled={incidentPhotos.length >= 3}
+                              />
+                            </Button>
+                          </div>
+                        </div>
+
+                        {incidentPhotos.length > 0 && (
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 animate-in fade-in duration-500">
+                            {incidentPhotos.map((photo, idx) => (
+                              <div key={idx} className="relative group aspect-square rounded-2xl overflow-hidden border-4 border-white dark:border-slate-900 shadow-lg">
+                                <Image src={photo} alt={`Incident ${idx + 1}`} fill className="object-cover" />
+                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                  <Button 
+                                    type="button" 
+                                    variant="destructive" 
+                                    size="icon" 
+                                    className="rounded-full h-8 w-8"
+                                    onClick={() => removePhoto(idx)}
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </Button>
+                                </div>
+                                <div className="absolute bottom-2 left-2">
+                                  <Badge className="bg-primary/60 backdrop-blur-sm text-[8px] border-none"># {idx + 1}</Badge>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {incidentPhotos.length === 0 && (
+                          <div className="flex flex-col items-center justify-center py-10 opacity-30">
+                            <ImageIcon className="w-12 h-12 text-slate-300 mb-2" />
+                            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">No photos attached / কোনো ছবি যুক্ত করা হয়নি</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Part 5: Procedural Status */}
                     <div className="space-y-6">
                       <h3 className="text-xs font-black uppercase tracking-[0.3em] text-accent flex items-center gap-2">
                         <span className="w-8 h-px bg-accent"></span> Procedural Status / পদ্ধতিগত অবস্থা
