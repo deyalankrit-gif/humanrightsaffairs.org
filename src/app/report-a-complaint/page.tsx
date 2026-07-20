@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form'
 import { useFirestore } from '@/firebase'
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
 import { 
@@ -25,13 +25,14 @@ import {
   Gavel,
   AlertCircle,
   Clock,
-  Camera,
   ArrowLeft,
   FileText,
   Scale,
   ChevronRight,
-  ClipboardList,
-  Home
+  Home,
+  UserRoundX,
+  Baby,
+  Users
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { errorEmitter } from '@/firebase/error-emitter'
@@ -39,8 +40,11 @@ import { FirestorePermissionError, type SecurityRuleContext } from '@/firebase/e
 import { Footer } from '@/components/footer'
 import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 const complaintSchema = z.object({
+  // Complainant Info
   fullName: z.string().min(2, "Full name is required"),
   email: z.string().email("Invalid email address").optional().or(z.literal('')),
   aadhaar: z.string().length(12, "Aadhaar must be exactly 12 digits"),
@@ -49,6 +53,20 @@ const complaintSchema = z.object({
   postOffice: z.string().min(2, "Post Office is required"),
   policeStation: z.string().min(2, "Police Station is required"),
   pinCode: z.string().length(6, "PIN Code must be 6 digits"),
+  
+  // Third Party Reporting
+  isThirdParty: z.boolean().default(false),
+  victimName: z.string().optional(),
+  victimPhone: z.string().optional(),
+  victimAddress: z.string().optional(),
+  victimAadhaar: z.string().optional(),
+  
+  // Minor Victim Info
+  victimIsMinor: z.boolean().default(false),
+  victimAge: z.string().optional(),
+  victimGender: z.string().optional(),
+
+  // Incident Details
   incidentDate: z.string().min(1, "Date of incident is required"),
   incidentLocation: z.string().min(5, "Venue/Location is required"),
   subject: z.string().min(5, "Please provide a subject for the complaint"),
@@ -76,6 +94,14 @@ export default function ReportAComplaintPage() {
       postOffice: '',
       policeStation: '',
       pinCode: '',
+      isThirdParty: false,
+      victimName: '',
+      victimPhone: '',
+      victimAddress: '',
+      victimAadhaar: '',
+      victimIsMinor: false,
+      victimAge: '',
+      victimGender: '',
       incidentDate: '',
       incidentLocation: '',
       subject: '',
@@ -86,6 +112,9 @@ export default function ReportAComplaintPage() {
       isSubJudice: ''
     }
   })
+
+  const isThirdParty = form.watch('isThirdParty')
+  const victimIsMinor = form.watch('victimIsMinor')
 
   const onSubmit = async (values: z.infer<typeof complaintSchema>) => {
     if (!db) return
@@ -196,24 +225,6 @@ export default function ReportAComplaintPage() {
         <div className="container mx-auto">
           <div className="max-w-5xl mx-auto">
             
-            <div className="mb-12 grid md:grid-cols-3 gap-6">
-               <Card className="bg-red-50 dark:bg-red-950/20 border-red-100 dark:border-red-900 rounded-3xl p-6 flex flex-col items-center text-center gap-4">
-                  <AlertCircle className="w-10 h-10 text-red-600" />
-                  <p className="text-[10px] font-black uppercase text-red-700 dark:text-red-400">Strict Confidentiality</p>
-                  <p className="text-xs text-red-800/70 dark:text-red-400/70 leading-relaxed font-medium">Your identity and submission data are encrypted and accessible only to the central council.</p>
-               </Card>
-               <Card className="bg-indigo-50 dark:bg-indigo-950/20 border-indigo-100 dark:border-indigo-900 rounded-3xl p-6 flex flex-col items-center text-center gap-4">
-                  <Gavel className="w-10 h-10 text-indigo-600" />
-                  <p className="text-[10px] font-black uppercase text-indigo-700 dark:text-indigo-400">Legal Merit Audit</p>
-                  <p className="text-xs text-indigo-800/70 dark:text-indigo-400/70 leading-relaxed font-medium">Every report undergoes a preliminary legal assessment by our pro-bono advocate panel.</p>
-               </Card>
-               <Card className="bg-emerald-50 dark:bg-emerald-950/20 border-emerald-100 dark:border-emerald-900 rounded-3xl p-6 flex flex-col items-center text-center gap-4">
-                  <Clock className="w-10 h-10 text-emerald-600" />
-                  <p className="text-[10px] font-black uppercase text-emerald-700 dark:text-emerald-400">Live Response Track</p>
-                  <p className="text-xs text-emerald-800/70 dark:text-emerald-400/70 leading-relaxed font-medium">Use your generated token to verify the investigation status across all regional chapters.</p>
-               </Card>
-            </div>
-
             <Card className="rounded-[3rem] border-none shadow-2xl overflow-hidden bg-white dark:bg-slate-900">
               <CardHeader className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800 p-8 md:p-12">
                  <CardTitle className="text-2xl font-headline font-bold text-primary dark:text-white flex items-center gap-3">
@@ -223,7 +234,7 @@ export default function ReportAComplaintPage() {
               </CardHeader>
               <CardContent className="p-8 md:p-16">
                 <Form {...form}>
-                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-10">
+                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-12">
                     
                     {/* Part 1: Complainant Credentials */}
                     <div className="space-y-6">
@@ -234,7 +245,7 @@ export default function ReportAComplaintPage() {
                         <FormField control={form.control} name="fullName" render={({ field }) => (
                           <FormItem>
                             <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Full Legal Name / পূর্ণ আইনি নাম *</FormLabel>
-                            <FormControl><Input placeholder="Enter your name as per ID" className="h-12 rounded-xl bg-slate-50 dark:bg-slate-950" {...field} /></FormControl>
+                            <FormControl><Input placeholder="Complainant Name" className="h-12 rounded-xl bg-slate-50 dark:bg-slate-950" {...field} /></FormControl>
                             <FormMessage />
                           </FormItem>
                         )} />
@@ -248,7 +259,7 @@ export default function ReportAComplaintPage() {
                         <FormField control={form.control} name="email" render={({ field }) => (
                           <FormItem>
                             <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Official Email (Optional) / অফিসিয়াল ইমেল (ঐচ্ছিক)</FormLabel>
-                            <FormControl><Input placeholder="name@example.com" className="h-12 rounded-xl bg-slate-50 dark:bg-slate-950" {...field} /></FormControl>
+                            <FormControl><Input placeholder="email@example.com" className="h-12 rounded-xl bg-slate-50 dark:bg-slate-950" {...field} /></FormControl>
                             <FormMessage />
                           </FormItem>
                         )} />
@@ -262,7 +273,7 @@ export default function ReportAComplaintPage() {
                       </div>
                     </div>
 
-                    {/* Part 1.1: Verified Address */}
+                    {/* Part 1.1: Address Details */}
                     <div className="space-y-6">
                       <h3 className="text-xs font-black uppercase tracking-[0.3em] text-accent flex items-center gap-2">
                         <span className="w-8 h-px bg-accent"></span> Verified Residential Address / যাচাইকৃত আবাসিক ঠিকানা
@@ -271,7 +282,7 @@ export default function ReportAComplaintPage() {
                         <FormField control={form.control} name="address" render={({ field }) => (
                           <FormItem>
                             <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Street / Village / House No / রাস্তা / গ্রাম / বাড়ি নম্বর *</FormLabel>
-                            <FormControl><Input placeholder="Detailed Street Address" className="h-12 rounded-xl bg-slate-50 dark:bg-slate-950" {...field} /></FormControl>
+                            <FormControl><Input placeholder="Street/Detailed Address" className="h-12 rounded-xl bg-slate-50 dark:bg-slate-950" {...field} /></FormControl>
                             <FormMessage />
                           </FormItem>
                         )} />
@@ -279,14 +290,14 @@ export default function ReportAComplaintPage() {
                           <FormField control={form.control} name="postOffice" render={({ field }) => (
                             <FormItem>
                               <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Post Office / পোস্ট অফিস *</FormLabel>
-                              <FormControl><Input placeholder="Enter Post Office" className="h-12 rounded-xl bg-slate-50 dark:bg-slate-950" {...field} /></FormControl>
+                              <FormControl><Input placeholder="Post Office" className="h-12 rounded-xl bg-slate-50 dark:bg-slate-950" {...field} /></FormControl>
                               <FormMessage />
                             </FormItem>
                           )} />
                           <FormField control={form.control} name="policeStation" render={({ field }) => (
                             <FormItem>
                               <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Police Station / পুলিশ স্টেশন *</FormLabel>
-                              <FormControl><Input placeholder="Enter Police Station" className="h-12 rounded-xl bg-slate-50 dark:bg-slate-950" {...field} /></FormControl>
+                              <FormControl><Input placeholder="Police Station" className="h-12 rounded-xl bg-slate-50 dark:bg-slate-950" {...field} /></FormControl>
                               <FormMessage />
                             </FormItem>
                           )} />
@@ -299,6 +310,91 @@ export default function ReportAComplaintPage() {
                           )} />
                         </div>
                       </div>
+                    </div>
+
+                    {/* Part 1.2: Conditional Third Party Section */}
+                    <div className="space-y-6 p-8 rounded-[2.5rem] bg-slate-50 dark:bg-slate-800/30 border border-slate-100 dark:border-slate-800">
+                      <FormField control={form.control} name="isThirdParty" render={({ field }) => (
+                        <FormItem className="flex flex-row items-center space-x-3 space-y-0">
+                          <FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} className="border-accent h-5 w-5" /></FormControl>
+                          <div className="space-y-0.5">
+                            <FormLabel className="text-sm font-black text-primary dark:text-white uppercase tracking-tight cursor-pointer">
+                              Report on behalf of someone else / এই অভিযোগ কি অন্য কারো পক্ষে?
+                            </FormLabel>
+                            <FormDescription className="text-[10px] uppercase font-bold text-slate-400">Enable this if the victim is a third party.</FormDescription>
+                          </div>
+                        </FormItem>
+                      )} />
+
+                      {isThirdParty && (
+                        <div className="space-y-8 pt-6 animate-in fade-in slide-in-from-top-2 duration-500">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <FormField control={form.control} name="victimName" render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-accent">Victim's Full Name / ভুক্তভোগীর পূর্ণ নাম *</FormLabel>
+                                <FormControl><Input placeholder="Name of the aggrieved person" className="h-12 rounded-xl bg-white dark:bg-slate-950" {...field} /></FormControl>
+                              </FormItem>
+                            )} />
+                            <FormField control={form.control} name="victimPhone" render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-accent">Victim's Contact / ভুক্তভোগীর ফোন নম্বর</FormLabel>
+                                <FormControl><Input placeholder="Phone number (if available)" className="h-12 rounded-xl bg-white dark:bg-slate-950" {...field} /></FormControl>
+                              </FormItem>
+                            )} />
+                            <FormField control={form.control} name="victimAadhaar" render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-accent">Victim's Aadhaar / ভুক্তভোগীর আধার নম্বর</FormLabel>
+                                <FormControl><Input placeholder="Victim's 12-digit Aadhaar" maxLength={12} className="h-12 rounded-xl bg-white dark:bg-slate-950 font-mono" {...field} /></FormControl>
+                              </FormItem>
+                            )} />
+                            <FormField control={form.control} name="victimAddress" render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-accent">Victim's Address / ভুক্তভোগীর ঠিকানা</FormLabel>
+                                <FormControl><Input placeholder="Complete residential address" className="h-12 rounded-xl bg-white dark:bg-slate-950" {...field} /></FormControl>
+                              </FormItem>
+                            )} />
+                          </div>
+
+                          <div className="pt-4 border-t border-slate-200 dark:border-slate-700">
+                            <FormField control={form.control} name="victimIsMinor" render={({ field }) => (
+                              <FormItem className="flex flex-row items-center space-x-3 space-y-0">
+                                <FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} className="border-red-500 h-5 w-5" /></FormControl>
+                                <div className="space-y-0.5">
+                                  <FormLabel className="text-sm font-black text-red-600 dark:text-red-400 uppercase tracking-tight cursor-pointer">
+                                    Victim is a Minor / ভুক্তভোগী কি নাবালক?
+                                  </FormLabel>
+                                </div>
+                              </FormItem>
+                            )} />
+
+                            {victimIsMinor && (
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 animate-in zoom-in-95 duration-300">
+                                <FormField control={form.control} name="victimAge" render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-red-500">Minor's Age / ভুক্তভোগীর বয়স *</FormLabel>
+                                    <FormControl><Input placeholder="Current Age" type="number" className="h-12 rounded-xl bg-white dark:bg-slate-950" {...field} /></FormControl>
+                                  </FormItem>
+                                )} />
+                                <FormField control={form.control} name="victimGender" render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-red-500">Minor's Gender / ভুক্তভোগীর লিঙ্গ *</FormLabel>
+                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                      <FormControl>
+                                        <SelectTrigger className="h-12 rounded-xl bg-white dark:bg-slate-950"><SelectValue placeholder="Select Gender" /></SelectTrigger>
+                                      </FormControl>
+                                      <SelectContent className="bg-white">
+                                        <SelectItem value="male">Male / পুরুষ</SelectItem>
+                                        <SelectItem value="female">Female / মহিলা</SelectItem>
+                                        <SelectItem value="other">Other / অন্যান্য</SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                  </FormItem>
+                                )} />
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                     {/* Part 2: Incident Logistics */}
@@ -317,14 +413,14 @@ export default function ReportAComplaintPage() {
                         <FormField control={form.control} name="incidentLocation" render={({ field }) => (
                           <FormItem>
                             <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Venue / Location / ঘটনাস্থল / অবস্থান *</FormLabel>
-                            <FormControl><Input placeholder="Where did it happen?" className="h-12 rounded-xl bg-slate-50 dark:bg-slate-950" {...field} /></FormControl>
+                            <FormControl><Input placeholder="Place where incident happened" className="h-12 rounded-xl bg-slate-50 dark:bg-slate-950" {...field} /></FormControl>
                             <FormMessage />
                           </FormItem>
                         )} />
                       </div>
                     </div>
 
-                    {/* Part 3: Narrative & Accused */}
+                    {/* Part 3: Violation Details */}
                     <div className="space-y-6">
                       <h3 className="text-xs font-black uppercase tracking-[0.3em] text-accent flex items-center gap-2">
                         <span className="w-8 h-px bg-accent"></span> Violation Narrative / লঙ্ঘনের বিবরণ
@@ -333,30 +429,28 @@ export default function ReportAComplaintPage() {
                         <FormField control={form.control} name="subject" render={({ field }) => (
                           <FormItem>
                             <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Complaint Subject / অভিযোগের বিষয় *</FormLabel>
-                            <FormControl><Input placeholder="Brief title for the issue" className="h-12 rounded-xl bg-slate-50 dark:bg-slate-950" {...field} /></FormControl>
+                            <FormControl><Input placeholder="Title of the incident" className="h-12 rounded-xl bg-slate-50 dark:bg-slate-950" {...field} /></FormControl>
                             <FormMessage />
                           </FormItem>
                         )} />
                         <FormField control={form.control} name="description" render={({ field }) => (
                           <FormItem>
                             <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Detailed Description / বিস্তারিত বিবরণ *</FormLabel>
-                            <FormControl><Textarea placeholder="Explain the incident in sequence. Mention facts, times, and specific actions..." className="min-h-[180px] rounded-2xl bg-slate-50 dark:bg-slate-950 p-6 leading-relaxed" {...field} /></FormControl>
+                            <FormControl><Textarea placeholder="Explain the facts and sequence of events in detail..." className="min-h-[200px] rounded-2xl bg-slate-50 dark:bg-slate-950 p-6 leading-relaxed" {...field} /></FormControl>
                             <FormMessage />
                           </FormItem>
                         )} />
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           <FormField control={form.control} name="accusedDetails" render={({ field }) => (
                             <FormItem>
-                              <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Accused Person(s) - If Known / অভিযুক্ত ব্যক্তি(গণ) - যদি জানা থাকে</FormLabel>
-                              <FormControl><Textarea placeholder="Names, designations, or descriptions of the alleged violators..." className="min-h-[100px] rounded-2xl bg-slate-50 dark:bg-slate-950" {...field} /></FormControl>
-                              <FormMessage />
+                              <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Accused Person(s) / অভিযুক্ত ব্যক্তি(গণ)</FormLabel>
+                              <FormControl><Textarea placeholder="Names and identifiers of violators..." className="min-h-[100px] rounded-2xl bg-slate-50 dark:bg-slate-950" {...field} /></FormControl>
                             </FormItem>
                           )} />
                           <FormField control={form.control} name="witnesses" render={({ field }) => (
                             <FormItem>
-                              <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Eye Witnesses / প্রত্যক্ষদর্শী</FormLabel>
-                              <FormControl><Textarea placeholder="Names and contact of people present during the incident..." className="min-h-[100px] rounded-2xl bg-slate-50 dark:bg-slate-950" {...field} /></FormControl>
-                              <FormMessage />
+                              <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Witness Details / প্রত্যক্ষদর্শী</FormLabel>
+                              <FormControl><Textarea placeholder="Names and contact of witnesses..." className="min-h-[100px] rounded-2xl bg-slate-50 dark:bg-slate-950" {...field} /></FormControl>
                             </FormItem>
                           )} />
                         </div>
@@ -372,29 +466,27 @@ export default function ReportAComplaintPage() {
                         <FormField control={form.control} name="otherAuthorities" render={({ field }) => (
                           <FormItem>
                             <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Lodged with other authorities? / অন্য কোনো কর্তৃপক্ষের কাছে অভিযোগ করা হয়েছে কি?</FormLabel>
-                            <FormControl><Textarea placeholder="Provide details if reported elsewhere..." className="min-h-[100px] rounded-2xl bg-slate-50 dark:bg-slate-950" {...field} /></FormControl>
-                            <FormMessage />
+                            <FormControl><Textarea placeholder="Details of prior reporting to Police/NHRC etc." className="min-h-[100px] rounded-2xl bg-slate-50 dark:bg-slate-950" {...field} /></FormControl>
                           </FormItem>
                         )} />
                         <FormField control={form.control} name="isSubJudice" render={({ field }) => (
                           <FormItem>
                             <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Sub Judice / Pending Proceedings / আইনি পদক্ষেপ বা মামলা কি বিচারাধীন?</FormLabel>
-                            <FormControl><Textarea placeholder="Provide details of pending court cases regarding this matter..." className="min-h-[100px] rounded-2xl bg-slate-50 dark:bg-slate-950" {...field} /></FormControl>
-                            <FormMessage />
+                            <FormControl><Textarea placeholder="Details of pending court cases if any..." className="min-h-[100px] rounded-2xl bg-slate-50 dark:bg-slate-950" {...field} /></FormControl>
                           </FormItem>
                         )} />
                       </div>
                     </div>
 
                     <div className="pt-10 border-t border-slate-100 dark:border-slate-800">
-                      <div className="bg-slate-950 rounded-3xl p-8 text-white relative overflow-hidden mb-10">
+                      <div className="bg-slate-950 rounded-3xl p-8 text-white relative overflow-hidden mb-10 shadow-xl">
                         <div className="absolute top-0 right-0 w-32 h-32 bg-accent/10 rounded-full -mr-16 -mt-16 blur-3xl"></div>
                         <div className="flex items-start gap-4 relative z-10">
                            <ShieldCheck className="w-8 h-8 text-emerald-400 shrink-0 mt-1" />
                            <div className="space-y-2">
-                             <p className="font-bold text-sm uppercase tracking-widest text-emerald-400 leading-none">Affirmation of Truth</p>
+                             <p className="font-bold text-sm uppercase tracking-widest text-emerald-400 leading-none">Affirmation of Integrity</p>
                              <p className="text-xs text-slate-400 leading-relaxed font-medium">
-                               "By submitting this complaint, I solemnly affirm that the information provided is true to the best of my knowledge. I understand that Human Rights Affairs Trust operates in liaison with law enforcement and administrative authorities."
+                               "I solemnly affirm that the information provided in this formal complaint is true and accurate to the best of my knowledge. I understand that Human Rights Affairs Trust operates in collaboration with statutory authorities for the protection of constitutional rights."
                              </p>
                            </div>
                         </div>
@@ -413,7 +505,7 @@ export default function ReportAComplaintPage() {
                       </Button>
 
                       <p className="text-center text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] mt-8">
-                        Central Command Registry Node • HRAT India
+                        National Rights Registry Node • HRAT India
                       </p>
                     </div>
 
@@ -424,7 +516,7 @@ export default function ReportAComplaintPage() {
 
             <div className="mt-16 text-center">
               <Link href="/legal-aid" className="text-primary dark:text-white font-bold hover:text-accent transition-colors flex items-center justify-center gap-2 group">
-                 <Scale className="w-5 h-5 text-accent" /> Need immediate legal advice instead? Visit our Legal Aid Cell <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                 <Scale className="w-5 h-5 text-accent" /> Need immediate legal advice? Visit Legal Aid Cell <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Link>
             </div>
           </div>
