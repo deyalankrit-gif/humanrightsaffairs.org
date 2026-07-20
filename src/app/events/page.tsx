@@ -703,7 +703,7 @@ export default function EventsPage() {
                           className="h-8 rounded-lg text-[10px] font-bold uppercase gap-2 border-slate-200 hover:border-accent hover:bg-accent/5 transition-all"
                         >
                           <Languages className="w-3.5 h-3.5 text-accent" />
-                          {narrativeLang === 'en' ? "Switch to Bengali" : "Switch to English"}
+                          {narrativeLang === 'en' ? "বাংলায় পড়ুন" : "Switch to English"}
                         </Button>
                       )}
                     </div>
