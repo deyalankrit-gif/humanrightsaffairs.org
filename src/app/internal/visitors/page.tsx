@@ -72,7 +72,9 @@ export default function WebsiteVisitorsPage() {
       unique: 0, 
       returning: 0, 
       new: 0, 
-      external: 0,
+      wbCount: 0,
+      otherStateCount: 0,
+      intlCount: 0,
       todayPageViews: 0,
       todayWebsiteViews: 0,
       chartData: [], 
@@ -92,12 +94,25 @@ export default function WebsiteVisitorsPage() {
     const todayPageViews = visitors.reduce((acc, v: any) => acc + (v[todayViewsKey] || 0), 0);
     const todayWebsiteViews = visitors.reduce((acc, v: any) => acc + (v[todayVisitsKey] || 0), 0);
 
-    // Calculate external (Non-WB or Non-India)
-    const externalCount = visitors.filter((v: any) => {
+    // Granular Geo Counts
+    const wbCount = visitors.filter((v: any) => {
       const country = v.country || 'IN';
       const isIndia = country === 'India' || country === 'IN';
-      const isWB = v.state === 'West Bengal';
-      return !isIndia || !isWB;
+      const state = v.state || '';
+      return isIndia && (state === 'West Bengal' || state.toLowerCase() === 'west bengal');
+    }).length;
+
+    const otherStateCount = visitors.filter((v: any) => {
+      const country = v.country || 'IN';
+      const isIndia = country === 'India' || country === 'IN';
+      const state = v.state || '';
+      return isIndia && state !== 'West Bengal' && state.toLowerCase() !== 'west bengal' && state !== 'Unknown';
+    }).length;
+
+    const intlCount = visitors.filter((v: any) => {
+      const country = v.country || 'IN';
+      const isIndia = country === 'India' || country === 'IN';
+      return !isIndia;
     }).length;
 
     const chartData = [
@@ -113,7 +128,7 @@ export default function WebsiteVisitorsPage() {
     })
     const deviceData = Object.keys(deviceMap).map(name => ({ name, value: deviceMap[name] }))
 
-    return { total, unique, returning, new: newCount, external: externalCount, todayPageViews, todayWebsiteViews, chartData, deviceData }
+    return { total, unique, returning, new: newCount, wbCount, otherStateCount, intlCount, todayPageViews, todayWebsiteViews, chartData, deviceData }
   }, [visitors])
 
   const handleExport = (format: 'PDF' | 'Excel' | 'CSV') => {
@@ -162,25 +177,27 @@ export default function WebsiteVisitorsPage() {
             <div className="text-center py-32"><Loader2 className="w-12 h-12 animate-spin text-accent mx-auto mb-4" /><p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Synchronizing Live Logs...</p></div>
           ) : (
             <div className="space-y-8">
-              <div className="grid grid-cols-2 lg:grid-cols-6 gap-4">
+              <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-4">
                  {[
                    { label: "Total Sessions", value: stats.total, icon: <Users className="w-4 h-4" />, color: "text-blue-500", trend: "Live" },
                    { label: "Unique Users", value: stats.unique, icon: <UserCheck className="w-4 h-4" />, color: "text-emerald-500", trend: "Steady" },
                    { label: "Daily Page Views", value: stats.todayPageViews, icon: <Activity className="w-4 h-4" />, color: "text-indigo-500", trend: "Today" },
                    { label: "Website Views", value: stats.todayWebsiteViews, icon: <Monitor className="w-4 h-4" />, color: "text-rose-500", trend: "Today" },
-                   { label: "External Reach", value: stats.external, icon: <Globe className="w-4 h-4" />, color: "text-amber-500", trend: "Global" },
+                   { label: "WB Visitors", value: stats.wbCount, icon: <MapPin className="w-4 h-4" />, color: "text-emerald-600", trend: "State" },
+                   { label: "Other States", value: stats.otherStateCount, icon: <Globe className="w-4 h-4" />, color: "text-amber-500", trend: "National" },
+                   { label: "International", value: stats.intlCount, icon: <Globe className="w-4 h-4" />, color: "text-red-500", trend: "Global" },
                    { label: "Connection", value: "Verified", icon: <Wifi className="w-4 h-4" />, color: "text-slate-400", trend: "Stable" }
                  ].map((stat, i) => (
                    <Card key={i} className="border-none shadow-sm rounded-2xl overflow-hidden group">
                      <CardContent className="p-5 flex flex-col gap-2">
                         <div className="flex justify-between items-start">
                           <div className={cn("p-2 rounded-xl bg-slate-50 dark:bg-slate-800", stat.color)}>{stat.icon}</div>
-                          <Badge variant="outline" className="text-[8px] border-emerald-100 text-emerald-600 font-bold flex gap-1 items-center">
+                          <Badge variant="outline" className="text-[7px] border-emerald-100 text-emerald-600 font-bold flex gap-1 items-center">
                             <span className="w-1 h-1 rounded-full bg-emerald-500 animate-ping" /> {stat.trend}
                           </Badge>
                         </div>
-                        <p className="text-2xl font-headline font-bold text-primary dark:text-white leading-none mt-2">{stat.value}</p>
-                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{stat.label}</p>
+                        <p className="text-xl md:text-2xl font-headline font-bold text-primary dark:text-white leading-none mt-2">{stat.value}</p>
+                        <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">{stat.label}</p>
                      </CardContent>
                    </Card>
                  ))}
