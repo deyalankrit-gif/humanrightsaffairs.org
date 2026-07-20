@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useEffect, useState, useMemo } from 'react'
@@ -266,6 +265,7 @@ export default function WebsiteVisitorsPage() {
                                <th className="px-6 py-4">Current Status</th>
                                <th className="px-6 py-4">Platform Info</th>
                                <th className="px-6 py-4">Geo Location</th>
+                               <th className="px-6 py-4">Date</th>
                                <th className="px-6 py-4 text-right">Latest Action</th>
                              </tr>
                           </thead>
@@ -332,6 +332,13 @@ export default function WebsiteVisitorsPage() {
                                               <Badge className="bg-amber-500 hover:bg-amber-600 text-[6px] h-3 px-1 font-black border-none">OUT-OF-STATE</Badge>
                                            )}
                                         </div>
+                                     </div>
+                                  </td>
+                                  <td className="px-6 py-4">
+                                     <div className="flex flex-col">
+                                        <span className="text-[10px] font-bold text-slate-700 dark:text-slate-300">
+                                           {v.lastActivity?.toDate ? v.lastActivity.toDate().toLocaleDateString() : 'N/A'}
+                                        </span>
                                      </div>
                                   </td>
                                   <td className="px-6 py-4 text-right">
