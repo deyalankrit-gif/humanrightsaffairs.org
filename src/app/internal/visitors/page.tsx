@@ -226,7 +226,7 @@ export default function WebsiteVisitorsPage() {
                    <div className="space-y-2 mt-4">
                       {stats.deviceData.map((d, i) => (
                         <div key={i} className="flex justify-between items-center text-[10px] font-bold">
-                           <div className="flex items-center gap-2">
+                           <div className="flex items-center gap-1.5">
                              <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: COLORS[i % COLORS.length] }}></div>
                              <span className="text-slate-500 uppercase">{d.name}</span>
                            </div>
@@ -267,6 +267,7 @@ export default function WebsiteVisitorsPage() {
                                <th className="px-6 py-4">Geo Location</th>
                                <th className="px-6 py-4">Current Page</th>
                                <th className="px-6 py-4">Date</th>
+                               <th className="px-6 py-4">Session Duration</th>
                                <th className="px-6 py-4 text-right">Latest Action</th>
                              </tr>
                           </thead>
@@ -347,6 +348,21 @@ export default function WebsiteVisitorsPage() {
                                      <div className="flex flex-col">
                                         <span className="text-[10px] font-bold text-slate-700 dark:text-slate-300">
                                            {v.lastActivity?.toDate ? v.lastActivity.toDate().toLocaleDateString() : 'N/A'}
+                                        </span>
+                                     </div>
+                                  </td>
+                                  <td className="px-6 py-4">
+                                     <div className="flex flex-col">
+                                        <span className="text-[10px] font-bold text-slate-700 dark:text-slate-300">
+                                           {(() => {
+                                             if (v.lastActivity?.toDate && v.firstVisit?.toDate) {
+                                               const diff = v.lastActivity.toDate().getTime() - v.firstVisit.toDate().getTime();
+                                               const minutes = Math.floor(diff / 60000);
+                                               const seconds = Math.floor((diff % 60000) / 1000);
+                                               return `${minutes}m ${seconds}s`;
+                                             }
+                                             return '0m 0s';
+                                           })()}
                                         </span>
                                      </div>
                                   </td>
