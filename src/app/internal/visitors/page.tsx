@@ -265,6 +265,7 @@ export default function WebsiteVisitorsPage() {
                                <th className="px-6 py-4">Current Status</th>
                                <th className="px-6 py-4">Platform Info</th>
                                <th className="px-6 py-4">Geo Location</th>
+                               <th className="px-6 py-4">Current Page</th>
                                <th className="px-6 py-4">Date</th>
                                <th className="px-6 py-4">Visit Start Time</th>
                                <th className="px-6 py-4 text-right">Latest Action</th>
@@ -333,6 +334,14 @@ export default function WebsiteVisitorsPage() {
                                               <Badge className="bg-amber-500 hover:bg-amber-600 text-[6px] h-3 px-1 font-black border-none">OUT-OF-STATE</Badge>
                                            )}
                                         </div>
+                                     </div>
+                                  </td>
+                                  <td className="px-6 py-4">
+                                     <div className="flex items-center gap-1.5">
+                                        <Navigation className="w-3 h-3 text-slate-400" />
+                                        <span className="text-[10px] font-mono text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">
+                                           {v.pagesVisited?.[v.pagesVisited.length - 1] || '/'}
+                                        </span>
                                      </div>
                                   </td>
                                   <td className="px-6 py-4">
