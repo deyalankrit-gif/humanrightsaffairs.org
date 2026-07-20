@@ -179,7 +179,7 @@ export default function InternalDonorsManagement() {
           
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-accent text-primary font-bold rounded-xl h-11 px-8 flex gap-2 shadow-2xl hover:bg-secondary hover:text-white transition-all transform hover:scale-105">
+              <Button className="bg-accent text-primary font-bold rounded-xl h-11 px-8 flex gap-2 shadow-2xl shadow-accent/20 hover:bg-secondary hover:text-white transition-all transform hover:scale-105">
                 <Plus className="w-4 h-4" /> Add Recognition Circle
               </Button>
             </DialogTrigger>
@@ -189,18 +189,38 @@ export default function InternalDonorsManagement() {
                 <DialogDescription>Define a donor tier to be displayed on the public Wall of Gratitude.</DialogDescription>
               </DialogHeader>
               <div className="space-y-6 py-2">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1"><Label className="text-[10px] font-bold uppercase text-slate-400">Tier Title</Label><Input placeholder="e.g. Platinum Circle" value={newTier.title} onChange={e => setNewTier({...newTier, title: e.target.value})} className="h-11 rounded-xl" /></div>
-                  <div className="space-y-1"><Label className="text-[10px] font-bold uppercase text-slate-400">Priority (Sort)</Label><Input type="number" value={newTier.priority} onChange={e => setNewTier({...newTier, priority: Number(e.target.value)})} className="h-11 rounded-xl" /></div>
+                <div className="grid grid-cols-1 gap-4">
+                  <div className="space-y-1">
+                    <Label className="text-[10px] font-bold uppercase text-slate-400">Tier Title</Label>
+                    <div className="flex gap-2">
+                       <Select onValueChange={(val) => setNewTier({...newTier, title: val})}>
+                          <SelectTrigger className="w-[160px] h-11 rounded-xl bg-white dark:bg-slate-900 border-slate-200">
+                             <SelectValue placeholder="Presets" />
+                          </SelectTrigger>
+                          <SelectContent position="popper" className="z-[1000001] bg-white">
+                             <SelectItem value="Platinum Circle">Platinum Circle</SelectItem>
+                             <SelectItem value="Gold Circle">Gold Circle</SelectItem>
+                             <SelectItem value="Silver Circle">Silver Circle</SelectItem>
+                          </SelectContent>
+                       </Select>
+                       <Input placeholder="Or enter manually..." value={newTier.title} onChange={e => setNewTier({...newTier, title: e.target.value})} className="h-11 rounded-xl flex-1" />
+                    </div>
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1"><Label className="text-[10px] font-bold uppercase text-slate-400">Priority (Sort)</Label><Input type="number" value={newTier.priority} onChange={e => setNewTier({...newTier, priority: Number(e.target.value)})} className="h-11 rounded-xl" /></div>
                   <div className="space-y-1"><Label className="text-[10px] font-bold uppercase text-slate-400">Visual Aesthetic</Label>
                     <Select value={newTier.color} onValueChange={v => setNewTier({...newTier, color: v})}><SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
                       <SelectContent className="bg-white">{colorOptions.map(c => <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>)}</SelectContent></Select></div>
-                  <div className="space-y-1"><Label className="text-[10px] font-bold uppercase text-slate-400">Symbol</Label>
-                    <Select value={newTier.iconName} onValueChange={v => setNewTier({...newTier, iconName: v})}><SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
-                      <SelectContent className="bg-white">{iconOptions.map(i => <SelectItem key={i.value} value={i.value}>{i.label}</SelectItem>)}</SelectContent></Select></div>
+                </div>
+
+                <div className="space-y-1">
+                  <Label className="text-[10px] font-bold uppercase text-slate-400">Symbol</Label>
+                  <Select value={newTier.iconName} onValueChange={v => setNewTier({...newTier, iconName: v})}>
+                    <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
+                    <SelectContent className="bg-white">{iconOptions.map(i => <SelectItem key={i.value} value={i.value}>{i.label}</SelectItem>)}</SelectContent>
+                  </Select>
                 </div>
 
                 <div className="space-y-1"><Label className="text-[10px] font-bold uppercase text-slate-400">Mission Impact Narrative</Label><Textarea placeholder="Describe how this circle supports the Trust..." value={newTier.description} onChange={e => setNewTier({...newTier, description: e.target.value})} className="rounded-xl min-h-[80px]" /></div>
@@ -272,7 +292,7 @@ export default function InternalDonorsManagement() {
                {(tiers || []).length === 0 && (
                  <div className="text-center py-20 bg-white dark:bg-slate-900 rounded-[3rem] border-4 border-dashed border-slate-100 dark:border-slate-800 opacity-40">
                     <Award className="w-16 h-16 text-slate-200 mx-auto mb-4" />
-                    <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Honor Registry Empty</p>
+                    <p className="text-slate-400 font-black uppercase tracking-widest text-xs">Honor Registry Empty</p>
                  </div>
                )}
              </div>
@@ -285,18 +305,38 @@ export default function InternalDonorsManagement() {
           <DialogHeader><DialogTitle>Update Recognition Meta</DialogTitle></DialogHeader>
           {editTier && (
             <div className="space-y-6 py-2">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1"><Label className="text-[10px] font-bold uppercase">Tier Title</Label><Input value={editTier.title} onChange={e => setEditTier({...editTier, title: e.target.value})} /></div>
-                  <div className="space-y-1"><Label className="text-[10px] font-bold uppercase">Priority</Label><Input type="number" value={editTier.priority} onChange={e => setEditTier({...editTier, priority: Number(e.target.value)})} /></div>
+                <div className="grid grid-cols-1 gap-4">
+                  <div className="space-y-1">
+                    <Label className="text-[10px] font-bold uppercase text-slate-400">Tier Title</Label>
+                    <div className="flex gap-2">
+                       <Select onValueChange={(val) => setEditTier({...editTier, title: val})}>
+                          <SelectTrigger className="w-[160px] h-11 rounded-xl bg-white dark:bg-slate-900 border-slate-200">
+                             <SelectValue placeholder="Presets" />
+                          </SelectTrigger>
+                          <SelectContent position="popper" className="z-[1000001] bg-white">
+                             <SelectItem value="Platinum Circle">Platinum Circle</SelectItem>
+                             <SelectItem value="Gold Circle">Gold Circle</SelectItem>
+                             <SelectItem value="Silver Circle">Silver Circle</SelectItem>
+                          </SelectContent>
+                       </Select>
+                       <Input placeholder="Or enter manually..." value={editTier.title} onChange={e => setEditTier({...editTier, title: e.target.value})} className="h-11 rounded-xl flex-1" />
+                    </div>
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1"><Label className="text-[10px] font-bold uppercase">Priority</Label><Input type="number" value={editTier.priority} onChange={e => setEditTier({...editTier, priority: Number(e.target.value)})} /></div>
                   <div className="space-y-1"><Label className="text-[10px] font-bold uppercase">Visual Aesthetic</Label>
                     <Select value={editTier.color} onValueChange={v => setEditTier({...editTier, color: v})}><SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent className="bg-white">{colorOptions.map(c => <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>)}</SelectContent></Select></div>
-                  <div className="space-y-1"><Label className="text-[10px] font-bold uppercase">Symbol</Label>
-                    <Select value={editTier.iconName} onValueChange={v => setEditTier({...editTier, iconName: v})}><SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent className="bg-white">{iconOptions.map(i => <SelectItem key={i.value} value={i.value}>{i.label}</SelectItem>)}</SelectContent></Select></div>
+                </div>
+
+                <div className="space-y-1">
+                  <Label className="text-[10px] font-bold uppercase">Symbol</Label>
+                  <Select value={editTier.iconName} onValueChange={v => setEditTier({...editTier, iconName: v})}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent className="bg-white">{iconOptions.map(i => <SelectItem key={i.value} value={i.value}>{i.label}</SelectItem>)}</SelectContent>
+                  </Select>
                 </div>
 
                 <div className="space-y-1"><Label className="text-[10px] font-bold uppercase">Mission Narrative</Label><Textarea value={editTier.description} onChange={e => setEditTier({...editTier, description: e.target.value})} className="min-h-[80px]" /></div>
