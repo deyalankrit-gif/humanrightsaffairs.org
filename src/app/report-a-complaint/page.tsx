@@ -214,33 +214,33 @@ export default function ReportAComplaintPage() {
                     {/* Part 1: Complainant Credentials */}
                     <div className="space-y-6">
                       <h3 className="text-xs font-black uppercase tracking-[0.3em] text-accent flex items-center gap-2">
-                        <span className="w-8 h-px bg-accent"></span> Complainant Particulars
+                        <span className="w-8 h-px bg-accent"></span> Complainant Particulars / অভিযোগকারীর বিবরণ
                       </h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <FormField control={form.control} name="fullName" render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Full Legal Name *</FormLabel>
+                            <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Full Legal Name / পূর্ণ আইনি নাম *</FormLabel>
                             <FormControl><Input placeholder="Enter your name as per ID" className="h-12 rounded-xl bg-slate-50 dark:bg-slate-950" {...field} /></FormControl>
                             <FormMessage />
                           </FormItem>
                         )} />
                         <FormField control={form.control} name="email" render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Official Email *</FormLabel>
+                            <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Official Email / অফিসিয়াল ইমেল *</FormLabel>
                             <FormControl><Input placeholder="name@example.com" className="h-12 rounded-xl bg-slate-50 dark:bg-slate-950" {...field} /></FormControl>
                             <FormMessage />
                           </FormItem>
                         )} />
                         <FormField control={form.control} name="phone" render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Contact Number *</FormLabel>
+                            <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Contact Number / যোগাযোগের নম্বর *</FormLabel>
                             <FormControl><Input placeholder="+91 XXXXX XXXXX" className="h-12 rounded-xl bg-slate-50 dark:bg-slate-950" {...field} /></FormControl>
                             <FormMessage />
                           </FormItem>
                         )} />
                         <FormField control={form.control} name="address" render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Complete Address *</FormLabel>
+                            <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Complete Address / সম্পূর্ণ ঠিকানা *</FormLabel>
                             <FormControl><Input placeholder="Street, Village, PS, PO, District" className="h-12 rounded-xl bg-slate-50 dark:bg-slate-950" {...field} /></FormControl>
                             <FormMessage />
                           </FormItem>
@@ -251,19 +251,19 @@ export default function ReportAComplaintPage() {
                     {/* Part 2: Incident Logistics */}
                     <div className="space-y-6">
                       <h3 className="text-xs font-black uppercase tracking-[0.3em] text-accent flex items-center gap-2">
-                        <span className="w-8 h-px bg-accent"></span> Incident Logistics
+                        <span className="w-8 h-px bg-accent"></span> Incident Logistics / ঘটনার বিবরণ
                       </h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <FormField control={form.control} name="incidentDate" render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Date of Occurrence *</FormLabel>
+                            <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Date of Occurrence / ঘটনার তারিখ *</FormLabel>
                             <FormControl><Input type="date" className="h-12 rounded-xl bg-slate-50 dark:bg-slate-950" {...field} /></FormControl>
                             <FormMessage />
                           </FormItem>
                         )} />
                         <FormField control={form.control} name="incidentLocation" render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Venue / Location *</FormLabel>
+                            <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Venue / Location / ঘটনাস্থল / অবস্থান *</FormLabel>
                             <FormControl><Input placeholder="Where did it happen?" className="h-12 rounded-xl bg-slate-50 dark:bg-slate-950" {...field} /></FormControl>
                             <FormMessage />
                           </FormItem>
@@ -274,19 +274,19 @@ export default function ReportAComplaintPage() {
                     {/* Part 3: Narrative & Accused */}
                     <div className="space-y-6">
                       <h3 className="text-xs font-black uppercase tracking-[0.3em] text-accent flex items-center gap-2">
-                        <span className="w-8 h-px bg-accent"></span> Violation Narrative
+                        <span className="w-8 h-px bg-accent"></span> Violation Narrative / লঙ্ঘনের বিবরণ
                       </h3>
                       <div className="space-y-6">
                         <FormField control={form.control} name="subject" render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Complaint Subject *</FormLabel>
+                            <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Complaint Subject / অভিযোগের বিষয় *</FormLabel>
                             <FormControl><Input placeholder="Brief title for the issue" className="h-12 rounded-xl bg-slate-50 dark:bg-slate-950" {...field} /></FormControl>
                             <FormMessage />
                           </FormItem>
                         )} />
                         <FormField control={form.control} name="description" render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Detailed Description *</FormLabel>
+                            <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Detailed Description / বিস্তারিত বিবরণ *</FormLabel>
                             <FormControl><Textarea placeholder="Explain the incident in sequence. Mention facts, times, and specific actions..." className="min-h-[180px] rounded-2xl bg-slate-50 dark:bg-slate-950 p-6 leading-relaxed" {...field} /></FormControl>
                             <FormMessage />
                           </FormItem>
@@ -294,14 +294,14 @@ export default function ReportAComplaintPage() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           <FormField control={form.control} name="accusedDetails" render={({ field }) => (
                             <FormItem>
-                              <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Accused Person(s) - If Known</FormLabel>
+                              <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Accused Person(s) - If Known / অভিযুক্ত ব্যক্তি(গণ) - যদি জানা থাকে</FormLabel>
                               <FormControl><Textarea placeholder="Names, designations, or descriptions of the alleged violators..." className="min-h-[100px] rounded-2xl bg-slate-50 dark:bg-slate-950" {...field} /></FormControl>
                               <FormMessage />
                             </FormItem>
                           )} />
                           <FormField control={form.control} name="witnesses" render={({ field }) => (
                             <FormItem>
-                              <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Eye Witnesses</FormLabel>
+                              <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Eye Witnesses / প্রত্যক্ষদর্শী</FormLabel>
                               <FormControl><Textarea placeholder="Names and contact of people present during the incident..." className="min-h-[100px] rounded-2xl bg-slate-50 dark:bg-slate-950" {...field} /></FormControl>
                               <FormMessage />
                             </FormItem>
