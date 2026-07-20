@@ -29,7 +29,8 @@ import {
   ArrowLeft,
   FileText,
   Scale,
-  ChevronRight
+  ChevronRight,
+  ClipboardList
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { errorEmitter } from '@/firebase/error-emitter'
@@ -50,6 +51,8 @@ const complaintSchema = z.object({
   description: z.string().min(30, "Please describe the incident in detail (min 30 chars)"),
   accusedDetails: z.string().optional(),
   witnesses: z.string().optional(),
+  otherAuthorities: z.string().optional(),
+  isSubJudice: z.string().optional(),
 })
 
 export default function ReportAComplaintPage() {
@@ -71,7 +74,9 @@ export default function ReportAComplaintPage() {
       subject: '',
       description: '',
       accusedDetails: '',
-      witnesses: ''
+      witnesses: '',
+      otherAuthorities: '',
+      isSubJudice: ''
     }
   })
 
@@ -316,6 +321,29 @@ export default function ReportAComplaintPage() {
                             </FormItem>
                           )} />
                         </div>
+                      </div>
+                    </div>
+
+                    {/* Part 4: Procedural Status */}
+                    <div className="space-y-6">
+                      <h3 className="text-xs font-black uppercase tracking-[0.3em] text-accent flex items-center gap-2">
+                        <span className="w-8 h-px bg-accent"></span> Procedural Status / পদ্ধতিগত অবস্থা
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <FormField control={form.control} name="otherAuthorities" render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Lodged with other authorities? / অন্য কোনো কর্তৃপক্ষের কাছে অভিযোগ করা হয়েছে কি?</FormLabel>
+                            <FormControl><Textarea placeholder="Provide details if reported elsewhere..." className="min-h-[100px] rounded-2xl bg-slate-50 dark:bg-slate-950" {...field} /></FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )} />
+                        <FormField control={form.control} name="isSubJudice" render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Sub Judice / Pending Proceedings / আইনি পদক্ষেপ বা মামলা কি বিচারাধীন?</FormLabel>
+                            <FormControl><Textarea placeholder="Provide details of pending court cases regarding this matter..." className="min-h-[100px] rounded-2xl bg-slate-50 dark:bg-slate-950" {...field} /></FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )} />
                       </div>
                     </div>
 
