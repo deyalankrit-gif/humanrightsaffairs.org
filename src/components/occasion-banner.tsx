@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
@@ -13,11 +13,27 @@ import { cn } from '@/lib/utils';
  * OccasionBanner: High-fidelity festive display area.
  * Features: Fully transparent background, #CFFF04 primary typography, and #FF00FF for "Welcome to HRAT".
  * Optimized for real-time synchronization with the administrative terminal.
+ * Updated: Hides automatically when scrolling to prevent overlap with floating navigation.
  */
 export function OccasionBanner() {
   const db = useFirestore();
   const pathname = usePathname();
   const isHome = pathname === '/';
+  const [scrolled, setScrolled] = useState(false);
+
+  // Monitor scroll position to hide the banner when navigating away from the top
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
+    const handleScroll = () => {
+      // Threshold set to 10px to ensure it hides quickly as the user moves away from the top
+      setScrolled(window.scrollY > 10);
+    };
+    
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll(); // Initial check
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const DEFAULT_BANNER = {
     title: 'Welcome to HRAT',
@@ -55,7 +71,8 @@ export function OccasionBanner() {
     return validOccasions[0] || DEFAULT_BANNER;
   }, [occasions]);
 
-  if (!isHome) return null;
+  // Hide the banner if not on home page or if the user has scrolled down
+  if (!isHome || scrolled) return null;
 
   const isDefault = activeOccasion.isDefault === true;
 
