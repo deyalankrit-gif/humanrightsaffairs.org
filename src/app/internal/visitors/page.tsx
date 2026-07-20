@@ -266,6 +266,7 @@ export default function WebsiteVisitorsPage() {
                                <th className="px-6 py-4">Platform Info</th>
                                <th className="px-6 py-4">Geo Location</th>
                                <th className="px-6 py-4">Date</th>
+                               <th className="px-6 py-4">Visit Start Time</th>
                                <th className="px-6 py-4 text-right">Latest Action</th>
                              </tr>
                           </thead>
@@ -338,6 +339,13 @@ export default function WebsiteVisitorsPage() {
                                      <div className="flex flex-col">
                                         <span className="text-[10px] font-bold text-slate-700 dark:text-slate-300">
                                            {v.lastActivity?.toDate ? v.lastActivity.toDate().toLocaleDateString() : 'N/A'}
+                                        </span>
+                                     </div>
+                                  </td>
+                                  <td className="px-6 py-4">
+                                     <div className="flex flex-col">
+                                        <span className="text-[10px] font-bold text-slate-700 dark:text-slate-300">
+                                           {v.lastVisit?.toDate ? v.lastVisit.toDate().toLocaleTimeString() : (v.firstVisit?.toDate ? v.firstVisit.toDate().toLocaleTimeString() : 'N/A')}
                                         </span>
                                      </div>
                                   </td>
