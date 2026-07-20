@@ -74,20 +74,23 @@ export default function WebsiteVisitorsPage() {
       new: 0, 
       external: 0,
       todayPageViews: 0,
+      todayWebsiteViews: 0,
       chartData: [], 
       deviceData: [] 
     }
 
     const todayStr = new Date().toLocaleDateString('en-CA').replace(/-/g, '_');
     const todayViewsKey = `views_${todayStr}`;
+    const todayVisitsKey = `visits_${todayStr}`;
 
     const total = visitors.length
     const unique = visitors.length
     const returning = visitors.filter((v: any) => v.status === 'Returning').length
     const newCount = visitors.filter((v: any) => v.status === 'New').length
 
-    // Calculate daily page views across these recent visitors
+    // Calculate daily metrics across loaded visitors
     const todayPageViews = visitors.reduce((acc, v: any) => acc + (v[todayViewsKey] || 0), 0);
+    const todayWebsiteViews = visitors.reduce((acc, v: any) => acc + (v[todayVisitsKey] || 0), 0);
 
     // Calculate external (Non-WB or Non-India)
     const externalCount = visitors.filter((v: any) => {
@@ -110,7 +113,7 @@ export default function WebsiteVisitorsPage() {
     })
     const deviceData = Object.keys(deviceMap).map(name => ({ name, value: deviceMap[name] }))
 
-    return { total, unique, returning, new: newCount, external: externalCount, todayPageViews, chartData, deviceData }
+    return { total, unique, returning, new: newCount, external: externalCount, todayPageViews, todayWebsiteViews, chartData, deviceData }
   }, [visitors])
 
   const handleExport = (format: 'PDF' | 'Excel' | 'CSV') => {
@@ -159,11 +162,12 @@ export default function WebsiteVisitorsPage() {
             <div className="text-center py-32"><Loader2 className="w-12 h-12 animate-spin text-accent mx-auto mb-4" /><p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Synchronizing Live Logs...</p></div>
           ) : (
             <div className="space-y-8">
-              <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+              <div className="grid grid-cols-2 lg:grid-cols-6 gap-4">
                  {[
                    { label: "Total Sessions", value: stats.total, icon: <Users className="w-4 h-4" />, color: "text-blue-500", trend: "Live" },
                    { label: "Unique Users", value: stats.unique, icon: <UserCheck className="w-4 h-4" />, color: "text-emerald-500", trend: "Steady" },
                    { label: "Daily Page Views", value: stats.todayPageViews, icon: <Activity className="w-4 h-4" />, color: "text-indigo-500", trend: "Today" },
+                   { label: "Website Views", value: stats.todayWebsiteViews, icon: <Monitor className="w-4 h-4" />, color: "text-rose-500", trend: "Today" },
                    { label: "External Reach", value: stats.external, icon: <Globe className="w-4 h-4" />, color: "text-amber-500", trend: "Global" },
                    { label: "Connection", value: "Verified", icon: <Wifi className="w-4 h-4" />, color: "text-slate-400", trend: "Stable" }
                  ].map((stat, i) => (

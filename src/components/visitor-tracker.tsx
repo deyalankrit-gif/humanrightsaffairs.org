@@ -7,8 +7,7 @@ import { doc, setDoc, serverTimestamp, increment, arrayUnion } from 'firebase/fi
 
 /**
  * VisitorTracker captures real-time technical and geographic metadata.
- * Updated to monitor pathname changes for instant interaction logging.
- * Enhanced to detect specific device types: Smartphone, Tablet, or Computer/Laptop.
+ * Updated: Now tracks both individual page views and full website visits (sessions) on a daily basis.
  */
 export function VisitorTracker() {
   const db = useFirestore();
@@ -85,11 +84,12 @@ export function VisitorTracker() {
         userType: user ? 'Admin' : 'Guest',
         pagesVisited: arrayUnion(pathname),
         pageViews: increment(1), // Total views across all time
-        [`views_${todayStr}`]: increment(1) // Segmented daily views
+        [`views_${todayStr}`]: increment(1) // Segmented daily page views
       };
 
       if (isNewSession) {
         updatePayload.totalVisits = increment(1);
+        updatePayload[`visits_${todayStr}`] = increment(1); // Segmented daily website views (sessions)
         sessionStorage.setItem('hrat_session_active', 'true');
         
         if (!localStorage.getItem('hrat_visitor_exists')) {
