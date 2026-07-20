@@ -59,6 +59,9 @@ export function VisitorTracker() {
 
       const visitorRef = doc(db, 'visitors', visitorId!);
       
+      // Date string for daily views tracking (YYYY_MM_DD)
+      const todayStr = new Date().toLocaleDateString('en-CA').replace(/-/g, '_');
+
       const updatePayload: any = {
         name: user?.displayName || 'Anonymous Guest',
         email: user?.email || '',
@@ -73,7 +76,9 @@ export function VisitorTracker() {
         country: geoData.country,
         status: isNewSession ? 'Returning' : 'Active',
         userType: user ? 'Admin' : 'Guest',
-        pagesVisited: arrayUnion(pathname)
+        pagesVisited: arrayUnion(pathname),
+        pageViews: increment(1), // Total views across all time
+        [`views_${todayStr}`]: increment(1) // Segmented daily views
       };
 
       if (isNewSession) {
