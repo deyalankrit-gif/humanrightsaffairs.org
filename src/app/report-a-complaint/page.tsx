@@ -40,7 +40,8 @@ import { Badge } from '@/components/ui/badge'
 
 const complaintSchema = z.object({
   fullName: z.string().min(2, "Full name is required"),
-  email: z.string().email("Invalid email address"),
+  email: z.string().email("Invalid email address").optional().or(z.literal('')),
+  aadhaar: z.string().length(12, "Aadhaar must be exactly 12 digits"),
   phone: z.string().min(10, "Valid phone number required"),
   address: z.string().min(10, "Full address is required for documentation"),
   incidentDate: z.string().min(1, "Date of incident is required"),
@@ -62,6 +63,7 @@ export default function ReportAComplaintPage() {
     defaultValues: {
       fullName: '',
       email: '',
+      aadhaar: '',
       phone: '',
       address: '',
       incidentDate: '',
@@ -224,9 +226,16 @@ export default function ReportAComplaintPage() {
                             <FormMessage />
                           </FormItem>
                         )} />
+                        <FormField control={form.control} name="aadhaar" render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Aadhaar Number / আধার নম্বর *</FormLabel>
+                            <FormControl><Input placeholder="12-digit Aadhaar Number" maxLength={12} className="h-12 rounded-xl bg-slate-50 dark:bg-slate-950 font-mono" {...field} /></FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )} />
                         <FormField control={form.control} name="email" render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Official Email / অফিসিয়াল ইমেল *</FormLabel>
+                            <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Official Email (Optional) / অফিসিয়াল ইমেল (ঐচ্ছিক)</FormLabel>
                             <FormControl><Input placeholder="name@example.com" className="h-12 rounded-xl bg-slate-50 dark:bg-slate-950" {...field} /></FormControl>
                             <FormMessage />
                           </FormItem>
@@ -239,7 +248,7 @@ export default function ReportAComplaintPage() {
                           </FormItem>
                         )} />
                         <FormField control={form.control} name="address" render={({ field }) => (
-                          <FormItem>
+                          <FormItem className="md:col-span-2">
                             <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Complete Address / সম্পূর্ণ ঠিকানা *</FormLabel>
                             <FormControl><Input placeholder="Street, Village, PS, PO, District" className="h-12 rounded-xl bg-slate-50 dark:bg-slate-950" {...field} /></FormControl>
                             <FormMessage />
