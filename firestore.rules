@@ -9,6 +9,11 @@ service cloud.firestore {
       allow write: if hasPermission('occasions');
     }
     
+    match /donor_tiers/{tierId} {
+      allow read: if true;
+      allow write: if hasPermission('donorWall');
+    }
+    
     match /memberProfiles/{profileId} {
       allow read: if true;
       allow write: if hasPermission('members');

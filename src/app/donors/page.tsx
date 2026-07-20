@@ -1,3 +1,4 @@
+
 "use client"
 
 import React from 'react'
@@ -16,42 +17,29 @@ import {
   ArrowRight,
   TrendingUp,
   Globe,
-  Sparkles
+  Sparkles,
+  Loader2
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { DonationDialog } from '@/components/donation-dialog'
 import { PlaceHolderImages } from '@/lib/placeholder-images'
+import { useCollection, useFirestore, useMemoFirebase } from '@/firebase'
+import { collection, query, orderBy } from 'firebase/firestore'
 import { cn } from '@/lib/utils'
 
 export default function DonorsPage() {
+  const db = useFirestore()
   const impactImg1 = PlaceHolderImages.find(img => img.id === 'donation-bg-1');
   const impactImg2 = PlaceHolderImages.find(img => img.id === 'donation-bg-2');
 
-  const donorTiers = [
-    {
-      title: "Platinum Circle",
-      color: "from-blue-600 to-indigo-800",
-      icon: <Award className="w-8 h-8 text-blue-200" />,
-      description: "Visionary supporters driving our national expansion and high-court advocacy.",
-      members: ["Anonymous Trustee", "Social Justice Foundation", "West Bengal Philanthropy Cell"]
-    },
-    {
-      title: "Gold Circle",
-      color: "from-amber-500 to-orange-700",
-      icon: <Star className="w-8 h-8 text-amber-100" />,
-      description: "Dedicated contributors fueling our rural legal aid camps and awareness drives.",
-      members: ["Jayanta Kumar Paul", "Global Human Rights Watch", "Dr. S. Banerjee & Family"]
-    },
-    {
-      title: "Silver Circle",
-      color: "from-slate-400 to-slate-600",
-      icon: <ShieldCheck className="w-8 h-8 text-slate-100" />,
-      description: "Essential supporters maintaining our day-to-day operations and helpdesk.",
-      members: ["Kolkata Community Union", "A. Dasgupta", "Youth for Justice (Howrah)"]
-    }
-  ]
+  const tiersQuery = useMemoFirebase(() => {
+    if (!db) return null;
+    return query(collection(db, 'donor_tiers'), orderBy('priority', 'desc'));
+  }, [db]);
+
+  const { data: donorTiers, loading } = useCollection(tiersQuery);
 
   const impactMetrics = [
     { label: "Free Consultations", value: "4,500+", color: "text-emerald-500" },
@@ -59,6 +47,16 @@ export default function DonorsPage() {
     { label: "State Reach", value: "18 States", color: "text-indigo-500" },
     { label: "Success Rate", value: "92%", color: "text-blue-500" }
   ]
+
+  const getIcon = (name: string) => {
+    switch (name) {
+      case 'Award': return <Award className="w-8 h-8 text-white/80" />;
+      case 'Star': return <Star className="w-8 h-8 text-white/80" />;
+      case 'ShieldCheck': return <ShieldCheck className="w-8 h-8 text-white/80" />;
+      case 'Users': return <Users className="w-8 h-8 text-white/80" />;
+      default: return <Award className="w-8 h-8 text-white/80" />;
+    }
+  }
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
@@ -69,7 +67,7 @@ export default function DonorsPage() {
           <div className="max-w-4xl mx-auto">
             <Badge className="bg-accent text-white font-bold px-4 py-1.5 uppercase tracking-widest text-[10px] border-none mb-6">Wall of Gratitude</Badge>
             <h1 className="text-4xl md:text-7xl font-headline font-bold mb-6">Thank You <span className="text-accent italic">Our Donors</span></h1>
-            <p className="text-lg md:text-2xl opacity-80 leading-relaxed font-medium mb-12">
+            <p className="text-lg md:text-xl opacity-80 leading-relaxed font-medium mb-12">
               Every coin contributed is a brick in the foundation of a more just and equitable India. We celebrate the spirit of giving that powers our mission.
             </p>
             
@@ -93,37 +91,43 @@ export default function DonorsPage() {
             <p className="text-muted-foreground text-sm md:text-lg max-w-2xl mx-auto">Recognizing the individuals and institutions that provide the critical resources for JusticeShield to function.</p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {donorTiers.map((tier, idx) => (
-              <Card key={idx} className="border-none shadow-xl rounded-[2.5rem] overflow-hidden bg-white dark:bg-slate-900 flex flex-col group hover:-translate-y-2 transition-all duration-500">
-                <div className={cn("h-32 flex items-center justify-center bg-gradient-to-br relative", tier.color)}>
-                   <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                   <div className="relative z-10 p-4 bg-white/20 backdrop-blur-md rounded-2xl border border-white/30">
-                      {tier.icon}
-                   </div>
-                </div>
-                <CardHeader className="p-8 pb-4">
-                  <CardTitle className="text-2xl font-headline font-bold text-primary dark:text-white">{tier.title}</CardTitle>
-                </CardHeader>
-                <CardContent className="p-8 pt-0 flex-1 flex flex-col justify-between">
-                  <div className="space-y-6">
-                    <p className="text-sm text-slate-500 dark:text-slate-400 italic">"{tier.description}"</p>
-                    <div className="space-y-3">
-                      <p className="text-[10px] font-black uppercase tracking-widest text-accent">Top Benefactors</p>
-                      <ul className="space-y-3">
-                        {tier.members.map((name, i) => (
-                          <li key={i} className="flex items-center gap-3 text-sm font-bold text-primary dark:text-slate-200">
-                            <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                            {name}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
+          {loading ? (
+            <div className="flex justify-center py-20">
+               <Loader2 className="w-10 h-10 animate-spin text-accent" />
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+              {(donorTiers || []).map((tier: any, idx: number) => (
+                <Card key={idx} className="border-none shadow-xl rounded-[2.5rem] overflow-hidden bg-white dark:bg-slate-900 flex flex-col group hover:-translate-y-2 transition-all duration-500">
+                  <div className={cn("h-32 flex items-center justify-center bg-gradient-to-br relative", tier.color)}>
+                     <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                     <div className="relative z-10 p-4 bg-white/20 backdrop-blur-md rounded-2xl border border-white/30">
+                        {getIcon(tier.iconName)}
+                     </div>
                   </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                  <CardHeader className="p-8 pb-4">
+                    <CardTitle className="text-2xl font-headline font-bold text-primary dark:text-white">{tier.title}</CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-8 pt-0 flex-1 flex flex-col justify-between">
+                    <div className="space-y-6">
+                      <p className="text-sm text-slate-500 dark:text-slate-400 italic">"{tier.description}"</p>
+                      <div className="space-y-3">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-accent">Top Benefactors</p>
+                        <ul className="space-y-3">
+                          {(tier.members || []).map((name: string, i: number) => (
+                            <li key={i} className="flex items-center gap-3 text-sm font-bold text-primary dark:text-slate-200">
+                              <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                              {name}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 

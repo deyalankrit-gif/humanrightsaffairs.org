@@ -31,7 +31,8 @@
             "terminated": { "type": "boolean" },
             "renewals": { "type": "boolean" },
             "activityHub": { "type": "boolean", "description": "Access to manage Activity Calendar Hub." },
-            "occasions": { "type": "boolean", "description": "Access to manage Festival & Occasion greetings." }
+            "occasions": { "type": "boolean", "description": "Access to manage Festival & Occasion greetings." },
+            "donorWall": { "type": "boolean", "description": "Access to manage Wall of Donors recognition." }
           }
         },
         "lastLogin": { "type": "string", "format": "date-time" },
@@ -94,6 +95,21 @@
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["title", "imageUrl", "startDate", "endDate", "isActive"]
+    },
+    "DonorTier": {
+      "title": "Donor Tier",
+      "description": "Recognition level for benefactors on the Wall of Donors.",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "color": { "type": "string", "description": "Tailwind CSS gradient classes." },
+        "iconName": { "type": "string", "description": "Lucide icon identifier." },
+        "members": { "type": "array", "items": { "type": "string" } },
+        "priority": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "members", "priority"]
     }
   },
   "auth": {
@@ -103,6 +119,7 @@
     "/users/{userEmail}": { "schema": "UserAccount", "description": "Permissions registry." },
     "/activity_events/{eventId}": { "schema": "ActivityEvent" },
     "/activity_reminders/{reminderId}": { "schema": "ActivityReminder" },
-    "/occasions/{occasionId}": { "schema": "Occasion", "description": "Festival and special occasion banner registry." }
+    "/occasions/{occasionId}": { "schema": "Occasion", "description": "Festival and special occasion banner registry." },
+    "/donor_tiers/{tierId}": { "schema": "DonorTier", "description": "Wall of Donors recognition levels." }
   }
 }

@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useEffect, useState } from 'react'
@@ -71,6 +72,7 @@ const MODULES = [
   { id: 'events', label: 'Event Archives' },
   { id: 'gallery', label: 'Gallery Archive' },
   { id: 'occasions', label: 'Occasion Greetings' },
+  { id: 'donorWall', label: 'Donor Wall Management' },
   { id: 'activityHub', label: 'Activity Hub' },
   { id: 'publicView', label: 'Public Site View' },
   { id: 'terminated', label: 'Terminated Registry' },
