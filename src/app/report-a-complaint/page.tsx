@@ -30,7 +30,8 @@ import {
   FileText,
   Scale,
   ChevronRight,
-  ClipboardList
+  ClipboardList,
+  Home
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { errorEmitter } from '@/firebase/error-emitter'
@@ -44,7 +45,10 @@ const complaintSchema = z.object({
   email: z.string().email("Invalid email address").optional().or(z.literal('')),
   aadhaar: z.string().length(12, "Aadhaar must be exactly 12 digits"),
   phone: z.string().min(10, "Valid phone number required"),
-  address: z.string().min(10, "Full address is required for documentation"),
+  address: z.string().min(10, "Street address is required"),
+  postOffice: z.string().min(2, "Post Office is required"),
+  policeStation: z.string().min(2, "Police Station is required"),
+  pinCode: z.string().length(6, "PIN Code must be 6 digits"),
   incidentDate: z.string().min(1, "Date of incident is required"),
   incidentLocation: z.string().min(5, "Venue/Location is required"),
   subject: z.string().min(5, "Please provide a subject for the complaint"),
@@ -69,6 +73,9 @@ export default function ReportAComplaintPage() {
       aadhaar: '',
       phone: '',
       address: '',
+      postOffice: '',
+      policeStation: '',
+      pinCode: '',
       incidentDate: '',
       incidentLocation: '',
       subject: '',
@@ -252,13 +259,45 @@ export default function ReportAComplaintPage() {
                             <FormMessage />
                           </FormItem>
                         )} />
+                      </div>
+                    </div>
+
+                    {/* Part 1.1: Verified Address */}
+                    <div className="space-y-6">
+                      <h3 className="text-xs font-black uppercase tracking-[0.3em] text-accent flex items-center gap-2">
+                        <span className="w-8 h-px bg-accent"></span> Verified Residential Address / যাচাইকৃত আবাসিক ঠিকানা
+                      </h3>
+                      <div className="space-y-6">
                         <FormField control={form.control} name="address" render={({ field }) => (
-                          <FormItem className="md:col-span-2">
-                            <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Complete Address / সম্পূর্ণ ঠিকানা *</FormLabel>
-                            <FormControl><Input placeholder="Street, Village, PS, PO, District" className="h-12 rounded-xl bg-slate-50 dark:bg-slate-950" {...field} /></FormControl>
+                          <FormItem>
+                            <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Street / Village / House No / রাস্তা / গ্রাম / বাড়ি নম্বর *</FormLabel>
+                            <FormControl><Input placeholder="Detailed Street Address" className="h-12 rounded-xl bg-slate-50 dark:bg-slate-950" {...field} /></FormControl>
                             <FormMessage />
                           </FormItem>
                         )} />
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                          <FormField control={form.control} name="postOffice" render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Post Office / পোস্ট অফিস *</FormLabel>
+                              <FormControl><Input placeholder="Enter Post Office" className="h-12 rounded-xl bg-slate-50 dark:bg-slate-950" {...field} /></FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )} />
+                          <FormField control={form.control} name="policeStation" render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Police Station / পুলিশ স্টেশন *</FormLabel>
+                              <FormControl><Input placeholder="Enter Police Station" className="h-12 rounded-xl bg-slate-50 dark:bg-slate-950" {...field} /></FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )} />
+                          <FormField control={form.control} name="pinCode" render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">PIN Code / পিন কোড *</FormLabel>
+                              <FormControl><Input placeholder="6 digits" maxLength={6} className="h-12 rounded-xl bg-slate-50 dark:bg-slate-950 font-mono" {...field} /></FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )} />
+                        </div>
                       </div>
                     </div>
 
