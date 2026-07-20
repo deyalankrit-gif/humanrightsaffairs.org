@@ -34,20 +34,34 @@ const publicLinks = [
 export function Navbar() {
   const pathname = usePathname()
   const [activeHash, setActiveHash] = useState('')
+  const [scrolled, setScrolled] = useState(false)
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
+      const handleScroll = () => {
+        setScrolled(window.scrollY > 20)
+      }
       const handleHashChange = () => {
         setActiveHash(window.location.hash || '')
       }
+      window.addEventListener('scroll', handleScroll)
       window.addEventListener('hashchange', handleHashChange)
       handleHashChange()
-      return () => window.removeEventListener('hashchange', handleHashChange)
+      handleScroll()
+      return () => {
+        window.removeEventListener('scroll', handleScroll)
+        window.removeEventListener('hashchange', handleHashChange)
+      }
     }
   }, [])
 
   return (
-    <header className="flex h-14 md:h-16 shrink-0 items-center border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-2 md:px-4 sticky top-0 z-[100] transition-all duration-300 w-full overflow-visible">
+    <header className={cn(
+      "flex h-14 md:h-16 shrink-0 items-center transition-all duration-500 z-[100] overflow-visible",
+      scrolled 
+        ? "fixed top-3 left-1/2 -translate-x-1/2 w-[95%] md:w-[90%] max-w-7xl rounded-full bg-background/70 backdrop-blur-xl border border-white/20 shadow-2xl px-6" 
+        : "sticky top-0 w-full px-2 md:px-4 bg-background border-b"
+    )}>
       {/* Brand Section */}
       <Link href="/" className="flex items-center gap-2 mr-4 md:mr-8 shrink-0 group">
         <div className="relative w-7 h-7 md:w-9 md:h-9 transition-transform group-hover:scale-110 duration-500">
