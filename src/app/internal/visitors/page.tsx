@@ -356,10 +356,19 @@ export default function WebsiteVisitorsPage() {
                                      </div>
                                   </td>
                                   <td className="px-6 py-4">
-                                     <div className="flex flex-col">
-                                        <span className="text-[10px] font-bold text-slate-700 dark:text-slate-300">
-                                           {v.lastActivity?.toDate ? v.lastActivity.toDate().toLocaleDateString() : 'N/A'}
-                                        </span>
+                                     <div className="flex flex-col gap-1">
+                                        <div className="flex items-center gap-1.5">
+                                          <span className="text-[8px] font-black text-slate-400 uppercase tracking-tighter shrink-0">Start:</span>
+                                          <span className="text-[10px] font-bold text-slate-500">
+                                            {v.firstVisit?.toDate ? v.firstVisit.toDate().toLocaleDateString() : 'N/A'}
+                                          </span>
+                                        </div>
+                                        <div className="flex items-center gap-1.5">
+                                          <span className="text-[8px] font-black text-accent uppercase tracking-tighter shrink-0">Now:</span>
+                                          <span className="text-[10px] font-bold text-primary dark:text-white">
+                                            {v.lastActivity?.toDate ? v.lastActivity.toDate().toLocaleDateString() : 'N/A'}
+                                          </span>
+                                        </div>
                                      </div>
                                   </td>
                                   <td className="px-6 py-4">
