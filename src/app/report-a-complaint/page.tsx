@@ -46,6 +46,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 const complaintSchema = z.object({
   // Complainant Info
   fullName: z.string().min(2, "Full name is required"),
+  relationName: z.string().min(2, "Father's or husband's name is required"),
   email: z.string().email("Invalid email address").optional().or(z.literal('')),
   aadhaar: z.string().length(12, "Aadhaar must be exactly 12 digits"),
   phone: z.string().min(10, "Valid phone number required"),
@@ -87,6 +88,7 @@ export default function ReportAComplaintPage() {
     resolver: zodResolver(complaintSchema),
     defaultValues: {
       fullName: '',
+      relationName: '',
       email: '',
       aadhaar: '',
       phone: '',
@@ -249,6 +251,13 @@ export default function ReportAComplaintPage() {
                             <FormMessage />
                           </FormItem>
                         )} />
+                        <FormField control={form.control} name="relationName" render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Father's or Husband's Name / পিতার বা স্বামীর নাম *</FormLabel>
+                            <FormControl><Input placeholder="Guardian Name" className="h-12 rounded-xl bg-slate-50 dark:bg-slate-950" {...field} /></FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )} />
                         <FormField control={form.control} name="aadhaar" render={({ field }) => (
                           <FormItem>
                             <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Aadhaar Number / আধার নম্বর *</FormLabel>
@@ -256,17 +265,17 @@ export default function ReportAComplaintPage() {
                             <FormMessage />
                           </FormItem>
                         )} />
-                        <FormField control={form.control} name="email" render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Official Email (Optional) / অফিসিয়াল ইমেল (ঐচ্ছিক)</FormLabel>
-                            <FormControl><Input placeholder="email@example.com" className="h-12 rounded-xl bg-slate-50 dark:bg-slate-950" {...field} /></FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )} />
                         <FormField control={form.control} name="phone" render={({ field }) => (
                           <FormItem>
                             <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Contact Number / যোগাযোগের নম্বর *</FormLabel>
                             <FormControl><Input placeholder="+91 XXXXX XXXXX" className="h-12 rounded-xl bg-slate-50 dark:bg-slate-950" {...field} /></FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )} />
+                        <FormField control={form.control} name="email" render={({ field }) => (
+                          <FormItem className="md:col-span-2">
+                            <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Official Email (Optional) / অফিসিয়াল ইমেল (ঐচ্ছিক)</FormLabel>
+                            <FormControl><Input placeholder="email@example.com" className="h-12 rounded-xl bg-slate-50 dark:bg-slate-950" {...field} /></FormControl>
                             <FormMessage />
                           </FormItem>
                         )} />
@@ -279,6 +288,10 @@ export default function ReportAComplaintPage() {
                         <span className="w-8 h-px bg-accent"></span> Verified Residential Address / যাচাইকৃত আবাসিক ঠিকানা
                       </h3>
                       <div className="space-y-6">
+                        <div className="flex items-center gap-2 text-primary mb-4">
+                           <Home className="w-5 h-5 text-accent" />
+                           <span className="text-sm font-bold uppercase tracking-widest">Address Protocol</span>
+                        </div>
                         <FormField control={form.control} name="address" render={({ field }) => (
                           <FormItem>
                             <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Street / Village / House No / রাস্তা / গ্রাম / বাড়ি নম্বর *</FormLabel>
