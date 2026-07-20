@@ -22,6 +22,7 @@ import {
   ShieldCheck,
   Smartphone,
   Laptop,
+  Tablet,
   TrendingUp,
   History,
   FileDown,
@@ -104,7 +105,7 @@ export default function WebsiteVisitorsPage() {
 
     const deviceMap: Record<string, number> = {}
     visitors.forEach((v: any) => {
-      const dev = v.deviceType || 'Desktop'
+      const dev = v.deviceType || 'Computer/Laptop'
       deviceMap[dev] = (deviceMap[dev] || 0) + 1
     })
     const deviceData = Object.keys(deviceMap).map(name => ({ name, value: deviceMap[name] }))
@@ -315,8 +316,10 @@ export default function WebsiteVisitorsPage() {
                                      <div className="flex items-center gap-4">
                                         <div className="flex flex-col">
                                            <span className="text-[9px] font-bold text-slate-600 dark:text-slate-300 flex items-center gap-1">
-                                              {v.deviceType === 'Mobile' ? <Smartphone className="w-2.5 h-2.5" /> : <Laptop className="w-2.5 h-2.5" />}
-                                              {v.browser}
+                                              {v.deviceType === 'Smartphone' ? <Smartphone className="w-2.5 h-2.5" /> : 
+                                               v.deviceType === 'Tablet' ? <Tablet className="w-2.5 h-2.5" /> : 
+                                               <Laptop className="w-2.5 h-2.5" />}
+                                              {v.deviceType || 'Computer'} — {v.browser}
                                            </span>
                                            <span className="text-[7px] text-slate-400 uppercase font-black">{v.os}</span>
                                         </div>

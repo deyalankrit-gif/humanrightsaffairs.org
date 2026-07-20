@@ -8,7 +8,7 @@ import { doc, setDoc, serverTimestamp, increment, arrayUnion } from 'firebase/fi
 /**
  * VisitorTracker captures real-time technical and geographic metadata.
  * Updated to monitor pathname changes for instant interaction logging.
- * Protected against race-condition permission execution on mount.
+ * Enhanced to detect specific device types: Smartphone, Tablet, or Computer/Laptop.
  */
 export function VisitorTracker() {
   const db = useFirestore();
@@ -34,7 +34,14 @@ export function VisitorTracker() {
       // Technical profile
       const userAgent = window.navigator.userAgent;
       const platform = window.navigator.platform;
-      const isMobile = /iPhone|iPad|iPod|Android/i.test(userAgent);
+      
+      // Granular Device Detection
+      const isTablet = /(ipad|tablet|(android(?!.*mobile))|(windows(?!.*phone)(.*touch))|kindle|playbook|silk|(puffin(?!.*(IP|AP|WP))))/i.test(userAgent);
+      const isMobile = /iPhone|iPod|Android|BlackBerry|IEMobile|Opera Mini/i.test(userAgent) && !isTablet;
+      
+      let deviceType = "Computer/Laptop";
+      if (isTablet) deviceType = "Tablet";
+      else if (isMobile) deviceType = "Smartphone";
       
       let browser = "Unknown";
       if (userAgent.includes("Chrome")) browser = "Chrome";
@@ -65,7 +72,7 @@ export function VisitorTracker() {
       const updatePayload: any = {
         name: user?.displayName || 'Anonymous Guest',
         email: user?.email || '',
-        deviceType: isMobile ? 'Mobile' : 'Desktop',
+        deviceType,
         browser,
         os: platform,
         lastActivity: serverTimestamp(),
