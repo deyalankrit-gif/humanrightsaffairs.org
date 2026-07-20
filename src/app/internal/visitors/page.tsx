@@ -29,7 +29,8 @@ import {
   Wifi,
   Activity,
   Circle,
-  Navigation
+  Navigation,
+  Cpu
 } from 'lucide-react'
 import { 
   BarChart, 
@@ -51,12 +52,19 @@ export default function WebsiteVisitorsPage() {
   const db = useFirestore()
   
   const [search, setSearch] = useState('')
+  const [localVisitorId, setLocalVisitorId] = useState<string | null>(null)
 
   useEffect(() => {
     if (!authLoading && !user) {
       router.push('/internal/login')
     }
   }, [user, authLoading, router])
+
+  useEffect(() => {
+    // Identify the visitor ID of the current device
+    const id = localStorage.getItem('hrat_visitor_id');
+    setLocalVisitorId(id);
+  }, []);
 
   // Real-time listener for the last 100 visitors
   const visitorsQuery = useMemoFirebase(() => {
@@ -307,11 +315,13 @@ export default function WebsiteVisitorsPage() {
                                const state = v.state || 'Unknown';
                                const isInternational = country !== 'India' && country !== 'IN';
                                const isOutOfState = !isInternational && state !== 'West Bengal' && state !== 'Unknown';
+                               const isCurrentDevice = v.id === localVisitorId;
 
                                return (
                                <tr key={v.id} className={cn(
                                  "hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors",
-                                 isInternational ? "bg-red-50/20 dark:bg-red-950/10" : isOutOfState ? "bg-amber-50/20 dark:bg-amber-950/10" : ""
+                                 isInternational ? "bg-red-50/20 dark:bg-red-950/10" : isOutOfState ? "bg-amber-50/20 dark:bg-amber-950/10" : "",
+                                 isCurrentDevice ? "bg-accent/5" : ""
                                )}>
                                   <td className="px-6 py-4">
                                      <div className="flex items-center gap-3">
@@ -320,7 +330,14 @@ export default function WebsiteVisitorsPage() {
                                            <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-emerald-500 rounded-full border-2 border-white dark:border-slate-900 animate-pulse"></span>
                                         </div>
                                         <div>
-                                          <p className="text-xs font-bold text-primary dark:text-white leading-none">{v.name || 'Anonymous Guest'}</p>
+                                          <div className="flex items-center gap-2">
+                                            <p className="text-xs font-bold text-primary dark:text-white leading-none">{v.name || 'Anonymous Guest'}</p>
+                                            {isCurrentDevice && (
+                                              <Badge className="bg-accent text-primary font-black text-[6px] h-3 px-1 leading-none border-none flex gap-0.5 items-center">
+                                                <Cpu className="w-2 h-2" /> THIS DEVICE
+                                              </Badge>
+                                            )}
+                                          </div>
                                           <p className="text-[8px] font-mono text-slate-400 mt-0.5">{v.id}</p>
                                         </div>
                                      </div>
