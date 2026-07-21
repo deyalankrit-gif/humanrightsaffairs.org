@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo } from 'react'
@@ -116,11 +115,11 @@ export default function PublicKitManagementPage() {
 
     filteredMembers.forEach(m => {
       const category = m.designationCategory || "General Member";
-      const eligibleItems = eligibilityRules[category] || [];
+      const eligibleItemsList = eligibilityRules[category] || [];
       const kit = kitMap[m.id];
 
       kitItems.forEach((item: any) => {
-        if (eligibleItems.includes(item.id)) {
+        if (eligibleItemsList.includes(item.id)) {
           stats[item.id].total += 1;
           if (kit?.items?.[item.id]) {
             stats[item.id].issued += 1;
