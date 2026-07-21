@@ -37,7 +37,8 @@ import {
   Edit,
   Trash2,
   Clock,
-  FileText
+  FileText,
+  Car
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
@@ -390,6 +391,11 @@ export default function MemberKitManagement() {
                       {kit?.dispatchDate && (
                         <span className="flex items-center gap-1.5 text-blue-500">
                           <Clock className="w-3 h-3" /> {kit.dispatchDate}
+                        </span>
+                      )}
+                      {kit?.items?.designationCarPlate && (
+                        <span className="flex items-center gap-1.5 text-red-600 animate-pulse" title="Metal Designation Car Plate Issued">
+                          <Car className="w-3.5 h-3.5" />
                         </span>
                       )}
                       {kit?.notes && (
