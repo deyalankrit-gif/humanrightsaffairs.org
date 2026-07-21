@@ -292,11 +292,11 @@ export default function MemberKitManagement() {
 
     filteredMembers.forEach(m => {
       const category = m.designationCategory || "General Member";
-      const eligibleItems = eligibilityRules[category] || [];
+      const eligibleItemsList = eligibilityRules[category] || [];
       const kit = kitMap[m.id];
 
       kitItems.forEach((item: any) => {
-        if (eligibleItems.includes(item.id)) {
+        if (eligibleItemsList.includes(item.id)) {
           stats[item.id].total += 1;
           if (kit?.items?.[item.id]) {
             stats[item.id].issued += 1;
@@ -341,7 +341,7 @@ export default function MemberKitManagement() {
     const eligibleItems = kitItems.filter((item: any) => eligibleItemIds.includes(item.id));
     const isOfficeBearer = category === 'Office-bearing Member';
 
-    // Robust Car Plate Check: Identifies any item in the current registry containing "Car Plate" in its label
+    // Dynamic Car Plate Check: Scans the registry for ANY item containing "Car Plate" in its label
     const carPlateItemIds = kitItems
       .filter((item: any) => item.label.toLowerCase().includes('car plate'))
       .map((item: any) => item.id);
