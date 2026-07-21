@@ -199,15 +199,25 @@ export default function MemberKitManagement() {
   }
 
   const handleDeleteKitItem = (id: string) => {
+    // If deleting the item being edited, reset the edit state
+    if (editingItemId === id) {
+      setEditingItemId(null)
+      setEditingItemLabel('')
+    }
+
     setKitItems(prev => prev.filter(item => item.id !== id))
+    
     // Cleanup eligibility rules
-    const newRules = { ...eligibilityRules }
-    MEMBER_CATEGORIES.forEach(cat => {
-      if (newRules[cat]) {
-        newRules[cat] = newRules[cat].filter(itemId => itemId !== id)
-      }
+    setEligibilityRules(prev => {
+      const newRules = { ...prev }
+      MEMBER_CATEGORIES.forEach(cat => {
+        if (newRules[cat]) {
+          newRules[cat] = newRules[cat].filter(itemId => itemId !== id)
+        }
+      })
+      return newRules
     })
-    setEligibilityRules(newRules)
+    
     toast({ title: "Item Purged", description: "Item removed from global registry and all eligibility lists." })
   }
 
@@ -301,7 +311,7 @@ export default function MemberKitManagement() {
         key={m.id} 
         onClick={() => handleSelectMember(m)}
         className={cn(
-          "border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 relative group cursor-pointer transition-all hover:scale-[1.01]",
+          "border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 relative group cursor-pointer transition-all hover:scale-[1.01]",
           selectedMember?.id === m.id && "ring-2 ring-accent"
         )}
       >
@@ -401,9 +411,9 @@ export default function MemberKitManagement() {
                        <div className="p-6 bg-slate-50 dark:bg-slate-900 rounded-3xl border-2 border-dashed border-slate-200 dark:border-slate-800 space-y-6">
                           <div className="space-y-4">
                             <div className="flex items-center gap-2">
-                               <Plus className="w-4 h-4 text-accent" />
+                               {editingItemId ? <Edit className="w-4 h-4 text-accent" /> : <Plus className="w-4 h-4 text-accent" />}
                                <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-500">
-                                 {editingItemId ? "Update Institutional Item" : "Create New Institutional Item"}
+                                 {editingItemId ? "Modify Registry Entry" : "Create New Institutional Item"}
                                </h4>
                             </div>
                             <div className="flex gap-3">
@@ -411,7 +421,10 @@ export default function MemberKitManagement() {
                                   placeholder="e.g. Official Blazer, ID Case" 
                                   value={editingItemId ? editingItemLabel : newItemLabel}
                                   onChange={e => editingItemId ? setEditingItemLabel(e.target.value) : setNewItemLabel(e.target.value)}
-                                  className="h-11 rounded-xl bg-white dark:bg-slate-950"
+                                  className={cn(
+                                    "h-11 rounded-xl bg-white dark:bg-slate-950",
+                                    editingItemId && "border-accent ring-1 ring-accent"
+                                  )}
                                   onKeyDown={e => {
                                     if (e.key === 'Enter') {
                                       editingItemId ? handleSaveEditItem() : handleCreateKitItem();
@@ -421,7 +434,7 @@ export default function MemberKitManagement() {
                                {editingItemId ? (
                                  <div className="flex gap-2">
                                    <Button onClick={handleSaveEditItem} className="h-11 px-6 rounded-xl font-bold bg-emerald-600 text-white hover:bg-emerald-700">
-                                      Save
+                                      Commit
                                    </Button>
                                    <Button onClick={() => setEditingItemId(null)} variant="ghost" className="h-11 px-4 rounded-xl font-bold text-slate-500">
                                       Cancel
@@ -437,19 +450,33 @@ export default function MemberKitManagement() {
 
                           {/* GLOBAL ITEM LIST WITH ACTIONS */}
                           <div className="space-y-3">
-                            <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">Global Item Registry</p>
+                            <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">Global Item Registry Management</p>
                             <div className="flex flex-wrap gap-2">
                                {kitItems.map(item => (
-                                 <div key={item.id} className="flex items-center gap-2 bg-white dark:bg-slate-950 border border-slate-100 dark:border-slate-800 pl-4 pr-1 py-1 rounded-xl group hover:border-accent/40 transition-all">
-                                    <span className="text-[10px] font-bold text-primary dark:text-white">{item.label}</span>
-                                    <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                 <div 
+                                   key={item.id} 
+                                   className={cn(
+                                     "flex items-center gap-2 bg-white dark:bg-slate-950 border pl-4 pr-1 py-1 rounded-xl transition-all",
+                                     editingItemId === item.id ? "border-accent ring-1 ring-accent" : "border-slate-100 dark:border-slate-800"
+                                   )}
+                                 >
+                                    <span className={cn(
+                                      "text-[10px] font-bold",
+                                      editingItemId === item.id ? "text-accent" : "text-primary dark:text-white"
+                                    )}>
+                                      {item.label}
+                                    </span>
+                                    <div className="flex items-center gap-0.5 ml-1">
                                        <Button 
                                          variant="ghost" 
                                          size="icon" 
                                          onClick={() => handleStartEditItem(item)}
-                                         className="h-7 w-7 rounded-lg text-slate-400 hover:text-blue-500"
+                                         className={cn(
+                                           "h-7 w-7 rounded-lg transition-colors",
+                                           editingItemId === item.id ? "text-accent bg-accent/10" : "text-slate-400 hover:text-blue-500"
+                                         )}
                                        >
-                                         <Edit className="w-3 h-3" />
+                                         <Edit className="w-3.5 h-3.5" />
                                        </Button>
                                        <Button 
                                          variant="ghost" 
@@ -457,7 +484,7 @@ export default function MemberKitManagement() {
                                          onClick={() => handleDeleteKitItem(item.id)}
                                          className="h-7 w-7 rounded-lg text-slate-400 hover:text-red-500"
                                        >
-                                         <Trash2 className="w-3 h-3" />
+                                         <Trash2 className="w-3.5 h-3.5" />
                                        </Button>
                                     </div>
                                  </div>
