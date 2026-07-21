@@ -2,8 +2,8 @@
 
 import React, { useEffect, useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import { useUser, useCollection, useFirestore, useMemoFirebase, useDoc } from '@/firebase'
-import { collection, query, orderBy, doc, setDoc, serverTimestamp, where } from 'firebase/firestore'
+import { useUser, useCollection, useFirestore, useMemoFirebase } from '@/firebase'
+import { collection, query, orderBy, doc, setDoc, serverTimestamp } from 'firebase/firestore'
 import { Footer } from '@/components/footer'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -377,5 +377,3 @@ export default function MemberKitManagement() {
     </main>
   )
 }
-
-import { X } from 'lucide-react'
