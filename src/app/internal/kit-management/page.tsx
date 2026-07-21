@@ -42,7 +42,8 @@ import {
   DialogTitle,
   DialogDescription,
   DialogTrigger,
-  DialogClose
+  DialogClose,
+  DialogFooter
 } from "@/components/ui/dialog"
 
 const KIT_ITEMS = [
