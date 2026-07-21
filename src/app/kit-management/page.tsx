@@ -164,7 +164,7 @@ export default function PublicKitManagementPage() {
     const isOfficeBearer = category === 'Office-bearing Member';
 
     return (
-      <Card key={m.id} className="border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 relative group">
+      <Card key={m.id} className="border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 relative group">
         <CardContent className="p-0">
           <div className="flex flex-col md:flex-row items-stretch">
              <div className="p-5 bg-slate-50 dark:bg-slate-800 md:w-44 text-center border-r border-slate-100 dark:border-slate-700 flex flex-col items-center justify-center shrink-0">
@@ -360,7 +360,7 @@ export default function PublicKitManagementPage() {
                 </div>
               )}
 
-              {Object.keys(stateGroups).sort().map(state => (
+              {Object.keys(groupings.stateGroups).sort().map(state => (
                 <div key={state} className="space-y-4">
                   <div className="flex items-center gap-3 px-2">
                      <Globe className="w-6 h-6 text-emerald-600" />
@@ -369,13 +369,13 @@ export default function PublicKitManagementPage() {
                      </h4>
                      <div className="h-px flex-1 bg-slate-200 dark:bg-slate-800"></div>
                   </div>
-                  {stateGroups[state].map(renderMemberCard)}
+                  {groupings.stateGroups[state].map(renderMemberCard)}
                 </div>
               ))}
 
-              {Object.keys(districtGroups).sort().map(state => (
+              {Object.keys(groupings.districtGroups).sort().map(state => (
                 <div key={state} className="space-y-12">
-                  {Object.keys(districtGroups[state]).sort().map(district => (
+                  {Object.keys(groupings.districtGroups[state]).sort().map(district => (
                     <div key={district} className="space-y-4">
                       <div className="flex items-center gap-3 px-2">
                          <Building2 className="w-6 h-6 text-blue-600" />
@@ -385,7 +385,7 @@ export default function PublicKitManagementPage() {
                          <div className="h-px flex-1 bg-slate-200 dark:bg-slate-800"></div>
                       </div>
                       <div className="grid gap-4">
-                         {districtGroups[state][district].map(renderMemberCard)}
+                         {groupings.districtGroups[state][district].map(renderMemberCard)}
                       </div>
                     </div>
                   ))}
