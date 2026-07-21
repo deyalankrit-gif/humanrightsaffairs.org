@@ -30,7 +30,9 @@ import {
   Globe,
   Activity,
   ClipboardList,
-  Settings2
+  Settings2,
+  AlertCircle,
+  Users
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
@@ -166,6 +168,14 @@ export default function MemberKitManagement() {
     const matchesStatus = statusFilter === 'All' || status === statusFilter;
     return matchesSearch && matchesStatus;
   })
+
+  // GLOBAL SUMMARY CALCULATION
+  const globalStats = useMemo(() => {
+    const total = (members || []).length;
+    const delivered = (members || []).filter(m => kitMap[m.id]?.deliveryStatus === 'Delivered').length;
+    const notDelivered = total - delivered;
+    return { total, delivered, notDelivered };
+  }, [members, kitMap]);
 
   // CLASSIFIED BREAKDOWN CALCULATION (Filtered by Eligibility)
   const itemStats = useMemo(() => {
@@ -367,6 +377,46 @@ export default function MemberKitManagement() {
           </div>
         </div>
       </header>
+
+      {/* GLOBAL LOGISTICS SUMMARY */}
+      <section className="py-8 bg-white dark:bg-slate-900 border-b shadow-sm">
+        <div className="container mx-auto px-4">
+           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Card className="border-none shadow-sm rounded-3xl bg-slate-50 dark:bg-slate-800/50 p-6 flex items-center gap-6 group hover:bg-slate-100 transition-colors">
+                 <div className="w-14 h-14 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-600 shrink-0">
+                    <Users className="w-7 h-7" />
+                 </div>
+                 <div className="space-y-1">
+                    <p className="text-[9px] font-black uppercase text-slate-400 tracking-widest">Total Force</p>
+                    <p className="text-3xl font-headline font-bold text-primary dark:text-white leading-none">{globalStats.total}</p>
+                    <p className="text-[8px] font-bold text-slate-500">Registered Members</p>
+                 </div>
+              </Card>
+
+              <Card className="border-none shadow-sm rounded-3xl bg-emerald-50 dark:bg-emerald-950/20 p-6 flex items-center gap-6 group hover:bg-emerald-50 transition-colors">
+                 <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-600 shrink-0">
+                    <CheckCircle2 className="w-7 h-7" />
+                 </div>
+                 <div className="space-y-1">
+                    <p className="text-[9px] font-black uppercase text-emerald-600 tracking-widest">Kit Delivered</p>
+                    <p className="text-3xl font-headline font-bold text-emerald-700 dark:text-emerald-400 leading-none">{globalStats.delivered}</p>
+                    <p className="text-[8px] font-bold text-emerald-600/60 uppercase">Distribution Successful</p>
+                 </div>
+              </Card>
+
+              <Card className="border-none shadow-sm rounded-3xl bg-amber-50 dark:bg-amber-950/20 p-6 flex items-center gap-6 group hover:bg-amber-50 transition-colors">
+                 <div className="w-14 h-14 rounded-2xl bg-amber-500/10 flex items-center justify-center text-amber-600 shrink-0">
+                    <Truck className="w-7 h-7" />
+                 </div>
+                 <div className="space-y-1">
+                    <p className="text-[9px] font-black uppercase text-amber-600 tracking-widest">Pending Delivery</p>
+                    <p className="text-3xl font-headline font-bold text-amber-700 dark:text-amber-400 leading-none">{globalStats.notDelivered}</p>
+                    <p className="text-[8px] font-bold text-amber-600/60 uppercase">Logistics in Pipeline</p>
+                 </div>
+              </Card>
+           </div>
+        </div>
+      </section>
 
       {/* CLASSIFIED BREAKDOWN DASHBOARD */}
       <section className="py-6 border-b bg-white dark:bg-slate-900 shadow-sm animate-in fade-in duration-700">
