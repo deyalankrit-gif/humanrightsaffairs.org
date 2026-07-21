@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useMemo } from 'react'
+import React, { useMemo, useState } from 'react'
 import Image from 'next/image'
 import { 
   Package, 
@@ -19,14 +19,28 @@ import {
   Star,
   Clock,
   FileText,
-  Car
+  Car,
+  X,
+  BadgeCheck,
+  CalendarClock,
+  Hash
 } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
 import { useCollection, useFirestore, useMemoFirebase, useDoc } from '@/firebase'
 import { collection, query, orderBy, doc } from 'firebase/firestore'
 import { cn } from '@/lib/utils'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogClose,
+} from "@/components/ui/dialog"
+import { PlaceHolderImages } from '@/lib/placeholder-images'
 
 const INITIAL_KIT_ITEMS = [
   { id: 'identityCard', label: 'Identity Card' },
@@ -50,7 +64,8 @@ const INITIAL_ELIGIBILITY: Record<string, string[]> = {
 };
 
 export default function PublicKitManagementPage() {
-  const [search, setSearch] = React.useState('')
+  const [search, setSearch] = useState('')
+  const [selectedMemberDetail, setSelectedMemberDetail] = useState<any>(null)
   const db = useFirestore()
 
   const configDocRef = useMemoFirebase(() => {
@@ -160,7 +175,14 @@ export default function PublicKitManagementPage() {
     const isOfficeBearer = category === 'Office-bearing Member';
 
     return (
-      <Card key={m.id} className="border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 relative group">
+      <Card 
+        key={m.id} 
+        onClick={() => setSelectedMemberDetail(m)}
+        className={cn(
+          "border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 relative group cursor-pointer transition-all hover:scale-[1.01]",
+          selectedMemberDetail?.id === m.id && "ring-2 ring-accent"
+        )}
+      >
         <CardContent className="p-0">
           <div className="flex flex-col md:flex-row items-stretch">
              <div className="p-5 bg-slate-50 dark:bg-slate-800 md:w-44 text-center border-r border-slate-100 dark:border-slate-700 flex flex-col items-center justify-center shrink-0">
@@ -204,7 +226,7 @@ export default function PublicKitManagementPage() {
                         </span>
                       )}
                       {kit?.notes && (
-                        <span className="flex items-center gap-1.5 text-slate-400 italic normal-case font-medium max-w-[200px] truncate">
+                        <span className="flex items-center gap-1.5 text-slate-400 italic font-medium max-w-[200px] truncate normal-case">
                           <FileText className="w-3 h-3" /> {kit.notes}
                         </span>
                       )}
@@ -345,7 +367,7 @@ export default function PublicKitManagementPage() {
               
               <div className="bg-white/60 dark:bg-slate-900/60 p-4 rounded-2xl border border-blue-100 dark:border-blue-900/30 text-center max-w-2xl mx-auto shadow-sm mb-12">
                 <p className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest">Verified Institutional Logistics Node</p>
-                <p className="text-[8px] text-slate-400 mt-1 uppercase">Read-only transparency feed synchronized with the National Registry.</p>
+                <p className="text-[8px] text-slate-400 mt-1 uppercase">Read-only transparency feed synchronized with the National Registry. Click a member for full details.</p>
               </div>
 
               {groupings.central.length > 0 && (
@@ -394,6 +416,145 @@ export default function PublicKitManagementPage() {
           )}
         </div>
       </section>
+
+      {/* DETAILED LOGISTICS MODAL */}
+      <Dialog open={!!selectedMemberDetail} onOpenChange={(val) => !val && setSelectedMemberDetail(null)}>
+        <DialogContent className="max-w-4xl p-0 border-none shadow-2xl rounded-[2.5rem] overflow-hidden bg-white dark:bg-slate-950 flex flex-col [&>button]:hidden max-h-[90vh]">
+          <DialogHeader className="sr-only">
+             <DialogTitle>Member Logistics Detail: {selectedMemberDetail?.name}</DialogTitle>
+             <DialogDescription>Institutional record of issued assets and credentials.</DialogDescription>
+          </DialogHeader>
+          <div className="absolute right-6 top-6 z-50">
+            <DialogClose asChild>
+              <Button variant="ghost" size="icon" className="rounded-full bg-blue-600 hover:bg-blue-500 text-white h-10 w-10 shadow-xl transition-all hover:scale-110 active:scale-95 duration-300">
+                <X className="w-6 h-6 text-white" />
+              </Button>
+            </DialogClose>
+          </div>
+
+          {selectedMemberDetail && (
+            <div className="flex-1 overflow-y-auto custom-scrollbar">
+               <div className="flex flex-col">
+                  {/* High-Fidelity Header */}
+                  <div className="relative bg-slate-900 p-12 md:p-16 text-white overflow-hidden border-b-8 border-accent/20">
+                    <div className="absolute top-0 right-0 opacity-10 pointer-events-none transform translate-x-12 translate-y-[-20px]"><ShieldCheck className="w-64 h-64 md:w-96 md:h-96" /></div>
+                    <div className="relative z-10 flex flex-col md:flex-row items-center gap-8">
+                       <div className="relative w-32 h-32 md:w-40 md:h-40 rounded-[2rem] overflow-hidden border-4 border-white/20 shadow-2xl bg-slate-800">
+                          <Image 
+                            src={selectedMemberDetail.imageId?.startsWith('data:') ? selectedMemberDetail.imageId : (PlaceHolderImages.find(i => i.id === selectedMemberDetail.imageId)?.imageUrl || (selectedMemberDetail.gender?.toLowerCase() === 'female' ? '/dummy w.png' : '/dummy m.png'))} 
+                            alt={selectedMemberDetail.name} 
+                            fill 
+                            className="object-cover" 
+                          />
+                       </div>
+                       <div className="space-y-3 text-center md:text-left">
+                          <div className="inline-flex items-center gap-2 bg-accent/20 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/20">
+                            <BadgeCheck className="w-4 h-4 text-accent" />
+                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-accent">{selectedMemberDetail.designationCategory || "Member"} Profile</span>
+                          </div>
+                          <h2 className="text-4xl md:text-6xl font-headline font-bold drop-shadow-xl">{selectedMemberDetail.name}</h2>
+                          <div className="flex items-center gap-4 justify-center md:justify-start">
+                             <p className="text-white/60 font-bold uppercase tracking-widest text-xs flex items-center gap-2">
+                                <Hash className="w-3.5 h-3.5 text-accent" /> ID: {selectedMemberDetail.memberId}
+                             </p>
+                             <Badge className="bg-emerald-500 text-white font-black text-[8px] h-5 px-3">VERIFIED ACTIVE</Badge>
+                          </div>
+                       </div>
+                    </div>
+                  </div>
+
+                  <div className="p-8 md:p-16 space-y-12 pb-24">
+                     {/* Logistics Grid */}
+                     <div className="grid md:grid-cols-2 gap-12">
+                        {/* Issued Items Checklist */}
+                        <div className="space-y-6">
+                           <h4 className="text-[10px] font-black uppercase tracking-widest text-accent flex items-center gap-2"><Package className="w-4 h-4" /> Item Issuance Checklist</h4>
+                           <div className="grid grid-cols-1 gap-2">
+                              {kitItems.filter((item: any) => (eligibilityRules[selectedMemberDetail.designationCategory || "General Member"] || []).includes(item.id)).map((item: any) => {
+                                const isIssued = kitMap[selectedMemberDetail.id]?.items?.[item.id];
+                                return (
+                                  <div key={item.id} className={cn(
+                                    "flex items-center gap-3 p-4 rounded-2xl border transition-all shadow-sm",
+                                    isIssued ? "bg-emerald-50 dark:bg-emerald-950/20 border-emerald-100 dark:border-emerald-900" : "bg-slate-50 dark:bg-slate-900 border-slate-100 dark:border-slate-800"
+                                  )}>
+                                     {isIssued ? (
+                                       <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
+                                     ) : (
+                                       <div className="w-5 h-5 rounded-full border-2 border-slate-200 dark:border-slate-700 shrink-0" />
+                                     )}
+                                     <span className={cn(
+                                       "text-sm font-bold uppercase tracking-tight",
+                                       isIssued ? "text-emerald-700 dark:text-emerald-400" : "text-slate-400"
+                                     )}>{item.label}</span>
+                                  </div>
+                                )
+                              })}
+                           </div>
+                        </div>
+
+                        {/* Jurisdictional & Metadata Info */}
+                        <div className="space-y-10">
+                           <div className="space-y-4">
+                              <h4 className="text-[10px] font-black uppercase tracking-widest text-indigo-500 flex items-center gap-2"><Globe className="w-4 h-4" /> Jurisdictional Scope</h4>
+                              <div className="p-6 bg-slate-50 dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 space-y-4">
+                                 <div>
+                                    <p className="text-[8px] font-bold text-slate-400 uppercase mb-1">Operational Level</p>
+                                    <p className="text-sm font-bold text-primary dark:text-white uppercase">{selectedMemberDetail.level} Council</p>
+                                 </div>
+                                 <div className="h-px bg-slate-200 dark:bg-slate-800"></div>
+                                 <div>
+                                    <p className="text-[8px] font-bold text-slate-400 uppercase mb-1">Assigned Region</p>
+                                    <p className="text-sm font-bold text-primary dark:text-white uppercase">
+                                       {selectedMemberDetail.districtName ? `${selectedMemberDetail.districtName}, ` : ''}{selectedMemberDetail.stateName || 'National Center'}
+                                    </p>
+                                 </div>
+                              </div>
+                           </div>
+
+                           <div className="space-y-4">
+                              <h4 className="text-[10px] font-black uppercase tracking-widest text-emerald-500 flex items-center gap-2"><CalendarClock className="w-4 h-4" /> Membership Term</h4>
+                              <div className="p-6 bg-slate-50 dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 space-y-4">
+                                 <div className="grid grid-cols-2 gap-4">
+                                    <div><p className="text-[8px] font-bold text-slate-400 uppercase mb-1">Issue Date</p><p className="text-xs font-bold">{selectedMemberDetail.joiningDate || 'Verified'}</p></div>
+                                    <div><p className="text-[8px] font-bold text-slate-400 uppercase mb-1">Expiry Date</p><p className="text-xs font-bold text-red-500">{selectedMemberDetail.expiryDate || 'N/A'}</p></div>
+                                 </div>
+                                 <div className="h-px bg-slate-200 dark:bg-slate-800"></div>
+                                 <div><p className="text-[8px] font-bold text-slate-400 uppercase mb-1">Term Duration</p><p className="text-xs font-bold text-indigo-500">{selectedMemberDetail.membershipDuration || '1 Year'}</p></div>
+                              </div>
+                           </div>
+
+                           {kitMap[selectedMemberDetail.id]?.notes && (
+                              <div className="space-y-4">
+                                 <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-2"><FileText className="w-4 h-4" /> Registry Notes</h4>
+                                 <div className="p-6 bg-amber-50/30 dark:bg-amber-950/20 rounded-3xl border border-amber-100 dark:border-amber-900/50">
+                                    <p className="text-sm italic text-amber-900 dark:text-amber-400 leading-relaxed">
+                                       "{kitMap[selectedMemberDetail.id].notes}"
+                                    </p>
+                                 </div>
+                              </div>
+                           )}
+                        </div>
+                     </div>
+
+                     {/* Footer Mandate */}
+                     <div className="pt-12 border-t border-slate-100 dark:border-slate-800 text-center space-y-4">
+                        <Button 
+                          size="lg" 
+                          onClick={() => setSelectedMemberDetail(null)}
+                          className="w-full bg-primary text-white font-bold h-16 rounded-2xl text-lg hover:bg-secondary transition-all shadow-xl shadow-primary/20"
+                        >
+                          Close Detail Registry
+                        </Button>
+                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.4em]">
+                           Verified Institutional Logistics Feed • Human Rights Affairs Trust
+                        </p>
+                     </div>
+                  </div>
+               </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </main>
   )
 }
