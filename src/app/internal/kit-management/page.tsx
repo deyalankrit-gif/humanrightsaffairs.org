@@ -33,7 +33,9 @@ import {
   Settings2,
   Plus,
   Users,
-  Star
+  Star,
+  Edit,
+  Trash2
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
@@ -84,6 +86,8 @@ export default function MemberKitManagement() {
   // DYNAMIC KIT REGISTRY
   const [kitItems, setKitItems] = useState(INITIAL_KIT_ITEMS)
   const [newItemLabel, setNewItemLabel] = useState('')
+  const [editingItemId, setEditingItemId] = useState<string | null>(null)
+  const [editingItemLabel, setEditingItemLabel] = useState('')
 
   // ELIGIBILITY STATE
   const [eligibilityRules, setEligibilityRules] = useState<Record<string, string[]>>({
@@ -177,6 +181,34 @@ export default function MemberKitManagement() {
     setKitItems(prev => [...prev, newItem])
     setNewItemLabel('')
     toast({ title: "Item Created", description: `${newItem.label} added to logistical scope.` })
+  }
+
+  const handleStartEditItem = (item: {id: string, label: string}) => {
+    setEditingItemId(item.id)
+    setEditingItemLabel(item.label)
+  }
+
+  const handleSaveEditItem = () => {
+    if (!editingItemId || !editingItemLabel.trim()) return
+    setKitItems(prev => prev.map(item => 
+      item.id === editingItemId ? { ...item, label: editingItemLabel.trim() } : item
+    ))
+    setEditingItemId(null)
+    setEditingItemLabel('')
+    toast({ title: "Item Updated", description: "Registry label modified successfully." })
+  }
+
+  const handleDeleteKitItem = (id: string) => {
+    setKitItems(prev => prev.filter(item => item.id !== id))
+    // Cleanup eligibility rules
+    const newRules = { ...eligibilityRules }
+    MEMBER_CATEGORIES.forEach(cat => {
+      if (newRules[cat]) {
+        newRules[cat] = newRules[cat].filter(itemId => itemId !== id)
+      }
+    })
+    setEligibilityRules(newRules)
+    toast({ title: "Item Purged", description: "Item removed from global registry and all eligibility lists." })
   }
 
   const filteredMembers = (members || []).filter(m => {
@@ -365,23 +397,72 @@ export default function MemberKitManagement() {
                     </DialogHeader>
                     
                     <div className="py-6 space-y-8">
-                       {/* ITEM CREATION FACILITY */}
-                       <div className="p-6 bg-slate-50 dark:bg-slate-900 rounded-3xl border-2 border-dashed border-slate-200 dark:border-slate-800 space-y-4">
-                          <div className="flex items-center gap-2">
-                             <Plus className="w-4 h-4 text-accent" />
-                             <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-500">Create New Institutional Item</h4>
+                       {/* ITEM CREATION & MANAGEMENT FACILITY */}
+                       <div className="p-6 bg-slate-50 dark:bg-slate-900 rounded-3xl border-2 border-dashed border-slate-200 dark:border-slate-800 space-y-6">
+                          <div className="space-y-4">
+                            <div className="flex items-center gap-2">
+                               <Plus className="w-4 h-4 text-accent" />
+                               <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+                                 {editingItemId ? "Update Institutional Item" : "Create New Institutional Item"}
+                               </h4>
+                            </div>
+                            <div className="flex gap-3">
+                               <Input 
+                                  placeholder="e.g. Official Blazer, ID Case" 
+                                  value={editingItemId ? editingItemLabel : newItemLabel}
+                                  onChange={e => editingItemId ? setEditingItemLabel(e.target.value) : setNewItemLabel(e.target.value)}
+                                  className="h-11 rounded-xl bg-white dark:bg-slate-950"
+                                  onKeyDown={e => {
+                                    if (e.key === 'Enter') {
+                                      editingItemId ? handleSaveEditItem() : handleCreateKitItem();
+                                    }
+                                  }}
+                               />
+                               {editingItemId ? (
+                                 <div className="flex gap-2">
+                                   <Button onClick={handleSaveEditItem} className="h-11 px-6 rounded-xl font-bold bg-emerald-600 text-white hover:bg-emerald-700">
+                                      Save
+                                   </Button>
+                                   <Button onClick={() => setEditingItemId(null)} variant="ghost" className="h-11 px-4 rounded-xl font-bold text-slate-500">
+                                      Cancel
+                                   </Button>
+                                 </div>
+                               ) : (
+                                 <Button onClick={handleCreateKitItem} className="h-11 px-6 rounded-xl font-bold bg-accent text-primary hover:bg-secondary hover:text-white transition-all">
+                                    Establish Item
+                                 </Button>
+                               )}
+                            </div>
                           </div>
-                          <div className="flex gap-3">
-                             <Input 
-                                placeholder="e.g. Official Blazer, ID Case" 
-                                value={newItemLabel}
-                                onChange={e => setNewItemLabel(e.target.value)}
-                                className="h-11 rounded-xl bg-white dark:bg-slate-950"
-                                onKeyDown={e => e.key === 'Enter' && handleCreateKitItem()}
-                             />
-                             <Button onClick={handleCreateKitItem} className="h-11 px-6 rounded-xl font-bold bg-accent text-primary hover:bg-secondary hover:text-white transition-all">
-                                Establish Item
-                             </Button>
+
+                          {/* GLOBAL ITEM LIST WITH ACTIONS */}
+                          <div className="space-y-3">
+                            <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">Global Item Registry</p>
+                            <div className="flex flex-wrap gap-2">
+                               {kitItems.map(item => (
+                                 <div key={item.id} className="flex items-center gap-2 bg-white dark:bg-slate-950 border border-slate-100 dark:border-slate-800 pl-4 pr-1 py-1 rounded-xl group hover:border-accent/40 transition-all">
+                                    <span className="text-[10px] font-bold text-primary dark:text-white">{item.label}</span>
+                                    <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                       <Button 
+                                         variant="ghost" 
+                                         size="icon" 
+                                         onClick={() => handleStartEditItem(item)}
+                                         className="h-7 w-7 rounded-lg text-slate-400 hover:text-blue-500"
+                                       >
+                                         <Edit className="w-3 h-3" />
+                                       </Button>
+                                       <Button 
+                                         variant="ghost" 
+                                         size="icon" 
+                                         onClick={() => handleDeleteKitItem(item.id)}
+                                         className="h-7 w-7 rounded-lg text-slate-400 hover:text-red-500"
+                                       >
+                                         <Trash2 className="w-3 h-3" />
+                                       </Button>
+                                    </div>
+                                 </div>
+                               ))}
+                            </div>
                           </div>
                        </div>
 
@@ -403,7 +484,7 @@ export default function MemberKitManagement() {
                                     )}
                                    >
                                       <Checkbox checked={isEligible} onCheckedChange={() => toggleEligibility(category, item.id)} className="border-accent" />
-                                      <span className="text-[10px] uppercase">{item.label}</span>
+                                      <span className="text-[10px] uppercase truncate">{item.label}</span>
                                    </div>
                                  )
                                })}
