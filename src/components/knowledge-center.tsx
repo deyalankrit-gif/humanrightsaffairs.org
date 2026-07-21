@@ -33,7 +33,12 @@ import {
 } from "@/components/ui/dialog"
 import { cn } from '@/lib/utils'
 
-const JUVENILE_JUSTICE_DETAILS: Record<string, { title: string, content: string, mandate: string }> = {
+/**
+ * GUIDE_SUB_DETAILS: A comprehensive registry of in-depth legal analysis for every focus area
+ * in the Knowledge Hub. Renamed from JUVENILE_JUSTICE_DETAILS to reflect its global scope.
+ */
+const GUIDE_SUB_DETAILS: Record<string, { title: string, content: string, mandate: string }> = {
+  // Juvenile Justice
   "Child Welfare Committees": {
     title: "Child Welfare Committees (CWC)",
     content: "The Child Welfare Committee is a statutory body established in every district under the JJ Act. It consists of a Chairperson and four members, including at least one woman. They are the final authority in matters relating to children in need of care and protection, having the same powers as a Metropolitan Magistrate.",
@@ -53,6 +58,204 @@ const JUVENILE_JUSTICE_DETAILS: Record<string, { title: string, content: string,
     title: "Legal Adoption Framework",
     content: "The Act provides a comprehensive framework for adoption, governed by the Central Adoption Resource Authority (CARA). It ensures that adoption is always in the best interest of the child and maintains strict transparency to prevent illegal trafficking or exploitation.",
     mandate: "Securing every child's right to a stable family through a legally verified, child-centric, and ethically monitored adoption process."
+  },
+
+  // Constitution of India
+  "Fundamental Rights (Articles 12-35)": {
+    title: "Fundamental Rights (Part III)",
+    content: "Articles 12 to 35 of the Indian Constitution define the fundamental rights of citizens. These include equality before the law, freedom of speech and expression, protection of life and personal liberty (Article 21), and the right to constitutional remedies. These rights are justiceable and enforceable by the courts.",
+    mandate: "Protecting individual liberties against state encroachment and ensuring the dignity of every citizen."
+  },
+  "Directive Principles of State Policy": {
+    title: "Directive Principles (Part IV)",
+    content: "The Directive Principles of State Policy (DPSP) are guidelines for the framing of laws by the government. Although not justiceable in court, they are fundamental in the governance of the country, aiming to create a social and economic democracy based on welfare and equity.",
+    mandate: "Directing the State to establish a just social order where wealth is distributed and the environment is protected."
+  },
+  "Fundamental Duties of Citizens": {
+    title: "Fundamental Duties (Part IV-A)",
+    content: "Added by the 42nd Amendment, these duties remind citizens that while they enjoy rights, they also have obligations towards the nation, such as respecting the national flag, protecting public property, and promoting a spirit of common brotherhood.",
+    mandate: "Promoting a sense of responsibility and patriotism among citizens to maintain national integrity and social harmony."
+  },
+  "Independence of the Judiciary": {
+    title: "Judicial Independence",
+    content: "The Constitution ensures that the judiciary remains independent of the executive and legislative branches. This is achieved through secure tenure for judges, fixed salaries, and the power of judicial review to strike down unconstitutional laws or state actions.",
+    mandate: "Maintaining the rule of law and ensuring a robust checks-and-balances system within the Indian democracy."
+  },
+
+  // Women's Rights
+  "Domestic Violence Act, 2005": {
+    title: "Protection of Women from Domestic Violence Act",
+    content: "This Act provides a civil remedy for women who are victims of violence within the household. It covers physical, sexual, verbal, emotional, and economic abuse, granting protection orders and residence orders to victims immediately.",
+    mandate: "Ensuring a life free from violence within the domestic sphere through rapid judicial protection and compensation."
+  },
+  "POSH Act, 2013": {
+    title: "Sexual Harassment at Workplace Act",
+    content: "The POSH Act mandates every employer to provide a safe working environment for women. It requires the establishment of Internal Committees (IC) to address complaints and promotes a zero-tolerance policy toward workplace harassment.",
+    mandate: "Fostering professional environments where women can work with dignity, equity, and absolute security."
+  },
+  "Maternity Benefit Rights": {
+    title: "Maternity Benefit Act",
+    content: "This law regulates the employment of women in certain establishments for specific periods before and after childbirth. It provides for paid maternity leave and other essential benefits to ensure the health of the mother and child.",
+    mandate: "Supporting maternal health and job security during the critical period of childbirth and early childcare."
+  },
+  "Right to Equal Pay": {
+    title: "Equal Remuneration Act",
+    content: "The principle of equal pay for equal work is a constitutional mandate. This Act prevents discrimination between men and women in recruitment and ensures equal wages for work of the same nature or similar skill requirements.",
+    mandate: "Eliminating gender-based economic disparity and promoting fair labor practices in the national workforce."
+  },
+  
+  // Labor Laws
+  "Minimum Wages Compliance": {
+    title: "Minimum Wages Act",
+    content: "This Act ensures that workers are paid a baseline wage that meets their essential needs. It prevents the exploitation of labor in scheduled employments and requires periodic revision of wage rates based on inflation and the cost of living.",
+    mandate: "Securing a dignified standard of living for the labor force through mandatory, non-negotiable wage floors."
+  },
+  "Industrial Disputes Rights": {
+    title: "Industrial Disputes Act",
+    content: "This framework provides for the investigation and settlement of industrial disputes. It regulates layoffs, retrenchment, and closures, ensuring that workers are not arbitrarily dismissed without due process or fair compensation.",
+    mandate: "Balancing industrial peace with the protection of workers' livelihoods and professional rights."
+  },
+  "Social Security Benefits": {
+    title: "ESI & Provident Fund (EPF)",
+    content: "Social security laws like the ESI Act and EPF Act provide financial support during sickness, disablement, or retirement. They create a vital safety net for workers and their families against life's uncertainties and old age.",
+    mandate: "Building long-term financial resilience and healthcare access for the marginalized working class."
+  },
+  "Workplace Safety Norms": {
+    title: "Factories Act & Occupational Safety",
+    content: "This legislation mandates strict health, safety, and welfare measures in factories. It covers ventilation, lighting, machinery guarding, and restricted working hours to prevent industrial accidents and occupational diseases.",
+    mandate: "Ensuring that 'Right to Life' under Article 21 includes the right to a safe and hazard-free industrial workplace."
+  },
+
+  // RTI
+  "Filing Procedure Guide": {
+    title: "How to File an RTI",
+    content: "Filing an RTI involves identifying the Public Authority, drafting a specific query, and paying the nominal fee (₹10). The application can be submitted online or via registered post. Accuracy in identifying the PIO is key to a timely response.",
+    mandate: "Simplifying the process for citizens to demand transparency and accountability from public institutions."
+  },
+  "Drafting Applications": {
+    title: "RTI Drafting Standards",
+    content: "While no specific format is required, a well-drafted RTI is clear and concise. It should ask for specific records or documents (Certified Copies) rather than vague explanations, ensuring higher success in information retrieval.",
+    mandate: "Enabling precision in citizen inquiries to minimize bureaucratic evasiveness and delays."
+  },
+  "Appellate Authority Info": {
+    title: "The RTI Appeals Process",
+    content: "If info is denied, the first appeal goes to a senior officer (FAA) within 30 days. If still unsatisfied, a second appeal is filed with the Information Commission (CIC/SIC). This multi-level scrutiny protects the citizen's right to know.",
+    mandate: "Providing a robust grievance redressal mechanism against administrative information suppression."
+  },
+  "Tracking Status Guidelines": {
+    title: "Tracking & Follow-up Protocol",
+    content: "Citizens must monitor the 30-day statutory timeline. Use the RTI Online dashboard or speed post tracking. Persistence in follow-up is necessary to hold defaulting officers accountable and invoke penalty provisions.",
+    mandate: "Ensuring strict adherence to statutory timelines for meaningful public accountability."
+  },
+
+  // Child Labor
+  "Prohibition of Child Labor": {
+    title: "Complete Prohibition (Under 14)",
+    content: "The law prohibits the employment of children below 14 years in all occupations and processes. This is a fundamental safeguard against exploitation, prioritizing the child's right to education over labor.",
+    mandate: "Universal protection of childhood innocence and the non-negotiable right to primary education."
+  },
+  "Regulation of Adolescent Work": {
+    title: "Adolescent Safety (14-18)",
+    content: "Work for adolescents (14-18 years) is strictly prohibited in hazardous occupations like mining or explosive manufacturing. In other areas, it is regulated to ensure health and education are not compromised.",
+    mandate: "Preventing physical and developmental harm to young workers in dangerous industries."
+  },
+  "Rehabilitation Provisions": {
+    title: "Rescue & Social Re-integration",
+    content: "Rescued children are provided with social security, bridge education, and vocational training. The law mandates the creation of a 'Child Labour Rehabilitation Fund' for their long-term welfare and education.",
+    mandate: "Restoring the rights of exploited children through holistic social and economic support."
+  },
+  "Penalties for Violations": {
+    title: "Strict Statutory Penalties",
+    content: "Employing a child in violation of the Act is a cognizable offence. Penalties include significant imprisonment and heavy fines, which are utilized directly for the welfare of the rescued children.",
+    mandate: "Creating a powerful legal deterrent against the inhuman exploitation of children for profit."
+  },
+
+  // Speech
+  "Right to Expression": {
+    title: "Article 19(1)(a) Foundations",
+    content: "The right to freedom of speech and expression includes the right to propagate one's views as well as the views of others. It covers speech, writing, printing, and digital broadcasting as fundamental tools of democracy.",
+    mandate: "Upholding the primary pillar of a free, transparent, and democratic Indian society."
+  },
+  "Press Freedom": {
+    title: "Media Rights & Oversight",
+    content: "Press freedom is implied under Article 19. It protects journalists from arbitrary censorship and allows the media to act as the watchdog of democracy, reporting on the actions of the state without fear.",
+    mandate: "Protecting the 'Fourth Estate' to ensure institutional transparency and public awareness."
+  },
+  "Internet Rights": {
+    title: "Access to Digital Rights",
+    content: "The Supreme Court has recognized that access to the internet is part of fundamental rights under Article 19. Arbitrary internet shutdowns are subject to judicial review to prevent the silencing of citizen voices.",
+    mandate: "Safeguarding the right to information and digital expression in the modern age."
+  },
+  "Reasonable Restrictions": {
+    title: "Constraints of Article 19(2)",
+    content: "Speech is not absolute. It can be restricted in the interest of national security, public order, decency, morality, or to prevent defamation and contempt of court as per constitutional guidelines.",
+    mandate: "Balancing individual freedom with the collective security, sovereignty, and harmony of the nation."
+  },
+
+  // Privacy
+  "Informational Privacy": {
+    title: "Right to Data Control",
+    content: "Individuals have the right to control how their personal data is collected and processed. This includes the 'Right to be Forgotten' and the right to correct inaccurate digital records in state databases.",
+    mandate: "Preventing digital profiling and unauthorized commercial exploitation of an individual's personal life."
+  },
+  "Data Protection Rights": {
+    title: "Privacy against Surveillance",
+    content: "The right to privacy includes protection against state or private surveillance. Any access to personal communications must have a clear legal mandate, valid reason, and judicial oversight.",
+    mandate: "Securing the sanctity of personal information and private life against state overreach."
+  },
+  "Bodily Autonomy": {
+    title: "Right to Physical Integrity",
+    content: "Privacy includes the right to make choices about one's own body, including medical decisions and reproductive rights, free from coerced interference or state-mandated procedures.",
+    mandate: "Upholding individual dignity through the absolute right to bodily self-determination and physical privacy."
+  },
+  "Digital Privacy Laws": {
+    title: "IT Act & Personal Privacy",
+    content: "The Information Technology Act and associated rules provide a framework for addressing cybercrimes and protecting sensitive personal data held by corporate or state entities in the digital domain.",
+    mandate: "Regulating the digital ecosystem to prevent data breaches, cyber-harassment, and privacy violations."
+  },
+
+  // Traffic
+  "Motor Vehicles Act (1988/2019)": {
+    title: "Road Transport Framework",
+    content: "The Motor Vehicles Act is the primary legislation for road transport in India. The 2019 amendment significantly increased penalties for violations to promote stricter adherence to road safety standards.",
+    mandate: "Codifying the rules of the road to ensure the 'Right to Life' (Article 21) for every Indian commuter."
+  },
+  "Traffic Rules & Violations": {
+    title: "Road Safety Compliance",
+    content: "Mandatory adherence to signals, speed limits, and lane discipline. Violations like drink-driving, over-speeding, and using mobile phones while driving are strictly penalized to prevent fatal accidents.",
+    mandate: "Minimizing road fatalities through behavioral regulation, education, and strict legal enforcement."
+  },
+  "Driving License Procedures": {
+    title: "Credentialing & Standards",
+    content: "Obtaining a license involves rigorous testing of driving skills and traffic knowledge. Licenses are subject to periodic renewal and mandatory medical fitness checks for commercial operators.",
+    mandate: "Ensuring that only qualified and physically fit individuals are authorized to operate vehicles on public roads."
+  },
+  "Penalty & Fine Structures": {
+    title: "Deterrence & Adjudication",
+    content: "Penalties are designed to be significant deterrents. Serious offences can lead to license suspension, vehicle impoundment, or imprisonment, emphasizing the zero-tolerance policy toward road safety negligence.",
+    mandate: "Leveraging legal consequences to enforce a culture of safety, discipline, and responsibility on Indian roads."
+  },
+
+  // Manuals
+  "Hindi Language Editions": {
+    title: "Regional Manual: Hindi",
+    content: "Our Hindi language manuals provide a simplified breakdown of the Bharatiya Nyaya Sanhita (BNS) and Bharatiya Nagarik Suraksha Sanhita (BNSS). They are designed for rural outreach and community training camps.",
+    mandate: "Bridging the language gap to ensure constitutional literacy in the Hindi heartland."
+  },
+  "Bengali Language Editions": {
+    title: "Regional Manual: Bengali",
+    content: "Focused on West Bengal and surrounding regions, these manuals translate complex legal procedures into standard Bengali. They are highly effective for local village-level advocacy sessions.",
+    mandate: "Empowering the people of Bengal with knowledge of their rights in their native tongue."
+  },
+  "English Quick-Start Guides": {
+    title: "Standard English Handbooks",
+    content: "Concise handbooks for professionals and students. They provide immediate reference points for arrest procedures, filing complaints, and understanding the hierarchy of courts.",
+    mandate: "Providing rapid-access legal knowledge for urban and professional sectors."
+  },
+  "Interactive Case Studies": {
+    title: "Learning thru Precedents",
+    content: "Practical examples of how human rights were successfully defended in real-life scenarios. These cases help volunteers understand the application of law in ground-level missions.",
+    mandate: "Transforming theoretical law into practical mission strategy for our members."
   }
 };
 
@@ -210,7 +413,7 @@ export function KnowledgeCenter() {
     window.open(url, "_blank", "noopener,noreferrer");
   };
 
-  const activeSubDetailData = subDetail ? JUVENILE_JUSTICE_DETAILS[subDetail] : null;
+  const activeSubDetailData = subDetail ? GUIDE_SUB_DETAILS[subDetail] : null;
 
   return (
     <section id="knowledge" className="py-16 md:py-24 bg-slate-50 dark:bg-slate-900">
@@ -373,7 +576,7 @@ export function KnowledgeCenter() {
                             </h4>
                             <ul className="space-y-4">
                               {selectedGuide.features.map((feature, idx) => {
-                                const isClickable = selectedGuide.id === 'juvenile-justice' && JUVENILE_JUSTICE_DETAILS[feature];
+                                const isClickable = GUIDE_SUB_DETAILS[feature];
                                 return (
                                   <li 
                                     key={idx} 
@@ -395,9 +598,7 @@ export function KnowledgeCenter() {
                                 )
                               })}
                             </ul>
-                            {selectedGuide.id === 'juvenile-justice' && (
-                              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest text-center animate-pulse">Click on a focus area to examine details</p>
-                            )}
+                            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest text-center animate-pulse">Click on a focus area to examine details</p>
                          </div>
 
                          <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-700">
