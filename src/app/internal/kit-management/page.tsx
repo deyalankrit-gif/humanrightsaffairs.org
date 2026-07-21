@@ -134,12 +134,13 @@ export default function MemberKitManagement() {
     return query(collection(db, 'memberProfiles'), orderBy('name', 'asc'));
   }, [db, user]);
 
+  const { data: members, loading: membersLoading } = useCollection(membersQuery);
+
   const kitsQuery = useMemoFirebase(() => {
     if (!db || !user) return null;
     return query(collection(db, 'member_kits'));
   }, [db, user]);
 
-  const { data: members, loading: membersLoading } = useCollection(membersQuery);
   const { data: kits, loading: kitsLoading } = useCollection(kitsQuery);
 
   const kitMap = useMemo(() => {
@@ -401,7 +402,7 @@ export default function MemberKitManagement() {
                         </div>
                       ))}
                    </div>
-                   <ChevronRight className="w-4 h-4 text-slate-300 group-hover:translate-x-1 transition-transform shrink-0" />
+                   <ChevronRight className="w-4 h-4 text-slate-950 dark:text-white stroke-[3px] group-hover:translate-x-1 transition-transform shrink-0" />
                 </div>
              </div>
           </div>

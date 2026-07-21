@@ -212,6 +212,7 @@ export default function PublicKitManagementPage() {
                         </div>
                       ))}
                    </div>
+                   <ChevronRight className="w-4 h-4 text-slate-950 dark:text-white stroke-[3px] group-hover:translate-x-1 transition-transform shrink-0" />
                 </div>
              </div>
           </div>
