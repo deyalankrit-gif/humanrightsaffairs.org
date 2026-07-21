@@ -19,15 +19,9 @@ import {
   Loader2, 
   ShieldCheck, 
   UserCheck, 
-  Calendar as CalendarIcon, 
   CheckCircle2, 
-  Clock, 
-  Hash, 
   Archive,
-  ArrowRight,
-  Filter,
   Save,
-  Info,
   MapPin,
   ChevronRight,
   X,
@@ -218,6 +212,7 @@ export default function MemberKitManagement() {
                    </div>
                 </div>
                 <div className="flex items-center gap-6">
+                   {/* KIT INDICATORS - WRAPPED AND SPACED */}
                    <div className="flex flex-wrap gap-1.5 justify-end max-w-[160px] md:max-w-[200px]">
                       {KIT_ITEMS.map(item => (
                         <div 
@@ -461,8 +456,6 @@ export default function MemberKitManagement() {
           )}
         </div>
       </section>
-
-      <Footer />
     </main>
   )
 }
