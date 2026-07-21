@@ -16,7 +16,10 @@ import {
   Shield, 
   MessageCircle, 
   EyeOff,
-  Navigation
+  Navigation,
+  ChevronRight,
+  ArrowLeft,
+  BookOpenCheck
 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -28,6 +31,30 @@ import {
   DialogClose,
   DialogDescription,
 } from "@/components/ui/dialog"
+import { cn } from '@/lib/utils'
+
+const JUVENILE_JUSTICE_DETAILS: Record<string, { title: string, content: string, mandate: string }> = {
+  "Child Welfare Committees": {
+    title: "Child Welfare Committees (CWC)",
+    content: "The Child Welfare Committee is a statutory body established in every district under the JJ Act. It consists of a Chairperson and four members, including at least one woman. They are the final authority in matters relating to children in need of care and protection, having the same powers as a Metropolitan Magistrate.",
+    mandate: "Ensuring the safety, well-being, and legal representation of abandoned, orphaned, or abused children through district-level judicial oversight."
+  },
+  "Juvenile Rehabilitation": {
+    title: "Rehabilitation & Social Integration",
+    content: "Rehabilitation is the core philosophy of the Act. It moves away from punishment toward reformation. This includes community-based programs, vocational training, psychological counseling, and family-based care to help children lead a dignified life post-inquiry.",
+    mandate: "Transforming 'conflict with law' into 'contribution to society' through structured education, moral guidance, and skill-building."
+  },
+  "Observation Homes": {
+    title: "Observation & Special Homes",
+    content: "Observation homes provide temporary reception and care for juveniles during the pendency of an inquiry by the Juvenile Justice Board. Special homes are dedicated to the long-term care and rehabilitation of children committed for longer durations, focusing on their growth and safety.",
+    mandate: "Providing a secure, nurturing environment that facilitates physical and mental growth during legal proceedings, far removed from traditional adult prisons."
+  },
+  "Adoption Procedures": {
+    title: "Legal Adoption Framework",
+    content: "The Act provides a comprehensive framework for adoption, governed by the Central Adoption Resource Authority (CARA). It ensures that adoption is always in the best interest of the child and maintains strict transparency to prevent illegal trafficking or exploitation.",
+    mandate: "Securing every child's right to a stable family through a legally verified, child-centric, and ethically monitored adoption process."
+  }
+};
 
 const guides = [
   {
@@ -134,10 +161,12 @@ const guides = [
 
 export function KnowledgeCenter() {
   const [selectedGuide, setSelectedGuide] = useState<typeof guides[0] | null>(null)
+  const [subDetail, setSubDetail] = useState<string | null>(null)
   const [open, setOpen] = useState(false)
 
   const handleOpenDetail = (guide: typeof guides[0]) => {
     setSelectedGuide(guide)
+    setSubDetail(null)
     setOpen(true)
   }
 
@@ -181,6 +210,8 @@ export function KnowledgeCenter() {
     window.open(url, "_blank", "noopener,noreferrer");
   };
 
+  const activeSubDetailData = subDetail ? JUVENILE_JUSTICE_DETAILS[subDetail] : null;
+
   return (
     <section id="knowledge" className="py-16 md:py-24 bg-slate-50 dark:bg-slate-900">
       <div className="container mx-auto px-4">
@@ -206,7 +237,11 @@ export function KnowledgeCenter() {
           {guides.map((guide) => (
             <Card 
               key={guide.id} 
-              className={`p-6 md:p-8 border-none flex flex-col justify-between group overflow-hidden relative shadow-sm hover:shadow-xl transition-all duration-500 ${guide.color} ${guide.size === 'lg' ? 'md:col-span-2' : ''} min-h-[250px]`}
+              className={cn(
+                "p-6 md:p-8 border-none flex flex-col justify-between group overflow-hidden relative shadow-sm hover:shadow-xl transition-all duration-500 min-h-[250px]",
+                guide.color,
+                guide.size === 'lg' ? 'md:col-span-2' : ''
+              )}
             >
               <div className="absolute -right-4 -bottom-4 opacity-5 group-hover:scale-125 transition-transform duration-700 hidden md:block">
                 {React.cloneElement(guide.icon as React.ReactElement, { className: "w-32 h-32 md:w-48 md:h-48" })}
@@ -237,7 +272,7 @@ export function KnowledgeCenter() {
         </div>
       </div>
 
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog open={open} onOpenChange={(val) => { setOpen(val); if(!val) setSubDetail(null); }}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden rounded-[2.5rem] p-0 border-none shadow-2xl bg-white dark:bg-slate-950 flex flex-col [&>button]:hidden">
           <DialogHeader className="sr-only">
             <DialogTitle>{selectedGuide?.title || 'Guide Details'}</DialogTitle>
@@ -264,53 +299,118 @@ export function KnowledgeCenter() {
                     {React.cloneElement(selectedGuide.icon as React.ReactElement, { className: "w-64 h-64 md:w-80 md:h-80" })}
                   </div>
                   <div className="relative z-10 space-y-4">
-                    <div className="inline-flex items-center gap-2 bg-accent/20 backdrop-blur-md px-4 py-1.5 rounded-full border border-accent/30">
+                    <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/30">
                       <ShieldCheck className="w-4 h-4 text-accent" />
                       <span className="text-[10px] font-black uppercase tracking-[0.2em] text-accent">Official Legal Resource</span>
                     </div>
-                    <h2 className="text-4xl md:text-6xl font-headline font-bold leading-tight pr-12">
-                      {selectedGuide.title}
-                    </h2>
-                    <p className="text-xl text-primary-foreground/70 font-medium italic">
-                      {selectedGuide.desc}
-                    </p>
+                    
+                    {subDetail ? (
+                      <div className="animate-in fade-in slide-in-from-left-4 duration-500">
+                        <Button 
+                          variant="ghost" 
+                          onClick={() => setSubDetail(null)}
+                          className="p-0 h-auto text-white/60 hover:text-white font-bold text-xs uppercase tracking-widest gap-2 mb-2 hover:bg-transparent"
+                        >
+                          <ArrowLeft className="w-4 h-4" /> Back to Overview
+                        </Button>
+                        <h2 className="text-3xl md:text-5xl font-headline font-bold leading-tight drop-shadow-lg">
+                          {activeSubDetailData?.title}
+                        </h2>
+                      </div>
+                    ) : (
+                      <h2 className="text-4xl md:text-6xl font-headline font-bold leading-tight pr-12">
+                        {selectedGuide.title}
+                      </h2>
+                    )}
+                    
+                    {!subDetail && (
+                      <p className="text-xl text-primary-foreground/70 font-medium italic">
+                        {selectedGuide.desc}
+                      </p>
+                    )}
                   </div>
                 </div>
 
                 <div className="p-8 md:p-12 space-y-12 pb-24">
-                  <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                    <h3 className="text-xs font-black uppercase tracking-[0.3em] text-accent flex items-center gap-2">
-                       <span className="w-8 h-px bg-accent"></span> Overview
-                    </h3>
-                    <p className="text-xl md:text-2xl text-slate-700 dark:text-slate-300 leading-relaxed font-body font-medium italic border-l-4 border-accent pl-6">
-                      "{selectedGuide.overview}"
-                    </p>
-                  </div>
+                  {subDetail ? (
+                    <div className="space-y-12 animate-in fade-in duration-700">
+                       <div className="space-y-6">
+                         <h3 className="text-xs font-black uppercase tracking-[0.3em] text-accent flex items-center gap-2">
+                           <span className="w-8 h-px bg-accent"></span> Detailed Analysis
+                         </h3>
+                         <p className="text-xl md:text-2xl text-slate-700 dark:text-slate-300 leading-relaxed font-body font-medium italic border-l-4 border-accent pl-6">
+                           "{activeSubDetailData?.content}"
+                         </p>
+                       </div>
 
-                  <div className="grid md:grid-cols-2 gap-12 pt-8 border-t border-slate-100 dark:border-slate-800">
-                     <div className="space-y-6 animate-in fade-in slide-in-from-left-4 duration-700">
-                        <h4 className="text-xs font-black uppercase tracking-[0.3em] text-primary dark:text-white flex items-center gap-2">
-                          <CheckCircle2 className="w-4 h-4 text-emerald-500" /> Key Areas of Focus
-                        </h4>
-                        <ul className="space-y-4">
-                          {selectedGuide.features.map((feature, idx) => (
-                            <li key={idx} className="flex items-center gap-3 bg-slate-50 dark:bg-slate-900 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 group hover:border-accent transition-all shadow-sm">
-                               <span className="w-7 h-7 bg-accent text-primary rounded-full flex items-center justify-center text-[10px] font-bold shadow-md">{idx + 1}</span>
-                               <span className="font-bold text-slate-700 dark:text-slate-200">{feature}</span>
-                            </li>
-                          ))}
-                        </ul>
-                     </div>
+                       <div className="p-8 rounded-[2.5rem] bg-indigo-50 dark:bg-indigo-950/20 border-2 border-indigo-100 dark:border-indigo-900/30 shadow-inner">
+                          <div className="flex items-start gap-4">
+                            <BookOpenCheck className="w-6 h-6 text-indigo-500 mt-1 shrink-0" />
+                            <div className="space-y-2">
+                               <h4 className="font-black uppercase tracking-widest text-[10px] text-indigo-700 dark:text-indigo-400">Institutional Mandate</h4>
+                               <p className="text-sm md:text-lg font-bold text-slate-700 dark:text-slate-200 leading-relaxed">
+                                 {activeSubDetailData?.mandate}
+                               </p>
+                            </div>
+                          </div>
+                       </div>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                        <h3 className="text-xs font-black uppercase tracking-[0.3em] text-accent flex items-center gap-2">
+                           <span className="w-8 h-px bg-accent"></span> Overview
+                        </h3>
+                        <p className="text-xl md:text-2xl text-slate-700 dark:text-slate-300 leading-relaxed font-body font-medium italic border-l-4 border-accent pl-6">
+                          "{selectedGuide.overview}"
+                        </p>
+                      </div>
 
-                     <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-700">
-                        <h4 className="text-xs font-black uppercase tracking-[0.3em] text-primary dark:text-white">Significance</h4>
-                        <div className="p-8 rounded-[2.5rem] bg-indigo-50 dark:bg-indigo-950/20 border border-indigo-100 dark:border-indigo-900/30 shadow-inner">
-                          <p className="text-slate-600 dark:text-slate-400 leading-relaxed italic text-sm md:text-base font-medium">
-                            "The knowledge of these rights is not just informative—it is transformative. By understanding the legal safeguards provided by the State, every citizen becomes a vital part of a just and transparent democracy."
-                          </p>
-                        </div>
-                     </div>
-                  </div>
+                      <div className="grid md:grid-cols-2 gap-12 pt-8 border-t border-slate-100 dark:border-slate-800">
+                         <div className="space-y-6 animate-in fade-in slide-in-from-left-4 duration-700">
+                            <h4 className="text-xs font-black uppercase tracking-[0.3em] text-primary dark:text-white flex items-center gap-2">
+                              <CheckCircle2 className="w-4 h-4 text-emerald-500" /> Key Areas of Focus
+                            </h4>
+                            <ul className="space-y-4">
+                              {selectedGuide.features.map((feature, idx) => {
+                                const isClickable = selectedGuide.id === 'juvenile-justice' && JUVENILE_JUSTICE_DETAILS[feature];
+                                return (
+                                  <li 
+                                    key={idx} 
+                                    onClick={() => isClickable && setSubDetail(feature)}
+                                    className={cn(
+                                      "flex items-center gap-3 p-4 rounded-2xl border transition-all shadow-sm",
+                                      isClickable 
+                                        ? "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-accent hover:shadow-lg cursor-pointer group/item" 
+                                        : "bg-slate-50 dark:bg-slate-900 border-slate-100 dark:border-slate-800"
+                                    )}
+                                  >
+                                     <span className={cn(
+                                       "w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold shadow-md shrink-0 transition-colors",
+                                       isClickable ? "bg-accent text-primary group-hover/item:bg-secondary group-hover/item:text-white" : "bg-primary text-white"
+                                     )}>{idx + 1}</span>
+                                     <span className="font-bold text-slate-700 dark:text-slate-200 flex-1">{feature}</span>
+                                     {isClickable && <ChevronRight className="w-4 h-4 text-slate-300 group-hover/item:text-accent group-hover/item:translate-x-1 transition-all" />}
+                                  </li>
+                                )
+                              })}
+                            </ul>
+                            {selectedGuide.id === 'juvenile-justice' && (
+                              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest text-center animate-pulse">Click on a focus area to examine details</p>
+                            )}
+                         </div>
+
+                         <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-700">
+                            <h4 className="text-xs font-black uppercase tracking-[0.3em] text-primary dark:text-white">Significance</h4>
+                            <div className="p-8 rounded-[2.5rem] bg-indigo-50 dark:bg-indigo-950/20 border-2 border-indigo-100 dark:border-indigo-900/30 shadow-inner">
+                              <p className="text-slate-600 dark:text-slate-400 leading-relaxed italic text-sm md:text-base font-medium">
+                                "The knowledge of these rights is not just informative—it is transformative. By understanding the legal safeguards provided by the State, every citizen becomes a vital part of a just and transparent democracy."
+                              </p>
+                            </div>
+                         </div>
+                      </div>
+                    </>
+                  )}
 
                   <div className="pt-12 flex flex-col gap-4 items-center">
                     <Button 
@@ -318,7 +418,7 @@ export function KnowledgeCenter() {
                       onClick={handleAccessRepository}
                       className="w-full bg-accent text-primary font-bold h-16 rounded-2xl text-lg hover:bg-secondary hover:text-white transition-all shadow-xl shadow-accent/20 group"
                     >
-                      Access Full Repository <ExternalLink className="ml-2 w-5 h-5 group-hover:scale-110 transition-transform" />
+                      Access Full {subDetail ? 'Topic' : 'Guide'} Repository <ExternalLink className="ml-2 w-5 h-5 group-hover:scale-110 transition-transform" />
                     </Button>
                     
                     <DialogClose asChild>
@@ -326,7 +426,7 @@ export function KnowledgeCenter() {
                         variant="outline" 
                         className="w-full h-14 rounded-2xl border-slate-200 text-slate-500 font-bold hover:bg-primary hover:text-primary-foreground transition-colors"
                       >
-                        Close Page
+                        Close Portal
                       </Button>
                     </DialogClose>
                     
