@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useEffect, useState, useMemo } from 'react'
@@ -33,7 +32,8 @@ import {
   ClipboardList,
   Settings2,
   Plus,
-  Users
+  Users,
+  Star
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
@@ -262,6 +262,7 @@ export default function MemberKitManagement() {
     const category = m.designationCategory || "General Member";
     const eligibleItemIds = eligibilityRules[category] || [];
     const eligibleItems = kitItems.filter(item => eligibleItemIds.includes(item.id));
+    const isOfficeBearer = category === 'Office-bearing Member';
 
     return (
       <Card 
@@ -285,30 +286,34 @@ export default function MemberKitManagement() {
                 <p className="text-[9px] font-bold text-slate-400 mt-2 uppercase tracking-widest">{m.memberId || 'NO ID'}</p>
              </div>
              <div className="flex-1 p-6 flex items-center justify-between">
-                <div className="space-y-1.5">
-                   <div className="flex flex-wrap items-center gap-2">
-                     <h3 className="text-lg font-bold text-primary dark:text-white leading-tight group-hover:text-accent transition-colors">{m.name}</h3>
-                     <Badge variant="secondary" className="bg-slate-100 dark:bg-slate-800 text-[7px] font-black uppercase tracking-tighter h-4">
+                <div className="space-y-2">
+                   <div className="flex flex-wrap items-center gap-3">
+                     <h3 className="text-xl font-bold text-primary dark:text-white leading-tight group-hover:text-accent transition-colors">{m.name}</h3>
+                     <Badge className={cn(
+                       "text-[8px] font-black uppercase tracking-wider h-5 px-3",
+                       isOfficeBearer ? "bg-accent text-primary shadow-sm" : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400"
+                     )}>
+                       {isOfficeBearer && <Star className="w-2.5 h-2.5 mr-1 fill-primary" />}
                        {category}
                      </Badge>
                    </div>
-                   <div className="flex flex-wrap gap-3 text-[10px] font-bold text-slate-500 uppercase">
-                      <span className="flex items-center gap-1 text-primary dark:text-slate-300">
-                        <Briefcase className="w-2.5 h-2.5 text-accent" /> {m.designation}
+                   <div className="flex flex-wrap gap-4 text-[11px] font-bold text-slate-500 uppercase tracking-wide">
+                      <span className="flex items-center gap-1.5 text-primary dark:text-slate-200">
+                        <Briefcase className="w-3 h-3 text-accent" /> {m.designation}
                       </span>
-                      <span className="flex items-center gap-1">
-                        <MapPin className="w-2.5 h-2.5 text-accent" /> 
+                      <span className="flex items-center gap-1.5">
+                        <MapPin className="w-3 h-3 text-accent" /> 
                         {m.level === 'District' ? `${m.districtName}, ${m.stateName}` : m.stateName || 'National Center'}
                       </span>
                    </div>
                 </div>
                 <div className="flex items-center gap-6">
-                   <div className="flex flex-wrap gap-1.5 justify-end max-w-[160px] md:max-w-[200px]">
+                   <div className="flex flex-wrap gap-1.5 justify-end max-w-[160px] md:max-w-[240px]">
                       {eligibleItems.map(item => (
                         <div 
                           key={item.id} 
                           className={cn(
-                            "w-5 h-5 rounded-full flex items-center justify-center text-[6px] font-black uppercase transition-all shadow-sm border shrink-0",
+                            "w-6 h-6 rounded-full flex items-center justify-center text-[7px] font-black uppercase transition-all shadow-sm border shrink-0",
                             kit?.items?.[item.id] ? "bg-emerald-500 text-white border-emerald-600" : "bg-slate-100 text-slate-300 dark:bg-slate-800 dark:text-slate-600 border-slate-200 dark:border-slate-700"
                           )}
                           title={item.label}
