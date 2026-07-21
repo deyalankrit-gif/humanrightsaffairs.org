@@ -326,7 +326,7 @@ export default function Home() {
 
                 <div className="flex flex-col md:flex-row gap-4 md:gap-8 justify-center items-center w-full px-4">
                   <DonationDialog>
-                    <Button className="bg-accent text-white font-bold hover:bg-secondary hover:scale-105 active:scale-95 transition-all px-6 py-5 md:px-14 md:py-8 rounded-xl text-sm md:text-2xl shadow-xl shadow-accent/20 w-full md:w-auto h-auto">
+                    <Button className="bg-accent text-white font-bold hover:bg-secondary hover:scale-105 active:scale-95 transition-all px-6 py-4 md:px-10 md:py-6 rounded-xl text-sm md:text-lg shadow-xl shadow-accent/20 w-full md:w-auto h-auto">
                       Please Enter the Donor's Details
                     </Button>
                   </DonationDialog>
