@@ -40,9 +40,9 @@ export function RazorpayDonation() {
       
       <Button 
         onClick={handleDonate}
-        className="w-full bg-white text-primary font-bold h-12 md:h-14 rounded-xl hover:bg-accent hover:text-white transition-all shadow-xl shadow-white/5 flex items-center justify-center gap-3 group border-none"
+        className="w-full bg-gradient-to-r from-accent via-secondary to-accent bg-[length:200%_auto] text-white font-bold h-12 md:h-14 rounded-xl hover:scale-105 active:scale-95 transition-all shadow-xl shadow-accent/20 flex items-center justify-center gap-3 group border-none animate-gradient-x"
       >
-        <CreditCard className="w-4 h-4 md:w-5 md:h-5 text-accent group-hover:text-white transition-colors" />
+        <CreditCard className="w-4 h-4 md:w-5 md:h-5 text-white transition-colors" />
         <span className="text-[10px] md:text-xs uppercase tracking-[0.2em] font-black">Donate Now</span>
         <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
       </Button>
