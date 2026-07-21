@@ -146,12 +146,30 @@ export default function MemberKitManagement() {
     return matchesSearch && matchesStatus;
   })
 
-  const groupedMembers = useMemo(() => {
-    return {
-      central: filteredMembers.filter(m => m.level === 'National'),
-      state: filteredMembers.filter(m => m.level === 'State'),
-      district: filteredMembers.filter(m => m.level === 'District'),
-    }
+  const groupings = useMemo(() => {
+    const central = filteredMembers.filter(m => m.level === 'National');
+    
+    const stateGroups = filteredMembers
+      .filter(m => m.level === 'State')
+      .reduce((acc, m) => {
+        const state = m.stateName || 'Unspecified State';
+        if (!acc[state]) acc[state] = [];
+        acc[state].push(m);
+        return acc;
+      }, {} as Record<string, any[]>);
+
+    const districtGroups = filteredMembers
+      .filter(m => m.level === 'District')
+      .reduce((acc, m) => {
+        const state = m.stateName || 'Unspecified State';
+        const district = m.districtName || 'Unspecified District';
+        if (!acc[state]) acc[state] = {};
+        if (!acc[state][district]) acc[state][district] = [];
+        acc[state][district].push(m);
+        return acc;
+      }, {} as Record<string, Record<string, any[]>>);
+
+    return { central, stateGroups, districtGroups };
   }, [filteredMembers]);
 
   if (authLoading || !user) {
@@ -201,7 +219,7 @@ export default function MemberKitManagement() {
                    </div>
                 </div>
                 <div className="flex items-center gap-4">
-                   <div className="flex gap-1.5 overflow-hidden">
+                   <div className="flex gap-2 overflow-hidden">
                       {KIT_ITEMS.slice(0, 5).map(item => (
                         <div 
                           key={item.id} 
@@ -265,7 +283,7 @@ export default function MemberKitManagement() {
                </button>
              ))}
           </div>
-          <div className="relative w-full max-w-lg">
+          <div className="relative w-full max-lg:max-w-full max-w-lg">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <Input placeholder="Search member name or ID..." className="pl-9 h-11 rounded-xl border-slate-200 text-sm" value={search} onChange={e => setSearch(e.target.value)} />
           </div>
@@ -280,37 +298,54 @@ export default function MemberKitManagement() {
             <div className="grid lg:grid-cols-3 gap-8 items-start">
               
               {/* Member List - Categorized */}
-              <div className="lg:col-span-2 space-y-10">
-                {groupedMembers.central.length > 0 && (
+              <div className="lg:col-span-2 space-y-12">
+                {/* Central Committee */}
+                {groupings.central.length > 0 && (
                   <div className="space-y-4">
-                    <div className="flex items-center gap-2 px-2">
-                       <ShieldCheck className="w-4 h-4 text-red-600" />
-                       <h4 className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400">Central Committee</h4>
-                       <div className="h-px flex-1 bg-slate-100 dark:bg-slate-800"></div>
+                    <div className="flex items-center gap-3 px-2">
+                       <ShieldCheck className="w-5 h-5 text-red-600" />
+                       <h4 className="text-sm font-black uppercase tracking-[0.25em] text-primary dark:text-white">Central Committee</h4>
+                       <div className="h-px flex-1 bg-slate-200 dark:bg-slate-800"></div>
                     </div>
-                    {groupedMembers.central.map(renderMemberCard)}
+                    {groupings.central.map(renderMemberCard)}
                   </div>
                 )}
 
-                {groupedMembers.state.length > 0 && (
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-2 px-2">
-                       <Globe className="w-4 h-4 text-emerald-600" />
-                       <h4 className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400">State Committee</h4>
-                       <div className="h-px flex-1 bg-slate-100 dark:bg-slate-800"></div>
-                    </div>
-                    {groupedMembers.state.map(renderMemberCard)}
+                {/* State Committees */}
+                {Object.keys(groupings.stateGroups).length > 0 && (
+                  <div className="space-y-10">
+                    {Object.keys(groupings.stateGroups).sort().map(state => (
+                      <div key={state} className="space-y-4">
+                        <div className="flex items-center gap-3 px-2">
+                           <Globe className="w-5 h-5 text-emerald-600" />
+                           <h4 className="text-sm font-black uppercase tracking-[0.25em] text-primary dark:text-white">{state} State Committee</h4>
+                           <div className="h-px flex-1 bg-slate-200 dark:bg-slate-800"></div>
+                        </div>
+                        {groupings.stateGroups[state].map(renderMemberCard)}
+                      </div>
+                    ))}
                   </div>
                 )}
 
-                {groupedMembers.district.length > 0 && (
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-2 px-2">
-                       <Building2 className="w-4 h-4 text-blue-600" />
-                       <h4 className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400">District Committee</h4>
-                       <div className="h-px flex-1 bg-slate-100 dark:bg-slate-800"></div>
-                    </div>
-                    {groupedMembers.district.map(renderMemberCard)}
+                {/* District Committees */}
+                {Object.keys(groupings.districtGroups).length > 0 && (
+                  <div className="space-y-14">
+                    {Object.keys(groupings.districtGroups).sort().map(state => (
+                      <div key={state} className="space-y-10">
+                        {Object.keys(groupings.districtGroups[state]).sort().map(district => (
+                          <div key={district} className="space-y-4">
+                            <div className="flex items-center gap-3 px-2">
+                               <Building2 className="w-5 h-5 text-blue-600" />
+                               <h4 className="text-sm font-black uppercase tracking-[0.25em] text-primary dark:text-white">
+                                 {district} District Committee <span className="text-slate-400 font-bold ml-2">({state})</span>
+                               </h4>
+                               <div className="h-px flex-1 bg-slate-200 dark:bg-slate-800"></div>
+                            </div>
+                            {groupings.districtGroups[state][district].map(renderMemberCard)}
+                          </div>
+                        ))}
+                      </div>
+                    ))}
                   </div>
                 )}
 
