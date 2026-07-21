@@ -174,6 +174,12 @@ export default function PublicKitManagementPage() {
     const eligibleItems = kitItems.filter((item: any) => eligibleItemIds.includes(item.id));
     const isOfficeBearer = category === 'Office-bearing Member';
 
+    // Robust Car Plate Check: Scans the registry for ANY item containing "Car Plate" in its label
+    const carPlateItemIds = kitItems
+      .filter((item: any) => item.label.toLowerCase().includes('car plate'))
+      .map((item: any) => item.id);
+    const isCarPlateIssued = carPlateItemIds.some((id: string) => kit?.items?.[id]);
+
     return (
       <Card 
         key={m.id} 
@@ -220,7 +226,7 @@ export default function PublicKitManagementPage() {
                           <Clock className="w-3 h-3" /> {kit.dispatchDate}
                         </span>
                       )}
-                      {kit?.items?.designationCarPlate && (
+                      {isCarPlateIssued && (
                         <span className="flex items-center gap-1.5 text-red-600 animate-pulse" title="Metal Designation Car Plate Issued">
                           <Car className="w-3.5 h-3.5" />
                         </span>
@@ -553,7 +559,7 @@ export default function PublicKitManagementPage() {
                </div>
             </div>
           )}
-        </DialogContent>
+        </div>
       </Dialog>
     </main>
   )

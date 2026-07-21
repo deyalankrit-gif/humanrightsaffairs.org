@@ -20,7 +20,6 @@ import {
   ShieldCheck, 
   UserCheck, 
   CheckCircle2, 
-  Archive,
   Save,
   MapPin,
   ChevronRight,
@@ -342,6 +341,12 @@ export default function MemberKitManagement() {
     const eligibleItems = kitItems.filter((item: any) => eligibleItemIds.includes(item.id));
     const isOfficeBearer = category === 'Office-bearing Member';
 
+    // Robust Car Plate Check: Identifies any item in the current registry containing "Car Plate" in its label
+    const carPlateItemIds = kitItems
+      .filter((item: any) => item.label.toLowerCase().includes('car plate'))
+      .map((item: any) => item.id);
+    const isCarPlateIssued = carPlateItemIds.some((id: string) => kit?.items?.[id]);
+
     return (
       <Card 
         key={m.id} 
@@ -388,13 +393,13 @@ export default function MemberKitManagement() {
                           <Clock className="w-3 h-3" /> {kit.dispatchDate}
                         </span>
                       )}
-                      {kit?.items?.designationCarPlate && (
+                      {isCarPlateIssued && (
                         <span className="flex items-center gap-1.5 text-red-600 animate-pulse" title="Metal Designation Car Plate Issued">
                           <Car className="w-3.5 h-3.5" />
                         </span>
                       )}
                       {kit?.notes && (
-                        <span className="flex items-center gap-1.5 text-slate-400 italic normal-case font-medium max-w-[200px] truncate">
+                        <span className="flex items-center gap-1.5 text-slate-400 italic font-medium max-w-[200px] truncate">
                           <FileText className="w-3 h-3" /> {kit.notes}
                         </span>
                       )}
@@ -636,7 +641,7 @@ export default function MemberKitManagement() {
                           <span className="text-sm font-black text-primary dark:text-white">{s.issued}</span>
                           <span className="text-[8px] font-bold text-slate-400">/ {s.total}</span>
                        </div>
-                       <div className="h-1 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+                       <div className="h-1 w-full bg-slate-200 dark:bg-sidebar-border rounded-full overflow-hidden">
                           <div 
                             className={cn(
                               "h-full transition-all duration-1000",
