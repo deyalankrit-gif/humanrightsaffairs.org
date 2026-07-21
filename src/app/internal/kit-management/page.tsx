@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import { useUser, useCollection, useFirestore, useMemoFirebase } from '@/firebase'
+import { useUser, useCollection, useFirestore, useMemoFirebase, useDoc } from '@/firebase'
 import { collection, query, orderBy, doc, setDoc, serverTimestamp } from 'firebase/firestore'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -50,6 +50,8 @@ import {
   DialogClose,
   DialogFooter
 } from "@/components/ui/dialog"
+import { errorEmitter } from '@/firebase/error-emitter'
+import { FirestorePermissionError, type SecurityRuleContext } from '@/firebase/errors'
 
 const INITIAL_KIT_ITEMS = [
   { id: 'identityCard', label: 'Identity Card' },
@@ -72,6 +74,13 @@ const MEMBER_CATEGORIES = [
   "Volunteer"
 ]
 
+const INITIAL_ELIGIBILITY: Record<string, string[]> = {
+  "Volunteer": ['identityCard', 'lanyard', 'cardHolder'],
+  "General Member": ['identityCard', 'lanyard', 'cardHolder', 'membershipCertificate'],
+  "Board Member": ['identityCard', 'lanyard', 'cardHolder', 'badge', 'membershipCertificate', 'appointmentLetter', 'vehicleSticker'],
+  "Office-bearing Member": INITIAL_KIT_ITEMS.map(i => i.id)
+};
+
 export default function MemberKitManagement() {
   const { user, loading: authLoading } = useUser()
   const router = useRouter()
@@ -83,19 +92,11 @@ export default function MemberKitManagement() {
   const [isSaving, setIsSaving] = useState<string | null>(null)
   const [selectedMember, setSelectedMember] = useState<any>(null)
 
-  // DYNAMIC KIT REGISTRY
-  const [kitItems, setKitItems] = useState(INITIAL_KIT_ITEMS)
+  // CONFIGURATION PERSISTENCE STATES
+  const [isConfiguring, setIsConfiguring] = useState(false)
   const [newItemLabel, setNewItemLabel] = useState('')
   const [editingItemId, setEditingItemId] = useState<string | null>(null)
   const [editingItemLabel, setEditingItemLabel] = useState('')
-
-  // ELIGIBILITY STATE
-  const [eligibilityRules, setEligibilityRules] = useState<Record<string, string[]>>({
-    "Volunteer": ['identityCard', 'lanyard', 'cardHolder'],
-    "General Member": ['identityCard', 'lanyard', 'cardHolder', 'membershipCertificate'],
-    "Board Member": ['identityCard', 'lanyard', 'cardHolder', 'badge', 'membershipCertificate', 'appointmentLetter', 'vehicleSticker'],
-    "Office-bearing Member": INITIAL_KIT_ITEMS.map(i => i.id)
-  });
 
   const [kitForm, setKitForm] = useState({
     items: {} as Record<string, boolean>,
@@ -111,6 +112,22 @@ export default function MemberKitManagement() {
       router.push('/internal/login')
     }
   }, [user, authLoading, router])
+
+  // LOAD GLOBAL CONFIGURATION FROM FIRESTORE
+  const configDocRef = useMemoFirebase(() => {
+    if (!db) return null;
+    return doc(db, 'member_kits', 'settings');
+  }, [db]);
+
+  const { data: configData, loading: configLoading } = useDoc(configDocRef);
+
+  const kitItems = useMemo(() => {
+    return (configData as any)?.kitItems || INITIAL_KIT_ITEMS;
+  }, [configData]);
+
+  const eligibilityRules = useMemo(() => {
+    return (configData as any)?.eligibilityRules || INITIAL_ELIGIBILITY;
+  }, [configData]);
 
   const membersQuery = useMemoFirebase(() => {
     if (!db || !user) return null;
@@ -169,16 +186,39 @@ export default function MemberKitManagement() {
     }
   }
 
+  // FIRESTORE CONFIGURATION UPDATE HELPER
+  const saveLogisticsConfig = async (newKitItems: any[], newEligibilityRules: any) => {
+    if (!db) return;
+    const updateData = {
+      kitItems: newKitItems,
+      eligibilityRules: newEligibilityRules,
+      updatedAt: serverTimestamp(),
+      updatedBy: user?.email
+    };
+    
+    setDoc(doc(db, 'member_kits', 'settings'), updateData, { merge: true })
+      .catch(async (error) => {
+        const permissionError = new FirestorePermissionError({
+          path: 'member_kits/settings',
+          operation: 'update',
+          requestResourceData: updateData,
+        } satisfies SecurityRuleContext);
+        errorEmitter.emit('permission-error', permissionError);
+      });
+  }
+
   const handleCreateKitItem = () => {
     if (!newItemLabel.trim()) return
     const id = newItemLabel.toLowerCase().replace(/\s+/g, '')
-    if (kitItems.find(i => i.id === id)) {
+    if (kitItems.find((i: any) => i.id === id)) {
       toast({ variant: "destructive", title: "Duplicate Entry", description: "This item already exists in the institutional registry." })
       return
     }
 
     const newItem = { id, label: newItemLabel.trim() }
-    setKitItems(prev => [...prev, newItem])
+    const updatedItems = [...kitItems, newItem];
+    
+    saveLogisticsConfig(updatedItems, eligibilityRules);
     setNewItemLabel('')
     toast({ title: "Item Created", description: `${newItem.label} added to logistical scope.` })
   }
@@ -190,36 +230,43 @@ export default function MemberKitManagement() {
 
   const handleSaveEditItem = () => {
     if (!editingItemId || !editingItemLabel.trim()) return
-    setKitItems(prev => prev.map(item => 
+    const updatedItems = kitItems.map((item: any) => 
       item.id === editingItemId ? { ...item, label: editingItemLabel.trim() } : item
-    ))
+    )
+    
+    saveLogisticsConfig(updatedItems, eligibilityRules);
     setEditingItemId(null)
     setEditingItemLabel('')
     toast({ title: "Item Updated", description: "Registry label modified successfully." })
   }
 
   const handleDeleteKitItem = (id: string) => {
-    // If deleting the item being edited, reset the edit state
     if (editingItemId === id) {
       setEditingItemId(null)
       setEditingItemLabel('')
     }
 
-    setKitItems(prev => prev.filter(item => item.id !== id))
-    
-    // Cleanup eligibility rules
-    setEligibilityRules(prev => {
-      const newRules = { ...prev }
-      MEMBER_CATEGORIES.forEach(cat => {
-        if (newRules[cat]) {
-          newRules[cat] = newRules[cat].filter(itemId => itemId !== id)
-        }
-      })
-      return newRules
+    const updatedItems = kitItems.filter((item: any) => item.id !== id);
+    const updatedEligibility = { ...eligibilityRules };
+    MEMBER_CATEGORIES.forEach(cat => {
+      if (updatedEligibility[cat]) {
+        updatedEligibility[cat] = updatedEligibility[cat].filter((itemId: string) => itemId !== id)
+      }
     })
     
+    saveLogisticsConfig(updatedItems, updatedEligibility);
     toast({ title: "Item Purged", description: "Item removed from global registry and all eligibility lists." })
   }
+
+  const toggleEligibility = (category: string, itemId: string) => {
+    const current = eligibilityRules[category] || [];
+    const updated = current.includes(itemId) 
+      ? current.filter((id: string) => id !== itemId) 
+      : [...current, itemId];
+    
+    const updatedEligibility = { ...eligibilityRules, [category]: updated };
+    saveLogisticsConfig(kitItems, updatedEligibility);
+  };
 
   const filteredMembers = (members || []).filter(m => {
     const matchesSearch = (m.name || '').toLowerCase().includes(search.toLowerCase()) || 
@@ -241,7 +288,7 @@ export default function MemberKitManagement() {
   // CLASSIFIED BREAKDOWN CALCULATION (Filtered by Eligibility)
   const itemStats = useMemo(() => {
     const stats: Record<string, { issued: number, total: number }> = {};
-    kitItems.forEach(item => {
+    kitItems.forEach((item: any) => {
       stats[item.id] = { issued: 0, total: 0 };
     });
 
@@ -250,7 +297,7 @@ export default function MemberKitManagement() {
       const eligibleItems = eligibilityRules[category] || [];
       const kit = kitMap[m.id];
 
-      kitItems.forEach(item => {
+      kitItems.forEach((item: any) => {
         if (eligibleItems.includes(item.id)) {
           stats[item.id].total += 1;
           if (kit?.items?.[item.id]) {
@@ -288,22 +335,12 @@ export default function MemberKitManagement() {
     return { central, stateGroups, districtGroups };
   }, [filteredMembers]);
 
-  const toggleEligibility = (category: string, itemId: string) => {
-    setEligibilityRules(prev => {
-      const current = prev[category] || [];
-      const updated = current.includes(itemId) 
-        ? current.filter(id => id !== itemId) 
-        : [...current, itemId];
-      return { ...prev, [category]: updated };
-    });
-  };
-
   const renderMemberCard = (m: any) => {
     const kit = kitMap[m.id];
     const status = kit?.deliveryStatus || 'Pending';
     const category = m.designationCategory || "General Member";
     const eligibleItemIds = eligibilityRules[category] || [];
-    const eligibleItems = kitItems.filter(item => eligibleItemIds.includes(item.id));
+    const eligibleItems = kitItems.filter((item: any) => eligibleItemIds.includes(item.id));
     const isOfficeBearer = category === 'Office-bearing Member';
 
     return (
@@ -351,11 +388,11 @@ export default function MemberKitManagement() {
                 </div>
                 <div className="flex items-center gap-6">
                    <div className="flex flex-wrap gap-1.5 justify-end max-w-[160px] md:max-w-[240px]">
-                      {eligibleItems.map(item => (
+                      {eligibleItems.map((item: any) => (
                         <div 
                           key={item.id} 
                           className={cn(
-                            "w-6 h-6 rounded-full flex items-center justify-center text-[7px] font-black uppercase transition-all shadow-sm border shrink-0",
+                            "w-5 h-5 rounded-full flex items-center justify-center text-[6px] font-black uppercase transition-all shadow-sm border shrink-0",
                             kit?.items?.[item.id] ? "bg-emerald-500 text-white border-emerald-600" : "bg-slate-100 text-slate-300 dark:bg-slate-800 dark:text-slate-600 border-slate-200 dark:border-slate-700"
                           )}
                           title={item.label}
@@ -363,9 +400,6 @@ export default function MemberKitManagement() {
                           {item.label[0]}
                         </div>
                       ))}
-                      {eligibleItems.length === 0 && (
-                        <span className="text-[8px] font-bold text-slate-300 uppercase italic">No items assigned</span>
-                      )}
                    </div>
                    <ChevronRight className="w-4 h-4 text-slate-300 group-hover:translate-x-1 transition-transform shrink-0" />
                 </div>
@@ -376,7 +410,7 @@ export default function MemberKitManagement() {
     );
   };
 
-  if (authLoading || !user) {
+  if (authLoading || (user && (membersLoading || kitsLoading || configLoading))) {
     return <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950"><Loader2 className="w-10 h-10 animate-spin text-accent" /></div>
   }
 
@@ -452,7 +486,7 @@ export default function MemberKitManagement() {
                           <div className="space-y-3">
                             <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">Global Item Registry Management</p>
                             <div className="flex flex-wrap gap-3">
-                               {kitItems.map(item => (
+                               {kitItems.map((item: any) => (
                                  <div 
                                    key={item.id} 
                                    className={cn(
@@ -499,7 +533,7 @@ export default function MemberKitManagement() {
                                <UserCheck className="w-4 h-4 text-accent" /> {category}
                             </h4>
                             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                               {kitItems.map(item => {
+                               {kitItems.map((item: any) => {
                                  const isEligible = (eligibilityRules[category] || []).includes(item.id);
                                  return (
                                    <div 
@@ -521,7 +555,7 @@ export default function MemberKitManagement() {
                     </div>
                     <DialogFooter>
                        <DialogClose asChild>
-                         <Button className="w-full h-12 rounded-xl font-bold bg-primary text-white hover:bg-secondary">Save & Commit Rules</Button>
+                         <Button className="w-full h-12 rounded-xl font-bold bg-primary text-white hover:bg-secondary">Close Configuration</Button>
                        </DialogClose>
                     </DialogFooter>
                  </DialogContent>
@@ -579,8 +613,8 @@ export default function MemberKitManagement() {
              <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Eligibility-Based Issuance Breakdown</h2>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 xl:grid-cols-11 gap-3">
-             {kitItems.map(item => {
-               const s = itemStats[item.id];
+             {kitItems.map((item: any) => {
+               const s = itemStats[item.id] || { issued: 0, total: 0 };
                const percentage = Math.round((s.issued / (s.total || 1)) * 100);
                return (
                  <div key={item.id} className="p-3 rounded-2xl border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50 flex flex-col justify-between group hover:border-accent/40 transition-colors">
@@ -631,7 +665,7 @@ export default function MemberKitManagement() {
 
       <section className="py-8 flex-1">
         <div className="container mx-auto px-4">
-          {membersLoading || kitsLoading ? (
+          {membersLoading || kitsLoading || configLoading ? (
             <div className="text-center py-20"><Loader2 className="w-10 h-10 animate-spin text-accent mx-auto" /></div>
           ) : (
             <div className="grid lg:grid-cols-3 gap-8 items-start">
@@ -715,7 +749,7 @@ export default function MemberKitManagement() {
                              <ClipboardList className="w-3.5 h-3.5" /> Eligible Items for {selectedMember.designationCategory || "Member"}
                            </h4>
                            <div className="grid grid-cols-1 gap-2">
-                              {kitItems.filter(item => (eligibilityRules[selectedMember.designationCategory || "General Member"] || []).includes(item.id)).map(item => (
+                              {kitItems.filter((item: any) => (eligibilityRules[selectedMember.designationCategory || "General Member"] || []).includes(item.id)).map((item: any) => (
                                 <div key={item.id} className="flex items-center space-x-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 hover:border-accent/30 transition-all">
                                    <Checkbox 
                                     id={item.id} 
@@ -730,7 +764,7 @@ export default function MemberKitManagement() {
                                    {kitForm.items[item.id] && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />}
                                 </div>
                               ))}
-                              {kitItems.filter(item => (eligibilityRules[selectedMember.designationCategory || "General Member"] || []).includes(item.id)).length === 0 && (
+                              {kitItems.filter((item: any) => (eligibilityRules[selectedMember.designationCategory || "General Member"] || []).includes(item.id)).length === 0 && (
                                 <div className="text-center py-4 border-2 border-dashed rounded-xl border-slate-100 text-[10px] text-slate-400 uppercase font-bold">
                                   No items configured for this type.
                                 </div>

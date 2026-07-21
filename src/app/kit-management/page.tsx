@@ -21,11 +21,11 @@ import {
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
-import { useCollection, useFirestore, useMemoFirebase } from '@/firebase'
-import { collection, query, orderBy } from 'firebase/firestore'
+import { useCollection, useFirestore, useMemoFirebase, useDoc } from '@/firebase'
+import { collection, query, orderBy, doc } from 'firebase/firestore'
 import { cn } from '@/lib/utils'
 
-const KIT_ITEMS = [
+const INITIAL_KIT_ITEMS = [
   { id: 'identityCard', label: 'Identity Card' },
   { id: 'lanyard', label: 'Lanyard' },
   { id: 'cardHolder', label: 'Card Holder' },
@@ -39,11 +39,11 @@ const KIT_ITEMS = [
   { id: 'officeSeal', label: 'Office Seal' },
 ]
 
-const ELIGIBILITY_RULES: Record<string, string[]> = {
+const INITIAL_ELIGIBILITY: Record<string, string[]> = {
   "Volunteer": ['identityCard', 'lanyard', 'cardHolder'],
   "General Member": ['identityCard', 'lanyard', 'cardHolder', 'membershipCertificate'],
   "Board Member": ['identityCard', 'lanyard', 'cardHolder', 'badge', 'membershipCertificate', 'appointmentLetter', 'vehicleSticker'],
-  "Office-bearing Member": KIT_ITEMS.map(i => i.id)
+  "Office-bearing Member": INITIAL_KIT_ITEMS.map(i => i.id)
 };
 
 /**
@@ -53,6 +53,22 @@ const ELIGIBILITY_RULES: Record<string, string[]> = {
 export default function PublicKitManagementPage() {
   const [search, setSearch] = React.useState('')
   const db = useFirestore()
+
+  // LOAD GLOBAL CONFIGURATION FROM FIRESTORE
+  const configDocRef = useMemoFirebase(() => {
+    if (!db) return null;
+    return doc(db, 'member_kits', 'settings');
+  }, [db]);
+
+  const { data: configData, loading: configLoading } = useDoc(configDocRef);
+
+  const kitItems = useMemo(() => {
+    return (configData as any)?.kitItems || INITIAL_KIT_ITEMS;
+  }, [configData]);
+
+  const eligibilityRules = useMemo(() => {
+    return (configData as any)?.eligibilityRules || INITIAL_ELIGIBILITY;
+  }, [configData]);
 
   const membersQuery = useMemoFirebase(() => {
     if (!db) return null;
@@ -90,16 +106,16 @@ export default function PublicKitManagementPage() {
 
   const itemStats = useMemo(() => {
     const stats: Record<string, { issued: number, total: number }> = {};
-    KIT_ITEMS.forEach(item => {
+    kitItems.forEach((item: any) => {
       stats[item.id] = { issued: 0, total: 0 };
     });
 
     filteredMembers.forEach(m => {
       const category = m.designationCategory || "General Member";
-      const eligibleItems = ELIGIBILITY_RULES[category] || [];
+      const eligibleItems = eligibilityRules[category] || [];
       const kit = kitMap[m.id];
 
-      KIT_ITEMS.forEach(item => {
+      kitItems.forEach((item: any) => {
         if (eligibleItems.includes(item.id)) {
           stats[item.id].total += 1;
           if (kit?.items?.[item.id]) {
@@ -109,7 +125,7 @@ export default function PublicKitManagementPage() {
       });
     });
     return stats;
-  }, [filteredMembers, kitMap]);
+  }, [filteredMembers, kitMap, eligibilityRules, kitItems]);
 
   const groupings = useMemo(() => {
     const central = filteredMembers.filter(m => m.level === 'National');
@@ -141,8 +157,8 @@ export default function PublicKitManagementPage() {
     const kit = kitMap[m.id];
     const status = kit?.deliveryStatus || 'Pending';
     const category = m.designationCategory || "General Member";
-    const eligibleItemIds = ELIGIBILITY_RULES[category] || [];
-    const eligibleItems = KIT_ITEMS.filter(item => eligibleItemIds.includes(item.id));
+    const eligibleItemIds = eligibilityRules[category] || [];
+    const eligibleItems = kitItems.filter((item: any) => eligibleItemIds.includes(item.id));
     const isOfficeBearer = category === 'Office-bearing Member';
 
     return (
@@ -183,11 +199,11 @@ export default function PublicKitManagementPage() {
                 </div>
                 <div className="flex items-center gap-6">
                    <div className="flex flex-wrap gap-1.5 justify-end max-w-[160px] md:max-w-[240px]">
-                      {eligibleItems.map(item => (
+                      {eligibleItems.map((item: any) => (
                         <div 
                           key={item.id} 
                           className={cn(
-                            "w-6 h-6 rounded-full flex items-center justify-center text-[7px] font-black uppercase transition-all shadow-sm border shrink-0",
+                            "w-5 h-5 rounded-full flex items-center justify-center text-[6px] font-black uppercase transition-all shadow-sm border shrink-0",
                             kit?.items?.[item.id] ? "bg-emerald-500 text-white border-emerald-600" : "bg-slate-100 text-slate-300 dark:bg-slate-800 dark:text-slate-600 border-slate-200 dark:border-slate-700"
                           )}
                           title={item.label}
@@ -269,8 +285,8 @@ export default function PublicKitManagementPage() {
              <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Item-wise Issuance Status</h2>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 xl:grid-cols-11 gap-3">
-             {KIT_ITEMS.map(item => {
-               const s = itemStats[item.id];
+             {kitItems.map((item: any) => {
+               const s = itemStats[item.id] || { issued: 0, total: 0 };
                const percentage = Math.round((s.issued / (s.total || 1)) * 100);
                return (
                  <div key={item.id} className="p-3 rounded-2xl border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50 flex flex-col justify-between">
@@ -310,7 +326,7 @@ export default function PublicKitManagementPage() {
 
       <section className="py-12 flex-1 pb-24">
         <div className="container mx-auto px-4">
-          {membersLoading || kitsLoading ? (
+          {membersLoading || kitsLoading || configLoading ? (
             <div className="text-center py-20"><Loader2 className="w-10 h-10 animate-spin text-accent mx-auto" /></div>
           ) : (
             <div className="space-y-12 max-w-6xl mx-auto">
