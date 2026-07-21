@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useEffect, useState, useMemo } from 'react'
@@ -31,7 +32,7 @@ import {
   Activity,
   ClipboardList,
   Settings2,
-  AlertCircle,
+  Plus,
   Users
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
@@ -48,7 +49,7 @@ import {
   DialogFooter
 } from "@/components/ui/dialog"
 
-const KIT_ITEMS = [
+const INITIAL_KIT_ITEMS = [
   { id: 'identityCard', label: 'Identity Card' },
   { id: 'lanyard', label: 'Lanyard' },
   { id: 'cardHolder', label: 'Card Holder' },
@@ -80,12 +81,16 @@ export default function MemberKitManagement() {
   const [isSaving, setIsSaving] = useState<string | null>(null)
   const [selectedMember, setSelectedMember] = useState<any>(null)
 
+  // DYNAMIC KIT REGISTRY
+  const [kitItems, setKitItems] = useState(INITIAL_KIT_ITEMS)
+  const [newItemLabel, setNewItemLabel] = useState('')
+
   // ELIGIBILITY STATE
   const [eligibilityRules, setEligibilityRules] = useState<Record<string, string[]>>({
     "Volunteer": ['identityCard', 'lanyard', 'cardHolder'],
     "General Member": ['identityCard', 'lanyard', 'cardHolder', 'membershipCertificate'],
     "Board Member": ['identityCard', 'lanyard', 'cardHolder', 'badge', 'membershipCertificate', 'appointmentLetter', 'vehicleSticker'],
-    "Office-bearing Member": KIT_ITEMS.map(i => i.id)
+    "Office-bearing Member": INITIAL_KIT_ITEMS.map(i => i.id)
   });
 
   const [kitForm, setKitForm] = useState({
@@ -160,6 +165,20 @@ export default function MemberKitManagement() {
     }
   }
 
+  const handleCreateKitItem = () => {
+    if (!newItemLabel.trim()) return
+    const id = newItemLabel.toLowerCase().replace(/\s+/g, '')
+    if (kitItems.find(i => i.id === id)) {
+      toast({ variant: "destructive", title: "Duplicate Entry", description: "This item already exists in the institutional registry." })
+      return
+    }
+
+    const newItem = { id, label: newItemLabel.trim() }
+    setKitItems(prev => [...prev, newItem])
+    setNewItemLabel('')
+    toast({ title: "Item Created", description: `${newItem.label} added to logistical scope.` })
+  }
+
   const filteredMembers = (members || []).filter(m => {
     const matchesSearch = (m.name || '').toLowerCase().includes(search.toLowerCase()) || 
                           (m.memberId || '').toLowerCase().includes(search.toLowerCase());
@@ -180,7 +199,7 @@ export default function MemberKitManagement() {
   // CLASSIFIED BREAKDOWN CALCULATION (Filtered by Eligibility)
   const itemStats = useMemo(() => {
     const stats: Record<string, { issued: number, total: number }> = {};
-    KIT_ITEMS.forEach(item => {
+    kitItems.forEach(item => {
       stats[item.id] = { issued: 0, total: 0 };
     });
 
@@ -189,7 +208,7 @@ export default function MemberKitManagement() {
       const eligibleItems = eligibilityRules[category] || [];
       const kit = kitMap[m.id];
 
-      KIT_ITEMS.forEach(item => {
+      kitItems.forEach(item => {
         if (eligibleItems.includes(item.id)) {
           stats[item.id].total += 1;
           if (kit?.items?.[item.id]) {
@@ -199,7 +218,7 @@ export default function MemberKitManagement() {
       });
     });
     return stats;
-  }, [filteredMembers, kitMap, eligibilityRules]);
+  }, [filteredMembers, kitMap, eligibilityRules, kitItems]);
 
   const groupings = useMemo(() => {
     const central = filteredMembers.filter(m => m.level === 'National');
@@ -242,7 +261,7 @@ export default function MemberKitManagement() {
     const status = kit?.deliveryStatus || 'Pending';
     const category = m.designationCategory || "General Member";
     const eligibleItemIds = eligibilityRules[category] || [];
-    const eligibleItems = KIT_ITEMS.filter(item => eligibleItemIds.includes(item.id));
+    const eligibleItems = kitItems.filter(item => eligibleItemIds.includes(item.id));
 
     return (
       <Card 
@@ -339,14 +358,35 @@ export default function MemberKitManagement() {
                        <DialogTitle>Member Item Eligibility Protocol</DialogTitle>
                        <DialogDescription>Define which institutional items each category of member is entitled to receive.</DialogDescription>
                     </DialogHeader>
+                    
                     <div className="py-6 space-y-8">
+                       {/* ITEM CREATION FACILITY */}
+                       <div className="p-6 bg-slate-50 dark:bg-slate-900 rounded-3xl border-2 border-dashed border-slate-200 dark:border-slate-800 space-y-4">
+                          <div className="flex items-center gap-2">
+                             <Plus className="w-4 h-4 text-accent" />
+                             <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-500">Create New Institutional Item</h4>
+                          </div>
+                          <div className="flex gap-3">
+                             <Input 
+                                placeholder="e.g. Official Blazer, ID Case" 
+                                value={newItemLabel}
+                                onChange={e => setNewItemLabel(e.target.value)}
+                                className="h-11 rounded-xl bg-white dark:bg-slate-950"
+                                onKeyDown={e => e.key === 'Enter' && handleCreateKitItem()}
+                             />
+                             <Button onClick={handleCreateKitItem} className="h-11 px-6 rounded-xl font-bold bg-accent text-primary hover:bg-secondary hover:text-white transition-all">
+                                Establish Item
+                             </Button>
+                          </div>
+                       </div>
+
                        {MEMBER_CATEGORIES.map(category => (
                          <div key={category} className="space-y-4">
                             <h4 className="text-sm font-black uppercase tracking-widest text-primary border-b pb-2 flex items-center gap-2">
                                <UserCheck className="w-4 h-4 text-accent" /> {category}
                             </h4>
                             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                               {KIT_ITEMS.map(item => {
+                               {kitItems.map(item => {
                                  const isEligible = (eligibilityRules[category] || []).includes(item.id);
                                  return (
                                    <div 
@@ -426,7 +466,7 @@ export default function MemberKitManagement() {
              <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Eligibility-Based Issuance Breakdown</h2>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 xl:grid-cols-11 gap-3">
-             {KIT_ITEMS.map(item => {
+             {kitItems.map(item => {
                const s = itemStats[item.id];
                const percentage = Math.round((s.issued / (s.total || 1)) * 100);
                return (
@@ -562,7 +602,7 @@ export default function MemberKitManagement() {
                              <ClipboardList className="w-3.5 h-3.5" /> Eligible Items for {selectedMember.designationCategory || "Member"}
                            </h4>
                            <div className="grid grid-cols-1 gap-2">
-                              {KIT_ITEMS.filter(item => (eligibilityRules[selectedMember.designationCategory || "General Member"] || []).includes(item.id)).map(item => (
+                              {kitItems.filter(item => (eligibilityRules[selectedMember.designationCategory || "General Member"] || []).includes(item.id)).map(item => (
                                 <div key={item.id} className="flex items-center space-x-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 hover:border-accent/30 transition-all">
                                    <Checkbox 
                                     id={item.id} 
@@ -577,7 +617,7 @@ export default function MemberKitManagement() {
                                    {kitForm.items[item.id] && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />}
                                 </div>
                               ))}
-                              {KIT_ITEMS.filter(item => (eligibilityRules[selectedMember.designationCategory || "General Member"] || []).includes(item.id)).length === 0 && (
+                              {kitItems.filter(item => (eligibilityRules[selectedMember.designationCategory || "General Member"] || []).includes(item.id)).length === 0 && (
                                 <div className="text-center py-4 border-2 border-dashed rounded-xl border-slate-100 text-[10px] text-slate-400 uppercase font-bold">
                                   No items configured for this type.
                                 </div>
