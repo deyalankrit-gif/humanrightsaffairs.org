@@ -35,6 +35,7 @@ import {
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
+import Image from 'next/image'
 
 const KIT_ITEMS = [
   { id: 'identityCard', label: 'Identity Card' },
@@ -231,20 +232,24 @@ export default function MemberKitManagement() {
                                  </div>
                               </div>
                               <div className="flex items-center gap-4">
-                                 <div className="flex -space-x-1.5 overflow-hidden">
+                                 <div className="flex gap-1.5 overflow-hidden">
                                     {KIT_ITEMS.slice(0, 5).map(item => (
                                       <div 
                                         key={item.id} 
                                         className={cn(
-                                          "w-5 h-5 rounded-full border-2 border-white dark:border-slate-900 flex items-center justify-center text-[6px] font-black uppercase",
-                                          kit?.items?.[item.id] ? "bg-emerald-500 text-white" : "bg-slate-200 text-slate-400"
+                                          "w-6 h-6 rounded-full flex items-center justify-center text-[7px] font-black uppercase transition-all shadow-sm border",
+                                          kit?.items?.[item.id] ? "bg-emerald-500 text-white border-emerald-600" : "bg-slate-100 text-slate-300 dark:bg-slate-800 dark:text-slate-600 border-slate-200 dark:border-slate-700"
                                         )}
                                         title={item.label}
                                       >
                                         {item.label[0]}
                                       </div>
                                     ))}
-                                    {KIT_ITEMS.length > 5 && <div className="w-5 h-5 rounded-full border-2 border-white bg-slate-100 flex items-center justify-center text-[6px] font-bold">+{KIT_ITEMS.length - 5}</div>}
+                                    {KIT_ITEMS.length > 5 && (
+                                      <div className="w-6 h-6 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-[7px] font-bold text-slate-400 border border-slate-200 dark:border-slate-700">
+                                        +{KIT_ITEMS.length - 5}
+                                      </div>
+                                    )}
                                  </div>
                                  <ChevronRight className="w-4 h-4 text-slate-300 group-hover:translate-x-1 transition-transform" />
                               </div>
