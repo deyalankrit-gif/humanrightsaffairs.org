@@ -31,7 +31,10 @@ import {
   Info,
   MapPin,
   ChevronRight,
-  X
+  X,
+  Briefcase,
+  Building2,
+  Globe
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
@@ -143,9 +146,88 @@ export default function MemberKitManagement() {
     return matchesSearch && matchesStatus;
   })
 
+  const groupedMembers = useMemo(() => {
+    return {
+      central: filteredMembers.filter(m => m.level === 'National'),
+      state: filteredMembers.filter(m => m.level === 'State'),
+      district: filteredMembers.filter(m => m.level === 'District'),
+    }
+  }, [filteredMembers]);
+
   if (authLoading || !user) {
     return <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950"><Loader2 className="w-10 h-10 animate-spin text-accent" /></div>
   }
+
+  const renderMemberCard = (m: any) => {
+    const kit = kitMap[m.id];
+    const status = kit?.deliveryStatus || 'Pending';
+    return (
+      <Card 
+        key={m.id} 
+        onClick={() => handleSelectMember(m)}
+        className={cn(
+          "border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 relative group cursor-pointer transition-all hover:scale-[1.01]",
+          selectedMember?.id === m.id && "ring-2 ring-accent"
+        )}
+      >
+        <CardContent className="p-0">
+          <div className="flex flex-col md:flex-row items-stretch">
+             <div className="p-5 bg-slate-50 dark:bg-slate-800 md:w-44 text-center border-r border-slate-100 dark:border-slate-700 flex flex-col items-center justify-center shrink-0">
+                <Badge variant="outline" className={cn(
+                  "text-[8px] font-bold px-3 py-1 rounded-full uppercase border-none",
+                  status === 'Delivered' ? "bg-emerald-500 text-white" : 
+                  status === 'Dispatched' ? "bg-blue-500 text-white" : "bg-amber-500 text-white"
+                )}>
+                  {status}
+                </Badge>
+                <p className="text-[9px] font-bold text-slate-400 mt-2 uppercase tracking-widest">{m.memberId || 'NO ID'}</p>
+             </div>
+             <div className="flex-1 p-6 flex items-center justify-between">
+                <div className="space-y-1.5">
+                   <div className="flex flex-wrap items-center gap-2">
+                     <h3 className="text-lg font-bold text-primary dark:text-white leading-tight group-hover:text-accent transition-colors">{m.name}</h3>
+                     <Badge variant="secondary" className="bg-slate-100 dark:bg-slate-800 text-[7px] font-black uppercase tracking-tighter h-4">
+                       {m.level === 'National' ? 'Central' : m.level} Position
+                     </Badge>
+                   </div>
+                   <div className="flex flex-wrap gap-3 text-[10px] font-bold text-slate-500 uppercase">
+                      <span className="flex items-center gap-1 text-primary dark:text-slate-300">
+                        <Briefcase className="w-2.5 h-2.5 text-accent" /> {m.designation}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <MapPin className="w-2.5 h-2.5 text-accent" /> 
+                        {m.level === 'District' ? `${m.districtName}, ${m.stateName}` : m.stateName || 'National Center'}
+                      </span>
+                   </div>
+                </div>
+                <div className="flex items-center gap-4">
+                   <div className="flex gap-1.5 overflow-hidden">
+                      {KIT_ITEMS.slice(0, 5).map(item => (
+                        <div 
+                          key={item.id} 
+                          className={cn(
+                            "w-6 h-6 rounded-full flex items-center justify-center text-[7px] font-black uppercase transition-all shadow-sm border",
+                            kit?.items?.[item.id] ? "bg-emerald-500 text-white border-emerald-600" : "bg-slate-100 text-slate-300 dark:bg-slate-800 dark:text-slate-600 border-slate-200 dark:border-slate-700"
+                          )}
+                          title={item.label}
+                        >
+                          {item.label[0]}
+                        </div>
+                      ))}
+                      {KIT_ITEMS.length > 5 && (
+                        <div className="w-6 h-6 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-[7px] font-bold text-slate-400 border border-slate-200 dark:border-slate-700">
+                          +{KIT_ITEMS.length - 5}
+                        </div>
+                      )}
+                   </div>
+                   <ChevronRight className="w-4 h-4 text-slate-300 group-hover:translate-x-1 transition-transform" />
+                </div>
+             </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
@@ -197,68 +279,41 @@ export default function MemberKitManagement() {
           ) : (
             <div className="grid lg:grid-cols-3 gap-8 items-start">
               
-              {/* Member List */}
-              <div className="lg:col-span-2 space-y-4">
-                {filteredMembers.map((m: any) => {
-                  const kit = kitMap[m.id];
-                  const status = kit?.deliveryStatus || 'Pending';
-                  return (
-                    <Card 
-                      key={m.id} 
-                      onClick={() => handleSelectMember(m)}
-                      className={cn(
-                        "border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 relative group cursor-pointer transition-all hover:scale-[1.01]",
-                        selectedMember?.id === m.id && "ring-2 ring-accent"
-                      )}
-                    >
-                      <CardContent className="p-0">
-                        <div className="flex flex-col md:flex-row items-stretch">
-                           <div className="p-5 bg-slate-50 dark:bg-slate-800 md:w-44 text-center border-r border-slate-100 dark:border-slate-700 flex flex-col items-center justify-center shrink-0">
-                              <Badge variant="outline" className={cn(
-                                "text-[8px] font-bold px-3 py-1 rounded-full uppercase border-none",
-                                status === 'Delivered' ? "bg-emerald-500 text-white" : 
-                                status === 'Dispatched' ? "bg-blue-500 text-white" : "bg-amber-500 text-white"
-                              )}>
-                                {status}
-                              </Badge>
-                              <p className="text-[9px] font-bold text-slate-400 mt-2 uppercase tracking-widest">{m.memberId || 'NO ID'}</p>
-                           </div>
-                           <div className="flex-1 p-6 flex items-center justify-between">
-                              <div className="space-y-1">
-                                 <h3 className="text-lg font-bold text-primary dark:text-white leading-tight group-hover:text-accent transition-colors">{m.name}</h3>
-                                 <div className="flex flex-wrap gap-3 text-[10px] font-bold text-slate-500 uppercase">
-                                    <span className="flex items-center gap-1"><UserCheck className="w-2.5 h-2.5 text-accent" /> {m.designation}</span>
-                                    <span className="flex items-center gap-1"><MapPin className="w-2.5 h-2.5 text-accent" /> {m.stateName || 'National'}</span>
-                                 </div>
-                              </div>
-                              <div className="flex items-center gap-4">
-                                 <div className="flex gap-1.5 overflow-hidden">
-                                    {KIT_ITEMS.slice(0, 5).map(item => (
-                                      <div 
-                                        key={item.id} 
-                                        className={cn(
-                                          "w-6 h-6 rounded-full flex items-center justify-center text-[7px] font-black uppercase transition-all shadow-sm border",
-                                          kit?.items?.[item.id] ? "bg-emerald-500 text-white border-emerald-600" : "bg-slate-100 text-slate-300 dark:bg-slate-800 dark:text-slate-600 border-slate-200 dark:border-slate-700"
-                                        )}
-                                        title={item.label}
-                                      >
-                                        {item.label[0]}
-                                      </div>
-                                    ))}
-                                    {KIT_ITEMS.length > 5 && (
-                                      <div className="w-6 h-6 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-[7px] font-bold text-slate-400 border border-slate-200 dark:border-slate-700">
-                                        +{KIT_ITEMS.length - 5}
-                                      </div>
-                                    )}
-                                 </div>
-                                 <ChevronRight className="w-4 h-4 text-slate-300 group-hover:translate-x-1 transition-transform" />
-                              </div>
-                           </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  )
-                })}
+              {/* Member List - Categorized */}
+              <div className="lg:col-span-2 space-y-10">
+                {groupedMembers.central.length > 0 && (
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2 px-2">
+                       <ShieldCheck className="w-4 h-4 text-red-600" />
+                       <h4 className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400">Central Committee</h4>
+                       <div className="h-px flex-1 bg-slate-100 dark:bg-slate-800"></div>
+                    </div>
+                    {groupedMembers.central.map(renderMemberCard)}
+                  </div>
+                )}
+
+                {groupedMembers.state.length > 0 && (
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2 px-2">
+                       <Globe className="w-4 h-4 text-emerald-600" />
+                       <h4 className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400">State Committee</h4>
+                       <div className="h-px flex-1 bg-slate-100 dark:bg-slate-800"></div>
+                    </div>
+                    {groupedMembers.state.map(renderMemberCard)}
+                  </div>
+                )}
+
+                {groupedMembers.district.length > 0 && (
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2 px-2">
+                       <Building2 className="w-4 h-4 text-blue-600" />
+                       <h4 className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400">District Committee</h4>
+                       <div className="h-px flex-1 bg-slate-100 dark:bg-slate-800"></div>
+                    </div>
+                    {groupedMembers.district.map(renderMemberCard)}
+                  </div>
+                )}
+
                 {filteredMembers.length === 0 && (
                   <div className="text-center py-24 opacity-30">
                      <Package className="w-16 h-16 mx-auto mb-4" />
