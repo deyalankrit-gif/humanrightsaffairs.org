@@ -2,7 +2,7 @@
 
 import React, { useMemo, useState } from 'react';
 import Image from 'next/image';
-import { Mail, Phone, MapPin, Facebook, Twitter, Instagram, Youtube, Bell, Crown, ShieldCheck, Lock, ArrowRight, Loader2, CheckCircle2, Package } from 'lucide-react';
+import { Mail, Phone, MapPin, Facebook, Twitter, Instagram, Youtube, Bell, Crown, ShieldCheck, Lock, ArrowRight, Loader2, CheckCircle2, Package, Heart } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { DonationDialog } from './donation-dialog';
@@ -156,7 +156,11 @@ export function PublicFooter() {
               <li><Link href="/#knowledge" className="hover:text-accent transition-colors font-medium">Rights Center</Link></li>
               <li><Link href="/#membership" className="hover:text-accent transition-colors font-medium">Be A Member</Link></li>
               <li><Link href="/#helpline" className="hover:text-accent transition-colors font-medium">Emergency Contacts</Link></li>
-              <li><Link href="/donors" className="hover:text-accent transition-colors font-medium">Wall of Donors</Link></li>
+              <li>
+                <Link href="/donors" className="hover:text-accent transition-colors font-medium flex items-center gap-2">
+                  Wall of Donors <Heart className="w-3.5 h-3.5 text-red-500 fill-red-500/20" />
+                </Link>
+              </li>
               <li>
                 <Link href="/trust-credentials" className="hover:text-accent transition-colors font-medium flex items-center gap-2">
                   Trust Credentials <Crown className="w-3.5 h-3.5 text-[#D4AF37] fill-[#D4AF37]/20" />
