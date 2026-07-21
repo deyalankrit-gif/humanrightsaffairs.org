@@ -114,7 +114,7 @@ export default function PublicKitManagementPage() {
 
     filteredMembers.forEach(m => {
       const category = m.designationCategory || "General Member";
-      const eligibleItems = eligibleRules[category] || [];
+      const eligibleItems = eligibilityRules[category] || [];
       const kit = kitMap[m.id];
 
       kitItems.forEach((item: any) => {
@@ -360,7 +360,7 @@ export default function PublicKitManagementPage() {
                 </div>
               )}
 
-              {Object.keys(groupings.stateGroups).sort().map(state => (
+              {Object.keys(stateGroups).sort().map(state => (
                 <div key={state} className="space-y-4">
                   <div className="flex items-center gap-3 px-2">
                      <Globe className="w-6 h-6 text-emerald-600" />
@@ -369,13 +369,13 @@ export default function PublicKitManagementPage() {
                      </h4>
                      <div className="h-px flex-1 bg-slate-200 dark:bg-slate-800"></div>
                   </div>
-                  {groupings.stateGroups[state].map(renderMemberCard)}
+                  {stateGroups[state].map(renderMemberCard)}
                 </div>
               ))}
 
-              {Object.keys(groupings.districtGroups).sort().map(state => (
+              {Object.keys(districtGroups).sort().map(state => (
                 <div key={state} className="space-y-12">
-                  {Object.keys(groupings.districtGroups[state]).sort().map(district => (
+                  {Object.keys(districtGroups[state]).sort().map(district => (
                     <div key={district} className="space-y-4">
                       <div className="flex items-center gap-3 px-2">
                          <Building2 className="w-6 h-6 text-blue-600" />
@@ -385,7 +385,7 @@ export default function PublicKitManagementPage() {
                          <div className="h-px flex-1 bg-slate-200 dark:bg-slate-800"></div>
                       </div>
                       <div className="grid gap-4">
-                         {groupings.districtGroups[state][district].map(renderMemberCard)}
+                         {districtGroups[state][district].map(renderMemberCard)}
                       </div>
                     </div>
                   ))}
