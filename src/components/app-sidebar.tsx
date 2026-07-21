@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from "react"
@@ -43,7 +42,9 @@ import {
   Sparkles,
   ShieldAlert,
   Award,
-  ShieldQuestion
+  ShieldQuestion,
+  Archive,
+  HeartHandshake
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -72,6 +73,7 @@ const adminLinksConfig = [
   { name: 'Expenses', href: '/internal/expenses', icon: TrendingDown, permission: 'expenses' },
   { name: 'Applications', href: '/internal/applications', icon: FileText, permission: 'applications' },
   { name: 'Public Complaints', href: '/internal/public-complaints', icon: ShieldQuestion, permission: 'publicComplaints' },
+  { name: 'Kit Management', href: '/internal/kit-management', icon: Archive, permission: 'kitManagement' },
   { name: 'Members', href: '/internal/members', icon: Users, permission: 'members' },
   { name: 'Renewals', href: '/internal/renewals', icon: RefreshCw, permission: 'renewals' },
   { name: 'Terminated', href: '/internal/terminated-members', icon: UserX, permission: 'terminated' },

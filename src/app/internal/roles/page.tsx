@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useEffect, useState } from 'react'
@@ -66,6 +65,7 @@ const MODULES = [
   { id: 'expenses', label: 'Expenses Tracking' },
   { id: 'applications', label: 'Membership Apps' },
   { id: 'publicComplaints', label: 'Public Complaints' },
+  { id: 'kitManagement', label: 'Kit & Asset Management' },
   { id: 'inventory', label: 'Material Inventory' },
   { id: 'vendors', label: 'Vendor Registry' },
   { id: 'grievances', label: 'Grievance Cell' },

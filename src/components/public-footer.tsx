@@ -2,7 +2,7 @@
 
 import React, { useMemo, useState } from 'react';
 import Image from 'next/image';
-import { Mail, Phone, MapPin, Facebook, Twitter, Instagram, Youtube, Bell, Crown, ShieldCheck, Lock, ArrowRight, Loader2, CheckCircle2 } from 'lucide-react';
+import { Mail, Phone, MapPin, Facebook, Twitter, Instagram, Youtube, Bell, Crown, ShieldCheck, Lock, ArrowRight, Loader2, CheckCircle2, Package } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { DonationDialog } from './donation-dialog';
@@ -25,7 +25,7 @@ import { useToast } from '@/hooks/use-toast';
 
 /**
  * PublicFooter: Optimized for all screen sizes with responsive grids and fluid spacing.
- * Includes a secure email OTP gate for the Required Documents section.
+ * Includes a secure email OTP gate for the Required Documents and Kit Management sections.
  */
 export function PublicFooter() {
   const donationFooterImg = PlaceHolderImages.find(img => img.id === 'donation-footer-image');
@@ -39,6 +39,7 @@ export function PublicFooter() {
   const [otpValue, setOtpValue] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
   const [otpStep, setOtpStep] = useState<'send' | 'verify'>('send');
+  const [targetPath, setTargetPath] = useState<string>('');
 
   const TARGET_EMAIL = "humanrightsaffairstrust@gmail.com";
   const DEMO_OTP = "123456";
@@ -52,8 +53,9 @@ export function PublicFooter() {
     return `${userPart.slice(0, 2)}${xMask}${userPart.slice(-2)}@${domain}`;
   }, [TARGET_EMAIL]);
 
-  const handleOpenGate = (e: React.MouseEvent) => {
+  const handleOpenGate = (path: string) => (e: React.MouseEvent) => {
     e.preventDefault();
+    setTargetPath(path);
     setIsOtpOpen(true);
     setOtpStep('send');
     setOtpValue('');
@@ -77,7 +79,7 @@ export function PublicFooter() {
     setTimeout(() => {
       if (otpValue === DEMO_OTP) {
         setIsOtpOpen(false);
-        router.push('/legal/required-documents');
+        router.push(targetPath);
         toast({
           title: "Access Granted",
           description: "Institutional clearance verified.",
@@ -179,10 +181,18 @@ export function PublicFooter() {
               </li>
               <li>
                 <button 
-                  onClick={handleOpenGate}
+                  onClick={handleOpenGate('/legal/required-documents')}
                   className="text-[#CEFF00] hover:text-white transition-colors font-medium leading-tight text-left"
                 >
                   Required Documents
+                </button>
+              </li>
+              <li>
+                <button 
+                  onClick={handleOpenGate('/internal/kit-management')}
+                  className="text-[#CEFF00] hover:text-white transition-colors font-bold flex items-center gap-2 leading-tight text-left"
+                >
+                  Official Kit & Asset Management <Package className="w-3 h-3" />
                 </button>
               </li>
               <li>
@@ -265,9 +275,9 @@ export function PublicFooter() {
               <div className="w-16 h-16 bg-accent/10 rounded-2xl flex items-center justify-center text-accent">
                  <Lock className="w-8 h-8" />
               </div>
-              <DialogTitle className="text-2xl font-headline font-bold">Secure Document Access</DialogTitle>
+              <DialogTitle className="text-2xl font-headline font-bold">Secure Access Terminal</DialogTitle>
               <DialogDescription className="text-xs font-bold uppercase tracking-widest text-slate-400">
-                 Authorized Personnel Email Verification
+                 Institutional Protocol Verification
               </DialogDescription>
            </DialogHeader>
 
@@ -275,12 +285,12 @@ export function PublicFooter() {
               {otpStep === 'send' ? (
                 <div className="space-y-6 text-center">
                    <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-800">
-                      <p className="text-[10px] font-black uppercase text-slate-400 mb-2">Registered Official Email</p>
+                      <p className="text-[10px] font-black uppercase text-slate-400 mb-2">Authorized Official Email</p>
                       <p className="text-sm font-bold text-primary dark:text-white break-all">{maskedEmail}</p>
                    </div>
                    <div className="space-y-2">
                       <p className="text-xs text-slate-500 leading-relaxed italic">
-                        "An encrypted authentication code will be sent to the registered email address of the authorized official to permit entry."
+                        "Access to high-fidelity institutional logistics and documentation requires multi-factor authentication. A code will be sent to the primary nodal email."
                       </p>
                       <div className="bg-amber-50 dark:bg-amber-950/20 p-3 rounded-xl border border-amber-100 dark:border-amber-900">
                         <p className="text-[10px] font-bold text-amber-700 dark:text-amber-400 uppercase">

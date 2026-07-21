@@ -1,4 +1,3 @@
-
 {
   "entities": {
     "UserAccount": {
@@ -33,7 +32,8 @@
             "activityHub": { "type": "boolean", "description": "Access to manage Activity Calendar Hub." },
             "occasions": { "type": "boolean", "description": "Access to manage Festival & Occasion greetings." },
             "donorWall": { "type": "boolean", "description": "Access to manage Wall of Donors recognition." },
-            "publicComplaints": { "type": "boolean", "description": "Access to review public human rights complaints." }
+            "publicComplaints": { "type": "boolean", "description": "Access to review public human rights complaints." },
+            "kitManagement": { "type": "boolean", "description": "Access to manage official kits and member assets." }
           }
         },
         "lastLogin": { "type": "string", "format": "date-time" },
@@ -86,6 +86,37 @@
         "incidentPhotos": { "type": "array", "items": { "type": "string" } },
         "createdAt": { "type": "string", "format": "date-time" }
       }
+    },
+    "MemberKit": {
+      "title": "Member Kit",
+      "description": "Tracking of official materials issued to a member.",
+      "type": "object",
+      "properties": {
+        "memberId": { "type": "string" },
+        "memberName": { "type": "string" },
+        "items": {
+          "type": "object",
+          "properties": {
+            "identityCard": { "type": "boolean" },
+            "lanyard": { "type": "boolean" },
+            "cardHolder": { "type": "boolean" },
+            "vehicleSticker": { "type": "boolean" },
+            "badge": { "type": "boolean" },
+            "appointmentLetter": { "type": "boolean" },
+            "membershipCertificate": { "type": "boolean" },
+            "designationCarPlate": { "type": "boolean" },
+            "approvalLetterCarPlate": { "type": "boolean" },
+            "letterhead": { "type": "boolean" },
+            "officeSeal": { "type": "boolean" }
+          }
+        },
+        "dispatchDate": { "type": "string", "format": "date" },
+        "courierDetails": { "type": "string" },
+        "deliveryStatus": { "type": "string", "enum": ["Pending", "Dispatched", "In Transit", "Delivered", "Returned"] },
+        "acknowledgementReceived": { "type": "boolean" },
+        "notes": { "type": "string" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      }
     }
   },
   "auth": {
@@ -94,6 +125,7 @@
   "firestore": {
     "/users/{userEmail}": { "schema": "UserAccount", "description": "Permissions registry." },
     "/activity_events/{eventId}": { "schema": "ActivityEvent" },
-    "/public_complaints/{complaintId}": { "schema": "PublicComplaint", "description": "Public human rights reports." }
+    "/public_complaints/{complaintId}": { "schema": "PublicComplaint", "description": "Public human rights reports." },
+    "/member_kits/{memberId}": { "schema": "MemberKit", "description": "Member asset tracking." }
   }
 }
