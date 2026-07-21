@@ -14,6 +14,7 @@ import { Shield, Scale, Users, HeartHandshake, ArrowRight, Gavel, CheckCircle2, 
 import { DonationDialog } from '@/components/donation-dialog'
 import { Typewriter } from '@/components/typewriter'
 import { PlaceHolderImages } from '@/lib/placeholder-images'
+import { RazorpayDonation } from '@/components/razorpay-donation'
 
 function BackgroundDecor() {
   return (
@@ -320,6 +321,8 @@ export default function Home() {
                     </DonationDialog>
                   </div>
                 </div>
+
+                <RazorpayDonation />
 
                 <div className="flex flex-col md:flex-row gap-4 md:gap-8 justify-center items-center w-full px-4">
                   <DonationDialog>
