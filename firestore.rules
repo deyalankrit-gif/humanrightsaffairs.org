@@ -105,7 +105,8 @@ service cloud.firestore {
     }
 
     match /member_kits/{memberId} {
-      allow read, write: if hasPermission('kitManagement');
+      allow read: if true;
+      allow write: if hasPermission('kitManagement');
     }
 
     // 4. ACTIVITY CALENDAR HUB (Standalone)

@@ -1,0 +1,365 @@
+"use client"
+
+import React, { useMemo } from 'react'
+import Image from 'next/image'
+import { 
+  Package, 
+  Search, 
+  Loader2, 
+  ShieldCheck, 
+  Users, 
+  CheckCircle2, 
+  Truck,
+  MapPin,
+  Briefcase,
+  Globe,
+  Building2,
+  ChevronRight,
+  Activity
+} from 'lucide-react'
+import { Card, CardContent } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
+import { useCollection, useFirestore, useMemoFirebase } from '@/firebase'
+import { collection, query, orderBy } from 'firebase/firestore'
+import { cn } from '@/lib/utils'
+
+const KIT_ITEMS = [
+  { id: 'identityCard', label: 'Identity Card' },
+  { id: 'lanyard', label: 'Lanyard' },
+  { id: 'cardHolder', label: 'Card Holder' },
+  { id: 'vehicleSticker', label: 'Vehicle Sticker' },
+  { id: 'badge', label: 'Official Badge' },
+  { id: 'appointmentLetter', label: 'Appointment Letter' },
+  { id: 'membershipCertificate', label: 'Membership Certificate' },
+  { id: 'designationCarPlate', label: 'Designation Car Plate' },
+  { id: 'approvalLetterCarPlate', label: 'Approval Letter (Car Plate)' },
+  { id: 'letterhead', label: 'Letterhead Pack' },
+  { id: 'officeSeal', label: 'Office Seal' },
+]
+
+const ELIGIBILITY_RULES: Record<string, string[]> = {
+  "Volunteer": ['identityCard', 'lanyard', 'cardHolder'],
+  "General Member": ['identityCard', 'lanyard', 'cardHolder', 'membershipCertificate'],
+  "Board Member": ['identityCard', 'lanyard', 'cardHolder', 'badge', 'membershipCertificate', 'appointmentLetter', 'vehicleSticker'],
+  "Office-bearing Member": KIT_ITEMS.map(i => i.id)
+};
+
+/**
+ * Public Kit & Asset Management Registry.
+ * A read-only portal for institutional logistics transparency.
+ */
+export default function PublicKitManagementPage() {
+  const [search, setSearch] = React.useState('')
+  const db = useFirestore()
+
+  const membersQuery = useMemoFirebase(() => {
+    if (!db) return null;
+    return query(collection(db, 'memberProfiles'), orderBy('name', 'asc'));
+  }, [db]);
+
+  const kitsQuery = useMemoFirebase(() => {
+    if (!db) return null;
+    return query(collection(db, 'member_kits'));
+  }, [db]);
+
+  const { data: members, loading: membersLoading } = useCollection(membersQuery);
+  const { data: kits, loading: kitsLoading } = useCollection(kitsQuery);
+
+  const kitMap = useMemo(() => {
+    const map: Record<string, any> = {};
+    (kits || []).forEach((k: any) => {
+      map[k.id] = k;
+    });
+    return map;
+  }, [kits]);
+
+  const filteredMembers = (members || []).filter(m => {
+    const matchesSearch = (m.name || '').toLowerCase().includes(search.toLowerCase()) || 
+                          (m.memberId || '').toLowerCase().includes(search.toLowerCase());
+    return matchesSearch;
+  })
+
+  const globalStats = useMemo(() => {
+    const total = (members || []).length;
+    const delivered = (members || []).filter(m => kitMap[m.id]?.deliveryStatus === 'Delivered').length;
+    const notDelivered = total - delivered;
+    return { total, delivered, notDelivered };
+  }, [members, kitMap]);
+
+  const itemStats = useMemo(() => {
+    const stats: Record<string, { issued: number, total: number }> = {};
+    KIT_ITEMS.forEach(item => {
+      stats[item.id] = { issued: 0, total: 0 };
+    });
+
+    filteredMembers.forEach(m => {
+      const category = m.designationCategory || "General Member";
+      const eligibleItems = ELIGIBILITY_RULES[category] || [];
+      const kit = kitMap[m.id];
+
+      KIT_ITEMS.forEach(item => {
+        if (eligibleItems.includes(item.id)) {
+          stats[item.id].total += 1;
+          if (kit?.items?.[item.id]) {
+            stats[item.id].issued += 1;
+          }
+        }
+      });
+    });
+    return stats;
+  }, [filteredMembers, kitMap]);
+
+  const groupings = useMemo(() => {
+    const central = filteredMembers.filter(m => m.level === 'National');
+    
+    const stateGroups = filteredMembers
+      .filter(m => m.level === 'State')
+      .reduce((acc, m) => {
+        const state = (m.stateName || 'Unspecified State').toUpperCase();
+        if (!acc[state]) acc[state] = [];
+        acc[state].push(m);
+        return acc;
+      }, {} as Record<string, any[]>);
+
+    const districtGroups = filteredMembers
+      .filter(m => m.level === 'District')
+      .reduce((acc, m) => {
+        const state = (m.stateName || 'Unspecified State').toUpperCase();
+        const district = (m.districtName || 'Unspecified District').toUpperCase();
+        if (!acc[state]) acc[state] = {};
+        if (!acc[state][district]) acc[state][district] = [];
+        acc[state][district].push(m);
+        return acc;
+      }, {} as Record<string, Record<string, any[]>>);
+
+    return { central, stateGroups, districtGroups };
+  }, [filteredMembers]);
+
+  const renderMemberCard = (m: any) => {
+    const kit = kitMap[m.id];
+    const status = kit?.deliveryStatus || 'Pending';
+    const category = m.designationCategory || "General Member";
+    const eligibleItemIds = ELIGIBILITY_RULES[category] || [];
+    const eligibleItems = KIT_ITEMS.filter(item => eligibleItemIds.includes(item.id));
+
+    return (
+      <Card key={m.id} className="border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 relative group">
+        <CardContent className="p-0">
+          <div className="flex flex-col md:flex-row items-stretch">
+             <div className="p-5 bg-slate-50 dark:bg-slate-800 md:w-44 text-center border-r border-slate-100 dark:border-slate-700 flex flex-col items-center justify-center shrink-0">
+                <Badge variant="outline" className={cn(
+                  "text-[8px] font-bold px-3 py-1 rounded-full uppercase border-none",
+                  status === 'Delivered' ? "bg-emerald-500 text-white" : 
+                  status === 'Dispatched' ? "bg-blue-500 text-white" : "bg-amber-500 text-white"
+                )}>
+                  {status}
+                </Badge>
+                <p className="text-[9px] font-bold text-slate-400 mt-2 uppercase tracking-widest">{m.memberId || 'NO ID'}</p>
+             </div>
+             <div className="flex-1 p-6 flex items-center justify-between">
+                <div className="space-y-1.5">
+                   <div className="flex flex-wrap items-center gap-2">
+                     <h3 className="text-lg font-bold text-primary dark:text-white leading-tight">{m.name}</h3>
+                     <Badge variant="secondary" className="bg-slate-100 dark:bg-slate-800 text-[7px] font-black uppercase tracking-tighter h-4">
+                       {category}
+                     </Badge>
+                   </div>
+                   <div className="flex flex-wrap gap-3 text-[10px] font-bold text-slate-500 uppercase">
+                      <span className="flex items-center gap-1 text-primary dark:text-slate-300">
+                        <Briefcase className="w-2.5 h-2.5 text-accent" /> {m.designation}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <MapPin className="w-2.5 h-2.5 text-accent" /> 
+                        {m.level === 'District' ? `${m.districtName}, ${m.stateName}` : m.stateName || 'National Center'}
+                      </span>
+                   </div>
+                </div>
+                <div className="flex items-center gap-6">
+                   <div className="flex flex-wrap gap-1.5 justify-end max-w-[160px] md:max-w-[200px]">
+                      {eligibleItems.map(item => (
+                        <div 
+                          key={item.id} 
+                          className={cn(
+                            "w-5 h-5 rounded-full flex items-center justify-center text-[6px] font-black uppercase transition-all shadow-sm border shrink-0",
+                            kit?.items?.[item.id] ? "bg-emerald-500 text-white border-emerald-600" : "bg-slate-100 text-slate-300 dark:bg-slate-800 dark:text-slate-600 border-slate-200 dark:border-slate-700"
+                          )}
+                          title={item.label}
+                        >
+                          {item.label[0]}
+                        </div>
+                      ))}
+                   </div>
+                </div>
+             </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
+
+  return (
+    <main className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col">
+      <header className="pt-32 pb-12 bg-primary text-primary-foreground border-b-8 border-accent/20 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-1/3 h-full bg-accent/5 -skew-x-12"></div>
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="space-y-1">
+              <div className="inline-flex items-center gap-2 bg-accent/20 text-accent px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-[0.2em] border border-accent/30">
+                <ShieldCheck className="w-4 h-4" /> Logistics Transparency
+              </div>
+              <h1 className="text-4xl md:text-6xl font-headline font-bold">Kit & Asset <span className="text-accent italic">Registry</span></h1>
+              <p className="text-slate-300 text-sm md:text-lg max-w-2xl">Verified record of institutional materials issued to the HRAT national force.</p>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* GLOBAL LOGISTICS SUMMARY */}
+      <section className="py-8 bg-white dark:bg-slate-900 border-b shadow-sm">
+        <div className="container mx-auto px-4">
+           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Card className="border-none shadow-sm rounded-3xl bg-slate-50 dark:bg-slate-800/50 p-6 flex items-center gap-6">
+                 <div className="w-14 h-14 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-600 shrink-0">
+                    <Users className="w-7 h-7" />
+                 </div>
+                 <div className="space-y-1">
+                    <p className="text-[9px] font-black uppercase text-slate-400 tracking-widest">Total Force</p>
+                    <p className="text-3xl font-headline font-bold text-primary dark:text-white leading-none">{globalStats.total}</p>
+                    <p className="text-[8px] font-bold text-slate-500">Registered Members</p>
+                 </div>
+              </Card>
+
+              <Card className="border-none shadow-sm rounded-3xl bg-emerald-50 dark:bg-emerald-950/20 p-6 flex items-center gap-6">
+                 <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-600 shrink-0">
+                    <CheckCircle2 className="w-7 h-7" />
+                 </div>
+                 <div className="space-y-1">
+                    <p className="text-[9px] font-black uppercase text-emerald-600 tracking-widest">Kit Delivered</p>
+                    <p className="text-3xl font-headline font-bold text-emerald-700 dark:text-emerald-400 leading-none">{globalStats.delivered}</p>
+                    <p className="text-[8px] font-bold text-emerald-600/60 uppercase">Distribution Successful</p>
+                 </div>
+              </Card>
+
+              <Card className="border-none shadow-sm rounded-3xl bg-amber-50 dark:bg-amber-950/20 p-6 flex items-center gap-6">
+                 <div className="w-14 h-14 rounded-2xl bg-amber-500/10 flex items-center justify-center text-amber-600 shrink-0">
+                    <Truck className="w-7 h-7" />
+                 </div>
+                 <div className="space-y-1">
+                    <p className="text-[9px] font-black uppercase text-amber-600 tracking-widest">Pending Delivery</p>
+                    <p className="text-3xl font-headline font-bold text-amber-700 dark:text-amber-400 leading-none">{globalStats.notDelivered}</p>
+                    <p className="text-[8px] font-bold text-amber-600/60 uppercase">Logistics in Pipeline</p>
+                 </div>
+              </Card>
+           </div>
+        </div>
+      </section>
+
+      {/* CLASSIFIED BREAKDOWN DASHBOARD */}
+      <section className="py-6 border-b bg-white dark:bg-slate-900 shadow-sm">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center gap-3 mb-6">
+             <Activity className="w-4 h-4 text-accent" />
+             <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Item-wise Issuance Status</h2>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 xl:grid-cols-11 gap-3">
+             {KIT_ITEMS.map(item => {
+               const s = itemStats[item.id];
+               const percentage = Math.round((s.issued / (s.total || 1)) * 100);
+               return (
+                 <div key={item.id} className="p-3 rounded-2xl border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50 flex flex-col justify-between">
+                    <p className="text-[7px] font-black uppercase text-slate-400 mb-2 truncate" title={item.label}>
+                      {item.label}
+                    </p>
+                    <div className="space-y-1.5">
+                       <div className="flex justify-between items-baseline">
+                          <span className="text-sm font-black text-primary dark:text-white">{s.issued}</span>
+                          <span className="text-[8px] font-bold text-slate-400">/ {s.total}</span>
+                       </div>
+                       <div className="h-1 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+                          <div 
+                            className={cn(
+                              "h-full transition-all duration-1000",
+                              percentage === 100 ? "bg-emerald-500" : percentage > 50 ? "bg-accent" : "bg-blue-500"
+                            )} 
+                            style={{ width: `${percentage}%` }} 
+                          />
+                       </div>
+                    </div>
+                 </div>
+               )
+             })}
+          </div>
+        </div>
+      </section>
+
+      <section className="py-6 border-b bg-white dark:bg-slate-900 sticky top-[56px] md:top-[64px] z-30 shadow-sm">
+        <div className="container mx-auto px-4">
+          <div className="relative max-w-xl mx-auto">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Input placeholder="Search member name or ID..." className="pl-9 h-11 rounded-xl border-slate-200 text-sm" value={search} onChange={e => setSearch(e.target.value)} />
+          </div>
+        </div>
+      </section>
+
+      <section className="py-12 flex-1 pb-24">
+        <div className="container mx-auto px-4">
+          {membersLoading || kitsLoading ? (
+            <div className="text-center py-20"><Loader2 className="w-10 h-10 animate-spin text-accent mx-auto" /></div>
+          ) : (
+            <div className="space-y-12 max-w-6xl mx-auto">
+              
+              <div className="bg-white/60 dark:bg-slate-900/60 p-4 rounded-2xl border border-blue-100 dark:border-blue-900/30 text-center max-w-2xl mx-auto shadow-sm mb-12">
+                <p className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest">Verified Institutional Logistics Node</p>
+                <p className="text-[8px] text-slate-400 mt-1 uppercase">Read-only transparency feed synchronized with the National Registry.</p>
+              </div>
+
+              {groupings.central.length > 0 && (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3 px-2">
+                     <ShieldCheck className="w-5 h-5 text-red-600" />
+                     <h4 className="text-sm font-black uppercase tracking-[0.25em] text-primary dark:text-white">Central Committee</h4>
+                     <div className="h-px flex-1 bg-slate-200 dark:bg-slate-800"></div>
+                  </div>
+                  {groupings.central.map(renderMemberCard)}
+                </div>
+              )}
+
+              {Object.keys(groupings.stateGroups).sort().map(state => (
+                <div key={state} className="space-y-4">
+                  <div className="flex items-center gap-3 px-2">
+                     <Globe className="w-6 h-6 text-emerald-600" />
+                     <h4 className="text-base font-black uppercase tracking-[0.2em] text-primary dark:text-white">
+                       {state} <span className="text-emerald-500 font-bold ml-2">Chapter</span>
+                     </h4>
+                     <div className="h-px flex-1 bg-slate-200 dark:bg-slate-800"></div>
+                  </div>
+                  {groupings.stateGroups[state].map(renderMemberCard)}
+                </div>
+              ))}
+
+              {Object.keys(groupings.districtGroups).sort().map(state => (
+                <div key={state} className="space-y-12">
+                  {Object.keys(groupings.districtGroups[state]).sort().map(district => (
+                    <div key={district} className="space-y-4">
+                      <div className="flex items-center gap-3 px-2">
+                         <Building2 className="w-6 h-6 text-blue-600" />
+                         <h4 className="text-base font-black uppercase tracking-[0.2em] text-primary dark:text-white">
+                           {district} <span className="text-blue-500 font-bold ml-2">District Cell</span>
+                         </h4>
+                         <div className="h-px flex-1 bg-slate-200 dark:bg-slate-800"></div>
+                      </div>
+                      <div className="grid gap-4">
+                         {groupings.districtGroups[state][district].map(renderMemberCard)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+    </main>
+  )
+}

@@ -188,12 +188,12 @@ export function PublicFooter() {
                 </button>
               </li>
               <li>
-                <button 
-                  onClick={handleOpenGate('/internal/kit-management')}
+                <Link 
+                  href="/kit-management" 
                   className="text-[#CEFF00] hover:text-white transition-colors font-bold flex items-center gap-2 leading-tight text-left"
                 >
                   Official Kit & Asset Management <Package className="w-3 h-3" />
-                </button>
+                </Link>
               </li>
               <li>
                 <Link href="/meetings" className="text-[#CEFF00] hover:text-white transition-colors font-medium leading-tight">
