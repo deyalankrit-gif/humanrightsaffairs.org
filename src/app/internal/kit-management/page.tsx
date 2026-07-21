@@ -4,7 +4,6 @@ import React, { useEffect, useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { useUser, useCollection, useFirestore, useMemoFirebase } from '@/firebase'
 import { collection, query, orderBy, doc, setDoc, serverTimestamp } from 'firebase/firestore'
-import { Footer } from '@/components/footer'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -218,13 +217,13 @@ export default function MemberKitManagement() {
                       </span>
                    </div>
                 </div>
-                <div className="flex items-center gap-4">
-                   <div className="flex gap-2 overflow-hidden">
-                      {KIT_ITEMS.slice(0, 5).map(item => (
+                <div className="flex items-center gap-6">
+                   <div className="flex flex-wrap gap-1.5 justify-end max-w-[160px] md:max-w-[200px]">
+                      {KIT_ITEMS.map(item => (
                         <div 
                           key={item.id} 
                           className={cn(
-                            "w-6 h-6 rounded-full flex items-center justify-center text-[7px] font-black uppercase transition-all shadow-sm border",
+                            "w-5 h-5 rounded-full flex items-center justify-center text-[6px] font-black uppercase transition-all shadow-sm border shrink-0",
                             kit?.items?.[item.id] ? "bg-emerald-500 text-white border-emerald-600" : "bg-slate-100 text-slate-300 dark:bg-slate-800 dark:text-slate-600 border-slate-200 dark:border-slate-700"
                           )}
                           title={item.label}
@@ -232,13 +231,8 @@ export default function MemberKitManagement() {
                           {item.label[0]}
                         </div>
                       ))}
-                      {KIT_ITEMS.length > 5 && (
-                        <div className="w-6 h-6 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-[7px] font-bold text-slate-400 border border-slate-200 dark:border-slate-700">
-                          +{KIT_ITEMS.length - 5}
-                        </div>
-                      )}
                    </div>
-                   <ChevronRight className="w-4 h-4 text-slate-300 group-hover:translate-x-1 transition-transform" />
+                   <ChevronRight className="w-4 h-4 text-slate-300 group-hover:translate-x-1 transition-transform shrink-0" />
                 </div>
              </div>
           </div>
