@@ -40,6 +40,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogTrigger,
   DialogClose
 } from "@/components/ui/dialog"
@@ -324,7 +325,7 @@ export default function MemberKitManagement() {
                  </DialogTrigger>
                  <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto rounded-[2rem] border-none shadow-2xl">
                     <DialogHeader>
-                       <DialogTitle>Memeber Item Eligibility Protocol</DialogTitle>
+                       <DialogTitle>Member Item Eligibility Protocol</DialogTitle>
                        <DialogDescription>Define which institutional items each category of member is entitled to receive.</DialogDescription>
                     </DialogHeader>
                     <div className="py-6 space-y-8">
