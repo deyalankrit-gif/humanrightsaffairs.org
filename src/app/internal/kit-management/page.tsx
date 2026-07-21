@@ -393,7 +393,7 @@ export default function MemberKitManagement() {
                           key={item.id} 
                           className={cn(
                             "w-5 h-5 rounded-full flex items-center justify-center text-[6px] font-black uppercase transition-all shadow-sm border shrink-0",
-                            kit?.items?.[item.id] ? "bg-emerald-500 text-white border-emerald-600" : "bg-slate-100 text-slate-300 dark:bg-slate-800 dark:text-slate-600 border-slate-200 dark:border-slate-700"
+                            kit?.items?.[item.id] ? "bg-emerald-500 text-white border-emerald-600" : "bg-yellow-100 text-yellow-600 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-500 dark:border-yellow-800"
                           )}
                           title={item.label}
                         >
