@@ -29,11 +29,20 @@ import {
   Building2,
   Globe,
   Activity,
-  ClipboardList
+  ClipboardList,
+  Settings2
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
 import Image from 'next/image'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogClose
+} from "@/components/ui/dialog"
 
 const KIT_ITEMS = [
   { id: 'identityCard', label: 'Identity Card' },
@@ -49,6 +58,13 @@ const KIT_ITEMS = [
   { id: 'officeSeal', label: 'Office Seal' },
 ]
 
+const MEMBER_CATEGORIES = [
+  "General Member",
+  "Board Member",
+  "Office-bearing Member",
+  "Volunteer"
+]
+
 export default function MemberKitManagement() {
   const { user, loading: authLoading } = useUser()
   const router = useRouter()
@@ -59,6 +75,14 @@ export default function MemberKitManagement() {
   const [statusFilter, setStatusFilter] = useState('All')
   const [isSaving, setIsSaving] = useState<string | null>(null)
   const [selectedMember, setSelectedMember] = useState<any>(null)
+
+  // ELIGIBILITY STATE
+  const [eligibilityRules, setEligibilityRules] = useState<Record<string, string[]>>({
+    "Volunteer": ['identityCard', 'lanyard', 'cardHolder'],
+    "General Member": ['identityCard', 'lanyard', 'cardHolder', 'membershipCertificate'],
+    "Board Member": ['identityCard', 'lanyard', 'cardHolder', 'badge', 'membershipCertificate', 'appointmentLetter', 'vehicleSticker'],
+    "Office-bearing Member": KIT_ITEMS.map(i => i.id)
+  });
 
   const [kitForm, setKitForm] = useState({
     items: {} as Record<string, boolean>,
@@ -141,23 +165,29 @@ export default function MemberKitManagement() {
     return matchesSearch && matchesStatus;
   })
 
-  // CLASSIFIED BREAKDOWN CALCULATION
+  // CLASSIFIED BREAKDOWN CALCULATION (Filtered by Eligibility)
   const itemStats = useMemo(() => {
     const stats: Record<string, { issued: number, total: number }> = {};
     KIT_ITEMS.forEach(item => {
-      stats[item.id] = { issued: 0, total: filteredMembers.length };
+      stats[item.id] = { issued: 0, total: 0 };
     });
 
     filteredMembers.forEach(m => {
+      const category = m.designationCategory || "General Member";
+      const eligibleItems = eligibilityRules[category] || [];
       const kit = kitMap[m.id];
+
       KIT_ITEMS.forEach(item => {
-        if (kit?.items?.[item.id]) {
-          stats[item.id].issued += 1;
+        if (eligibleItems.includes(item.id)) {
+          stats[item.id].total += 1;
+          if (kit?.items?.[item.id]) {
+            stats[item.id].issued += 1;
+          }
         }
       });
     });
     return stats;
-  }, [filteredMembers, kitMap]);
+  }, [filteredMembers, kitMap, eligibilityRules]);
 
   const groupings = useMemo(() => {
     const central = filteredMembers.filter(m => m.level === 'National');
@@ -185,13 +215,23 @@ export default function MemberKitManagement() {
     return { central, stateGroups, districtGroups };
   }, [filteredMembers]);
 
-  if (authLoading || !user) {
-    return <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950"><Loader2 className="w-10 h-10 animate-spin text-accent" /></div>
-  }
+  const toggleEligibility = (category: string, itemId: string) => {
+    setEligibilityRules(prev => {
+      const current = prev[category] || [];
+      const updated = current.includes(itemId) 
+        ? current.filter(id => id !== itemId) 
+        : [...current, itemId];
+      return { ...prev, [category]: updated };
+    });
+  };
 
   const renderMemberCard = (m: any) => {
     const kit = kitMap[m.id];
     const status = kit?.deliveryStatus || 'Pending';
+    const category = m.designationCategory || "General Member";
+    const eligibleItemIds = eligibilityRules[category] || [];
+    const eligibleItems = KIT_ITEMS.filter(item => eligibleItemIds.includes(item.id));
+
     return (
       <Card 
         key={m.id} 
@@ -218,7 +258,7 @@ export default function MemberKitManagement() {
                    <div className="flex flex-wrap items-center gap-2">
                      <h3 className="text-lg font-bold text-primary dark:text-white leading-tight group-hover:text-accent transition-colors">{m.name}</h3>
                      <Badge variant="secondary" className="bg-slate-100 dark:bg-slate-800 text-[7px] font-black uppercase tracking-tighter h-4">
-                       {m.level === 'National' ? 'Central' : m.level} Position
+                       {category}
                      </Badge>
                    </div>
                    <div className="flex flex-wrap gap-3 text-[10px] font-bold text-slate-500 uppercase">
@@ -233,7 +273,7 @@ export default function MemberKitManagement() {
                 </div>
                 <div className="flex items-center gap-6">
                    <div className="flex flex-wrap gap-1.5 justify-end max-w-[160px] md:max-w-[200px]">
-                      {KIT_ITEMS.map(item => (
+                      {eligibleItems.map(item => (
                         <div 
                           key={item.id} 
                           className={cn(
@@ -245,6 +285,9 @@ export default function MemberKitManagement() {
                           {item.label[0]}
                         </div>
                       ))}
+                      {eligibleItems.length === 0 && (
+                        <span className="text-[8px] font-bold text-slate-300 uppercase italic">No items assigned</span>
+                      )}
                    </div>
                    <ChevronRight className="w-4 h-4 text-slate-300 group-hover:translate-x-1 transition-transform shrink-0" />
                 </div>
@@ -254,6 +297,10 @@ export default function MemberKitManagement() {
       </Card>
     );
   };
+
+  if (authLoading || !user) {
+    return <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950"><Loader2 className="w-10 h-10 animate-spin text-accent" /></div>
+  }
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col">
@@ -269,10 +316,51 @@ export default function MemberKitManagement() {
               <p className="text-slate-400 text-[11px]">Tracking institutional materials and official representation assets.</p>
             </div>
             <div className="flex gap-2">
-               <div className="bg-white/5 px-6 py-2 rounded-xl border border-white/10 text-center">
-                  <p className="text-[8px] font-bold text-slate-500 uppercase mb-0.5">Active Kits</p>
-                  <p className="text-lg font-bold text-emerald-400">{kits?.length || 0}</p>
-               </div>
+               <Dialog>
+                 <DialogTrigger asChild>
+                   <Button variant="outline" className="bg-white/5 border-accent/30 text-accent h-10 rounded-xl text-[10px] font-black uppercase tracking-widest gap-2 hover:bg-accent hover:text-primary transition-all">
+                      <Settings2 className="w-4 h-4" /> Eligibility Configuration
+                   </Button>
+                 </DialogTrigger>
+                 <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto rounded-[2rem] border-none shadow-2xl">
+                    <DialogHeader>
+                       <DialogTitle>Memeber Item Eligibility Protocol</DialogTitle>
+                       <DialogDescription>Define which institutional items each category of member is entitled to receive.</DialogDescription>
+                    </DialogHeader>
+                    <div className="py-6 space-y-8">
+                       {MEMBER_CATEGORIES.map(category => (
+                         <div key={category} className="space-y-4">
+                            <h4 className="text-sm font-black uppercase tracking-widest text-primary border-b pb-2 flex items-center gap-2">
+                               <UserCheck className="w-4 h-4 text-accent" /> {category}
+                            </h4>
+                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                               {KIT_ITEMS.map(item => {
+                                 const isEligible = (eligibilityRules[category] || []).includes(item.id);
+                                 return (
+                                   <div 
+                                    key={item.id} 
+                                    onClick={() => toggleEligibility(category, item.id)}
+                                    className={cn(
+                                      "flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer select-none",
+                                      isEligible ? "bg-accent/10 border-accent/40 text-primary font-bold" : "bg-slate-50 border-slate-100 text-slate-400"
+                                    )}
+                                   >
+                                      <Checkbox checked={isEligible} onCheckedChange={() => toggleEligibility(category, item.id)} className="border-accent" />
+                                      <span className="text-[10px] uppercase">{item.label}</span>
+                                   </div>
+                                 )
+                               })}
+                            </div>
+                         </div>
+                       ))}
+                    </div>
+                    <DialogFooter>
+                       <DialogClose asChild>
+                         <Button className="w-full h-12 rounded-xl font-bold bg-primary text-white">Save & Commit Rules</Button>
+                       </DialogClose>
+                    </DialogFooter>
+                 </DialogContent>
+               </Dialog>
             </div>
           </div>
         </div>
@@ -283,7 +371,7 @@ export default function MemberKitManagement() {
         <div className="container mx-auto px-4">
           <div className="flex items-center gap-3 mb-6">
              <Activity className="w-4 h-4 text-accent" />
-             <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Classified Issuance Breakdown</h2>
+             <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Eligibility-Based Issuance Breakdown</h2>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 xl:grid-cols-11 gap-3">
              {KIT_ITEMS.map(item => {
@@ -345,7 +433,6 @@ export default function MemberKitManagement() {
               
               {/* Member List - Categorized */}
               <div className="lg:col-span-2 space-y-12 pb-20">
-                {/* Central Committee */}
                 {groupings.central.length > 0 && (
                   <div className="space-y-4">
                     <div className="flex items-center gap-3 px-2">
@@ -357,7 +444,6 @@ export default function MemberKitManagement() {
                   </div>
                 )}
 
-                {/* State Committees */}
                 {Object.keys(groupings.stateGroups).length > 0 && (
                   <div className="space-y-12">
                     {Object.keys(groupings.stateGroups).sort().map(state => (
@@ -375,7 +461,6 @@ export default function MemberKitManagement() {
                   </div>
                 )}
 
-                {/* District Committees */}
                 {Object.keys(groupings.districtGroups).length > 0 && (
                   <div className="space-y-16">
                     {Object.keys(groupings.districtGroups).sort().map(state => (
@@ -422,10 +507,10 @@ export default function MemberKitManagement() {
                      <CardContent className="p-8 space-y-8">
                         <div className="space-y-4">
                            <h4 className="text-[10px] font-black uppercase tracking-widest text-accent flex items-center gap-2">
-                             <ClipboardList className="w-3.5 h-3.5" /> Items Ready for Issuance
+                             <ClipboardList className="w-3.5 h-3.5" /> Eligible Items for {selectedMember.designationCategory || "Member"}
                            </h4>
                            <div className="grid grid-cols-1 gap-2">
-                              {KIT_ITEMS.map(item => (
+                              {KIT_ITEMS.filter(item => (eligibilityRules[selectedMember.designationCategory || "General Member"] || []).includes(item.id)).map(item => (
                                 <div key={item.id} className="flex items-center space-x-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 hover:border-accent/30 transition-all">
                                    <Checkbox 
                                     id={item.id} 
@@ -440,6 +525,11 @@ export default function MemberKitManagement() {
                                    {kitForm.items[item.id] && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />}
                                 </div>
                               ))}
+                              {KIT_ITEMS.filter(item => (eligibilityRules[selectedMember.designationCategory || "General Member"] || []).includes(item.id)).length === 0 && (
+                                <div className="text-center py-4 border-2 border-dashed rounded-xl border-slate-100 text-[10px] text-slate-400 uppercase font-bold">
+                                  No items configured for this type.
+                                </div>
+                              )}
                            </div>
                         </div>
 
