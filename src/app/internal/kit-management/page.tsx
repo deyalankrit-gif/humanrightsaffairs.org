@@ -95,7 +95,6 @@ export default function MemberKitManagement() {
   const [isSaving, setIsSaving] = useState<string | null>(null)
   const [selectedMember, setSelectedMember] = useState<any>(null)
 
-  // CONFIGURATION PERSISTENCE STATES
   const [isConfiguring, setIsConfiguring] = useState(false)
   const [newItemLabel, setNewItemLabel] = useState('')
   const [editingItemId, setEditingItemId] = useState<string | null>(null)
@@ -116,7 +115,6 @@ export default function MemberKitManagement() {
     }
   }, [user, authLoading, router])
 
-  // LOAD GLOBAL CONFIGURATION FROM FIRESTORE
   const configDocRef = useMemoFirebase(() => {
     if (!db) return null;
     return doc(db, 'member_kits', 'settings');
@@ -190,7 +188,6 @@ export default function MemberKitManagement() {
     }
   }
 
-  // FIRESTORE CONFIGURATION UPDATE HELPER
   const saveLogisticsConfig = async (newKitItems: any[], newEligibilityRules: any) => {
     if (!db) return;
     const updateData = {
@@ -281,7 +278,6 @@ export default function MemberKitManagement() {
     return matchesSearch && matchesStatus;
   })
 
-  // GLOBAL SUMMARY CALCULATION
   const globalStats = useMemo(() => {
     const total = (members || []).length;
     const delivered = (members || []).filter(m => kitMap[m.id]?.deliveryStatus === 'Delivered').length;
@@ -289,7 +285,6 @@ export default function MemberKitManagement() {
     return { total, delivered, notDelivered };
   }, [members, kitMap]);
 
-  // CLASSIFIED BREAKDOWN CALCULATION (Filtered by Eligibility)
   const itemStats = useMemo(() => {
     const stats: Record<string, { issued: number, total: number }> = {};
     kitItems.forEach((item: any) => {
@@ -460,7 +455,6 @@ export default function MemberKitManagement() {
                     </DialogHeader>
                     
                     <div className="py-6 space-y-8">
-                       {/* ITEM CREATION & MANAGEMENT FACILITY */}
                        <div className="p-6 bg-slate-50 dark:bg-slate-900 rounded-3xl border-2 border-dashed border-slate-200 dark:border-slate-800 space-y-6">
                           <div className="space-y-4">
                             <div className="flex items-center gap-2">
@@ -501,7 +495,6 @@ export default function MemberKitManagement() {
                             </div>
                           </div>
 
-                          {/* GLOBAL ITEM LIST WITH ACTIONS - ENHANCED VISIBILITY */}
                           <div className="space-y-3">
                             <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">Global Item Registry Management</p>
                             <div className="flex flex-wrap gap-3">
@@ -584,7 +577,6 @@ export default function MemberKitManagement() {
         </div>
       </header>
 
-      {/* GLOBAL LOGISTICS SUMMARY */}
       <section className="py-8 bg-white dark:bg-slate-900 border-b shadow-sm">
         <div className="container mx-auto px-4">
            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -624,7 +616,6 @@ export default function MemberKitManagement() {
         </div>
       </section>
 
-      {/* CLASSIFIED BREAKDOWN DASHBOARD */}
       <section className="py-6 border-b bg-white dark:bg-slate-900 shadow-sm animate-in fade-in duration-700">
         <div className="container mx-auto px-4">
           <div className="flex items-center gap-3 mb-6">
@@ -688,8 +679,6 @@ export default function MemberKitManagement() {
             <div className="text-center py-20"><Loader2 className="w-10 h-10 animate-spin text-accent mx-auto" /></div>
           ) : (
             <div className="grid lg:grid-cols-3 gap-8 items-start">
-              
-              {/* Member List - Categorized */}
               <div className="lg:col-span-2 space-y-12 pb-20">
                 {groupings.central.length > 0 && (
                   <div className="space-y-4">
@@ -750,7 +739,6 @@ export default function MemberKitManagement() {
                 )}
               </div>
 
-              {/* Management Side Panel */}
               <div className="lg:col-span-1">
                 {selectedMember ? (
                   <Card className="rounded-[2.5rem] bg-white dark:bg-slate-900 border-none shadow-2xl sticky top-32 overflow-hidden animate-in slide-in-from-right-4 duration-500">
@@ -854,7 +842,6 @@ export default function MemberKitManagement() {
                   </div>
                 )}
               </div>
-
             </div>
           )}
         </div>

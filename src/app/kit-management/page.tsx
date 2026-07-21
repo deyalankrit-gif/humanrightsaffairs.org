@@ -49,15 +49,10 @@ const INITIAL_ELIGIBILITY: Record<string, string[]> = {
   "Office-bearing Member": INITIAL_KIT_ITEMS.map(i => i.id)
 };
 
-/**
- * Public Kit & Asset Management Registry.
- * A read-only portal for institutional logistics transparency.
- */
 export default function PublicKitManagementPage() {
   const [search, setSearch] = React.useState('')
   const db = useFirestore()
 
-  // LOAD GLOBAL CONFIGURATION FROM FIRESTORE
   const configDocRef = useMemoFirebase(() => {
     if (!db) return null;
     return doc(db, 'member_kits', 'settings');
@@ -256,7 +251,6 @@ export default function PublicKitManagementPage() {
         </div>
       </header>
 
-      {/* GLOBAL LOGISTICS SUMMARY */}
       <section className="py-8 bg-white dark:bg-slate-900 border-b shadow-sm">
         <div className="container mx-auto px-4">
            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -296,7 +290,6 @@ export default function PublicKitManagementPage() {
         </div>
       </section>
 
-      {/* CLASSIFIED BREAKDOWN DASHBOARD */}
       <section className="py-6 border-b bg-white dark:bg-slate-900 shadow-sm">
         <div className="container mx-auto px-4">
           <div className="flex items-center gap-3 mb-6">
