@@ -16,7 +16,9 @@ import {
   Building2,
   ChevronRight,
   Activity,
-  Star
+  Star,
+  Clock,
+  FileText
 } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -112,7 +114,7 @@ export default function PublicKitManagementPage() {
 
     filteredMembers.forEach(m => {
       const category = m.designationCategory || "General Member";
-      const eligibleItems = eligibilityRules[category] || [];
+      const eligibleItems = eligibleRules[category] || [];
       const kit = kitMap[m.id];
 
       kitItems.forEach((item: any) => {
@@ -195,6 +197,16 @@ export default function PublicKitManagementPage() {
                         <MapPin className="w-3 h-3 text-accent" /> 
                         {m.level === 'District' ? `${m.districtName}, ${m.stateName}` : m.stateName || 'National Center'}
                       </span>
+                      {kit?.dispatchDate && (
+                        <span className="flex items-center gap-1.5 text-blue-500">
+                          <Clock className="w-3 h-3" /> {kit.dispatchDate}
+                        </span>
+                      )}
+                      {kit?.notes && (
+                        <span className="flex items-center gap-1.5 text-slate-400 italic normal-case font-medium max-w-[200px] truncate">
+                          <FileText className="w-3 h-3" /> {kit.notes}
+                        </span>
+                      )}
                    </div>
                 </div>
                 <div className="flex items-center gap-6">

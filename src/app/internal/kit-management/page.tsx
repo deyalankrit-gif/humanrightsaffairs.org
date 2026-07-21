@@ -35,7 +35,9 @@ import {
   Users,
   Star,
   Edit,
-  Trash2
+  Trash2,
+  Clock,
+  FileText
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
@@ -385,6 +387,16 @@ export default function MemberKitManagement() {
                         <MapPin className="w-3 h-3 text-accent" /> 
                         {m.level === 'District' ? `${m.districtName}, ${m.stateName}` : m.stateName || 'National Center'}
                       </span>
+                      {kit?.dispatchDate && (
+                        <span className="flex items-center gap-1.5 text-blue-500">
+                          <Clock className="w-3 h-3" /> {kit.dispatchDate}
+                        </span>
+                      )}
+                      {kit?.notes && (
+                        <span className="flex items-center gap-1.5 text-slate-400 italic normal-case font-medium max-w-[200px] truncate">
+                          <FileText className="w-3 h-3" /> {kit.notes}
+                        </span>
+                      )}
                    </div>
                 </div>
                 <div className="flex items-center gap-6">
@@ -647,7 +659,7 @@ export default function MemberKitManagement() {
       <section className="py-6 border-b bg-white dark:bg-slate-900 sticky top-10 z-30 shadow-sm">
         <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
-             {['All', 'Pending', 'Dispatched', 'Delivered'].map(st => (
+             {['All', 'Pending', 'In Progress', 'Resolved'].map(st => (
                <button 
                 key={st} 
                 onClick={() => setStatusFilter(st)}
