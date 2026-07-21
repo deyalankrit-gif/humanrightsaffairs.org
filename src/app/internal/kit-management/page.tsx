@@ -448,16 +448,16 @@ export default function MemberKitManagement() {
                             </div>
                           </div>
 
-                          {/* GLOBAL ITEM LIST WITH ACTIONS */}
+                          {/* GLOBAL ITEM LIST WITH ACTIONS - ENHANCED VISIBILITY */}
                           <div className="space-y-3">
                             <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">Global Item Registry Management</p>
-                            <div className="flex flex-wrap gap-2">
+                            <div className="flex flex-wrap gap-3">
                                {kitItems.map(item => (
                                  <div 
                                    key={item.id} 
                                    className={cn(
-                                     "flex items-center gap-2 bg-white dark:bg-slate-950 border pl-4 pr-1 py-1 rounded-xl transition-all",
-                                     editingItemId === item.id ? "border-accent ring-1 ring-accent" : "border-slate-100 dark:border-slate-800"
+                                     "flex items-center gap-3 bg-white dark:bg-slate-950 border pl-4 pr-1 py-1 rounded-xl transition-all shadow-sm",
+                                     editingItemId === item.id ? "border-accent ring-2 ring-accent/20" : "border-slate-100 dark:border-slate-800"
                                    )}
                                  >
                                     <span className={cn(
@@ -466,25 +466,25 @@ export default function MemberKitManagement() {
                                     )}>
                                       {item.label}
                                     </span>
-                                    <div className="flex items-center gap-0.5 ml-1">
+                                    <div className="flex items-center gap-1 ml-2">
                                        <Button 
                                          variant="ghost" 
                                          size="icon" 
-                                         onClick={() => handleStartEditItem(item)}
+                                         onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleStartEditItem(item); }}
                                          className={cn(
-                                           "h-7 w-7 rounded-lg transition-colors",
-                                           editingItemId === item.id ? "text-accent bg-accent/10" : "text-slate-400 hover:text-blue-500"
+                                           "h-8 w-8 rounded-lg transition-all",
+                                           editingItemId === item.id ? "text-accent bg-accent/10" : "text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20"
                                          )}
                                        >
-                                         <Edit className="w-3.5 h-3.5" />
+                                         <Edit className="w-4 h-4" />
                                        </Button>
                                        <Button 
                                          variant="ghost" 
                                          size="icon" 
-                                         onClick={() => handleDeleteKitItem(item.id)}
-                                         className="h-7 w-7 rounded-lg text-slate-400 hover:text-red-500"
+                                         onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleDeleteKitItem(item.id); }}
+                                         className="h-8 w-8 rounded-lg text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"
                                        >
-                                         <Trash2 className="w-3.5 h-3.5" />
+                                         <Trash2 className="w-4 h-4" />
                                        </Button>
                                     </div>
                                  </div>
@@ -507,7 +507,7 @@ export default function MemberKitManagement() {
                                     onClick={() => toggleEligibility(category, item.id)}
                                     className={cn(
                                       "flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer select-none",
-                                      isEligible ? "bg-accent/10 border-accent/40 text-primary font-bold" : "bg-slate-50 border-slate-100 text-slate-400"
+                                      isEligible ? "bg-accent/10 border-accent/40 text-primary font-bold shadow-sm" : "bg-slate-50 border-slate-100 text-slate-400"
                                     )}
                                    >
                                       <Checkbox checked={isEligible} onCheckedChange={() => toggleEligibility(category, item.id)} className="border-accent" />
@@ -521,7 +521,7 @@ export default function MemberKitManagement() {
                     </div>
                     <DialogFooter>
                        <DialogClose asChild>
-                         <Button className="w-full h-12 rounded-xl font-bold bg-primary text-white">Save & Commit Rules</Button>
+                         <Button className="w-full h-12 rounded-xl font-bold bg-primary text-white hover:bg-secondary">Save & Commit Rules</Button>
                        </DialogClose>
                     </DialogFooter>
                  </DialogContent>
