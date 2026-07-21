@@ -27,7 +27,9 @@ import {
   X,
   Briefcase,
   Building2,
-  Globe
+  Globe,
+  Activity,
+  ClipboardList
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
@@ -139,13 +141,31 @@ export default function MemberKitManagement() {
     return matchesSearch && matchesStatus;
   })
 
+  // CLASSIFIED BREAKDOWN CALCULATION
+  const itemStats = useMemo(() => {
+    const stats: Record<string, { issued: number, total: number }> = {};
+    KIT_ITEMS.forEach(item => {
+      stats[item.id] = { issued: 0, total: filteredMembers.length };
+    });
+
+    filteredMembers.forEach(m => {
+      const kit = kitMap[m.id];
+      KIT_ITEMS.forEach(item => {
+        if (kit?.items?.[item.id]) {
+          stats[item.id].issued += 1;
+        }
+      });
+    });
+    return stats;
+  }, [filteredMembers, kitMap]);
+
   const groupings = useMemo(() => {
     const central = filteredMembers.filter(m => m.level === 'National');
     
     const stateGroups = filteredMembers
       .filter(m => m.level === 'State')
       .reduce((acc, m) => {
-        const state = m.stateName || 'Unspecified State';
+        const state = (m.stateName || 'Unspecified State').toUpperCase();
         if (!acc[state]) acc[state] = [];
         acc[state].push(m);
         return acc;
@@ -154,8 +174,8 @@ export default function MemberKitManagement() {
     const districtGroups = filteredMembers
       .filter(m => m.level === 'District')
       .reduce((acc, m) => {
-        const state = m.stateName || 'Unspecified State';
-        const district = m.districtName || 'Unspecified District';
+        const state = (m.stateName || 'Unspecified State').toUpperCase();
+        const district = (m.districtName || 'Unspecified District').toUpperCase();
         if (!acc[state]) acc[state] = {};
         if (!acc[state][district]) acc[state][district] = [];
         acc[state][district].push(m);
@@ -212,7 +232,6 @@ export default function MemberKitManagement() {
                    </div>
                 </div>
                 <div className="flex items-center gap-6">
-                   {/* KIT INDICATORS - WRAPPED AND SPACED */}
                    <div className="flex flex-wrap gap-1.5 justify-end max-w-[160px] md:max-w-[200px]">
                       {KIT_ITEMS.map(item => (
                         <div 
@@ -237,8 +256,8 @@ export default function MemberKitManagement() {
   };
 
   return (
-    <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
-      <section className="pt-16 pb-8 bg-slate-900 text-white border-b-8 border-accent/20 relative overflow-hidden">
+    <main className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col">
+      <header className="pt-16 pb-8 bg-slate-900 text-white border-b-8 border-accent/20 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-1/3 h-full bg-accent/5 -skew-x-12"></div>
         <div className="container mx-auto px-4 relative z-10">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
@@ -255,6 +274,44 @@ export default function MemberKitManagement() {
                   <p className="text-lg font-bold text-emerald-400">{kits?.length || 0}</p>
                </div>
             </div>
+          </div>
+        </div>
+      </header>
+
+      {/* CLASSIFIED BREAKDOWN DASHBOARD */}
+      <section className="py-6 border-b bg-white dark:bg-slate-900 shadow-sm animate-in fade-in duration-700">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center gap-3 mb-6">
+             <Activity className="w-4 h-4 text-accent" />
+             <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Classified Issuance Breakdown</h2>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 xl:grid-cols-11 gap-3">
+             {KIT_ITEMS.map(item => {
+               const s = itemStats[item.id];
+               const percentage = Math.round((s.issued / (s.total || 1)) * 100);
+               return (
+                 <div key={item.id} className="p-3 rounded-2xl border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50 flex flex-col justify-between group hover:border-accent/40 transition-colors">
+                    <p className="text-[7px] font-black uppercase text-slate-400 mb-2 truncate group-hover:text-primary dark:group-hover:text-accent transition-colors" title={item.label}>
+                      {item.label}
+                    </p>
+                    <div className="space-y-1.5">
+                       <div className="flex justify-between items-baseline">
+                          <span className="text-sm font-black text-primary dark:text-white">{s.issued}</span>
+                          <span className="text-[8px] font-bold text-slate-400">/ {s.total}</span>
+                       </div>
+                       <div className="h-1 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+                          <div 
+                            className={cn(
+                              "h-full transition-all duration-1000",
+                              percentage === 100 ? "bg-emerald-500" : percentage > 50 ? "bg-accent" : "bg-blue-500"
+                            )} 
+                            style={{ width: `${percentage}%` }} 
+                          />
+                       </div>
+                    </div>
+                 </div>
+               )
+             })}
           </div>
         </div>
       </section>
@@ -279,7 +336,7 @@ export default function MemberKitManagement() {
         </div>
       </section>
 
-      <section className="py-8">
+      <section className="py-8 flex-1">
         <div className="container mx-auto px-4">
           {membersLoading || kitsLoading ? (
             <div className="text-center py-20"><Loader2 className="w-10 h-10 animate-spin text-accent mx-auto" /></div>
@@ -287,13 +344,13 @@ export default function MemberKitManagement() {
             <div className="grid lg:grid-cols-3 gap-8 items-start">
               
               {/* Member List - Categorized */}
-              <div className="lg:col-span-2 space-y-12">
+              <div className="lg:col-span-2 space-y-12 pb-20">
                 {/* Central Committee */}
                 {groupings.central.length > 0 && (
                   <div className="space-y-4">
                     <div className="flex items-center gap-3 px-2">
                        <ShieldCheck className="w-5 h-5 text-red-600" />
-                       <h4 className="text-sm font-black uppercase tracking-[0.25em] text-primary dark:text-white">Central Committee</h4>
+                       <h4 className="text-sm font-black uppercase tracking-[0.25em] text-primary dark:text-white">Central Committee Registry</h4>
                        <div className="h-px flex-1 bg-slate-200 dark:bg-slate-800"></div>
                     </div>
                     {groupings.central.map(renderMemberCard)}
@@ -302,12 +359,14 @@ export default function MemberKitManagement() {
 
                 {/* State Committees */}
                 {Object.keys(groupings.stateGroups).length > 0 && (
-                  <div className="space-y-10">
+                  <div className="space-y-12">
                     {Object.keys(groupings.stateGroups).sort().map(state => (
                       <div key={state} className="space-y-4">
                         <div className="flex items-center gap-3 px-2">
-                           <Globe className="w-5 h-5 text-emerald-600" />
-                           <h4 className="text-sm font-black uppercase tracking-[0.25em] text-primary dark:text-white">{state} State Committee</h4>
+                           <Globe className="w-6 h-6 text-emerald-600" />
+                           <h4 className="text-base font-black uppercase tracking-[0.2em] text-primary dark:text-white">
+                             {state} <span className="text-emerald-500 font-bold ml-2">State Committee</span>
+                           </h4>
                            <div className="h-px flex-1 bg-slate-200 dark:bg-slate-800"></div>
                         </div>
                         {groupings.stateGroups[state].map(renderMemberCard)}
@@ -318,19 +377,21 @@ export default function MemberKitManagement() {
 
                 {/* District Committees */}
                 {Object.keys(groupings.districtGroups).length > 0 && (
-                  <div className="space-y-14">
+                  <div className="space-y-16">
                     {Object.keys(groupings.districtGroups).sort().map(state => (
-                      <div key={state} className="space-y-10">
+                      <div key={state} className="space-y-12">
                         {Object.keys(groupings.districtGroups[state]).sort().map(district => (
                           <div key={district} className="space-y-4">
                             <div className="flex items-center gap-3 px-2">
-                               <Building2 className="w-5 h-5 text-blue-600" />
-                               <h4 className="text-sm font-black uppercase tracking-[0.25em] text-primary dark:text-white">
-                                 {district} District Committee <span className="text-slate-400 font-bold ml-2">({state})</span>
+                               <Building2 className="w-6 h-6 text-blue-600" />
+                               <h4 className="text-base font-black uppercase tracking-[0.2em] text-primary dark:text-white">
+                                 {district} <span className="text-blue-500 font-bold ml-2">District Cell</span>
                                </h4>
                                <div className="h-px flex-1 bg-slate-200 dark:bg-slate-800"></div>
                             </div>
-                            {groupings.districtGroups[state][district].map(renderMemberCard)}
+                            <div className="grid gap-4">
+                               {groupings.districtGroups[state][district].map(renderMemberCard)}
+                            </div>
                           </div>
                         ))}
                       </div>
@@ -341,27 +402,27 @@ export default function MemberKitManagement() {
                 {filteredMembers.length === 0 && (
                   <div className="text-center py-24 opacity-30">
                      <Package className="w-16 h-16 mx-auto mb-4" />
-                     <p className="text-lg font-headline font-bold">No member records identified.</p>
+                     <p className="text-lg font-headline font-bold">No records matching criteria.</p>
                   </div>
                 )}
               </div>
 
-              {/* Management Form */}
+              {/* Management Side Panel */}
               <div className="lg:col-span-1">
                 {selectedMember ? (
-                  <Card className="rounded-[2.5rem] bg-white dark:bg-slate-900 border-none shadow-2xl sticky top-32 overflow-hidden">
+                  <Card className="rounded-[2.5rem] bg-white dark:bg-slate-900 border-none shadow-2xl sticky top-32 overflow-hidden animate-in slide-in-from-right-4 duration-500">
                      <CardHeader className="bg-slate-900 text-white p-8 border-b-4 border-accent/20">
                         <div className="flex items-center justify-between mb-4">
                            <Badge className="bg-accent text-primary font-black text-[8px] tracking-widest">{selectedMember.memberId}</Badge>
                            <button onClick={() => setSelectedMember(null)} className="text-white/40 hover:text-white transition-colors"><X className="w-5 h-5" /></button>
                         </div>
                         <CardTitle className="text-2xl font-headline font-bold">{selectedMember.name}</CardTitle>
-                        <CardDescription className="text-slate-400 text-xs font-bold uppercase tracking-widest mt-1">Official Asset Registry</CardDescription>
+                        <CardDescription className="text-slate-400 text-xs font-bold uppercase tracking-widest mt-1">Personnel Logistics Registry</CardDescription>
                      </CardHeader>
                      <CardContent className="p-8 space-y-8">
                         <div className="space-y-4">
                            <h4 className="text-[10px] font-black uppercase tracking-widest text-accent flex items-center gap-2">
-                             <Archive className="w-3.5 h-3.5" /> Issued Kit Contents
+                             <ClipboardList className="w-3.5 h-3.5" /> Items Ready for Issuance
                            </h4>
                            <div className="grid grid-cols-1 gap-2">
                               {KIT_ITEMS.map(item => (
@@ -384,7 +445,7 @@ export default function MemberKitManagement() {
 
                         <div className="space-y-6 pt-6 border-t border-slate-100 dark:border-slate-800">
                            <h4 className="text-[10px] font-black uppercase tracking-widest text-indigo-500 flex items-center gap-2">
-                             <Truck className="w-3.5 h-3.5" /> Logistics Payload
+                             <Truck className="w-3.5 h-3.5" /> Dispatch Particulars
                            </h4>
                            
                            <div className="grid grid-cols-2 gap-4">
@@ -404,8 +465,8 @@ export default function MemberKitManagement() {
                            </div>
 
                            <div className="space-y-1.5">
-                              <Label className="text-[9px] font-bold text-slate-400 uppercase">Courier Details / AWB No.</Label>
-                              <Input placeholder="e.g. DTDC - 123456789" value={kitForm.courierDetails} onChange={e => setKitForm({...kitForm, courierDetails: e.target.value})} className="h-10 rounded-xl" />
+                              <Label className="text-[9px] font-bold text-slate-400 uppercase">AWB / Courier Info</Label>
+                              <Input placeholder="e.g. Speed Post - EW123456789IN" value={kitForm.courierDetails} onChange={e => setKitForm({...kitForm, courierDetails: e.target.value})} className="h-10 rounded-xl" />
                            </div>
 
                            <div className="flex items-center space-x-3 p-4 bg-emerald-50/50 dark:bg-emerald-950/20 rounded-2xl border border-emerald-100 dark:border-emerald-900">
@@ -415,12 +476,12 @@ export default function MemberKitManagement() {
                                 onCheckedChange={(val) => setKitForm({...kitForm, acknowledgementReceived: !!val})}
                                 className="border-emerald-500 h-5 w-5"
                               />
-                              <Label htmlFor="ack" className="text-xs font-black text-emerald-700 dark:text-emerald-400 cursor-pointer uppercase tracking-tight">Acknowledgement Received</Label>
+                              <Label htmlFor="ack" className="text-xs font-black text-emerald-700 dark:text-emerald-400 cursor-pointer uppercase tracking-tight">Ack. Received</Label>
                            </div>
 
                            <div className="space-y-1.5">
                               <Label className="text-[9px] font-bold text-slate-400 uppercase">Registry Notes</Label>
-                              <Textarea value={kitForm.notes} onChange={e => setKitForm({...kitForm, notes: e.target.value})} placeholder="Internal logistics notes..." className="rounded-xl min-h-[80px]" />
+                              <Textarea value={kitForm.notes} onChange={e => setKitForm({...kitForm, notes: e.target.value})} placeholder="Internal notes..." className="rounded-xl min-h-[80px]" />
                            </div>
                         </div>
 
@@ -429,24 +490,18 @@ export default function MemberKitManagement() {
                           disabled={isSaving === selectedMember.id}
                           className="w-full h-14 rounded-2xl bg-primary text-white font-bold text-lg hover:bg-secondary shadow-xl shadow-primary/20 transition-all flex gap-2"
                         >
-                          {isSaving === selectedMember.id ? <Loader2 className="animate-spin w-5 h-5" /> : <><Save className="w-5 h-5" /> Commit Logistics Log</>}
+                          {isSaving === selectedMember.id ? <Loader2 className="animate-spin w-5 h-5" /> : <><Save className="w-5 h-5" /> Commit Logistics Data</>}
                         </Button>
                      </CardContent>
                   </Card>
                 ) : (
-                  <div className="bg-white dark:bg-slate-900 p-10 rounded-[3rem] border border-slate-100 dark:border-slate-800 text-center space-y-6 sticky top-32">
+                  <div className="bg-white dark:bg-slate-900 p-10 rounded-[3rem] border border-slate-100 dark:border-slate-800 text-center space-y-6 sticky top-32 shadow-sm">
                      <div className="w-20 h-20 bg-slate-50 dark:bg-slate-800 rounded-3xl flex items-center justify-center mx-auto border-2 border-dashed border-slate-200">
                         <UserCheck className="w-10 h-10 text-slate-300" />
                      </div>
                      <div className="space-y-2">
-                        <h4 className="text-xl font-headline font-bold text-primary dark:text-white">Nodal View Terminal</h4>
-                        <p className="text-sm text-slate-400 leading-relaxed italic">"Select a member from the registry to view or update their official kit status and logistics payload."</p>
-                     </div>
-                     <div className="pt-6 border-t border-slate-50 dark:border-slate-800">
-                        <div className="flex items-center gap-3 text-[10px] font-bold text-slate-400 uppercase justify-center">
-                           <ShieldCheck className="w-4 h-4 text-emerald-500" />
-                           Audit Log Active
-                        </div>
+                        <h4 className="text-xl font-headline font-bold text-primary dark:text-white">Logistics Node</h4>
+                        <p className="text-sm text-slate-400 leading-relaxed italic">"Select a member to manage their official institutional kit and tracking assets."</p>
                      </div>
                   </div>
                 )}
