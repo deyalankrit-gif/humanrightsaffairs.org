@@ -126,7 +126,7 @@ export default function PublicKitManagementPage() {
       stats[item.id] = { issued: 0, total: 0 };
     });
 
-    filteredMembers.forEach(m => {
+    members?.forEach(m => {
       const category = m.designationCategory || "General Member";
       const eligibleItemsList = eligibilityRules[category] || [];
       const kit = kitMap[m.id];
@@ -141,7 +141,7 @@ export default function PublicKitManagementPage() {
       });
     });
     return stats;
-  }, [filteredMembers, kitMap, eligibilityRules, kitItems]);
+  }, [members, kitMap, eligibilityRules, kitItems]);
 
   const groupings = useMemo(() => {
     const central = filteredMembers.filter(m => m.level === 'National');
@@ -348,7 +348,7 @@ export default function PublicKitManagementPage() {
                           <span className="text-sm font-black text-primary dark:text-white">{s.issued}</span>
                           <span className="text-[8px] font-bold text-slate-400">/ {s.total}</span>
                        </div>
-                       <div className="h-1 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+                       <div className="h-1 w-full bg-slate-200 dark:bg-sidebar-border rounded-full overflow-hidden">
                           <div 
                             className={cn(
                               "h-full transition-all duration-1000",
@@ -583,39 +583,41 @@ export default function PublicKitManagementPage() {
              </DialogDescription>
           </DialogHeader>
           
-          <ScrollArea className="flex-1 p-6">
-             <div className="space-y-3">
-                {viewingItemMembers?.members.map((m: any) => (
-                  <div 
-                    key={m.id} 
-                    onClick={() => { setSelectedMemberDetail(m); setViewingItemMembers(null); }}
-                    className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800 group hover:border-accent/40 transition-all cursor-pointer"
-                  >
-                     <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-full bg-white dark:bg-slate-800 flex items-center justify-center border border-slate-100 group-hover:border-accent transition-colors">
-                           <UserCheck className="w-5 h-5 text-accent" />
-                        </div>
-                        <div>
-                           <p className="text-sm font-bold text-primary dark:text-white leading-none">{m.name}</p>
-                           <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-1">{m.memberId}</p>
-                        </div>
-                     </div>
-                     <div className="flex flex-col items-end gap-1">
-                        <Badge variant="outline" className="text-[7px] font-bold border-slate-200 text-slate-500 uppercase">
-                          {m.level} Level
-                        </Badge>
-                        <p className="text-[8px] font-bold text-slate-400 uppercase">{m.stateName || 'National Center'}</p>
-                     </div>
-                  </div>
-                ))}
-                {viewingItemMembers?.members.length === 0 && (
-                  <div className="text-center py-20 opacity-30">
-                     <Package className="w-12 h-12 mx-auto mb-3" />
-                     <p className="text-sm font-bold uppercase tracking-widest">No verified issuances for this item.</p>
-                  </div>
-                )}
-             </div>
-          </ScrollArea>
+          <div className="flex-1 min-h-0 overflow-hidden">
+            <ScrollArea className="h-full">
+               <div className="p-6 space-y-3">
+                  {viewingItemMembers?.members.map((m: any) => (
+                    <div 
+                      key={m.id} 
+                      onClick={() => { setSelectedMemberDetail(m); setViewingItemMembers(null); }}
+                      className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800 group hover:border-accent/40 transition-all cursor-pointer"
+                    >
+                       <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 rounded-full bg-white dark:bg-slate-800 flex items-center justify-center border border-slate-100 group-hover:border-accent transition-colors">
+                             <UserCheck className="w-5 h-5 text-accent" />
+                          </div>
+                          <div>
+                             <p className="text-sm font-bold text-primary dark:text-white leading-none">{m.name}</p>
+                             <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-1">{m.memberId}</p>
+                          </div>
+                       </div>
+                       <div className="flex flex-col items-end gap-1">
+                          <Badge variant="outline" className="text-[7px] font-bold border-slate-200 text-slate-500 uppercase">
+                            {m.level} Level
+                          </Badge>
+                          <p className="text-[8px] font-bold text-slate-400 uppercase">{m.stateName || 'National Center'}</p>
+                       </div>
+                    </div>
+                  ))}
+                  {viewingItemMembers?.members.length === 0 && (
+                    <div className="text-center py-20 opacity-30">
+                       <Package className="w-12 h-12 mx-auto mb-3" />
+                       <p className="text-sm font-bold uppercase tracking-widest">No verified issuances for this item.</p>
+                    </div>
+                  )}
+               </div>
+            </ScrollArea>
+          </div>
           
           <div className="p-6 border-t bg-slate-50 dark:bg-slate-900/50 flex justify-between items-center">
              <p className="text-[10px] font-black uppercase text-slate-400">Public Record: {viewingItemMembers?.members.length} Distributed</p>
