@@ -33,7 +33,8 @@ import {
   Globe,
   Sparkles,
   Settings2,
-  X
+  X,
+  Check
 } from 'lucide-react'
 import {
   Dialog,
@@ -42,6 +43,7 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogFooter,
+  DialogDescription,
 } from "@/components/ui/dialog"
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
@@ -72,7 +74,12 @@ export default function InternalVendorsPage() {
   const [typeFilter, setTypeFilter] = useState('All')
   const [isActionLoading, setIsActionLoading] = useState(false)
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+  const [editVendor, setEditVendor] = useState<Vendor | null>(null)
+  
   const [newCategoryLabel, setNewCategoryLabel] = useState('')
+  const [editingCategoryIndex, setEditingCategoryIndex] = useState<number | null>(null)
+  const [editingCategoryValue, setEditingCategoryValue] = useState('')
   
   const [newVendor, setNewVendor] = useState<Partial<Vendor>>({
     companyName: '',
@@ -137,6 +144,46 @@ export default function InternalVendorsPage() {
     }
   }
 
+  const handleUpdateCategory = async () => {
+    if (editingCategoryIndex === null || !editingCategoryValue.trim() || !settingsRef) return;
+    
+    const updatedCustom = [...((settingsData as any)?.customCategories || [])];
+    updatedCustom[editingCategoryIndex] = editingCategoryValue.trim();
+    
+    try {
+      await setDoc(settingsRef, {
+        customCategories: updatedCustom,
+        updatedAt: serverTimestamp(),
+        updatedBy: user?.email
+      }, { merge: true });
+      
+      setEditingCategoryIndex(null);
+      setEditingCategoryValue('');
+      toast({ title: "Category Updated" });
+    } catch (e: any) {
+      toast({ variant: "destructive", title: "Update Failed" });
+    }
+  }
+
+  const handleDeleteCategory = async (idx: number) => {
+    if (!settingsRef) return;
+    
+    const updatedCustom = [...((settingsData as any)?.customCategories || [])];
+    updatedCustom.splice(idx, 1);
+    
+    try {
+      await setDoc(settingsRef, {
+        customCategories: updatedCustom,
+        updatedAt: serverTimestamp(),
+        updatedBy: user?.email
+      }, { merge: true });
+      
+      toast({ title: "Category Purged" });
+    } catch (e: any) {
+      toast({ variant: "destructive", title: "Delete Failed" });
+    }
+  }
+
   const handleAddVendor = async () => {
     if (!db) return;
     if (!newVendor.companyName?.trim()) {
@@ -153,6 +200,24 @@ export default function InternalVendorsPage() {
       .finally(() => setIsActionLoading(false))
   }
 
+  const handleUpdateVendor = async () => {
+    if (!db || !editVendor) return;
+    setIsActionLoading(true)
+    const { id, ...data } = editVendor;
+    updateDoc(doc(db, 'vendors', id), { ...data, updatedAt: serverTimestamp() })
+      .then(() => {
+        toast({ title: "Registry Updated" })
+        setIsEditDialogOpen(false)
+        setEditVendor(null)
+      })
+      .finally(() => setIsActionLoading(false))
+  }
+
+  const handleDeleteVendor = async (id: string) => {
+    if (!db) return;
+    deleteDoc(doc(db, 'vendors', id)).then(() => toast({ title: "Vendor Purged" }));
+  }
+
   if (authLoading || !user) {
     return <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950"><Loader2 className="w-10 h-10 animate-spin text-accent" /></div>
   }
@@ -163,6 +228,152 @@ export default function InternalVendorsPage() {
     const matchesType = typeFilter === 'All' || v.vendorType === typeFilter;
     return matchesSearch && matchesType;
   })
+
+  const CategoryManagement = () => (
+    <div className="p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 space-y-4 shadow-inner mt-4">
+      <div className="space-y-1">
+        <Label className="text-[9px] font-black uppercase text-accent tracking-widest">Taxonomy Management</Label>
+        <p className="text-[8px] text-slate-400 font-bold uppercase">Create or modify institutional vendor categories.</p>
+      </div>
+      <div className="flex gap-2">
+        <Input 
+          placeholder={editingCategoryIndex !== null ? "Edit label..." : "New category name..."} 
+          value={editingCategoryIndex !== null ? editingCategoryValue : newCategoryLabel} 
+          onChange={e => editingCategoryIndex !== null ? setEditingCategoryValue(e.target.value) : setNewCategoryLabel(e.target.value)}
+          className="h-9 text-xs rounded-xl bg-white dark:bg-slate-950 border-slate-200" 
+          onKeyDown={e => {
+            if (e.key === 'Enter') {
+              editingCategoryIndex !== null ? handleUpdateCategory() : handleAddCategory();
+            }
+          }}
+        />
+        {editingCategoryIndex !== null ? (
+          <div className="flex gap-1 shrink-0">
+            <Button onClick={handleUpdateCategory} size="sm" variant="secondary" className="h-9 px-3 rounded-xl bg-emerald-500 text-white hover:bg-emerald-600"><Check className="w-4 h-4"/></Button>
+            <Button onClick={() => { setEditingCategoryIndex(null); setEditingCategoryValue(''); }} size="sm" variant="ghost" className="h-9 px-3 rounded-xl"><X className="w-4 h-4"/></Button>
+          </div>
+        ) : (
+          <Button 
+            onClick={handleAddCategory} 
+            size="sm" 
+            variant="secondary" 
+            className="h-9 px-4 rounded-xl bg-accent text-primary font-bold"
+            disabled={!newCategoryLabel.trim()}
+          >
+            <Plus className="w-4 h-4" />
+          </Button>
+        )}
+      </div>
+      <div className="flex flex-wrap gap-2">
+        {((settingsData as any)?.customCategories || []).map((cat: string, idx: number) => (
+          <Badge key={idx} variant="outline" className="text-[9px] font-bold px-3 py-1 flex items-center gap-2 border-slate-200 bg-white dark:bg-slate-800 group h-7 rounded-lg">
+            <span className={cn(editingCategoryIndex === idx && "text-accent")}>{cat}</span>
+            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <button 
+                onClick={(e) => { e.preventDefault(); setEditingCategoryIndex(idx); setEditingCategoryValue(cat); }}
+                className="hover:text-blue-500 transition-colors"
+              >
+                <Edit className="w-3 h-3"/>
+              </button>
+              <button 
+                onClick={(e) => { e.preventDefault(); handleDeleteCategory(idx); }}
+                className="hover:text-red-500 transition-colors"
+              >
+                <X className="w-3 h-3"/>
+              </button>
+            </div>
+          </Badge>
+        ))}
+        {((settingsData as any)?.customCategories || []).length === 0 && (
+          <p className="text-[8px] font-bold text-slate-300 uppercase italic">No custom categories established.</p>
+        )}
+      </div>
+    </div>
+  )
+
+  const VendorFormFields = ({ data, setData }: { data: any, setData: any }) => (
+    <div className="space-y-6">
+      <div className="grid md:grid-cols-2 gap-6">
+        <div className="space-y-1">
+          <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Company Name *</Label>
+          <Input value={data.companyName} onChange={e => setData({...data, companyName: e.target.value})} placeholder="Official Entity Name" className="h-11 rounded-xl" />
+        </div>
+        <div className="space-y-1">
+          <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Vendor Category *</Label>
+          <Select value={data.vendorType} onValueChange={(v: any) => setData({...data, vendorType: v})}>
+            <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
+            <SelectContent position="popper" className="z-[1000001] bg-white max-h-60">
+              {vendorTypes.map(type => <SelectItem key={type} value={type}>{type}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-6">
+        <div className="space-y-1">
+          <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Official Contact Number *</Label>
+          <div className="relative">
+            <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+            <Input value={data.phone} onChange={e => setData({...data, phone: e.target.value})} placeholder="+91" className="h-11 pl-9 rounded-xl" />
+          </div>
+        </div>
+        <div className="space-y-1">
+          <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Official Email</Label>
+          <div className="relative">
+            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+            <Input value={data.email} onChange={e => setData({...data, email: e.target.value})} placeholder="office@vendor.com" className="h-11 pl-9 rounded-xl" />
+          </div>
+        </div>
+      </div>
+
+      <div className="space-y-1">
+        <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Company Office Address *</Label>
+        <div className="relative">
+          <MapPin className="absolute left-3 top-3 w-3.5 h-3.5 text-slate-400" />
+          <Textarea value={data.address} onChange={e => setData({...data, address: e.target.value})} placeholder="Registered Head Office Location" className="min-h-[80px] pl-9 rounded-xl" />
+        </div>
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-6">
+        <div className="space-y-1">
+          <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">GSTIN / Tax ID</Label>
+          <div className="relative">
+            <Hash className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+            <Input value={data.gstin} onChange={e => setData({...data, gstin: e.target.value.toUpperCase()})} placeholder="19AAAAA0000A1Z5" className="h-11 pl-9 rounded-xl font-mono" />
+          </div>
+        </div>
+        <div className="space-y-1">
+          <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Point of Contact (Person)</Label>
+          <div className="relative">
+            <User className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+            <Input value={data.contactPerson} onChange={e => setData({...data, contactPerson: e.target.value})} placeholder="Name of Manager/Proprietor" className="h-11 pl-9 rounded-xl" />
+          </div>
+        </div>
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-6">
+        <div className="space-y-1">
+          <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Particular Service Function</Label>
+          <div className="relative">
+            <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+            <Input value={data.particularFunction} onChange={e => setData({...data, particularFunction: e.target.value})} placeholder="e.g. Bulk Printing of ID Cards" className="h-11 pl-9 rounded-xl" />
+          </div>
+        </div>
+        <div className="space-y-1">
+          <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Relationship Status</Label>
+          <Select value={data.status} onValueChange={(v: any) => setData({...data, status: v})}>
+            <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
+            <SelectContent position="popper" className="z-[1000001] bg-white">
+              <SelectItem value="Active">Active</SelectItem>
+              <SelectItem value="Inactive">Inactive</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      <CategoryManagement />
+    </div>
+  )
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
@@ -186,102 +397,14 @@ export default function InternalVendorsPage() {
               <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="max-w-2xl rounded-[2rem] max-h-[90vh] overflow-y-auto border-none shadow-2xl">
                 <DialogHeader>
                   <DialogTitle className="text-2xl font-headline font-bold text-primary dark:text-white">Register Institutional Vendor</DialogTitle>
+                  <DialogDescription>Establish a new service provider entry in the national registry.</DialogDescription>
                 </DialogHeader>
-                <div className="space-y-6 py-4">
-                   <div className="grid md:grid-cols-2 gap-6">
-                      <div className="space-y-1">
-                        <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Company Name *</Label>
-                        <Input value={newVendor.companyName} onChange={e => setNewVendor({...newVendor, companyName: e.target.value})} placeholder="Official Entity Name" className="h-11 rounded-xl" />
-                      </div>
-                      
-                      <div className="space-y-4">
-                        <div className="space-y-1">
-                          <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Vendor Category *</Label>
-                          <div className="flex gap-2">
-                             <Select value={newVendor.vendorType} onValueChange={(v: any) => setNewVendor({...newVendor, vendorType: v})}>
-                                <SelectTrigger className="h-11 rounded-xl flex-1"><SelectValue /></SelectTrigger>
-                                <SelectContent position="popper" className="z-[1000001] bg-white max-h-60">
-                                  {vendorTypes.map(type => <SelectItem key={type} value={type}>{type}</SelectItem>)}
-                                </SelectContent>
-                             </Select>
-                          </div>
-                        </div>
-                        
-                        <div className="p-3 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800 space-y-2">
-                           <Label className="text-[9px] font-black uppercase text-accent tracking-tighter">Create New Category</Label>
-                           <div className="flex gap-2">
-                              <Input 
-                                placeholder="Category Name" 
-                                value={newCategoryLabel} 
-                                onChange={e => setNewCategoryLabel(e.target.value)}
-                                className="h-8 text-xs rounded-lg bg-white dark:bg-slate-950" 
-                                onKeyDown={e => e.key === 'Enter' && handleAddCategory()}
-                              />
-                              <Button 
-                                onClick={handleAddCategory} 
-                                size="sm" 
-                                variant="secondary" 
-                                className="h-8 px-3 rounded-lg"
-                                disabled={!newCategoryLabel.trim()}
-                              >
-                                <Plus className="w-3.5 h-3.5" />
-                              </Button>
-                           </div>
-                        </div>
-                      </div>
-                   </div>
-
-                   <div className="grid md:grid-cols-2 gap-6">
-                      <div className="space-y-1">
-                        <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Official Contact Number *</Label>
-                        <div className="relative">
-                          <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
-                          <Input value={newVendor.phone} onChange={e => setNewVendor({...newVendor, phone: e.target.value})} placeholder="+91" className="h-11 pl-9 rounded-xl" />
-                        </div>
-                      </div>
-                      <div className="space-y-1">
-                        <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Official Email</Label>
-                        <div className="relative">
-                          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
-                          <Input value={newVendor.email} onChange={e => setNewVendor({...newVendor, email: e.target.value})} placeholder="office@vendor.com" className="h-11 pl-9 rounded-xl" />
-                        </div>
-                      </div>
-                   </div>
-
-                   <div className="space-y-1">
-                      <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Company Office Address *</Label>
-                      <div className="relative">
-                        <MapPin className="absolute left-3 top-3 w-3.5 h-3.5 text-slate-400" />
-                        <Textarea value={newVendor.address} onChange={e => setNewVendor({...newVendor, address: e.target.value})} placeholder="Registered Head Office Location" className="min-h-[80px] pl-9 rounded-xl" />
-                      </div>
-                   </div>
-
-                   <div className="grid md:grid-cols-2 gap-6">
-                      <div className="space-y-1">
-                        <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">GSTIN / Tax ID</Label>
-                        <div className="relative">
-                          <Hash className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
-                          <Input value={newVendor.gstin} onChange={e => setNewVendor({...newVendor, gstin: e.target.value.toUpperCase()})} placeholder="19AAAAA0000A1Z5" className="h-11 pl-9 rounded-xl font-mono" />
-                        </div>
-                      </div>
-                      <div className="space-y-1">
-                        <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Point of Contact (Person)</Label>
-                        <div className="relative">
-                          <User className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
-                          <Input value={newVendor.contactPerson} onChange={e => setNewVendor({...newVendor, contactPerson: e.target.value})} placeholder="Name of Manager/Proprietor" className="h-11 pl-9 rounded-xl" />
-                        </div>
-                      </div>
-                   </div>
-
-                   <div className="space-y-1">
-                      <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Particular Service Function</Label>
-                      <div className="relative">
-                        <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
-                        <Input value={newVendor.particularFunction} onChange={e => setNewVendor({...newVendor, particularFunction: e.target.value})} placeholder="e.g. Bulk Printing of ID Cards" className="h-11 pl-9 rounded-xl" />
-                      </div>
-                   </div>
-                </div>
-                <Button onClick={handleAddVendor} disabled={isActionLoading} className="w-full h-14 rounded-2xl mt-4 bg-primary text-white hover:bg-secondary transition-all font-bold text-lg shadow-xl shadow-primary/10">Commit to National Registry</Button>
+                <VendorFormFields data={newVendor} setData={setNewVendor} />
+                <DialogFooter className="mt-8">
+                  <Button onClick={handleAddVendor} disabled={isActionLoading} className="w-full h-14 rounded-2xl bg-primary text-white hover:bg-secondary transition-all font-bold text-lg shadow-xl shadow-primary/10">
+                    {isActionLoading ? <Loader2 className="animate-spin" /> : "Commit to National Registry"}
+                  </Button>
+                </DialogFooter>
               </DialogContent>
             </Dialog>
           </div>
@@ -366,8 +489,8 @@ export default function InternalVendorsPage() {
                            </div>
                         </div>
                         <div className="flex flex-row lg:flex-col justify-end gap-3 h-full">
-                           <Button size="sm" variant="outline" className="flex-1 lg:flex-none h-11 rounded-xl text-[10px] font-bold uppercase tracking-widest border-slate-200 hover:bg-primary hover:text-white transition-all">Modify</Button>
-                           <Button size="sm" variant="ghost" className="h-11 w-11 rounded-xl text-slate-300 hover:text-red-500 hover:bg-red-50 transition-all"><Trash2 className="w-5 h-5" /></Button>
+                           <Button size="sm" variant="outline" onClick={() => { setEditVendor(vendor); setIsEditDialogOpen(true); }} className="flex-1 lg:flex-none h-11 rounded-xl text-[10px] font-bold uppercase tracking-widest border-slate-200 hover:bg-primary hover:text-white transition-all">Modify</Button>
+                           <Button size="sm" variant="ghost" onClick={() => handleDeleteVendor(vendor.id)} className="h-11 w-11 rounded-xl text-slate-300 hover:text-red-500 hover:bg-red-50 transition-all"><Trash2 className="w-5 h-5" /></Button>
                         </div>
                       </div>
                     </div>
@@ -385,6 +508,25 @@ export default function InternalVendorsPage() {
           )}
         </div>
       </section>
+
+      {/* Edit Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="max-w-2xl rounded-[2rem] max-h-[90vh] overflow-y-auto border-none shadow-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-headline font-bold">Update Vendor Meta</DialogTitle>
+          </DialogHeader>
+          {editVendor && (
+            <>
+              <VendorFormFields data={editVendor} setData={setEditVendor} />
+              <DialogFooter className="mt-8">
+                <Button onClick={handleUpdateVendor} disabled={isActionLoading} className="w-full h-14 rounded-2xl bg-primary text-white hover:bg-secondary transition-all font-bold text-lg">
+                  {isActionLoading ? <Loader2 className="animate-spin" /> : "Commit Profile Refresh"}
+                </Button>
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
 
       <Footer />
     </main>
