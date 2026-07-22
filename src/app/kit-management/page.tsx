@@ -42,7 +42,6 @@ import {
   DialogClose,
 } from "@/components/ui/dialog"
 import { PlaceHolderImages } from '@/lib/placeholder-images'
-import { ScrollArea } from '@/components/ui/scroll-area'
 
 const INITIAL_KIT_ITEMS = [
   { id: 'identityCard', label: 'Identity Card' },
@@ -569,8 +568,8 @@ export default function PublicKitManagementPage() {
 
       {/* Issuance Breakdown Members Modal (Public) */}
       <Dialog open={!!viewingItemMembers} onOpenChange={(val) => !val && setViewingItemMembers(null)}>
-        <DialogContent className="max-w-2xl rounded-[2rem] border-none shadow-2xl bg-white dark:bg-slate-900 p-0 overflow-hidden flex flex-col max-h-[80vh]">
-          <DialogHeader className="p-8 bg-slate-900 text-white border-b-4 border-accent/20">
+        <DialogContent className="max-w-2xl rounded-[2rem] border-none shadow-2xl bg-white dark:bg-slate-900 p-0 overflow-hidden flex flex-col h-[80vh]">
+          <DialogHeader className="p-8 bg-slate-900 text-white border-b-4 border-accent/20 shrink-0">
              <div className="flex items-center justify-between mb-2">
                 <Badge className="bg-accent text-primary font-black text-[8px] tracking-[0.2em]">Verified Issued Personnel</Badge>
                 <DialogClose asChild><button className="text-white/40 hover:text-white transition-colors"><X className="w-5 h-5" /></button></DialogClose>
@@ -583,43 +582,41 @@ export default function PublicKitManagementPage() {
              </DialogDescription>
           </DialogHeader>
           
-          <div className="flex-1 min-h-0 overflow-hidden">
-            <ScrollArea className="h-[50vh]">
-               <div className="p-6 space-y-3">
-                  {viewingItemMembers?.members.map((m: any) => (
-                    <div 
-                      key={m.id} 
-                      onClick={() => { setSelectedMemberDetail(m); setViewingItemMembers(null); }}
-                      className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800 group hover:border-accent/40 transition-all cursor-pointer"
-                    >
-                       <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 rounded-full bg-white dark:bg-slate-800 flex items-center justify-center border border-slate-100 group-hover:border-accent transition-colors">
-                             <UserCheck className="w-5 h-5 text-accent" />
-                          </div>
-                          <div>
-                             <p className="text-sm font-bold text-primary dark:text-white leading-none">{m.name}</p>
-                             <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-1">{m.memberId}</p>
-                          </div>
-                       </div>
-                       <div className="flex flex-col items-end gap-1">
-                          <Badge variant="outline" className="text-[7px] font-bold border-slate-200 text-slate-500 uppercase">
-                            {m.level} Level
-                          </Badge>
-                          <p className="text-[8px] font-bold text-slate-400 uppercase">{m.stateName || 'National Center'}</p>
-                       </div>
-                    </div>
-                  ))}
-                  {viewingItemMembers?.members.length === 0 && (
-                    <div className="text-center py-20 opacity-30">
-                       <Package className="w-12 h-12 mx-auto mb-3" />
-                       <p className="text-sm font-bold uppercase tracking-widest">No verified issuances for this item.</p>
-                    </div>
-                  )}
-               </div>
-            </ScrollArea>
+          <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar">
+             <div className="p-6 space-y-3">
+                {viewingItemMembers?.members.map((m: any) => (
+                  <div 
+                    key={m.id} 
+                    onClick={() => { setSelectedMemberDetail(m); setViewingItemMembers(null); }}
+                    className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800 group hover:border-accent/40 transition-all cursor-pointer"
+                  >
+                     <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-full bg-white dark:bg-slate-800 flex items-center justify-center border border-slate-100 group-hover:border-accent transition-colors">
+                           <UserCheck className="w-5 h-5 text-accent" />
+                        </div>
+                        <div>
+                           <p className="text-sm font-bold text-primary dark:text-white leading-none">{m.name}</p>
+                           <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-1">{m.memberId}</p>
+                        </div>
+                     </div>
+                     <div className="flex flex-col items-end gap-1">
+                        <Badge variant="outline" className="text-[7px] font-bold border-slate-200 text-slate-500 uppercase">
+                          {m.level} Level
+                        </Badge>
+                        <p className="text-[8px] font-bold text-slate-400 uppercase">{m.stateName || 'National Center'}</p>
+                     </div>
+                  </div>
+                ))}
+                {viewingItemMembers?.members.length === 0 && (
+                  <div className="text-center py-20 opacity-30">
+                     <Package className="w-12 h-12 mx-auto mb-3" />
+                     <p className="text-sm font-bold uppercase tracking-widest">No verified issuances for this item.</p>
+                  </div>
+                )}
+             </div>
           </div>
           
-          <div className="p-6 border-t bg-slate-50 dark:bg-slate-900/50 flex justify-between items-center">
+          <div className="p-6 border-t bg-slate-50 dark:bg-slate-900/50 flex justify-between items-center shrink-0">
              <p className="text-[10px] font-black uppercase text-slate-400">Public Record: {viewingItemMembers?.members.length} Distributed</p>
              <Button variant="ghost" onClick={() => setViewingItemMembers(null)} className="text-[10px] font-black uppercase tracking-widest text-accent hover:bg-accent/10">Close Feed</Button>
           </div>
