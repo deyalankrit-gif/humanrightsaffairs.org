@@ -177,6 +177,7 @@ export default function PublicKitManagementPage() {
     const eligibleItems = kitItems.filter((item: any) => eligibleItemIds.includes(item.id));
     const isOfficeBearer = category === 'Office-bearing Member';
 
+    // Dynamic car plate detection logic
     const carPlateItemIds = kitItems
       .filter((item: any) => item.label.toLowerCase().includes('car plate'))
       .map((item: any) => item.id);
@@ -450,7 +451,6 @@ export default function PublicKitManagementPage() {
           {selectedMemberDetail && (
             <div className="flex-1 overflow-y-auto custom-scrollbar">
                <div className="flex flex-col">
-                  {/* High-Fidelity Header */}
                   <div className="relative bg-slate-900 p-12 md:p-16 text-white overflow-hidden border-b-8 border-accent/20">
                     <div className="absolute top-0 right-0 opacity-10 pointer-events-none transform translate-x-12 translate-y-[-20px]"><ShieldCheck className="w-64 h-64 md:w-96 md:h-96" /></div>
                     <div className="relative z-10 flex flex-col md:flex-row items-center gap-8">
@@ -479,9 +479,7 @@ export default function PublicKitManagementPage() {
                   </div>
 
                   <div className="p-8 md:p-16 space-y-12 pb-24">
-                     {/* Logistics Grid */}
                      <div className="grid md:grid-cols-2 gap-12">
-                        {/* Issued Items Checklist */}
                         <div className="space-y-6">
                            <h4 className="text-[10px] font-black uppercase tracking-widest text-accent flex items-center gap-2"><Package className="w-4 h-4" /> Item Issuance Checklist</h4>
                            <div className="grid grid-cols-1 gap-2">
@@ -507,7 +505,6 @@ export default function PublicKitManagementPage() {
                            </div>
                         </div>
 
-                        {/* Jurisdictional & Metadata Info */}
                         <div className="space-y-10">
                            <div className="space-y-4">
                               <h4 className="text-[10px] font-black uppercase tracking-widest text-indigo-500 flex items-center gap-2"><Globe className="w-4 h-4" /> Jurisdictional Scope</h4>
@@ -551,7 +548,6 @@ export default function PublicKitManagementPage() {
                         </div>
                      </div>
 
-                     {/* Footer Mandate */}
                      <div className="pt-12 border-t border-slate-100 dark:border-slate-800 text-center space-y-4">
                         <Button 
                           size="lg" 

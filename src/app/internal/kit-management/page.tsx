@@ -100,7 +100,6 @@ export default function MemberKitManagement() {
   const [editingItemId, setEditingItemId] = useState<string | null>(null)
   const [editingItemLabel, setEditingItemLabel] = useState('')
   
-  // Breakdown Detail State
   const [viewingItemMembers, setViewingItemMembers] = useState<{item: any, members: any[]} | null>(null)
 
   const [kitForm, setKitForm] = useState({
@@ -345,6 +344,7 @@ export default function MemberKitManagement() {
     const eligibleItems = kitItems.filter((item: any) => eligibleItemIds.includes(item.id));
     const isOfficeBearer = category === 'Office-bearing Member';
 
+    // Dynamic car plate detection logic
     const carPlateItemIds = kitItems
       .filter((item: any) => item.label.toLowerCase().includes('car plate'))
       .map((item: any) => item.id);
@@ -860,7 +860,7 @@ export default function MemberKitManagement() {
             </div>
           )}
         </div>
-      </header>
+      </section>
 
       {/* Issuance Breakdown Members Modal */}
       <Dialog open={!!viewingItemMembers} onOpenChange={(val) => !val && setViewingItemMembers(null)}>
