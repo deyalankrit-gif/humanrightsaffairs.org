@@ -1,9 +1,10 @@
+
 "use client"
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import { useUser, useCollection, useFirestore, useMemoFirebase } from '@/firebase'
-import { collection, query, orderBy, addDoc, deleteDoc, doc, updateDoc, serverTimestamp } from 'firebase/firestore'
+import { useUser, useCollection, useFirestore, useMemoFirebase, useDoc } from '@/firebase'
+import { collection, query, orderBy, addDoc, deleteDoc, doc, updateDoc, setDoc, serverTimestamp } from 'firebase/firestore'
 import { Footer } from '@/components/footer'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -29,7 +30,10 @@ import {
   XCircle,
   Briefcase,
   Hash,
-  Globe
+  Globe,
+  Sparkles,
+  Settings2,
+  X
 } from 'lucide-react'
 import {
   Dialog,
@@ -39,26 +43,15 @@ import {
   DialogTrigger,
   DialogFooter,
 } from "@/components/ui/dialog"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
 
-type VendorType = "Legal" | "Logistics" | "Printing" | "IT Services" | "Media" | "Travel" | "Stationery" | "Other"
+const DEFAULT_VENDOR_TYPES = ["Legal", "Logistics", "Printing", "IT Services", "Media", "Travel", "Stationery", "Other"]
 
 type Vendor = {
   id: string
   companyName: string
-  vendorType: VendorType
+  vendorType: string
   particularFunction: string
   contactPerson: string
   email: string
@@ -79,8 +72,8 @@ export default function InternalVendorsPage() {
   const [typeFilter, setTypeFilter] = useState('All')
   const [isActionLoading, setIsActionLoading] = useState(false)
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
-  const [editVendor, setEditVendor] = useState<Vendor | null>(null)
-
+  const [newCategoryLabel, setNewCategoryLabel] = useState('')
+  
   const [newVendor, setNewVendor] = useState<Partial<Vendor>>({
     companyName: '',
     vendorType: 'Printing',
@@ -99,12 +92,50 @@ export default function InternalVendorsPage() {
     }
   }, [user, authLoading, router])
 
+  // Persistence for Custom Categories
+  const settingsRef = useMemoFirebase(() => {
+    if (!db) return null;
+    return doc(db, 'vendors', 'settings');
+  }, [db]);
+
+  const { data: settingsData } = useDoc(settingsRef);
+
+  const vendorTypes = useMemo(() => {
+    const custom = (settingsData as any)?.customCategories || [];
+    return Array.from(new Set([...DEFAULT_VENDOR_TYPES, ...custom]));
+  }, [settingsData]);
+
   const vendorsQuery = useMemoFirebase(() => {
     if (!db || !user) return null;
     return query(collection(db, 'vendors'), orderBy('companyName', 'asc'));
   }, [db, user]);
 
   const { data: vendors, loading: dataLoading } = useCollection(vendorsQuery);
+
+  const handleAddCategory = async () => {
+    if (!newCategoryLabel.trim() || !settingsRef) return;
+    
+    const label = newCategoryLabel.trim();
+    if (vendorTypes.includes(label)) {
+      toast({ variant: "destructive", title: "Duplicate Category", description: "This category already exists in the registry." });
+      return;
+    }
+
+    const updatedCustom = [...((settingsData as any)?.customCategories || []), label];
+    
+    try {
+      await setDoc(settingsRef, {
+        customCategories: updatedCustom,
+        updatedAt: serverTimestamp(),
+        updatedBy: user?.email
+      }, { merge: true });
+      
+      setNewCategoryLabel('');
+      toast({ title: "Category Established", description: `${label} added to institutional categories.` });
+    } catch (e: any) {
+      toast({ variant: "destructive", title: "Save Failed" });
+    }
+  }
 
   const handleAddVendor = async () => {
     if (!db) return;
@@ -133,8 +164,6 @@ export default function InternalVendorsPage() {
     return matchesSearch && matchesType;
   })
 
-  const vendorTypes: VendorType[] = ["Legal", "Logistics", "Printing", "IT Services", "Media", "Travel", "Stationery", "Other"]
-
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
       <section className="pt-16 pb-8 bg-slate-900 text-white border-b-8 border-accent/20">
@@ -154,7 +183,7 @@ export default function InternalVendorsPage() {
                   <Plus className="w-4 h-4" /> Register New Provider
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-2xl rounded-[2rem] max-h-[90vh] overflow-y-auto border-none shadow-2xl">
+              <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="max-w-2xl rounded-[2rem] max-h-[90vh] overflow-y-auto border-none shadow-2xl">
                 <DialogHeader>
                   <DialogTitle className="text-2xl font-headline font-bold text-primary dark:text-white">Register Institutional Vendor</DialogTitle>
                 </DialogHeader>
@@ -164,14 +193,41 @@ export default function InternalVendorsPage() {
                         <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Company Name *</Label>
                         <Input value={newVendor.companyName} onChange={e => setNewVendor({...newVendor, companyName: e.target.value})} placeholder="Official Entity Name" className="h-11 rounded-xl" />
                       </div>
-                      <div className="space-y-1">
-                        <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Vendor Category *</Label>
-                        <Select value={newVendor.vendorType} onValueChange={(v: any) => setNewVendor({...newVendor, vendorType: v})}>
-                           <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
-                           <SelectContent position="popper" className="z-[1000001] bg-white">
-                             {vendorTypes.map(type => <SelectItem key={type} value={type}>{type}</SelectItem>)}
-                           </SelectContent>
-                        </Select>
+                      
+                      <div className="space-y-4">
+                        <div className="space-y-1">
+                          <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Vendor Category *</Label>
+                          <div className="flex gap-2">
+                             <Select value={newVendor.vendorType} onValueChange={(v: any) => setNewVendor({...newVendor, vendorType: v})}>
+                                <SelectTrigger className="h-11 rounded-xl flex-1"><SelectValue /></SelectTrigger>
+                                <SelectContent position="popper" className="z-[1000001] bg-white max-h-60">
+                                  {vendorTypes.map(type => <SelectItem key={type} value={type}>{type}</SelectItem>)}
+                                </SelectContent>
+                             </Select>
+                          </div>
+                        </div>
+                        
+                        <div className="p-3 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800 space-y-2">
+                           <Label className="text-[9px] font-black uppercase text-accent tracking-tighter">Create New Category</Label>
+                           <div className="flex gap-2">
+                              <Input 
+                                placeholder="Category Name" 
+                                value={newCategoryLabel} 
+                                onChange={e => setNewCategoryLabel(e.target.value)}
+                                className="h-8 text-xs rounded-lg bg-white dark:bg-slate-950" 
+                                onKeyDown={e => e.key === 'Enter' && handleAddCategory()}
+                              />
+                              <Button 
+                                onClick={handleAddCategory} 
+                                size="sm" 
+                                variant="secondary" 
+                                className="h-8 px-3 rounded-lg"
+                                disabled={!newCategoryLabel.trim()}
+                              >
+                                <Plus className="w-3.5 h-3.5" />
+                              </Button>
+                           </div>
+                        </div>
                       </div>
                    </div>
 
