@@ -584,7 +584,7 @@ export default function PublicKitManagementPage() {
           </DialogHeader>
           
           <div className="flex-1 min-h-0 overflow-hidden">
-            <ScrollArea className="h-full">
+            <ScrollArea className="h-[50vh]">
                <div className="p-6 space-y-3">
                   {viewingItemMembers?.members.map((m: any) => (
                     <div 
