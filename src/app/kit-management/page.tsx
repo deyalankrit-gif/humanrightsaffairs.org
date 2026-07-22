@@ -542,7 +542,7 @@ export default function PublicKitManagementPage() {
                               <div className="space-y-4">
                                  <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-2"><FileText className="w-4 h-4" /> Registry Notes</h4>
                                  <div className="p-6 bg-amber-50/30 dark:bg-amber-950/20 rounded-3xl border border-amber-100 dark:border-amber-900/50">
-                                    <p className="text-sm italic text-amber-900 dark:text-amber-400 leading-relaxed">
+                                    <p className="text-sm italic text-amber-900 dark:text-amber-400 leading-relaxed normal-case">
                                        "{kitMap[selectedMemberDetail.id].notes}"
                                     </p>
                                  </div>

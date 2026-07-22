@@ -860,7 +860,7 @@ export default function MemberKitManagement() {
             </div>
           )}
         </div>
-      </section>
+      </header>
 
       {/* Issuance Breakdown Members Modal */}
       <Dialog open={!!viewingItemMembers} onOpenChange={(val) => !val && setViewingItemMembers(null)}>
