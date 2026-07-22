@@ -23,7 +23,8 @@ import {
   X,
   BadgeCheck,
   CalendarClock,
-  Hash
+  Hash,
+  UserCheck
 } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -41,6 +42,7 @@ import {
   DialogClose,
 } from "@/components/ui/dialog"
 import { PlaceHolderImages } from '@/lib/placeholder-images'
+import { ScrollArea } from '@/components/ui/scroll-area'
 
 const INITIAL_KIT_ITEMS = [
   { id: 'identityCard', label: 'Identity Card' },
@@ -66,6 +68,7 @@ const INITIAL_ELIGIBILITY: Record<string, string[]> = {
 export default function PublicKitManagementPage() {
   const [search, setSearch] = useState('')
   const [selectedMemberDetail, setSelectedMemberDetail] = useState<any>(null)
+  const [viewingItemMembers, setViewingItemMembers] = useState<{item: any, members: any[]} | null>(null)
   const db = useFirestore()
 
   const configDocRef = useMemoFirebase(() => {
@@ -174,7 +177,6 @@ export default function PublicKitManagementPage() {
     const eligibleItems = kitItems.filter((item: any) => eligibleItemIds.includes(item.id));
     const isOfficeBearer = category === 'Office-bearing Member';
 
-    // Dynamic Car Plate Check: Scan registry for any item containing "Car Plate" in label
     const carPlateItemIds = kitItems
       .filter((item: any) => item.label.toLowerCase().includes('car plate'))
       .map((item: any) => item.id);
@@ -322,15 +324,22 @@ export default function PublicKitManagementPage() {
         <div className="container mx-auto px-4">
           <div className="flex items-center gap-3 mb-6">
              <Activity className="w-4 h-4 text-accent" />
-             <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Item-wise Issuance Status</h2>
+             <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Eligibility-Based Issuance Breakdown</h2>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 xl:grid-cols-11 gap-3">
              {kitItems.map((item: any) => {
                const s = itemStats[item.id] || { issued: 0, total: 0 };
                const percentage = Math.round((s.issued / (s.total || 1)) * 100);
                return (
-                 <div key={item.id} className="p-3 rounded-2xl border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50 flex flex-col justify-between">
-                    <p className="text-[7px] font-black uppercase text-slate-400 mb-2 truncate" title={item.label}>
+                 <div 
+                  key={item.id} 
+                  onClick={() => {
+                    const issuedMembers = (members || []).filter(m => kitMap[m.id]?.items?.[item.id]);
+                    setViewingItemMembers({ item, members: issuedMembers });
+                  }}
+                  className="p-3 rounded-2xl border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50 flex flex-col justify-between group hover:border-accent/40 transition-colors cursor-pointer hover:shadow-md"
+                 >
+                    <p className="text-[7px] font-black uppercase text-slate-400 mb-2 truncate group-hover:text-primary dark:group-hover:text-accent transition-colors" title={item.label}>
                       {item.label}
                     </p>
                     <div className="space-y-1.5">
@@ -454,7 +463,7 @@ export default function PublicKitManagementPage() {
                           />
                        </div>
                        <div className="space-y-3 text-center md:text-left">
-                          <div className="inline-flex items-center gap-2 bg-accent/20 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/20">
+                          <div className="inline-flex items-center gap-2 bg-accent/20 backdrop-blur-md px-3 py-1 rounded-full border border-accent/40">
                             <BadgeCheck className="w-4 h-4 text-accent" />
                             <span className="text-[10px] font-black uppercase tracking-[0.2em] text-accent">{selectedMemberDetail.designationCategory || "Member"} Profile</span>
                           </div>
@@ -559,6 +568,63 @@ export default function PublicKitManagementPage() {
                </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Issuance Breakdown Members Modal (Public) */}
+      <Dialog open={!!viewingItemMembers} onOpenChange={(val) => !val && setViewingItemMembers(null)}>
+        <DialogContent className="max-w-2xl rounded-[2rem] border-none shadow-2xl bg-white dark:bg-slate-900 p-0 overflow-hidden flex flex-col max-h-[80vh]">
+          <DialogHeader className="p-8 bg-slate-900 text-white border-b-4 border-accent/20">
+             <div className="flex items-center justify-between mb-2">
+                <Badge className="bg-accent text-primary font-black text-[8px] tracking-[0.2em]">Verified Issued Personnel</Badge>
+                <DialogClose asChild><button className="text-white/40 hover:text-white transition-colors"><X className="w-5 h-5" /></button></DialogClose>
+             </div>
+             <DialogTitle className="text-2xl font-headline font-bold">
+               {viewingItemMembers?.item?.label} Registry
+             </DialogTitle>
+             <DialogDescription className="text-slate-400 text-xs font-bold uppercase">
+               Public record of officials holding this institutional asset.
+             </DialogDescription>
+          </DialogHeader>
+          
+          <ScrollArea className="flex-1 p-6">
+             <div className="space-y-3">
+                {viewingItemMembers?.members.map((m: any) => (
+                  <div 
+                    key={m.id} 
+                    onClick={() => { setSelectedMemberDetail(m); setViewingItemMembers(null); }}
+                    className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800 group hover:border-accent/40 transition-all cursor-pointer"
+                  >
+                     <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-full bg-white dark:bg-slate-800 flex items-center justify-center border border-slate-100 group-hover:border-accent transition-colors">
+                           <UserCheck className="w-5 h-5 text-accent" />
+                        </div>
+                        <div>
+                           <p className="text-sm font-bold text-primary dark:text-white leading-none">{m.name}</p>
+                           <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-1">{m.memberId}</p>
+                        </div>
+                     </div>
+                     <div className="flex flex-col items-end gap-1">
+                        <Badge variant="outline" className="text-[7px] font-bold border-slate-200 text-slate-500 uppercase">
+                          {m.level} Level
+                        </Badge>
+                        <p className="text-[8px] font-bold text-slate-400 uppercase">{m.stateName || 'National Center'}</p>
+                     </div>
+                  </div>
+                ))}
+                {viewingItemMembers?.members.length === 0 && (
+                  <div className="text-center py-20 opacity-30">
+                     <Package className="w-12 h-12 mx-auto mb-3" />
+                     <p className="text-sm font-bold uppercase tracking-widest">No verified issuances for this item.</p>
+                  </div>
+                )}
+             </div>
+          </ScrollArea>
+          
+          <div className="p-6 border-t bg-slate-50 dark:bg-slate-900/50 flex justify-between items-center">
+             <p className="text-[10px] font-black uppercase text-slate-400">Public Record: {viewingItemMembers?.members.length} Distributed</p>
+             <Button variant="ghost" onClick={() => setViewingItemMembers(null)} className="text-[10px] font-black uppercase tracking-widest text-accent hover:bg-accent/10">Close Feed</Button>
+          </div>
         </DialogContent>
       </Dialog>
     </main>
