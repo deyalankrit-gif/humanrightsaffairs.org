@@ -54,6 +54,7 @@ import {
 } from "@/components/ui/dialog"
 import { errorEmitter } from '@/firebase/error-emitter'
 import { FirestorePermissionError, type SecurityRuleContext } from '@/firebase/errors'
+import { ScrollArea } from '@/components/ui/scroll-area'
 
 const INITIAL_KIT_ITEMS = [
   { id: 'identityCard', label: 'Identity Card' },
@@ -98,6 +99,9 @@ export default function MemberKitManagement() {
   const [newItemLabel, setNewItemLabel] = useState('')
   const [editingItemId, setEditingItemId] = useState<string | null>(null)
   const [editingItemLabel, setEditingItemLabel] = useState('')
+  
+  // Breakdown Detail State
+  const [viewingItemMembers, setViewingItemMembers] = useState<{item: any, members: any[]} | null>(null)
 
   const [kitForm, setKitForm] = useState({
     items: {} as Record<string, boolean>,
@@ -290,7 +294,7 @@ export default function MemberKitManagement() {
       stats[item.id] = { issued: 0, total: 0 };
     });
 
-    filteredMembers.forEach(m => {
+    members?.forEach(m => {
       const category = m.designationCategory || "General Member";
       const eligibleItemsList = eligibilityRules[category] || [];
       const kit = kitMap[m.id];
@@ -305,7 +309,7 @@ export default function MemberKitManagement() {
       });
     });
     return stats;
-  }, [filteredMembers, kitMap, eligibilityRules, kitItems]);
+  }, [members, kitMap, eligibilityRules, kitItems]);
 
   const groupings = useMemo(() => {
     const central = filteredMembers.filter(m => m.level === 'National');
@@ -341,7 +345,6 @@ export default function MemberKitManagement() {
     const eligibleItems = kitItems.filter((item: any) => eligibleItemIds.includes(item.id));
     const isOfficeBearer = category === 'Office-bearing Member';
 
-    // Dynamic Car Plate Check: Scans the registry for ANY item containing "Car Plate" in its label
     const carPlateItemIds = kitItems
       .filter((item: any) => item.label.toLowerCase().includes('car plate'))
       .map((item: any) => item.id);
@@ -632,7 +635,14 @@ export default function MemberKitManagement() {
                const s = itemStats[item.id] || { issued: 0, total: 0 };
                const percentage = Math.round((s.issued / (s.total || 1)) * 100);
                return (
-                 <div key={item.id} className="p-3 rounded-2xl border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50 flex flex-col justify-between group hover:border-accent/40 transition-colors">
+                 <div 
+                  key={item.id} 
+                  onClick={() => {
+                    const issuedMembers = (members || []).filter(m => kitMap[m.id]?.items?.[item.id]);
+                    setViewingItemMembers({ item, members: issuedMembers });
+                  }}
+                  className="p-3 rounded-2xl border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50 flex flex-col justify-between group hover:border-accent/40 transition-colors cursor-pointer hover:shadow-md"
+                 >
                     <p className="text-[7px] font-black uppercase text-slate-400 mb-2 truncate group-hover:text-primary dark:group-hover:text-accent transition-colors" title={item.label}>
                       {item.label}
                     </p>
@@ -851,6 +861,63 @@ export default function MemberKitManagement() {
           )}
         </div>
       </section>
+
+      {/* Issuance Breakdown Members Modal */}
+      <Dialog open={!!viewingItemMembers} onOpenChange={(val) => !val && setViewingItemMembers(null)}>
+        <DialogContent className="max-w-2xl rounded-[2rem] border-none shadow-2xl bg-white dark:bg-slate-900 p-0 overflow-hidden flex flex-col max-h-[80vh]">
+          <DialogHeader className="p-8 bg-slate-900 text-white border-b-4 border-accent/20">
+             <div className="flex items-center justify-between mb-2">
+                <Badge className="bg-accent text-primary font-black text-[8px] tracking-[0.2em]">Issued Personnel Registry</Badge>
+                <DialogClose asChild><button className="text-white/40 hover:text-white transition-colors"><X className="w-5 h-5" /></button></DialogClose>
+             </div>
+             <DialogTitle className="text-2xl font-headline font-bold">
+               {viewingItemMembers?.item?.label} Breakdown
+             </DialogTitle>
+             <DialogDescription className="text-slate-400 text-xs font-bold uppercase">
+               Authorized officials who have received this institutional asset.
+             </DialogDescription>
+          </DialogHeader>
+          
+          <ScrollArea className="flex-1 p-6">
+             <div className="space-y-3">
+                {viewingItemMembers?.members.map((m: any) => (
+                  <div 
+                    key={m.id} 
+                    onClick={() => { handleSelectMember(m); setViewingItemMembers(null); }}
+                    className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800 group hover:border-accent/40 transition-all cursor-pointer"
+                  >
+                     <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-full bg-white dark:bg-slate-800 flex items-center justify-center border border-slate-100 group-hover:border-accent transition-colors">
+                           <UserCheck className="w-5 h-5 text-accent" />
+                        </div>
+                        <div>
+                           <p className="text-sm font-bold text-primary dark:text-white leading-none">{m.name}</p>
+                           <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-1">{m.memberId}</p>
+                        </div>
+                     </div>
+                     <div className="flex flex-col items-end gap-1">
+                        <Badge variant="outline" className="text-[7px] font-bold border-slate-200 text-slate-500 uppercase">
+                          {m.level} Level
+                        </Badge>
+                        <p className="text-[8px] font-bold text-slate-400 uppercase">{m.stateName || 'National Center'}</p>
+                     </div>
+                  </div>
+                ))}
+                {viewingItemMembers?.members.length === 0 && (
+                  <div className="text-center py-20 opacity-30">
+                     <Package className="w-12 h-12 mx-auto mb-3" />
+                     <p className="text-sm font-bold uppercase tracking-widest">No issuances recorded.</p>
+                  </div>
+                )}
+             </div>
+          </ScrollArea>
+          
+          <div className="p-6 border-t bg-slate-50 dark:bg-slate-900/50 flex justify-between items-center">
+             <p className="text-[10px] font-black uppercase text-slate-400">Total Issued: {viewingItemMembers?.members.length}</p>
+             <Button variant="ghost" onClick={() => setViewingItemMembers(null)} className="text-[10px] font-black uppercase tracking-widest text-accent hover:bg-accent/10">Close Registry</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </main>
   )
 }
