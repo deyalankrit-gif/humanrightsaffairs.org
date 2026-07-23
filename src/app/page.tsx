@@ -1,3 +1,4 @@
+
 import Image from 'next/image'
 import Link from 'next/link'
 import { ChairmanMessage } from '@/components/chairman-message'
@@ -72,7 +73,7 @@ export default function Home() {
         <div className="absolute inset-0 z-0">
           <Image 
             src="/Human%20R2.jpeg" 
-            alt="Human Rights Heritage" 
+            alt="Human Rights Heritage Mural representing global justice" 
             fill 
             className="object-cover brightness-[0.25] scale-105"
             priority
@@ -83,7 +84,7 @@ export default function Home() {
         {/* Institutional Branding - Aligned Left */}
         <div className="absolute top-8 left-8 z-20 hidden xl:flex items-center gap-6 animate-in fade-in slide-in-from-left-4 duration-1000">
           <div className="relative w-24 h-24 transition-transform hover:scale-105">
-            <Image src="/HRAT%20Logo.jpeg" alt="HRAT Logo" fill className="object-contain" />
+            <Image src="/HRAT%20Logo.jpeg" alt="HRAT Official Institutional Logo" fill className="object-contain" />
           </div>
           <div className="flex flex-col text-white">
             <span className="font-headline font-bold text-3xl leading-none tracking-tight">HRAT</span>
@@ -100,7 +101,7 @@ export default function Home() {
               <div className="relative w-full max-w-[150px] h-[80px] sm:max-w-[200px] sm:h-[100px] md:max-w-[500px] md:h-[250px] transition-all duration-700">
                 <Image 
                   src="/niti2.png" 
-                  alt="Niti Aayog" 
+                  alt="Official Niti Aayog Registration Emblem of India" 
                   fill 
                   className="object-contain"
                 />
@@ -112,31 +113,31 @@ export default function Home() {
                 Government of India ( Niti Aayog Registered )
               </p>
               <div className="font-headline font-bold text-lg sm:text-3xl md:text-5xl lg:text-6xl tracking-tight leading-tight min-h-[1.5em] flex justify-center items-center overflow-visible w-full">
-                <span className="bg-gradient-to-r from-[#FF9933] via-white to-[#138808] bg-clip-text text-transparent italic block drop-shadow-sm px-2 pb-4 text-center">
+                <h1 className="bg-gradient-to-r from-[#FF9933] via-white to-[#138808] bg-clip-text text-transparent italic block drop-shadow-sm px-2 pb-4 text-center">
                   <Typewriter 
                     text="Human Rights Affairs Trust" 
                     speed={80} 
                     delay={500}
                   />
-                </span>
+                </h1>
               </div>
             </div>
             
-            <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-headline font-bold leading-tight bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-cyan-400 bg-[length:200%_auto] bg-clip-text text-transparent animate-gradient-x py-2 w-full drop-shadow-md">
+            <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-headline font-bold leading-tight bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-cyan-400 bg-[length:200%_auto] bg-clip-text text-transparent animate-gradient-x py-2 w-full drop-shadow-md">
               Upholding Justice. Empowering Citizens.
-            </h1>
+            </h2>
             
             <p className="text-[10px] sm:text-sm md:text-lg text-slate-300 font-body max-w-2xl leading-relaxed mx-auto px-4 opacity-90">
               Providing a robust shield against injustice through expert legal guidance, community support, and constitutional transparency.
             </p>
             
             <div className="flex flex-wrap gap-3 md:gap-6 pt-6 md:pt-8 justify-center">
-              <Link href="/legal-aid" className="w-full sm:w-auto">
+              <Link href="/legal-aid" aria-label="Access Legal Aid Cell services">
                 <Button size="lg" className="bg-accent text-white font-bold hover:bg-secondary hover:text-white px-5 py-4 md:px-10 md:py-7 rounded-xl text-xs md:text-lg shadow-xl shadow-accent/20 transition-all hover:-translate-y-1 h-auto whitespace-normal w-full max-w-xs mx-auto">
                   Legal Aid Cell <ArrowRight className="ml-2 w-3 h-3 md:w-5 md:h-5 shrink-0" />
                 </Button>
               </Link>
-              <Link href="/#knowledge" className="w-full sm:w-auto">
+              <Link href="/#knowledge" aria-label="Browse the Rights Library">
                 <Button size="lg" className="bg-secondary text-white font-bold hover:bg-accent px-5 py-4 md:px-10 md:py-7 rounded-xl text-xs md:text-lg transition-all shadow-xl shadow-secondary/10 hover:scale-105 active:scale-95 hover:shadow-2xl hover:shadow-accent/20 h-auto w-full sm:w-auto">
                   Rights Library
                 </Button>
@@ -214,7 +215,7 @@ export default function Home() {
               <div className="relative w-full h-full rounded-[2rem] md:rounded-[3rem] overflow-hidden border-4 md:border-8 border-white shadow-2xl rotate-[-6deg] bg-slate-200">
                 <Image 
                   src={donationImg1?.imageUrl || "/female.jpeg"} 
-                  alt="Inspiration Female" 
+                  alt="Inspiration for Human Rights advocacy" 
                   fill 
                   className="object-cover grayscale group-hover:grayscale-0 transition-all duration-1000"
                 />
@@ -226,7 +227,7 @@ export default function Home() {
               <div className="relative w-full h-full rounded-[2rem] md:rounded-[3rem] overflow-hidden border-4 md:border-8 border-white shadow-2xl rotate-[6deg] bg-slate-200">
                 <Image 
                   src={donationImg2?.imageUrl || "/child.jpeg"} 
-                  alt="Inspiration Child" 
+                  alt="Child safety advocacy representation" 
                   fill 
                   className="object-cover grayscale group-hover:grayscale-0 transition-all duration-1000"
                 />
@@ -237,7 +238,7 @@ export default function Home() {
             <div className="absolute inset-0 z-0 opacity-10 pointer-events-none">
               <Image 
                 src={donationImg1?.imageUrl || "/female.jpeg"} 
-                alt="Donation Background" 
+                alt="Donation background graphic" 
                 fill 
                 className="object-cover grayscale"
               />
@@ -249,7 +250,7 @@ export default function Home() {
                 <div className="relative w-12 h-14 md:w-28 md:h-36 rounded-2xl md:rounded-[2rem] overflow-hidden border-2 md:border-4 border-white/20 rotate-[-8deg] shadow-2xl hidden sm:block shrink-0">
                   <Image 
                     src={donationImg1?.imageUrl || "/female.jpeg"} 
-                    alt="Support" 
+                    alt="Community support image" 
                     fill 
                     className="object-cover"
                   />
@@ -258,7 +259,7 @@ export default function Home() {
                 <div className="relative w-12 h-14 md:w-28 md:h-36 rounded-2xl md:rounded-[2rem] overflow-hidden border-2 md:border-4 border-white/20 rotate-[8deg] shadow-2xl hidden sm:block shrink-0">
                   <Image 
                     src={donationImg2?.imageUrl || "/child.jpeg"} 
-                    alt="Support" 
+                    alt="Social justice representation" 
                     fill 
                     className="object-cover"
                   />
