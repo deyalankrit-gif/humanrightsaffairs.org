@@ -50,10 +50,11 @@ service cloud.firestore {
     }
 
     function hasPermission(permission) {
-      let email = request.auth.token.get('email', '').lower();
-      return isRoot() || 
-             (exists(/databases/$(database)/documents/users/$(email)) && 
-              get(/databases/$(database)/documents/users/$(email)).data.permissions.get(permission, false) == true);
+      return request.auth != null && (
+        isRoot() || 
+        (exists(/databases/$(database)/documents/users/$(request.auth.token.get('email', '').lower())) && 
+         get(/databases/$(database)/documents/users/$(request.auth.token.get('email', '').lower())).data.permissions.get(permission, false) == true)
+      );
     }
 
     // 3. PROTECTED ACCESS: Internal registry and administrative logs

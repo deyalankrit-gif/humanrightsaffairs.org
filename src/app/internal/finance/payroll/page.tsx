@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useMemo } from 'react'
@@ -35,15 +36,15 @@ export default function PayrollSuite() {
   const [search, setSearch] = useState('')
 
   const membersQuery = useMemoFirebase(() => {
-    if (!db) return null;
+    if (!db || !user) return null;
     return query(collection(db, 'memberProfiles'), orderBy('name', 'asc'));
-  }, [db]);
+  }, [db, user]);
   const { data: members, loading: membersLoading } = useCollection(membersQuery);
 
   const payrollQuery = useMemoFirebase(() => {
-    if (!db) return null;
+    if (!db || !user) return null;
     return query(collection(db, 'finance_payroll'), orderBy('year', 'desc'), orderBy('month', 'desc'));
-  }, [db]);
+  }, [db, user]);
   const { data: payrollRecords, loading: payrollLoading } = useCollection(payrollQuery);
 
   const stats = useMemo(() => {
@@ -52,7 +53,7 @@ export default function PayrollSuite() {
   }, [payrollRecords]);
 
   const handleProcessPayroll = async (member: any) => {
-    if (!db) return;
+    if (!db || !user) return;
     setIsProcessing(true);
     
     const recordData = {
@@ -60,14 +61,14 @@ export default function PayrollSuite() {
       employeeName: member.name,
       month: format(new Date(), 'MMMM'),
       year: new Date().getFullYear().toString(),
-      baseSalary: 25000, // Demo logic
+      baseSalary: 25000, 
       allowances: 2000,
       deductions: 500,
       netPaid: 26500,
       paymentDate: format(new Date(), 'yyyy-MM-dd'),
       status: 'Paid',
       createdAt: serverTimestamp(),
-      processedBy: user?.email
+      processedBy: user.email
     };
 
     try {
@@ -222,6 +223,5 @@ export default function PayrollSuite() {
 }
 
 function format(date: Date, fmt: string) {
-  // Simple implementation for demo
   return fmt === 'MMMM' ? date.toLocaleString('default', { month: 'long' }) : date.toISOString().split('T')[0];
 }

@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState } from 'react'
@@ -46,9 +47,9 @@ export default function VoucherHub() {
   })
 
   const txQuery = useMemoFirebase(() => {
-    if (!db) return null;
+    if (!db || !user) return null;
     return query(collection(db, 'finance_transactions'), orderBy('createdAt', 'desc'));
-  }, [db]);
+  }, [db, user]);
   const { data: transactions, loading: txLoading } = useCollection(txQuery);
 
   const handleCreateVoucher = async (e: React.FormEvent) => {
@@ -71,7 +72,6 @@ export default function VoucherHub() {
     try {
       await addDoc(collection(db, 'finance_transactions'), voucherData);
       
-      // Atomic increment for global summary
       const summaryRef = doc(db, 'finance_summary', 'state');
       const isIncome = formData.type === 'Income';
       await updateDoc(summaryRef, {
@@ -122,7 +122,7 @@ export default function VoucherHub() {
                   </CardHeader>
                   <CardContent className="p-0 overflow-x-auto">
                      <table className="w-full text-left">
-                        <thead className="bg-slate-50 dark:bg-slate-800 text-[9px] font-black text-slate-400 uppercase tracking-widest border-b">
+                        <thead className="bg-slate-50 dark:bg-slate-800 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b">
                            <tr>
                               <th className="px-8 py-5">Instrument No.</th>
                               <th className="px-8 py-5">Categorization</th>

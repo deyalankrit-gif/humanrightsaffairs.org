@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState } from 'react'
@@ -14,10 +15,6 @@ import { useToast } from '@/hooks/use-toast'
 import Image from 'next/image'
 import Link from 'next/link'
 
-/**
- * Staff Access Login Page: Unified Auth-Firestore verification.
- * Optimized for full mobile responsiveness.
- */
 export default function StaffLoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -35,15 +32,12 @@ export default function StaffLoginPage() {
     const inputEmail = email.toLowerCase().trim()
     
     try {
-      // PHASE 1: Primary Authentication via Firebase Auth
       const userCredential = await signInWithEmailAndPassword(auth, inputEmail, password)
       const firebaseUser = userCredential.user;
 
-      // PHASE 2: Authorized Personnel Registry Verification
       const userRef = doc(db, 'users', inputEmail)
       let userSnap = await getDoc(userRef)
 
-      // Auto-Provision logic for hardcoded staff if missing from DB but valid in Auth
       const isHardcodedStaff = inputEmail === 'deyalankrit@gmail.com' && password === 'Admin1234'
       
       if (!userSnap.exists()) {
@@ -64,7 +58,14 @@ export default function StaffLoginPage() {
             events: true,
             publicView: true,
             terminated: true,
-            occasions: true
+            occasions: true,
+            financeDashboard: true,
+            financeLedger: true,
+            financeVouchers: true,
+            financePayroll: true,
+            financeProjects: true,
+            financeAssets: true,
+            financeCompliance: true
           }
           
           await setDoc(userRef, {
@@ -89,13 +90,14 @@ export default function StaffLoginPage() {
 
       toast({
         title: "Access Granted",
-        description: "Institutional clearance verified. Redirecting to operational module.",
+        description: "Institutional clearance verified.",
       })
       
       const userData = userSnap.data();
       const perms = userData?.permissions || {};
       
       const priority = [
+        { id: 'financeDashboard', path: 'finance/dashboard' },
         { id: 'analytics', path: 'analytics' },
         { id: 'memberAnalytics', path: 'member-analytics' },
         { id: 'members', path: 'members' },

@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState } from 'react'
@@ -24,13 +25,13 @@ export default function FinanceLedger() {
   const [filterType, setFilterType] = useState('All')
 
   const txQuery = useMemoFirebase(() => {
-    if (!db) return null;
+    if (!db || !user) return null;
     let q = query(collection(db, 'finance_transactions'), orderBy('date', 'desc'));
     if (filterType !== 'All') {
       q = query(collection(db, 'finance_transactions'), where('type', '==', filterType), orderBy('date', 'desc'));
     }
     return q;
-  }, [db, filterType]);
+  }, [db, user, filterType]);
 
   const { data: transactions, loading: txLoading } = useCollection(txQuery);
 

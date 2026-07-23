@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo } from 'react'
@@ -25,15 +26,15 @@ export default function FinanceDashboard() {
   const router = useRouter()
 
   const summaryRef = useMemoFirebase(() => {
-    if (!db) return null;
+    if (!db || !user) return null;
     return doc(db, 'finance_summary', 'state');
-  }, [db]);
+  }, [db, user]);
   const { data: summary, loading: summaryLoading } = useDoc(summaryRef);
 
   const txQuery = useMemoFirebase(() => {
-    if (!db) return null;
+    if (!db || !user) return null;
     return query(collection(db, 'finance_transactions'), orderBy('createdAt', 'desc'), limit(10));
-  }, [db]);
+  }, [db, user]);
   const { data: recentTransactions, loading: txLoading } = useCollection(txQuery);
 
   const stats = useMemo(() => {

@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState } from 'react'
@@ -14,10 +15,6 @@ import { useToast } from '@/hooks/use-toast'
 import Image from 'next/image'
 import Link from 'next/link'
 
-/**
- * Root Access Login Page: Professional Terminal Entry.
- * Optimized for full mobile responsiveness.
- */
 export default function RootLoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -46,6 +43,34 @@ export default function RootLoginPage() {
       const userRef = doc(db, 'users', inputEmail)
       const userSnap = await getDoc(userRef)
       
+      const fullPermissions = {
+        analytics: true, 
+        memberAnalytics: true, 
+        members: true, 
+        renewals: true,
+        visitors: true, 
+        accounts: true,
+        expenses: true, 
+        applications: true, 
+        inventory: true, 
+        vendors: true,
+        grievances: true, 
+        meetings: true, 
+        events: true, 
+        publicView: true,
+        terminated: true,
+        occasions: true,
+        activityHub: true,
+        gallery: true,
+        financeDashboard: true,
+        financeLedger: true,
+        financeVouchers: true,
+        financePayroll: true,
+        financeProjects: true,
+        financeAssets: true,
+        financeCompliance: true
+      };
+
       if (!userSnap.exists()) {
         await setDoc(userRef, {
           uid: firebaseUser.uid,
@@ -54,51 +79,13 @@ export default function RootLoginPage() {
           role: 'admin',
           status: 'active',
           createdAt: serverTimestamp(),
-          permissions: {
-            analytics: true, 
-            memberAnalytics: true, 
-            members: true, 
-            renewals: true,
-            visitors: true, 
-            accounts: true,
-            expenses: true, 
-            applications: true, 
-            inventory: true, 
-            vendors: true,
-            grievances: true, 
-            meetings: true, 
-            events: true, 
-            publicView: true,
-            terminated: true,
-            occasions: true,
-            activityHub: true,
-            gallery: true
-          }
+          permissions: fullPermissions
         });
       } else {
         await setDoc(userRef, { 
           uid: firebaseUser.uid, 
           lastLogin: serverTimestamp(),
-          permissions: {
-            analytics: true, 
-            memberAnalytics: true, 
-            members: true, 
-            renewals: true,
-            visitors: true, 
-            accounts: true,
-            expenses: true, 
-            applications: true, 
-            inventory: true, 
-            vendors: true,
-            grievances: true, 
-            meetings: true, 
-            events: true, 
-            publicView: true,
-            terminated: true,
-            occasions: true,
-            activityHub: true,
-            gallery: true
-          }
+          permissions: fullPermissions
         }, { merge: true });
       }
 
@@ -107,7 +94,7 @@ export default function RootLoginPage() {
         description: "Governance privileges unlocked. Accessing National Registry.",
       })
       
-      router.push('/internal/analytics')
+      router.push('/internal/finance/dashboard')
     } catch (error: any) {
       toast({
         variant: "destructive",
