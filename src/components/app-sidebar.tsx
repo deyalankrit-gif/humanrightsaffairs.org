@@ -50,7 +50,6 @@ import {
   Receipt,
   FileSpreadsheet,
   HardDrive,
-  CreditCard,
   Building,
   ClipboardList
 } from "lucide-react"
@@ -174,7 +173,7 @@ export function AppSidebar() {
         {/* FINANCE MODULE GROUP */}
         {isAdminPortal && filteredFinanceLinks.length > 0 && (
           <SidebarGroup>
-            <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">
+            <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden text-red-600 font-bold">
               FINANCIAL GOVERNANCE
             </SidebarGroupLabel>
             <SidebarMenu>
@@ -205,7 +204,15 @@ export function AppSidebar() {
 
         <SidebarGroup>
           <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">
-            {isAdminPortal ? (isRoot ? "ROOT GOVERNANCE" : "STAFF OPERATIONS") : "NAVIGATION"}
+            {isAdminPortal ? (
+              isRoot ? (
+                <span className="text-emerald-500 font-bold">ROUTE GOVERNANCE</span>
+              ) : (
+                "STAFF OPERATIONS"
+              )
+            ) : (
+              "NAVIGATION"
+            )}
           </SidebarGroupLabel>
           <SidebarMenu>
             {links.map((link) => {
