@@ -79,7 +79,6 @@ const topAnalyticsLinksConfig = [
 ]
 
 const adminLinksConfig = [
-  { name: 'Accounts', href: '/internal/accounts', icon: Wallet, permission: 'accounts' },
   { name: 'Expenses', href: '/internal/expenses', icon: TrendingDown, permission: 'expenses' },
   { name: 'Applications', href: '/internal/applications', icon: FileText, permission: 'applications' },
   { name: 'Public Complaints', href: '/internal/public-complaints', icon: ShieldQuestion, permission: 'publicComplaints' },
@@ -102,6 +101,7 @@ const adminLinksConfig = [
 
 const financeLinksConfig = [
   { name: 'Finance Dashboard', href: '/internal/finance/dashboard', icon: BarChart3, permission: 'financeDashboard' },
+  { name: 'Accounts', href: '/internal/accounts', icon: Wallet, permission: 'accounts' },
   { name: 'General Ledger', href: '/internal/finance/ledger', icon: ClipboardList, permission: 'financeLedger' },
   { name: 'Voucher Hub', href: '/internal/finance/vouchers', icon: Receipt, permission: 'financeVouchers' },
   { name: 'Institutional Donors', href: '/internal/finance/donors', icon: HeartHandshake, permission: 'financeLedger' },
