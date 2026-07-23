@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useEffect, useState } from 'react'
@@ -14,7 +13,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
-import { Badge } from '@/badge'
+import { Badge } from '@/components/ui/badge'
 import { 
   ShieldAlert, 
   UserPlus, 
@@ -66,6 +65,7 @@ const MODULES = [
   { id: 'financeCompliance', label: 'Tax & Compliance' },
   { id: 'analytics', label: 'Donation Analytics' },
   { id: 'memberAnalytics', label: 'Member Analytics' },
+  { id: 'visitors', label: 'Website Visitors' },
   { id: 'members', label: 'Member Directory' },
   { id: 'renewals', label: 'Member Renewals' },
   { id: 'visitors', label: 'Website Visitors' },
@@ -345,7 +345,7 @@ export default function AccessRolesPage() {
                                   <AlertDialogTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8 text-slate-600 hover:text-red-500 rounded-full transition-colors"><Trash2 className="w-4 h-4" /></Button></AlertDialogTrigger>
                                   <AlertDialogContent className="bg-slate-900 border-white/10 text-white rounded-[2rem]">
                                     <AlertDialogHeader><AlertDialogTitle className="flex items-center gap-2 text-red-500"><AlertTriangle className="w-6 h-6" /> Revoke Clearance?</AlertDialogTitle><AlertDialogDescription className="text-slate-400 uppercase tracking-widest text-[10px]">Permanently purge the record for <strong className="text-white">{u.email || u.id}</strong>? Access will be terminated immediately.</AlertDialogDescription></AlertDialogHeader>
-                                    <AlertDialogFooter><AlertDialogCancel className="bg-white/5 border-white/10 text-white rounded-xl">Cancel</AlertDialogCancel><AlertDialogAction onClick={() => handleDeleteUser(u.id)} className="bg-red-600 hover:bg-red-700 rounded-xl font-bold">{isDeleting === u.id ? <Loader2 className="animate-spin" /> : "Revoke Clearance"}</AlertDialogAction></AlertDialogFooter>
+                                    <AlertDialogFooter><AlertDialogCancel className="bg-white/5 border-white/10 text-white rounded-xl">Cancel</AlertDialogCancel><AlertDialogAction onClick={() => handleDeleteUser(u.id)} className="bg-red-500 hover:bg-red-700 rounded-xl font-bold">{isDeleting === u.id ? <Loader2 className="animate-spin" /> : "Revoke Clearance"}</AlertDialogAction></AlertDialogFooter>
                                   </AlertDialogContent>
                                 </AlertDialog>
                               </div>
