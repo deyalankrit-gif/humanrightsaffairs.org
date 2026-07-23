@@ -99,7 +99,6 @@ export default function InternalVendorsPage() {
     }
   }, [user, authLoading, router])
 
-  // Persistence for Custom Categories
   const settingsRef = useMemoFirebase(() => {
     if (!db) return null;
     return doc(db, 'vendors', 'settings');
@@ -229,7 +228,8 @@ export default function InternalVendorsPage() {
     return matchesSearch && matchesType;
   })
 
-  const CategoryManagement = () => (
+  // INTERNAL RENDER HELPERS (Pure functions returning JSX, no local state within)
+  const renderCategoryManager = () => (
     <div className="p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 space-y-4 shadow-inner mt-4">
       <div className="space-y-1">
         <Label className="text-[9px] font-black uppercase text-accent tracking-widest">Taxonomy Management</Label>
@@ -284,19 +284,16 @@ export default function InternalVendorsPage() {
             </div>
           </Badge>
         ))}
-        {((settingsData as any)?.customCategories || []).length === 0 && (
-          <p className="text-[8px] font-bold text-slate-300 uppercase italic">No custom categories established.</p>
-        )}
       </div>
     </div>
   )
 
-  const VendorFormFields = ({ data, setData }: { data: any, setData: any }) => (
+  const renderFormFields = (data: any, setData: (d: any) => void) => (
     <div className="space-y-6">
       <div className="grid md:grid-cols-2 gap-6">
         <div className="space-y-1">
           <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Company Name *</Label>
-          <Input value={data.companyName} onChange={e => setData({...data, companyName: e.target.value})} placeholder="Official Entity Name" className="h-11 rounded-xl" />
+          <Input value={data.companyName || ''} onChange={e => setData({...data, companyName: e.target.value})} placeholder="Official Entity Name" className="h-11 rounded-xl" />
         </div>
         <div className="space-y-1">
           <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Vendor Category *</Label>
@@ -314,14 +311,14 @@ export default function InternalVendorsPage() {
           <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Official Contact Number *</Label>
           <div className="relative">
             <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
-            <Input value={data.phone} onChange={e => setData({...data, phone: e.target.value})} placeholder="+91" className="h-11 pl-9 rounded-xl" />
+            <Input value={data.phone || ''} onChange={e => setData({...data, phone: e.target.value})} placeholder="+91" className="h-11 pl-9 rounded-xl" />
           </div>
         </div>
         <div className="space-y-1">
           <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Official Email</Label>
           <div className="relative">
             <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
-            <Input value={data.email} onChange={e => setData({...data, email: e.target.value})} placeholder="office@vendor.com" className="h-11 pl-9 rounded-xl" />
+            <Input value={data.email || ''} onChange={e => setData({...data, email: e.target.value})} placeholder="office@vendor.com" className="h-11 pl-9 rounded-xl" />
           </div>
         </div>
       </div>
@@ -330,7 +327,7 @@ export default function InternalVendorsPage() {
         <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Company Office Address *</Label>
         <div className="relative">
           <MapPin className="absolute left-3 top-3 w-3.5 h-3.5 text-slate-400" />
-          <Textarea value={data.address} onChange={e => setData({...data, address: e.target.value})} placeholder="Registered Head Office Location" className="min-h-[80px] pl-9 rounded-xl" />
+          <Textarea value={data.address || ''} onChange={e => setData({...data, address: e.target.value})} placeholder="Registered Head Office Location" className="min-h-[80px] pl-9 rounded-xl" />
         </div>
       </div>
 
@@ -339,14 +336,14 @@ export default function InternalVendorsPage() {
           <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">GSTIN / Tax ID</Label>
           <div className="relative">
             <Hash className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
-            <Input value={data.gstin} onChange={e => setData({...data, gstin: e.target.value.toUpperCase()})} placeholder="19AAAAA0000A1Z5" className="h-11 pl-9 rounded-xl font-mono" />
+            <Input value={data.gstin || ''} onChange={e => setData({...data, gstin: e.target.value.toUpperCase()})} placeholder="19AAAAA0000A1Z5" className="h-11 pl-9 rounded-xl font-mono" />
           </div>
         </div>
         <div className="space-y-1">
           <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Point of Contact (Person)</Label>
           <div className="relative">
             <User className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
-            <Input value={data.contactPerson} onChange={e => setData({...data, contactPerson: e.target.value})} placeholder="Name of Manager/Proprietor" className="h-11 pl-9 rounded-xl" />
+            <Input value={data.contactPerson || ''} onChange={e => setData({...data, contactPerson: e.target.value})} placeholder="Name of Manager/Proprietor" className="h-11 pl-9 rounded-xl" />
           </div>
         </div>
       </div>
@@ -356,7 +353,7 @@ export default function InternalVendorsPage() {
           <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Particular Service Function</Label>
           <div className="relative">
             <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
-            <Input value={data.particularFunction} onChange={e => setData({...data, particularFunction: e.target.value})} placeholder="e.g. Bulk Printing of ID Cards" className="h-11 pl-9 rounded-xl" />
+            <Input value={data.particularFunction || ''} onChange={e => setData({...data, particularFunction: e.target.value})} placeholder="e.g. Bulk Printing of ID Cards" className="h-11 pl-9 rounded-xl" />
           </div>
         </div>
         <div className="space-y-1">
@@ -371,7 +368,7 @@ export default function InternalVendorsPage() {
         </div>
       </div>
 
-      <CategoryManagement />
+      {renderCategoryManager()}
     </div>
   )
 
@@ -380,7 +377,7 @@ export default function InternalVendorsPage() {
       <section className="pt-16 pb-8 bg-slate-900 text-white border-b-8 border-accent/20">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="space-y-1 text-center md:text-left">
+            <div className="space-y-1">
               <div className="inline-flex items-center gap-2 bg-accent/20 text-accent px-3 py-1 rounded-full text-[9px] font-bold uppercase border border-accent/30 tracking-[0.2em]">
                 <ShieldCheck className="w-2.5 h-2.5" /> External Governance
               </div>
@@ -399,7 +396,7 @@ export default function InternalVendorsPage() {
                   <DialogTitle className="text-2xl font-headline font-bold text-primary dark:text-white">Register Institutional Vendor</DialogTitle>
                   <DialogDescription>Establish a new service provider entry in the national registry.</DialogDescription>
                 </DialogHeader>
-                <VendorFormFields data={newVendor} setData={setNewVendor} />
+                {renderFormFields(newVendor, setNewVendor)}
                 <DialogFooter className="mt-8">
                   <Button onClick={handleAddVendor} disabled={isActionLoading} className="w-full h-14 rounded-2xl bg-primary text-white hover:bg-secondary transition-all font-bold text-lg shadow-xl shadow-primary/10">
                     {isActionLoading ? <Loader2 className="animate-spin" /> : "Commit to National Registry"}
@@ -415,7 +412,7 @@ export default function InternalVendorsPage() {
         <div className="container mx-auto px-4">
           <div className="flex flex-col lg:flex-row items-center justify-between gap-4">
             <div className="flex flex-wrap items-center gap-1.5 p-1 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700">
-              {["All", "Legal", "Logistics", "Printing", "IT Services"].map((t) => (
+              {["All", ...DEFAULT_VENDOR_TYPES.slice(0, 4)].map((t) => (
                 <Button 
                   key={t} 
                   variant={typeFilter === t ? "default" : "ghost"} 
@@ -497,13 +494,6 @@ export default function InternalVendorsPage() {
                   </CardContent>
                 </Card>
               ))}
-
-              {filtered.length === 0 && (
-                <div className="text-center py-24 bg-white dark:bg-slate-900 rounded-[3rem] border-4 border-dashed border-slate-100 dark:border-slate-800 opacity-30">
-                   <Truck className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-                   <p className="text-slate-400 font-black uppercase tracking-widest text-xs">Registry Empty</p>
-                </div>
-              )}
             </div>
           )}
         </div>
@@ -517,7 +507,7 @@ export default function InternalVendorsPage() {
           </DialogHeader>
           {editVendor && (
             <>
-              <VendorFormFields data={editVendor} setData={setEditVendor} />
+              {renderFormFields(editVendor, setEditVendor)}
               <DialogFooter className="mt-8">
                 <Button onClick={handleUpdateVendor} disabled={isActionLoading} className="w-full h-14 rounded-2xl bg-primary text-white hover:bg-secondary transition-all font-bold text-lg">
                   {isActionLoading ? <Loader2 className="animate-spin" /> : "Commit Profile Refresh"}
