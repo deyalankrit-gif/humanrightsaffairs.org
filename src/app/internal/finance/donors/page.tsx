@@ -1,7 +1,7 @@
 
 "use client"
 
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase'
 import { collection, query, orderBy, addDoc, serverTimestamp, doc, deleteDoc } from 'firebase/firestore'
@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Footer } from '@/components/footer'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { 
   HeartHandshake, 
   Plus, 
@@ -67,6 +68,12 @@ export default function InstitutionalDonors() {
   }, [db, user]);
 
   const { data: donors, loading: donorsLoading } = useCollection(donorsQuery);
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/internal/login')
+    }
+  }, [user, authLoading, router])
 
   const handleAddDonor = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -131,7 +138,7 @@ export default function InstitutionalDonors() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <Input 
                 placeholder="Search donors by name..." 
-                className="pl-9 h-11 rounded-xl bg-white dark:bg-slate-900 shadow-sm"
+                className="pl-9 h-11 rounded-xl bg-white dark:bg-slate-950 shadow-sm border-none"
                 value={search}
                 onChange={e => setSearch(e.target.value)}
               />
@@ -189,7 +196,7 @@ export default function InstitutionalDonors() {
       </section>
 
       <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
-         <DialogContent className="max-w-xl rounded-[2rem] border-none shadow-2xl p-0 overflow-hidden">
+         <DialogContent className="max-w-xl rounded-[2rem] border-none shadow-2xl p-0 overflow-hidden bg-white dark:bg-slate-900">
             <div className="bg-slate-900 p-8 text-white">
                <DialogTitle className="text-2xl font-headline font-bold">Donor Registration</DialogTitle>
                <DialogDescription className="text-emerald-400 uppercase tracking-widest font-black text-[10px]">Benefactor Registry Terminal</DialogDescription>
