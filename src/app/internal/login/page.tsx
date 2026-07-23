@@ -40,34 +40,34 @@ export default function StaffLoginPage() {
 
       const isHardcodedStaff = inputEmail === 'deyalankrit@gmail.com' && password === 'Admin1234'
       
+      const initialPermissions = {
+        analytics: false,
+        memberAnalytics: true,
+        members: true,
+        renewals: true,
+        visitors: true,
+        accounts: true,
+        expenses: true,
+        applications: true,
+        inventory: true,
+        vendors: true,
+        grievances: true,
+        meetings: true,
+        events: true,
+        publicView: true,
+        terminated: true,
+        occasions: true,
+        financeDashboard: true,
+        financeLedger: true,
+        financeVouchers: true,
+        financePayroll: true,
+        financeProjects: true,
+        financeAssets: true,
+        financeCompliance: true
+      }
+
       if (!userSnap.exists()) {
         if (isHardcodedStaff) {
-          const initialPermissions = {
-            analytics: false,
-            memberAnalytics: true,
-            members: true,
-            renewals: true,
-            visitors: true,
-            accounts: true,
-            expenses: true,
-            applications: true,
-            inventory: true,
-            vendors: true,
-            grievances: true,
-            meetings: true,
-            events: true,
-            publicView: true,
-            terminated: true,
-            occasions: true,
-            financeDashboard: true,
-            financeLedger: true,
-            financeVouchers: true,
-            financePayroll: true,
-            financeProjects: true,
-            financeAssets: true,
-            financeCompliance: true
-          }
-          
           await setDoc(userRef, {
             uid: firebaseUser.uid,
             email: inputEmail,
@@ -84,6 +84,12 @@ export default function StaffLoginPage() {
           await signOut(auth)
           throw new Error("Clearance Required: Your identity is not present in the institutional registry.")
         }
+      } else if (isHardcodedStaff) {
+        // Sync permissions for hardcoded staff to ensure new modules are available
+        await setDoc(userRef, { 
+          permissions: initialPermissions,
+          lastLogin: serverTimestamp() 
+        }, { merge: true });
       }
 
       await setDoc(userRef, { lastLogin: serverTimestamp(), uid: firebaseUser.uid }, { merge: true });

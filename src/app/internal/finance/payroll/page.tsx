@@ -43,7 +43,8 @@ export default function PayrollSuite() {
 
   const payrollQuery = useMemoFirebase(() => {
     if (!db || !user) return null;
-    return query(collection(db, 'finance_payroll'), orderBy('year', 'desc'), orderBy('month', 'desc'));
+    // Simplified query to prevent index-related permission evaluation failures
+    return query(collection(db, 'finance_payroll'), orderBy('createdAt', 'desc'));
   }, [db, user]);
   const { data: payrollRecords, loading: payrollLoading } = useCollection(payrollQuery);
 

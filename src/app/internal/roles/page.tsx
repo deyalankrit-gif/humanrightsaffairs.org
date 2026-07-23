@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useEffect, useState } from 'react'
@@ -56,6 +57,13 @@ import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
 
 const MODULES = [
+  { id: 'financeDashboard', label: 'Finance Dashboard' },
+  { id: 'financeLedger', label: 'General Ledger' },
+  { id: 'financeVouchers', label: 'Voucher Hub' },
+  { id: 'financePayroll', label: 'Payroll Suite' },
+  { id: 'financeProjects', label: 'Project Accounting' },
+  { id: 'financeAssets', label: 'Asset Registry' },
+  { id: 'financeCompliance', label: 'Tax & Compliance' },
   { id: 'analytics', label: 'Donation Analytics' },
   { id: 'memberAnalytics', label: 'Member Analytics' },
   { id: 'members', label: 'Member Directory' },
