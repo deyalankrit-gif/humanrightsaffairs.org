@@ -72,10 +72,13 @@ const publicLinks = [
   { name: 'Helpline', href: '/#helpline', icon: Phone },
 ]
 
-const adminLinksConfig = [
+const topAnalyticsLinksConfig = [
   { name: 'Donation Analytics', href: '/internal/analytics', icon: LayoutDashboard, permission: 'analytics' },
   { name: 'Member Analytics', href: '/internal/member-analytics', icon: BarChart, permission: 'memberAnalytics' },
   { name: 'Website Visitors', href: '/internal/visitors', icon: BarChart3, permission: 'visitors' },
+]
+
+const adminLinksConfig = [
   { name: 'Accounts', href: '/internal/accounts', icon: Wallet, permission: 'accounts' },
   { name: 'Expenses', href: '/internal/expenses', icon: TrendingDown, permission: 'expenses' },
   { name: 'Applications', href: '/internal/applications', icon: FileText, permission: 'applications' },
@@ -125,6 +128,14 @@ export function AppSidebar() {
 
   const isRoot = user?.email?.toLowerCase() === 'deydhritiman@gmail.com';
 
+  const filteredTopAnalyticsLinks = React.useMemo(() => {
+    if (!isAdminPortal) return []
+    return topAnalyticsLinksConfig.filter(link => {
+      if (isRoot) return true;
+      return userPermissions?.permissions?.[link.permission || ''] === true;
+    })
+  }, [isAdminPortal, isRoot, userPermissions])
+
   const filteredAdminLinks = React.useMemo(() => {
     if (!isAdminPortal) return []
     return adminLinksConfig.filter(link => {
@@ -141,8 +152,6 @@ export function AppSidebar() {
       return userPermissions?.permissions?.[link.permission || ''] === true;
     })
   }, [isAdminPortal, isRoot, userPermissions])
-
-  const links = isAdminPortal ? filteredAdminLinks : publicLinks
 
   React.useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -170,6 +179,38 @@ export function AppSidebar() {
       </SidebarHeader>
       
       <SidebarContent className="py-6 no-scrollbar">
+        {/* TOP ANALYTICS MODULE GROUP */}
+        {isAdminPortal && filteredTopAnalyticsLinks.length > 0 && (
+          <SidebarGroup>
+            <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden text-primary font-bold">
+              INSTITUTIONAL INTELLIGENCE
+            </SidebarGroupLabel>
+            <SidebarMenu>
+              {filteredTopAnalyticsLinks.map((link) => {
+                const isActive = pathname === link.href
+                return (
+                  <SidebarMenuItem key={link.name}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={isActive}
+                      tooltip={link.name}
+                      className={cn(
+                        "h-11 rounded-xl transition-all px-4",
+                        isActive ? "bg-accent text-white font-bold" : "hover:bg-accent/10 hover:text-accent group/btn"
+                      )}
+                    >
+                      <Link href={link.href} className="flex items-center gap-3">
+                        <link.icon className={cn("w-5 h-5", isActive ? "text-white" : "text-muted-foreground group-hover/btn:text-accent")} />
+                        <span className="group-data-[collapsible=icon]:hidden">{link.name}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                )
+              })}
+            </SidebarMenu>
+          </SidebarGroup>
+        )}
+
         {/* FINANCE MODULE GROUP */}
         {isAdminPortal && filteredFinanceLinks.length > 0 && (
           <SidebarGroup>
@@ -206,7 +247,7 @@ export function AppSidebar() {
           <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">
             {isAdminPortal ? (
               isRoot ? (
-                <span className="text-emerald-500 font-bold">ROUTE GOVERNANCE</span>
+                <span className="text-emerald-500 font-bold uppercase tracking-widest">Route Governance</span>
               ) : (
                 "STAFF OPERATIONS"
               )
@@ -215,7 +256,7 @@ export function AppSidebar() {
             )}
           </SidebarGroupLabel>
           <SidebarMenu>
-            {links.map((link) => {
+            {(isAdminPortal ? filteredAdminLinks : publicLinks).map((link) => {
               let isActive = false
               
               if (isAdminPortal) {
@@ -248,7 +289,7 @@ export function AppSidebar() {
                     <Link 
                       href={link.href}
                       onClick={() => {
-                        if (link.href.includes('#')) setActiveHash('#' + link.href.split('#')[1])
+                        if (!isAdminPortal && link.href.includes('#')) setActiveHash('#' + link.href.split('#')[1])
                         else if (!isAdminPortal) setActiveHash('')
                       }}
                       className="flex items-center gap-3"
