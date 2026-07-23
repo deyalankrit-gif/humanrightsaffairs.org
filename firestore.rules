@@ -81,7 +81,7 @@ service cloud.firestore {
     
     match /donations/{donationId} {
       allow create: if true;
-      allow read: if hasPermission('analytics') || hasPermission('financeLedger');
+      allow read: if hasPermission('analytics') || hasPermission('financeLedger') || hasPermission('financeDashboard');
       allow delete: if isRoot();
     }
 
@@ -119,29 +119,39 @@ service cloud.firestore {
 
     // 4. FINANCIAL GOVERNANCE (Enterprise Module)
     match /finance_transactions/{txId} {
-      allow read: if hasPermission('financeLedger');
-      allow create, update: if hasPermission('financeVouchers');
+      allow read: if hasPermission('financeLedger') || hasPermission('financeDashboard');
+      allow create, update: if hasPermission('financeVouchers') || isRoot();
       allow delete: if isRoot();
     }
 
     match /finance_projects/{projectId} {
-      allow read: if hasPermission('financeProjects');
+      allow read: if hasPermission('financeProjects') || hasPermission('financeDashboard');
       allow write: if hasPermission('financeVouchers') || isRoot();
     }
 
     match /finance_assets/{assetId} {
-      allow read: if hasPermission('financeAssets');
+      allow read: if hasPermission('financeAssets') || hasPermission('financeDashboard');
       allow write: if hasPermission('financeAssets') || isRoot();
     }
 
     match /finance_payroll/{recordId} {
-      allow read: if hasPermission('financePayroll');
+      allow read: if hasPermission('financePayroll') || hasPermission('financeDashboard');
       allow write: if hasPermission('financePayroll') || isRoot();
     }
 
     match /finance_summary/{docId} {
       allow read: if hasPermission('financeDashboard');
       allow write: if hasPermission('financeVouchers') || isRoot();
+    }
+
+    match /finance_donors/{donorId} {
+      allow read: if hasPermission('financeLedger') || hasPermission('financeDashboard');
+      allow write: if hasPermission('financeLedger') || isRoot();
+    }
+
+    match /finance_compliance/{docId} {
+      allow read: if hasPermission('financeCompliance') || hasPermission('financeDashboard');
+      allow write: if hasPermission('financeCompliance') || isRoot();
     }
 
     // 5. ACTIVITY CALENDAR HUB

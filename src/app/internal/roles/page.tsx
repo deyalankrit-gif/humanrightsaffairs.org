@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
-import { Badge } from '@/components/ui/badge'
+import { Badge } from '@/badge'
 import { 
   ShieldAlert, 
   UserPlus, 
@@ -104,8 +104,6 @@ export default function AccessRolesPage() {
   const [isDeleting, setIsDeleting] = useState<string | null>(null)
   
   const [editingUser, setEditingUser] = useState<any>(null)
-  const [editPassword, setEditPassword] = useState('')
-  const [showEditPassword, setShowEditPassword] = useState(false)
   const [isEditDialogOpen, setIsAddingEditDialogOpen] = useState(false)
 
   const isRoot = user?.email?.toLowerCase() === 'deydhritiman@gmail.com'
@@ -214,7 +212,6 @@ export default function AccessRolesPage() {
       await updateDoc(userRef, updateData)
       toast({ title: "Registry Updated", description: `Profile for ${editingUser.email} refreshed.` })
       setEditingUser(null);
-      setEditPassword('');
       setIsAddingEditDialogOpen(false);
     } catch (error: any) {
       toast({ variant: "destructive", title: "Update Failed", description: error.message })
@@ -340,7 +337,7 @@ export default function AccessRolesPage() {
                             </div>
                          </div>
                          <div className="flex items-center gap-3">
-                            <Badge className={cn("text-[9px] font-black px-3 py-1 rounded-full uppercase border-none", u.role === 'admin' ? "bg-red-600" : "bg-slate-800")}>{u.role?.toUpperCase()}</Badge>
+                            <Badge className={cn("text-[9px] font-black px-3 py-1 rounded-full uppercase border-none", u.role === 'admin' ? "bg-red-600 text-white" : "bg-slate-800 text-white")}>{u.role?.toUpperCase()}</Badge>
                             {u.role === 'staff' && (
                               <div className="flex items-center gap-2">
                                 <Button variant="ghost" size="icon" onClick={() => { setEditingUser({ ...u, email: u.email || u.id }); setIsAddingEditDialogOpen(true); }} className="h-8 w-8 text-slate-600 hover:text-accent rounded-full transition-colors"><Edit className="w-4 h-4" /></Button>
