@@ -1,3 +1,4 @@
+
 {
   "entities": {
     "UserAccount": {
@@ -8,7 +9,7 @@
         "uid": { "type": "string", "description": "Linked Firebase Authentication UID." },
         "email": { "type": "string", "format": "email" },
         "name": { "type": "string" },
-        "role": { "type": "string", "enum": ["admin", "staff"] },
+        "role": { "type": "string", "enum": ["admin", "staff", "national_finance", "state_finance", "auditor"] },
         "status": { "type": "string", "enum": ["active", "inactive"] },
         "permissions": {
           "type": "object",
@@ -29,93 +30,93 @@
             "publicView": { "type": "boolean" },
             "terminated": { "type": "boolean" },
             "renewals": { "type": "boolean" },
-            "activityHub": { "type": "boolean", "description": "Access to manage Activity Calendar Hub." },
-            "occasions": { "type": "boolean", "description": "Access to manage Festival & Occasion greetings." },
-            "donorWall": { "type": "boolean", "description": "Access to manage Wall of Donors recognition." },
-            "publicComplaints": { "type": "boolean", "description": "Access to review public human rights complaints." },
-            "kitManagement": { "type": "boolean", "description": "Access to manage official kits and member assets." }
+            "activityHub": { "type": "boolean" },
+            "occasions": { "type": "boolean" },
+            "donorWall": { "type": "boolean" },
+            "publicComplaints": { "type": "boolean" },
+            "kitManagement": { "type": "boolean" },
+            "financeDashboard": { "type": "boolean", "description": "Access to Financial Dashboard & Analytics." },
+            "financeLedger": { "type": "boolean", "description": "Access to General Ledger & Transactions." },
+            "financeVouchers": { "type": "boolean", "description": "Ability to create and approve vouchers." },
+            "financePayroll": { "type": "boolean", "description": "Management of employee salaries." },
+            "financeProjects": { "type": "boolean", "description": "Project-based accounting & fund utilization." },
+            "financeAssets": { "type": "boolean", "description": "Fixed asset management & depreciation." },
+            "financeCompliance": { "type": "boolean", "description": "Tax and statutory compliance records." }
           }
         },
         "lastLogin": { "type": "string", "format": "date-time" },
         "createdAt": { "type": "string", "format": "date-time" },
         "updatedAt": { "type": "string", "format": "date-time" },
-        "createdBy": { "type": "string", "description": "UID of the administrator who provisioned this account." }
+        "createdBy": { "type": "string" }
       },
       "required": ["email", "permissions", "uid", "role"]
     },
-    "ActivityEvent": {
-      "title": "Activity Event",
-      "description": "Organizational activity for the Hub.",
+    "FinancialTransaction": {
+      "title": "Financial Transaction",
+      "description": "Core ledger entry for income and expenses.",
       "type": "object",
       "properties": {
-        "title": { "type": "string" },
-        "description": { "type": "string" },
-        "category": { "type": "string" },
+        "voucherNo": { "type": "string" },
         "date": { "type": "string", "format": "date" },
-        "startTime": { "type": "string" },
-        "endTime": { "type": "string" },
-        "venue": { "type": "string" },
-        "organizer": { "type": "string" },
-        "responsiblePerson": { "type": "string" },
-        "budget": { "type": "number" },
-        "notes": { "type": "string" },
-        "status": { "type": "string", "enum": ["Planned", "Confirmed", "Completed", "Cancelled"] },
-        "priority": { "type": "string", "enum": ["High", "Medium", "Low"] },
+        "type": { "type": "string", "enum": ["Income", "Expense", "Contra", "Journal"] },
+        "account": { "type": "string", "description": "Account head from Chart of Accounts." },
+        "amount": { "type": "number" },
+        "paymentMethod": { "type": "string", "enum": ["Cash", "Bank", "UPI", "Cheque"] },
+        "reference": { "type": "string" },
+        "particulars": { "type": "string" },
+        "projectId": { "type": "string", "description": "Linked project if applicable." },
+        "status": { "type": "string", "enum": ["Draft", "Submitted", "Approved", "Rejected"] },
+        "attachmentUrl": { "type": "string" },
         "createdAt": { "type": "string", "format": "date-time" },
-        "createdBy": { "type": "string" }
+        "createdBy": { "type": "string" },
+        "approvedBy": { "type": "string" }
       },
-      "required": ["title", "date", "category", "status"]
+      "required": ["voucherNo", "date", "type", "amount", "status"]
     },
-    "PublicComplaint": {
-      "title": "Public Complaint",
-      "description": "A formal human rights violation report submitted by a citizen.",
+    "FinancialProject": {
+      "title": "Financial Project",
+      "description": "Project-based fund tracking.",
       "type": "object",
       "properties": {
-        "token": { "type": "string" },
-        "fullName": { "type": "string" },
-        "relationName": { "type": "string" },
-        "email": { "type": "string" },
-        "phone": { "type": "string" },
-        "aadhaar": { "type": "string" },
-        "address": { "type": "string" },
-        "incidentDate": { "type": "string" },
-        "incidentLocation": { "type": "string" },
-        "subject": { "type": "string" },
+        "name": { "type": "string" },
+        "code": { "type": "string" },
         "description": { "type": "string" },
-        "status": { "type": "string", "enum": ["Pending", "In Progress", "Resolved"] },
-        "incidentPhotos": { "type": "array", "items": { "type": "string" } },
+        "budget": { "type": "number" },
+        "utilized": { "type": "number" },
+        "startDate": { "type": "string", "format": "date" },
+        "status": { "type": "string", "enum": ["Active", "Completed", "On Hold"] },
         "createdAt": { "type": "string", "format": "date-time" }
       }
     },
-    "MemberKit": {
-      "title": "Member Kit",
-      "description": "Tracking of official materials issued to a member.",
+    "FixedAsset": {
+      "title": "Fixed Asset",
+      "description": "Registry of organizational property and equipment.",
       "type": "object",
       "properties": {
-        "memberId": { "type": "string" },
-        "memberName": { "type": "string" },
-        "items": {
-          "type": "object",
-          "properties": {
-            "identityCard": { "type": "boolean" },
-            "lanyard": { "type": "boolean" },
-            "cardHolder": { "type": "boolean" },
-            "vehicleSticker": { "type": "boolean" },
-            "badge": { "type": "boolean" },
-            "appointmentLetter": { "type": "boolean" },
-            "membershipCertificate": { "type": "boolean" },
-            "designationCarPlate": { "type": "boolean" },
-            "approvalLetterCarPlate": { "type": "boolean" },
-            "letterhead": { "type": "boolean" },
-            "officeSeal": { "type": "boolean" }
-          }
-        },
-        "dispatchDate": { "type": "string", "format": "date" },
-        "courierDetails": { "type": "string" },
-        "deliveryStatus": { "type": "string", "enum": ["Pending", "Dispatched", "In Transit", "Delivered", "Returned"] },
-        "acknowledgementReceived": { "type": "boolean" },
-        "notes": { "type": "string" },
-        "updatedAt": { "type": "string", "format": "date-time" }
+        "name": { "type": "string" },
+        "category": { "type": "string" },
+        "purchaseDate": { "type": "string", "format": "date" },
+        "purchaseValue": { "type": "number" },
+        "currentValue": { "type": "number" },
+        "depreciationRate": { "type": "number" },
+        "location": { "type": "string" },
+        "status": { "type": "string", "enum": ["In Use", "Maintenance", "Retired"] }
+      }
+    },
+    "PayrollRecord": {
+      "title": "Payroll Record",
+      "description": "Employee monthly salary details.",
+      "type": "object",
+      "properties": {
+        "employeeId": { "type": "string" },
+        "month": { "type": "string" },
+        "year": { "type": "string" },
+        "baseSalary": { "type": "number" },
+        "allowances": { "type": "number" },
+        "deductions": { "type": "number" },
+        "netPaid": { "type": "number" },
+        "paymentDate": { "type": "string", "format": "date" },
+        "status": { "type": "string", "enum": ["Pending", "Paid"] }
       }
     }
   },
@@ -124,8 +125,10 @@
   },
   "firestore": {
     "/users/{userEmail}": { "schema": "UserAccount", "description": "Permissions registry." },
-    "/activity_events/{eventId}": { "schema": "ActivityEvent" },
-    "/public_complaints/{complaintId}": { "schema": "PublicComplaint", "description": "Public human rights reports." },
-    "/member_kits/{memberId}": { "schema": "MemberKit", "description": "Member asset tracking." }
+    "/finance_transactions/{txId}": { "schema": "FinancialTransaction" },
+    "/finance_projects/{projectId}": { "schema": "FinancialProject" },
+    "/finance_assets/{assetId}": { "schema": "FixedAsset" },
+    "/finance_payroll/{recordId}": { "schema": "PayrollRecord" },
+    "/finance_summary/state": { "schema": "object", "description": "Global financial state." }
   }
 }

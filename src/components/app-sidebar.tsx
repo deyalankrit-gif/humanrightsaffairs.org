@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -44,7 +45,14 @@ import {
   Award,
   ShieldQuestion,
   Archive,
-  HeartHandshake
+  HeartHandshake,
+  IndianRupee,
+  Receipt,
+  FileSpreadsheet,
+  HardDrive,
+  CreditCard,
+  Building,
+  ClipboardList
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -90,6 +98,18 @@ const adminLinksConfig = [
   { name: 'Public Site View', href: '/internal/public-view', icon: Monitor, permission: 'publicView' },
 ]
 
+const financeLinksConfig = [
+  { name: 'Finance Dashboard', href: '/internal/finance/dashboard', icon: BarChart3, permission: 'financeDashboard' },
+  { name: 'General Ledger', href: '/internal/finance/ledger', icon: ClipboardList, permission: 'financeLedger' },
+  { name: 'Voucher Hub', href: '/internal/finance/vouchers', icon: Receipt, permission: 'financeVouchers' },
+  { name: 'Institutional Donors', href: '/internal/finance/donors', icon: HeartHandshake, permission: 'financeLedger' },
+  { name: 'Project Accounting', href: '/internal/finance/projects', icon: Building, permission: 'financeProjects' },
+  { name: 'Asset Registry', href: '/internal/finance/assets', icon: HardDrive, permission: 'financeAssets' },
+  { name: 'Payroll Suite', href: '/internal/finance/payroll', icon: IndianRupee, permission: 'financePayroll' },
+  { name: 'Reports Center', href: '/internal/finance/reports', icon: FileSpreadsheet, permission: 'financeDashboard' },
+  { name: 'Tax & Compliance', href: '/internal/finance/compliance', icon: Scale, permission: 'financeCompliance' },
+]
+
 export function AppSidebar() {
   const pathname = usePathname()
   const [activeHash, setActiveHash] = React.useState('')
@@ -104,13 +124,21 @@ export function AppSidebar() {
 
   const { data: userPermissions } = useDoc(userDocRef);
 
-  const isRoot = user?.email?.toLowerCase() === 'deydhritiman@gmail.com'
+  const isRoot = user?.email?.toLowerCase() === 'deydhritiman@gmail.com';
 
   const filteredAdminLinks = React.useMemo(() => {
     if (!isAdminPortal) return []
     return adminLinksConfig.filter(link => {
       if (isRoot) return true;
       if (link.rootOnly) return false;
+      return userPermissions?.permissions?.[link.permission || ''] === true;
+    })
+  }, [isAdminPortal, isRoot, userPermissions])
+
+  const filteredFinanceLinks = React.useMemo(() => {
+    if (!isAdminPortal) return []
+    return financeLinksConfig.filter(link => {
+      if (isRoot) return true;
       return userPermissions?.permissions?.[link.permission || ''] === true;
     })
   }, [isAdminPortal, isRoot, userPermissions])
@@ -143,6 +171,38 @@ export function AppSidebar() {
       </SidebarHeader>
       
       <SidebarContent className="py-6 no-scrollbar">
+        {/* FINANCE MODULE GROUP */}
+        {isAdminPortal && filteredFinanceLinks.length > 0 && (
+          <SidebarGroup>
+            <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">
+              FINANCIAL GOVERNANCE
+            </SidebarGroupLabel>
+            <SidebarMenu>
+              {filteredFinanceLinks.map((link) => {
+                const isActive = pathname === link.href || (link.href !== '/' && pathname.startsWith(link.href))
+                return (
+                  <SidebarMenuItem key={link.name}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={isActive}
+                      tooltip={link.name}
+                      className={cn(
+                        "h-11 rounded-xl transition-all px-4",
+                        isActive ? "bg-emerald-600 text-white font-bold" : "hover:bg-emerald-500/10 hover:text-emerald-500 group/btn"
+                      )}
+                    >
+                      <Link href={link.href} className="flex items-center gap-3">
+                        <link.icon className={cn("w-5 h-5", isActive ? "text-white" : "text-muted-foreground group-hover/btn:text-emerald-500")} />
+                        <span className="group-data-[collapsible=icon]:hidden">{link.name}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                )
+              })}
+            </SidebarMenu>
+          </SidebarGroup>
+        )}
+
         <SidebarGroup>
           <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">
             {isAdminPortal ? (isRoot ? "ROOT GOVERNANCE" : "STAFF OPERATIONS") : "NAVIGATION"}
