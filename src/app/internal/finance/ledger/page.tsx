@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState } from 'react'
@@ -11,9 +10,21 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Footer } from '@/components/footer'
 import { 
-  Search, ClipboardList, Filter, Download, FileText, 
-  IndianRupee, Calendar as CalendarIcon, ArrowLeft, Loader2, 
-  ChevronRight, ArrowUpRight, ArrowDownRight, Tag, ShieldCheck
+  Search, 
+  ClipboardList, 
+  Filter, 
+  Download, 
+  FileText, 
+  IndianRupee, 
+  Calendar as CalendarIcon, 
+  ArrowLeft, 
+  Loader2, 
+  ChevronRight, 
+  ArrowUpRight, 
+  ArrowDownRight, 
+  Tag, 
+  ShieldCheck,
+  Wallet
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
