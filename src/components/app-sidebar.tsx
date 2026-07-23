@@ -79,7 +79,6 @@ const topAnalyticsLinksConfig = [
 ]
 
 const adminLinksConfig = [
-  { name: 'Expenses', href: '/internal/expenses', icon: TrendingDown, permission: 'expenses' },
   { name: 'Applications', href: '/internal/applications', icon: FileText, permission: 'applications' },
   { name: 'Public Complaints', href: '/internal/public-complaints', icon: ShieldQuestion, permission: 'publicComplaints' },
   { name: 'Kit Management', href: '/internal/kit-management', icon: Archive, permission: 'kitManagement' },
@@ -89,7 +88,6 @@ const adminLinksConfig = [
   { name: 'Occasion Greetings', href: '/internal/occasions', icon: Sparkles, permission: 'occasions' },
   { name: 'Donor Wall Mgmt', href: '/internal/donors', icon: Award, permission: 'donorWall' },
   { name: 'Inventory', href: '/internal/inventory', icon: Package, permission: 'inventory' },
-  { name: 'Vendors', href: '/internal/vendors', icon: Truck, permission: 'vendors' },
   { name: 'Grievances', href: '/internal/grievances', icon: MessageSquareWarning, permission: 'grievances' },
   { name: 'Meetings', href: '/internal/meetings', icon: Handshake, permission: 'meetings' },
   { name: 'Events', href: '/internal/events', icon: Calendar, permission: 'events' },
@@ -102,6 +100,8 @@ const adminLinksConfig = [
 const financeLinksConfig = [
   { name: 'Finance Dashboard', href: '/internal/finance/dashboard', icon: BarChart3, permission: 'financeDashboard' },
   { name: 'Accounts', href: '/internal/accounts', icon: Wallet, permission: 'accounts' },
+  { name: 'Expenses', href: '/internal/expenses', icon: TrendingDown, permission: 'expenses' },
+  { name: 'Vendors', href: '/internal/vendors', icon: Truck, permission: 'vendors' },
   { name: 'General Ledger', href: '/internal/finance/ledger', icon: ClipboardList, permission: 'financeLedger' },
   { name: 'Voucher Hub', href: '/internal/finance/vouchers', icon: Receipt, permission: 'financeVouchers' },
   { name: 'Institutional Donors', href: '/internal/finance/donors', icon: HeartHandshake, permission: 'financeLedger' },
