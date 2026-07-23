@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useMemo } from 'react'
@@ -10,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Footer } from '@/components/footer'
 import { 
   Users, IndianRupee, FileText, CheckCircle2, Clock, 
   ArrowLeft, Loader2, Plus, Download, ShieldCheck, 

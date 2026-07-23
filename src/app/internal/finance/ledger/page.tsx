@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState } from 'react'
@@ -9,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
+import { Footer } from '@/components/footer'
 import { 
   Search, ClipboardList, Filter, Download, FileText, 
   IndianRupee, Calendar as CalendarIcon, ArrowLeft, Loader2, 

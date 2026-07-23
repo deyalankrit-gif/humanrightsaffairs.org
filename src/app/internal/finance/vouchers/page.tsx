@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState } from 'react'
@@ -11,11 +10,20 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { Footer } from '@/components/footer'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { 
   Plus, Receipt, ArrowLeft, Loader2, Save, Send, ShieldCheck, 
   IndianRupee, Calendar as CalendarIcon, FileText, CheckCircle2, XCircle
 } from 'lucide-react'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter
+} from "@/components/ui/dialog"
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
 

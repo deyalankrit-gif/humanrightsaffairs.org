@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo } from 'react'
@@ -8,6 +7,7 @@ import { collection, query, orderBy, limit, doc } from 'firebase/firestore'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Footer } from '@/components/footer'
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
   AreaChart, Area, PieChart, Pie, Cell 
@@ -201,7 +201,7 @@ export default function FinanceDashboard() {
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle className="text-xl font-headline font-bold">Recent Institutional Ledger</CardTitle>
-                  <CardDescription>The latest validated financial movements across all councils.</CardDescription>
+                  <CardDescription>The latest validated financial financial movements across all councils.</CardDescription>
                 </div>
                 <Button variant="ghost" onClick={() => router.push('/internal/finance/ledger')} className="text-xs font-bold text-emerald-600 uppercase tracking-widest">
                   View Full Ledger <ArrowUpRight className="w-4 h-4 ml-1" />
