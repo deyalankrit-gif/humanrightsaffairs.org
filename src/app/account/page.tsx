@@ -39,15 +39,22 @@ import {
   Award,
   Zap,
   Fingerprint,
-  RefreshCw
+  RefreshCw,
+  Loader2,
+  Globe,
+  Building2,
+  Users,
+  Star
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Label } from '@/components/ui/label'
+import { Input } from '@/components/ui/input'
 import { useUser, useCollection, useFirestore, useDoc, useMemoFirebase } from '@/firebase'
-import { collection, query, where, orderBy, doc } from 'firebase/firestore'
+import { collection, query, where, orderBy } from 'firebase/firestore'
 import { Footer } from '@/components/footer'
 import { cn } from '@/lib/utils'
 import { format, parseISO, differenceInDays } from 'date-fns'
@@ -626,7 +633,7 @@ export default function UserAccountDashboard() {
                                  <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-800 opacity-60">
                                     <div className="flex items-center gap-3">
                                        <Phone className="w-4 h-4 text-slate-400" />
-                                       <span className="text-xs font-bold text-slate-500">Mobile Verification Pending</span>
+                                       <span className="text-xs font-bold text-slate-50">Mobile Verification Pending</span>
                                     </div>
                                     <Button variant="ghost" size="sm" className="h-6 text-[8px] font-black uppercase text-accent hover:bg-accent/10">Start</Button>
                                  </div>

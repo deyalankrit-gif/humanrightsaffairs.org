@@ -26,7 +26,8 @@ import {
   Box, 
   Truck, 
   Monitor, 
-  Layers
+  Layers,
+  MapPin
 } from 'lucide-react'
 import {
   Dialog,
@@ -166,8 +167,8 @@ export default function AssetRegistry() {
                           <div className="space-y-1 flex-1">
                              <h3 className="text-lg font-bold text-primary dark:text-white leading-tight">{asset.name}</h3>
                              <div className="flex flex-wrap gap-4 text-[10px] font-bold text-slate-400 uppercase">
-                                <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> {asset.location}</span>
-                                <span className="flex items-center gap-1"><CalendarIcon className="w-3 h-3" /> Acquired: {asset.purchaseDate}</span>
+                                <span className="flex items-center gap-1.5"><MapPin className="w-3 h-3 text-accent" /> {asset.location}</span>
+                                <span className="flex items-center gap-1.5"><CalendarIcon className="w-3 h-3 text-accent" /> Acquired: {asset.purchaseDate}</span>
                              </div>
                           </div>
                           <div className="flex items-center gap-8">

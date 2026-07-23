@@ -1,10 +1,10 @@
 
 "use client"
 
-import React, { useState, useMemo, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase'
-import { collection, query, orderBy, addDoc, serverTimestamp, doc, deleteDoc } from 'firebase/firestore'
+import { collection, query, orderBy, addDoc, serverTimestamp, doc, deleteDoc, updateDoc } from 'firebase/firestore'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -28,7 +28,8 @@ import {
   IndianRupee,
   Briefcase,
   ExternalLink,
-  Trash2
+  Trash2,
+  Edit
 } from 'lucide-react'
 import {
   Dialog,
@@ -127,7 +128,7 @@ export default function InstitutionalDonors() {
               </div>
            </div>
            <Button onClick={() => setIsAddOpen(true)} className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold h-11 px-8 rounded-xl shadow-xl">
-             <Plus className="w-4 h-4 mr-2" /> Register Benefactor
+             <Plus className="w-5 h-5 mr-2" /> Register Benefactor
            </Button>
         </div>
       </header>
