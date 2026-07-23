@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useEffect, useState, useMemo } from 'react'
@@ -520,25 +521,21 @@ export default function MemberKitManagement() {
                                       {item.label}
                                     </span>
                                     <div className="flex items-center gap-1 ml-2">
-                                       <Button 
-                                         variant="ghost" 
-                                         size="icon" 
+                                       <button 
                                          onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleStartEditItem(item); }}
                                          className={cn(
-                                           "h-8 w-8 rounded-lg transition-all",
+                                           "h-8 w-8 rounded-lg transition-all flex items-center justify-center",
                                            editingItemId === item.id ? "text-accent bg-accent/10" : "text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20"
                                          )}
                                        >
                                          <Edit className="w-4 h-4" />
-                                       </Button>
-                                       <Button 
-                                         variant="ghost" 
-                                         size="icon" 
+                                       </button>
+                                       <button 
                                          onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleDeleteKitItem(item.id); }}
-                                         className="h-8 w-8 rounded-lg text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"
+                                         className="h-8 w-8 rounded-lg text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all flex items-center justify-center"
                                        >
                                          <Trash2 className="w-4 h-4" />
-                                       </Button>
+                                       </button>
                                     </div>
                                  </div>
                                ))}
@@ -913,7 +910,7 @@ export default function MemberKitManagement() {
           
           <div className="p-6 border-t bg-slate-50 dark:bg-slate-900/50 flex justify-between items-center shrink-0">
              <p className="text-[10px] font-black uppercase text-slate-400">Total Issued: {viewingItemMembers?.members.length}</p>
-             <Button variant="ghost" onClick={() => setViewingItemMembers(null)} className="text-[10px] font-black uppercase tracking-widest text-accent hover:bg-accent/10">Close Registry</Button>
+             <button onClick={() => setViewingItemMembers(null)} className="text-[10px] font-black uppercase tracking-widest text-accent hover:bg-accent/10 p-2 rounded-lg transition-colors">Close Registry</button>
           </div>
         </DialogContent>
       </Dialog>

@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useEffect } from 'react'
@@ -451,7 +452,7 @@ export default function MembersPage() {
                 <div className="space-y-6 py-4">
                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
                       <div className="flex flex-col items-center gap-3">
-                        <div className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-slate-50 dark:bg-slate-800 border-2 border-dashed border-slate-300 flex items-center justify-center overflow-hidden group cursor-pointer hover:border-accent transition-colors shadow-inner">
+                        <div className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-slate-50 dark:bg-slate-800 border-2 border-dashed border-slate-200 flex items-center justify-center overflow-hidden group cursor-pointer hover:border-accent transition-colors shadow-inner">
                           {newMember.imageId ? (
                             <Image src={newMember.imageId} alt="Preview" fill className="object-cover" />
                           ) : (
@@ -566,7 +567,7 @@ export default function MembersPage() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
               <Input 
                 placeholder="Search database..." 
-                className="pl-9 h-9 rounded-full border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-[8px] sm:text-[10px]" 
+                className="pl-9 h-9 rounded-full border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-[8px] sm:text-[10px]" 
                 value={search} 
                 onChange={(e) => setSearch(e.target.value)} 
               />

@@ -112,8 +112,8 @@ export function IDCardShowcase() {
               <div className="absolute -inset-10 bg-secondary/25 rounded-full blur-[100px] animate-pulse opacity-50"></div>
               <div className="absolute -inset-4 border border-secondary/20 rounded-[2.5rem] md:rounded-[3rem] pointer-events-none"></div>
               
-              <div className="relative transform transition-all duration-700 group-hover:rotate-y-6 group-hover:scale-[1.02]">
-                <div className="relative aspect-[4/2.5] w-full rounded-[1.5rem] md:rounded-[2rem] overflow-hidden shadow-[0_40px_100px_-20px_rgba(0,0,0,0.6)] border-8 border-secondary/80 bg-white ring-4 ring-secondary/20">
+              <div className="relative transform transition-all duration-700 group-hover:rotate-y-6 group-hover:scale-[1.02] flex justify-center overflow-hidden">
+                <div className="relative aspect-[4/2.5] w-full max-w-[600px] rounded-[1.5rem] md:rounded-[2rem] overflow-hidden shadow-[0_40px_100px_-20px_rgba(0,0,0,0.6)] border-4 md:border-8 border-secondary/80 bg-white ring-4 ring-secondary/20 shrink-0">
                   <Image 
                     src={idImg?.imageUrl || "/sample i card.jpeg"} 
                     alt="HRAT Official ID Card Sample" 

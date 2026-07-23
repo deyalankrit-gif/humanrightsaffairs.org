@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useEffect, useState, useMemo } from 'react'
@@ -295,15 +296,16 @@ export default function WebsiteVisitorsPage() {
                     </div>
                  </CardHeader>
                  <CardContent className="p-0">
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left">
+                    <div className="overflow-x-auto w-full">
+                      <div className="inline-block min-w-full align-middle">
+                        <table className="min-w-full text-left">
                           <thead className="bg-slate-50 dark:bg-slate-800/50 text-[8px] font-black text-slate-400 uppercase tracking-widest border-b dark:border-slate-800">
                              <tr>
-                               <th className="px-6 py-4">Visitor/Session</th>
+                               <th className="px-6 py-4 min-w-[200px]">Visitor/Session</th>
                                <th className="px-6 py-4">Current Status</th>
-                               <th className="px-6 py-4">Platform Info</th>
-                               <th className="px-6 py-4">Geo Location</th>
-                               <th className="px-6 py-4">Current Page</th>
+                               <th className="px-6 py-4 min-w-[150px]">Platform Info</th>
+                               <th className="px-6 py-4 min-w-[150px]">Geo Location</th>
+                               <th className="px-6 py-4 min-w-[120px]">Current Page</th>
                                <th className="px-6 py-4">Date</th>
                                <th className="px-6 py-4">Session Duration</th>
                                <th className="px-6 py-4 text-right">Latest Action</th>
@@ -388,7 +390,7 @@ export default function WebsiteVisitorsPage() {
                                   <td className="px-6 py-4">
                                      <div className="flex items-center gap-1.5">
                                         <Navigation className="w-3 h-3 text-slate-400" />
-                                        <span className="text-[10px] font-mono text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">
+                                        <span className="text-[10px] font-mono text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded truncate max-w-[100px]">
                                            {v.pagesVisited?.[v.pagesVisited.length - 1] || '/'}
                                         </span>
                                      </div>
@@ -440,6 +442,7 @@ export default function WebsiteVisitorsPage() {
                              )})}
                           </tbody>
                         </table>
+                      </div>
                     </div>
                  </CardContent>
               </Card>

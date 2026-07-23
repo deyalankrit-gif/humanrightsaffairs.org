@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo, useState } from 'react'
@@ -618,7 +619,7 @@ export default function PublicKitManagementPage() {
           
           <div className="p-6 border-t bg-slate-50 dark:bg-slate-900/50 flex justify-between items-center shrink-0">
              <p className="text-[10px] font-black uppercase text-slate-400">Public Record: {viewingItemMembers?.members.length} Distributed</p>
-             <Button variant="ghost" onClick={() => setViewingItemMembers(null)} className="text-[10px] font-black uppercase tracking-widest text-accent hover:bg-accent/10">Close Feed</Button>
+             <button onClick={() => setViewingItemMembers(null)} className="text-[10px] font-black uppercase tracking-widest text-accent hover:bg-accent/10 p-2 rounded-lg transition-colors">Close Feed</button>
           </div>
         </DialogContent>
       </Dialog>

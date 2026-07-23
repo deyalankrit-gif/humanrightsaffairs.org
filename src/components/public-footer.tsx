@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useMemo, useState } from 'react';
@@ -133,7 +134,7 @@ export function PublicFooter() {
             
             <div className="space-y-4">
               <DonationDialog initialStep="qr">
-                <button className="block w-32 md:w-40 h-24 md:h-28 relative group cursor-pointer overflow-hidden rounded-xl bg-transparent border-none p-0 outline-none transition-all duration-500 hover:scale-[2] active:scale-95 origin-center hover:z-50">
+                <button className="block w-32 md:w-40 h-24 md:h-28 relative group cursor-pointer overflow-hidden rounded-xl bg-transparent border-none p-0 outline-none transition-all duration-500 hover:scale-[1.5] active:scale-95 origin-center hover:z-50">
                   <Image src={donationFooterImg?.imageUrl || "/HRAT%20Donate.jpeg"} alt="Donate" fill className="object-contain" />
                   <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                 </button>
@@ -196,7 +197,7 @@ export function PublicFooter() {
                   href="/kit-management" 
                   className="text-[#CEFF00] hover:text-white transition-colors font-bold flex items-center gap-2 leading-tight text-left"
                 >
-                  Official Kit & Asset Management <Package className="w-3 h-3" />
+                  Official Kit & Asset Management <Package className="w-3.5 h-3.5" />
                 </Link>
               </li>
               <li>
@@ -226,7 +227,7 @@ export function PublicFooter() {
                 </Link>
               </li>
             </ul>
-            <div className="scale-90 md:scale-100 origin-left mt-4">
+            <div className="scale-90 md:scale-100 origin-left mt-6">
               <FooterMusicPlayer />
             </div>
           </div>
