@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -46,10 +47,13 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
         // Robust path extraction for both CollectionReference and Query objects
         let pathString = 'restricted_path';
         try {
+          // Attempt to find the path in the internal query structure if not exposed directly
           if ('path' in query) {
             pathString = (query as any).path;
           } else if ('_query' in query && (query as any)._query.path) {
             pathString = (query as any)._query.path.toString();
+          } else if ((query as any).converter?.path) {
+             pathString = (query as any).converter.path;
           }
         } catch (e) {
           pathString = 'unknown_path';

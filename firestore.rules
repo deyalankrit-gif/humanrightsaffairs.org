@@ -46,27 +46,27 @@ service cloud.firestore {
     // 2. AUTHORIZATION HELPERS
     function isRoot() {
       return request.auth != null && 
-             (request.auth.token.get('email', '').lower() == 'deydhritiman@gmail.com');
+             (request.auth.token.email.lower() == 'deydhritiman@gmail.com');
     }
 
     function isInternalStaff() {
       return request.auth != null && 
-             (request.auth.token.get('email', '').lower() == 'deyalankrit@gmail.com');
+             (request.auth.token.email.lower() == 'deyalankrit@gmail.com');
     }
 
     function hasPermission(permission) {
       return request.auth != null && (
         isRoot() || 
         isInternalStaff() ||
-        (exists(/databases/$(database)/documents/users/$(request.auth.token.get('email', '').lower())) && 
-         get(/databases/$(database)/documents/users/$(request.auth.token.get('email', '').lower())).data.permissions.get(permission, false) == true)
+        (exists(/databases/$(database)/documents/users/$(request.auth.token.email.lower())) && 
+         get(/databases/$(database)/documents/users/$(request.auth.token.email.lower())).data.permissions.get(permission, false) == true)
       );
     }
 
     // 3. PROTECTED ACCESS: Internal registry and administrative logs
     match /users/{userEmail} {
-      allow read: if request.auth != null && (request.auth.token.get('email', '').lower() == userEmail.lower() || isRoot());
-      allow write: if isRoot() || (request.auth != null && request.auth.token.get('email', '').lower() == 'deyalankrit@gmail.com' && userEmail.lower() == 'deyalankrit@gmail.com');
+      allow read: if request.auth != null && (request.auth.token.email.lower() == userEmail.lower() || isRoot());
+      allow write: if isRoot() || (request.auth != null && request.auth.token.email.lower() == 'deyalankrit@gmail.com' && userEmail.lower() == 'deyalankrit@gmail.com');
     }
 
     match /public_complaints/{complaintId} {
