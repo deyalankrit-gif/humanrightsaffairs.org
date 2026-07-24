@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useEffect, useState } from 'react'
@@ -36,6 +35,7 @@ import {
   DialogTrigger,
   DialogFooter,
   DialogDescription,
+  DialogClose
 } from "@/components/ui/dialog"
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
@@ -183,8 +183,15 @@ export default function InternalDonorsManagement() {
                 <Plus className="w-4 h-4" /> Add Recognition Circle
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-xl rounded-[2.5rem] max-h-[90vh] overflow-y-auto border-none shadow-2xl">
-              <DialogHeader>
+            <DialogContent className="max-w-xl rounded-[2.5rem] max-h-[90vh] overflow-y-auto border-none shadow-2xl [&>button]:hidden">
+              <DialogHeader className="relative">
+                <div className="absolute right-0 top-0">
+                  <DialogClose asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </DialogClose>
+                </div>
                 <DialogTitle>New Recognition Level</DialogTitle>
                 <DialogDescription>Define a donor tier to be displayed on the public Wall of Gratitude.</DialogDescription>
               </DialogHeader>
@@ -301,8 +308,17 @@ export default function InternalDonorsManagement() {
       </section>
 
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="max-w-xl rounded-[2.5rem] max-h-[90vh] overflow-y-auto border-none shadow-2xl">
-          <DialogHeader><DialogTitle>Update Recognition Meta</DialogTitle></DialogHeader>
+        <DialogContent className="max-w-xl rounded-[2.5rem] max-h-[90vh] overflow-y-auto border-none shadow-2xl [&>button]:hidden">
+          <DialogHeader className="relative">
+            <div className="absolute right-0 top-0">
+               <DialogClose asChild>
+                 <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
+                   <X className="w-4 h-4" />
+                 </Button>
+               </DialogClose>
+            </div>
+            <DialogTitle>Update Recognition Meta</DialogTitle>
+          </DialogHeader>
           {editTier && (
             <div className="space-y-6 py-2">
                 <div className="grid grid-cols-1 gap-4">

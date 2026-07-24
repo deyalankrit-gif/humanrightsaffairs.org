@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useEffect, useState, useMemo } from 'react'
@@ -44,6 +43,7 @@ import {
   DialogTrigger,
   DialogFooter,
   DialogDescription,
+  DialogClose
 } from "@/components/ui/dialog"
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
@@ -228,7 +228,7 @@ export default function InternalVendorsPage() {
     return matchesSearch && matchesType;
   })
 
-  // INTERNAL RENDER HELPERS (Pure functions returning JSX, no local state within)
+  // INTERNAL RENDER HELPERS
   const renderCategoryManager = () => (
     <div className="p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 space-y-4 shadow-inner mt-4">
       <div className="space-y-1">
@@ -391,8 +391,15 @@ export default function InternalVendorsPage() {
                   <Plus className="w-4 h-4" /> Register New Provider
                 </Button>
               </DialogTrigger>
-              <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="max-w-2xl rounded-[2rem] max-h-[90vh] overflow-y-auto border-none shadow-2xl">
-                <DialogHeader>
+              <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="max-w-2xl rounded-[2rem] max-h-[90vh] overflow-y-auto border-none shadow-2xl [&>button]:hidden">
+                <DialogHeader className="relative">
+                  <div className="absolute right-0 top-0">
+                    <DialogClose asChild>
+                      <Button variant="ghost" size="icon" className="rounded-full text-slate-400 hover:text-primary h-8 w-8">
+                        <X className="w-5 h-5" />
+                      </Button>
+                    </DialogClose>
+                  </div>
                   <DialogTitle className="text-2xl font-headline font-bold text-primary dark:text-white">Register Institutional Vendor</DialogTitle>
                   <DialogDescription>Establish a new service provider entry in the national registry.</DialogDescription>
                 </DialogHeader>
@@ -501,8 +508,15 @@ export default function InternalVendorsPage() {
 
       {/* Edit Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="max-w-2xl rounded-[2rem] max-h-[90vh] overflow-y-auto border-none shadow-2xl">
-          <DialogHeader>
+        <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="max-w-2xl rounded-[2rem] max-h-[90vh] overflow-y-auto border-none shadow-2xl [&>button]:hidden">
+          <DialogHeader className="relative">
+            <div className="absolute right-0 top-0">
+               <DialogClose asChild>
+                 <Button variant="ghost" size="icon" className="rounded-full text-slate-400 hover:text-primary h-8 w-8">
+                   <X className="w-5 h-5" />
+                 </Button>
+               </DialogClose>
+            </div>
             <DialogTitle className="text-2xl font-headline font-bold">Update Vendor Meta</DialogTitle>
           </DialogHeader>
           {editVendor && (

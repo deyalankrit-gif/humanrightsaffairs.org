@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo, useEffect, useState } from 'react'
@@ -23,7 +22,8 @@ import {
   Calendar as CalendarIcon, 
   TrendingDown,
   FilterX,
-  ShieldCheck
+  ShieldCheck,
+  X
 } from 'lucide-react'
 import {
   Dialog,
@@ -32,6 +32,7 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogFooter,
+  DialogClose
 } from "@/components/ui/dialog"
 import {
   Popover,
@@ -158,8 +159,17 @@ export default function ExpensesManagementPage() {
           </div>
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild><Button size="sm" className="bg-red-500 text-white font-bold rounded-xl h-11 px-6 flex gap-2 shadow-lg hover:bg-red-600 transition-colors"><Plus className="w-4 h-4" /> Log & Sync Expense</Button></DialogTrigger>
-            <DialogContent className="max-w-xl rounded-3xl max-h-[90vh] overflow-y-auto">
-               <DialogHeader><DialogTitle>Record Real-Time Expense</DialogTitle></DialogHeader>
+            <DialogContent className="max-w-xl rounded-3xl max-h-[90vh] overflow-y-auto [&>button]:hidden">
+               <DialogHeader className="relative">
+                  <div className="absolute right-0 top-0">
+                     <DialogClose asChild>
+                       <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
+                         <X className="w-4 h-4" />
+                       </Button>
+                     </DialogClose>
+                  </div>
+                  <DialogTitle>Record Real-Time Expense</DialogTitle>
+               </DialogHeader>
                <div className="space-y-4 py-4">
                  <div className="grid md:grid-cols-2 gap-4">
                    <div className="space-y-1"><Label className="text-[10px] font-bold uppercase">Expense Title</Label><Input value={newExpense.title} onChange={e => setNewExpense({...newExpense, title: e.target.value})} placeholder="e.g. Office Supplies" /></div>

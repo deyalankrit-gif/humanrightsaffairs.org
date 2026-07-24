@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState } from 'react'
@@ -12,7 +11,8 @@ import {
   DialogTitle, 
   DialogDescription,
   DialogTrigger,
-  DialogFooter
+  DialogFooter,
+  DialogClose
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -32,7 +32,7 @@ import {
   SelectValue 
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import { Loader2, Plus, IndianRupee, User, Mail, Phone, MapPin, Hash, CreditCard } from 'lucide-react'
+import { Loader2, Plus, IndianRupee, User, Mail, Phone, MapPin, Hash, CreditCard, X } from 'lucide-react'
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore'
 import { useFirestore } from '@/firebase'
 import { useToast } from '@/hooks/use-toast'
@@ -115,8 +115,15 @@ export function ManualDonationDialog({ children }: { children: React.ReactNode }
       <DialogTrigger asChild>
         {children}
       </DialogTrigger>
-      <DialogContent className="max-w-xl rounded-[2rem] max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
+      <DialogContent className="max-w-xl rounded-[2rem] max-h-[90vh] overflow-y-auto [&>button]:hidden">
+        <DialogHeader className="relative">
+          <div className="absolute right-0 top-0">
+             <DialogClose asChild>
+               <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
+                 <X className="w-4 h-4" />
+               </Button>
+             </DialogClose>
+          </div>
           <DialogTitle className="text-2xl font-headline font-bold flex items-center gap-2">
             <Plus className="w-6 h-6 text-accent" /> Detailed Manual Entry
           </DialogTitle>

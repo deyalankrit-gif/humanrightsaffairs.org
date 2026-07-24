@@ -25,7 +25,8 @@ import {
   Calendar as CalendarIcon, 
   IndianRupee,
   Activity,
-  Trash2
+  Trash2,
+  X
 } from 'lucide-react'
 import {
   Dialog,
@@ -34,7 +35,8 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogFooter,
-  DialogDescription
+  DialogDescription,
+  DialogClose
 } from "@/components/ui/dialog"
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
@@ -189,8 +191,15 @@ export default function ProjectAccounting() {
       </section>
 
       <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
-         <DialogContent className="max-w-xl rounded-[2rem] border-none shadow-2xl p-0 overflow-hidden">
-            <div className="bg-slate-900 p-8 text-white">
+         <DialogContent className="max-w-xl rounded-[2rem] border-none shadow-2xl p-0 overflow-hidden [&>button]:hidden">
+            <div className="bg-slate-900 p-8 text-white relative">
+               <div className="absolute right-6 top-6">
+                  <DialogClose asChild>
+                    <Button variant="ghost" size="icon" className="rounded-full text-white/40 hover:text-white hover:bg-white/10 h-8 w-8">
+                      <X className="w-5 h-5" />
+                    </Button>
+                  </DialogClose>
+               </div>
                <DialogTitle className="text-2xl font-headline font-bold">Mission Initialization</DialogTitle>
                <DialogDescription className="text-emerald-400 uppercase tracking-widest font-black text-[10px]">Strategic Project Entry Terminal</DialogDescription>
             </div>

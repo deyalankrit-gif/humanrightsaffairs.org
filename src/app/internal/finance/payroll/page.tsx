@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useMemo } from 'react'
@@ -14,7 +13,7 @@ import { Footer } from '@/components/footer'
 import { 
   Users, IndianRupee, FileText, CheckCircle2, Clock, 
   ArrowLeft, Loader2, Plus, Download, ShieldCheck, 
-  Search, Briefcase, Calendar as CalendarIcon, Save
+  Search, Briefcase, Calendar as CalendarIcon, Save, X
 } from 'lucide-react'
 import {
   Dialog,
@@ -22,7 +21,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogFooter
+  DialogFooter,
+  DialogClose
 } from "@/components/ui/dialog"
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
@@ -167,8 +167,17 @@ export default function PayrollSuite() {
                             </div>
                             <Dialog>
                                <DialogTrigger asChild><Button size="sm" variant="outline" className="h-9 rounded-xl font-bold text-[10px] border-emerald-100 text-emerald-600">Process Salary</Button></DialogTrigger>
-                               <DialogContent className="rounded-3xl max-w-md">
-                                  <DialogHeader><DialogTitle>Authorize Disbursement</DialogTitle></DialogHeader>
+                               <DialogContent className="rounded-3xl max-w-md [&>button]:hidden">
+                                  <DialogHeader className="relative">
+                                     <div className="absolute right-0 top-0">
+                                        <DialogClose asChild>
+                                          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
+                                            <X className="w-4 h-4" />
+                                          </Button>
+                                        </DialogClose>
+                                     </div>
+                                     <DialogTitle>Authorize Disbursement</DialogTitle>
+                                  </DialogHeader>
                                   <div className="py-6 space-y-4">
                                      <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 text-sm">
                                         <div className="flex justify-between mb-2"><span>Payable for {format(new Date(), 'MMMM')}</span><span className="font-bold">₹26,500</span></div>
