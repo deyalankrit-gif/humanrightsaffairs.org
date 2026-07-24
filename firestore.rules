@@ -124,6 +124,12 @@ service cloud.firestore {
       allow delete: if isRoot();
     }
 
+    match /finance_vms_vouchers/{vId} {
+      allow read: if hasPermission('financeVouchers') || hasPermission('financeDashboard');
+      allow create, update: if hasPermission('financeVouchers') || isRoot();
+      allow delete: if isRoot();
+    }
+
     match /finance_projects/{projectId} {
       allow read: if hasPermission('financeProjects') || hasPermission('financeDashboard');
       allow write: if hasPermission('financeVouchers') || isRoot();

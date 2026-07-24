@@ -51,6 +51,41 @@
       },
       "required": ["email", "permissions", "uid", "role"]
     },
+    "FinancialVoucher": {
+      "title": "Financial Voucher",
+      "description": "Comprehensive institutional instrument for financial movements.",
+      "type": "object",
+      "properties": {
+        "voucherNo": { "type": "string" },
+        "date": { "type": "string", "format": "date" },
+        "type": { "type": "string", "enum": ["Receipt Voucher", "Payment Voucher", "Journal Voucher", "Contra Voucher", "Donation Voucher", "Membership Fee Voucher", "Expense Voucher", "Advance Voucher", "Refund Voucher"] },
+        "financialYear": { "type": "string" },
+        "branch": { "type": "string" },
+        "state": { "type": "string" },
+        "district": { "type": "string" },
+        "person": {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string" },
+            "memberId": { "type": "string" },
+            "mobile": { "type": "string" },
+            "email": { "type": "string" },
+            "address": { "type": "string" }
+          }
+        },
+        "amount": { "type": "number" },
+        "amountInWords": { "type": "string" },
+        "accountHead": { "type": "string" },
+        "project": { "type": "string" },
+        "paymentMethod": { "type": "string", "enum": ["Cash", "Bank Transfer", "UPI", "Cheque", "Card"] },
+        "narration": { "type": "string" },
+        "status": { "type": "string", "enum": ["Draft", "Pending Verification", "Verified", "Pending Approval", "Approved", "Rejected", "Cancelled"] },
+        "auditTrail": { "type": "array", "items": { "type": "object" } },
+        "attachments": { "type": "array", "items": { "type": "string" } },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "createdBy": { "type": "string" }
+      }
+    },
     "FinancialTransaction": {
       "title": "Financial Transaction",
       "description": "Core ledger entry for income and expenses.",
@@ -126,6 +161,7 @@
   "firestore": {
     "/users/{userEmail}": { "schema": "UserAccount", "description": "Permissions registry." },
     "/finance_transactions/{txId}": { "schema": "FinancialTransaction" },
+    "/finance_vms_vouchers/{vId}": { "schema": "FinancialVoucher" },
     "/finance_projects/{projectId}": { "schema": "FinancialProject" },
     "/finance_assets/{assetId}": { "schema": "FixedAsset" },
     "/finance_payroll/{recordId}": { "schema": "PayrollRecord" },
