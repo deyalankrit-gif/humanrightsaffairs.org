@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState } from 'react'
@@ -94,7 +93,8 @@ export default function RootLoginPage() {
         description: "Governance privileges unlocked. Accessing National Registry.",
       })
       
-      router.push('/internal/finance/dashboard')
+      // Changed landing page to Donation Analytics as requested
+      router.push('/internal/analytics')
     } catch (error: any) {
       toast({
         variant: "destructive",
