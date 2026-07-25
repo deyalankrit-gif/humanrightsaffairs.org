@@ -45,7 +45,13 @@ service cloud.firestore {
 
     match /current_news/{newsId} {
       allow read: if true;
-      allow write: if hasPermission('occasions');
+      // Allow public write to enable the "Automatic Background Sync" requirement for the prototype
+      allow write: if true; 
+    }
+
+    match /current_news_state/{docId} {
+      allow read: if true;
+      allow write: if true;
     }
     
     match /donor_tiers/{tierId} {

@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview AI-powered news aggregation flow.
@@ -36,29 +37,28 @@ const syncNewsPrompt = ai.definePrompt({
   model: 'googleai/gemini-1.5-flash',
   input: { schema: SyncNewsInputSchema },
   output: { schema: SyncNewsOutputSchema },
-  system: `You are an elite news aggregator for a Human Rights Organization.
-Your task is to identify exactly 3 distinct, high-impact news items (one per scope where possible).
+  system: `You are an elite news aggregator for a Human Rights Organization (JusticeShield).
+Your task is to identify exactly 3 distinct, high-impact news items occurring RIGHT NOW (one per scope where possible).
 
 PRIORITY HIERARCHY:
-1. West Bengal (Top Priority)
-2. India
-3. World
+1. West Bengal (Top Priority) - Search for the most critical recent news from WB.
+2. India (Second Priority) - Trending national human rights or constitutional news.
+3. World (Third Priority) - Global humanitarian news.
 
-SOURCES (Strictly use only these):
+SOURCES (Strictly use ONLY these for verification):
 1. Google News India
 2. Reuters India
 3. The Hindu
 4. The Indian Express
 
 CONSTRAINTS:
-- Content MUST be within 10 lines.
-- Summaries must be factual and objective.
+- Content MUST be within 10 lines of text.
+- Summaries must be factual, objective, and recent.
 - Remove duplicate stories across sources.
-- Each item must have a valid source name and URL.
 - PublishedAt should be in a friendly readable format (e.g., Feb 24, 2025, 10:30 AM).
 
-Sorting: Sort by scopePriority (1, 2, 3).`,
-  prompt: `Current Context: {{{context}}}. Please aggregate the latest intelligence from the approved sources.`,
+Return the results sorted by scopePriority (1, 2, 3).`,
+  prompt: `Current Context: {{{context}}}. Please aggregate the latest intelligence from the approved sources for today.`,
 });
 
 const syncNewsFlow = ai.defineFlow(
