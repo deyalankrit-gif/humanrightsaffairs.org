@@ -36,7 +36,6 @@ async function getRawNewsData() {
   let items: any[] = [];
   for (const feed of RSS_FEEDS) {
     try {
-      // Use standard fetch with a 5s timeout and User-Agent to prevent blocking
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000);
       
@@ -98,7 +97,7 @@ export type SyncNewsOutput = z.infer<typeof SyncNewsOutputSchema>;
 export async function syncNews(input: SyncNewsInput): Promise<SyncNewsOutput> {
   try {
     const result = await syncNewsFlow(input);
-    // Ensure we return a serializable object
+    // CRITICAL: Ensure serializable object for Next.js Server Actions
     return JSON.parse(JSON.stringify(result));
   } catch (error) {
     console.error("Server Action Crash (syncNews):", error);
@@ -161,7 +160,7 @@ const syncNewsFlow = ai.defineFlow(
       // AI processing of harvested intelligence (sliced for efficiency)
       const { output } = await syncNewsPrompt({
         context: input.context,
-        rawItems: rawItems.slice(0, 12) // Slightly smaller slice for stability
+        rawItems: rawItems.slice(0, 15)
       });
 
       if (!output || !output.news) {

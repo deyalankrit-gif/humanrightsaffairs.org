@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser, useCollection, useFirestore, useMemoFirebase, useDoc } from '@/firebase';
-import { collection, query, where, addDoc, deleteDoc, doc, updateDoc, serverTimestamp, writeBatch, getDocs } from 'firebase/firestore';
+import { collection, query, where, addDoc, deleteDoc, doc, updateDoc, serverTimestamp, getDocs } from 'firebase/firestore';
 import { Footer } from '@/components/footer';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -23,10 +23,8 @@ import {
   Radio, 
   Newspaper,
   ArrowRight,
-  Wifi,
   Clock,
   X,
-  RefreshCw,
   Zap,
   Globe,
   MapPin,
@@ -37,7 +35,6 @@ import {
   Sparkles,
   CheckCircle2,
   BrainCircuit,
-  Eye,
   User as UserIcon,
   Tag
 } from 'lucide-react';
@@ -70,7 +67,6 @@ export default function InternalNewsManagement() {
   const [editNews, setEditNews] = useState<any>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   
-  // AI Selection States
   const [aiSuggestions, setAiSuggestions] = useState<any[]>([]);
   const [isViewingSuggestions, setIsViewingSuggestions] = useState(false);
 
@@ -133,12 +129,12 @@ export default function InternalNewsManagement() {
       if (output && output.news && output.news.length > 0) {
         setAiSuggestions(output.news);
         setIsViewingSuggestions(true);
-        toast({ title: "Intelligence Harvester Active", description: `${output.news.length} AI items retrieved from RSS feeds.` });
+        toast({ title: "Intelligence Harvester Active", description: `${output.news.length} AI items retrieved from national feeds.` });
       } else {
         toast({ 
           variant: "destructive", 
           title: "Harvest yielded no data", 
-          description: "All sources failed to return high-impact human rights news at this moment." 
+          description: "All sources failed to return high-impact news at this moment. Check your internet connection." 
         });
       }
     } catch (e: any) {
@@ -351,7 +347,7 @@ export default function InternalNewsManagement() {
                  <button onClick={() => setIsViewingSuggestions(false)} className="text-white/40 hover:text-white transition-colors"><X className="w-6 h-6" /></button>
                </div>
                <DialogTitle className="text-3xl font-headline font-bold">AI News <span className="text-accent italic">Selection</span></DialogTitle>
-               <DialogDesc className="text-white/60 font-medium">Review and selectively publish identified human rights intelligence from harvested RSS feeds.</DialogDesc>
+               <DialogDesc className="text-white/60 font-medium">Review and selectively publish identified human rights intelligence from across the internet.</DialogDesc>
             </DialogHeader>
             <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
                <div className="grid gap-6">
@@ -388,7 +384,7 @@ export default function InternalNewsManagement() {
                                      <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{suggestion.author || 'Institutional Reporter'}</span>
                                    </div>
                                    <div className="flex gap-2">
-                                      <Button variant="ghost" onClick={() => setAiSuggestions(prev => prev.filter((_, i) => i !== idx))} className="h-9 px-4 rounded-xl text-slate-400 hover:text-red-500 font-bold text-[10px] uppercase">Discard</Button>
+                                      <button onClick={() => setAiSuggestions(prev => prev.filter((_, i) => i !== idx))} className="h-9 px-4 rounded-xl text-slate-400 hover:text-red-500 font-bold text-[10px] uppercase">Discard</button>
                                       <Button onClick={() => publishSuggestion(suggestion)} disabled={isActionLoading} className="h-9 px-6 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 font-bold text-[10px] uppercase tracking-widest gap-2">
                                          {isActionLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle2 className="w-3 h-3" />}
                                          Publish Now

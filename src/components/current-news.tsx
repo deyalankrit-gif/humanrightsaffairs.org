@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo, useEffect, useState } from 'react';
@@ -42,6 +41,7 @@ export function CurrentNews({ className }: { className?: string }) {
       const now = new Date();
       const hoursSinceSync = (now.getTime() - lastSync.getTime()) / (1000 * 60 * 60);
 
+      // Trigger if no news or sync is older than 6 hours
       if (hoursSinceSync >= 6 || (!loading && (!newsItems || newsItems.length === 0))) {
         setIsSyncing(true);
         try {
@@ -50,9 +50,11 @@ export function CurrentNews({ className }: { className?: string }) {
           if (output && output.news && output.news.length > 0) {
             const batch = writeBatch(db);
             
+            // Terminate old broadcast
             const currentActiveSnap = await getDocs(query(collection(db, 'current_news'), where('isActive', '==', true)));
             currentActiveSnap.docs.forEach(d => batch.update(d.ref, { isActive: false }));
 
+            // Establish new broadcast
             output.news.forEach(item => {
               const ref = doc(collection(db, 'current_news'));
               batch.set(ref, {
@@ -63,6 +65,7 @@ export function CurrentNews({ className }: { className?: string }) {
               });
             });
 
+            // Update Registry Meta
             batch.set(doc(db, 'current_news_state', 'registry'), {
               lastSyncAt: serverTimestamp(),
               status: 'Success'
@@ -124,6 +127,7 @@ export function CurrentNews({ className }: { className?: string }) {
       "flex flex-col gap-5 animate-in fade-in slide-in-from-left-6 duration-1000 max-w-[320px] md:max-w-[420px] p-7 bg-transparent relative overflow-hidden group transition-all",
       className
     )}>
+      {/* Visualizer Header */}
       <div className="flex items-center justify-between border-b border-white/20 pb-4">
         <div className="flex items-center gap-2.5">
           <TrendingUp className="w-5 h-5 text-[#CEFF00] animate-pulse" />
@@ -169,6 +173,7 @@ export function CurrentNews({ className }: { className?: string }) {
         </div>
       </div>
 
+      {/* Footer Tags */}
       <div className="flex items-center justify-between pt-3 border-t border-white/20">
         <div className="flex items-center gap-2">
            <History className="w-3 h-3 text-white/60" />
