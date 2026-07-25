@@ -68,7 +68,15 @@ const syncNewsFlow = ai.defineFlow(
     outputSchema: SyncNewsOutputSchema,
   },
   async (input) => {
-    const { output } = await syncNewsPrompt(input);
-    return output!;
+    try {
+      const { output } = await syncNewsPrompt(input);
+      if (!output) {
+        return { news: [] };
+      }
+      return output;
+    } catch (error) {
+      console.error("AI News Sync Error:", error);
+      return { news: [] };
+    }
   }
 );

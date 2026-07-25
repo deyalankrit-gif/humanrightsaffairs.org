@@ -59,7 +59,21 @@ const aiDocumentSearchFlow = ai.defineFlow(
     outputSchema: AiDocumentSearchOutputSchema,
   },
   async (input) => {
-    const {output} = await aiDocumentSearchPrompt(input);
-    return output!;
+    try {
+      const {output} = await aiDocumentSearchPrompt(input);
+      if (!output) {
+        return {
+          summary: "I am currently unable to analyze the legal database. Please try again or contact our legal cell for direct assistance.",
+          relevantDocuments: []
+        };
+      }
+      return output;
+    } catch (error) {
+      console.error("AI Document Search Error:", error);
+      return {
+        summary: "An error occurred during high-fidelity legal analysis. Access to the knowledge hub is temporarily limited.",
+        relevantDocuments: []
+      };
+    }
   }
 );

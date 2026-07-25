@@ -65,16 +65,18 @@ const aiLegalAssistantChatbotFlow = ai.defineFlow(
     outputSchema: InquireLegalAssistantOutputSchema,
   },
   async (input) => {
-    // Generate response using the defined prompt
-    const response = await legalAssistantPrompt(input);
-    
-    // Extract text and provide fallback for empty/blocked responses
-    const finalOutput = response.text;
-    
-    if (!finalOutput || finalOutput.trim().length === 0) {
-      return "I apologize, but I am currently having trouble processing your query. This might be due to safety filters or a connection issue. Please rephrase your question or contact our official helpline for urgent assistance.";
+    try {
+      const response = await legalAssistantPrompt(input);
+      const finalOutput = response.text;
+      
+      if (!finalOutput || finalOutput.trim().length === 0) {
+        return "I apologize, but I am currently having trouble processing your query. This might be due to safety filters or a connection issue. Please rephrase your question or contact our official helpline for urgent assistance.";
+      }
+      
+      return finalOutput;
+    } catch (error) {
+      console.error("AI Chatbot Error:", error);
+      return "I am currently offline due to a technical synchronization issue with the national legal database. Please contact our helpline for assistance.";
     }
-    
-    return finalOutput;
   }
 );
