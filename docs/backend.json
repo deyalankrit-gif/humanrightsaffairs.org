@@ -58,6 +58,9 @@
       "properties": {
         "title": { "type": "string" },
         "content": { "type": "string" },
+        "source": { "type": "string" },
+        "url": { "type": "string" },
+        "publishedAt": { "type": "string" },
         "scope": { "type": "string", "enum": ["West Bengal", "India", "World"] },
         "scopePriority": { "type": "number", "description": "1: WB, 2: India, 3: World" },
         "isActive": { "type": "boolean" },
@@ -175,6 +178,7 @@
   "firestore": {
     "/users/{userEmail}": { "schema": "UserAccount", "description": "Permissions registry." },
     "/current_news/{newsId}": { "schema": "CurrentNews", "description": "Homepage news broadcast." },
+    "/current_news_state/registry": { "schema": "object", "description": "Metadata for news synchronization." },
     "/finance_transactions/{txId}": { "schema": "FinancialTransaction" },
     "/finance_vms_vouchers/{vId}": { "schema": "FinancialVoucher" },
     "/finance_projects/{projectId}": { "schema": "FinancialProject" },

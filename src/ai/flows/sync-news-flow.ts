@@ -1,26 +1,29 @@
+
 'use server';
 /**
- * @fileOverview AI-powered news synchronization flow focused on national trends from specific sources.
- *
- * - syncNews - A function that fetches and categorizes human rights news, prioritizing India's trends from verified sources.
- * - SyncNewsInput - The input type for the syncNews function.
- * - SyncNewsOutput - The return type for the syncNews function.
+ * @fileOverview AI-powered news aggregation flow.
+ * 
+ * - syncNews - Aggregates the most important news with priority: West Bengal > India > World.
+ * - Monitored Sources: Google News India, Reuters India, The Hindu, The Indian Express.
  */
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const SyncNewsInputSchema = z.object({
-  context: z.string().describe("Context for the news sync, e.g. current date/time or specific focus area.")
+  context: z.string().describe("Context for the news sync, e.g. current date/time.")
 });
 export type SyncNewsInput = z.infer<typeof SyncNewsInputSchema>;
 
 const SyncNewsOutputSchema = z.object({
   news: z.array(z.object({
-    title: z.string().describe("Headline for the news."),
-    content: z.string().describe("Narrative limited to 10 lines."),
+    title: z.string().describe("Impactful headline."),
+    content: z.string().describe("Concise summary, maximum 10 lines."),
+    source: z.string().describe("Name of the news publisher."),
+    url: z.string().describe("Direct URL to the original article."),
+    publishedAt: z.string().describe("Publication date and time."),
     scope: z.enum(["West Bengal", "India", "World"]),
-    scopePriority: z.number().describe("1: India (Trending), 2: West Bengal, 3: World"),
+    scopePriority: z.number().describe("1: West Bengal, 2: India, 3: World"),
   }))
 });
 export type SyncNewsOutput = z.infer<typeof SyncNewsOutputSchema>;
@@ -31,30 +34,32 @@ export async function syncNews(input: SyncNewsInput): Promise<SyncNewsOutput> {
 
 const syncNewsPrompt = ai.definePrompt({
   name: 'syncNewsPrompt',
-  model: 'googleai/gemini-2.5-flash',
+  model: 'googleai/gemini-2.0-flash',
   input: { schema: SyncNewsInputSchema },
   output: { schema: SyncNewsOutputSchema },
-  system: `You are an expert news aggregator for the Human Rights Affairs Trust.
-Your task is to identify 3 distinct news items relevant to human rights, social justice, and constitutional literacy.
+  system: `You are an elite news aggregator for a Human Rights Organization.
+Your task is to identify exactly 3 distinct, high-impact news items (one per scope where possible).
 
-SOURCES TO MONITOR:
+PRIORITY HIERARCHY:
+1. West Bengal (Top Priority)
+2. India
+3. World
+
+SOURCES (Strictly use only these):
 1. Google News India
 2. Reuters India
 3. The Hindu
 4. The Indian Express
 
-STRICT FOCUS:
-Identify the #1 MOST TRENDING human rights news item in India across these specific sources. This is the absolute priority for our national audience.
+CONSTRAINTS:
+- Content MUST be within 10 lines.
+- Summaries must be factual and objective.
+- Remove duplicate stories across sources.
+- Each item must have a valid source name and URL.
+- PublishedAt should be in a friendly readable format (e.g., Feb 24, 2025, 10:30 AM).
 
-Priority Order:
-1. The most trending human rights or social justice news from broader India (Top Priority).
-2. Significant news from West Bengal.
-3. Important Global/World human rights context.
-
-Constraint:
-Each news content MUST be exactly within 10 lines for front-end clarity.
-Return news sorted by scope priority (India Trending: 1, WB: 2, World: 3).`,
-  prompt: `Current Sync Context: {{{context}}}. Please aggregate the latest national trends and regional intelligence using Google News India, Reuters India, The Hindu, and The Indian Express.`,
+Sorting: Sort by scopePriority (1, 2, 3).`,
+  prompt: `Current Context: {{{context}}}. Please aggregate the latest intelligence from the approved sources.`,
 });
 
 const syncNewsFlow = ai.defineFlow(
