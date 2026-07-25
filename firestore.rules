@@ -8,25 +8,25 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    function getUserEmail() {
+    function getAuthEmail() {
       return request.auth.token.get('email', '').lower();
     }
 
     // High-Priority Administrative Roles
     function isRoot() {
-      return isAuthenticated() && getUserEmail() == 'deydhritiman@gmail.com';
+      return isAuthenticated() && getAuthEmail() == 'deydhritiman@gmail.com';
     }
 
     function isInternalStaff() {
-      return isAuthenticated() && getUserEmail() == 'deyalankrit@gmail.com';
+      return isAuthenticated() && getAuthEmail() == 'deyalankrit@gmail.com';
     }
 
     // Permission-based authorization
     function hasPermission(permission) {
       return isRoot() || isInternalStaff() || (
         isAuthenticated() && 
-        exists(/databases/$(database)/documents/users/$(getUserEmail())) && 
-        get(/databases/$(database)/documents/users/$(getUserEmail())).data.permissions.get(permission, false) == true
+        exists(/databases/$(database)/documents/users/$(getAuthEmail())) && 
+        get(/databases/$(database)/documents/users/$(getAuthEmail())).data.permissions.get(permission, false) == true
       );
     }
 
@@ -91,7 +91,7 @@ service cloud.firestore {
     // 4. SECURE USER REGISTRY
     match /users/{userEmail} {
       allow read: if isAuthenticated() && (
-        (getUserEmail() == userEmail.lower()) || isRoot()
+        (getAuthEmail() == userEmail.lower()) || isRoot()
       );
       allow write: if isRoot();
     }

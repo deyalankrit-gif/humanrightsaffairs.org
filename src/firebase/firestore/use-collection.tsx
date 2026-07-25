@@ -69,6 +69,7 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
         const publicPaths = [
           'occasions', 
           'events', 
+          'current_news',
           'memberprofiles', 
           'leadership', 
           'gallery', 
