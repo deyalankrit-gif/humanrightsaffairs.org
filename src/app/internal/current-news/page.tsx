@@ -55,6 +55,10 @@ import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import Image from 'next/image';
 
+/**
+ * Internal News Management: Official terminal for news curation.
+ * Features AI-driven intelligence harvesting with full tactical diagnostics.
+ */
 export default function InternalNewsManagement() {
   const { user, loading: authLoading } = useUser();
   const router = useRouter();
@@ -141,7 +145,7 @@ export default function InternalNewsManagement() {
         });
       }
     } catch (e: any) {
-      toast({ variant: "destructive", title: "Harvesting Failed", description: "Communication with news engine timed out." });
+      toast({ variant: "destructive", title: "Harvesting Failed", description: "Communication with news engine failed. Check logs." });
     } finally {
       setIsSyncing(false);
     }
@@ -237,7 +241,7 @@ export default function InternalNewsManagement() {
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-20">
-      <section className="pt-16 pb-8 bg-slate-900 text-white border-b-8 border-accent/20 relative overflow-hidden">
+      <header className="pt-16 pb-8 bg-slate-900 text-white border-b-8 border-accent/20 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-1/3 h-full bg-accent/5 -skew-x-12"></div>
         <div className="container mx-auto px-4 relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="space-y-1 text-center md:text-left">
@@ -337,7 +341,7 @@ export default function InternalNewsManagement() {
              </Dialog>
           </div>
         </div>
-      </section>
+      </header>
 
       {/* AI Suggestions View with Technical Diagnostics */}
       <Dialog open={isViewingSuggestions} onOpenChange={setIsViewingSuggestions}>

@@ -2,8 +2,8 @@
 /**
  * @fileOverview Resilient AI-powered news aggregation flow with tactical diagnostics.
  * 
- * - syncNews - Aggregates high-impact news with multi-source failover and retry logic.
- * - Features: POJO serialization, Timeout management, Context optimization.
+ * - syncNews - Aggregates news from Google News, Reuters, The Hindu, and Indian Express.
+ * - Features: POJO serialization, Timeout management, Context optimization, Fallback logic.
  */
 
 import {ai} from '@/ai/genkit';
@@ -18,9 +18,9 @@ const parser = new Parser({
 
 const RSS_SOURCES = [
   { name: 'Google News India', url: 'https://news.google.com/rss/headlines/section/topic/NATION?hl=en-IN&gl=IN&ceid=IN:en' },
+  { name: 'Reuters India', url: 'https://news.google.com/rss/search?q=reuters+india&hl=en-IN&gl=IN&ceid=IN:en' },
   { name: 'The Hindu', url: 'https://www.thehindu.com/news/national/feeder/default.rss' },
-  { name: 'Indian Express', url: 'https://indianexpress.com/section/india/feed/' },
-  { name: 'Times of India', url: 'https://timesofindia.indiatimes.com/rssfeeds/-2128936835.cms' }
+  { name: 'Indian Express', url: 'https://indianexpress.com/section/india/feed/' }
 ];
 
 /**
@@ -88,7 +88,7 @@ export type SyncNewsOutput = z.infer<typeof SyncNewsOutputSchema>;
 export async function syncNews(input: { context: string }): Promise<SyncNewsOutput> {
   try {
     const result = await syncNewsFlow(input);
-    // Explicitly serialize/deserialize to guarantee POJO return
+    // Explicitly serialize/deserialize to guarantee POJO return for Next.js server actions
     return JSON.parse(JSON.stringify(result));
   } catch (error) {
     console.error("Critical System Crash (syncNews):", error);
@@ -115,7 +115,7 @@ const syncNewsPrompt = ai.definePrompt({
   },
   output: { schema: SyncNewsOutputSchema },
   system: `You are an elite news aggregator for Human Rights Affairs Trust.
-Your task is to identify and summarize high-impact news items.
+Your task is to identify, summarize, and deduplicate high-impact news items.
 
 PRIMARY OBJECTIVE:
 Find Human Rights, Legal, or Constitutional news.
@@ -132,7 +132,8 @@ CONSTRAINTS:
 - CONTENT: Concise summary, maximum 10 lines.
 - SCOPE: Accurate classification as West Bengal, India, or World.
 - IMAGERY: Preserve absolute imageUrl if present.
-- REJECTION LOG: If you discard items that are relevant to the general topic but fail quality checks (duplicates, low impact), list them in diagnostics.rejectionLog with a specific reason.`,
+- DE-DUPLICATION: If multiple sources report the same event, keep ONLY the most detailed one.
+- REJECTION LOG: If you discard items that are relevant but fail quality checks or are duplicates, list them in diagnostics.rejectionLog with a specific reason.`,
   prompt: `Current Context: {{{context}}}. 
   
 Raw Intelligence from Multi-Source RSS Harvest:
@@ -192,7 +193,7 @@ const syncNewsFlow = ai.defineFlow(
       };
     }
 
-    // Limit context to stay within token/time constraints
+    // Limit context to stay within token/time constraints for rapid extraction
     const { output } = await syncNewsPrompt({
       context: input.context,
       rawItems: rawItems.slice(0, 20)
