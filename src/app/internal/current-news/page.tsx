@@ -319,7 +319,7 @@ export default function InternalNewsManagement() {
       {/* AI Suggestions View (Active Options for Selection) */}
       <Dialog open={isViewingSuggestions} onOpenChange={setIsViewingSuggestions}>
          <DialogContent className="max-w-4xl rounded-[3rem] border-none shadow-2xl p-0 overflow-hidden bg-slate-50 dark:bg-slate-950 flex flex-col h-[85vh]">
-            <CardHeader className="bg-primary p-8 text-white border-b-4 border-accent/20 shrink-0">
+            <DialogHeader className="bg-primary p-8 text-white border-b-4 border-accent/20 shrink-0 text-left sm:text-left">
                <div className="flex items-center justify-between mb-2">
                  <div className="flex items-center gap-2">
                    <BrainCircuit className="w-6 h-6 text-accent animate-pulse" />
@@ -327,9 +327,9 @@ export default function InternalNewsManagement() {
                  </div>
                  <button onClick={() => setIsViewingSuggestions(false)} className="text-white/40 hover:text-white transition-colors"><X className="w-6 h-6" /></button>
                </div>
-               <CardTitle className="text-3xl font-headline font-bold">AI News <span className="text-accent italic">Selection</span></CardTitle>
-               <CardDescription className="text-white/60 font-medium">Review and selectively publish identified human rights intelligence from across the internet.</CardDescription>
-            </CardHeader>
+               <DialogTitle className="text-3xl font-headline font-bold">AI News <span className="text-accent italic">Selection</span></DialogTitle>
+               <DialogDesc className="text-white/60 font-medium">Review and selectively publish identified human rights intelligence from across the internet.</DialogDesc>
+            </DialogHeader>
             <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
                <div className="grid gap-6">
                   {aiSuggestions.map((suggestion, idx) => (
