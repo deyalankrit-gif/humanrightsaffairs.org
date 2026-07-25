@@ -53,17 +53,17 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
           if (q.path) {
             pathString = q.path;
           } 
-          // Strategy 2: Internal path segments (standard query)
+          // Strategy 2: Internal query path segments
           else if (q._query?.path?.segments) {
             pathString = q._query.path.segments.join('/');
           } 
-          // Strategy 3: Internal path object
-          else if (q._query?.path) {
-            pathString = q._query.path.toString();
-          } 
-          // Strategy 4: Converter context
-          else if (q.converter?._query?.path?.segments) {
-            pathString = q.converter._query.path.segments.join('/');
+          // Strategy 3: Standard query conversion
+          else if (q.query?.path?.segments) {
+            pathString = q.query.path.segments.join('/');
+          }
+          // Strategy 4: Fallback to collection name identification
+          else if (typeof q.type === 'string' && q.type === 'collection') {
+            pathString = 'collection_query';
           }
         } catch (e) {
           pathString = 'unknown_collection';
