@@ -41,7 +41,7 @@ export async function inquireLegalAssistant(
 
 const legalAssistantPrompt = ai.definePrompt({
   name: 'legalAssistantPrompt',
-  model: 'googleai/gemini-2.0-flash',
+  model: 'googleai/gemini-1.5-flash',
   input: {
     schema: z.object({
       query: z.string()

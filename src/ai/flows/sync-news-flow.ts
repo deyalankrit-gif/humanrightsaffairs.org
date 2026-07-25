@@ -1,9 +1,9 @@
 'use server';
 /**
- * @fileOverview Resilient AI-powered news aggregation flow with tactical diagnostics.
+ * @fileOverview Resilient AI-powered news aggregation flow with rule-based fallback.
  * 
  * - syncNews - Aggregates news from Google News, Reuters, The Hindu, and Indian Express.
- * - Features: POJO serialization, Timeout management, Context optimization, Fallback logic.
+ * - Features: gemini-1.5-flash model, rule-based fallback, timeout management.
  */
 
 import {ai} from '@/ai/genkit';
@@ -25,7 +25,6 @@ const RSS_SOURCES = [
 
 /**
  * Enhanced fetcher with browser-mimicry.
- * Optimized for speed to avoid server action timeouts.
  */
 async function fetchSource(url: string): Promise<Response> {
   const headers = {
@@ -35,7 +34,7 @@ async function fetchSource(url: string): Promise<Response> {
   };
 
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 4000); // 4s timeout per source
+  const timeoutId = setTimeout(() => controller.abort(), 4000); 
   
   try {
     const response = await fetch(url, { headers, signal: controller.signal, cache: 'no-store' });
@@ -83,12 +82,10 @@ export type SyncNewsOutput = z.infer<typeof SyncNewsOutputSchema>;
 
 /**
  * syncNews - Robust Server Action wrapper.
- * Ensures the response is a strict POJO to avoid Next.js serialization errors.
  */
 export async function syncNews(input: { context: string }): Promise<SyncNewsOutput> {
   try {
     const result = await syncNewsFlow(input);
-    // Explicitly serialize/deserialize to guarantee POJO return for Next.js server actions
     return JSON.parse(JSON.stringify(result));
   } catch (error) {
     console.error("Critical System Crash (syncNews):", error);
@@ -106,7 +103,7 @@ export async function syncNews(input: { context: string }): Promise<SyncNewsOutp
 
 const syncNewsPrompt = ai.definePrompt({
   name: 'syncNewsPrompt',
-  model: 'googleai/gemini-2.0-flash',
+  model: 'googleai/gemini-1.5-flash',
   input: { 
     schema: z.object({
       context: z.string(),
@@ -130,10 +127,7 @@ PRIORITY HIERARCHY:
 
 CONSTRAINTS:
 - CONTENT: Concise summary, maximum 10 lines.
-- SCOPE: Accurate classification as West Bengal, India, or World.
-- IMAGERY: Preserve absolute imageUrl if present.
-- DE-DUPLICATION: If multiple sources report the same event, keep ONLY the most detailed one.
-- REJECTION LOG: If you discard items that are relevant but fail quality checks or are duplicates, list them in diagnostics.rejectionLog with a specific reason.`,
+- SCOPE: Accurate classification as West Bengal, India, or World.`,
   prompt: `Current Context: {{{context}}}. 
   
 Raw Intelligence from Multi-Source RSS Harvest:
@@ -176,41 +170,71 @@ const syncNewsFlow = ai.defineFlow(
         rawItems = rawItems.concat(sourceItems);
         successfulCount++;
       } catch (err: any) {
-        const msg = `Source [${source.name}] failed: ${err.message}`;
-        errorLog += msg + "; ";
+        errorLog += `Source [${source.name}] failed: ${err.message}; `;
       }
     }
 
-    if (rawItems.length === 0) {
-      return { 
-        news: [], 
-        diagnostics: { 
-          sourcesAttempted: RSS_SOURCES.length, 
-          sourcesSuccessful: successfulCount, 
-          totalRawItems: 0, 
-          errorSummary: `Harvester returned 0 items. Logs: ${errorLog}` 
-        } 
-      };
-    }
-
-    // Limit context to stay within token/time constraints for rapid extraction
-    const { output } = await syncNewsPrompt({
-      context: input.context,
-      rawItems: rawItems.slice(0, 20)
-    });
-
-    if (!output) {
-       throw new Error("AI extraction yielded null response.");
-    }
-
-    output.diagnostics = {
-      ...output.diagnostics,
+    const initialDiagnostics = {
       sourcesAttempted: RSS_SOURCES.length,
       sourcesSuccessful: successfulCount,
       totalRawItems: rawItems.length,
-      errorSummary: output.diagnostics.errorSummary || (successfulCount < RSS_SOURCES.length ? `Partial success: ${errorLog}` : 'Full harvest complete.')
+      errorSummary: successfulCount < RSS_SOURCES.length ? `Partial success: ${errorLog}` : 'Full harvest complete.'
     };
 
-    return output;
+    if (rawItems.length === 0) {
+      return { news: [], diagnostics: initialDiagnostics };
+    }
+
+    try {
+      const { output } = await syncNewsPrompt({
+        context: input.context,
+        rawItems: rawItems.slice(0, 20)
+      });
+
+      if (!output) throw new Error("AI returned null response.");
+      
+      return {
+        ...output,
+        diagnostics: { ...output.diagnostics, ...initialDiagnostics }
+      };
+    } catch (aiError: any) {
+      console.warn("AI extraction failed, entering rule-based fallback:", aiError);
+      
+      // Rule-based Fallback Scoring System
+      const fallbackNews = rawItems.slice(0, 10).map(item => {
+        const text = (item.title + " " + item.content).toLowerCase();
+        let scope: "West Bengal" | "India" | "World" = "India";
+        let priority = 2;
+
+        if (text.includes("bengal") || text.includes("kolkata") || text.includes("mamata") || text.includes("howrah")) {
+          scope = "West Bengal";
+          priority = 1;
+        } else if (text.includes("world") || text.includes("global") || text.includes("un ") || text.includes("international")) {
+          scope = "World";
+          priority = 3;
+        }
+
+        return {
+          title: item.title,
+          content: item.content.substring(0, 300) + "...",
+          source: item.source,
+          url: item.link,
+          publishedAt: item.pubDate,
+          author: item.author,
+          category: "General Intelligence",
+          imageUrl: item.imageUrl,
+          scope,
+          scopePriority: priority
+        };
+      });
+
+      return {
+        news: fallbackNews,
+        diagnostics: {
+          ...initialDiagnostics,
+          errorSummary: `AI Failure: ${aiError.message}. Triggered rule-based fallback.`
+        }
+      };
+    }
   }
 );
