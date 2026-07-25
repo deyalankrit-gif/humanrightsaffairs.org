@@ -44,22 +44,22 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
         setLoading(false);
       },
       async (serverError) => {
-        // Robust path extraction for both CollectionReference and Query objects
+        // Advanced path extraction strategy
         let pathString = 'restricted_path';
         try {
-          // Attempt to find the path in the internal query structure
-          // This logic covers the various ways path is exposed in Firestore SDK versions
-          if ((query as any).path) {
-            pathString = (query as any).path;
-          } else if ((query as any)._query?.path?.segments) {
-            pathString = (query as any)._query.path.segments.join('/');
-          } else if ((query as any)._query?.path) {
-            pathString = (query as any)._query.path.toString();
-          } else if ('path' in query) {
-            pathString = (query as any).path;
+          const q = query as any;
+          // Check for standard CollectionReference/Query path properties
+          if (q.path) {
+            pathString = q.path;
+          } else if (q._query?.path?.segments) {
+            pathString = q._query.path.segments.join('/');
+          } else if (q._query?.path) {
+            pathString = q._query.path.toString();
+          } else if (q.converter?._query?.path?.segments) {
+            pathString = q.converter._query.path.segments.join('/');
           }
         } catch (e) {
-          pathString = 'unknown_path';
+          pathString = 'unknown_collection';
         }
         
         const permissionError = new FirestorePermissionError({
@@ -70,21 +70,26 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
         const auth = getAuth();
         const lowerPath = pathString.toLowerCase();
         
-        // Define public-facing paths that should never trigger administrative blocking overlays
-        const isPublicPath = lowerPath.includes('occasions') || 
-                           lowerPath.includes('events') || 
-                           lowerPath.includes('memberprofiles') || 
-                           lowerPath.includes('leadership') || 
-                           lowerPath.includes('gallery') || 
-                           lowerPath.includes('public_complaints') || 
-                           lowerPath.includes('terminatedmembers') ||
-                           lowerPath.includes('activity_events');
+        // Comprehensive list of public-facing paths that should not trigger blocking overlays
+        const publicPaths = [
+          'occasions', 
+          'events', 
+          'memberprofiles', 
+          'leadership', 
+          'gallery', 
+          'public_complaints', 
+          'terminatedmembers',
+          'activity_events'
+        ];
 
-        // Only emit to the global listener if a user is authenticated and the path is restricted
+        const isPublicPath = publicPaths.some(p => lowerPath.includes(p));
+
+        // Administrative policy: Only emit to global listener for authenticated staff on restricted data
         if (auth.currentUser && !isPublicPath) {
           errorEmitter.emit('permission-error', permissionError);
         }
         
+        // Set empty result on failure to prevent stale data UI
         setData([]); 
         setError(permissionError);
         setLoading(false);
