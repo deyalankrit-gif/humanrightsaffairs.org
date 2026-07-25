@@ -36,7 +36,8 @@ import {
   CheckCircle2,
   BrainCircuit,
   User as UserIcon,
-  Tag
+  Tag,
+  Bug
 } from 'lucide-react';
 import {
   Dialog,
@@ -49,7 +50,7 @@ import {
   DialogClose
 } from "@/components/ui/dialog";
 import { useToast } from '@/hooks/use-toast';
-import { syncNews } from '@/ai/flows/sync-news-flow';
+import { syncNews, type SyncNewsOutput } from '@/ai/flows/sync-news-flow';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import Image from 'next/image';
@@ -67,7 +68,7 @@ export default function InternalNewsManagement() {
   const [editNews, setEditNews] = useState<any>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   
-  const [aiSuggestions, setAiSuggestions] = useState<any[]>([]);
+  const [harvestResult, setHarvestResult] = useState<SyncNewsOutput | null>(null);
   const [isViewingSuggestions, setIsViewingSuggestions] = useState(false);
 
   const [newNews, setNewNews] = useState({
@@ -124,21 +125,23 @@ export default function InternalNewsManagement() {
 
   const handleFetchAiSuggestions = async () => {
     setIsSyncing(true);
+    setHarvestResult(null);
     try {
-      const output = await syncNews({ context: `Manual selection request at ${new Date().toISOString()}` });
-      if (output && output.news && output.news.length > 0) {
-        setAiSuggestions(output.news);
-        setIsViewingSuggestions(true);
-        toast({ title: "Intelligence Harvester Active", description: `${output.news.length} AI items retrieved from national feeds.` });
+      const result = await syncNews({ context: `Manual selection request at ${new Date().toISOString()}` });
+      setHarvestResult(result);
+      setIsViewingSuggestions(true);
+      
+      if (result.news.length > 0) {
+        toast({ title: "Intelligence Harvester Active", description: `${result.news.length} items retrieved from national feeds.` });
       } else {
         toast({ 
           variant: "destructive", 
-          title: "Harvest yielded no data", 
-          description: "All sources failed to return high-impact news at this moment. Check your internet connection." 
+          title: "Harvest Analysis Complete", 
+          description: "Zero high-impact matches identified. Review diagnostics for details." 
         });
       }
     } catch (e: any) {
-      toast({ variant: "destructive", title: "Harvesting Failed", description: "Internal server error while reaching national news servers." });
+      toast({ variant: "destructive", title: "Harvesting Failed", description: "Communication with news engine timed out." });
     } finally {
       setIsSyncing(false);
     }
@@ -159,18 +162,19 @@ export default function InternalNewsManagement() {
 
       await addDoc(collection(db, 'current_news'), newsData);
       
-      // Update Registry Meta
       await updateDoc(doc(db, 'current_news_state', 'registry'), {
         lastSyncAt: serverTimestamp(),
         updatedBy: user?.email
       });
 
-      setAiSuggestions(prev => prev.filter(s => s.url !== suggestion.url));
-      toast({ title: "Broadcast Published", description: "AI harvested intelligence committed to the feed." });
-      
-      if (aiSuggestions.length <= 1) {
-        setIsViewingSuggestions(false);
+      if (harvestResult) {
+        setHarvestResult({
+          ...harvestResult,
+          news: harvestResult.news.filter(s => s.url !== suggestion.url)
+        });
       }
+      
+      toast({ title: "Broadcast Published", description: "AI intelligence committed to the live feed." });
     } catch (e) {
       toast({ variant: "destructive", title: "Publication Failed" });
     } finally {
@@ -335,7 +339,7 @@ export default function InternalNewsManagement() {
         </div>
       </section>
 
-      {/* AI Suggestions View */}
+      {/* AI Suggestions View with Technical Diagnostics */}
       <Dialog open={isViewingSuggestions} onOpenChange={setIsViewingSuggestions}>
          <DialogContent className="max-w-4xl rounded-[3rem] border-none shadow-2xl p-0 overflow-hidden bg-slate-50 dark:bg-slate-950 flex flex-col h-[85vh]">
             <DialogHeader className="bg-primary p-8 text-white border-b-4 border-accent/20 shrink-0 text-left sm:text-left">
@@ -349,9 +353,43 @@ export default function InternalNewsManagement() {
                <DialogTitle className="text-3xl font-headline font-bold">AI News <span className="text-accent italic">Selection</span></DialogTitle>
                <DialogDesc className="text-white/60 font-medium">Review and selectively publish identified human rights intelligence from across the internet.</DialogDesc>
             </DialogHeader>
-            <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
+            
+            <div className="flex-1 overflow-y-auto p-8 custom-scrollbar space-y-8">
+               {/* Technical Diagnostic Node */}
+               {harvestResult?.diagnostics && (
+                 <Card className="border-none shadow-sm rounded-2xl bg-slate-900 text-white p-6 border-l-4 border-l-blue-500 overflow-hidden relative">
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/10 rounded-full -mr-12 -mt-12 blur-2xl"></div>
+                    <div className="relative z-10 space-y-4">
+                       <div className="flex items-center gap-3">
+                          <Bug className="w-4 h-4 text-blue-400" />
+                          <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-400">Harvester Diagnostics</h4>
+                       </div>
+                       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                          <div><p className="text-[8px] font-bold text-slate-500 uppercase">Sources Success</p><p className="text-sm font-bold text-emerald-400">{harvestResult.diagnostics.sourcesSuccessful} / {harvestResult.diagnostics.sourcesAttempted}</p></div>
+                          <div><p className="text-[8px] font-bold text-slate-500 uppercase">Raw Items</p><p className="text-sm font-bold">{harvestResult.diagnostics.totalRawItems}</p></div>
+                          <div><p className="text-[8px] font-bold text-slate-500 uppercase">Extraction Yield</p><p className="text-sm font-bold">{harvestResult.news.length} Items</p></div>
+                       </div>
+                       {harvestResult.diagnostics.errorSummary && (
+                         <div className="pt-2 border-t border-white/5">
+                            <p className="text-[9px] font-bold text-slate-400 italic">Logs: {harvestResult.diagnostics.errorSummary}</p>
+                         </div>
+                       )}
+                       {harvestResult.diagnostics.rejectionLog && harvestResult.diagnostics.rejectionLog.length > 0 && (
+                         <div className="pt-2 border-t border-white/5">
+                            <p className="text-[9px] font-black uppercase text-red-400 mb-2">Discarded Items Summary:</p>
+                            <ul className="space-y-1">
+                               {harvestResult.diagnostics.rejectionLog.map((reason, i) => (
+                                 <li key={i} className="text-[9px] text-slate-500 flex gap-2"><span className="text-red-500">•</span> {reason}</li>
+                               ))}
+                            </ul>
+                         </div>
+                       )}
+                    </div>
+                 </Card>
+               )}
+
                <div className="grid gap-6">
-                  {aiSuggestions.map((suggestion, idx) => (
+                  {harvestResult?.news.map((suggestion, idx) => (
                     <Card key={idx} className="border-none shadow-sm rounded-[2rem] overflow-hidden bg-white dark:bg-slate-900 group">
                        <CardContent className="p-0">
                           <div className="flex flex-col md:flex-row items-stretch">
@@ -384,7 +422,14 @@ export default function InternalNewsManagement() {
                                      <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{suggestion.author || 'Institutional Reporter'}</span>
                                    </div>
                                    <div className="flex gap-2">
-                                      <button onClick={() => setAiSuggestions(prev => prev.filter((_, i) => i !== idx))} className="h-9 px-4 rounded-xl text-slate-400 hover:text-red-500 font-bold text-[10px] uppercase">Discard</button>
+                                      <button onClick={() => {
+                                        if (harvestResult) {
+                                          setHarvestResult({
+                                            ...harvestResult,
+                                            news: harvestResult.news.filter((_, i) => i !== idx)
+                                          });
+                                        }
+                                      }} className="h-9 px-4 rounded-xl text-slate-400 hover:text-red-500 font-bold text-[10px] uppercase">Discard</button>
                                       <Button onClick={() => publishSuggestion(suggestion)} disabled={isActionLoading} className="h-9 px-6 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 font-bold text-[10px] uppercase tracking-widest gap-2">
                                          {isActionLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle2 className="w-3 h-3" />}
                                          Publish Now
@@ -396,10 +441,17 @@ export default function InternalNewsManagement() {
                        </CardContent>
                     </Card>
                   ))}
+                  
+                  {harvestResult?.news.length === 0 && (
+                    <div className="text-center py-20 opacity-40">
+                      <AlertTriangle className="w-12 h-12 mx-auto mb-4" />
+                      <p className="font-headline font-bold text-lg">No extractable intelligence identified in this harvest.</p>
+                    </div>
+                  )}
                </div>
             </div>
             <div className="p-6 bg-white dark:bg-slate-900 border-t flex justify-between items-center shrink-0">
-               <p className="text-[10px] font-black uppercase text-slate-400">{aiSuggestions.length} Harvested Items Pending</p>
+               <p className="text-[10px] font-black uppercase text-slate-400">{harvestResult?.news.length || 0} Harvested Items Pending</p>
                <Button variant="outline" onClick={() => setIsViewingSuggestions(false)} className="rounded-xl h-9 px-8 font-bold text-[10px] uppercase">Close Terminal</Button>
             </div>
          </DialogContent>

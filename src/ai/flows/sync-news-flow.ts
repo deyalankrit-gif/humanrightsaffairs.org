@@ -1,9 +1,9 @@
 'use server';
 /**
- * @fileOverview AI-powered news aggregation flow with RSS harvester.
+ * @fileOverview Resilient AI-powered news aggregation flow with tactical diagnostics.
  * 
- * - syncNews - Aggregates the most important news with priority: West Bengal > India > World.
- * - Features: RSS fallback, Deduplication, Multi-Source Resilience.
+ * - syncNews - Aggregates high-impact news with multi-source failover and retry logic.
+ * - Features: Exponential backoff, Source-level logging, AI Rejection Intelligence.
  */
 
 import {ai} from '@/ai/genkit';
@@ -16,7 +16,7 @@ const parser = new Parser({
   }
 });
 
-const RSS_FEEDS = [
+const RSS_SOURCES = [
   { name: 'Google News India', url: 'https://news.google.com/rss/headlines/section/topic/NATION?hl=en-IN&gl=IN&ceid=IN:en' },
   { name: 'The Hindu', url: 'https://www.thehindu.com/news/national/feeder/default.rss' },
   { name: 'Indian Express', url: 'https://indianexpress.com/section/india/feed/' },
@@ -24,83 +24,83 @@ const RSS_FEEDS = [
 ];
 
 /**
- * Strips HTML and limits string length for AI prompt safety.
+ * Enhanced fetcher with browser-mimicry and retry logic.
  */
+async function fetchWithRetry(url: string, retries = 2, backoff = 1000): Promise<Response> {
+  const headers = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    'Accept': 'application/rss+xml, application/xml, text/xml, */*',
+    'Accept-Language': 'en-US,en;q=0.9',
+    'Cache-Control': 'no-cache',
+    'Pragma': 'no-cache'
+  };
+
+  for (let i = 0; i <= retries; i++) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 6000);
+      const response = await fetch(url, { headers, signal: controller.signal, cache: 'no-store' });
+      clearTimeout(timeoutId);
+      if (response.ok) return response;
+      if (response.status === 403 || response.status === 429) {
+         console.warn(`Source throttled/forbidden (HTTP ${response.status}). Retrying...`);
+      }
+    } catch (err: any) {
+      if (i === retries) throw err;
+    }
+    await new Promise(r => setTimeout(r, backoff * Math.pow(2, i)));
+  }
+  throw new Error("Maximum retries reached");
+}
+
 function cleanText(text: string, limit = 400): string {
   if (!text) return '';
   const cleaned = text.replace(/<[^>]*>?/gm, '').replace(/\s+/g, ' ').trim();
   return cleaned.length > limit ? cleaned.substring(0, limit) + '...' : cleaned;
 }
 
-async function getRawNewsData() {
-  let items: any[] = [];
-  for (const feed of RSS_FEEDS) {
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000);
-      
-      const response = await fetch(feed.url, { 
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-          'Accept': 'application/rss+xml, application/xml, text/xml'
-        },
-        cache: 'no-store', // CRITICAL: Avoid stale empty responses
-        signal: controller.signal 
-      });
-      clearTimeout(timeoutId);
-      
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      
-      const xml = await response.text();
-      const data = await parser.parseString(xml);
-      
-      items = items.concat(data.items.map(i => ({
-        title: cleanText(i.title || '', 200),
-        link: i.link || '',
-        pubDate: i.pubDate || '',
-        author: i.creator || i.author || null,
-        content: cleanText(i.contentSnippet || i.content || '', 400),
-        source: feed.name,
-        imageUrl: (i as any).media?.$?.url || null
-      })));
-    } catch (err) {
-      console.warn(`RSS Harvest failed for ${feed.name}:`, err);
-    }
-  }
-  return items;
-}
-
 const SyncNewsInputSchema = z.object({
-  context: z.string().describe("Context for the news sync, e.g. current date/time.")
+  context: z.string().describe("Context for the news sync.")
 });
-export type SyncNewsInput = z.infer<typeof SyncNewsInputSchema>;
 
 const SyncNewsOutputSchema = z.object({
   news: z.array(z.object({
-    title: z.string().describe("Impactful headline."),
-    content: z.string().describe("Concise summary, maximum 10 lines."),
-    source: z.string().describe("Name of the news publisher."),
-    url: z.string().describe("Direct URL to the original article."),
-    publishedAt: z.string().optional().nullable().describe("Publication date and time."),
-    author: z.string().optional().nullable().describe("Author name if identified."),
-    category: z.string().optional().nullable().describe("Category: Legal, Human Rights, Social, etc."),
-    imageUrl: z.string().optional().nullable().describe("Relevant image URL."),
+    title: z.string(),
+    content: z.string(),
+    source: z.string(),
+    url: z.string(),
+    publishedAt: z.string().optional().nullable(),
+    author: z.string().optional().nullable(),
+    category: z.string().optional().nullable(),
+    imageUrl: z.string().optional().nullable(),
     scope: z.enum(["West Bengal", "India", "World"]),
-    scopePriority: z.number().describe("1: West Bengal, 2: India, 3: World"),
-  }))
+    scopePriority: z.number(),
+  })),
+  diagnostics: z.object({
+    sourcesAttempted: z.number(),
+    sourcesSuccessful: z.number(),
+    totalRawItems: z.number(),
+    rejectionLog: z.array(z.string()).optional().describe("AI's reasoning for discarded articles."),
+    errorSummary: z.string().optional()
+  })
 });
+
 export type SyncNewsOutput = z.infer<typeof SyncNewsOutputSchema>;
 
-/**
- * syncNews - Robust Server Action wrapper for news aggregation.
- */
-export async function syncNews(input: SyncNewsInput): Promise<SyncNewsOutput> {
+export async function syncNews(input: { context: string }): Promise<SyncNewsOutput> {
   try {
-    const result = await syncNewsFlow(input);
-    return JSON.parse(JSON.stringify(result));
+    return await syncNewsFlow(input);
   } catch (error) {
-    console.error("Server Action Crash (syncNews):", error);
-    return { news: [] };
+    console.error("Critical System Crash (syncNews):", error);
+    return { 
+      news: [], 
+      diagnostics: { 
+        sourcesAttempted: RSS_SOURCES.length, 
+        sourcesSuccessful: 0, 
+        totalRawItems: 0, 
+        errorSummary: String(error) 
+      } 
+    };
   }
 }
 
@@ -123,22 +123,20 @@ PRIORITY HIERARCHY:
 3. World (Third Priority)
 
 CONSTRAINTS:
-- CONTENT: Must be a Concise summary, maximum 10 lines.
-- SCOPE: If a story is about a specific state in India, check if it's West Bengal. Otherwise, classify as India or World.
-- IMAGERY: Preserve imageUrl if present, else null.
-- FORMAT: publishedAt should be readable like 'Feb 24, 2025, 10:30 AM'. If unsure, use current date.
-- COUNT: Aim for exactly 3-5 distinct high-impact stories.
-- DEDUPLICATE: If multiple sources report the same event, pick the most authoritative one.`,
+- CONTENT: Concise summary, maximum 10 lines.
+- SCOPE: Accurate classification as West Bengal, India, or World.
+- IMAGERY: Preserve absolute imageUrl if present.
+- REJECTION LOG: If you discard items that are relevant to the general topic but fail quality checks (duplicates, low impact, or commercial), list them in diagnostics.rejectionLog with a specific reason.`,
   prompt: `Current Context: {{{context}}}. 
   
-Raw Intelligence from RSS Harvest:
+Raw Intelligence from Multi-Source RSS Harvest:
 {{#each rawItems}}
 - [{{{this.source}}}] {{{this.title}}}
   Link: {{{this.link}}}
   Summary: {{{this.content}}}
 {{/each}}
 
-Please aggregate and summarize the most relevant news according to the hierarchy. Do not return an empty list if any significant news exists.`,
+Please aggregate the most relevant news. If no news is suitable, return an empty news array and explain why in diagnostics.errorSummary.`,
 });
 
 const syncNewsFlow = ai.defineFlow(
@@ -148,27 +146,66 @@ const syncNewsFlow = ai.defineFlow(
     outputSchema: SyncNewsOutputSchema,
   },
   async (input) => {
-    try {
-      const rawItems = await getRawNewsData();
-      
-      if (!rawItems || rawItems.length === 0) {
-        console.warn("Harvester returned zero raw items.");
-        return { news: [] };
-      }
+    let rawItems: any[] = [];
+    let successfulCount = 0;
+    let errorLog = "";
 
-      // Increase context window slightly for better coverage
-      const { output } = await syncNewsPrompt({
-        context: input.context,
-        rawItems: rawItems.slice(0, 30)
-      });
+    for (const source of RSS_SOURCES) {
+      try {
+        const response = await fetchWithRetry(source.url);
+        const xml = await response.text();
+        const data = await parser.parseString(xml);
+        
+        const sourceItems = data.items.map(i => ({
+          title: cleanText(i.title || '', 200),
+          link: i.link || '',
+          pubDate: i.pubDate || '',
+          author: i.creator || i.author || null,
+          content: cleanText(i.contentSnippet || i.content || '', 400),
+          source: source.name,
+          imageUrl: (i as any).media?.$?.url || null
+        }));
 
-      if (!output || !output.news) {
-        return { news: [] };
+        rawItems = rawItems.concat(sourceItems);
+        successfulCount++;
+        console.log(`Source [${source.name}]: Fetched ${sourceItems.length} articles successfully.`);
+      } catch (err: any) {
+        const msg = `Source [${source.name}] failed: ${err.message}`;
+        console.warn(msg);
+        errorLog += msg + "; ";
       }
-      return output;
-    } catch (error) {
-      console.error("AI Flow Execution Error (syncNewsFlow):", error);
-      return { news: [] };
     }
+
+    if (rawItems.length === 0) {
+      return { 
+        news: [], 
+        diagnostics: { 
+          sourcesAttempted: RSS_SOURCES.length, 
+          sourcesSuccessful: successfulCount, 
+          totalRawItems: 0, 
+          errorSummary: `Harvester returned 0 items. Possible network block or dead feeds. Logs: ${errorLog}` 
+        } 
+      };
+    }
+
+    const { output } = await syncNewsPrompt({
+      context: input.context,
+      rawItems: rawItems.slice(0, 40)
+    });
+
+    if (!output) {
+       throw new Error("AI extraction yielded null response.");
+    }
+
+    // Ensure diagnostics are populated correctly if AI missed them
+    output.diagnostics = {
+      ...output.diagnostics,
+      sourcesAttempted: RSS_SOURCES.length,
+      sourcesSuccessful: successfulCount,
+      totalRawItems: rawItems.length,
+      errorSummary: output.diagnostics.errorSummary || (successfulCount < RSS_SOURCES.length ? `Partial success: ${errorLog}` : 'Full harvest complete.')
+    };
+
+    return output;
   }
 );
