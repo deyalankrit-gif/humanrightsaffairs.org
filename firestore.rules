@@ -95,16 +95,17 @@ service cloud.firestore {
     
     match /donations/{donationId} {
       allow create: if true;
-      allow read: if hasPermission('analytics') || hasPermission('financeLedger') || hasPermission('financeDashboard');
+      allow read: if isRoot() || isInternalStaff() || hasPermission('analytics') || hasPermission('financeLedger') || hasPermission('financeDashboard');
       allow delete: if isRoot();
     }
 
     match /expenses/{expenseId} {
-      allow read, write: if hasPermission('expenses') || hasPermission('financeLedger');
+      allow read: if isRoot() || isInternalStaff() || hasPermission('expenses') || hasPermission('financeLedger');
+      allow write: if isRoot() || isInternalStaff() || hasPermission('expenses');
     }
 
     match /accounts/{accountId} {
-      allow read, write: if hasPermission('accounts') || hasPermission('financeDashboard');
+      allow read, write: if isRoot() || isInternalStaff() || hasPermission('accounts') || hasPermission('financeDashboard');
     }
 
     match /grievances/{grievanceId} {
@@ -122,8 +123,7 @@ service cloud.firestore {
 
     match /visitors/{visitorId} {
       allow create: if true;
-      allow read: if hasPermission('visitors');
-      allow write: if hasPermission('visitors');
+      allow read, write: if hasPermission('visitors');
     }
 
     match /member_kits/{memberId} {
@@ -133,45 +133,45 @@ service cloud.firestore {
 
     // 4. FINANCIAL GOVERNANCE (Enterprise Module)
     match /finance_transactions/{txId} {
-      allow get, list: if isRoot() || isInternalStaff() || hasPermission('financeLedger') || hasPermission('financeDashboard');
-      allow create, update: if hasPermission('financeVouchers') || isRoot();
+      allow read: if isRoot() || isInternalStaff() || hasPermission('financeLedger') || hasPermission('financeDashboard');
+      allow create, update: if isRoot() || isInternalStaff() || hasPermission('financeVouchers');
       allow delete: if isRoot();
     }
 
     match /finance_vms_vouchers/{vId} {
-      allow get, list: if isRoot() || isInternalStaff() || hasPermission('financeVouchers') || hasPermission('financeDashboard');
-      allow create, update: if hasPermission('financeVouchers') || isRoot();
+      allow read: if isRoot() || isInternalStaff() || hasPermission('financeVouchers') || hasPermission('financeDashboard');
+      allow create, update: if isRoot() || isInternalStaff() || hasPermission('financeVouchers');
       allow delete: if isRoot();
     }
 
     match /finance_projects/{projectId} {
-      allow get, list: if isRoot() || isInternalStaff() || hasPermission('financeProjects') || hasPermission('financeDashboard');
-      allow write: if hasPermission('financeVouchers') || isRoot();
+      allow read: if isRoot() || isInternalStaff() || hasPermission('financeProjects') || hasPermission('financeDashboard');
+      allow write: if isRoot() || isInternalStaff() || hasPermission('financeVouchers');
     }
 
     match /finance_assets/{assetId} {
-      allow get, list: if isRoot() || isInternalStaff() || hasPermission('financeAssets') || hasPermission('financeDashboard');
-      allow write: if hasPermission('financeAssets') || isRoot();
+      allow read: if isRoot() || isInternalStaff() || hasPermission('financeAssets') || hasPermission('financeDashboard');
+      allow write: if isRoot() || isInternalStaff() || hasPermission('financeAssets');
     }
 
     match /finance_payroll/{recordId} {
-      allow get, list: if isRoot() || isInternalStaff() || hasPermission('financePayroll') || hasPermission('financeDashboard');
-      allow write: if hasPermission('financePayroll') || isRoot();
+      allow read: if isRoot() || isInternalStaff() || hasPermission('financePayroll') || hasPermission('financeDashboard');
+      allow write: if isRoot() || isInternalStaff() || hasPermission('financePayroll');
     }
 
     match /finance_summary/{docId} {
-      allow get, list: if isRoot() || isInternalStaff() || hasPermission('financeDashboard');
-      allow write: if hasPermission('financeVouchers') || isRoot();
+      allow read: if isRoot() || isInternalStaff() || hasPermission('financeDashboard');
+      allow write: if isRoot() || isInternalStaff() || hasPermission('financeVouchers');
     }
 
     match /finance_donors/{donorId} {
-      allow get, list: if isRoot() || isInternalStaff() || hasPermission('financeLedger') || hasPermission('financeDashboard');
-      allow write: if hasPermission('financeLedger') || isRoot();
+      allow read: if isRoot() || isInternalStaff() || hasPermission('financeLedger') || hasPermission('financeDashboard');
+      allow write: if isRoot() || isInternalStaff() || hasPermission('financeLedger');
     }
 
     match /finance_compliance/{docId} {
-      allow get, list: if isRoot() || isInternalStaff() || hasPermission('financeCompliance') || hasPermission('financeDashboard');
-      allow write: if hasPermission('financeCompliance') || isRoot();
+      allow read: if isRoot() || isInternalStaff() || hasPermission('financeCompliance') || hasPermission('financeDashboard');
+      allow write: if isRoot() || isInternalStaff() || hasPermission('financeCompliance');
     }
 
     // 5. ACTIVITY CALENDAR HUB

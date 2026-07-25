@@ -48,14 +48,21 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
         let pathString = 'restricted_path';
         try {
           const q = query as any;
-          // Check for standard CollectionReference/Query path properties
+          
+          // Strategy 1: Explicit path property
           if (q.path) {
             pathString = q.path;
-          } else if (q._query?.path?.segments) {
+          } 
+          // Strategy 2: Internal path segments (standard query)
+          else if (q._query?.path?.segments) {
             pathString = q._query.path.segments.join('/');
-          } else if (q._query?.path) {
+          } 
+          // Strategy 3: Internal path object
+          else if (q._query?.path) {
             pathString = q._query.path.toString();
-          } else if (q.converter?._query?.path?.segments) {
+          } 
+          // Strategy 4: Converter context
+          else if (q.converter?._query?.path?.segments) {
             pathString = q.converter._query.path.segments.join('/');
           }
         } catch (e) {
@@ -79,7 +86,8 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
           'gallery', 
           'public_complaints', 
           'terminatedmembers',
-          'activity_events'
+          'activity_events',
+          'donor_tiers'
         ];
 
         const isPublicPath = publicPaths.some(p => lowerPath.includes(p));
