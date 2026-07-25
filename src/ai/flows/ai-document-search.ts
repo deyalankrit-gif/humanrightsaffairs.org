@@ -29,8 +29,19 @@ const AiDocumentSearchOutputSchema = z.object({
 });
 export type AiDocumentSearchOutput = z.infer<typeof AiDocumentSearchOutputSchema>;
 
+/**
+ * aiDocumentSearch - Robust Server Action wrapper.
+ */
 export async function aiDocumentSearch(input: AiDocumentSearchInput): Promise<AiDocumentSearchOutput> {
-  return aiDocumentSearchFlow(input);
+  try {
+    return await aiDocumentSearchFlow(input);
+  } catch (error) {
+    console.error("Server Action Crash (aiDocumentSearch):", error);
+    return {
+      summary: "An error occurred during legal analysis. Access to the knowledge hub is temporarily limited.",
+      relevantDocuments: []
+    };
+  }
 }
 
 const aiDocumentSearchPrompt = ai.definePrompt({
@@ -69,7 +80,7 @@ const aiDocumentSearchFlow = ai.defineFlow(
       }
       return output;
     } catch (error) {
-      console.error("AI Document Search Error:", error);
+      console.error("AI Document Search Flow Error:", error);
       return {
         summary: "An error occurred during high-fidelity legal analysis. Access to the knowledge hub is temporarily limited.",
         relevantDocuments: []

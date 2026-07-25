@@ -24,10 +24,18 @@ export type InquireLegalAssistantOutput = z.infer<
   typeof InquireLegalAssistantOutputSchema
 >;
 
+/**
+ * inquireLegalAssistant - Robust Server Action wrapper.
+ */
 export async function inquireLegalAssistant(
   input: InquireLegalAssistantInput
 ): Promise<InquireLegalAssistantOutput> {
-  return aiLegalAssistantChatbotFlow(input);
+  try {
+    return await aiLegalAssistantChatbotFlow(input);
+  } catch (error) {
+    console.error("Server Action Crash (inquireLegalAssistant):", error);
+    return "I am currently offline due to a technical synchronization issue with the national legal database. Please contact our helpline for assistance.";
+  }
 }
 
 const legalAssistantPrompt = ai.definePrompt({
@@ -70,12 +78,12 @@ const aiLegalAssistantChatbotFlow = ai.defineFlow(
       const finalOutput = response.text;
       
       if (!finalOutput || finalOutput.trim().length === 0) {
-        return "I apologize, but I am currently having trouble processing your query. This might be due to safety filters or a connection issue. Please rephrase your question or contact our official helpline for urgent assistance.";
+        return "I apologize, but I am currently having trouble processing your query. Please rephrase your question or contact our official helpline for urgent assistance.";
       }
       
       return finalOutput;
     } catch (error) {
-      console.error("AI Chatbot Error:", error);
+      console.error("AI Chatbot Flow Error:", error);
       return "I am currently offline due to a technical synchronization issue with the national legal database. Please contact our helpline for assistance.";
     }
   }

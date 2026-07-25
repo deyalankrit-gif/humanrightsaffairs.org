@@ -3,7 +3,6 @@
  * @fileOverview AI-powered news aggregation flow with RSS harvester.
  * 
  * - syncNews - Aggregates the most important news with priority: West Bengal > India > World.
- * - Monitored Sources: Google News India, Reuters India, The Hindu, The Indian Express.
  * - Features: RSS fallback, Deduplication, Multi-Source Resilience.
  */
 
@@ -28,8 +27,16 @@ async function getRawNewsData() {
   let items: any[] = [];
   for (const feed of RSS_FEEDS) {
     try {
-      // Use standard fetch with revalidation
-      const response = await fetch(feed.url, { next: { revalidate: 3600 } });
+      // Use standard fetch with a 10s timeout to prevent server action hang
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+      
+      const response = await fetch(feed.url, { 
+        next: { revalidate: 3600 },
+        signal: controller.signal 
+      });
+      clearTimeout(timeoutId);
+      
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       
       const xml = await response.text();
@@ -39,13 +46,13 @@ async function getRawNewsData() {
         title: i.title,
         link: i.link,
         pubDate: i.pubDate,
-        author: i.creator || i.author || '',
+        author: i.creator || i.author || null,
         content: i.contentSnippet || i.content || '',
         source: feed.name,
-        imageUrl: (i as any).media?.$?.url || ''
+        imageUrl: (i as any).media?.$?.url || null
       })));
     } catch (err) {
-      console.warn(`RSS Fetch failed for ${feed.name}, engine continuing collection:`, err);
+      console.warn(`RSS Harvest failed for ${feed.name}:`, err);
     }
   }
   return items;
@@ -63,17 +70,26 @@ const SyncNewsOutputSchema = z.object({
     source: z.string().describe("Name of the news publisher."),
     url: z.string().describe("Direct URL to the original article."),
     publishedAt: z.string().describe("Publication date and time."),
-    author: z.string().optional().describe("Author name if identified."),
+    author: z.string().optional().nullable().describe("Author name if identified."),
     category: z.string().describe("Category: Legal, Human Rights, Social, etc."),
-    imageUrl: z.string().optional().describe("Relevant image URL."),
+    imageUrl: z.string().optional().nullable().describe("Relevant image URL."),
     scope: z.enum(["West Bengal", "India", "World"]),
     scopePriority: z.number().describe("1: West Bengal, 2: India, 3: World"),
   }))
 });
 export type SyncNewsOutput = z.infer<typeof SyncNewsOutputSchema>;
 
+/**
+ * syncNews - Robust Server Action wrapper for news aggregation.
+ * Prevents "Unexpected Response" by catching all top-level errors.
+ */
 export async function syncNews(input: SyncNewsInput): Promise<SyncNewsOutput> {
-  return syncNewsFlow(input);
+  try {
+    return await syncNewsFlow(input);
+  } catch (error) {
+    console.error("Server Action Crash (syncNews):", error);
+    return { news: [] };
+  }
 }
 
 const syncNewsPrompt = ai.definePrompt({
@@ -95,23 +111,17 @@ PRIORITY HIERARCHY:
 3. World (Third Priority)
 
 CONSTRAINTS:
-- Use provided RSS data as primary source. If empty or insufficient, use your internal real-time knowledge for the date {{{context}}}.
 - CONTENT: Must be a Concise summary, maximum 10 lines.
-- DEDUPLICATION: Remove duplicate stories. Choose ONE source per story. 
-- SORT: Sort exactly by scopePriority (1, 2, 3) then by newest publication date.
-- IMAGERY: Preserve imageUrl if present, else suggest 'https://picsum.photos/seed/news/800/400'.
-- FORMAT: publishedAt should be readable like 'Feb 24, 2025, 10:30 AM'.
-- CATEGORY: Assign a relevant human rights or social justice category.`,
+- SORT: Sort exactly by scopePriority (1, 2, 3).
+- IMAGERY: Preserve imageUrl if present, else null.
+- FORMAT: publishedAt should be readable like 'Feb 24, 2025, 10:30 AM'.`,
   prompt: `Current Context: {{{context}}}. 
   
 Raw Intelligence from RSS Harvest:
 {{#each rawItems}}
 - [{{{this.source}}}] {{{this.title}}}
   Link: {{{this.link}}}
-  Date: {{{this.pubDate}}}
-  Author: {{{this.author}}}
   Summary: {{{this.content}}}
-  Image: {{{this.imageUrl}}}
 {{/each}}
 
 Please aggregate and summarize according to the hierarchy.`,
@@ -127,10 +137,10 @@ const syncNewsFlow = ai.defineFlow(
     try {
       const rawItems = await getRawNewsData();
       
-      // AI processing of harvested intelligence
+      // AI processing of harvested intelligence (sliced for token efficiency)
       const { output } = await syncNewsPrompt({
         context: input.context,
-        rawItems: rawItems.slice(0, 30) // Context optimization
+        rawItems: rawItems.slice(0, 20)
       });
 
       if (!output) {
@@ -138,7 +148,7 @@ const syncNewsFlow = ai.defineFlow(
       }
       return output;
     } catch (error) {
-      console.error("AI News Sync Error:", error);
+      console.error("AI Flow Execution Error (syncNewsFlow):", error);
       return { news: [] };
     }
   }
