@@ -47,13 +47,16 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
         // Robust path extraction for both CollectionReference and Query objects
         let pathString = 'restricted_path';
         try {
-          // Attempt to find the path in the internal query structure if not exposed directly
-          if ('path' in query) {
+          // Attempt to find the path in the internal query structure
+          // This logic covers the various ways path is exposed in Firestore SDK versions
+          if ((query as any).path) {
             pathString = (query as any).path;
-          } else if ('_query' in query && (query as any)._query.path) {
+          } else if ((query as any)._query?.path?.segments) {
+            pathString = (query as any)._query.path.segments.join('/');
+          } else if ((query as any)._query?.path) {
             pathString = (query as any)._query.path.toString();
-          } else if ((query as any).converter?.path) {
-             pathString = (query as any).converter.path;
+          } else if ('path' in query) {
+            pathString = (query as any).path;
           }
         } catch (e) {
           pathString = 'unknown_path';
@@ -70,11 +73,12 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
         // Define public-facing paths that should never trigger administrative blocking overlays
         const isPublicPath = lowerPath.includes('occasions') || 
                            lowerPath.includes('events') || 
-                           lowerPath.includes('memberprofiles') ||
-                           lowerPath.includes('leadership') ||
-                           lowerPath.includes('gallery') ||
-                           lowerPath.includes('public_complaints') ||
-                           lowerPath.includes('terminatedmembers');
+                           lowerPath.includes('memberprofiles') || 
+                           lowerPath.includes('leadership') || 
+                           lowerPath.includes('gallery') || 
+                           lowerPath.includes('public_complaints') || 
+                           lowerPath.includes('terminatedmembers') ||
+                           lowerPath.includes('activity_events');
 
         // Only emit to the global listener if a user is authenticated and the path is restricted
         if (auth.currentUser && !isPublicPath) {
