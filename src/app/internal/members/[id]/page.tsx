@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useEffect, useState } from 'react'
@@ -27,7 +28,7 @@ import {
   Globe,
   Briefcase,
   Sparkles,
-  IdCard,
+  Contact,
   FileText,
   Award,
   CalendarClock,
@@ -502,7 +503,7 @@ export default function MemberDetailsPage() {
                  <div className="space-y-3">
                    <Link href={`/internal/members/${memberId}/id-card`} className="w-full">
                       <Button variant="outline" className="w-full justify-start rounded-xl h-12 border-white/10 bg-white/5 hover:bg-accent hover:text-primary transition-all text-white hover:text-primary font-bold text-[10px] uppercase tracking-widest gap-3 hover:translate-x-1">
-                         <IdCard className="w-4 h-4 text-accent" /> Digital ID Card
+                         <Contact className="w-4 h-4 text-accent" /> Digital ID Card
                       </Button>
                    </Link>
                    <Link href={`/internal/members/${memberId}/certificate`} className="w-full">

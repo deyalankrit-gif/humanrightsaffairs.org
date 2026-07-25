@@ -1,7 +1,7 @@
 
 "use client"
 
-import React, { useMemo, useEffect } from 'react'
+import React, { useMemo, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useUser, useCollection, useFirestore, useMemoFirebase } from '@/firebase'
 import { collection, query, orderBy } from 'firebase/firestore'
@@ -43,6 +43,11 @@ export default function MemberAnalyticsPage() {
   const { user, loading: authLoading } = useUser()
   const router = useRouter()
   const db = useFirestore()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const profilesQuery = useMemoFirebase(() => {
     if (!db || !user) return null;
@@ -58,7 +63,7 @@ export default function MemberAnalyticsPage() {
   }, [user, authLoading, router])
 
   const stats = useMemo(() => {
-    if (!members) return { 
+    if (!members || !mounted) return { 
       total: 0, 
       levelData: [], 
       genderData: [], 
@@ -149,9 +154,9 @@ export default function MemberAnalyticsPage() {
       expiredCount,
       renewalData
     };
-  }, [members]);
+  }, [members, mounted]);
 
-  if (authLoading || !user) {
+  if (!mounted || authLoading || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
         <Loader2 className="w-10 h-10 animate-spin text-accent" />

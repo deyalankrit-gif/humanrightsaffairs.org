@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useMemo, useState, useEffect } from 'react';
@@ -20,18 +21,18 @@ export function OccasionBanner() {
   const pathname = usePathname();
   const isHome = pathname === '/';
   const [scrolled, setScrolled] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
-  // Monitor scroll position to hide the banner when navigating away from the top
   useEffect(() => {
+    setMounted(true);
     if (typeof window === 'undefined') return;
     
     const handleScroll = () => {
-      // Threshold set to 10px to ensure it hides quickly as the user moves away from the top
       setScrolled(window.scrollY > 10);
     };
     
     window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll(); // Initial check
+    handleScroll();
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -44,14 +45,13 @@ export function OccasionBanner() {
 
   const occasionsQuery = useMemoFirebase(() => {
     if (!db) return null;
-    // We fetch all and filter client-side to ensure instant updates without complex indexing
     return collection(db, 'occasions');
   }, [db]);
 
   const { data: occasions, loading } = useCollection(occasionsQuery);
 
   const activeOccasion = useMemo(() => {
-    if (!occasions || occasions.length === 0) return DEFAULT_BANNER;
+    if (!mounted || !occasions || occasions.length === 0) return DEFAULT_BANNER;
     
     const now = new Date();
     
@@ -69,10 +69,9 @@ export function OccasionBanner() {
       .sort((a, b) => (b.priority || 0) - (a.priority || 0));
 
     return validOccasions[0] || DEFAULT_BANNER;
-  }, [occasions]);
+  }, [occasions, mounted]);
 
-  // Hide the banner if not on home page or if the user has scrolled down
-  if (!isHome || scrolled) return null;
+  if (!mounted || !isHome || scrolled) return null;
 
   const isDefault = activeOccasion.isDefault === true;
 
@@ -82,8 +81,6 @@ export function OccasionBanner() {
         "bg-transparent p-4 md:p-6 flex items-center gap-4 md:gap-7 group transition-all duration-700",
         loading && "opacity-80"
       )}>
-        
-        {/* Visual Focus: Enlarged High-Impact Image Container */}
         <div className="relative w-24 h-24 md:w-32 md:h-32 rounded-2xl md:rounded-[1.5rem] overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.4)] border-2 border-white/20 shrink-0 group-hover:scale-105 transition-transform duration-700 bg-slate-900/40">
           <Image 
             src={activeOccasion.imageUrl || '/HRAT%20Logo.jpeg'} 
@@ -95,7 +92,6 @@ export function OccasionBanner() {
           <div className="absolute inset-0 bg-gradient-to-tr from-black/20 via-transparent to-white/5 pointer-events-none"></div>
         </div>
 
-        {/* Narrative Context: High-Visibility Chrome Typography in Neon Palette */}
         <div className="flex flex-col min-w-0 flex-1">
           <div className="flex items-center gap-2 mb-1.5 shrink-0">
              <div className={cn(

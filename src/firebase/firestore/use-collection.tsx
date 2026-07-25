@@ -43,7 +43,7 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
         setError(null);
         setLoading(false);
       },
-      async (serverError) => {
+      (serverError: any) => {
         // Advanced path extraction strategy to provide meaningful context to the error overlay
         let pathString = 'restricted_collection';
         try {

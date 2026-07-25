@@ -1,7 +1,7 @@
 
 "use client"
 
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { 
@@ -67,6 +67,11 @@ export default function UserAccountDashboard() {
   const { user, loading: authLoading } = useUser()
   const db = useFirestore()
   const [activeTab, setActiveTab] = useState('overview')
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   // Data Fetching: Find member profile linked to current user email
   const memberQuery = useMemoFirebase(() => {
@@ -87,7 +92,7 @@ export default function UserAccountDashboard() {
 
   // Stats Calculations
   const stats = useMemo(() => {
-    if (!profile) return { completion: 0, daysActive: 0, totalDonated: 0 };
+    if (!profile || !mounted) return { completion: 0, daysActive: 0, totalDonated: 0 };
     
     let completion = 0;
     const fields = ['name', 'phone', 'address', 'imageId', 'bloodGroup', 'aadhaar', 'profession', 'education'];
@@ -104,9 +109,9 @@ export default function UserAccountDashboard() {
     }
 
     return { completion: Math.round(completion), daysActive, totalDonated };
-  }, [profile, donations]);
+  }, [profile, donations, mounted]);
 
-  if (authLoading || profileLoading) {
+  if (!mounted || authLoading || profileLoading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-950">
         <Loader2 className="w-12 h-12 animate-spin text-accent mb-4" />
@@ -713,3 +718,4 @@ function IdCard({ className, ...props }: React.SVGProps<SVGSVGElement>) {
     </svg>
   )
 }
+

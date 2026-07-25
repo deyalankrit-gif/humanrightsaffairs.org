@@ -65,7 +65,7 @@ export default function ActivityHubDashboard() {
   const { data: reminders } = useCollection(remindersQuery);
 
   const stats = useMemo(() => {
-    if (!events) return { today: [], upcoming: [], month: [] };
+    if (!events || !mounted) return { today: [], upcoming: [], month: [] };
     const now = new Date();
     const next30 = addDays(now, 30);
     const mStart = startOfMonth(now);
@@ -82,15 +82,16 @@ export default function ActivityHubDashboard() {
         return isAfter(d, mStart) && isBefore(d, mEnd);
       })
     };
-  }, [events]);
+  }, [events, mounted]);
 
   const currentMonthObservances = useMemo(() => {
+    if (!mounted) return [];
     const month = new Date().getMonth() + 1;
     return [
       ...BUILT_IN_HOLIDAYS.filter(h => h.month === month),
       ...BUILT_IN_OBSERVANCES.filter(o => o.month === month)
     ].sort((a, b) => a.day - b.day);
-  }, []);
+  }, [mounted]);
 
   const validReminders = useMemo(() => {
     if (!reminders) return [];
@@ -100,6 +101,7 @@ export default function ActivityHubDashboard() {
   }, [reminders, events]);
 
   const getCountdownText = (dateStr: string) => {
+    if (!mounted) return null;
     const eventDate = parseISO(dateStr);
     if (isToday(eventDate)) return "Starting Today";
     if (isTomorrow(eventDate)) return "Tomorrow";
@@ -111,6 +113,7 @@ export default function ActivityHubDashboard() {
   }
 
   const getObservanceCountdown = (obsDay: number, obsMonth: number) => {
+    if (!mounted) return null;
     const today = startOfDay(new Date());
     const year = today.getFullYear();
     const observanceDate = startOfDay(new Date(year, obsMonth - 1, obsDay));
@@ -122,6 +125,14 @@ export default function ActivityHubDashboard() {
     if (diff > 1) return `In ${diff} Days`;
     if (diff < 0) return "Completed";
     return null;
+  }
+
+  if (!mounted) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
+        <Loader2 className="w-10 h-10 animate-spin text-accent" />
+      </div>
+    )
   }
 
   return (
@@ -181,7 +192,7 @@ export default function ActivityHubDashboard() {
                  </CardHeader>
                  <CardContent className="p-0">
                     <div className="divide-y divide-slate-50 dark:divide-slate-800">
-                      {mounted && stats.upcoming.length > 0 ? stats.upcoming.map((e: any) => {
+                      {stats.upcoming.length > 0 ? stats.upcoming.map((e: any) => {
                         const countdown = getCountdownText(e.date);
                         return (
                           <div key={e.id} className="p-6 hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors flex flex-col md:flex-row items-center justify-between gap-4">
@@ -238,7 +249,7 @@ export default function ActivityHubDashboard() {
                         <div className="py-20 text-center text-slate-300">
                            <CalendarIcon className="w-12 h-12 mx-auto mb-4 opacity-20" />
                            <p className="font-bold uppercase tracking-widest text-xs">
-                             {mounted ? "No programs scheduled for the next 30 days." : "Synchronizing Schedule..."}
+                             No programs scheduled for the next 30 days.
                            </p>
                         </div>
                       )}
@@ -254,11 +265,11 @@ export default function ActivityHubDashboard() {
                     <CardTitle className="text-lg font-headline font-bold flex items-center gap-2">
                       <ShieldCheck className="w-5 h-5 text-emerald-500" /> Current Month Observances
                     </CardTitle>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{mounted ? format(new Date(), 'MMMM yyyy') : 'Loading...'}</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{format(new Date(), 'MMMM yyyy')}</p>
                   </CardHeader>
                   <div className="space-y-4">
                      {currentMonthObservances.map((o, idx) => {
-                       const countdown = mounted ? getObservanceCountdown(o.day, o.month) : null;
+                       const countdown = getObservanceCountdown(o.day, o.month);
                        return (
                         <div key={idx} className="flex gap-4 group">
                            <div className="w-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center shrink-0 border border-slate-100 group-hover:border-accent transition-colors">
@@ -267,7 +278,7 @@ export default function ActivityHubDashboard() {
                            <div className="flex-1">
                               <p className="text-[8px] font-black uppercase text-accent leading-none mb-1">{o.type}</p>
                               <p className="font-bold text-sm leading-tight text-slate-700 dark:text-slate-300">{o.title}</p>
-                              {mounted && countdown && (
+                              {countdown && (
                                 <div className="mt-1.5 flex items-center gap-1.5">
                                    <Hourglass className="w-2.5 h-2.5 text-accent opacity-50" />
                                    <span className={cn(
