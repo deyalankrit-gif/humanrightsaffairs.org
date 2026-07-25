@@ -17,6 +17,7 @@ import { useToast } from '@/hooks/use-toast';
 /**
  * Technical Broadcast Manager: Root-exclusive file management system.
  * Replaces the active player with a facility to select and insert MP3 files.
+ * Updated: Music-related text set to white.
  */
 export function SidebarAudioStation() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -67,7 +68,7 @@ export function SidebarAudioStation() {
       <div className="bg-slate-900/80 rounded-2xl p-5 border border-orange-500/20 space-y-4 shadow-[0_0_30px_rgba(249,115,22,0.05)]">
         <div className="space-y-1.5">
           <p className="text-[10px] font-black text-white uppercase tracking-[0.25em] drop-shadow-sm">Broadcast Node</p>
-          <p className="text-[9px] text-slate-400 font-bold leading-relaxed italic opacity-80">
+          <p className="text-[9px] text-white/60 font-bold leading-relaxed italic opacity-80">
             Select local MP3 assets for institutional queue.
           </p>
         </div>
@@ -125,12 +126,12 @@ export function SidebarAudioStation() {
                 </div>
                 <div className="flex flex-col overflow-hidden">
                   <span className="text-[10px] font-bold text-white truncate tracking-tight">{file.name}</span>
-                  <span className="text-[8px] text-slate-500 font-mono uppercase font-black">{file.size}</span>
+                  <span className="text-[8px] text-white/50 font-mono uppercase font-black">{file.size}</span>
                 </div>
               </div>
               <button 
                 onClick={() => removeFile(idx)}
-                className="text-slate-700 hover:text-red-500 transition-colors ml-2 shrink-0 p-1.5"
+                className="text-white/40 hover:text-red-500 transition-colors ml-2 shrink-0 p-1.5"
                 title="Purge"
               >
                 <Trash2 className="w-4 h-4" />
@@ -138,15 +139,15 @@ export function SidebarAudioStation() {
             </div>
           )) : (
             <div className="text-center py-10 bg-black/20 rounded-[2.5rem] border border-dashed border-white/5 opacity-40">
-              <FileAudio className="w-8 h-8 text-slate-700 mx-auto mb-2" />
-              <p className="text-[9px] text-slate-700 font-black uppercase tracking-[0.2em]">Queue Empty</p>
+              <FileAudio className="w-8 h-8 text-white/30 mx-auto mb-2" />
+              <p className="text-[9px] text-white/40 font-black uppercase tracking-[0.2em]">Queue Empty</p>
             </div>
           )}
         </div>
       </div>
 
       <div className="text-center pt-2 opacity-50">
-        <p className="text-[8px] font-black text-white uppercase tracking-[0.4em]">Node ID: HRAT-BROADCAST-ALPHA</p>
+        <p className="text-[8px] font-black text-white/50 uppercase tracking-[0.4em]">Node ID: HRAT-BROADCAST-ALPHA</p>
       </div>
     </div>
   );

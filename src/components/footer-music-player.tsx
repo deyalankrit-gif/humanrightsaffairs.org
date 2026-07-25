@@ -264,9 +264,9 @@ export function FooterMusicPlayer({ className }: { className?: string }) {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56 bg-slate-900 border-white/10 text-white rounded-2xl shadow-2xl p-2">
-                 <p className="px-3 py-2 text-[8px] font-black uppercase tracking-widest text-slate-500 border-b border-white/5 mb-1">Select Track</p>
+                 <p className="px-3 py-2 text-[8px] font-black uppercase tracking-widest text-white/50 border-b border-white/5 mb-1">Select Track</p>
                  {PLAYLIST.map((track, idx) => (
-                   <DropdownMenuItem key={idx} onClick={() => selectTrack(idx)} className={cn("rounded-xl focus:bg-orange-500 focus:text-white cursor-pointer mb-0.5", currentTrackIndex === idx ? "bg-orange-500/20 text-orange-500" : "text-slate-300")}>
+                   <DropdownMenuItem key={idx} onClick={() => selectTrack(idx)} className={cn("rounded-xl focus:bg-orange-500 focus:text-white cursor-pointer mb-0.5", currentTrackIndex === idx ? "bg-orange-500/20 text-orange-500" : "text-white/70")}>
                      <span className="text-[10px] uppercase font-bold tracking-wide truncate">{track.title}</span>
                      {currentTrackIndex === idx && <Check className="ml-auto w-3 h-3" />}
                    </DropdownMenuItem>
