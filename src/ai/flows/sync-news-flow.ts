@@ -1,9 +1,8 @@
-
 'use server';
 /**
- * @fileOverview AI-powered news synchronization flow.
+ * @fileOverview AI-powered news synchronization flow focused on national trends.
  *
- * - syncNews - A function that fetches and categorizes human rights news.
+ * - syncNews - A function that fetches and categorizes human rights news, prioritizing India's trends.
  * - SyncNewsInput - The input type for the syncNews function.
  * - SyncNewsOutput - The return type for the syncNews function.
  */
@@ -21,7 +20,7 @@ const SyncNewsOutputSchema = z.object({
     title: z.string().describe("Headline for the news."),
     content: z.string().describe("Narrative limited to 10 lines."),
     scope: z.enum(["West Bengal", "India", "World"]),
-    scopePriority: z.number().describe("1: WB, 2: India, 3: World"),
+    scopePriority: z.number().describe("1: India (Trending), 2: West Bengal, 3: World"),
   }))
 });
 export type SyncNewsOutput = z.infer<typeof SyncNewsOutputSchema>;
@@ -38,15 +37,18 @@ const syncNewsPrompt = ai.definePrompt({
   system: `You are an expert news aggregator for the Human Rights Affairs Trust.
 Your task is to identify 3 distinct news items relevant to human rights, social justice, and constitutional literacy.
 
-Strict Prioritization:
-1. One item MUST be from West Bengal (Top Priority).
-2. One item MUST be from broader India.
-3. One item MUST be from Global/World context.
+STRICT FOCUS:
+Identify the #1 MOST TRENDING human rights news item in India. This is the absolute priority for our national audience.
+
+Priority Order:
+1. The most trending human rights or social justice news from broader India (Top Priority).
+2. Significant news from West Bengal.
+3. Important Global/World human rights context.
 
 Constraint:
 Each news content MUST be exactly within 10 lines for front-end clarity.
-Return news sorted by scope priority (WB: 1, India: 2, World: 3).`,
-  prompt: `Current Sync Context: {{{context}}}. Please aggregate the latest intelligence.`,
+Return news sorted by scope priority (India Trending: 1, WB: 2, World: 3).`,
+  prompt: `Current Sync Context: {{{context}}}. Please aggregate the latest national trends and regional intelligence.`,
 });
 
 const syncNewsFlow = ai.defineFlow(

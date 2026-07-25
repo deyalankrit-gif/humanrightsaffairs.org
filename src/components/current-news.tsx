@@ -1,16 +1,15 @@
-
 'use client';
 
 import React, { useMemo } from 'react';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { collection, query, where, limit } from 'firebase/firestore';
-import { Newspaper, Radio, MapPin, Globe, Loader2 } from 'lucide-react';
+import { Newspaper, Radio, MapPin, Globe, Loader2, TrendingUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 /**
  * CurrentNews: High-fidelity real-time news display area for the homepage.
  * Positions exactly below the logo, maximum 10 lines, transparent background.
- * Logic: Prioritizes WB > India > World. Sorted in-memory to avoid index errors.
+ * Logic: Prioritizes Trending India > WB > World.
  */
 export function CurrentNews({ className }: { className?: string }) {
   const db = useFirestore();
@@ -20,7 +19,7 @@ export function CurrentNews({ className }: { className?: string }) {
     return query(
       collection(db, 'current_news'),
       where('isActive', '==', true),
-      limit(10) // Fetch top active candidates to sort in memory
+      limit(10) 
     );
   }, [db]);
 
@@ -29,7 +28,7 @@ export function CurrentNews({ className }: { className?: string }) {
   const activeNews = useMemo(() => {
     if (!newsItems || newsItems.length === 0) return null;
     
-    // Sort logic: Scope Priority (1: WB, 2: India, 3: World) ASC, then latest first
+    // Sort logic: Scope Priority (1: India Trending, 2: WB, 3: World) ASC, then latest first
     return [...newsItems].sort((a: any, b: any) => {
       if (a.scopePriority !== b.scopePriority) {
         return (a.scopePriority || 99) - (b.scopePriority || 99);
@@ -44,12 +43,14 @@ export function CurrentNews({ className }: { className?: string }) {
     return (
       <div className={cn("flex items-center gap-2 opacity-50", className)}>
         <Loader2 className="w-3 h-3 animate-spin text-accent" />
-        <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Fetching Feed...</span>
+        <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Scanning Trends...</span>
       </div>
     );
   }
 
   if (!activeNews) return null;
+
+  const isIndiaTrending = activeNews.scope === 'India' && activeNews.scopePriority === 1;
 
   return (
     <div className={cn(
@@ -57,8 +58,14 @@ export function CurrentNews({ className }: { className?: string }) {
       className
     )}>
       <div className="flex items-center gap-2 border-b border-white/10 pb-2">
-        <Radio className="w-3.5 h-3.5 text-accent animate-pulse" />
-        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-accent">Current Intelligence</span>
+        {isIndiaTrending ? (
+          <TrendingUp className="w-3.5 h-3.5 text-accent animate-pulse" />
+        ) : (
+          <Radio className="w-3.5 h-3.5 text-accent animate-pulse" />
+        )}
+        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-accent">
+          {isIndiaTrending ? "Trending in India" : "Current Intelligence"}
+        </span>
       </div>
 
       <div className="space-y-3">
@@ -69,7 +76,7 @@ export function CurrentNews({ className }: { className?: string }) {
              <MapPin className="w-3 h-3 text-emerald-400" />
            )}
            <span className="text-[8px] font-bold text-slate-300 uppercase tracking-widest">
-             {activeNews.scope === 'West Bengal' ? 'West Bengal Chapter' : activeNews.scope}
+             {activeNews.scope === 'India' ? 'National Update' : `${activeNews.scope} Chapter`}
            </span>
         </div>
 

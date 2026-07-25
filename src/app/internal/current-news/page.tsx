@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useEffect, useState, useMemo } from 'react';
@@ -31,7 +30,8 @@ import {
   Zap,
   Globe,
   MapPin,
-  AlertTriangle
+  AlertTriangle,
+  TrendingUp
 } from 'lucide-react';
 import {
   Dialog,
@@ -64,7 +64,7 @@ export default function InternalNewsManagement() {
   const [newNews, setNewNews] = useState({
     title: '',
     content: '',
-    scope: 'West Bengal' as 'West Bengal' | 'India' | 'World',
+    scope: 'India' as 'West Bengal' | 'India' | 'World',
     scopePriority: 1,
     isActive: true,
     priority: 1
@@ -78,7 +78,6 @@ export default function InternalNewsManagement() {
 
   const newsQuery = useMemoFirebase(() => {
     if (!db || !user) return null;
-    // Simplified query to avoid index errors in admin view
     return query(collection(db, 'current_news'));
   }, [db, user]);
 
@@ -95,9 +94,6 @@ export default function InternalNewsManagement() {
         if (a.scopePriority !== b.scopePriority) {
           return (a.scopePriority || 99) - (b.scopePriority || 99);
         }
-        if (a.priority !== b.priority) {
-          return (b.priority || 0) - (a.priority || 0);
-        }
         const dateA = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : 0;
         const dateB = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : 0;
         return dateB - dateA;
@@ -108,7 +104,7 @@ export default function InternalNewsManagement() {
     if (!db) return;
     setIsSyncing(true);
     try {
-      const output = await syncNews({ context: `Sync cycle at ${new Date().toISOString()}` });
+      const output = await syncNews({ context: `Sync cycle at ${new Date().toISOString()}. Focus: National Trends.` });
       const batch = writeBatch(db);
       
       output.news.forEach(item => {
@@ -122,7 +118,7 @@ export default function InternalNewsManagement() {
       });
 
       await batch.commit();
-      toast({ title: "AI Intelligence Sync Success", description: "Internet synchronization complete. Priorities established." });
+      toast({ title: "India Trending Sync Success", description: "National intelligence synchronization complete." });
     } catch (e: any) {
       toast({ variant: "destructive", title: "Sync Failed", description: e.message });
     } finally {
@@ -142,7 +138,7 @@ export default function InternalNewsManagement() {
       .then(() => {
         toast({ title: "News Broadcasted", description: "Synchronized with public homepage display." });
         setIsAddDialogOpen(false);
-        setNewNews({ title: '', content: '', scope: 'West Bengal', scopePriority: 1, isActive: true, priority: 1 });
+        setNewNews({ title: '', content: '', scope: 'India', scopePriority: 1, isActive: true, priority: 1 });
       })
       .finally(() => setIsActionLoading(false));
   };
@@ -169,7 +165,8 @@ export default function InternalNewsManagement() {
     return <div className="min-h-screen flex items-center justify-center bg-slate-950"><Loader2 className="w-10 h-10 animate-spin text-accent" /></div>;
   }
 
-  const getScopeBadge = (scope: string) => {
+  const getScopeBadge = (scope: string, priority: number) => {
+    if (scope === 'India' && priority === 1) return "bg-accent text-primary";
     switch (scope) {
       case 'West Bengal': return "bg-emerald-500 text-white";
       case 'India': return "bg-blue-600 text-white";
@@ -184,10 +181,10 @@ export default function InternalNewsManagement() {
         <div className="container mx-auto px-4 relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="space-y-1">
             <div className="inline-flex items-center gap-2 bg-emerald-500/20 text-emerald-400 px-3 py-1 rounded-full text-[9px] font-bold uppercase border border-emerald-500/30 tracking-[0.2em]">
-              <Wifi className="w-2.5 h-2.5 animate-pulse" /> Live News Terminal
+              <TrendingUp className="w-2.5 h-2.5 animate-pulse" /> India Trends Terminal
             </div>
             <h1 className="text-3xl md:text-4xl font-headline font-bold">Current <span className="text-accent italic">Intelligence</span></h1>
-            <p className="text-slate-400 text-[11px] uppercase font-black">Prioritization: WB (1) > India (2) > World (3)</p>
+            <p className="text-slate-400 text-[11px] uppercase font-black">Prioritization: India Trending (1) > WB (2) > World (3)</p>
           </div>
           
           <div className="flex gap-3">
@@ -198,7 +195,7 @@ export default function InternalNewsManagement() {
               className="bg-white/5 border-white/10 text-white font-bold h-11 px-6 rounded-xl hover:bg-white/10"
              >
                 {isSyncing ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <RefreshCw className="w-4 h-4 mr-2" />}
-                Sync Internet Feed
+                Sync India Trends
              </Button>
              
              <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
@@ -213,7 +210,7 @@ export default function InternalNewsManagement() {
                       <DialogClose asChild><Button variant="ghost" size="icon" className="h-8 w-8 rounded-full"><X className="w-4 h-4" /></Button></DialogClose>
                     </div>
                     <DialogTitle className="text-2xl font-headline font-bold">Publish Daily News</DialogTitle>
-                    <DialogDescription>Entries follow the priority hierarchy: West Bengal is always shown first.</DialogDescription>
+                    <DialogDescription>Trending India news (Priority 1) will be displayed below the homepage logo.</DialogDescription>
                   </DialogHeader>
                   <div className="space-y-6 py-4">
                     <div className="grid grid-cols-2 gap-4">
@@ -223,11 +220,11 @@ export default function InternalNewsManagement() {
                        </div>
                        <div className="space-y-1">
                           <Label className="text-[10px] font-bold uppercase text-slate-400">News Scope</Label>
-                          <Select value={newNews.scope} onValueChange={(val: any) => setNewNews({...newNews, scope: val, scopePriority: val === 'West Bengal' ? 1 : val === 'India' ? 2 : 3})}>
+                          <Select value={newNews.scope} onValueChange={(val: any) => setNewNews({...newNews, scope: val, scopePriority: val === 'India' ? 1 : val === 'West Bengal' ? 2 : 3})}>
                              <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
                              <SelectContent className="bg-white">
-                                <SelectItem value="West Bengal">West Bengal (Top Priority)</SelectItem>
-                                <SelectItem value="India">Broader India</SelectItem>
+                                <SelectItem value="India">India (Trending Priority)</SelectItem>
+                                <SelectItem value="West Bengal">West Bengal</SelectItem>
                                 <SelectItem value="World">Global News</SelectItem>
                              </SelectContent>
                           </Select>
@@ -277,8 +274,8 @@ export default function InternalNewsManagement() {
                   <CardContent className="p-0">
                     <div className="flex flex-col md:flex-row items-stretch">
                       <div className={cn("p-6 md:w-48 text-center border-r flex flex-col items-center justify-center shrink-0 bg-slate-50 dark:bg-slate-800/50")}>
-                         <Badge className={cn("text-[9px] font-black px-3 py-1 uppercase border-none mb-3", getScopeBadge(n.scope))}>
-                           {n.scope}
+                         <Badge className={cn("text-[9px] font-black px-3 py-1 uppercase border-none mb-3", getScopeBadge(n.scope, n.scopePriority))}>
+                           {n.scope} {n.scopePriority === 1 && "TRENDING"}
                          </Badge>
                          <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
                            <Clock className="w-2.5 h-2.5" /> Priority: {n.scopePriority}
@@ -309,7 +306,7 @@ export default function InternalNewsManagement() {
                 <div className="text-center py-20 opacity-40">
                   <AlertTriangle className="w-12 h-12 mx-auto mb-4" />
                   <p className="text-sm font-bold uppercase tracking-widest">No news items identified in the registry.</p>
-                  <p className="text-xs mt-2">Try syncing with the internet or creating a manual entry.</p>
+                  <p className="text-xs mt-2">Try syncing with India trends or creating a manual entry.</p>
                 </div>
               )}
             </div>
@@ -331,11 +328,11 @@ export default function InternalNewsManagement() {
                   <div className="space-y-1"><Label className="text-[10px] font-bold uppercase text-slate-400">Headline</Label><Input value={editNews.title} onChange={e => setEditNews({...editNews, title: e.target.value})} className="h-11 rounded-xl" /></div>
                   <div className="space-y-1">
                     <Label className="text-[10px] font-bold uppercase text-slate-400">Scope</Label>
-                    <Select value={editNews.scope} onValueChange={(val: any) => setEditNews({...editNews, scope: val, scopePriority: val === 'West Bengal' ? 1 : val === 'India' ? 2 : 3})}>
+                    <Select value={editNews.scope} onValueChange={(val: any) => setEditNews({...editNews, scope: val, scopePriority: val === 'India' ? 1 : val === 'West Bengal' ? 2 : 3})}>
                        <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
                        <SelectContent className="bg-white">
+                          <SelectItem value="India">India (Trending Priority)</SelectItem>
                           <SelectItem value="West Bengal">West Bengal</SelectItem>
-                          <SelectItem value="India">India</SelectItem>
                           <SelectItem value="World">World</SelectItem>
                        </SelectContent>
                     </Select>
