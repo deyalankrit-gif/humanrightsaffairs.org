@@ -2,8 +2,8 @@
 
 import React, { useMemo, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useUser, useCollection, useFirestore, useMemoFirebase } from '@/firebase'
-import { collection, query, orderBy, deleteDoc, doc, updateDoc, addDoc, serverTimestamp, increment } from 'firebase/firestore'
+import { useUser, useCollection, useFirestore, useMemoFirebase, useDoc } from '@/firebase'
+import { collection, query, orderBy, deleteDoc, doc, updateDoc, addDoc, setDoc, serverTimestamp, increment } from 'firebase/firestore'
 import { Footer } from '@/components/footer'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -23,7 +23,9 @@ import {
   TrendingDown,
   FilterX,
   ShieldCheck,
-  X
+  X,
+  Check,
+  Settings2
 } from 'lucide-react'
 import {
   Dialog,
@@ -34,15 +36,9 @@ import {
   DialogFooter,
   DialogClose
 } from "@/components/ui/dialog"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
-import { Calendar } from "@/components/ui/calendar"
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
-import { format, parse } from 'date-fns'
+import { format } from 'date-fns'
 
 export default function ExpensesManagementPage() {
   const { user, loading: authLoading } = useUser()
@@ -54,8 +50,10 @@ export default function ExpensesManagementPage() {
   const [categoryFilter, setCategoryFilter] = useState('All')
   const [isActionLoading, setIsActionLoading] = useState(false)
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
-  const [editExpense, setEditExpense] = useState<any>(null)
+  
+  const [newCategoryLabel, setNewCategoryLabel] = useState('')
+  const [editingCategoryIndex, setEditingCategoryIndex] = useState<number | null>(null)
+  const [editingCategoryValue, setEditingCategoryValue] = useState('')
 
   const [newExpense, setNewExpense] = useState({
     title: '',
@@ -74,12 +72,68 @@ export default function ExpensesManagementPage() {
     }
   }, [user, authLoading, router])
 
+  const settingsRef = useMemoFirebase(() => {
+    if (!db) return null;
+    return doc(db, 'expenses', 'settings');
+  }, [db]);
+
+  const { data: settingsData } = useDoc(settingsRef);
+
+  const expenseCategories = useMemo(() => {
+    const defaultCats = ["Salaries", "Rent", "Utility", "Legal Fees", "Logistics", "Printing", "Travel", "Relief Aid", "Other"];
+    const custom = (settingsData as any)?.customCategories || [];
+    return Array.from(new Set([...defaultCats, ...custom]));
+  }, [settingsData]);
+
   const expensesQuery = useMemoFirebase(() => {
     if (!db || !user) return null;
     return query(collection(db, 'expenses'), orderBy('createdAt', 'desc'));
   }, [db, user]);
 
   const { data: expenses, loading: dataLoading } = useCollection(expensesQuery);
+
+  const handleAddCategory = async () => {
+    if (!newCategoryLabel.trim() || !settingsRef) return;
+    const label = newCategoryLabel.trim();
+    if (expenseCategories.includes(label)) {
+      toast({ variant: "destructive", title: "Duplicate Category", description: "This category already exists in the registry." });
+      return;
+    }
+    const updatedCustom = [...((settingsData as any)?.customCategories || []), label];
+    try {
+      await setDoc(settingsRef, { customCategories: updatedCustom, updatedAt: serverTimestamp() }, { merge: true });
+      setNewCategoryLabel('');
+      toast({ title: "Category Established" });
+    } catch (e) {
+      toast({ variant: "destructive", title: "Update Failed" });
+    }
+  }
+
+  const handleUpdateCategory = async () => {
+    if (editingCategoryIndex === null || !editingCategoryValue.trim() || !settingsRef) return;
+    const updatedCustom = [...((settingsData as any)?.customCategories || [])];
+    updatedCustom[editingCategoryIndex] = editingCategoryValue.trim();
+    try {
+      await setDoc(settingsRef, { customCategories: updatedCustom, updatedAt: serverTimestamp() }, { merge: true });
+      setEditingCategoryIndex(null);
+      setEditingCategoryValue('');
+      toast({ title: "Category Updated" });
+    } catch (e) {
+      toast({ variant: "destructive", title: "Update Failed" });
+    }
+  }
+
+  const handleDeleteCategory = async (idx: number) => {
+    if (!settingsRef) return;
+    const updatedCustom = [...((settingsData as any)?.customCategories || [])];
+    updatedCustom.splice(idx, 1);
+    try {
+      await setDoc(settingsRef, { customCategories: updatedCustom, updatedAt: serverTimestamp() }, { merge: true });
+      toast({ title: "Category Purged" });
+    } catch (e) {
+      toast({ variant: "destructive", title: "Delete Failed" });
+    }
+  }
 
   const handleAddExpense = async () => {
     if (!db || !user) return;
@@ -138,7 +192,6 @@ export default function ExpensesManagementPage() {
 
   if (authLoading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="animate-spin text-accent" /></div>
 
-  const expenseCategories = ["Salaries", "Rent", "Utility", "Legal Fees", "Logistics", "Printing", "Travel", "Relief Aid", "Other"]
   const paymentMethods = ["Cash", "Bank Transfer", "UPI", "Cheque"]
 
   const filtered = (expenses || []).filter((e: any) => {
@@ -159,84 +212,169 @@ export default function ExpensesManagementPage() {
           </div>
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild><Button size="sm" className="bg-red-500 text-white font-bold rounded-xl h-11 px-6 flex gap-2 shadow-lg hover:bg-red-600 transition-colors"><Plus className="w-4 h-4" /> Log & Sync Expense</Button></DialogTrigger>
-            <DialogContent className="max-w-xl rounded-3xl max-h-[90vh] overflow-y-auto [&>button]:hidden">
+            <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="max-w-xl rounded-3xl max-h-[90vh] overflow-y-auto [&>button]:hidden border-none shadow-2xl">
                <DialogHeader className="relative">
                   <div className="absolute right-0 top-0">
                      <DialogClose asChild>
-                       <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
+                       <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-slate-400 hover:text-red-500">
                          <X className="w-4 h-4" />
                        </Button>
                      </DialogClose>
                   </div>
-                  <DialogTitle>Record Real-Time Expense</DialogTitle>
+                  <DialogTitle className="text-2xl font-headline font-bold text-primary dark:text-white">Record Real-Time Expense</DialogTitle>
                </DialogHeader>
-               <div className="space-y-4 py-4">
+               
+               <div className="space-y-6 py-4">
                  <div className="grid md:grid-cols-2 gap-4">
-                   <div className="space-y-1"><Label className="text-[10px] font-bold uppercase">Expense Title</Label><Input value={newExpense.title} onChange={e => setNewExpense({...newExpense, title: e.target.value})} placeholder="e.g. Office Supplies" /></div>
-                   <div className="space-y-1"><Label className="text-[10px] font-bold uppercase">Payee / Vendor</Label><Input value={newExpense.payee} onChange={e => setNewExpense({...newExpense, payee: e.target.value})} placeholder="Entity Name" /></div>
+                   <div className="space-y-1">
+                     <Label className="text-[10px] font-bold uppercase text-slate-400">Expense Title *</Label>
+                     <Input value={newExpense.title} onChange={e => setNewExpense({...newExpense, title: e.target.value})} placeholder="e.g. Office Supplies" className="h-11 rounded-xl" />
+                   </div>
+                   <div className="space-y-1">
+                     <Label className="text-[10px] font-bold uppercase text-slate-400">Payee / Vendor *</Label>
+                     <Input value={newExpense.payee} onChange={e => setNewExpense({...newExpense, payee: e.target.value})} placeholder="Entity Name" className="h-11 rounded-xl" />
+                   </div>
                  </div>
+
                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-1"><Label className="text-[10px] font-bold uppercase">Category</Label>
+                    <div className="space-y-1">
+                      <Label className="text-[10px] font-bold uppercase text-slate-400">Category *</Label>
                       <Select value={newExpense.category} onValueChange={(val: any) => setNewExpense({...newExpense, category: val})}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
-                        <SelectContent position="popper" className="z-[1000001] bg-white">{expenseCategories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+                        <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
+                        <SelectContent position="popper" className="z-[1000001] bg-white max-h-60">
+                          {expenseCategories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                        </SelectContent>
                       </Select>
                     </div>
-                    <div className="space-y-1"><Label className="text-[10px] font-bold uppercase">Amount (₹)</Label><Input type="number" value={newExpense.amount} onChange={e => setNewExpense({...newExpense, amount: e.target.value})} placeholder="0.00" /></div>
+                    <div className="space-y-1">
+                      <Label className="text-[10px] font-bold uppercase text-slate-400">Amount (₹) *</Label>
+                      <div className="relative">
+                        <IndianRupee className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+                        <Input type="number" value={newExpense.amount} onChange={e => setNewExpense({...newExpense, amount: e.target.value})} placeholder="0.00" className="h-11 pl-8 rounded-xl font-bold" />
+                      </div>
+                    </div>
                  </div>
-                 <div className="space-y-1"><Label className="text-[10px] font-bold uppercase">Payment Channel</Label>
+
+                 <div className="space-y-1">
+                    <Label className="text-[10px] font-bold uppercase text-slate-400">Payment Channel</Label>
                     <Select value={newExpense.paymentMethod} onValueChange={(val: any) => setNewExpense({...newExpense, paymentMethod: val})}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent position="popper" className="z-[1000001] bg-white">{paymentMethods.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}</SelectContent>
+                      <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
+                      <SelectContent position="popper" className="z-[1000001] bg-white">
+                        {paymentMethods.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}
+                      </SelectContent>
                     </Select>
                  </div>
+
+                 {/* Taxonomy Management Section */}
+                 <div className="p-5 bg-slate-50 dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 space-y-5 shadow-inner">
+                    <div className="space-y-1">
+                      <Label className="text-[9px] font-black uppercase text-accent tracking-[0.15em] flex items-center gap-2">
+                        <Settings2 className="w-3 h-3" /> Category Management Hub
+                      </Label>
+                      <p className="text-[8px] text-slate-400 font-bold uppercase leading-tight">Define or modify custom institutional expenditure categories.</p>
+                    </div>
+                    
+                    <div className="flex gap-2">
+                       <Input 
+                        placeholder={editingCategoryIndex !== null ? "Modify label..." : "New category name..."} 
+                        value={editingCategoryIndex !== null ? editingCategoryValue : newCategoryLabel} 
+                        onChange={e => editingCategoryIndex !== null ? setEditingCategoryValue(e.target.value) : setNewCategoryLabel(e.target.value)}
+                        className="h-9 text-xs rounded-xl bg-white dark:bg-slate-950"
+                        onKeyDown={e => e.key === 'Enter' && (editingCategoryIndex !== null ? handleUpdateCategory() : handleAddCategory())}
+                       />
+                       {editingCategoryIndex !== null ? (
+                         <div className="flex gap-1 shrink-0">
+                           <Button onClick={handleUpdateCategory} size="sm" className="h-9 px-3 rounded-xl bg-emerald-500 text-white hover:bg-emerald-600"><Check className="w-4 h-4"/></Button>
+                           <Button onClick={() => { setEditingCategoryIndex(null); setEditingCategoryValue(''); }} size="sm" variant="ghost" className="h-9 px-3 rounded-xl"><X className="w-4 h-4"/></Button>
+                         </div>
+                       ) : (
+                         <Button onClick={handleAddCategory} size="sm" className="h-9 px-4 rounded-xl bg-accent text-primary font-bold shadow-sm" disabled={!newCategoryLabel.trim()}>
+                           <Plus className="w-4 h-4" />
+                         </Button>
+                       )}
+                    </div>
+
+                    <div className="flex flex-wrap gap-2 pt-1">
+                       {((settingsData as any)?.customCategories || []).map((cat: string, idx: number) => (
+                         <Badge key={idx} variant="outline" className="text-[9px] font-bold px-3 py-1 flex items-center gap-2 border-slate-200 bg-white dark:bg-slate-800 group h-8 rounded-xl shadow-sm transition-all hover:border-accent">
+                           <span className={cn(editingCategoryIndex === idx && "text-accent")}>{cat}</span>
+                           <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <button onClick={(e) => { e.preventDefault(); setEditingCategoryIndex(idx); setEditingCategoryValue(cat); }} className="hover:text-blue-500"><Edit className="w-3 h-3"/></button>
+                              <button onClick={(e) => { e.preventDefault(); handleDeleteCategory(idx); }} className="hover:text-red-500"><X className="w-3 h-3"/></button>
+                           </div>
+                         </Badge>
+                       ))}
+                       {(!settingsData || !((settingsData as any)?.customCategories?.length)) && (
+                         <p className="text-[8px] text-slate-400 font-bold uppercase italic px-2">No custom categories established.</p>
+                       )}
+                    </div>
+                 </div>
                </div>
-               <DialogFooter><Button onClick={handleAddExpense} disabled={isActionLoading} className="w-full h-11 rounded-xl bg-red-600 mt-4 text-white hover:bg-red-700 font-bold transition-all">{isActionLoading ? <Loader2 className="animate-spin" /> : "Commit to Global Ledger"}</Button></DialogFooter>
+
+               <DialogFooter>
+                 <Button onClick={handleAddExpense} disabled={isActionLoading} className="w-full h-14 rounded-2xl bg-red-600 text-white hover:bg-red-700 font-bold text-lg shadow-xl shadow-red-600/20 transition-all">
+                   {isActionLoading ? <Loader2 className="animate-spin" /> : "Commit to Global Ledger"}
+                 </Button>
+               </DialogFooter>
             </DialogContent>
           </Dialog>
         </div>
       </header>
 
-      <section className="py-6 bg-white dark:bg-slate-900 border-b sticky top-10 z-30 shadow-sm">
+      <section className="py-6 bg-white dark:bg-slate-900 border-b sticky top-10 z-30 shadow-sm transition-colors">
         <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex gap-2">
             <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-              <SelectTrigger className="w-40"><SelectValue placeholder="Category" /></SelectTrigger>
-              <SelectContent position="popper" className="z-[1000001] bg-white"><SelectItem value="All">All Categories</SelectItem>{expenseCategories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+              <SelectTrigger className="w-48 h-11 rounded-xl bg-slate-50 dark:bg-slate-950 border-none shadow-sm"><SelectValue placeholder="Category" /></SelectTrigger>
+              <SelectContent position="popper" className="z-[1000001] bg-white max-h-60">
+                <SelectItem value="All">All Categories</SelectItem>
+                {expenseCategories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+              </SelectContent>
             </Select>
-            <Button variant="ghost" onClick={() => { setSearch(''); setCategoryFilter('All'); }} className="hover:bg-slate-100"><FilterX className="w-4 h-4" /></Button>
+            <Button variant="ghost" onClick={() => { setSearch(''); setCategoryFilter('All'); }} className="h-11 w-11 rounded-xl hover:bg-slate-100"><FilterX className="w-5 h-5 text-slate-400" /></Button>
           </div>
-          <div className="relative w-full max-w-xs">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <Input placeholder="Search records..." className="pl-9" value={search} onChange={(e) => setSearch(e.target.value)} />
+          <div className="relative w-full max-w-md">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Input placeholder="Search records, payees or titles..." className="pl-10 h-11 rounded-xl border-slate-100 bg-slate-50 dark:bg-slate-950 text-sm" value={search} onChange={(e) => setSearch(e.target.value)} />
           </div>
         </div>
       </section>
 
       <section className="py-8">
         <div className="container mx-auto px-4">
-          <div className="grid gap-4">
+          <div className="grid gap-4 max-w-5xl mx-auto">
             {filtered.map((expense: any) => (
-              <Card key={expense.id} className="border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900 rounded-2xl border border-slate-100">
+              <Card key={expense.id} className="border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 group hover:shadow-xl transition-all duration-300">
                 <CardContent className="p-0">
                   <div className="flex flex-col md:flex-row items-stretch">
-                    <div className="p-5 bg-slate-50 dark:bg-slate-800 md:w-44 text-center border-r border-slate-100 flex flex-col items-center justify-center shrink-0">
+                    <div className={cn("p-6 md:w-48 text-center border-r border-slate-100 dark:border-slate-700 flex flex-col items-center justify-center shrink-0 bg-slate-50 dark:bg-slate-800/50")}>
                        <p className="text-2xl font-headline font-bold text-primary dark:text-white leading-none mb-2">₹{expense.amount?.toLocaleString()}</p>
-                       <Badge className="text-[8px] font-bold px-2 py-0.5 uppercase bg-emerald-500 text-white">Live Sync</Badge>
+                       <Badge className="text-[8px] font-black px-2.5 py-0.5 uppercase bg-emerald-500 text-white tracking-widest border-none">Live Sync</Badge>
+                       <p className="text-[8px] font-bold text-slate-400 uppercase mt-3 tracking-widest">{expense.date}</p>
                     </div>
-                    <div className="flex-1 p-5 flex items-center justify-between">
-                      <div>
-                           <h3 className="text-lg font-bold text-primary dark:text-white leading-tight">{expense.title}</h3>
-                           <p className="text-[10px] font-bold text-slate-500 uppercase">{expense.payee} • {expense.category}</p>
+                    <div className="flex-1 p-6 flex flex-col md:flex-row items-center justify-between gap-6">
+                      <div className="space-y-1 text-center md:text-left flex-1">
+                           <h3 className="text-xl font-bold text-primary dark:text-white leading-tight">{expense.title}</h3>
+                           <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-2">
+                             <span className="flex items-center gap-1.5"><TrendingDown className="w-3 h-3 text-red-500" /> {expense.payee}</span>
+                             <span className="flex items-center gap-1.5"><ShieldCheck className="w-3 h-3 text-accent" /> {expense.category}</span>
+                             <span className="flex items-center gap-1.5"><Settings2 className="w-3 h-3 text-blue-500" /> {expense.paymentMethod}</span>
+                           </div>
                       </div>
                       <div className="flex gap-2">
-                         <Button variant="ghost" size="sm" onClick={() => handleDelete(expense.id)} className="h-8 w-8 text-slate-300 hover:text-red-500 transition-colors"><Trash2 className="w-3.5 h-3.5" /></Button>
+                         <Button variant="ghost" size="icon" onClick={() => handleDelete(expense.id)} className="h-10 w-10 text-slate-300 hover:text-red-500 hover:bg-red-50 transition-all rounded-xl"><Trash2 className="w-4.5 h-4.5" /></Button>
                       </div>
                     </div>
                   </div>
                 </CardContent>
               </Card>
             ))}
+            {filtered.length === 0 && (
+              <div className="text-center py-32 bg-white dark:bg-slate-900 rounded-[3rem] border-4 border-dashed border-slate-100 dark:border-slate-800 opacity-40">
+                 <TrendingDown className="w-16 h-16 text-slate-300 mx-auto mb-4" />
+                 <p className="text-sm font-bold uppercase tracking-widest text-slate-400">No matching expense records identified</p>
+              </div>
+            )}
           </div>
         </div>
       </section>
