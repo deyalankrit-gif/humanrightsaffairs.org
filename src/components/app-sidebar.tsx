@@ -51,7 +51,8 @@ import {
   FileSpreadsheet,
   HardDrive,
   Building,
-  ClipboardList
+  ClipboardList,
+  Newspaper
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -81,6 +82,7 @@ const topAnalyticsLinksConfig = [
 const adminLinksConfig = [
   { name: 'Applications', href: '/internal/applications', icon: FileText, permission: 'applications' },
   { name: 'Public Complaints', href: '/internal/public-complaints', icon: ShieldQuestion, permission: 'publicComplaints' },
+  { name: 'Current News', href: '/internal/current-news', icon: Newspaper, permission: 'occasions' },
   { name: 'Kit Management', href: '/internal/kit-management', icon: Archive, permission: 'kitManagement' },
   { name: 'Members', href: '/internal/members', icon: Users, permission: 'members' },
   { name: 'Renewals', href: '/internal/renewals', icon: RefreshCw, permission: 'renewals' },

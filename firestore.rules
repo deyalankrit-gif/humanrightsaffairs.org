@@ -42,6 +42,11 @@ service cloud.firestore {
       allow read: if true;
       allow write: if hasPermission('occasions');
     }
+
+    match /current_news/{newsId} {
+      allow read: if true;
+      allow write: if hasPermission('occasions');
+    }
     
     match /donor_tiers/{tierId} {
       allow read: if true;

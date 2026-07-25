@@ -51,6 +51,18 @@
       },
       "required": ["email", "permissions", "uid", "role"]
     },
+    "CurrentNews": {
+      "title": "Current News",
+      "description": "Daily news broadcast for the homepage display area.",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "content": { "type": "string" },
+        "isActive": { "type": "boolean" },
+        "priority": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      }
+    },
     "FinancialVoucher": {
       "title": "Financial Voucher",
       "description": "Comprehensive institutional instrument for financial movements.",
@@ -160,6 +172,7 @@
   },
   "firestore": {
     "/users/{userEmail}": { "schema": "UserAccount", "description": "Permissions registry." },
+    "/current_news/{newsId}": { "schema": "CurrentNews", "description": "Homepage news broadcast." },
     "/finance_transactions/{txId}": { "schema": "FinancialTransaction" },
     "/finance_vms_vouchers/{vId}": { "schema": "FinancialVoucher" },
     "/finance_projects/{projectId}": { "schema": "FinancialProject" },

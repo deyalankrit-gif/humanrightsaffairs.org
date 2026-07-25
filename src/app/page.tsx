@@ -16,6 +16,7 @@ import { DonationDialog } from '@/components/donation-dialog'
 import { Typewriter } from '@/components/typewriter'
 import { PlaceHolderImages } from '@/lib/placeholder-images'
 import { RazorpayDonation } from '@/components/razorpay-donation'
+import { CurrentNews } from '@/components/current-news'
 
 function BackgroundDecor() {
   return (
@@ -81,16 +82,22 @@ export default function Home() {
           <div className="absolute inset-0 bg-gradient-to-b from-primary/40 via-primary/20 to-primary/60 dark:from-slate-950/70 dark:via-slate-950/50 dark:to-slate-950/80"></div>
         </div>
 
-        {/* Institutional Branding - Aligned Left */}
-        <div className="absolute top-8 left-8 z-20 hidden xl:flex items-center gap-6 animate-in fade-in slide-in-from-left-4 duration-1000">
-          <div className="relative w-24 h-24 transition-transform hover:scale-105">
-            <Image src="/HRAT%20Logo.jpeg" alt="HRAT Official Institutional Logo" fill className="object-contain" />
+        {/* Institutional Sidebar (Logo + News) */}
+        <div className="absolute top-8 left-8 z-20 hidden xl:flex flex-col gap-10">
+          {/* Logo Section */}
+          <div className="flex items-center gap-6 animate-in fade-in slide-in-from-left-4 duration-1000">
+            <div className="relative w-24 h-24 transition-transform hover:scale-105">
+              <Image src="/HRAT%20Logo.jpeg" alt="HRAT Official Institutional Logo" fill className="object-contain" />
+            </div>
+            <div className="flex flex-col text-white">
+              <span className="font-headline font-bold text-3xl leading-none tracking-tight">HRAT</span>
+              <span className="text-[10px] font-bold text-accent uppercase tracking-[0.3em]">Justice Shield</span>
+              <span className="text-[12px] font-bold text-white mt-1 border-t border-white/10 pt-1">মানবাধিকার সংগঠন</span>
+            </div>
           </div>
-          <div className="flex flex-col text-white">
-            <span className="font-headline font-bold text-3xl leading-none tracking-tight">HRAT</span>
-            <span className="text-[10px] font-bold text-accent uppercase tracking-[0.3em]">Justice Shield</span>
-            <span className="text-[12px] font-bold text-white mt-1 border-t border-white/10 pt-1">মানবাধিকার সংগঠন</span>
-          </div>
+
+          {/* Current News Node */}
+          <CurrentNews />
         </div>
 
         <div className="container mx-auto px-0 md:px-4 relative z-10 text-white text-center">
@@ -155,7 +162,7 @@ export default function Home() {
                   <div className="flex flex-col items-center gap-1.5 md:gap-3 text-white hover:opacity-80 transition-opacity cursor-default justify-center" key={i}>
                     <div className="p-1.5 md:p-3 bg-white/5 rounded-lg md:rounded-xl shrink-0">{stat.icon}</div>
                     <div className="space-y-0 text-center">
-                      <p className="text-[10px] md:text-sm font-bold font-headline leading-none">{stat.count}</p>
+                      <p className="text-[10px] md:sm font-bold font-headline leading-none">{stat.count}</p>
                       <p className="text-[6px] md:text-[8px] font-bold uppercase tracking-[0.1em] text-slate-400 leading-tight">
                         {stat.label}
                       </p>
