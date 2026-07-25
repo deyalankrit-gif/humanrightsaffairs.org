@@ -19,7 +19,11 @@ import {
   IndianRupee, 
   User, 
   Building,
-  Calendar as CalendarIcon
+  Calendar as CalendarIcon,
+  CreditCard,
+  Building2,
+  Hash,
+  Fingerprint
 } from 'lucide-react'
 import {
   Popover,
@@ -39,7 +43,7 @@ import { cn } from '@/lib/utils'
 /**
  * NewVoucherPage: Terminal for generating official financial instruments.
  * Features: Real-time amount-to-words conversion, auto-ID generation, and ledger sync.
- * Updated: Included dual-mode date entry (Manual/Calendar) in the Fiscal Mechanics section.
+ * Updated: Included dynamic fields for Bank, UPI, Cheque, and Card details.
  */
 export default function NewVoucherPage() {
   const { user, loading: authLoading } = useUser()
@@ -69,6 +73,7 @@ export default function NewVoucherPage() {
     accountNo: '',
     utr: '',
     chequeNo: '',
+    cardLast4: '',
     narration: ''
   })
 
@@ -267,6 +272,77 @@ export default function NewVoucherPage() {
                      </SelectContent>
                    </Select>
                  </div>
+              </div>
+
+              {/* Conditional Payment Detail Fields */}
+              <div className="pt-6 border-t border-slate-100 dark:border-slate-800 animate-in fade-in slide-in-from-top-2 duration-500">
+                {formData.paymentMethod === 'Bank Transfer' && (
+                  <div className="grid md:grid-cols-3 gap-6">
+                    <div className="space-y-1.5">
+                      <Label className="text-[10px] font-bold uppercase text-emerald-600 flex items-center gap-2">
+                        <Building2 className="w-3 h-3" /> Remitting Bank Name
+                      </Label>
+                      <Input value={formData.bankName} onChange={e => setFormData({...formData, bankName: e.target.value})} placeholder="e.g. State Bank of India" className="h-10 rounded-xl" />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-[10px] font-bold uppercase text-emerald-600 flex items-center gap-2">
+                        <Hash className="w-3 h-3" /> Account Number
+                      </Label>
+                      <Input value={formData.accountNo} onChange={e => setFormData({...formData, accountNo: e.target.value})} placeholder="Account digits" className="h-10 rounded-xl font-mono" />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-[10px] font-bold uppercase text-emerald-600 flex items-center gap-2">
+                        <Fingerprint className="w-3 h-3" /> UTR / Transaction ID
+                      </Label>
+                      <Input value={formData.utr} onChange={e => setFormData({...formData, utr: e.target.value})} placeholder="Ref Number" className="h-10 rounded-xl font-mono" />
+                    </div>
+                  </div>
+                )}
+
+                {formData.paymentMethod === 'UPI' && (
+                  <div className="grid md:grid-cols-1 max-w-md">
+                    <div className="space-y-1.5">
+                      <Label className="text-[10px] font-bold uppercase text-emerald-600 flex items-center gap-2">
+                        <Fingerprint className="w-3 h-3" /> UPI Transaction Reference (UTR)
+                      </Label>
+                      <Input value={formData.utr} onChange={e => setFormData({...formData, utr: e.target.value})} placeholder="e.g. 325412987456" className="h-10 rounded-xl font-mono" />
+                    </div>
+                  </div>
+                )}
+
+                {formData.paymentMethod === 'Cheque' && (
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div className="space-y-1.5">
+                      <Label className="text-[10px] font-bold uppercase text-emerald-600 flex items-center gap-2">
+                        <Building2 className="w-3 h-3" /> Drawee Bank Name
+                      </Label>
+                      <Input value={formData.bankName} onChange={e => setFormData({...formData, bankName: e.target.value})} placeholder="e.g. HDFC Bank" className="h-10 rounded-xl" />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-[10px] font-bold uppercase text-emerald-600 flex items-center gap-2">
+                        <Hash className="w-3 h-3" /> Cheque Number
+                      </Label>
+                      <Input value={formData.chequeNo} onChange={e => setFormData({...formData, chequeNo: e.target.value})} placeholder="6-digit number" maxLength={6} className="h-10 rounded-xl font-mono" />
+                    </div>
+                  </div>
+                )}
+
+                {formData.paymentMethod === 'Card' && (
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div className="space-y-1.5">
+                      <Label className="text-[10px] font-bold uppercase text-emerald-600 flex items-center gap-2">
+                        <CreditCard className="w-3 h-3" /> Card Last 4 Digits
+                      </Label>
+                      <Input value={formData.cardLast4} onChange={e => setFormData({...formData, cardLast4: e.target.value})} placeholder="XXXX" maxLength={4} className="h-10 rounded-xl font-mono" />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-[10px] font-bold uppercase text-emerald-600 flex items-center gap-2">
+                        <Fingerprint className="w-3 h-3" /> Terminal Approval Code / Ref
+                      </Label>
+                      <Input value={formData.utr} onChange={e => setFormData({...formData, utr: e.target.value})} placeholder="Auth Ref" className="h-10 rounded-xl font-mono" />
+                    </div>
+                  </div>
+                )}
               </div>
               
               <div className="space-y-1.5">
