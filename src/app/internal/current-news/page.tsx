@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useUser, useCollection, useFirestore, useMemoFirebase, useDoc } from '@/firebase';
 import { collection, query, where, addDoc, deleteDoc, doc, updateDoc, serverTimestamp, writeBatch } from 'firebase/firestore';
 import { Footer } from '@/components/footer';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -34,7 +34,11 @@ import {
   AlertTriangle,
   TrendingUp,
   Link as LinkIcon,
-  Calendar
+  Calendar,
+  Sparkles,
+  CheckCircle2,
+  BrainCircuit,
+  Eye
 } from 'lucide-react';
 import {
   Dialog,
@@ -63,6 +67,10 @@ export default function InternalNewsManagement() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editNews, setEditNews] = useState<any>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  
+  // AI Selection States
+  const [aiSuggestions, setAiSuggestions] = useState<any[]>([]);
+  const [isViewingSuggestions, setIsViewingSuggestions] = useState(false);
 
   const [newNews, setNewNews] = useState({
     title: '',
@@ -113,44 +121,53 @@ export default function InternalNewsManagement() {
       });
   }, [newsItems, search]);
 
-  const handleSync = async () => {
-    if (!db) return;
+  const handleFetchAiSuggestions = async () => {
     setIsSyncing(true);
     try {
-      const output = await syncNews({ context: `Manual priority sync at ${new Date().toISOString()}` });
-      const batch = writeBatch(db);
-      
-      // Deactivate old news
-      if (newsItems) {
-        newsItems.forEach(item => {
-          if (item.isActive) {
-            batch.update(doc(db, 'current_news', item.id), { isActive: false });
-          }
-        });
+      const output = await syncNews({ context: `Manual selection request at ${new Date().toISOString()}` });
+      if (output && output.news) {
+        setAiSuggestions(output.news);
+        setIsViewingSuggestions(true);
+        toast({ title: "Intelligence Fetched", description: `${output.news.length} AI suggestions are ready for review.` });
       }
-
-      output.news.forEach(item => {
-        const ref = doc(collection(db, 'current_news'));
-        batch.set(ref, {
-          ...item,
-          isActive: true,
-          priority: 1,
-          createdAt: serverTimestamp()
-        });
-      });
-
-      batch.set(doc(db, 'current_news_state', 'registry'), {
-        lastSyncAt: serverTimestamp(),
-        status: 'Success',
-        updatedBy: user?.email
-      }, { merge: true });
-
-      await batch.commit();
-      toast({ title: "Intelligence Sync Success", description: "Priority feed has been updated across the network." });
     } catch (e: any) {
-      toast({ variant: "destructive", title: "Sync Failed", description: e.message });
+      toast({ variant: "destructive", title: "Sync Failed", description: "Could not reach national news servers." });
     } finally {
       setIsSyncing(false);
+    }
+  };
+
+  const publishSuggestion = async (suggestion: any) => {
+    if (!db) return;
+    setIsActionLoading(true);
+    try {
+      const newsData = {
+        ...suggestion,
+        isActive: true,
+        priority: 1,
+        createdAt: serverTimestamp(),
+        publishedBy: user?.email,
+        isAiGenerated: true
+      };
+
+      await addDoc(collection(db, 'current_news'), newsData);
+      
+      // Update Registry Meta
+      await updateDoc(doc(db, 'current_news_state', 'registry'), {
+        lastSyncAt: serverTimestamp(),
+        updatedBy: user?.email
+      });
+
+      setAiSuggestions(prev => prev.filter(s => s.url !== suggestion.url));
+      toast({ title: "Broadcast Published", description: "AI intelligence has been committed to the live feed." });
+      
+      if (aiSuggestions.length <= 1) {
+        setIsViewingSuggestions(false);
+      }
+    } catch (e) {
+      toast({ variant: "destructive", title: "Publication Failed" });
+    } finally {
+      setIsActionLoading(false);
     }
   };
 
@@ -162,7 +179,7 @@ export default function InternalNewsManagement() {
     }
     
     setIsActionLoading(true);
-    addDoc(collection(db, 'current_news'), { ...newNews, createdAt: serverTimestamp() })
+    addDoc(collection(db, 'current_news'), { ...newNews, createdAt: serverTimestamp(), publishedBy: user?.email })
       .then(() => {
         toast({ title: "News Broadcasted", description: "Manual entry committed to registry." });
         setIsAddDialogOpen(false);
@@ -197,7 +214,7 @@ export default function InternalNewsManagement() {
     return <div className="min-h-screen flex items-center justify-center bg-slate-950"><Loader2 className="w-10 h-10 animate-spin text-accent" /></div>;
   }
 
-  const getScopeBadge = (scope: string, priority: number) => {
+  const getScopeBadge = (scope: string) => {
     switch (scope) {
       case 'West Bengal': return "bg-emerald-500 text-white";
       case 'India': return "bg-blue-600 text-white";
@@ -211,32 +228,31 @@ export default function InternalNewsManagement() {
       <section className="pt-16 pb-8 bg-slate-900 text-white border-b-8 border-accent/20 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-1/3 h-full bg-accent/5 -skew-x-12"></div>
         <div className="container mx-auto px-4 relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="space-y-1">
+          <div className="space-y-1 text-center md:text-left">
             <div className="inline-flex items-center gap-2 bg-emerald-500/20 text-emerald-400 px-3 py-1 rounded-full text-[9px] font-bold uppercase border border-emerald-500/30 tracking-[0.2em]">
               <TrendingUp className="w-2.5 h-2.5 animate-pulse" /> Global Intelligence Terminal
             </div>
             <h1 className="text-3xl md:text-4xl font-headline font-bold">News <span className="text-accent italic">Governance</span></h1>
-            <div className="flex items-center gap-4 text-[10px] font-black text-slate-400 uppercase">
+            <div className="flex items-center justify-center md:justify-start gap-4 text-[10px] font-black text-slate-400 uppercase">
                <span className="flex items-center gap-1.5"><Clock className="w-3 h-3 text-accent" /> Last Sync: {meta?.lastSyncAt?.toDate ? format(meta.lastSyncAt.toDate(), 'hh:mm a') : 'Never'}</span>
                <span className="flex items-center gap-1.5"><ShieldCheck className="w-3 h-3 text-emerald-500" /> Automatic refresh active (6h)</span>
             </div>
           </div>
           
-          <div className="flex gap-3">
+          <div className="flex flex-wrap justify-center gap-3">
              <Button 
-              onClick={handleSync} 
+              onClick={handleFetchAiSuggestions} 
               disabled={isSyncing}
-              variant="outline"
-              className="bg-white/5 border-white/10 text-white font-bold h-11 px-6 rounded-xl hover:bg-white/10"
+              className="bg-primary text-white hover:bg-secondary h-11 px-6 rounded-xl font-bold gap-2 shadow-xl shadow-primary/20 border border-white/10"
              >
-                {isSyncing ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <RefreshCw className="w-4 h-4 mr-2" />}
-                Force Priority Sync
+                {isSyncing ? <Loader2 className="w-4 h-4 animate-spin" /> : <BrainCircuit className="w-4 h-4 text-accent" />}
+                Fetch AI Suggestions
              </Button>
              
              <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                 <DialogTrigger asChild>
                   <Button className="bg-accent text-primary font-bold rounded-xl h-11 px-8 flex gap-2 shadow-xl shadow-accent/20 hover:bg-secondary hover:text-white transition-all">
-                    <Plus className="w-4 h-4" /> Create Broadcast
+                    <Plus className="w-4 h-4" /> Create Manual Entry
                   </Button>
                 </DialogTrigger>
                 <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="max-w-2xl rounded-[2.5rem] border-none shadow-2xl [&>button]:hidden">
@@ -300,6 +316,69 @@ export default function InternalNewsManagement() {
         </div>
       </section>
 
+      {/* AI Suggestions View (Active Options for Selection) */}
+      <Dialog open={isViewingSuggestions} onOpenChange={setIsViewingSuggestions}>
+         <DialogContent className="max-w-4xl rounded-[3rem] border-none shadow-2xl p-0 overflow-hidden bg-slate-50 dark:bg-slate-950 flex flex-col h-[85vh]">
+            <CardHeader className="bg-primary p-8 text-white border-b-4 border-accent/20 shrink-0">
+               <div className="flex items-center justify-between mb-2">
+                 <div className="flex items-center gap-2">
+                   <BrainCircuit className="w-6 h-6 text-accent animate-pulse" />
+                   <Badge className="bg-accent text-primary font-black uppercase text-[10px] tracking-widest">AI Intelligence Queue</Badge>
+                 </div>
+                 <button onClick={() => setIsViewingSuggestions(false)} className="text-white/40 hover:text-white transition-colors"><X className="w-6 h-6" /></button>
+               </div>
+               <CardTitle className="text-3xl font-headline font-bold">AI News <span className="text-accent italic">Selection</span></CardTitle>
+               <CardDescription className="text-white/60 font-medium">Review and selectively publish identified human rights intelligence from across the internet.</CardDescription>
+            </CardHeader>
+            <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
+               <div className="grid gap-6">
+                  {aiSuggestions.map((suggestion, idx) => (
+                    <Card key={idx} className="border-none shadow-sm rounded-[2rem] overflow-hidden bg-white dark:bg-slate-900 group">
+                       <CardContent className="p-0">
+                          <div className="flex flex-col md:flex-row items-stretch">
+                             <div className="p-6 md:w-40 text-center border-r border-slate-100 flex flex-col items-center justify-center shrink-0 bg-slate-50 dark:bg-slate-800/50">
+                                <Badge className={cn("text-[8px] font-black uppercase px-2 py-1 mb-2", getScopeBadge(suggestion.scope))}>
+                                  {suggestion.scope}
+                                </Badge>
+                                <span className="text-[7px] font-black text-slate-400 uppercase tracking-[0.2em]">Rank: {suggestion.scopePriority}</span>
+                             </div>
+                             <div className="flex-1 p-6 space-y-4">
+                                <div className="space-y-1">
+                                   <div className="flex items-center gap-3 text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                                      <span className="flex items-center gap-1.5"><Clock className="w-3 h-3 text-accent" /> {suggestion.publishedAt}</span>
+                                      <span className="flex items-center gap-1.5"><Globe className="w-3 h-3 text-accent" /> {suggestion.source}</span>
+                                   </div>
+                                   <h4 className="text-xl font-bold text-primary dark:text-white leading-tight">{suggestion.title}</h4>
+                                </div>
+                                <div className="p-4 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-100 italic text-xs text-slate-600 leading-relaxed">
+                                   "{suggestion.content}"
+                                </div>
+                                <div className="flex items-center justify-between gap-4">
+                                   <a href={suggestion.url} target="_blank" rel="noopener noreferrer" className="text-[9px] font-black text-blue-500 uppercase flex items-center gap-1 hover:underline">
+                                      <LinkIcon className="w-3 h-3" /> Examine Source
+                                   </a>
+                                   <div className="flex gap-2">
+                                      <Button variant="ghost" onClick={() => setAiSuggestions(prev => prev.filter((_, i) => i !== idx))} className="h-9 px-4 rounded-xl text-slate-400 hover:text-red-500 font-bold text-[10px] uppercase">Discard</Button>
+                                      <Button onClick={() => publishSuggestion(suggestion)} disabled={isActionLoading} className="h-9 px-6 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 font-bold text-[10px] uppercase tracking-widest gap-2">
+                                         {isActionLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle2 className="w-3 h-3" />}
+                                         Publish Now
+                                      </Button>
+                                   </div>
+                                </div>
+                             </div>
+                          </div>
+                       </CardContent>
+                    </Card>
+                  ))}
+               </div>
+            </div>
+            <div className="p-6 bg-white dark:bg-slate-900 border-t flex justify-between items-center shrink-0">
+               <p className="text-[10px] font-black uppercase text-slate-400">{aiSuggestions.length} Suggestions Pending</p>
+               <Button variant="outline" onClick={() => setIsViewingSuggestions(false)} className="rounded-xl h-9 px-8 font-bold text-[10px] uppercase">Review Later</Button>
+            </div>
+         </DialogContent>
+      </Dialog>
+
       <section className="py-6 border-b bg-white dark:bg-slate-900 sticky top-10 z-30 shadow-sm transition-colors">
         <div className="container mx-auto px-4">
           <div className="relative max-w-lg mx-auto">
@@ -320,13 +399,18 @@ export default function InternalNewsManagement() {
                   <CardContent className="p-0">
                     <div className="flex flex-col md:flex-row items-stretch">
                       <div className={cn("p-6 md:w-48 text-center border-r border-slate-100 dark:border-slate-800 flex flex-col items-center justify-center shrink-0 bg-slate-50 dark:bg-slate-800/50")}>
-                         <Badge className={cn("text-[9px] font-black px-3 py-1 uppercase border-none mb-3", getScopeBadge(n.scope, n.scopePriority))}>
+                         <Badge className={cn("text-[9px] font-black px-3 py-1 uppercase border-none mb-3", getScopeBadge(n.scope))}>
                            {n.scope}
                          </Badge>
                          <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
                            <Clock className="w-2.5 h-2.5" /> Priority: {n.scopePriority}
                          </p>
-                         {!n.isActive && <Badge variant="destructive" className="mt-2 text-[8px] font-black">INACTIVE</Badge>}
+                         {n.isAiGenerated && (
+                           <div className="mt-3 flex items-center gap-1 text-[8px] font-black text-accent uppercase tracking-widest bg-accent/10 px-2 py-0.5 rounded-full">
+                              <Sparkles className="w-2.5 h-2.5" /> AI Sourced
+                           </div>
+                         )}
+                         {!n.isActive && <Badge variant="destructive" className="mt-2 text-[8px] font-black">TERMINATED</Badge>}
                       </div>
                       <div className="flex-1 p-8">
                         <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
@@ -339,15 +423,18 @@ export default function InternalNewsManagement() {
                               <div className="p-5 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-100 dark:border-slate-800 italic text-sm line-clamp-[10] whitespace-pre-line text-slate-600 dark:text-slate-400">
                                 "{n.content}"
                               </div>
-                              {n.url && (
-                                <a href={n.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-[10px] font-bold text-blue-500 hover:underline">
-                                   <LinkIcon className="w-3 h-3" /> Original Article Source
-                                </a>
-                              )}
+                              <div className="flex items-center justify-between">
+                                 {n.url && (
+                                   <a href={n.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-[10px] font-bold text-blue-500 hover:underline">
+                                      <LinkIcon className="w-3 h-3" /> Original Article Source
+                                   </a>
+                                 )}
+                                 <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest italic">Author: {n.publishedBy || 'System'}</span>
+                              </div>
                            </div>
                            <div className="flex items-center gap-2 shrink-0">
-                              <Button variant="outline" size="sm" onClick={() => { setEditNews(n); setIsEditDialogOpen(true); }} className="h-10 px-5 rounded-xl text-[10px] font-bold border-slate-200">Modify</Button>
-                              <Button variant="ghost" size="icon" onClick={() => handleDelete(n.id)} className="h-10 w-10 text-slate-300 hover:text-red-500 rounded-xl transition-all"><Trash2 className="w-4.5 h-4.5" /></Button>
+                              <Button variant="outline" size="sm" onClick={() => { setEditNews(n); setIsEditDialogOpen(true); }} className="h-10 px-5 rounded-xl text-[10px] font-bold border-slate-200 hover:bg-accent hover:text-primary transition-all">Modify</Button>
+                              <Button variant="ghost" size="icon" onClick={() => handleDelete(n.id)} className="h-10 w-10 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"><Trash2 className="w-4.5 h-4.5" /></Button>
                            </div>
                         </div>
                       </div>
@@ -403,7 +490,7 @@ export default function InternalNewsManagement() {
                     <Label className="font-bold uppercase text-[10px] tracking-widest">Active Broadcast</Label>
                     <Switch checked={editNews.isActive} onCheckedChange={val => setEditNews({...editNews, isActive: val})} />
                 </div>
-                <Button onClick={handleUpdate} disabled={isActionLoading} className="w-full h-14 bg-primary text-white font-bold rounded-2xl shadow-2xl mt-4">Commit Profile Refresh</Button>
+                <Button onClick={handleUpdate} disabled={isActionLoading} className="w-full h-14 bg-primary text-white font-bold rounded-2xl shadow-2xl mt-4 hover:bg-secondary transition-all">Commit Profile Refresh</Button>
             </div>
           )}
         </DialogContent>
@@ -413,3 +500,4 @@ export default function InternalNewsManagement() {
     </main>
   );
 }
+
