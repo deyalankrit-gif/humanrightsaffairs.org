@@ -25,8 +25,21 @@ import {
   ArrowDownRight, 
   Tag, 
   ShieldCheck,
-  Wallet
+  Wallet,
+  X,
+  User,
+  Hash,
+  Clock,
+  CheckCircle2
 } from 'lucide-react'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogClose,
+} from "@/components/ui/dialog"
 import { cn } from '@/lib/utils'
 import { useToast } from '@/hooks/use-toast'
 
@@ -37,6 +50,7 @@ export default function FinanceLedger() {
   const { toast } = useToast()
   const [search, setSearch] = useState('')
   const [filterType, setFilterType] = useState('All')
+  const [selectedTx, setSelectedTx] = useState<any>(null)
 
   // Real-time synchronization for the transaction registry
   const txQuery = useMemoFirebase(() => {
@@ -165,7 +179,12 @@ export default function FinanceLedger() {
                              </div>
                           </div>
                           <div className="flex items-center gap-2 print:hidden">
-                             <Button variant="outline" size="sm" className="h-9 rounded-xl text-[10px] font-bold px-5 border-slate-200 hover:bg-emerald-50">
+                             <Button 
+                              variant="outline" 
+                              size="sm" 
+                              onClick={() => setSelectedTx(tx)}
+                              className="h-9 rounded-xl text-[10px] font-bold px-5 border-slate-200 hover:bg-emerald-50"
+                             >
                                <FileText className="w-3.5 h-3.5 mr-2" /> Examine
                              </Button>
                           </div>
@@ -183,6 +202,117 @@ export default function FinanceLedger() {
            </div>
          )}
       </section>
+
+      {/* Transaction Examination Dialog */}
+      <Dialog open={!!selectedTx} onOpenChange={(open) => !open && setSelectedTx(null)}>
+        <DialogContent className="max-w-xl rounded-[2.5rem] bg-white dark:bg-slate-900 border-none shadow-2xl p-0 overflow-hidden [&>button]:hidden">
+          {selectedTx && (
+            <div className="flex flex-col">
+              <div className={cn("p-8 text-white relative", selectedTx.type === 'Income' ? 'bg-emerald-600' : 'bg-rose-600')}>
+                <div className="absolute right-6 top-6">
+                  <DialogClose asChild>
+                    <Button variant="ghost" size="icon" className="rounded-full text-white/40 hover:text-white hover:bg-white/10 h-8 w-8">
+                      <X className="w-5 h-5" />
+                    </Button>
+                  </DialogClose>
+                </div>
+                <div className="flex items-center gap-3 mb-2">
+                   <ShieldCheck className="w-5 h-5 text-white/60" />
+                   <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/80">Audit Investigation Node</span>
+                </div>
+                <DialogTitle className="text-3xl font-headline font-bold mb-2">
+                  {selectedTx.type} Record
+                </DialogTitle>
+                <DialogDescription className="text-white/60 font-bold uppercase tracking-widest text-[10px]">
+                  Ref: {selectedTx.voucherNo}
+                </DialogDescription>
+              </div>
+
+              <div className="p-8 space-y-8">
+                 <div className="grid grid-cols-2 gap-4">
+                    <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-800">
+                       <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Transaction Value</p>
+                       <p className={cn("text-2xl font-headline font-bold", selectedTx.type === 'Income' ? 'text-emerald-600' : 'text-rose-600')}>
+                         ₹{selectedTx.amount.toLocaleString()}
+                       </p>
+                    </div>
+                    <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-800">
+                       <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Payment Method</p>
+                       <div className="flex items-center gap-2">
+                          <Wallet className="w-4 h-4 text-accent" />
+                          <p className="text-sm font-bold text-primary dark:text-white">{selectedTx.paymentMethod}</p>
+                       </div>
+                    </div>
+                 </div>
+
+                 <div className="space-y-4">
+                    <div className="flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 pb-2">
+                       <ClipboardList className="w-4 h-4 text-accent" />
+                       <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-500">Particulars & Purpose</h4>
+                    </div>
+                    <p className="text-base font-bold text-primary dark:text-white leading-relaxed">
+                       "{selectedTx.particulars}"
+                    </p>
+                    <div className="flex flex-wrap gap-3 pt-2">
+                       <Badge className="bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 border-none font-bold text-[9px] px-3">
+                         ACCOUNT: {selectedTx.account}
+                       </Badge>
+                       {selectedTx.projectId && (
+                         <Badge className="bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 border-none font-bold text-[9px] px-3">
+                           PROJECT: {selectedTx.projectId}
+                         </Badge>
+                       )}
+                    </div>
+                 </div>
+
+                 <div className="grid grid-cols-2 gap-8 pt-4 border-t border-slate-100 dark:border-slate-800">
+                    <div className="space-y-3">
+                       <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-400"><CalendarIcon className="w-4 h-4" /></div>
+                          <div>
+                             <p className="text-[8px] font-bold text-slate-400 uppercase">Effective Date</p>
+                             <p className="text-xs font-bold">{selectedTx.date}</p>
+                          </div>
+                       </div>
+                       <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-400"><User className="w-4 h-4" /></div>
+                          <div>
+                             <p className="text-[8px] font-bold text-slate-400 uppercase">Recorded By</p>
+                             <p className="text-xs font-bold truncate max-w-[120px]">{selectedTx.createdBy}</p>
+                          </div>
+                       </div>
+                    </div>
+                    <div className="space-y-3">
+                       <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-400"><Hash className="w-4 h-4" /></div>
+                          <div>
+                             <p className="text-[8px] font-bold text-slate-400 uppercase">Reference</p>
+                             <p className="text-xs font-bold truncate max-w-[120px]">{selectedTx.reference || 'None'}</p>
+                          </div>
+                       </div>
+                       <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center text-emerald-500"><CheckCircle2 className="w-4 h-4" /></div>
+                          <div>
+                             <p className="text-[8px] font-bold text-emerald-600 uppercase">Sync Status</p>
+                             <p className="text-xs font-black text-emerald-600 uppercase">Validated</p>
+                          </div>
+                       </div>
+                    </div>
+                 </div>
+
+                 <div className="pt-6">
+                    <Button onClick={() => setSelectedTx(null)} className="w-full h-12 rounded-xl bg-slate-900 text-white font-bold hover:bg-slate-800 transition-all shadow-xl shadow-slate-900/10">
+                       End Review
+                    </Button>
+                    <p className="text-center text-[8px] font-bold text-slate-400 uppercase tracking-[0.3em] mt-4">
+                       Institutional General Ledger Node
+                    </p>
+                 </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       <Footer />
     </main>
