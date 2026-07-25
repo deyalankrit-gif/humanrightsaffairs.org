@@ -1,4 +1,3 @@
-
 'use server';
 /**
  * @fileOverview AI-powered news aggregation flow.
@@ -34,7 +33,7 @@ export async function syncNews(input: SyncNewsInput): Promise<SyncNewsOutput> {
 
 const syncNewsPrompt = ai.definePrompt({
   name: 'syncNewsPrompt',
-  model: 'googleai/gemini-2.0-flash',
+  model: 'googleai/gemini-1.5-flash',
   input: { schema: SyncNewsInputSchema },
   output: { schema: SyncNewsOutputSchema },
   system: `You are an elite news aggregator for a Human Rights Organization.
