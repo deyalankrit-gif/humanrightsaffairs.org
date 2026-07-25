@@ -66,7 +66,7 @@ export function SidebarAudioStation() {
       {/* File Selection Facility */}
       <div className="bg-slate-900/80 rounded-2xl p-5 border border-orange-500/20 space-y-4 shadow-[0_0_30px_rgba(249,115,22,0.05)]">
         <div className="space-y-1.5">
-          <p className="text-[10px] font-black text-orange-500 uppercase tracking-[0.25em] drop-shadow-sm">Broadcast Node</p>
+          <p className="text-[10px] font-black text-white uppercase tracking-[0.25em] drop-shadow-sm">Broadcast Node</p>
           <p className="text-[9px] text-slate-400 font-bold leading-relaxed italic opacity-80">
             Select local MP3 assets for institutional queue.
           </p>
@@ -86,7 +86,7 @@ export function SidebarAudioStation() {
               )} />
               <p className={cn(
                 "text-[11px] font-black text-center uppercase tracking-widest leading-tight transition-colors",
-                selectedFile ? "text-orange-400" : "text-white"
+                selectedFile ? "text-white" : "text-white/60"
               )}>
                 {selectedFile ? selectedFile.name : "Select MP3 File"}
               </p>
@@ -112,7 +112,7 @@ export function SidebarAudioStation() {
       {/* Inserted Files Log */}
       <div className="space-y-3">
         <div className="flex items-center justify-between px-1">
-          <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Deployment Queue</p>
+          <p className="text-[10px] font-black text-white uppercase tracking-widest">Deployment Queue</p>
           <BadgeCheck className="w-4 h-4 text-emerald-500 drop-shadow-[0_0_5px_rgba(16,185,129,0.5)]" />
         </div>
 
@@ -124,7 +124,7 @@ export function SidebarAudioStation() {
                   <Music className="w-3.5 h-3.5 text-orange-500 shrink-0" />
                 </div>
                 <div className="flex flex-col overflow-hidden">
-                  <span className="text-[10px] font-bold text-slate-200 truncate tracking-tight">{file.name}</span>
+                  <span className="text-[10px] font-bold text-white truncate tracking-tight">{file.name}</span>
                   <span className="text-[8px] text-slate-500 font-mono uppercase font-black">{file.size}</span>
                 </div>
               </div>
@@ -146,7 +146,7 @@ export function SidebarAudioStation() {
       </div>
 
       <div className="text-center pt-2 opacity-50">
-        <p className="text-[8px] font-black text-slate-600 uppercase tracking-[0.4em]">Node ID: HRAT-BROADCAST-ALPHA</p>
+        <p className="text-[8px] font-black text-white uppercase tracking-[0.4em]">Node ID: HRAT-BROADCAST-ALPHA</p>
       </div>
     </div>
   );

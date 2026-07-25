@@ -183,12 +183,12 @@ export function FooterMusicPlayer({ className }: { className?: string }) {
           <div className="flex flex-col min-w-0 overflow-hidden flex-1">
             <div className="flex items-center gap-2 mb-1 shrink-0">
               <Radio className={cn("w-3 h-3 text-orange-500", isPlaying && "animate-pulse")} />
-              <span className="text-[9px] font-black uppercase tracking-[0.2em] text-orange-500/70">Mission Broadcast</span>
+              <span className="text-[9px] font-black uppercase tracking-[0.2em] text-white/70">Mission Broadcast</span>
             </div>
             {/* Scrolling Title Container */}
             <div className="overflow-hidden w-full whitespace-nowrap">
               <h4 className={cn(
-                "text-[12px] font-black uppercase tracking-wider text-orange-400 drop-shadow-[0_0_8px_rgba(251,146,60,0.8)] inline-block animate-marquee",
+                "text-[12px] font-black uppercase tracking-wider text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.8)] inline-block animate-marquee",
                 error && "animate-none"
               )}>
                 {error ? "Broadcast Offline" : PLAYLIST[currentTrackIndex].title}
@@ -236,7 +236,7 @@ export function FooterMusicPlayer({ className }: { className?: string }) {
             disabled={error || !isLoaded}
             className="cursor-pointer"
           />
-          <div className="flex justify-between items-center text-[9px] font-bold font-mono text-orange-500/60 tracking-widest px-1 uppercase">
+          <div className="flex justify-between items-center text-[9px] font-bold font-mono text-white/60 tracking-widest px-1 uppercase">
             <span>{formatTime(currentTime)}</span>
             <span>{formatTime(duration)}</span>
           </div>
@@ -251,7 +251,7 @@ export function FooterMusicPlayer({ className }: { className?: string }) {
             <div className="flex-1 h-1.5">
               <Slider value={[isMuted ? 0 : volume]} max={1} step={0.01} onValueChange={handleVolumeChange} className="cursor-pointer" />
             </div>
-            <span className="text-[8px] font-black text-orange-500/80 w-6 text-center tabular-nums">
+            <span className="text-[8px] font-black text-white/80 w-6 text-center tabular-nums">
               {Math.round((isMuted ? 0 : volume) * 100)}%
             </span>
           </div>
@@ -287,9 +287,9 @@ export function FooterMusicPlayer({ className }: { className?: string }) {
       </div>
       
       <div className="mt-4 flex items-center justify-center gap-3 opacity-60">
-        <div className="h-px w-6 bg-orange-500/30"></div>
-        <p className="text-[10px] font-black text-orange-500 uppercase tracking-[0.4em]">HRAT Audio Station</p>
-        <div className="h-px w-6 bg-orange-500/30"></div>
+        <div className="h-px w-6 bg-white/30"></div>
+        <p className="text-[10px] font-black text-white uppercase tracking-[0.4em]">HRAT Audio Station</p>
+        <div className="h-px w-6 bg-white/30"></div>
       </div>
     </div>
   );
