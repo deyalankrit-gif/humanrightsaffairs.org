@@ -34,7 +34,8 @@ export type AiDocumentSearchOutput = z.infer<typeof AiDocumentSearchOutputSchema
  */
 export async function aiDocumentSearch(input: AiDocumentSearchInput): Promise<AiDocumentSearchOutput> {
   try {
-    return await aiDocumentSearchFlow(input);
+    const result = await aiDocumentSearchFlow(input);
+    return JSON.parse(JSON.stringify(result));
   } catch (error) {
     console.error("Server Action Crash (aiDocumentSearch):", error);
     return {

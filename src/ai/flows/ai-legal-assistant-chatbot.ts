@@ -31,7 +31,8 @@ export async function inquireLegalAssistant(
   input: InquireLegalAssistantInput
 ): Promise<InquireLegalAssistantOutput> {
   try {
-    return await aiLegalAssistantChatbotFlow(input);
+    const result = await aiLegalAssistantChatbotFlow(input);
+    return JSON.parse(JSON.stringify(result));
   } catch (error) {
     console.error("Server Action Crash (inquireLegalAssistant):", error);
     return "I am currently offline due to a technical synchronization issue with the national legal database. Please contact our helpline for assistance.";

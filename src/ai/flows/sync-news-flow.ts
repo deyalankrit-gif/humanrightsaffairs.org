@@ -3,7 +3,7 @@
  * @fileOverview Resilient AI-powered news aggregation flow with tactical diagnostics.
  * 
  * - syncNews - Aggregates high-impact news with multi-source failover and retry logic.
- * - Features: Exponential backoff, Source-level logging, AI Rejection Intelligence.
+ * - Features: POJO serialization, Timeout management, Context optimization.
  */
 
 import {ai} from '@/ai/genkit';
@@ -24,33 +24,27 @@ const RSS_SOURCES = [
 ];
 
 /**
- * Enhanced fetcher with browser-mimicry and retry logic.
+ * Enhanced fetcher with browser-mimicry.
+ * Optimized for speed to avoid server action timeouts.
  */
-async function fetchWithRetry(url: string, retries = 2, backoff = 1000): Promise<Response> {
+async function fetchSource(url: string): Promise<Response> {
   const headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
     'Accept': 'application/rss+xml, application/xml, text/xml, */*',
-    'Accept-Language': 'en-US,en;q=0.9',
-    'Cache-Control': 'no-cache',
-    'Pragma': 'no-cache'
+    'Cache-Control': 'no-cache'
   };
 
-  for (let i = 0; i <= retries; i++) {
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 6000);
-      const response = await fetch(url, { headers, signal: controller.signal, cache: 'no-store' });
-      clearTimeout(timeoutId);
-      if (response.ok) return response;
-      if (response.status === 403 || response.status === 429) {
-         console.warn(`Source throttled/forbidden (HTTP ${response.status}). Retrying...`);
-      }
-    } catch (err: any) {
-      if (i === retries) throw err;
-    }
-    await new Promise(r => setTimeout(r, backoff * Math.pow(2, i)));
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 4000); // 4s timeout per source
+  
+  try {
+    const response = await fetch(url, { headers, signal: controller.signal, cache: 'no-store' });
+    clearTimeout(timeoutId);
+    return response;
+  } catch (err) {
+    clearTimeout(timeoutId);
+    throw err;
   }
-  throw new Error("Maximum retries reached");
 }
 
 function cleanText(text: string, limit = 1000): string {
@@ -87,9 +81,15 @@ const SyncNewsOutputSchema = z.object({
 
 export type SyncNewsOutput = z.infer<typeof SyncNewsOutputSchema>;
 
+/**
+ * syncNews - Robust Server Action wrapper.
+ * Ensures the response is a strict POJO to avoid Next.js serialization errors.
+ */
 export async function syncNews(input: { context: string }): Promise<SyncNewsOutput> {
   try {
-    return await syncNewsFlow(input);
+    const result = await syncNewsFlow(input);
+    // Explicitly serialize/deserialize to guarantee POJO return
+    return JSON.parse(JSON.stringify(result));
   } catch (error) {
     console.error("Critical System Crash (syncNews):", error);
     return { 
@@ -158,7 +158,7 @@ const syncNewsFlow = ai.defineFlow(
 
     for (const source of RSS_SOURCES) {
       try {
-        const response = await fetchWithRetry(source.url);
+        const response = await fetchSource(source.url);
         const xml = await response.text();
         const data = await parser.parseString(xml);
         
@@ -174,10 +174,8 @@ const syncNewsFlow = ai.defineFlow(
 
         rawItems = rawItems.concat(sourceItems);
         successfulCount++;
-        console.log(`Source [${source.name}]: Fetched ${sourceItems.length} articles successfully.`);
       } catch (err: any) {
         const msg = `Source [${source.name}] failed: ${err.message}`;
-        console.warn(msg);
         errorLog += msg + "; ";
       }
     }
@@ -189,21 +187,21 @@ const syncNewsFlow = ai.defineFlow(
           sourcesAttempted: RSS_SOURCES.length, 
           sourcesSuccessful: successfulCount, 
           totalRawItems: 0, 
-          errorSummary: `Harvester returned 0 items. Possible network block or dead feeds. Logs: ${errorLog}` 
+          errorSummary: `Harvester returned 0 items. Logs: ${errorLog}` 
         } 
       };
     }
 
+    // Limit context to stay within token/time constraints
     const { output } = await syncNewsPrompt({
       context: input.context,
-      rawItems: rawItems.slice(0, 40)
+      rawItems: rawItems.slice(0, 20)
     });
 
     if (!output) {
        throw new Error("AI extraction yielded null response.");
     }
 
-    // Ensure diagnostics are populated correctly if AI missed them
     output.diagnostics = {
       ...output.diagnostics,
       sourcesAttempted: RSS_SOURCES.length,
