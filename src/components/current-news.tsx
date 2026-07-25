@@ -4,12 +4,13 @@
 import React, { useMemo } from 'react';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { collection, query, where, orderBy, limit } from 'firebase/firestore';
-import { Newspaper, Radio, AlertCircle } from 'lucide-react';
+import { Newspaper, Radio, MapPin, Globe } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 /**
  * CurrentNews: High-fidelity real-time news display area for the homepage.
  * Positions exactly below the logo, maximum 10 lines, transparent background.
+ * Logic: Prioritizes WB > India > World.
  */
 export function CurrentNews({ className }: { className?: string }) {
   const db = useFirestore();
@@ -19,6 +20,7 @@ export function CurrentNews({ className }: { className?: string }) {
     return query(
       collection(db, 'current_news'),
       where('isActive', '==', true),
+      orderBy('scopePriority', 'asc'),
       orderBy('priority', 'desc'),
       orderBy('createdAt', 'desc'),
       limit(1)
@@ -42,6 +44,17 @@ export function CurrentNews({ className }: { className?: string }) {
       </div>
 
       <div className="space-y-3">
+        <div className="flex items-center gap-1.5 opacity-70">
+           {activeNews.scope === 'World' ? (
+             <Globe className="w-3 h-3 text-sky-400" />
+           ) : (
+             <MapPin className="w-3 h-3 text-emerald-400" />
+           )}
+           <span className="text-[8px] font-bold text-slate-300 uppercase tracking-widest">
+             {activeNews.scope === 'West Bengal' ? 'West Bengal Chapter' : activeNews.scope}
+           </span>
+        </div>
+
         <h3 className="text-sm md:text-lg font-headline font-bold text-white leading-tight drop-shadow-md">
           {activeNews.title}
         </h3>
@@ -57,7 +70,7 @@ export function CurrentNews({ className }: { className?: string }) {
 
       <div className="flex items-center gap-2 pt-1 opacity-40">
         <span className="text-[7px] font-black uppercase tracking-widest text-slate-300">
-          Last Broadcast: {activeNews.createdAt?.toDate ? activeNews.createdAt.toDate().toLocaleDateString() : 'Just now'}
+          Sync Time: {activeNews.createdAt?.toDate ? activeNews.createdAt.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Live'}
         </span>
       </div>
     </div>

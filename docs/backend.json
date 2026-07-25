@@ -53,11 +53,13 @@
     },
     "CurrentNews": {
       "title": "Current News",
-      "description": "Daily news broadcast for the homepage display area.",
+      "description": "Daily news broadcast for the homepage display area with priority scopes.",
       "type": "object",
       "properties": {
         "title": { "type": "string" },
         "content": { "type": "string" },
+        "scope": { "type": "string", "enum": ["West Bengal", "India", "World"] },
+        "scopePriority": { "type": "number", "description": "1: WB, 2: India, 3: World" },
         "isActive": { "type": "boolean" },
         "priority": { "type": "number" },
         "createdAt": { "type": "string", "format": "date-time" }
