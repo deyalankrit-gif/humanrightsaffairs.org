@@ -17,10 +17,10 @@ const parser = new Parser({
 });
 
 const RSS_FEEDS = [
-  { name: 'Google News India', url: 'https://news.google.com/rss/search?q=human+rights+india+west+bengal&hl=en-IN&gl=IN&ceid=IN:en' },
+  { name: 'Google News India', url: 'https://news.google.com/rss/headlines/section/topic/NATION?hl=en-IN&gl=IN&ceid=IN:en' },
   { name: 'The Hindu', url: 'https://www.thehindu.com/news/national/feeder/default.rss' },
   { name: 'Indian Express', url: 'https://indianexpress.com/section/india/feed/' },
-  { name: 'Reuters India', url: 'https://news.google.com/rss/search?q=source:Reuters+India+human+rights&hl=en-IN&gl=IN&ceid=IN:en' }
+  { name: 'Times of India', url: 'https://timesofindia.indiatimes.com/rssfeeds/-2128936835.cms' }
 ];
 
 /**
@@ -44,7 +44,7 @@ async function getRawNewsData() {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
           'Accept': 'application/rss+xml, application/xml, text/xml'
         },
-        next: { revalidate: 3600 },
+        cache: 'no-store', // CRITICAL: Avoid stale empty responses
         signal: controller.signal 
       });
       clearTimeout(timeoutId);
@@ -97,7 +97,6 @@ export type SyncNewsOutput = z.infer<typeof SyncNewsOutputSchema>;
 export async function syncNews(input: SyncNewsInput): Promise<SyncNewsOutput> {
   try {
     const result = await syncNewsFlow(input);
-    // CRITICAL: Ensure serializable object for Next.js Server Actions
     return JSON.parse(JSON.stringify(result));
   } catch (error) {
     console.error("Server Action Crash (syncNews):", error);
@@ -116,7 +115,7 @@ const syncNewsPrompt = ai.definePrompt({
   },
   output: { schema: SyncNewsOutputSchema },
   system: `You are an elite news aggregator for Human Rights Affairs Trust.
-Your task is to identify and summarize high-impact human rights or legal news items from the provided raw data.
+Your task is to identify and summarize high-impact human rights, legal, or significant social news items from the provided raw data.
 
 PRIORITY HIERARCHY:
 1. West Bengal (Top Priority)
@@ -125,10 +124,10 @@ PRIORITY HIERARCHY:
 
 CONSTRAINTS:
 - CONTENT: Must be a Concise summary, maximum 10 lines.
-- SORT: Sort exactly by scopePriority (1, 2, 3).
+- SCOPE: If a story is about a specific state in India, check if it's West Bengal. Otherwise, classify as India or World.
 - IMAGERY: Preserve imageUrl if present, else null.
-- FORMAT: publishedAt should be readable like 'Feb 24, 2025, 10:30 AM'.
-- COUNT: Aim for exactly 3 distinct stories if possible.
+- FORMAT: publishedAt should be readable like 'Feb 24, 2025, 10:30 AM'. If unsure, use current date.
+- COUNT: Aim for exactly 3-5 distinct high-impact stories.
 - DEDUPLICATE: If multiple sources report the same event, pick the most authoritative one.`,
   prompt: `Current Context: {{{context}}}. 
   
@@ -139,7 +138,7 @@ Raw Intelligence from RSS Harvest:
   Summary: {{{this.content}}}
 {{/each}}
 
-Please aggregate and summarize the most relevant news according to the hierarchy.`,
+Please aggregate and summarize the most relevant news according to the hierarchy. Do not return an empty list if any significant news exists.`,
 });
 
 const syncNewsFlow = ai.defineFlow(
@@ -157,10 +156,10 @@ const syncNewsFlow = ai.defineFlow(
         return { news: [] };
       }
 
-      // AI processing of harvested intelligence (sliced for efficiency)
+      // Increase context window slightly for better coverage
       const { output } = await syncNewsPrompt({
         context: input.context,
-        rawItems: rawItems.slice(0, 15)
+        rawItems: rawItems.slice(0, 30)
       });
 
       if (!output || !output.news) {
