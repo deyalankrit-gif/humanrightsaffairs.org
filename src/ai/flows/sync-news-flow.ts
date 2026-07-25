@@ -53,7 +53,7 @@ async function fetchWithRetry(url: string, retries = 2, backoff = 1000): Promise
   throw new Error("Maximum retries reached");
 }
 
-function cleanText(text: string, limit = 400): string {
+function cleanText(text: string, limit = 1000): string {
   if (!text) return '';
   const cleaned = text.replace(/<[^>]*>?/gm, '').replace(/\s+/g, ' ').trim();
   return cleaned.length > limit ? cleaned.substring(0, limit) + '...' : cleaned;
@@ -115,7 +115,13 @@ const syncNewsPrompt = ai.definePrompt({
   },
   output: { schema: SyncNewsOutputSchema },
   system: `You are an elite news aggregator for Human Rights Affairs Trust.
-Your task is to identify and summarize high-impact human rights, legal, or significant social news items from the provided raw data.
+Your task is to identify and summarize high-impact news items.
+
+PRIMARY OBJECTIVE:
+Find Human Rights, Legal, or Constitutional news.
+
+MANDATORY FALLBACK:
+If no explicit human rights news is found, you MUST still aggregate the most important national or local news available. The feed must NEVER be empty.
 
 PRIORITY HIERARCHY:
 1. West Bengal (Top Priority)
@@ -126,7 +132,7 @@ CONSTRAINTS:
 - CONTENT: Concise summary, maximum 10 lines.
 - SCOPE: Accurate classification as West Bengal, India, or World.
 - IMAGERY: Preserve absolute imageUrl if present.
-- REJECTION LOG: If you discard items that are relevant to the general topic but fail quality checks (duplicates, low impact, or commercial), list them in diagnostics.rejectionLog with a specific reason.`,
+- REJECTION LOG: If you discard items that are relevant to the general topic but fail quality checks (duplicates, low impact), list them in diagnostics.rejectionLog with a specific reason.`,
   prompt: `Current Context: {{{context}}}. 
   
 Raw Intelligence from Multi-Source RSS Harvest:
@@ -136,7 +142,7 @@ Raw Intelligence from Multi-Source RSS Harvest:
   Summary: {{{this.content}}}
 {{/each}}
 
-Please aggregate the most relevant news. If no news is suitable, return an empty news array and explain why in diagnostics.errorSummary.`,
+Please aggregate the most relevant news. Return up to 10 items.`,
 });
 
 const syncNewsFlow = ai.defineFlow(
@@ -161,7 +167,7 @@ const syncNewsFlow = ai.defineFlow(
           link: i.link || '',
           pubDate: i.pubDate || '',
           author: i.creator || i.author || null,
-          content: cleanText(i.contentSnippet || i.content || '', 400),
+          content: cleanText(i.contentSnippet || i.content || '', 1000),
           source: source.name,
           imageUrl: (i as any).media?.$?.url || null
         }));
