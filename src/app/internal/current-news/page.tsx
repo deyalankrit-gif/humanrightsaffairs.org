@@ -1,10 +1,10 @@
 
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser, useCollection, useFirestore, useMemoFirebase } from '@/firebase';
-import { collection, query, orderBy, addDoc, deleteDoc, doc, updateDoc, serverTimestamp, writeBatch } from 'firebase/firestore';
+import { collection, query, where, addDoc, deleteDoc, doc, updateDoc, serverTimestamp, writeBatch } from 'firebase/firestore';
 import { Footer } from '@/components/footer';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -30,7 +30,8 @@ import {
   RefreshCw,
   Zap,
   Globe,
-  MapPin
+  MapPin,
+  AlertTriangle
 } from 'lucide-react';
 import {
   Dialog,
@@ -77,10 +78,31 @@ export default function InternalNewsManagement() {
 
   const newsQuery = useMemoFirebase(() => {
     if (!db || !user) return null;
-    return query(collection(db, 'current_news'), orderBy('scopePriority', 'asc'), orderBy('priority', 'desc'), orderBy('createdAt', 'desc'));
+    // Simplified query to avoid index errors in admin view
+    return query(collection(db, 'current_news'));
   }, [db, user]);
 
   const { data: newsItems, loading: dataLoading } = useCollection(newsQuery);
+
+  const sortedNews = useMemo(() => {
+    if (!newsItems) return [];
+    return [...newsItems]
+      .filter((n: any) => 
+        n.title?.toLowerCase().includes(search.toLowerCase()) || 
+        n.content?.toLowerCase().includes(search.toLowerCase())
+      )
+      .sort((a: any, b: any) => {
+        if (a.scopePriority !== b.scopePriority) {
+          return (a.scopePriority || 99) - (b.scopePriority || 99);
+        }
+        if (a.priority !== b.priority) {
+          return (b.priority || 0) - (a.priority || 0);
+        }
+        const dateA = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : 0;
+        const dateB = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : 0;
+        return dateB - dateA;
+      });
+  }, [newsItems, search]);
 
   const handleSync = async () => {
     if (!db) return;
@@ -146,11 +168,6 @@ export default function InternalNewsManagement() {
   if (authLoading || !user) {
     return <div className="min-h-screen flex items-center justify-center bg-slate-950"><Loader2 className="w-10 h-10 animate-spin text-accent" /></div>;
   }
-
-  const filtered = (newsItems || []).filter((n: any) => 
-    n.title.toLowerCase().includes(search.toLowerCase()) || 
-    n.content.toLowerCase().includes(search.toLowerCase())
-  );
 
   const getScopeBadge = (scope: string) => {
     switch (scope) {
@@ -255,7 +272,7 @@ export default function InternalNewsManagement() {
             <div className="text-center py-20"><Loader2 className="w-10 h-10 animate-spin text-accent mx-auto" /></div>
           ) : (
             <div className="grid gap-6 max-w-4xl mx-auto">
-              {filtered.map((n: any) => (
+              {sortedNews.map((n: any) => (
                 <Card key={n.id} className="border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-100 group">
                   <CardContent className="p-0">
                     <div className="flex flex-col md:flex-row items-stretch">
@@ -266,6 +283,7 @@ export default function InternalNewsManagement() {
                          <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
                            <Clock className="w-2.5 h-2.5" /> Priority: {n.scopePriority}
                          </p>
+                         {!n.isActive && <Badge variant="destructive" className="mt-2 text-[8px]">INACTIVE</Badge>}
                       </div>
                       <div className="flex-1 p-8">
                         <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
@@ -286,6 +304,14 @@ export default function InternalNewsManagement() {
                   </CardContent>
                 </Card>
               ))}
+
+              {sortedNews.length === 0 && (
+                <div className="text-center py-20 opacity-40">
+                  <AlertTriangle className="w-12 h-12 mx-auto mb-4" />
+                  <p className="text-sm font-bold uppercase tracking-widest">No news items identified in the registry.</p>
+                  <p className="text-xs mt-2">Try syncing with the internet or creating a manual entry.</p>
+                </div>
+              )}
             </div>
           )}
         </div>

@@ -3,14 +3,14 @@
 
 import React, { useMemo } from 'react';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
-import { collection, query, where, orderBy, limit } from 'firebase/firestore';
-import { Newspaper, Radio, MapPin, Globe } from 'lucide-react';
+import { collection, query, where, limit } from 'firebase/firestore';
+import { Newspaper, Radio, MapPin, Globe, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 /**
  * CurrentNews: High-fidelity real-time news display area for the homepage.
  * Positions exactly below the logo, maximum 10 lines, transparent background.
- * Logic: Prioritizes WB > India > World.
+ * Logic: Prioritizes WB > India > World. Sorted in-memory to avoid index errors.
  */
 export function CurrentNews({ className }: { className?: string }) {
   const db = useFirestore();
@@ -20,17 +20,35 @@ export function CurrentNews({ className }: { className?: string }) {
     return query(
       collection(db, 'current_news'),
       where('isActive', '==', true),
-      orderBy('scopePriority', 'asc'),
-      orderBy('priority', 'desc'),
-      orderBy('createdAt', 'desc'),
-      limit(1)
+      limit(10) // Fetch top active candidates to sort in memory
     );
   }, [db]);
 
   const { data: newsItems, loading } = useCollection(newsQuery);
-  const activeNews = newsItems?.[0] as any;
 
-  if (loading) return null;
+  const activeNews = useMemo(() => {
+    if (!newsItems || newsItems.length === 0) return null;
+    
+    // Sort logic: Scope Priority (1: WB, 2: India, 3: World) ASC, then latest first
+    return [...newsItems].sort((a: any, b: any) => {
+      if (a.scopePriority !== b.scopePriority) {
+        return (a.scopePriority || 99) - (b.scopePriority || 99);
+      }
+      const dateA = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : 0;
+      const dateB = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : 0;
+      return dateB - dateA;
+    })[0];
+  }, [newsItems]);
+
+  if (loading) {
+    return (
+      <div className={cn("flex items-center gap-2 opacity-50", className)}>
+        <Loader2 className="w-3 h-3 animate-spin text-accent" />
+        <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Fetching Feed...</span>
+      </div>
+    );
+  }
+
   if (!activeNews) return null;
 
   return (

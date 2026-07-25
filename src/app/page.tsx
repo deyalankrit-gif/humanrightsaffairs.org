@@ -82,17 +82,17 @@ export default function Home() {
           <div className="absolute inset-0 bg-gradient-to-b from-primary/40 via-primary/20 to-primary/60 dark:from-slate-950/70 dark:via-slate-950/50 dark:to-slate-950/80"></div>
         </div>
 
-        {/* Institutional Sidebar (Logo + News) */}
-        <div className="absolute top-8 left-8 z-20 hidden xl:flex flex-col gap-10">
+        {/* Institutional Sidebar (Logo + News) - Adjusted visibility to LG for broader compatibility */}
+        <div className="absolute top-8 left-8 z-20 hidden lg:flex flex-col gap-10">
           {/* Logo Section */}
           <div className="flex items-center gap-6 animate-in fade-in slide-in-from-left-4 duration-1000">
-            <div className="relative w-24 h-24 transition-transform hover:scale-105">
+            <div className="relative w-20 h-20 md:w-24 md:h-24 transition-transform hover:scale-105">
               <Image src="/HRAT%20Logo.jpeg" alt="HRAT Official Institutional Logo" fill className="object-contain" />
             </div>
             <div className="flex flex-col text-white">
-              <span className="font-headline font-bold text-3xl leading-none tracking-tight">HRAT</span>
-              <span className="text-[10px] font-bold text-accent uppercase tracking-[0.3em]">Justice Shield</span>
-              <span className="text-[12px] font-bold text-white mt-1 border-t border-white/10 pt-1">মানবাধিকার সংগঠন</span>
+              <span className="font-headline font-bold text-2xl md:text-3xl leading-none tracking-tight">HRAT</span>
+              <span className="text-[9px] md:text-[10px] font-bold text-accent uppercase tracking-[0.3em]">Justice Shield</span>
+              <span className="text-[10px] md:text-[12px] font-bold text-white mt-1 border-t border-white/10 pt-1">মানবাধিকার সংগঠন</span>
             </div>
           </div>
 
