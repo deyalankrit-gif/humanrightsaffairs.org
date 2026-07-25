@@ -44,29 +44,25 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
         setLoading(false);
       },
       async (serverError) => {
-        // Advanced path extraction strategy
-        let pathString = 'restricted_path';
+        // Advanced path extraction strategy to provide meaningful context to the error overlay
+        let pathString = 'restricted_collection';
         try {
           const q = query as any;
           
-          // Strategy 1: Explicit path property
-          if (q.path) {
-            pathString = q.path;
-          } 
-          // Strategy 2: Internal query path segments
-          else if (q._query?.path?.segments) {
+          // Strategy 1: Standard internal query path identification
+          if (q._query && q._query.path && q._query.path.segments) {
             pathString = q._query.path.segments.join('/');
-          } 
-          // Strategy 3: Standard query conversion
-          else if (q.query?.path?.segments) {
+          }
+          // Strategy 2: Direct path identification
+          else if (q.path) {
+            pathString = q.path;
+          }
+          // Strategy 3: Nested object identification
+          else if (q.query && q.query.path && q.query.path.segments) {
             pathString = q.query.path.segments.join('/');
           }
-          // Strategy 4: Fallback to collection name identification
-          else if (typeof q.type === 'string' && q.type === 'collection') {
-            pathString = 'collection_query';
-          }
         } catch (e) {
-          pathString = 'unknown_collection';
+          pathString = 'unidentified_collection';
         }
         
         const permissionError = new FirestorePermissionError({
@@ -93,11 +89,12 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
         const isPublicPath = publicPaths.some(p => lowerPath.includes(p));
 
         // Administrative policy: Only emit to global listener for authenticated staff on restricted data
+        // This prevents the application from locking up for public users on secondary fetch failures.
         if (auth.currentUser && !isPublicPath) {
           errorEmitter.emit('permission-error', permissionError);
         }
         
-        // Set empty result on failure to prevent stale data UI
+        // Return empty result to maintain UI stability
         setData([]); 
         setError(permissionError);
         setLoading(false);

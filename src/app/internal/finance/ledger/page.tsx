@@ -38,21 +38,23 @@ export default function FinanceLedger() {
   const [search, setSearch] = useState('')
   const [filterType, setFilterType] = useState('All')
 
+  // Real-time synchronization for the transaction registry
   const txQuery = useMemoFirebase(() => {
     if (!db || !user) return null;
-    let q = query(collection(db, 'finance_transactions'), orderBy('date', 'desc'));
+    let baseQuery = collection(db, 'finance_transactions');
+    
     if (filterType !== 'All') {
-      q = query(collection(db, 'finance_transactions'), where('type', '==', filterType), orderBy('date', 'desc'));
+      return query(baseQuery, where('type', '==', filterType), orderBy('date', 'desc'));
     }
-    return q;
+    return query(baseQuery, orderBy('date', 'desc'));
   }, [db, user, filterType]);
 
   const { data: transactions, loading: txLoading } = useCollection(txQuery);
 
   const filtered = (transactions || []).filter((tx: any) => 
-    tx.particulars?.toLowerCase().includes(search.toLowerCase()) ||
-    tx.voucherNo?.toLowerCase().includes(search.toLowerCase()) ||
-    tx.account?.toLowerCase().includes(search.toLowerCase())
+    (tx.particulars || '').toLowerCase().includes(search.toLowerCase()) ||
+    (tx.voucherNo || '').toLowerCase().includes(search.toLowerCase()) ||
+    (tx.account || '').toLowerCase().includes(search.toLowerCase())
   )
 
   const handleExportPDF = () => {
@@ -70,7 +72,6 @@ export default function FinanceLedger() {
       description: "Preparing general ledger layout. Please select 'Save as PDF' from the destination dropdown.",
     })
     
-    // Slight delay to allow toast to settle before opening print dialog
     setTimeout(() => {
       window.print()
     }, 500)
