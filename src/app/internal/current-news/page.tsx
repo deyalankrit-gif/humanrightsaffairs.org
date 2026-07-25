@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useUser, useCollection, useFirestore, useMemoFirebase, useDoc } from '@/firebase';
 import { collection, query, where, addDoc, deleteDoc, doc, updateDoc, serverTimestamp, writeBatch } from 'firebase/firestore';
 import { Footer } from '@/components/footer';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -47,7 +47,7 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogFooter,
-  DialogDescription,
+  DialogDescription as DialogDesc,
   DialogClose
 } from "@/components/ui/dialog";
 import { useToast } from '@/hooks/use-toast';
@@ -261,7 +261,7 @@ export default function InternalNewsManagement() {
                       <DialogClose asChild><Button variant="ghost" size="icon" className="h-8 w-8 rounded-full"><X className="w-4 h-4" /></Button></DialogClose>
                     </div>
                     <DialogTitle className="text-2xl font-headline font-bold">Institutional Broadcast Entry</DialogTitle>
-                    <DialogDescription>Manual news entries will override AI-synced content if priority is higher.</DialogDescription>
+                    <DialogDesc>Manual news entries will override AI-synced content if priority is higher.</DialogDesc>
                   </DialogHeader>
                   <div className="space-y-6 py-4">
                     <div className="grid grid-cols-2 gap-4">
@@ -433,7 +433,7 @@ export default function InternalNewsManagement() {
                               </div>
                            </div>
                            <div className="flex items-center gap-2 shrink-0">
-                              <Button variant="outline" size="sm" onClick={() => { setEditNews(n); setIsEditDialogOpen(true); }} className="h-10 px-5 rounded-xl text-[10px] font-bold border-slate-200 hover:bg-accent hover:text-primary transition-all">Modify</Button>
+                              <Button variant="outline" size="sm" onClick={() => { setEditNews(n); setIsEditDialogOpen(true); }} className="h-10 px-5 rounded-xl text-[10px] font-bold border-slate-200 hover:bg-accent hover:text-primary hover:border-accent transition-all">Modify</Button>
                               <Button variant="ghost" size="icon" onClick={() => handleDelete(n.id)} className="h-10 w-10 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"><Trash2 className="w-4.5 h-4.5" /></Button>
                            </div>
                         </div>
@@ -500,4 +500,3 @@ export default function InternalNewsManagement() {
     </main>
   );
 }
-
