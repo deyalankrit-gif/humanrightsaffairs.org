@@ -18,19 +18,28 @@ import {
   ShieldCheck, 
   IndianRupee, 
   User, 
-  Building
+  Building,
+  Calendar as CalendarIcon
 } from 'lucide-react'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import { Calendar } from "@/components/ui/calendar"
 import { useToast } from '@/hooks/use-toast'
-import { format } from 'date-fns'
+import { format, parse } from 'date-fns'
 import { 
   amountToWords, 
   VOUCHER_TYPE_CODES, 
   getCurrentFinancialYear 
 } from '@/lib/vms-utils'
+import { cn } from '@/lib/utils'
 
 /**
  * NewVoucherPage: Terminal for generating official financial instruments.
  * Features: Real-time amount-to-words conversion, auto-ID generation, and ledger sync.
+ * Updated: Included dual-mode date entry (Manual/Calendar) in the Fiscal Mechanics section.
  */
 export default function NewVoucherPage() {
   const { user, loading: authLoading } = useUser()
@@ -110,6 +119,20 @@ export default function NewVoucherPage() {
       toast({ variant: "destructive", title: "Sync Failed", description: e.message });
     } finally {
       setIsSaving(false);
+    }
+  }
+
+  const handleCalendarSelect = (date: Date | undefined) => {
+    if (date) {
+      setFormData({ ...formData, date: format(date, 'yyyy-MM-dd') });
+    }
+  }
+
+  const getParsedDate = (dateStr: string) => {
+    try {
+      return parse(dateStr, 'yyyy-MM-dd', new Date());
+    } catch (e) {
+      return new Date();
     }
   }
 
@@ -195,7 +218,33 @@ export default function NewVoucherPage() {
               <h3 className="text-xs font-black uppercase text-accent tracking-[0.2em] flex items-center gap-2 border-b pb-4">
                 <IndianRupee className="w-4 h-4" /> Fiscal Mechanics
               </h3>
-              <div className="grid md:grid-cols-3 gap-6">
+              <div className="grid md:grid-cols-1 lg:grid-cols-4 gap-6">
+                 <div className="space-y-1.5">
+                   <Label className="text-[10px] font-bold uppercase text-slate-400">Voucher Date *</Label>
+                   <div className="flex gap-2">
+                     <Input 
+                       value={formData.date} 
+                       onChange={e => setFormData({...formData, date: e.target.value})} 
+                       placeholder="YYYY-MM-DD"
+                       className="h-11 rounded-xl flex-1"
+                     />
+                     <Popover>
+                       <PopoverTrigger asChild>
+                         <Button variant="outline" size="icon" className="h-11 w-11 shrink-0 rounded-xl border-slate-200">
+                           <CalendarIcon className="h-4 w-4 text-slate-500" />
+                         </Button>
+                       </PopoverTrigger>
+                       <PopoverContent className="w-auto p-0 z-[1000001]" align="end">
+                         <Calendar
+                           mode="single"
+                           selected={formData.date ? getParsedDate(formData.date) : undefined}
+                           onSelect={handleCalendarSelect}
+                           initialFocus
+                         />
+                       </PopoverContent>
+                     </Popover>
+                   </div>
+                 </div>
                  <div className="space-y-1.5">
                    <Label className="text-[10px] font-bold uppercase text-slate-400">Amount (INR) *</Label>
                    <Input type="number" value={formData.amount} onChange={e => setFormData({...formData, amount: e.target.value})} className="h-11 rounded-xl text-lg font-black" required />
