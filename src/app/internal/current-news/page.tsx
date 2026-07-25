@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useEffect, useState, useMemo } from 'react';
@@ -38,7 +37,9 @@ import {
   Sparkles,
   CheckCircle2,
   BrainCircuit,
-  Eye
+  Eye,
+  User as UserIcon,
+  Tag
 } from 'lucide-react';
 import {
   Dialog,
@@ -54,6 +55,7 @@ import { useToast } from '@/hooks/use-toast';
 import { syncNews } from '@/ai/flows/sync-news-flow';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
+import Image from 'next/image';
 
 export default function InternalNewsManagement() {
   const { user, loading: authLoading } = useUser();
@@ -78,6 +80,9 @@ export default function InternalNewsManagement() {
     source: 'The Hindu',
     url: '',
     publishedAt: format(new Date(), 'MMM dd, yyyy, hh:mm a'),
+    author: '',
+    category: 'Human Rights',
+    imageUrl: '',
     scope: 'India' as 'West Bengal' | 'India' | 'World',
     scopePriority: 2,
     isActive: true,
@@ -128,10 +133,10 @@ export default function InternalNewsManagement() {
       if (output && output.news) {
         setAiSuggestions(output.news);
         setIsViewingSuggestions(true);
-        toast({ title: "Intelligence Fetched", description: `${output.news.length} AI suggestions are ready for review.` });
+        toast({ title: "Intelligence Harvester Active", description: `${output.news.length} AI items retrieved from RSS feeds.` });
       }
     } catch (e: any) {
-      toast({ variant: "destructive", title: "Sync Failed", description: "Could not reach national news servers." });
+      toast({ variant: "destructive", title: "Harvesting Failed", description: "Could not reach national news servers." });
     } finally {
       setIsSyncing(false);
     }
@@ -159,7 +164,7 @@ export default function InternalNewsManagement() {
       });
 
       setAiSuggestions(prev => prev.filter(s => s.url !== suggestion.url));
-      toast({ title: "Broadcast Published", description: "AI intelligence has been committed to the live feed." });
+      toast({ title: "Broadcast Published", description: "AI harvested intelligence committed to the feed." });
       
       if (aiSuggestions.length <= 1) {
         setIsViewingSuggestions(false);
@@ -186,6 +191,7 @@ export default function InternalNewsManagement() {
         setNewNews({ 
           title: '', content: '', source: 'The Hindu', url: '', 
           publishedAt: format(new Date(), 'MMM dd, yyyy, hh:mm a'),
+          author: '', category: 'Human Rights', imageUrl: '',
           scope: 'India', scopePriority: 2, isActive: true, priority: 1 
         });
       })
@@ -234,8 +240,8 @@ export default function InternalNewsManagement() {
             </div>
             <h1 className="text-3xl md:text-4xl font-headline font-bold">News <span className="text-accent italic">Governance</span></h1>
             <div className="flex items-center justify-center md:justify-start gap-4 text-[10px] font-black text-slate-400 uppercase">
-               <span className="flex items-center gap-1.5"><Clock className="w-3 h-3 text-accent" /> Last Sync: {meta?.lastSyncAt?.toDate ? format(meta.lastSyncAt.toDate(), 'hh:mm a') : 'Never'}</span>
-               <span className="flex items-center gap-1.5"><ShieldCheck className="w-3 h-3 text-emerald-500" /> Automatic refresh active (6h)</span>
+               <span className="flex items-center gap-1.5"><Clock className="w-3 h-3 text-accent" /> Last Harvest: {meta?.lastSyncAt?.toDate ? format(meta.lastSyncAt.toDate(), 'hh:mm a') : 'Never'}</span>
+               <span className="flex items-center gap-1.5"><ShieldCheck className="w-3 h-3 text-emerald-500" /> RSS + AI Pipeline Active</span>
             </div>
           </div>
           
@@ -246,7 +252,7 @@ export default function InternalNewsManagement() {
               className="bg-primary text-white hover:bg-secondary h-11 px-6 rounded-xl font-bold gap-2 shadow-xl shadow-primary/20 border border-white/10"
              >
                 {isSyncing ? <Loader2 className="w-4 h-4 animate-spin" /> : <BrainCircuit className="w-4 h-4 text-accent" />}
-                Fetch AI Suggestions
+                Trigger Global Harvest
              </Button>
              
              <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
@@ -293,6 +299,17 @@ export default function InternalNewsManagement() {
                        </div>
                     </div>
 
+                    <div className="grid grid-cols-2 gap-4">
+                       <div className="space-y-1">
+                          <Label className="text-[10px] font-bold uppercase text-slate-400">Author</Label>
+                          <Input value={newNews.author} onChange={e => setNewNews({...newNews, author: e.target.value})} placeholder="Reporter Name" className="h-11 rounded-xl" />
+                       </div>
+                       <div className="space-y-1">
+                          <Label className="text-[10px] font-bold uppercase text-slate-400">Category</Label>
+                          <Input value={newNews.category} onChange={e => setNewNews({...newNews, category: e.target.value})} placeholder="e.g. Legal, Policy" className="h-11 rounded-xl" />
+                       </div>
+                    </div>
+
                     <div className="space-y-1">
                       <Label className="text-[10px] font-bold uppercase text-slate-400">Narrative (Max 10 Lines) *</Label>
                       <Textarea placeholder="Concise factual summary..." value={newNews.content} onChange={e => setNewNews({...newNews, content: e.target.value})} className="rounded-xl min-h-[150px]" />
@@ -328,7 +345,7 @@ export default function InternalNewsManagement() {
                  <button onClick={() => setIsViewingSuggestions(false)} className="text-white/40 hover:text-white transition-colors"><X className="w-6 h-6" /></button>
                </div>
                <DialogTitle className="text-3xl font-headline font-bold">AI News <span className="text-accent italic">Selection</span></DialogTitle>
-               <DialogDesc className="text-white/60 font-medium">Review and selectively publish identified human rights intelligence from across the internet.</DialogDesc>
+               <DialogDesc className="text-white/60 font-medium">Review and selectively publish identified human rights intelligence from harvested RSS feeds.</DialogDesc>
             </DialogHeader>
             <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
                <div className="grid gap-6">
@@ -336,17 +353,23 @@ export default function InternalNewsManagement() {
                     <Card key={idx} className="border-none shadow-sm rounded-[2rem] overflow-hidden bg-white dark:bg-slate-900 group">
                        <CardContent className="p-0">
                           <div className="flex flex-col md:flex-row items-stretch">
-                             <div className="p-6 md:w-40 text-center border-r border-slate-100 flex flex-col items-center justify-center shrink-0 bg-slate-50 dark:bg-slate-800/50">
+                             <div className="p-6 md:w-48 text-center border-r border-slate-100 flex flex-col items-center justify-center shrink-0 bg-slate-50 dark:bg-slate-800/50">
+                                {suggestion.imageUrl && (
+                                  <div className="relative w-24 h-24 rounded-2xl overflow-hidden mb-3 border-2 border-white shadow-md">
+                                    <Image src={suggestion.imageUrl} alt="News Thumb" fill className="object-cover" />
+                                  </div>
+                                )}
                                 <Badge className={cn("text-[8px] font-black uppercase px-2 py-1 mb-2", getScopeBadge(suggestion.scope))}>
                                   {suggestion.scope}
                                 </Badge>
-                                <span className="text-[7px] font-black text-slate-400 uppercase tracking-[0.2em]">Rank: {suggestion.scopePriority}</span>
+                                <span className="text-[7px] font-black text-slate-400 uppercase tracking-[0.2em]">Priority: {suggestion.scopePriority}</span>
                              </div>
                              <div className="flex-1 p-6 space-y-4">
                                 <div className="space-y-1">
                                    <div className="flex items-center gap-3 text-[9px] font-bold text-slate-400 uppercase tracking-widest">
                                       <span className="flex items-center gap-1.5"><Clock className="w-3 h-3 text-accent" /> {suggestion.publishedAt}</span>
                                       <span className="flex items-center gap-1.5"><Globe className="w-3 h-3 text-accent" /> {suggestion.source}</span>
+                                      <span className="flex items-center gap-1.5"><Tag className="w-3 h-3 text-accent" /> {suggestion.category}</span>
                                    </div>
                                    <h4 className="text-xl font-bold text-primary dark:text-white leading-tight">{suggestion.title}</h4>
                                 </div>
@@ -354,9 +377,10 @@ export default function InternalNewsManagement() {
                                    "{suggestion.content}"
                                 </div>
                                 <div className="flex items-center justify-between gap-4">
-                                   <a href={suggestion.url} target="_blank" rel="noopener noreferrer" className="text-[9px] font-black text-blue-500 uppercase flex items-center gap-1 hover:underline">
-                                      <LinkIcon className="w-3 h-3" /> Examine Source
-                                   </a>
+                                   <div className="flex items-center gap-2">
+                                     <UserIcon className="w-3 h-3 text-slate-400" />
+                                     <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{suggestion.author || 'Institutional Reporter'}</span>
+                                   </div>
                                    <div className="flex gap-2">
                                       <Button variant="ghost" onClick={() => setAiSuggestions(prev => prev.filter((_, i) => i !== idx))} className="h-9 px-4 rounded-xl text-slate-400 hover:text-red-500 font-bold text-[10px] uppercase">Discard</Button>
                                       <Button onClick={() => publishSuggestion(suggestion)} disabled={isActionLoading} className="h-9 px-6 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 font-bold text-[10px] uppercase tracking-widest gap-2">
@@ -373,8 +397,8 @@ export default function InternalNewsManagement() {
                </div>
             </div>
             <div className="p-6 bg-white dark:bg-slate-900 border-t flex justify-between items-center shrink-0">
-               <p className="text-[10px] font-black uppercase text-slate-400">{aiSuggestions.length} Suggestions Pending</p>
-               <Button variant="outline" onClick={() => setIsViewingSuggestions(false)} className="rounded-xl h-9 px-8 font-bold text-[10px] uppercase">Review Later</Button>
+               <p className="text-[10px] font-black uppercase text-slate-400">{aiSuggestions.length} Harvested Items Pending</p>
+               <Button variant="outline" onClick={() => setIsViewingSuggestions(false)} className="rounded-xl h-9 px-8 font-bold text-[10px] uppercase">Close Terminal</Button>
             </div>
          </DialogContent>
       </Dialog>
@@ -398,7 +422,12 @@ export default function InternalNewsManagement() {
                 <Card key={n.id} className="border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 group hover:shadow-xl transition-all duration-500">
                   <CardContent className="p-0">
                     <div className="flex flex-col md:flex-row items-stretch">
-                      <div className={cn("p-6 md:w-48 text-center border-r border-slate-100 dark:border-slate-800 flex flex-col items-center justify-center shrink-0 bg-slate-50 dark:bg-slate-800/50")}>
+                      <div className={cn("p-6 md:w-56 text-center border-r border-slate-100 dark:border-slate-800 flex flex-col items-center justify-center shrink-0 bg-slate-50 dark:bg-slate-800/50")}>
+                         {n.imageUrl && (
+                           <div className="relative w-20 h-20 rounded-2xl overflow-hidden mb-3 border-2 border-white shadow-lg">
+                             <Image src={n.imageUrl} alt="News" fill className="object-cover" />
+                           </div>
+                         )}
                          <Badge className={cn("text-[9px] font-black px-3 py-1 uppercase border-none mb-3", getScopeBadge(n.scope))}>
                            {n.scope}
                          </Badge>
@@ -418,6 +447,7 @@ export default function InternalNewsManagement() {
                               <div className="flex items-center gap-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">
                                  <span className="flex items-center gap-1.5"><MapPin className="w-3 h-3 text-accent" /> {n.source}</span>
                                  <span className="flex items-center gap-1.5"><Calendar className="w-3 h-3 text-accent" /> {n.publishedAt}</span>
+                                 <span className="flex items-center gap-1.5"><Tag className="w-3 h-3 text-accent" /> {n.category || 'General'}</span>
                               </div>
                               <h3 className="text-xl font-headline font-bold text-primary dark:text-white leading-tight group-hover:text-accent transition-colors">{n.title}</h3>
                               <div className="p-5 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-100 dark:border-slate-800 italic text-sm line-clamp-[10] whitespace-pre-line text-slate-600 dark:text-slate-400">
@@ -429,7 +459,7 @@ export default function InternalNewsManagement() {
                                       <LinkIcon className="w-3 h-3" /> Original Article Source
                                    </a>
                                  )}
-                                 <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest italic">Author: {n.publishedBy || 'System'}</span>
+                                 <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest italic">Author: {n.author || 'System'}</span>
                               </div>
                            </div>
                            <div className="flex items-center gap-2 shrink-0">
@@ -481,6 +511,10 @@ export default function InternalNewsManagement() {
                 <div className="grid grid-cols-2 gap-4">
                    <div className="space-y-1"><Label className="text-[10px] font-bold uppercase text-slate-400">Source</Label><Input value={editNews.source} onChange={e => setEditNews({...editNews, source: e.target.value})} className="h-11 rounded-xl" /></div>
                    <div className="space-y-1"><Label className="text-[10px] font-bold uppercase text-slate-400">URL</Label><Input value={editNews.url} onChange={e => setEditNews({...editNews, url: e.target.value})} className="h-11 rounded-xl" /></div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                   <div className="space-y-1"><Label className="text-[10px] font-bold uppercase text-slate-400">Author</Label><Input value={editNews.author || ''} onChange={e => setEditNews({...editNews, author: e.target.value})} className="h-11 rounded-xl" /></div>
+                   <div className="space-y-1"><Label className="text-[10px] font-bold uppercase text-slate-400">Category</Label><Input value={editNews.category || ''} onChange={e => setEditNews({...editNews, category: e.target.value})} className="h-11 rounded-xl" /></div>
                 </div>
                 <div className="space-y-1">
                   <Label className="text-[10px] font-bold uppercase text-slate-400">Narrative</Label>

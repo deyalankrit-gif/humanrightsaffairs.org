@@ -1,4 +1,3 @@
-
 {
   "entities": {
     "UserAccount": {
@@ -61,6 +60,9 @@
         "source": { "type": "string" },
         "url": { "type": "string" },
         "publishedAt": { "type": "string" },
+        "author": { "type": "string" },
+        "category": { "type": "string" },
+        "imageUrl": { "type": "string" },
         "scope": { "type": "string", "enum": ["West Bengal", "India", "World"] },
         "scopePriority": { "type": "number", "description": "1: WB, 2: India, 3: World" },
         "isActive": { "type": "boolean" },
