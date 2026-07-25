@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState } from 'react'
@@ -26,10 +25,15 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
+/**
+ * Reports Center: High-fidelity terminal for extracting institutional data.
+ * Features: Timeframe selection (MTD/QTD/YTD) and specialized audit exports.
+ */
 export default function ReportsCenter() {
   const { user, loading: authLoading } = useUser()
   const router = useRouter()
   const [isGenerating, setIsGenerating] = useState<string | null>(null)
+  const [activeTimeframe, setActiveTimeframe] = useState('YTD')
 
   const reportTypes = [
     { id: 'ledger', title: 'General Ledger Audit', desc: 'Consolidated transaction history with voucher mapping.', icon: ClipboardList, color: 'text-blue-500' },
@@ -42,9 +46,10 @@ export default function ReportsCenter() {
 
   const handleGenerate = (id: string) => {
     setIsGenerating(id)
+    // In a production environment, this would trigger a server-side PDF generation process
     setTimeout(() => {
       setIsGenerating(null)
-      alert(`Report "${id.toUpperCase()}" generated successfully. Check your secure downloads folder.`)
+      alert(`Report "${id.toUpperCase()}" for period ${activeTimeframe} generated successfully. Check your secure downloads folder.`)
     }, 2000)
   }
 
@@ -65,10 +70,23 @@ export default function ReportsCenter() {
                 </p>
               </div>
            </div>
+           
            <div className="flex items-center gap-2 bg-white/5 p-1 rounded-xl border border-white/10">
-              <Button variant="ghost" className="text-white text-[10px] font-bold uppercase tracking-widest h-8 hover:bg-white/10">MTD</Button>
-              <Button variant="ghost" className="text-white text-[10px] font-bold uppercase tracking-widest h-8 hover:bg-white/10">QTD</Button>
-              <Button className="bg-emerald-600 text-white text-[10px] font-bold uppercase tracking-widest h-8">YTD</Button>
+              {['MTD', 'QTD', 'YTD'].map((tf) => (
+                <Button 
+                  key={tf}
+                  variant="ghost" 
+                  onClick={() => setActiveTimeframe(tf)}
+                  className={cn(
+                    "h-8 px-6 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all",
+                    activeTimeframe === tf 
+                      ? "bg-emerald-600 text-white hover:bg-emerald-700 shadow-lg" 
+                      : "text-white/60 hover:bg-white/10 hover:text-white"
+                  )}
+                >
+                  {tf}
+                </Button>
+              ))}
            </div>
         </div>
       </header>
@@ -93,7 +111,7 @@ export default function ReportsCenter() {
                          disabled={!!isGenerating}
                          className="flex-1 bg-primary text-white font-bold h-12 rounded-xl text-xs uppercase tracking-widest transition-all hover:bg-secondary shadow-lg shadow-primary/20"
                        >
-                          {isGenerating === report.id ? <Loader2 className="animate-spin" /> : <><FileText className="w-4 h-4 mr-2" /> Generate</>}
+                          {isGenerating === report.id ? <Loader2 className="animate-spin" /> : <><FileText className="w-4 h-4 mr-2" /> Generate {activeTimeframe}</>}
                        </Button>
                        <Button variant="outline" className="w-12 h-12 rounded-xl border-slate-100 dark:border-slate-800 p-0">
                           <Download className="w-4 h-4 text-slate-400" />
@@ -110,10 +128,10 @@ export default function ReportsCenter() {
                <FileSpreadsheet className="w-16 h-16 text-emerald-500 mx-auto mb-4" />
                <h2 className="text-3xl font-headline font-bold leading-tight">Master <span className="text-emerald-400 italic">Audit Export</span></h2>
                <p className="text-slate-400 leading-relaxed italic">
-                 "Generate a comprehensive, time-stamped master audit log containing all financial movements, vouchers, and compliance records for the current fiscal cycle."
+                 "Generate a comprehensive, time-stamped master audit log containing all financial movements, vouchers, and compliance records for the {activeTimeframe} cycle."
                </p>
                <Button className="h-14 px-10 rounded-2xl bg-emerald-600 hover:bg-emerald-500 font-bold text-base shadow-xl shadow-emerald-900/40">
-                  Execute Master Export (XLSX)
+                  Execute Master {activeTimeframe} Export (XLSX)
                </Button>
             </div>
          </div>
