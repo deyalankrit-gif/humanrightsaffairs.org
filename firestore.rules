@@ -46,11 +46,13 @@ service cloud.firestore {
     // 2. AUTHORIZATION HELPERS
     function isRoot() {
       return request.auth != null && 
+             'email' in request.auth.token &&
              (request.auth.token.email.lower() == 'deydhritiman@gmail.com');
     }
 
     function isInternalStaff() {
       return request.auth != null && 
+             'email' in request.auth.token &&
              (request.auth.token.email.lower() == 'deyalankrit@gmail.com');
     }
 
@@ -58,15 +60,24 @@ service cloud.firestore {
       return request.auth != null && (
         isRoot() || 
         isInternalStaff() ||
-        (exists(/databases/$(database)/documents/users/$(request.auth.token.email.lower())) && 
+        ('email' in request.auth.token && 
+         exists(/databases/$(database)/documents/users/$(request.auth.token.email.lower())) && 
          get(/databases/$(database)/documents/users/$(request.auth.token.email.lower())).data.permissions.get(permission, false) == true)
       );
     }
 
     // 3. PROTECTED ACCESS: Internal registry and administrative logs
     match /users/{userEmail} {
-      allow read: if request.auth != null && (request.auth.token.email.lower() == userEmail.lower() || isRoot());
-      allow write: if isRoot() || (request.auth != null && request.auth.token.email.lower() == 'deyalankrit@gmail.com' && userEmail.lower() == 'deyalankrit@gmail.com');
+      allow read: if request.auth != null && (
+        ('email' in request.auth.token && request.auth.token.email.lower() == userEmail.lower()) || 
+        isRoot()
+      );
+      allow write: if isRoot() || (
+        request.auth != null && 
+        'email' in request.auth.token && 
+        request.auth.token.email.lower() == 'deyalankrit@gmail.com' && 
+        userEmail.lower() == 'deyalankrit@gmail.com'
+      );
     }
 
     match /public_complaints/{complaintId} {
@@ -119,44 +130,44 @@ service cloud.firestore {
 
     // 4. FINANCIAL GOVERNANCE (Enterprise Module)
     match /finance_transactions/{txId} {
-      allow read: if hasPermission('financeLedger') || hasPermission('financeDashboard');
+      allow read: if isRoot() || isInternalStaff() || hasPermission('financeLedger') || hasPermission('financeDashboard');
       allow create, update: if hasPermission('financeVouchers') || isRoot();
       allow delete: if isRoot();
     }
 
     match /finance_vms_vouchers/{vId} {
-      allow read: if hasPermission('financeVouchers') || hasPermission('financeDashboard');
+      allow read: if isRoot() || isInternalStaff() || hasPermission('financeVouchers') || hasPermission('financeDashboard');
       allow create, update: if hasPermission('financeVouchers') || isRoot();
       allow delete: if isRoot();
     }
 
     match /finance_projects/{projectId} {
-      allow read: if hasPermission('financeProjects') || hasPermission('financeDashboard');
+      allow read: if isRoot() || isInternalStaff() || hasPermission('financeProjects') || hasPermission('financeDashboard');
       allow write: if hasPermission('financeVouchers') || isRoot();
     }
 
     match /finance_assets/{assetId} {
-      allow read: if hasPermission('financeAssets') || hasPermission('financeDashboard');
+      allow read: if isRoot() || isInternalStaff() || hasPermission('financeAssets') || hasPermission('financeDashboard');
       allow write: if hasPermission('financeAssets') || isRoot();
     }
 
     match /finance_payroll/{recordId} {
-      allow read: if hasPermission('financePayroll') || hasPermission('financeDashboard');
+      allow read: if isRoot() || isInternalStaff() || hasPermission('financePayroll') || hasPermission('financeDashboard');
       allow write: if hasPermission('financePayroll') || isRoot();
     }
 
     match /finance_summary/{docId} {
-      allow read: if hasPermission('financeDashboard');
+      allow read: if isRoot() || isInternalStaff() || hasPermission('financeDashboard');
       allow write: if hasPermission('financeVouchers') || isRoot();
     }
 
     match /finance_donors/{donorId} {
-      allow read: if hasPermission('financeLedger') || hasPermission('financeDashboard');
+      allow read: if isRoot() || isInternalStaff() || hasPermission('financeLedger') || hasPermission('financeDashboard');
       allow write: if hasPermission('financeLedger') || isRoot();
     }
 
     match /finance_compliance/{docId} {
-      allow read: if hasPermission('financeCompliance') || hasPermission('financeDashboard');
+      allow read: if isRoot() || isInternalStaff() || hasPermission('financeCompliance') || hasPermission('financeDashboard');
       allow write: if hasPermission('financeCompliance') || isRoot();
     }
 
