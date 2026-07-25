@@ -107,7 +107,7 @@ export async function syncNews(input: SyncNewsInput): Promise<SyncNewsOutput> {
 
 const syncNewsPrompt = ai.definePrompt({
   name: 'syncNewsPrompt',
-  model: 'googleai/gemini-1.5-flash',
+  model: 'googleai/gemini-2.0-flash',
   input: { 
     schema: z.object({
       context: z.string(),
