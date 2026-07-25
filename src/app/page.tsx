@@ -82,8 +82,8 @@ export default function Home() {
           <div className="absolute inset-0 bg-gradient-to-b from-primary/40 via-primary/20 to-primary/60 dark:from-slate-950/70 dark:via-slate-950/50 dark:to-slate-950/80"></div>
         </div>
 
-        {/* Institutional Sidebar (Logo + News) - Adjusted visibility to LG for broader compatibility */}
-        <div className="absolute top-8 left-8 z-20 hidden lg:flex flex-col gap-10">
+        {/* Institutional Sidebar (Logo + News) - Visible on MD and larger for tactical awareness */}
+        <div className="absolute top-8 left-8 z-20 hidden md:flex flex-col gap-10">
           {/* Logo Section */}
           <div className="flex items-center gap-6 animate-in fade-in slide-in-from-left-4 duration-1000">
             <div className="relative w-20 h-20 md:w-24 md:h-24 transition-transform hover:scale-105">

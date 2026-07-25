@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useMemo } from 'react';
@@ -10,16 +11,18 @@ import { cn } from '@/lib/utils';
  * CurrentNews: High-fidelity real-time news display area for the homepage.
  * Positions exactly below the logo, maximum 10 lines, transparent background.
  * Logic: Prioritizes Trending India > WB > World.
+ * Updated: Resilient sorting and fallback states to ensure visibility.
  */
 export function CurrentNews({ className }: { className?: string }) {
   const db = useFirestore();
 
   const newsQuery = useMemoFirebase(() => {
     if (!db) return null;
+    // Simple query to avoid index requirements while maintaining real-time behavior
     return query(
       collection(db, 'current_news'),
       where('isActive', '==', true),
-      limit(10) 
+      limit(5) 
     );
   }, [db]);
 
@@ -28,11 +31,12 @@ export function CurrentNews({ className }: { className?: string }) {
   const activeNews = useMemo(() => {
     if (!newsItems || newsItems.length === 0) return null;
     
-    // Sort logic: Scope Priority (1: India Trending, 2: WB, 3: World) ASC, then latest first
+    // Superior Sorting: Rank 1 (India) > 2 (WB) > 3 (World), then by timestamp
     return [...newsItems].sort((a: any, b: any) => {
-      if (a.scopePriority !== b.scopePriority) {
-        return (a.scopePriority || 99) - (b.scopePriority || 99);
-      }
+      const pA = a.scopePriority ?? 99;
+      const pB = b.scopePriority ?? 99;
+      if (pA !== pB) return pA - pB;
+      
       const dateA = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : 0;
       const dateB = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : 0;
       return dateB - dateA;
@@ -41,14 +45,27 @@ export function CurrentNews({ className }: { className?: string }) {
 
   if (loading) {
     return (
-      <div className={cn("flex items-center gap-2 opacity-50", className)}>
+      <div className={cn("flex items-center gap-2 opacity-50 animate-in fade-in duration-500", className)}>
         <Loader2 className="w-3 h-3 animate-spin text-accent" />
         <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Scanning Trends...</span>
       </div>
     );
   }
 
-  if (!activeNews) return null;
+  // If no news is found, show a ready state instead of null to maintain layout and alert admin
+  if (!activeNews) {
+    return (
+      <div className={cn("flex flex-col gap-2 opacity-30 group grayscale hover:grayscale-0 transition-all", className)}>
+         <div className="flex items-center gap-2 border-b border-white/5 pb-2">
+           <Radio className="w-3.5 h-3.5 text-slate-500" />
+           <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Intelligence Node</span>
+         </div>
+         <p className="text-[10px] text-slate-500 italic leading-snug">
+           Connecting to National News Feed... Please initiate sync from the administrative terminal.
+         </p>
+      </div>
+    );
+  }
 
   const isIndiaTrending = activeNews.scope === 'India' && activeNews.scopePriority === 1;
 
