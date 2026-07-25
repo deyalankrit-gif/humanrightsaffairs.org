@@ -1,8 +1,8 @@
 'use server';
 /**
- * @fileOverview AI-powered news synchronization flow focused on national trends.
+ * @fileOverview AI-powered news synchronization flow focused on national trends from specific sources.
  *
- * - syncNews - A function that fetches and categorizes human rights news, prioritizing India's trends.
+ * - syncNews - A function that fetches and categorizes human rights news, prioritizing India's trends from verified sources.
  * - SyncNewsInput - The input type for the syncNews function.
  * - SyncNewsOutput - The return type for the syncNews function.
  */
@@ -37,8 +37,14 @@ const syncNewsPrompt = ai.definePrompt({
   system: `You are an expert news aggregator for the Human Rights Affairs Trust.
 Your task is to identify 3 distinct news items relevant to human rights, social justice, and constitutional literacy.
 
+SOURCES TO MONITOR:
+1. Google News India
+2. Reuters India
+3. The Hindu
+4. The Indian Express
+
 STRICT FOCUS:
-Identify the #1 MOST TRENDING human rights news item in India. This is the absolute priority for our national audience.
+Identify the #1 MOST TRENDING human rights news item in India across these specific sources. This is the absolute priority for our national audience.
 
 Priority Order:
 1. The most trending human rights or social justice news from broader India (Top Priority).
@@ -48,7 +54,7 @@ Priority Order:
 Constraint:
 Each news content MUST be exactly within 10 lines for front-end clarity.
 Return news sorted by scope priority (India Trending: 1, WB: 2, World: 3).`,
-  prompt: `Current Sync Context: {{{context}}}. Please aggregate the latest national trends and regional intelligence.`,
+  prompt: `Current Sync Context: {{{context}}}. Please aggregate the latest national trends and regional intelligence using Google News India, Reuters India, The Hindu, and The Indian Express.`,
 });
 
 const syncNewsFlow = ai.defineFlow(
