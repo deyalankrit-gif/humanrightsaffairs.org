@@ -21,15 +21,12 @@ service cloud.firestore {
     }
 
     function hasPermission(permission) {
-      if (isRoot() || isInternalStaff()) {
-        return true;
-      }
-      if (!isAuthenticated() || !('email' in request.auth.token)) {
-        return false;
-      }
-      let email = getUserEmail();
-      let userDoc = /databases/$(database)/documents/users/$(email);
-      return exists(userDoc) && get(userDoc).data.permissions.get(permission, false) == true;
+      return isRoot() || isInternalStaff() || (
+        isAuthenticated() && 
+        ('email' in request.auth.token) && 
+        exists(/databases/$(database)/documents/users/$(getUserEmail())) && 
+        get(/databases/$(database)/documents/users/$(getUserEmail())).data.permissions.get(permission, false) == true
+      );
     }
 
     // 2. GLOBAL ACCESS OVERRIDES
