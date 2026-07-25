@@ -147,14 +147,12 @@ export default function ExpensesManagementPage() {
     const voucherNo = `E${new Date().getFullYear()}${Math.floor(1000 + Math.random() * 9000)}`;
 
     try {
-      // 1. Log to Dedicated Expenses Collection
       await addDoc(collection(db, 'expenses'), { 
         ...newExpense, 
         amount: amountNum, 
         createdAt: serverTimestamp() 
       });
 
-      // 2. Log to General Ledger (finance_transactions)
       await addDoc(collection(db, 'finance_transactions'), {
         voucherNo,
         date: format(new Date(), 'yyyy-MM-dd'),
@@ -168,7 +166,6 @@ export default function ExpensesManagementPage() {
         createdBy: user.email
       });
 
-      // 3. Sync with Global Summary
       const summaryRef = doc(db, 'finance_summary', 'state');
       await updateDoc(summaryRef, {
         totalExpense: increment(amountNum),
@@ -271,24 +268,40 @@ export default function ExpensesManagementPage() {
                       <Label className="text-[9px] font-black uppercase text-accent tracking-[0.15em] flex items-center gap-2">
                         <Settings2 className="w-3 h-3" /> Category Management Hub
                       </Label>
-                      <p className="text-[8px] text-slate-400 font-bold uppercase leading-tight">Define or modify custom institutional expenditure categories.</p>
+                      <p className="text-[8px] text-slate-400 font-bold uppercase leading-tight">Define, modify or purge institutional expenditure categories.</p>
                     </div>
                     
                     <div className="flex gap-2">
-                       <Input 
-                        placeholder={editingCategoryIndex !== null ? "Modify label..." : "New category name..."} 
-                        value={editingCategoryIndex !== null ? editingCategoryValue : newCategoryLabel} 
-                        onChange={e => editingCategoryIndex !== null ? setEditingCategoryValue(e.target.value) : setNewCategoryLabel(e.target.value)}
-                        className="h-9 text-xs rounded-xl bg-white dark:bg-slate-950"
-                        onKeyDown={e => e.key === 'Enter' && (editingCategoryIndex !== null ? handleUpdateCategory() : handleAddCategory())}
-                       />
+                       <div className="relative flex-1">
+                          <Input 
+                            placeholder={editingCategoryIndex !== null ? "Updating label..." : "New category name..."} 
+                            value={editingCategoryIndex !== null ? editingCategoryValue : newCategoryLabel} 
+                            onChange={e => editingCategoryIndex !== null ? setEditingCategoryValue(e.target.value) : setNewCategoryLabel(e.target.value)}
+                            className={cn(
+                              "h-10 text-xs rounded-xl bg-white dark:bg-slate-950",
+                              editingCategoryIndex !== null ? "border-emerald-500 ring-1 ring-emerald-500/20" : "border-slate-200"
+                            )}
+                            onKeyDown={e => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault();
+                                editingCategoryIndex !== null ? handleUpdateCategory() : handleAddCategory();
+                              }
+                            }}
+                          />
+                          {editingCategoryIndex !== null && (
+                            <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                               <Badge className="bg-emerald-500 text-[6px] font-black h-4 uppercase">Edit Mode</Badge>
+                            </div>
+                          )}
+                       </div>
+                       
                        {editingCategoryIndex !== null ? (
                          <div className="flex gap-1 shrink-0">
-                           <Button onClick={handleUpdateCategory} size="sm" className="h-9 px-3 rounded-xl bg-emerald-500 text-white hover:bg-emerald-600"><Check className="w-4 h-4"/></Button>
-                           <Button onClick={() => { setEditingCategoryIndex(null); setEditingCategoryValue(''); }} size="sm" variant="ghost" className="h-9 px-3 rounded-xl"><X className="w-4 h-4"/></Button>
+                           <Button onClick={handleUpdateCategory} size="sm" className="h-10 px-3 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm"><Check className="w-4 h-4"/></Button>
+                           <Button onClick={() => { setEditingCategoryIndex(null); setEditingCategoryValue(''); }} size="sm" variant="outline" className="h-10 px-3 rounded-xl border-slate-200"><X className="w-4 h-4 text-slate-400"/></Button>
                          </div>
                        ) : (
-                         <Button onClick={handleAddCategory} size="sm" className="h-9 px-4 rounded-xl bg-accent text-primary font-bold shadow-sm" disabled={!newCategoryLabel.trim()}>
+                         <Button onClick={handleAddCategory} size="sm" className="h-10 px-4 rounded-xl bg-accent text-primary font-bold shadow-sm" disabled={!newCategoryLabel.trim()}>
                            <Plus className="w-4 h-4" />
                          </Button>
                        )}
@@ -296,16 +309,33 @@ export default function ExpensesManagementPage() {
 
                     <div className="flex flex-wrap gap-2 pt-1">
                        {((settingsData as any)?.customCategories || []).map((cat: string, idx: number) => (
-                         <Badge key={idx} variant="outline" className="text-[9px] font-bold px-3 py-1 flex items-center gap-2 border-slate-200 bg-white dark:bg-slate-800 group h-8 rounded-xl shadow-sm transition-all hover:border-accent">
-                           <span className={cn(editingCategoryIndex === idx && "text-accent")}>{cat}</span>
-                           <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <button onClick={(e) => { e.preventDefault(); setEditingCategoryIndex(idx); setEditingCategoryValue(cat); }} className="hover:text-blue-500"><Edit className="w-3 h-3"/></button>
-                              <button onClick={(e) => { e.preventDefault(); handleDeleteCategory(idx); }} className="hover:text-red-500"><X className="w-3 h-3"/></button>
+                         <Badge key={idx} variant="outline" className={cn(
+                           "text-[9px] font-bold px-3 py-1 flex items-center gap-2 h-8 rounded-xl shadow-sm transition-all group",
+                           editingCategoryIndex === idx ? "border-emerald-500 bg-emerald-50 text-emerald-700" : "border-slate-200 bg-white dark:bg-slate-800 hover:border-accent"
+                         )}>
+                           <span>{cat}</span>
+                           <div className="flex items-center gap-1 opacity-40 group-hover:opacity-100 transition-opacity">
+                              <button 
+                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); setEditingCategoryIndex(idx); setEditingCategoryValue(cat); }} 
+                                className="hover:text-blue-600 transition-colors"
+                                title="Edit Label"
+                              >
+                                <Edit className="w-3 h-3"/>
+                              </button>
+                              <button 
+                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleDeleteCategory(idx); }} 
+                                className="hover:text-red-600 transition-colors"
+                                title="Purge Category"
+                              >
+                                <Trash2 className="w-3 h-3"/>
+                              </button>
                            </div>
                          </Badge>
                        ))}
                        {(!settingsData || !((settingsData as any)?.customCategories?.length)) && (
-                         <p className="text-[8px] text-slate-400 font-bold uppercase italic px-2">No custom categories established.</p>
+                         <div className="w-full text-center py-4 bg-white/40 dark:bg-slate-950/20 rounded-2xl border-2 border-dashed border-slate-100 dark:border-slate-800">
+                           <p className="text-[8px] text-slate-400 font-bold uppercase tracking-widest">No custom categories established.</p>
+                         </div>
                        )}
                     </div>
                  </div>
