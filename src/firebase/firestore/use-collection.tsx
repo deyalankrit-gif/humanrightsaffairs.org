@@ -22,7 +22,7 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    // Reset state when query changes or becomes null
+    // Reset state when query changes or becomes null to ensure real-time responsiveness
     if (!query) {
       setLoading(false);
       setData(null);
@@ -44,25 +44,17 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
         setLoading(false);
       },
       (serverError: any) => {
-        // Advanced path extraction strategy to provide meaningful context to the error overlay
+        // Robust path extraction strategy for accurate security auditing
         let pathString = 'restricted_collection';
         try {
           const q = query as any;
-          
-          // Strategy 1: Standard internal query path identification
-          if (q._query && q._query.path && q._query.path.segments) {
+          if (q._query && q._query.path) {
             pathString = q._query.path.segments.join('/');
-          }
-          // Strategy 2: Direct path identification
-          else if (q.path) {
+          } else if (q.path) {
             pathString = q.path;
           }
-          // Strategy 3: Nested object identification
-          else if (q.query && q.query.path && q.query.path.segments) {
-            pathString = q.query.path.segments.join('/');
-          }
         } catch (e) {
-          pathString = 'unidentified_collection';
+          pathString = 'unidentified_stream';
         }
         
         const permissionError = new FirestorePermissionError({
@@ -73,7 +65,7 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
         const auth = getAuth();
         const lowerPath = pathString.toLowerCase();
         
-        // Comprehensive list of public-facing paths that should not trigger blocking overlays
+        // Exemption list for public-facing data streams
         const publicPaths = [
           'occasions', 
           'events', 
@@ -89,12 +81,11 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
         const isPublicPath = publicPaths.some(p => lowerPath.includes(p));
 
         // Administrative policy: Only emit to global listener for authenticated staff on restricted data
-        // This prevents the application from locking up for public users on secondary fetch failures.
         if (auth.currentUser && !isPublicPath) {
           errorEmitter.emit('permission-error', permissionError);
         }
         
-        // Return empty result to maintain UI stability
+        // Return empty result to maintain UI stability during transition
         setData([]); 
         setError(permissionError);
         setLoading(false);

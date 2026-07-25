@@ -3,9 +3,7 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // 1. AUTHORIZATION HELPERS
-    // All functions use pure CEL expressions to avoid syntax errors.
-    
+    // 1. AUTHORIZATION CORE
     function isAuthenticated() {
       return request.auth != null;
     }
@@ -14,6 +12,7 @@ service cloud.firestore {
       return request.auth.token.get('email', '').lower();
     }
 
+    // High-Priority Administrative Roles
     function isRoot() {
       return isAuthenticated() && getUserEmail() == 'deydhritiman@gmail.com';
     }
@@ -22,6 +21,7 @@ service cloud.firestore {
       return isAuthenticated() && getUserEmail() == 'deyalankrit@gmail.com';
     }
 
+    // Permission-based authorization
     function hasPermission(permission) {
       return isRoot() || isInternalStaff() || (
         isAuthenticated() && 
@@ -30,13 +30,14 @@ service cloud.firestore {
       );
     }
 
-    // 2. GLOBAL ACCESS OVERRIDES
+    // 2. GLOBAL OVERRIDE
     // Root official has full access to the entire database for emergency governance.
     match /{document=**} {
       allow read, write: if isRoot();
     }
 
-    // 3. PUBLIC READ ACCESS: High-priority paths readable by everyone
+    // 3. PUBLIC READ REGISTRY
+    // High-priority paths readable by everyone to ensure transparency.
     match /occasions/{occasionId} {
       allow read: if true;
       allow write: if hasPermission('occasions');
@@ -69,7 +70,7 @@ service cloud.firestore {
 
     match /terminatedMembers/{memberId} {
       allow read: if true;
-      allow write: if hasPermission('members');
+      allow write: if hasPermission('terminated');
     }
 
     match /meetings/{meetingId} {
@@ -77,17 +78,20 @@ service cloud.firestore {
       allow write: if hasPermission('meetings');
     }
 
-    // 4. PROTECTED ACCESS: Internal registry and administrative logs
-    match /users/{userEmail} {
-      allow read: if isAuthenticated() && (
-        (getUserEmail() == userEmail.lower()) || 
-        isRoot()
-      );
-      allow write: if isRoot() || (
-        isInternalStaff() && userEmail.lower() == 'deyalankrit@gmail.com'
-      );
+    match /activity_events/{eventId} {
+      allow read: if true;
+      allow write: if hasPermission('activityHub');
     }
 
+    // 4. SECURE USER REGISTRY
+    match /users/{userEmail} {
+      allow read: if isAuthenticated() && (
+        (getUserEmail() == userEmail.lower()) || isRoot()
+      );
+      allow write: if isRoot();
+    }
+
+    // 5. PUBLIC SUBMISSIONS (Atomic Write)
     match /public_complaints/{complaintId} {
       allow create: if true;
       allow read, write: if hasPermission('publicComplaints');
@@ -100,17 +104,8 @@ service cloud.firestore {
     
     match /donations/{donationId} {
       allow create: if true;
-      allow read: if isRoot() || isInternalStaff() || hasPermission('analytics') || hasPermission('financeLedger') || hasPermission('financeDashboard');
+      allow read: if isRoot() || isInternalStaff() || hasPermission('analytics') || hasPermission('financeLedger');
       allow delete: if isRoot();
-    }
-
-    match /expenses/{expenseId} {
-      allow read: if isRoot() || isInternalStaff() || hasPermission('expenses') || hasPermission('financeLedger');
-      allow write: if isRoot() || isInternalStaff() || hasPermission('expenses');
-    }
-
-    match /accounts/{accountId} {
-      allow read, write: if isRoot() || isInternalStaff() || hasPermission('accounts') || hasPermission('financeDashboard');
     }
 
     match /grievances/{grievanceId} {
@@ -118,25 +113,7 @@ service cloud.firestore {
       allow read, write: if hasPermission('grievances');
     }
 
-    match /inventory/{itemId} {
-      allow read, write: if hasPermission('inventory');
-    }
-
-    match /vendors/{vendorId} {
-      allow read, write: if hasPermission('vendors');
-    }
-
-    match /visitors/{visitorId} {
-      allow create: if true;
-      allow read, write: if hasPermission('visitors');
-    }
-
-    match /member_kits/{memberId} {
-      allow read: if true;
-      allow write: if hasPermission('kitManagement');
-    }
-
-    // 5. FINANCIAL GOVERNANCE (Enterprise Module)
+    // 6. FINANCIAL GOVERNANCE (Enterprise Modules)
     match /finance_transactions/{txId} {
       allow read: if isRoot() || isInternalStaff() || hasPermission('financeLedger') || hasPermission('financeDashboard');
       allow create, update: if isRoot() || isInternalStaff() || hasPermission('financeVouchers');
@@ -169,25 +146,31 @@ service cloud.firestore {
       allow write: if isRoot() || isInternalStaff() || hasPermission('financeVouchers');
     }
 
-    match /finance_donors/{donorId} {
-      allow read: if isRoot() || isInternalStaff() || hasPermission('financeLedger') || hasPermission('financeDashboard');
-      allow write: if isRoot() || isInternalStaff() || hasPermission('financeLedger');
-    }
-
     match /finance_compliance/{docId} {
       allow read: if isRoot() || isInternalStaff() || hasPermission('financeCompliance') || hasPermission('financeDashboard');
       allow write: if isRoot() || isInternalStaff() || hasPermission('financeCompliance');
     }
 
-    // 6. ACTIVITY CALENDAR HUB
-    match /activity_events/{eventId} {
-      allow read: if isAuthenticated();
-      allow write: if hasPermission('activityHub');
+    // 7. LOGISTICS & OPERATIONAL ASSETS
+    match /inventory/{itemId} {
+      allow read, write: if hasPermission('inventory');
+    }
+
+    match /vendors/{vendorId} {
+      allow read, write: if hasPermission('vendors');
+    }
+
+    match /member_kits/{memberId} {
+      allow read, write: if hasPermission('kitManagement');
+    }
+
+    match /visitors/{visitorId} {
+      allow create, update: if true;
+      allow read: if hasPermission('visitors');
     }
 
     match /activity_reminders/{reminderId} {
-      allow read: if isAuthenticated() && (request.auth.uid == resource.data.uid || hasPermission('activityHub'));
-      allow write: if isAuthenticated() && (request.auth.uid == resource.data.uid || hasPermission('activityHub'));
+      allow read, write: if isAuthenticated() && (request.auth.uid == resource.data.uid || isRoot());
       allow create: if isAuthenticated() && request.auth.uid == request.resource.data.uid;
     }
   }

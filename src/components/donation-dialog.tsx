@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useRef, useEffect } from 'react'
@@ -44,7 +45,7 @@ import {
   ArrowRight,
   Hash
 } from 'lucide-react'
-import { doc, setDoc, serverTimestamp } from 'firebase/firestore'
+import { doc, setDoc, serverTimestamp, increment, addDoc, collection } from 'firebase/firestore'
 import { useFirestore } from '@/firebase'
 import { errorEmitter } from '@/firebase/error-emitter'
 import { FirestorePermissionError, type SecurityRuleContext } from '@/firebase/errors'
@@ -121,20 +122,21 @@ export function DonationDialog({ children, defaultAmount, initialStep = 'details
   }
 
   const handleFinalSubmission = async (data: any) => {
+    if (!db) return
     setLoading(true)
     
-    // Robust safety check for data and transactionId
     const safeTransactionId = data?.transactionId || donationData?.transactionId || `TXN-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
+    const amountNum = Number(data?.amount || form.getValues('amount') || 0)
     
     const finalData = {
       name: data?.name || form.getValues('name') || donationData?.name || 'Valued Donor',
-      email: data?.email || form.getValues('email') || donationData?.email || 'anonymous@hrat-india.org',
-      phone: data?.phone || form.getValues('phone') || donationData?.phone || 'N/A',
-      address: data?.address || form.getValues('address') || donationData?.address || 'Direct Contribution',
-      pan: data?.pan || form.getValues('pan') || donationData?.pan || 'N/A',
-      aadhaar: data?.aadhaar || form.getValues('aadhaar') || donationData?.aadhaar || 'N/A',
-      amount: data?.amount || form.getValues('amount') || donationData?.amount || defaultAmount || "0",
-      paymentMethod: data?.paymentMethod || form.getValues('paymentMethod') || donationData?.paymentMethod || 'Instant UPI QR Code',
+      email: data?.email || form.getValues('email') || donationData?.email || '',
+      phone: data?.phone || form.getValues('phone') || donationData?.phone || '',
+      address: data?.address || form.getValues('address') || donationData?.address || '',
+      pan: data?.pan || form.getValues('pan') || donationData?.pan || '',
+      aadhaar: data?.aadhaar || form.getValues('aadhaar') || donationData?.aadhaar || '',
+      amount: amountNum,
+      paymentMethod: data?.paymentMethod || form.getValues('paymentMethod') || donationData?.paymentMethod || 'UPI QR Code',
       transactionId: safeTransactionId,
       status: 'completed',
       createdAt: serverTimestamp(),
@@ -142,24 +144,39 @@ export function DonationDialog({ children, defaultAmount, initialStep = 'details
       photo: data?.photo || donationData?.photo || photo
     }
     
-    const docRef = doc(db, "donations", safeTransactionId)
-    
-    setDoc(docRef, finalData)
-      .then(() => {
-        setDonationData(finalData)
-        setStep('success')
-        setLoading(false)
-      })
-      .catch(async (error) => {
-        const permissionError = new FirestorePermissionError({
-          path: docRef.path,
-          operation: 'create',
-          requestResourceData: finalData,
-        } satisfies SecurityRuleContext);
-        
-        errorEmitter.emit('permission-error', permissionError);
-        setLoading(false)
+    try {
+      // 1. Establish Master Donation Record
+      await setDoc(doc(db, "donations", safeTransactionId), finalData)
+
+      // 2. Synchronize with Financial Hub Transaction Ledger
+      await addDoc(collection(db, 'finance_transactions'), {
+        voucherNo: `D${new Date().getFullYear()}${Math.floor(1000 + Math.random() * 9000)}`,
+        date: format(new Date(), 'yyyy-MM-dd'),
+        type: 'Income',
+        account: 'Donations',
+        amount: amountNum,
+        paymentMethod: finalData.paymentMethod.includes('UPI') ? 'UPI' : finalData.paymentMethod === 'Cash' ? 'Cash' : 'Bank',
+        particulars: `Public Donation: ${finalData.name} (${safeTransactionId})`,
+        status: 'Approved',
+        createdAt: serverTimestamp(),
+        createdBy: 'Public Portal System'
       });
+
+      // 3. Atomically Update Treasury Summary
+      const summaryRef = doc(db, 'finance_summary', 'state');
+      await setDoc(summaryRef, {
+        totalIncome: increment(amountNum),
+        [finalData.paymentMethod === 'Cash' ? 'cashInHand' : 'bankBalance']: increment(amountNum),
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+
+      setDonationData(finalData)
+      setStep('success')
+    } catch (error: any) {
+      toast({ variant: "destructive", title: "Synchronization Error", description: "Could not commit records to National Registry." })
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handlePrint = () => {
@@ -200,13 +217,8 @@ export function DonationDialog({ children, defaultAmount, initialStep = 'details
       setOpen(val)
       if(!val) {
         setStep('details')
-        form.reset({
-          currency: "INR",
-          amount: defaultAmount || "",
-          paymentMethod: "UPI QR Code"
-        })
+        form.reset()
         setPhoto(null)
-        setDonationData(null)
       }
     }}>
       <DialogTrigger asChild>
@@ -224,7 +236,7 @@ export function DonationDialog({ children, defaultAmount, initialStep = 'details
           </DialogTitle>
           <DialogDescription className="text-base font-medium">
             {step === 'details' && "Specify your contribution details and preferred payment method."}
-            {step === 'qr' && `Please scan to donate ₹${donationData?.amount || defaultAmount || form.getValues('amount')} via UPI.`}
+            {step === 'qr' && `Please scan to donate ₹${donationData?.amount || form.getValues('amount')} via UPI.`}
             {step === 'success' && "Thank you for your contribution to human rights."}
           </DialogDescription>
         </DialogHeader>
@@ -323,35 +335,25 @@ export function DonationDialog({ children, defaultAmount, initialStep = 'details
                             <SelectValue placeholder="Select Method" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent
-                         position="popper"
-                          sideOffset={5}
-                          className="z-[999999] bg-white"
-                         >
+                        <SelectContent position="popper" className="z-[1000000] bg-white">
                          <SelectItem value="UPI QR Code">Instant UPI QR Code</SelectItem>
                          <SelectItem value="Cheque">Cheque</SelectItem>
                          <SelectItem value="Bank Transfer">Online Bank Transfer</SelectItem>
                          <SelectItem value="Cash">Cash Contribution</SelectItem>
-                         <SelectItem value="Credit/Debit Card">Online Card Payment</SelectItem>
                        </SelectContent>
                       </Select>
                       <FormMessage />
                     </FormItem>
                   )} />
 
-                  {selectedMethod !== 'Cheque' && (
-                    <FormField control={form.control} name="paymentDetails" render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                          {selectedMethod === 'Cash' ? 'Voucher / Ref Number' : 'Transaction Reference'}
-                        </FormLabel>
-                        <FormControl>
-                          <Input placeholder="Optional: Trans ID or Ref" className="h-11 rounded-xl" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )} />
-                  )}
+                  <FormField control={form.control} name="paymentDetails" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs font-bold uppercase tracking-wider text-slate-400">Transaction Reference</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Optional: Trans ID or Ref" className="h-11 rounded-xl" {...field} />
+                      </FormControl>
+                    </FormItem>
+                  )} />
                 </div>
 
                 {selectedMethod === 'Cheque' && (
@@ -360,21 +362,18 @@ export function DonationDialog({ children, defaultAmount, initialStep = 'details
                       <FormItem>
                         <FormLabel className="text-[10px] font-bold uppercase text-slate-400">Cheque No.</FormLabel>
                         <FormControl><Input placeholder="000123" className="h-11 rounded-xl" {...field} /></FormControl>
-                        <FormMessage />
                       </FormItem>
                     )} />
                     <FormField control={form.control} name="bankName" render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-[10px] font-bold uppercase text-slate-400">Bank Name</FormLabel>
                         <FormControl><Input placeholder="SBI" className="h-11 rounded-xl" {...field} /></FormControl>
-                        <FormMessage />
                       </FormItem>
                     )} />
                     <FormField control={form.control} name="branchName" render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-[10px] font-bold uppercase text-slate-400">Branch Name</FormLabel>
                         <FormControl><Input placeholder="Kolkata Main" className="h-11 rounded-xl" {...field} /></FormControl>
-                        <FormMessage />
                       </FormItem>
                     )} />
                   </div>
@@ -405,7 +404,7 @@ export function DonationDialog({ children, defaultAmount, initialStep = 'details
                   <ShieldCheck className="w-6 h-6 text-emerald-600 shrink-0 mt-1" />
                   <div>
                     <p className="font-bold text-emerald-900 leading-tight">Secure UPI Gateway</p>
-                    <p className="text-xs text-emerald-700">Please scan and pay ₹<strong>{donationData?.amount || defaultAmount || form.getValues('amount')}</strong>. Once complete, click the button below to finalize your authenticated receipt.</p>
+                    <p className="text-xs text-emerald-700">Please scan and pay ₹<strong>{donationData?.amount}</strong>. Once complete, click the button below to finalize your authenticated receipt.</p>
                   </div>
                 </div>
                 
@@ -460,15 +459,7 @@ export function DonationDialog({ children, defaultAmount, initialStep = 'details
                   <div className="bg-slate-50 p-4 rounded-xl">
                      <h6 className="font-bold text-slate-400 uppercase text-[9px] tracking-widest mb-1">Payment Trail</h6>
                      <p className="text-xs font-bold text-slate-700 uppercase">{donationData?.paymentMethod}</p>
-                     {donationData?.paymentMethod === 'Cheque' ? (
-                       <div className="text-[10px] text-slate-500 leading-tight mt-1">
-                          <p>Chq No: {donationData.chequeNumber}</p>
-                          <p>Bank: {donationData.bankName}</p>
-                          <p>Branch: {donationData.branchName}</p>
-                       </div>
-                     ) : (
-                       <p className="text-[10px] font-mono text-slate-500">{donationData?.paymentDetails || 'N/A'}</p>
-                     )}
+                     <p className="text-[10px] font-mono text-slate-500">{donationData?.paymentDetails || 'N/A'}</p>
                   </div>
                 </div>
                 <div className="text-right space-y-4">
@@ -500,13 +491,8 @@ export function DonationDialog({ children, defaultAmount, initialStep = 'details
               <div className="footer border-t pt-8 text-center space-y-2">
                 <p className="text-[9px] text-slate-400 leading-relaxed">
                   This is a digitally authenticated tax receipt issued by the Human Rights Affairs Trust. <br />
-                  <a href="https://ngodarpan.gov.in/#/search-ngo" target="_blank" rel="noopener noreferrer" className="hover:text-accent transition-colors font-bold">Reg No: WB/2025/0762605</a> | NITI Aayog Verified
+                  Reg No: WB/2025/0762605 | NITI Aayog Verified
                 </p>
-                <div className="flex justify-center pt-2">
-                   <div className="w-12 h-12 relative grayscale opacity-40">
-                      <Image src="/HRAT%20Logo.jpeg" alt="seal" fill className="object-contain" />
-                   </div>
-                </div>
               </div>
             </div>
 

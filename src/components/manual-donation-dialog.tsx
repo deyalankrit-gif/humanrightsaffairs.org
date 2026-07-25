@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState } from 'react'
@@ -33,11 +34,10 @@ import {
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { Loader2, Plus, IndianRupee, User, Mail, Phone, MapPin, Hash, CreditCard, X } from 'lucide-react'
-import { doc, setDoc, serverTimestamp } from 'firebase/firestore'
+import { doc, setDoc, serverTimestamp, increment, collection, addDoc } from 'firebase/firestore'
 import { useFirestore } from '@/firebase'
 import { useToast } from '@/hooks/use-toast'
-import { errorEmitter } from '@/firebase/error-emitter'
-import { FirestorePermissionError, type SecurityRuleContext } from '@/firebase/errors'
+import { format } from 'date-fns'
 
 const formSchema = z.object({
   donorName: z.string().min(2, "Name is required"),
@@ -89,25 +89,40 @@ export function ManualDonationDialog({ children }: { children: React.ReactNode }
       timestamp: new Date().toLocaleString()
     }
 
-    const docRef = doc(db, "donations", transactionId)
+    try {
+      // 1. Log Donation Entry
+      await setDoc(doc(db, "donations", transactionId), donationData)
 
-    setDoc(docRef, donationData)
-      .then(() => {
-        toast({ title: "Donation Recorded", description: `Record ID: ${transactionId}` })
-        form.reset()
-        setOpen(false)
-        setLoading(false)
-      })
-      .catch(async (error) => {
-        const permissionError = new FirestorePermissionError({
-          path: docRef.path,
-          operation: 'create',
-          requestResourceData: donationData,
-        } satisfies SecurityRuleContext);
-        
-        errorEmitter.emit('permission-error', permissionError);
-        setLoading(false)
+      // 2. Synchronize with Transaction Ledger
+      await addDoc(collection(db, 'finance_transactions'), {
+        voucherNo: `M${new Date().getFullYear()}${Math.floor(1000 + Math.random() * 9000)}`,
+        date: format(new Date(), 'yyyy-MM-dd'),
+        type: 'Income',
+        account: 'Donations',
+        amount: values.amount,
+        paymentMethod: values.paymentMethod === 'UPI' ? 'UPI' : values.paymentMethod === 'Cash' ? 'Cash' : 'Bank',
+        particulars: `Manual Donation Entry: ${values.donorName} (${transactionId})`,
+        status: 'Approved',
+        createdAt: serverTimestamp(),
+        createdBy: 'Internal Admin Console'
       });
+
+      // 3. Update Treasury Balance
+      const summaryRef = doc(db, 'finance_summary', 'state');
+      await setDoc(summaryRef, {
+        totalIncome: increment(values.amount),
+        [values.paymentMethod === 'Cash' ? 'cashInHand' : 'bankBalance']: increment(values.amount),
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+
+      toast({ title: "Donation Synchronized", description: `Record ID: ${transactionId} committed to ledger.` })
+      form.reset()
+      setOpen(false)
+    } catch (e: any) {
+      toast({ variant: "destructive", title: "Sync Failed", description: e.message })
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -180,7 +195,7 @@ export function ManualDonationDialog({ children }: { children: React.ReactNode }
               </FormItem>
             )} />
 
-            <div className="bg-slate-50 dark:bg-slate-900 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 space-y-4">
+            <div className="bg-slate-50 dark:bg-slate-900 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 space-y-4 shadow-inner">
               <div className="grid md:grid-cols-2 gap-4">
                 <FormField control={form.control} name="paymentMethod" render={({ field }) => (
                   <FormItem>
@@ -193,7 +208,7 @@ export function ManualDonationDialog({ children }: { children: React.ReactNode }
                           <SelectValue />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent>
+                      <SelectContent position="popper" className="z-[1000000] bg-white">
                         <SelectItem value="Cash">Cash</SelectItem>
                         <SelectItem value="Cheque">Cheque</SelectItem>
                         <SelectItem value="Bank Transfer">Bank Transfer</SelectItem>
@@ -213,7 +228,7 @@ export function ManualDonationDialog({ children }: { children: React.ReactNode }
                           <SelectValue />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent>
+                      <SelectContent position="popper" className="z-[1000000] bg-white">
                         <SelectItem value="Completed">Completed</SelectItem>
                         <SelectItem value="Pending">Pending</SelectItem>
                       </SelectContent>
@@ -229,21 +244,18 @@ export function ManualDonationDialog({ children }: { children: React.ReactNode }
                     <FormItem>
                       <FormLabel className="text-[9px] font-bold uppercase text-slate-400">Cheque No.</FormLabel>
                       <FormControl><Input placeholder="000123" className="h-10 rounded-lg" {...field} /></FormControl>
-                      <FormMessage />
                     </FormItem>
                   )} />
                   <FormField control={form.control} name="bankName" render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-[9px] font-bold uppercase text-slate-400">Bank Name</FormLabel>
                       <FormControl><Input placeholder="SBI" className="h-10 rounded-lg" {...field} /></FormControl>
-                      <FormMessage />
                     </FormItem>
                   )} />
                   <FormField control={form.control} name="branchName" render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-[9px] font-bold uppercase text-slate-400">Branch</FormLabel>
                       <FormControl><Input placeholder="Kolkata" className="h-10 rounded-lg" {...field} /></FormControl>
-                      <FormMessage />
                     </FormItem>
                   )} />
                 </div>
@@ -254,7 +266,6 @@ export function ManualDonationDialog({ children }: { children: React.ReactNode }
                     <FormControl>
                       <Input placeholder="Transaction ID, A/c Last 4, etc." className="h-10 rounded-lg" {...field} />
                     </FormControl>
-                    <FormMessage />
                   </FormItem>
                 )} />
               )}
@@ -265,14 +276,12 @@ export function ManualDonationDialog({ children }: { children: React.ReactNode }
                 <FormItem>
                   <FormLabel className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-400"><Hash className="w-3 h-3" /> PAN (Optional)</FormLabel>
                   <FormControl><Input className="uppercase font-mono h-11 rounded-xl" placeholder="ABCDE1234F" {...field} /></FormControl>
-                  <FormMessage />
                 </FormItem>
               )} />
               <FormField control={form.control} name="aadhaar" render={({ field }) => (
                 <FormItem>
                   <FormLabel className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-400"><Hash className="w-3 h-3" /> Aadhaar (Optional)</FormLabel>
                   <FormControl><Input className="font-mono h-11 rounded-xl" placeholder="1234 5678 9012" {...field} /></FormControl>
-                  <FormMessage />
                 </FormItem>
               )} />
             </div>
