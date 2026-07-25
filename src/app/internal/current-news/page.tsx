@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser, useCollection, useFirestore, useMemoFirebase, useDoc } from '@/firebase';
-import { collection, query, where, addDoc, deleteDoc, doc, updateDoc, serverTimestamp, writeBatch } from 'firebase/firestore';
+import { collection, query, where, addDoc, deleteDoc, doc, updateDoc, serverTimestamp, writeBatch, getDocs } from 'firebase/firestore';
 import { Footer } from '@/components/footer';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -130,13 +130,19 @@ export default function InternalNewsManagement() {
     setIsSyncing(true);
     try {
       const output = await syncNews({ context: `Manual selection request at ${new Date().toISOString()}` });
-      if (output && output.news) {
+      if (output && output.news && output.news.length > 0) {
         setAiSuggestions(output.news);
         setIsViewingSuggestions(true);
         toast({ title: "Intelligence Harvester Active", description: `${output.news.length} AI items retrieved from RSS feeds.` });
+      } else {
+        toast({ 
+          variant: "destructive", 
+          title: "Harvest yielded no data", 
+          description: "All sources failed to return high-impact human rights news at this moment." 
+        });
       }
     } catch (e: any) {
-      toast({ variant: "destructive", title: "Harvesting Failed", description: "Could not reach national news servers." });
+      toast({ variant: "destructive", title: "Harvesting Failed", description: "Internal server error while reaching national news servers." });
     } finally {
       setIsSyncing(false);
     }
@@ -333,7 +339,7 @@ export default function InternalNewsManagement() {
         </div>
       </section>
 
-      {/* AI Suggestions View (Active Options for Selection) */}
+      {/* AI Suggestions View */}
       <Dialog open={isViewingSuggestions} onOpenChange={setIsViewingSuggestions}>
          <DialogContent className="max-w-4xl rounded-[3rem] border-none shadow-2xl p-0 overflow-hidden bg-slate-50 dark:bg-slate-950 flex flex-col h-[85vh]">
             <DialogHeader className="bg-primary p-8 text-white border-b-4 border-accent/20 shrink-0 text-left sm:text-left">

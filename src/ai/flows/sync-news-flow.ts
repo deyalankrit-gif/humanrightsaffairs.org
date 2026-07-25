@@ -27,11 +27,14 @@ async function getRawNewsData() {
   let items: any[] = [];
   for (const feed of RSS_FEEDS) {
     try {
-      // Use standard fetch with a 10s timeout to prevent server action hang
+      // Use standard fetch with a 5s timeout and User-Agent to prevent blocking
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000);
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
       
       const response = await fetch(feed.url, { 
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        },
         next: { revalidate: 3600 },
         signal: controller.signal 
       });
@@ -81,7 +84,6 @@ export type SyncNewsOutput = z.infer<typeof SyncNewsOutputSchema>;
 
 /**
  * syncNews - Robust Server Action wrapper for news aggregation.
- * Prevents "Unexpected Response" by catching all top-level errors.
  */
 export async function syncNews(input: SyncNewsInput): Promise<SyncNewsOutput> {
   try {
@@ -103,7 +105,7 @@ const syncNewsPrompt = ai.definePrompt({
   },
   output: { schema: SyncNewsOutputSchema },
   system: `You are an elite news aggregator for Human Rights Affairs Trust.
-Your task is to identify and summarize exactly 3 distinct, high-impact news items from the provided raw data.
+Your task is to identify and summarize high-impact news items from the provided raw data.
 
 PRIORITY HIERARCHY:
 1. West Bengal (Top Priority)
@@ -114,7 +116,8 @@ CONSTRAINTS:
 - CONTENT: Must be a Concise summary, maximum 10 lines.
 - SORT: Sort exactly by scopePriority (1, 2, 3).
 - IMAGERY: Preserve imageUrl if present, else null.
-- FORMAT: publishedAt should be readable like 'Feb 24, 2025, 10:30 AM'.`,
+- FORMAT: publishedAt should be readable like 'Feb 24, 2025, 10:30 AM'.
+- COUNT: Aim for exactly 3 distinct stories if possible.`,
   prompt: `Current Context: {{{context}}}. 
   
 Raw Intelligence from RSS Harvest:
@@ -137,13 +140,18 @@ const syncNewsFlow = ai.defineFlow(
     try {
       const rawItems = await getRawNewsData();
       
-      // AI processing of harvested intelligence (sliced for token efficiency)
+      if (!rawItems || rawItems.length === 0) {
+        console.warn("Harvester returned zero raw items.");
+        return { news: [] };
+      }
+
+      // AI processing of harvested intelligence (sliced for efficiency)
       const { output } = await syncNewsPrompt({
         context: input.context,
-        rawItems: rawItems.slice(0, 20)
+        rawItems: rawItems.slice(0, 15)
       });
 
-      if (!output) {
+      if (!output || !output.news) {
         return { news: [] };
       }
       return output;
