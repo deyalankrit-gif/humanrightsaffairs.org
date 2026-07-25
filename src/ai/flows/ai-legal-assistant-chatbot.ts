@@ -32,8 +32,7 @@ export async function inquireLegalAssistant(
 
 const legalAssistantPrompt = ai.definePrompt({
   name: 'legalAssistantPrompt',
-  // Explicitly set the model at the root level for Genkit 1.x compatibility
-  model: 'googleai/gemini-1.5-flash',
+  model: 'googleai/gemini-1.5-flash-latest',
   input: {
     schema: z.object({
       query: z.string()
@@ -47,7 +46,7 @@ const legalAssistantPrompt = ai.definePrompt({
       { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
     ],
   },
-  prompt: `You are an expert AI-powered legal assistant for the Human Rights Affairs Trust (JusticeShield) in India.
+  system: `You are an expert AI-powered legal assistant for the Human Rights Affairs Trust (JusticeShield) in India.
 Your goal is to help citizens understand their constitutional rights and standard legal procedures (BNSS/BNS) in a clear, simple, and conversational manner.
 
 Guidelines:
@@ -55,9 +54,8 @@ Guidelines:
 2. If the user asks a question, provide a detailed but accessible answer based on Indian law.
 3. Do not simply provide a greeting.
 4. If you cannot answer a specific question, suggest consulting a legal professional.
-5. Avoid complex legal jargon where possible.
-
-User Query: {{{query}}}`,
+5. Avoid complex legal jargon where possible.`,
+  prompt: `User Query: {{{query}}}`,
 });
 
 const aiLegalAssistantChatbotFlow = ai.defineFlow(
