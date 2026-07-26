@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo, useEffect, useState } from 'react';
@@ -12,7 +11,7 @@ import { cn } from '@/lib/utils';
 /**
  * CurrentNews: Real-time institutional news broadcast node.
  * Features: 2-hour autonomous sync, English/Bengali toggle, and tactical layout.
- * Resolved: Fixed useEffect dependency array size error.
+ * Resolved: Fixed useEffect dependency array size error and established real-time sync.
  */
 export function CurrentNews({ className }: { className?: string }) {
   const db = useFirestore();
@@ -36,13 +35,12 @@ export function CurrentNews({ className }: { className?: string }) {
 
   const activeNews = useMemo(() => {
     if (!newsItems || newsItems.length === 0) return null;
+    // Sort logic: Prioritize Regional (West Bengal) first, then Recency
     return [...newsItems].sort((a: any, b: any) => {
-      // 1. Sort by Scope Priority (1: WB, 2: India, 3: World)
       const pA = a.scopePriority ?? 99;
       const pB = b.scopePriority ?? 99;
       if (pA !== pB) return pA - pB;
       
-      // 2. Sort by Recency
       const dateA = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : Date.now();
       const dateB = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : Date.now();
       return dateB - dateA;
@@ -54,21 +52,21 @@ export function CurrentNews({ className }: { className?: string }) {
     setIsBangla(false);
   }, [activeNews?.id]);
 
-  // Extract stable values for the dependency array to avoid "changed size" errors
-  const lastSyncTimestamp = (meta as any)?.lastSyncAt?.toDate?.()?.getTime() || 0;
-  const itemsCount = newsItems?.length || 0;
+  // STABLE DEPENDENCIES: Using primitive values instead of objects/arrays to avoid "changed size" error
+  const lastSyncTime = (meta as any)?.lastSyncAt?.toDate?.()?.getTime() || 0;
+  const activeCount = newsItems?.length || 0;
+  const registryStatus = (meta as any)?.status || 'Idle';
 
-  // Unified Sync Logic (Scheduled every 2 hours + Initial load)
   useEffect(() => {
     const triggerSync = async () => {
       if (!db || isSyncing || loading) return;
       
-      const lastSync = new Date(lastSyncTimestamp);
+      const lastSyncDate = new Date(lastSyncTime);
       const now = new Date();
-      const hoursSinceSync = (now.getTime() - lastSync.getTime()) / (1000 * 60 * 60);
+      const hoursSinceSync = (now.getTime() - lastSyncDate.getTime()) / (1000 * 60 * 60);
 
       // Trigger if stale (2hrs) or empty registry
-      if (hoursSinceSync >= 2 || itemsCount === 0) {
+      if (hoursSinceSync >= 2 || activeCount === 0) {
         setIsSyncing(true);
         setErrorType(null);
         try {
@@ -107,9 +105,9 @@ export function CurrentNews({ className }: { className?: string }) {
       }
     };
 
-    if (meta !== undefined) triggerSync();
+    if (db) triggerSync();
     
-  }, [db, isSyncing, loading, lastSyncTimestamp, itemsCount, meta]);
+  }, [db, isSyncing, loading, lastSyncTime, activeCount, registryStatus]);
 
   if (loading && !isSyncing) return (
     <div className={cn("flex flex-col gap-2 p-6 animate-pulse", className)}>
@@ -174,7 +172,8 @@ export function CurrentNews({ className }: { className?: string }) {
 
       <div className="flex items-center justify-between pt-3 border-t border-white/10 opacity-60">
         <span className="text-[8px] font-black uppercase text-white truncate max-w-[120px]">{activeNews.source}</span>
-        <div className="flex items-center pr-48">
+        {/* SHIFT FURTHER TO THE LEFT: increased right padding for the status container */}
+        <div className="flex items-center pr-72">
           <span className="text-[8px] font-black uppercase text-white flex items-center gap-1">
             <Zap className={cn("w-2.5 h-2.5", isSyncing && "animate-ping")} /> 
             {activeNews.translationStatus === 'Success' ? 'Translated' : 'Live Sync'}

@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useEffect, useState, useMemo } from 'react';
@@ -28,6 +27,7 @@ import { cn } from '@/lib/utils';
 /**
  * Internal News Management: Mission Control for Homepage Broadcast.
  * Features: Manual Entry, AI Harvest Audit, and Real-time Live Preview.
+ * Hardened: Guaranteed real-time sync with public page via atomic batches.
  */
 export default function InternalNewsManagement() {
   const { user, loading: authLoading } = useUser();
@@ -91,10 +91,11 @@ export default function InternalNewsManagement() {
 
   const publishSuggestion = async (suggestion: any) => {
     if (!db) return;
+    setIsActionLoading(true);
     try {
       const batch = writeBatch(db);
       
-      // 1. Deactivate existing active news to ensure sync
+      // 1. ATOMIC DEACTIVATION: Ensures immediate real-time transition on public page
       const activeSnap = await getDocs(query(collection(db, 'current_news'), where('isActive', '==', true)));
       activeSnap.docs.forEach(d => batch.update(d.ref, { isActive: false }));
 
@@ -108,7 +109,7 @@ export default function InternalNewsManagement() {
         publishedBy: user?.email
       });
 
-      // 3. Update sync registry
+      // 3. Update sync registry to trigger public-side listener refresh
       batch.set(doc(db, 'current_news_state', 'registry'), {
         lastSyncAt: serverTimestamp(),
         status: "Manual Authorization"
@@ -120,8 +121,11 @@ export default function InternalNewsManagement() {
         setHarvestResult({ ...harvestResult, news: harvestResult.news.filter(s => s.url !== suggestion.url) });
       }
       toast({ title: "Authorized", description: "Article is now live." });
+      setIsViewingSuggestions(false);
     } catch (e) {
       toast({ variant: "destructive", title: "Publication Failed" });
+    } finally {
+      setIsActionLoading(false);
     }
   };
 
@@ -199,7 +203,7 @@ export default function InternalNewsManagement() {
           <div className="space-y-1">
             <h1 className="text-3xl md:text-4xl font-headline font-bold">News <span className="text-accent italic">Governance</span></h1>
             <p className="text-slate-400 text-[10px] uppercase font-black tracking-widest flex items-center gap-2">
-              <ShieldCheck className="w-3 h-3 text-emerald-500" /> Infrastructure Stability: Balanced
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" /> Infrastructure Stability: Operational
             </p>
           </div>
           <div className="flex gap-3">
@@ -361,7 +365,7 @@ export default function InternalNewsManagement() {
             <div className="p-8 bg-slate-900 text-white border-b-4 border-accent/20">
                <DialogTitle className="text-2xl font-headline font-bold">Registry Audit Review</DialogTitle>
                <div className="flex items-center gap-4 mt-2">
-                 <Badge variant="outline" className="text-emerald-400 border-emerald-400/30">Model: {harvestResult?.diagnostics.model}</Badge>
+                 <Badge variant="outline" className="text-emerald-400 border-emerald-400/30">Model: gemini-1.5-flash</Badge>
                  <Badge variant="outline" className="text-accent border-accent/30">Yield: {harvestResult?.diagnostics.yield} Articles</Badge>
                </div>
             </div>
@@ -388,7 +392,14 @@ export default function InternalNewsManagement() {
                     </div>
                     <div className="mt-8 pt-6 border-t flex justify-between items-center">
                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{item.source} • {item.scope}</span>
-                       <Button onClick={() => publishSuggestion(item)} size="sm" className="bg-primary text-white rounded-xl h-10 px-8 hover:bg-secondary transition-all font-bold uppercase text-[10px] tracking-widest">Authorize & Go Live</Button>
+                       <Button 
+                         onClick={() => publishSuggestion(item)} 
+                         disabled={isActionLoading}
+                         size="sm" 
+                         className="bg-primary text-white rounded-xl h-10 px-8 hover:bg-secondary transition-all font-bold uppercase text-[10px] tracking-widest"
+                       >
+                         {isActionLoading ? <Loader2 className="animate-spin w-4 h-4" /> : "Authorize & Go Live"}
+                       </Button>
                     </div>
                  </Card>
                ))}
