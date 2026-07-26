@@ -1,7 +1,7 @@
 'use server';
 /**
  * @fileOverview AI Legal Assistant Chatbot (JusticeBot).
- * Standardized on Gemini 1.5 Flash for peak response stability.
+ * Standardized on Gemini 2.0 Flash for peak response stability.
  */
 
 import {ai} from '@/ai/genkit';
@@ -24,7 +24,7 @@ export async function inquireLegalAssistant(input: { query: string }): Promise<s
 
 const legalAssistantPrompt = ai.definePrompt({
   name: 'legalAssistantPrompt',
-  model: googleAI.model('gemini-1.5-flash'),
+  model: googleAI.model('gemini-2.0-flash'),
   input: { schema: InquireLegalAssistantInputSchema },
   config: {
     safetySettings: [

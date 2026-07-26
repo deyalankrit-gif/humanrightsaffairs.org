@@ -13,6 +13,7 @@ import { cn } from '@/lib/utils';
 /**
  * CurrentNews: Real-time institutional news broadcast node.
  * Features: 2-hour autonomous sync, persistent AI translation, and fixed layout.
+ * Updated: Gemini 2.0 Flash integration and refined footer spacing.
  */
 export function CurrentNews({ className }: { className?: string }) {
   const db = useFirestore();
@@ -56,7 +57,7 @@ export function CurrentNews({ className }: { className?: string }) {
     setIsBangla(false);
   }, [activeNews?.id]);
 
-  // Autonomous Sync Logic (Primitive dependencies for React Stability)
+  // Autonomous Sync Logic using stable primitive dependencies
   const lastSyncTime = (meta as any)?.lastSyncAt?.toDate?.()?.getTime() || 0;
   const activeCount = newsItems?.length || 0;
 
@@ -105,7 +106,8 @@ export function CurrentNews({ className }: { className?: string }) {
   const handleTranslateToggle = async () => {
     if (isTranslating || !activeNews || !db) return;
 
-    const hasTranslation = !!(activeNews.bengaliTranslation?.title || activeNews.bengaliTranslation?.content);
+    // Check for cached translation first (using original or audit fields)
+    const hasTranslation = !!(activeNews.bengaliTranslation?.title || activeNews.translatedTitle);
 
     if (!isBangla && !hasTranslation) {
       setIsTranslating(true);
@@ -118,12 +120,11 @@ export function CurrentNews({ className }: { className?: string }) {
 
         const result = await translateNews(input);
 
-        // Persistent update for all users
+        // Persistent update with audit fields as requested
         const newsRef = doc(db, 'current_news', activeNews.id);
         await updateDoc(newsRef, {
           bengaliTranslation: result,
           translationStatus: 'Success',
-          // User requested fields for explicit logging
           translatedTitle: result.title,
           translatedContent: result.content,
           translatedLanguage: "bn",
@@ -156,8 +157,10 @@ export function CurrentNews({ className }: { className?: string }) {
 
   if (!activeNews) return null;
 
-  const hasTranslation = !!(activeNews.bengaliTranslation?.title || activeNews.bengaliTranslation?.content);
-  const displayData = isBangla && hasTranslation ? activeNews.bengaliTranslation : (activeNews.originalEnglish || activeNews);
+  const hasTranslation = !!(activeNews.bengaliTranslation?.title || activeNews.translatedTitle);
+  const displayData = isBangla && hasTranslation 
+    ? (activeNews.bengaliTranslation || { title: activeNews.translatedTitle, content: activeNews.translatedContent }) 
+    : (activeNews.originalEnglish || activeNews);
 
   return (
     <div className={cn("flex flex-col gap-5 p-7 animate-in fade-in duration-1000 max-w-[420px]", className)}>
@@ -199,14 +202,14 @@ export function CurrentNews({ className }: { className?: string }) {
         </div>
       </div>
 
-      <div className="flex items-center pt-3 border-t border-white/10 opacity-60 gap-8 overflow-hidden">
+      <div className="flex items-center justify-between pt-3 border-t border-white/10 opacity-60 pr-48 overflow-hidden">
         <span className="text-[8px] font-black uppercase text-white truncate max-w-[150px] shrink-0">
           {activeNews.source}
         </span>
         
         <div className="flex items-center gap-1 shrink-0">
           <Zap className={cn("w-2.5 h-2.5", isSyncing && "animate-ping")} /> 
-          <span className="text-[8px] font-black uppercase text-white">
+          <span className="text-[8px] font-black uppercase text-white whitespace-nowrap">
             {isBangla ? 'Translated' : 'Live Sync'}
           </span>
         </div>

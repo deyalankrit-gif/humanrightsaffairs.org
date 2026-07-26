@@ -27,9 +27,7 @@ import { cn } from '@/lib/utils';
 
 /**
  * Internal News Management: Mission Control for Homepage Broadcast.
- * Features: Manual Entry, AI Harvest Audit, and Real-time Live Preview.
- * Hardened: Guaranteed real-time sync with public page via atomic batches.
- * Updated: Root-exclusive intelligence overlay for sync diagnostics.
+ * Updated: Gemini 2.0 Flash integration and root intelligence overlay.
  */
 export default function InternalNewsManagement() {
   const { user, loading: authLoading } = useUser();
@@ -99,11 +97,9 @@ export default function InternalNewsManagement() {
     try {
       const batch = writeBatch(db);
       
-      // 1. ATOMIC DEACTIVATION: Ensures immediate real-time transition on public page
       const activeSnap = await getDocs(query(collection(db, 'current_news'), where('isActive', '==', true)));
       activeSnap.docs.forEach(d => batch.update(d.ref, { isActive: false }));
 
-      // 2. Add new doc
       const newDocRef = doc(collection(db, 'current_news'));
       batch.set(newDocRef, {
         ...suggestion,
@@ -113,7 +109,6 @@ export default function InternalNewsManagement() {
         publishedBy: user?.email
       });
 
-      // 3. Update sync registry to trigger public-side listener refresh
       batch.set(doc(db, 'current_news_state', 'registry'), {
         lastSyncAt: serverTimestamp(),
         status: "Manual Authorization"
@@ -143,11 +138,9 @@ export default function InternalNewsManagement() {
     try {
       const batch = writeBatch(db);
 
-      // 1. Deactivate existing active news
       const activeSnap = await getDocs(query(collection(db, 'current_news'), where('isActive', '==', true)));
       activeSnap.docs.forEach(d => batch.update(d.ref, { isActive: false }));
 
-      // 2. Add manual entry
       const newDocRef = doc(collection(db, 'current_news'));
       batch.set(newDocRef, {
         originalEnglish: {
@@ -171,7 +164,6 @@ export default function InternalNewsManagement() {
         publishedBy: user?.email
       });
 
-      // 3. Update registry
       batch.set(doc(db, 'current_news_state', 'registry'), {
         lastSyncAt: serverTimestamp(),
         status: "Manual Entry"
@@ -223,7 +215,6 @@ export default function InternalNewsManagement() {
 
       <section className="py-8 container mx-auto px-4 max-w-5xl">
          
-         {/* Live Sync Preview Node */}
          <div className="mb-12 animate-in fade-in duration-700">
             <Card className="rounded-[2.5rem] bg-slate-950 border-none shadow-2xl overflow-hidden p-6 md:p-10 relative">
                <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full -mr-16 -mt-16 blur-2xl"></div>
@@ -241,7 +232,6 @@ export default function InternalNewsManagement() {
                   <CurrentNews />
                </div>
 
-               {/* ROOT-EXCLUSIVE INTELLIGENCE NODE */}
                {isRoot && (
                  <div className="mt-8 pt-6 border-t border-white/10 grid grid-cols-1 md:grid-cols-3 gap-8 animate-in fade-in duration-1000 slide-in-from-bottom-2">
                     <div className="space-y-3">
@@ -329,7 +319,6 @@ export default function InternalNewsManagement() {
          )}
       </section>
 
-      {/* Manual Entry Dialog */}
       <Dialog open={isManualEntryOpen} onOpenChange={setIsManualEntryOpen}>
         <DialogContent className="max-w-2xl rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden bg-white dark:bg-slate-950 flex flex-col max-h-[90vh]">
           <DialogHeader className="p-8 bg-slate-900 text-white shrink-0 border-b-4 border-accent/20">
@@ -405,13 +394,12 @@ export default function InternalNewsManagement() {
         </DialogContent>
       </Dialog>
 
-      {/* AI Suggestions Dialog */}
       <Dialog open={isViewingSuggestions} onOpenChange={setIsViewingSuggestions}>
          <DialogContent className="max-w-4xl rounded-[3rem] p-0 overflow-hidden bg-slate-50 dark:bg-slate-950 h-[85vh] flex flex-col border-none shadow-2xl">
             <div className="p-8 bg-slate-900 text-white border-b-4 border-accent/20">
                <DialogTitle className="text-2xl font-headline font-bold">Registry Audit Review</DialogTitle>
                <div className="flex items-center gap-4 mt-2">
-                 <Badge variant="outline" className="text-emerald-400 border-emerald-400/30">Model: gemini-1.5-flash</Badge>
+                 <Badge variant="outline" className="text-emerald-400 border-emerald-400/30">Model: gemini-2.0-flash</Badge>
                  <Badge variant="outline" className="text-accent border-accent/30">Yield: {harvestResult?.diagnostics.yield} Articles</Badge>
                </div>
             </div>

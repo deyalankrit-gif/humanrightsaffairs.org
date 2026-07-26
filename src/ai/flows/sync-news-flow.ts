@@ -1,8 +1,7 @@
-
 'use server';
 /**
  * @fileOverview Hardened News Sync Pipeline with sequential translation.
- * Optimized for industrial reliability using Gemini 1.5 Flash.
+ * Optimized for industrial reliability using Gemini 2.0 Flash.
  */
 
 import {ai} from '@/ai/genkit';
@@ -49,7 +48,7 @@ export async function syncNews(input: { context: string }): Promise<SyncNewsOutp
 
 const syncNewsPrompt = ai.definePrompt({
   name: 'syncNewsPrompt',
-  model: googleAI.model('gemini-1.5-flash'),
+  model: googleAI.model('gemini-2.0-flash'),
   input: { schema: z.object({ rawItems: z.array(z.any()) }) },
   output: { 
     schema: z.object({
@@ -156,7 +155,7 @@ const syncNewsFlow = ai.defineFlow(
       news: finalizedNews,
       diagnostics: {
         status: aiStatus,
-        model: "gemini-1.5-flash",
+        model: "gemini-2.0-flash",
         yield: finalizedNews.length,
         errorSummary: errorMsg
       }

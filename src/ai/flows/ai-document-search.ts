@@ -1,7 +1,7 @@
 'use server';
 /**
  * @fileOverview AI-enhanced document search for the HRAT Knowledge Hub.
- * Uses Gemini 1.5 Flash for rapid analysis and excerpt extraction.
+ * Uses Gemini 2.0 Flash for rapid analysis and excerpt extraction.
  */
 
 import {ai} from '@/ai/genkit';
@@ -41,7 +41,7 @@ export async function aiDocumentSearch(input: z.infer<typeof AiDocumentSearchInp
 
 const aiDocumentSearchPrompt = ai.definePrompt({
   name: 'aiDocumentSearchPrompt',
-  model: googleAI.model('gemini-1.5-flash'),
+  model: googleAI.model('gemini-2.0-flash'),
   input: {schema: AiDocumentSearchInputSchema},
   output: {schema: AiDocumentSearchOutputSchema},
   config: {
