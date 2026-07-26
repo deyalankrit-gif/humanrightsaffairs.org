@@ -216,8 +216,8 @@ export function CurrentNews({ className }: { className?: string }) {
       </div>
 
       <div className="flex items-center justify-between pt-3 border-t border-white/10 opacity-60">
-        <span className="text-[8px] font-black uppercase text-white truncate max-w-[120px]">{activeNews.source}</span>
-        <div className="flex items-center pr-72">
+        <span className="text-[8px] font-black uppercase text-white truncate max-w-[150px]">{activeNews.source}</span>
+        <div className="flex items-center">
           <span className="text-[8px] font-black uppercase text-white flex items-center gap-1">
             <Zap className={cn("w-2.5 h-2.5", isSyncing && "animate-ping")} /> 
             {hasTranslation ? 'Translated' : 'Live Sync'}
