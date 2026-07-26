@@ -36,6 +36,27 @@ export function CurrentNews({ className }: { className?: string }) {
 
   const { data: newsItems, loading } = useCollection(newsQuery);
 
+  const activeNews = useMemo(() => {
+    if (!newsItems || newsItems.length === 0) return null;
+    return [...newsItems].sort((a: any, b: any) => {
+      const pA = a.scopePriority ?? 99;
+      const pB = b.scopePriority ?? 99;
+      if (pA !== pB) return pA - pB;
+      
+      const dateA = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : 0;
+      const dateB = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : 0;
+      return dateB - dateA;
+    })[0];
+  }, [newsItems]);
+
+  // RESET TRANSLATION IF SOURCE NEWS CHANGES
+  useEffect(() => {
+    if (activeNews) {
+      setBanglaData(null);
+      setIsBangla(false);
+    }
+  }, [activeNews?.title]);
+
   // Autonomous Background Sync Trigger (Ghost Sync)
   useEffect(() => {
     const triggerAutoSync = async () => {
@@ -76,9 +97,6 @@ export function CurrentNews({ className }: { className?: string }) {
             }, { merge: true });
 
             await batch.commit();
-            // Clear old translations when news refreshes
-            setBanglaData(null);
-            setIsBangla(false);
           }
         } catch (e) {
           console.error("Autonomous Sync Error:", e);
@@ -92,19 +110,6 @@ export function CurrentNews({ className }: { className?: string }) {
       triggerAutoSync();
     }
   }, [meta, db, newsItems, isSyncing, loading]);
-
-  const activeNews = useMemo(() => {
-    if (!newsItems || newsItems.length === 0) return null;
-    return [...newsItems].sort((a: any, b: any) => {
-      const pA = a.scopePriority ?? 99;
-      const pB = b.scopePriority ?? 99;
-      if (pA !== pB) return pA - pB;
-      
-      const dateA = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : 0;
-      const dateB = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : 0;
-      return dateB - dateA;
-    })[0];
-  }, [newsItems]);
 
   const handleTranslate = async () => {
     if (isBangla) {
@@ -174,7 +179,7 @@ export function CurrentNews({ className }: { className?: string }) {
            <button 
              onClick={handleTranslate}
              disabled={isTranslating}
-             className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-[#CEFF00] transition-all flex items-center gap-1.5"
+             className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-[#CEFF00] transition-all flex items-center gap-1.5 shadow-xl"
              title="Translate to Bangla"
            >
              {isTranslating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Languages className="w-3.5 h-3.5" />}
