@@ -12,7 +12,7 @@ import { cn } from '@/lib/utils';
 /**
  * CurrentNews: Real-time institutional news broadcast node.
  * Features: 2-hour autonomous sync, English/Bengali toggle, and tactical layout.
- * Updated: Small translation button repositioned next to story examination.
+ * Resolved: Fixed useEffect dependency array size error.
  */
 export function CurrentNews({ className }: { className?: string }) {
   const db = useFirestore();
@@ -54,17 +54,21 @@ export function CurrentNews({ className }: { className?: string }) {
     setIsBangla(false);
   }, [activeNews?.id]);
 
+  // Extract stable values for the dependency array to avoid "changed size" errors
+  const lastSyncTimestamp = (meta as any)?.lastSyncAt?.toDate?.()?.getTime() || 0;
+  const itemsCount = newsItems?.length || 0;
+
   // Unified Sync Logic (Scheduled every 2 hours + Initial load)
   useEffect(() => {
     const triggerSync = async () => {
       if (!db || isSyncing || loading) return;
       
-      const lastSync = (meta as any)?.lastSyncAt?.toDate?.() || new Date(0);
+      const lastSync = new Date(lastSyncTimestamp);
       const now = new Date();
       const hoursSinceSync = (now.getTime() - lastSync.getTime()) / (1000 * 60 * 60);
 
       // Trigger if stale (2hrs) or empty registry
-      if (hoursSinceSync >= 2 || (!newsItems || newsItems.length === 0)) {
+      if (hoursSinceSync >= 2 || itemsCount === 0) {
         setIsSyncing(true);
         setErrorType(null);
         try {
@@ -105,7 +109,7 @@ export function CurrentNews({ className }: { className?: string }) {
 
     if (meta !== undefined) triggerSync();
     
-  }, [db, isSyncing, loading, meta, newsItems]);
+  }, [db, isSyncing, loading, lastSyncTimestamp, itemsCount, meta]);
 
   if (loading && !isSyncing) return (
     <div className={cn("flex flex-col gap-2 p-6 animate-pulse", className)}>
@@ -170,7 +174,7 @@ export function CurrentNews({ className }: { className?: string }) {
 
       <div className="flex items-center justify-between pt-3 border-t border-white/10 opacity-60">
         <span className="text-[8px] font-black uppercase text-white truncate max-w-[120px]">{activeNews.source}</span>
-        <div className="flex items-center pr-32">
+        <div className="flex items-center pr-48">
           <span className="text-[8px] font-black uppercase text-white flex items-center gap-1">
             <Zap className={cn("w-2.5 h-2.5", isSyncing && "animate-ping")} /> 
             {activeNews.translationStatus === 'Success' ? 'Translated' : 'Live Sync'}
