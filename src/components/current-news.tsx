@@ -3,9 +3,10 @@
 import React, { useMemo, useEffect, useState } from 'react';
 import { useCollection, useFirestore, useMemoFirebase, useDoc } from '@/firebase';
 import { collection, query, where, doc, setDoc, writeBatch, serverTimestamp, getDocs } from 'firebase/firestore';
-import { Radio, MapPin, Loader2, TrendingUp, ExternalLink, Clock, Zap, History } from 'lucide-react';
+import { Radio, MapPin, Loader2, TrendingUp, ExternalLink, Clock, Zap, History, Languages } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { syncNews } from '@/ai/flows/sync-news-flow';
+import { translateNews } from '@/ai/flows/translate-news-flow';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 
@@ -17,6 +18,9 @@ import { format } from 'date-fns';
 export function CurrentNews({ className }: { className?: string }) {
   const db = useFirestore();
   const [isSyncing, setIsSyncing] = useState(false);
+  const [isBangla, setIsBangla] = useState(false);
+  const [isTranslating, setIsTranslating] = useState(false);
+  const [banglaData, setBanglaData] = useState<{title: string, content: string} | null>(null);
 
   const metaRef = useMemoFirebase(() => {
     if (!db) return null;
@@ -72,6 +76,9 @@ export function CurrentNews({ className }: { className?: string }) {
             }, { merge: true });
 
             await batch.commit();
+            // Clear old translations when news refreshes
+            setBanglaData(null);
+            setIsBangla(false);
           }
         } catch (e) {
           console.error("Autonomous Sync Error:", e);
@@ -98,6 +105,34 @@ export function CurrentNews({ className }: { className?: string }) {
       return dateB - dateA;
     })[0];
   }, [newsItems]);
+
+  const handleTranslate = async () => {
+    if (isBangla) {
+      setIsBangla(false);
+      return;
+    }
+
+    if (banglaData) {
+      setIsBangla(true);
+      return;
+    }
+
+    if (!activeNews) return;
+
+    setIsTranslating(true);
+    try {
+      const result = await translateNews({
+        title: activeNews.title,
+        content: activeNews.content
+      });
+      setBanglaData(result);
+      setIsBangla(true);
+    } catch (e) {
+      console.error("Translation Failed", e);
+    } finally {
+      setIsTranslating(false);
+    }
+  };
 
   if (loading && !isSyncing) {
     return (
@@ -135,7 +170,18 @@ export function CurrentNews({ className }: { className?: string }) {
             {activeNews.scope === 'West Bengal' ? 'WB Chapter' : activeNews.scope === 'India' ? 'National Update' : 'Global Feed'}
           </span>
         </div>
-        {isSyncing && <Loader2 className="w-3.5 h-3.5 animate-spin text-[#CEFF00]/80" />}
+        <div className="flex items-center gap-2">
+           <button 
+             onClick={handleTranslate}
+             disabled={isTranslating}
+             className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-[#CEFF00] transition-all flex items-center gap-1.5"
+             title="Translate to Bangla"
+           >
+             {isTranslating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Languages className="w-3.5 h-3.5" />}
+             <span className="text-[9px] font-black uppercase tracking-widest">{isBangla ? 'ENG' : 'BN'}</span>
+           </button>
+           {isSyncing && <Loader2 className="w-3.5 h-3.5 animate-spin text-[#CEFF00]/80" />}
+        </div>
       </div>
 
       <div className="space-y-4">
@@ -147,12 +193,12 @@ export function CurrentNews({ className }: { className?: string }) {
         </div>
 
         <h3 className="text-xs md:text-lg font-headline font-bold text-white leading-tight drop-shadow-[0_4px_12px_rgba(0,0,0,1)] group-hover:text-[#CEFF00] transition-colors duration-500">
-          {activeNews.title}
+          {isBangla && banglaData ? banglaData.title : activeNews.title}
         </h3>
         
         <div className="relative pl-4 border-l-4 border-[#CEFF00]/40">
           <p className="text-[10px] md:text-xs text-white font-medium leading-relaxed italic drop-shadow-[0_2px_10px_rgba(0,0,0,1)]">
-            {activeNews.content}
+            {isBangla && banglaData ? banglaData.content : activeNews.content}
           </p>
         </div>
 
