@@ -9,12 +9,15 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { 
   Plus, Search, Trash2, Loader2, Newspaper,
   Zap, Globe, BrainCircuit, X, Languages, AlertTriangle, ShieldCheck
 } from 'lucide-react';
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle,
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose
 } from "@/components/ui/dialog";
 import { useToast } from '@/hooks/use-toast';
 import { syncNews, type SyncNewsOutput } from '@/ai/flows/sync-news-flow';
@@ -28,8 +31,23 @@ export default function InternalNewsManagement() {
   
   const [search, setSearch] = useState('');
   const [isSyncing, setIsSyncing] = useState(false);
+  const [isActionLoading, setIsActionLoading] = useState(false);
   const [harvestResult, setHarvestResult] = useState<SyncNewsOutput | null>(null);
   const [isViewingSuggestions, setIsViewingSuggestions] = useState(false);
+  const [isManualEntryOpen, setIsManualEntryOpen] = useState(false);
+
+  const [manualNews, setManualNews] = useState({
+    titleEn: '',
+    contentEn: '',
+    categoryEn: 'Human Rights',
+    titleBn: '',
+    contentBn: '',
+    categoryBn: 'মানবাধিকার',
+    source: 'HRAT Official',
+    url: '',
+    scope: 'India',
+    scopePriority: 2
+  });
 
   useEffect(() => {
     if (!authLoading && !user) router.push('/internal/login');
@@ -84,6 +102,49 @@ export default function InternalNewsManagement() {
     }
   };
 
+  const handleManualPublish = async () => {
+    if (!db || !manualNews.titleEn || !manualNews.contentEn) {
+      toast({ variant: "destructive", title: "Validation Error", description: "English Title and Content are required." });
+      return;
+    }
+
+    setIsActionLoading(true);
+    try {
+      await addDoc(collection(db, 'current_news'), {
+        originalEnglish: {
+          title: manualNews.titleEn,
+          content: manualNews.contentEn,
+          category: manualNews.categoryEn
+        },
+        bengaliTranslation: {
+          title: manualNews.titleBn || manualNews.titleEn,
+          content: manualNews.contentBn || manualNews.contentEn,
+          category: manualNews.categoryBn || 'সাধারণ'
+        },
+        translationStatus: manualNews.titleBn ? "Success" : "Pending",
+        source: manualNews.source,
+        url: manualNews.url || 'https://www.hrat-india.org',
+        scope: manualNews.scope,
+        scopePriority: manualNews.scopePriority,
+        isActive: true,
+        priority: 1,
+        createdAt: serverTimestamp(),
+        publishedBy: user?.email
+      });
+      toast({ title: "Authorized", description: "Manual article is now live." });
+      setIsManualEntryOpen(false);
+      setManualNews({
+        titleEn: '', contentEn: '', categoryEn: 'Human Rights',
+        titleBn: '', contentBn: '', categoryBn: 'মানবাধিকার',
+        source: 'HRAT Official', url: '', scope: 'India', scopePriority: 2
+      });
+    } catch (e) {
+      toast({ variant: "destructive", title: "Sync Failed" });
+    } finally {
+      setIsActionLoading(false);
+    }
+  };
+
   const handleDelete = async (id: string) => {
     if (!db) return;
     deleteDoc(doc(db, 'current_news', id)).then(() => toast({ title: "Purged" }));
@@ -102,6 +163,9 @@ export default function InternalNewsManagement() {
             </p>
           </div>
           <div className="flex gap-3">
+             <Button onClick={() => setIsManualEntryOpen(true)} variant="outline" className="bg-white/5 border-white/20 text-white hover:bg-white/10 h-11 px-6 rounded-xl font-bold gap-2">
+                <Plus className="w-4 h-4 text-accent" /> Add Manual Article
+             </Button>
              <Button onClick={handleFetchAiSuggestions} disabled={isSyncing} className="bg-primary hover:bg-secondary h-11 px-6 rounded-xl font-bold gap-2 shadow-xl">
                 {isSyncing ? <Loader2 className="animate-spin w-4 h-4" /> : <BrainCircuit className="w-4 h-4 text-accent" />} Trigger Harvest Audit
              </Button>
@@ -146,6 +210,83 @@ export default function InternalNewsManagement() {
          )}
       </section>
 
+      {/* Manual Entry Dialog */}
+      <Dialog open={isManualEntryOpen} onOpenChange={setIsManualEntryOpen}>
+        <DialogContent className="max-w-2xl rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden bg-white dark:bg-slate-950 flex flex-col max-h-[90vh]">
+          <DialogHeader className="p-8 bg-slate-900 text-white shrink-0 border-b-4 border-accent/20">
+            <DialogTitle className="text-2xl font-headline font-bold">Direct Broadcast Entry</DialogTitle>
+            <DialogDescription className="text-slate-400 uppercase tracking-widest text-[10px] font-black">Institutional News Registry Terminal</DialogDescription>
+          </DialogHeader>
+          <div className="flex-1 overflow-y-auto p-8 space-y-8 custom-scrollbar">
+            <div className="space-y-6">
+              <h3 className="text-[10px] font-black uppercase tracking-widest text-accent flex items-center gap-2">
+                <span className="w-6 h-px bg-accent" /> English Broadcast Metadata
+              </h3>
+              <div className="grid gap-4">
+                <div className="space-y-1.5">
+                  <Label className="text-[10px] uppercase font-bold text-slate-400">Headline (EN)</Label>
+                  <Input value={manualNews.titleEn} onChange={e => setManualNews({...manualNews, titleEn: e.target.value})} placeholder="Title in English..." className="h-11 rounded-xl" />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-[10px] uppercase font-bold text-slate-400">Content / Summary (EN)</Label>
+                  <Textarea value={manualNews.contentEn} onChange={e => setManualNews({...manualNews, contentEn: e.target.value})} placeholder="Detailed news in English..." className="min-h-[100px] rounded-xl" />
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-6 pt-6 border-t border-slate-100 dark:border-slate-800">
+              <h3 className="text-[10px] font-black uppercase tracking-widest text-emerald-500 flex items-center gap-2">
+                <span className="w-6 h-px bg-emerald-500" /> Bengali Translation (Manual Override)
+              </h3>
+              <div className="grid gap-4">
+                <div className="space-y-1.5">
+                  <Label className="text-[10px] uppercase font-bold text-slate-400">Headline (BN)</Label>
+                  <Input value={manualNews.titleBn} onChange={e => setManualNews({...manualNews, titleBn: e.target.value})} placeholder="শিরোনাম বাংলায়..." className="h-11 rounded-xl border-emerald-100" />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-[10px] uppercase font-bold text-slate-400">Content / Summary (BN)</Label>
+                  <Textarea value={manualNews.contentBn} onChange={e => setManualNews({...manualNews, contentBn: e.target.value})} placeholder="সংবাদ বিবরণ বাংলায়..." className="min-h-[100px] rounded-xl border-emerald-100" />
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-6 pt-6 border-t border-slate-100 dark:border-slate-800">
+              <h3 className="text-[10px] font-black uppercase tracking-widest text-indigo-500 flex items-center gap-2">
+                <span className="w-6 h-px bg-indigo-500" /> Scope & Logistics
+              </h3>
+              <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-1.5">
+                  <Label className="text-[10px] uppercase font-bold text-slate-400">Geographic Scope</Label>
+                  <Select value={manualNews.scope} onValueChange={v => setManualNews({...manualNews, scope: v, scopePriority: v === 'West Bengal' ? 1 : v === 'India' ? 2 : 3})}>
+                    <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="West Bengal">West Bengal</SelectItem>
+                      <SelectItem value="India">National (India)</SelectItem>
+                      <SelectItem value="World">International (World)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-[10px] uppercase font-bold text-slate-400">Official Source</Label>
+                  <Input value={manualNews.source} onChange={e => setManualNews({...manualNews, source: e.target.value})} className="h-11 rounded-xl" />
+                </div>
+                <div className="space-y-1.5 col-span-2">
+                  <Label className="text-[10px] uppercase font-bold text-slate-400">Reference URL (Optional)</Label>
+                  <Input value={manualNews.url} onChange={e => setManualNews({...manualNews, url: e.target.value})} placeholder="https://..." className="h-11 rounded-xl" />
+                </div>
+              </div>
+            </div>
+          </div>
+          <DialogFooter className="p-8 bg-slate-50 dark:bg-slate-900 border-t shrink-0">
+            <DialogClose asChild><Button variant="ghost" className="h-12 px-6 rounded-xl font-bold text-slate-500">Abort</Button></DialogClose>
+            <Button onClick={handleManualPublish} disabled={isActionLoading} className="h-12 px-10 rounded-xl bg-accent text-primary font-bold shadow-xl shadow-accent/20">
+              {isActionLoading ? <Loader2 className="animate-spin" /> : "Authorize Broadcast"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* AI Suggestions Dialog */}
       <Dialog open={isViewingSuggestions} onOpenChange={setIsViewingSuggestions}>
          <DialogContent className="max-w-4xl rounded-[3rem] p-0 overflow-hidden bg-slate-50 dark:bg-slate-950 h-[85vh] flex flex-col border-none shadow-2xl">
             <div className="p-8 bg-slate-900 text-white border-b-4 border-accent/20">
