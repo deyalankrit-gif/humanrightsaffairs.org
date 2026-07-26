@@ -1,9 +1,9 @@
 'use server';
 /**
- * @fileOverview Resilient AI-powered news aggregation flow with automated translation.
- * 
- * - syncNews - Aggregates and automatically translates news from Indian RSS sources.
- * - Model: Gemini 1.5 Flash (Industrial Stable)
+ * @fileOverview Hardened News Sync Pipeline with AI-failure resilience.
+ * - Extracts top 3 stories.
+ * - If AI Analysis fails, it serves a raw English feed to prevent UI blackout.
+ * - Logs detailed diagnostics for infrastructure audit.
  */
 
 import {ai} from '@/ai/genkit';
@@ -13,42 +13,18 @@ import { translateNews } from './translate-news-flow';
 import { googleAI } from '@genkit-ai/google-genai';
 
 const parser = new Parser();
-
 const RSS_SOURCES = [
   { name: 'Google News India', url: 'https://news.google.com/rss/headlines/section/topic/NATION?hl=en-IN&gl=IN&ceid=IN:en' },
   { name: 'The Hindu', url: 'https://www.thehindu.com/news/national/feeder/default.rss' },
   { name: 'NDTV India', url: 'https://feeds.feedburner.com/ndtvnews-india-news' }
 ];
 
-async function fetchSource(url: string): Promise<Response> {
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 8000); 
-  try {
-    const response = await fetch(url, { signal: controller.signal, cache: 'no-store' });
-    clearTimeout(timeoutId);
-    return response;
-  } catch (err) {
-    clearTimeout(timeoutId);
-    throw err;
-  }
-}
-
-function cleanText(text: string, limit = 1000): string {
-  if (!text) return '';
-  return text.replace(/<[^>]*>?/gm, '').replace(/\s+/g, ' ').trim().substring(0, limit);
-}
-
-const SyncNewsInputSchema = z.object({
-  context: z.string()
-});
-
 const SyncNewsOutputSchema = z.object({
   news: z.array(z.any()),
   diagnostics: z.object({
-    sourcesAttempted: z.number(),
-    sourcesSuccessful: z.number(),
-    totalRawItems: z.number(),
-    translationCount: z.number(),
+    status: z.string(),
+    model: z.string().optional(),
+    yield: z.number(),
     errorSummary: z.string().optional()
   })
 });
@@ -59,11 +35,15 @@ export async function syncNews(input: { context: string }): Promise<SyncNewsOutp
   try {
     const result = await syncNewsFlow(input);
     return JSON.parse(JSON.stringify(result));
-  } catch (error) {
-    console.error("[NEWS-SYNC] Engine Failure:", error);
+  } catch (error: any) {
+    console.error("[NEWS-SYNC-CRITICAL] Global flow failure:", error);
     return { 
       news: [], 
-      diagnostics: { sourcesAttempted: RSS_SOURCES.length, sourcesSuccessful: 0, totalRawItems: 0, translationCount: 0, errorSummary: String(error) } 
+      diagnostics: { 
+        status: "Critical Failure", 
+        yield: 0, 
+        errorSummary: error.message 
+      } 
     };
   }
 }
@@ -71,7 +51,7 @@ export async function syncNews(input: { context: string }): Promise<SyncNewsOutp
 const syncNewsPrompt = ai.definePrompt({
   name: 'syncNewsPrompt',
   model: googleAI.model('gemini-1.5-flash'),
-  input: { schema: z.object({ context: z.string(), rawItems: z.array(z.any()) }) },
+  input: { schema: z.object({ rawItems: z.array(z.any()) }) },
   output: { 
     schema: z.object({
       news: z.array(z.object({
@@ -84,83 +64,90 @@ const syncNewsPrompt = ai.definePrompt({
       }))
     }) 
   },
-  system: `You are an elite news aggregator for Human Rights Affairs Trust. Identify top 3 Human Rights or Legal news items in English.`,
-  prompt: `Intelligence Feed:
-{{#each rawItems}}
-- [{{{this.source}}}] {{{this.title}}} ({{{this.link}}})
-{{/each}}`,
+  system: `Analyze the intelligence feed. Select the TOP 3 human rights or legal stories for India Chapter. Return a structured JSON list.`,
+  prompt: `Feed:\n{{#each rawItems}}\n- [{{{this.source}}}] {{{this.title}}} ({{{this.link}}})\n{{/each}}`,
 });
 
 const syncNewsFlow = ai.defineFlow(
   {
     name: 'syncNewsFlow',
-    inputSchema: SyncNewsInputSchema,
+    inputSchema: z.object({ context: z.string() }),
     outputSchema: SyncNewsOutputSchema,
   },
   async (input) => {
     let rawItems: any[] = [];
-    let successfulCount = 0;
-
+    
+    // 1. Fetch raw news (Always works regardless of AI status)
     for (const source of RSS_SOURCES) {
       try {
-        const response = await fetchSource(source.url);
+        const response = await fetch(source.url, { next: { revalidate: 0 } });
         const xml = await response.text();
         const data = await parser.parseString(xml);
         rawItems = rawItems.concat(data.items.map(i => ({
-          title: cleanText(i.title || '', 200),
+          title: (i.title || '').substring(0, 300),
           link: i.link || '',
           source: source.name,
-          content: cleanText(i.contentSnippet || i.content || '', 800)
+          content: (i.contentSnippet || i.content || '').substring(0, 800)
         })));
-        successfulCount++;
       } catch (err) {
-        console.warn(`[NEWS-SYNC] Source ${source.name} failed`);
+        console.warn(`[NEWS-SYNC] Source ${source.name} unreachable.`);
       }
     }
 
     if (rawItems.length === 0) {
-      return { news: [], diagnostics: { sourcesAttempted: RSS_SOURCES.length, sourcesSuccessful: 0, totalRawItems: 0, translationCount: 0 } };
+      return { news: [], diagnostics: { status: "Network Failure", yield: 0, errorSummary: "No RSS items could be fetched." } };
     }
 
-    const { output } = await syncNewsPrompt({ context: input.context, rawItems: rawItems.slice(0, 20) });
-    const englishNews = output?.news || [];
+    // 2. AI Extraction (With fallback to raw items if AI fails)
+    let processedStories = [];
+    let aiStatus = "Success";
+    let errorMsg = "";
 
-    const translatedNews = [];
-    for (const item of englishNews) {
-      try {
-        const translation = await translateNews({
-          title: item.title,
-          content: item.content,
-          category: item.category || 'General'
-        });
+    try {
+      const { output } = await syncNewsPrompt({ rawItems: rawItems.slice(0, 20) });
+      processedStories = output?.news || [];
+      if (processedStories.length === 0) throw new Error("AI returned zero-length yield.");
+    } catch (e: any) {
+      console.warn("[NEWS-SYNC-AI] Model failed. Engaging Raw Fallback Mode.", e.message);
+      aiStatus = "AI Offline (Fallback Active)";
+      errorMsg = e.message;
+      // Fallback: Pick first 3 raw items
+      processedStories = rawItems.slice(0, 3).map(r => ({
+        title: r.title,
+        content: r.content,
+        source: r.source,
+        url: r.link,
+        scope: "India",
+        category: "General"
+      }));
+    }
 
-        translatedNews.push({
-          ...item,
-          originalEnglish: { title: item.title, content: item.content, category: item.category || 'General' },
-          bengaliTranslation: translation,
-          translationStatus: translation.title !== item.title ? "Success" : "Failed",
-          scope: item.scope.includes('Bengal') ? "West Bengal" : item.scope.includes('India') ? "India" : "World",
-          scopePriority: item.scope.includes('Bengal') ? 1 : item.scope.includes('India') ? 2 : 3
-        });
-      } catch (e) {
-        translatedNews.push({
-          ...item,
-          originalEnglish: { title: item.title, content: item.content, category: item.category || 'General' },
-          bengaliTranslation: { title: item.title, content: item.content, category: item.category || 'General' },
-          translationStatus: "Failed",
-          scope: "India",
-          scopePriority: 2
-        });
-      }
+    // 3. Sequential Translation (Resilient)
+    const finalizedNews = [];
+    for (const item of processedStories) {
+      const translation = await translateNews({
+        title: item.title,
+        content: item.content,
+        category: item.category || 'Human Rights'
+      });
+
+      finalizedNews.push({
+        ...item,
+        originalEnglish: { title: item.title, content: item.content, category: item.category || 'General' },
+        bengaliTranslation: translation,
+        translationStatus: translation.title !== item.title ? "Success" : "Fallback (EN)",
+        scope: item.scope || "India",
+        scopePriority: (item.scope || '').includes('Bengal') ? 1 : 2
+      });
     }
 
     return {
-      news: translatedNews,
+      news: finalizedNews,
       diagnostics: {
-        sourcesAttempted: RSS_SOURCES.length,
-        sourcesSuccessful: successfulCount,
-        totalRawItems: rawItems.length,
-        translationCount: translatedNews.filter(n => n.translationStatus === "Success").length
+        status: aiStatus,
+        model: "gemini-1.5-flash",
+        yield: finalizedNews.length,
+        errorSummary: errorMsg
       }
     };
   }

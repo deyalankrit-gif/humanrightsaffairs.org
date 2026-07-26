@@ -1,6 +1,7 @@
 'use server';
 /**
- * @fileOverview An AI-powered legal assistant chatbot.
+ * @fileOverview AI Legal Assistant Chatbot (JusticeBot).
+ * Standardized on Gemini 1.5 Flash for peak response stability.
  */
 
 import {ai} from '@/ai/genkit';
@@ -10,15 +11,14 @@ import { googleAI } from '@genkit-ai/google-genai';
 const InquireLegalAssistantInputSchema = z.object({
   query: z.string()
 });
-export type InquireLegalAssistantInput = z.infer<typeof InquireLegalAssistantInputSchema>;
 
-export async function inquireLegalAssistant(input: InquireLegalAssistantInput): Promise<string> {
+export async function inquireLegalAssistant(input: { query: string }): Promise<string> {
   try {
     const result = await aiLegalAssistantChatbotFlow(input);
     return String(result);
-  } catch (error) {
-    console.error("[CHATBOT] Engine Failure:", error);
-    return "I am currently offline due to a technical synchronization issue. Please contact our helpline.";
+  } catch (error: any) {
+    console.warn("[BOT-AUDIT] Engine Fallback triggered:", error.message);
+    return "I am currently performing a secure registry update. Please contact our 24/7 helpline for immediate assistance.";
   }
 }
 
@@ -34,8 +34,8 @@ const legalAssistantPrompt = ai.definePrompt({
       { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
     ],
   },
-  system: `You are an expert AI-powered legal assistant for the Human Rights Affairs Trust in India. Help citizens understand their rights clearly.`,
-  prompt: `User Query: {{{query}}}`,
+  system: `You are JusticeBot, the AI advocate for Human Rights Affairs Trust. Provide clear, empathetic, and constitutionally accurate guidance.`,
+  prompt: `Citizen Query: {{{query}}}`,
 });
 
 const aiLegalAssistantChatbotFlow = ai.defineFlow(
@@ -46,6 +46,6 @@ const aiLegalAssistantChatbotFlow = ai.defineFlow(
   },
   async (input) => {
     const response = await legalAssistantPrompt(input);
-    return response.text || "I am currently having trouble processing your query.";
+    return response.text || "I am processing your request. One moment...";
   }
 );

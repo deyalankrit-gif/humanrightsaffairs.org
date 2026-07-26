@@ -3,7 +3,7 @@
 import React, { useMemo, useEffect, useState } from 'react';
 import { useCollection, useFirestore, useMemoFirebase, useDoc } from '@/firebase';
 import { collection, query, where, doc, writeBatch, serverTimestamp, getDocs } from 'firebase/firestore';
-import { Radio, MapPin, Loader2, TrendingUp, ExternalLink, Clock, Zap, Languages, AlertTriangle } from 'lucide-react';
+import { Radio, MapPin, Loader2, TrendingUp, ExternalLink, Clock, Zap, Languages, AlertTriangle, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { syncNews } from '@/ai/flows/sync-news-flow';
 import { cn } from '@/lib/utils';
@@ -48,11 +48,12 @@ export function CurrentNews({ className }: { className?: string }) {
       const now = new Date();
       const hoursSinceSync = (now.getTime() - lastSync.getTime()) / (1000 * 60 * 60);
 
+      // Trigger if stale (6hrs) or empty
       if (hoursSinceSync >= 6 || (!newsItems || newsItems.length === 0)) {
         setIsSyncing(true);
         setErrorType(null);
         try {
-          const output = await syncNews({ context: "Autonomous daily sync" });
+          const output = await syncNews({ context: "Autonomous audit sync" });
           if (output?.news?.length > 0) {
             const batch = writeBatch(db);
             const currentActiveSnap = await getDocs(query(collection(db, 'current_news'), where('isActive', '==', true)));
@@ -62,14 +63,16 @@ export function CurrentNews({ className }: { className?: string }) {
               batch.set(doc(collection(db, 'current_news')), { ...item, isActive: true, createdAt: serverTimestamp() });
             });
 
-            batch.set(doc(db, 'current_news_state', 'registry'), { lastSyncAt: serverTimestamp(), status: 'Success' }, { merge: true });
+            batch.set(doc(db, 'current_news_state', 'registry'), { 
+              lastSyncAt: serverTimestamp(), 
+              status: output.diagnostics.status 
+            }, { merge: true });
+            
             await batch.commit();
           } else if (output?.diagnostics?.errorSummary) {
-             if (output.diagnostics.errorSummary.includes('404')) setErrorType('AI Model Unavailable');
-             else if (output.diagnostics.errorSummary.includes('429')) setErrorType('Rate Limit');
+             setErrorType(output.diagnostics.status);
           }
         } catch (e) {
-          console.error("Sync Fail:", e);
           setErrorType('Network Error');
         } finally {
           setIsSyncing(false);
@@ -83,18 +86,18 @@ export function CurrentNews({ className }: { className?: string }) {
   if (loading && !isSyncing) return (
     <div className={cn("flex flex-col gap-2 p-6 animate-pulse", className)}>
       <Loader2 className="w-5 h-5 animate-spin text-[#CEFF00]" />
-      <span className="text-[11px] font-black text-[#CEFF00] uppercase tracking-widest">Registry Sync...</span>
+      <span className="text-[11px] font-black text-[#CEFF00] uppercase tracking-widest">Registry Audit...</span>
     </div>
   );
 
-  if (errorType && (!activeNews)) return (
-    <div className={cn("p-6 text-red-400 flex items-center gap-2", className)}>
-      <AlertTriangle className="w-4 h-4" />
-      <span className="text-[10px] font-bold uppercase">{errorType}</span>
-    </div>
-  );
-
-  if (!activeNews) return null;
+  if (!activeNews) {
+    return errorType ? (
+      <div className={cn("p-6 text-red-400 flex items-center gap-2", className)}>
+        <AlertTriangle className="w-4 h-4" />
+        <span className="text-[10px] font-bold uppercase">{errorType}</span>
+      </div>
+    ) : null;
+  }
 
   const hasBangla = activeNews.bengaliTranslation && activeNews.translationStatus === 'Success';
   const displayData = isBangla && hasBangla ? activeNews.bengaliTranslation : activeNews.originalEnglish || activeNews;
@@ -105,16 +108,18 @@ export function CurrentNews({ className }: { className?: string }) {
         <div className="flex items-center gap-2.5">
           <TrendingUp className="w-5 h-5 text-[#CEFF00] animate-pulse" />
           <span className="text-[12px] font-black uppercase tracking-[0.3em] text-[#CEFF00]">
-            {activeNews.scope || 'Broadcast'}
+            {activeNews.scope || 'India'}
           </span>
         </div>
-        <button 
-          onClick={() => setIsBangla(!isBangla)}
-          className={cn("p-1.5 rounded-lg border transition-all flex items-center gap-1.5", isBangla ? "bg-[#CEFF00] text-primary" : "bg-white/5 text-[#CEFF00]")}
-        >
-          <Languages className="w-3.5 h-3.5" />
-          <span className="text-[9px] font-black">{isBangla ? 'ENG' : 'BN'}</span>
-        </button>
+        {hasBangla && (
+          <button 
+            onClick={() => setIsBangla(!isBangla)}
+            className={cn("p-1.5 rounded-lg border transition-all flex items-center gap-1.5", isBangla ? "bg-[#CEFF00] text-primary" : "bg-white/5 text-[#CEFF00]")}
+          >
+            <Languages className="w-3.5 h-3.5" />
+            <span className="text-[9px] font-black">{isBangla ? 'ENG' : 'BN'}</span>
+          </button>
+        )}
       </div>
 
       <div className="space-y-4">
@@ -132,7 +137,8 @@ export function CurrentNews({ className }: { className?: string }) {
       <div className="flex items-center justify-between pt-3 border-t border-white/10 opacity-60">
         <span className="text-[8px] font-black uppercase text-white">{activeNews.source}</span>
         <span className="text-[8px] font-black uppercase text-white flex items-center gap-1">
-          <Zap className={cn("w-2.5 h-2.5", isSyncing && "animate-ping")} /> {hasBangla ? 'Translated' : 'Verified'}
+          <Zap className={cn("w-2.5 h-2.5", isSyncing && "animate-ping")} /> 
+          {activeNews.translationStatus === 'Success' ? 'Live Sync' : 'Verified Feed'}
         </span>
       </div>
     </div>
