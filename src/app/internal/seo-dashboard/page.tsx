@@ -61,6 +61,7 @@ export default function SeoDashboard() {
   const { toast } = useToast()
   const [mounted, setMounted] = useState(false)
   const [isAuditing, setIsAuditing] = useState(false)
+  const [isSimulatingAi, setIsSimulatingAi] = useState(false)
 
   useEffect(() => {
     setMounted(true)
@@ -87,6 +88,23 @@ export default function SeoDashboard() {
         description: "Registry health verified. 3 technical conflicts identified.",
       })
     }, 2500)
+  }
+
+  const handleAiSimulation = () => {
+    setIsSimulatingAi(true)
+    toast({
+      title: "AI Synthesis Initialized",
+      description: "Modeling discovery probability across Gemini and SearchGPT nodes...",
+    })
+    
+    // Simulate AI processing
+    setTimeout(() => {
+      setIsSimulatingAi(false)
+      toast({
+        title: "Simulation Success",
+        description: "94% Discovery probability confirmed for 'Human Rights India' entities.",
+      })
+    }, 3000)
   }
 
   if (!mounted || authLoading || !user) {
@@ -279,7 +297,7 @@ export default function SeoDashboard() {
               </div>
            </TabsContent>
 
-           <TabsContent value="ai" className="animate-in slide-in-from-right-4 duration-500">
+           <TabsContent value="ai" className="animate-in fade-in slide-in-from-right-4 duration-500">
               <div className="grid lg:grid-cols-3 gap-8">
                  <Card className="lg:col-span-1 border-none shadow-sm rounded-[2.5rem] bg-white dark:bg-slate-900 p-8 space-y-8">
                     <div className="space-y-2">
@@ -307,12 +325,23 @@ export default function SeoDashboard() {
                  <Card className="lg:col-span-2 border-none shadow-sm rounded-[2.5rem] bg-slate-900 text-white p-10 relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-64 h-64 bg-accent/5 rounded-full -mr-32 -mt-32 blur-3xl"></div>
                     <div className="relative z-10 space-y-10">
-                       <div className="flex items-center gap-4">
-                          <Bot className="w-10 h-10 text-accent animate-float" />
-                          <div>
-                             <h3 className="text-2xl font-headline font-bold">AI Search Optimization</h3>
-                             <p className="text-slate-400 text-xs uppercase tracking-[0.2em] font-bold">Semantic Entity Mapping</p>
+                       <div className="flex items-center justify-between gap-4">
+                          <div className="flex items-center gap-4">
+                             <Bot className="w-10 h-10 text-accent animate-float" />
+                             <div>
+                                <h3 className="text-2xl font-headline font-bold">AI Search Optimization</h3>
+                                <p className="text-slate-400 text-xs uppercase tracking-[0.2em] font-bold">Semantic Entity Mapping</p>
+                             </div>
                           </div>
+                          <Button 
+                            variant="outline" 
+                            onClick={handleAiSimulation}
+                            disabled={isSimulatingAi}
+                            className="h-9 px-6 rounded-lg text-[10px] font-bold border-white/20 text-white hover:bg-accent hover:text-primary transition-all gap-2"
+                          >
+                            {isSimulatingAi ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Cpu className="w-3.5 h-3.5" />}
+                            {isSimulatingAi ? "Simulating..." : "Run AI Simulation"}
+                          </Button>
                        </div>
 
                        <div className="grid md:grid-cols-2 gap-8">
@@ -353,7 +382,6 @@ export default function SeoDashboard() {
                              <Cpu className="w-4 h-4 text-slate-600" />
                              <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">AI Search Engine Ready</span>
                           </div>
-                          <Button variant="outline" className="h-9 px-6 rounded-lg text-[10px] border-white/10 text-white hover:bg-white/10">Run AI Simulation</Button>
                        </div>
                     </div>
                  </Card>
