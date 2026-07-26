@@ -12,6 +12,7 @@ import { cn } from '@/lib/utils';
 /**
  * CurrentNews: Real-time institutional news broadcast node.
  * Features: 2-hour autonomous sync, English/Bengali toggle, and tactical layout.
+ * Updated: Small translation button repositioned next to story examination.
  */
 export function CurrentNews({ className }: { className?: string }) {
   const db = useFirestore();
@@ -104,7 +105,7 @@ export function CurrentNews({ className }: { className?: string }) {
 
     if (meta !== undefined) triggerSync();
     
-  }, [db, isSyncing, loading, meta]);
+  }, [db, isSyncing, loading, meta, newsItems]);
 
   if (loading && !isSyncing) return (
     <div className={cn("flex flex-col gap-2 p-6 animate-pulse", className)}>
@@ -144,17 +145,20 @@ export function CurrentNews({ className }: { className?: string }) {
           {displayData.content}
         </p>
         
-        <div className="flex items-center gap-3 pt-2">
-          <Button asChild variant="outline" className="h-9 w-fit rounded-xl border-[#CEFF00]/40 bg-[#CEFF00]/5 text-[#CEFF00] hover:bg-[#CEFF00] hover:text-primary text-[10px] font-black uppercase transition-all">
-            <a href={activeNews.url} target="_blank">Examine Story <ExternalLink className="w-3 h-3 ml-2" /></a>
+        <div className="flex items-center gap-2.5 pt-2">
+          <Button asChild variant="outline" className="h-8 w-fit rounded-xl border-[#CEFF00]/40 bg-[#CEFF00]/5 text-[#CEFF00] hover:bg-[#CEFF00] hover:text-primary text-[10px] font-black uppercase transition-all shadow-sm">
+            <a href={activeNews.url} target="_blank">Examine Story <ExternalLink className="w-3 h-3 ml-1.5" /></a>
           </Button>
           
           {hasBangla && (
             <button 
               onClick={() => setIsBangla(!isBangla)}
+              title={isBangla ? "Switch to English" : "বাংলায় অনুবাদ করুন"}
               className={cn(
-                "h-9 px-3 rounded-xl border transition-all flex items-center gap-2 shadow-lg", 
-                isBangla ? "bg-[#CEFF00] text-primary border-[#CEFF00]" : "bg-white/5 text-[#CEFF00] border-white/10 hover:bg-white/10"
+                "h-8 px-3 rounded-xl border transition-all flex items-center gap-1.5 shadow-md active:scale-95", 
+                isBangla 
+                  ? "bg-[#CEFF00] text-primary border-[#CEFF00]" 
+                  : "bg-white/5 text-[#CEFF00] border-white/10 hover:bg-white/10"
               )}
             >
               <Languages className="w-3.5 h-3.5" />
