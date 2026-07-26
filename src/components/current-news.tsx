@@ -215,7 +215,7 @@ export function CurrentNews({ className }: { className?: string }) {
         </div>
       </div>
 
-      <div className="flex items-center justify-between pt-3 border-t border-white/10 opacity-60">
+      <div className="flex items-center justify-between pt-3 border-t border-white/10 opacity-60 pr-20">
         <span className="text-[8px] font-black uppercase text-white truncate max-w-[150px]">{activeNews.source}</span>
         <div className="flex items-center">
           <span className="text-[8px] font-black uppercase text-white flex items-center gap-1">
