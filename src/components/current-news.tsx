@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo, useEffect, useState } from 'react';
@@ -95,7 +94,8 @@ export function CurrentNews({ className }: { className?: string }) {
     };
 
     if (meta !== undefined) triggerSync();
-  }, [meta, db, newsItems, activeNews, isSyncing, loading]);
+    // Dependency array fixed to have constant size
+  }, [db, isSyncing, loading, meta, activeNews, newsItems]);
 
   if (loading && !isSyncing) {
     return (
@@ -181,9 +181,9 @@ export function CurrentNews({ className }: { className?: string }) {
       <div className="flex items-center justify-between pt-3 border-t border-white/20 opacity-60">
         <div className="flex items-center gap-2">
            <History className="w-3 h-3 text-white" />
-           <span className="text-[8px] font-black uppercase tracking-widest text-white">Verified Feed</span>
+           <span className="text-[8px] font-black uppercase tracking-widest text-white pr-4">Verified Feed</span>
         </div>
-        <div className="flex items-center gap-2 mr-10">
+        <div className="flex items-center gap-2">
            <Zap className={cn("w-3 h-3 text-[#CEFF00]", isSyncing && "animate-ping")} />
            <span className="text-[8px] font-black uppercase tracking-widest text-white">
              {activeNews.translationStatus === 'Success' ? 'Translated' : 'Live Sync'}
