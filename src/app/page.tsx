@@ -1,3 +1,4 @@
+
 import Image from 'next/image'
 import Link from 'next/link'
 import { ChairmanMessage } from '@/components/chairman-message'
@@ -69,7 +70,7 @@ export default function Home() {
     <main className="min-h-screen relative overflow-x-hidden">
       <BackgroundDecor />
       
-      <section className="relative min-h-[90vh] md:min-h-screen flex flex-col items-center pt-24 md:pt-28 pb-20 px-4">
+      <section className="relative min-h-[90vh] md:min-h-screen flex flex-col items-center pt-6 md:pt-10 pb-20 px-4">
         <div className="absolute inset-0 z-0">
           <Image 
             src="/Human%20R2.jpeg" 
