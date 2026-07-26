@@ -334,12 +334,11 @@ export default function SeoDashboard() {
                              </div>
                           </div>
                           <Button 
-                            variant="outline" 
                             onClick={handleAiSimulation}
                             disabled={isSimulatingAi}
-                            className="h-9 px-6 rounded-lg text-[10px] font-bold border-white/20 text-white hover:bg-accent hover:text-primary transition-all gap-2"
+                            className="h-10 px-6 rounded-xl text-[10px] font-black uppercase tracking-widest bg-accent text-primary hover:bg-secondary hover:text-white transition-all gap-2 shadow-xl shadow-accent/20 border-none"
                           >
-                            {isSimulatingAi ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Cpu className="w-3.5 h-3.5" />}
+                            {isSimulatingAi ? <Loader2 className="w-4 h-4 animate-spin" /> : <Cpu className="w-4 h-4" />}
                             {isSimulatingAi ? "Simulating..." : "Run AI Simulation"}
                           </Button>
                        </div>
