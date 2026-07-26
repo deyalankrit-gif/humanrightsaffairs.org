@@ -14,6 +14,8 @@ import { cn } from '@/lib/utils';
  */
 export function CurrentNews({ className }: { className?: string }) {
   const db = useFirestore();
+  // Destructure loading to prevent firing writes before auth resolves
+  const { user, loading: authLoading } = useUser();
   const [isSyncing, setIsSyncing] = useState(false);
   const [isBangla, setIsBangla] = useState(false);
 
@@ -93,7 +95,7 @@ export function CurrentNews({ className }: { className?: string }) {
     };
 
     if (meta !== undefined) triggerSync();
-  }, [db, isSyncing, loading, meta ? 1 : 0]); // Stable dependency on meta presence
+  }, [db, isSyncing, loading, meta ? 1 : 0]); 
 
   if (loading && !isSyncing) {
     return (
@@ -181,7 +183,7 @@ export function CurrentNews({ className }: { className?: string }) {
            <History className="w-3 h-3 text-white" />
            <span className="text-[8px] font-black uppercase tracking-widest text-white pr-4">Verified Feed</span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 pr-6">
            <Zap className={cn("w-3 h-3 text-[#CEFF00]", isSyncing && "animate-ping")} />
            <span className="text-[8px] font-black uppercase tracking-widest text-white">
              {activeNews.translationStatus === 'Success' ? 'Translated' : 'Live Sync'}
@@ -191,3 +193,5 @@ export function CurrentNews({ className }: { className?: string }) {
     </div>
   );
 }
+
+import { useUser } from '@/firebase';
