@@ -81,8 +81,8 @@ export default function Home() {
           <div className="absolute inset-0 bg-gradient-to-b from-primary/40 via-primary/20 to-primary/60 dark:from-slate-950/70 dark:via-slate-950/50 dark:to-slate-950/80"></div>
         </div>
 
-        {/* Intelligence Node (Elevated News Feed - Repositioned higher and to the left) */}
-        <div className="absolute top-6 left-6 z-20 hidden md:flex flex-col">
+        {/* Intelligence Node (Elevated News Feed - Repositioned higher and to the left maximum) */}
+        <div className="absolute top-2 left-0 z-20 hidden md:flex flex-col">
           <CurrentNews />
         </div>
 
