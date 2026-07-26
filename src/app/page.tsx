@@ -86,6 +86,13 @@ export default function Home() {
           <CurrentNews />
         </div>
 
+        {/* NITI Aayog Registration Claim (Absolute Top Center - Maximum Height) */}
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 w-full text-center pointer-events-none px-4">
+          <p className="text-[#D4AF37] font-bold text-[8px] sm:text-xs md:text-base uppercase tracking-[0.2em] md:tracking-[0.25em] drop-shadow-lg animate-fade-in">
+            Government of India ( Niti Aayog Registered )
+          </p>
+        </div>
+
         {/* Institutional Identity Node (Top Right) */}
         <div className="absolute top-8 right-8 z-20 hidden md:flex items-center gap-6 animate-in fade-in slide-in-from-right-4 duration-1000">
           <div className="flex flex-col text-white text-right">
@@ -101,11 +108,6 @@ export default function Home() {
         <div className="container mx-auto px-0 md:px-4 relative z-10 text-white text-center">
           <div className="max-w-5xl mx-auto space-y-4 md:space-y-6 flex flex-col items-center">
             
-            {/* Top Registration Text */}
-            <p className="text-[#D4AF37] font-bold text-[8px] sm:text-xs md:text-base uppercase tracking-[0.2em] md:tracking-[0.25em] drop-shadow-lg animate-fade-in">
-              Government of India ( Niti Aayog Registered )
-            </p>
-
             {/* Logos and Flag */}
             <div className="flex flex-col items-center gap-4">
               <IndianFlag />
