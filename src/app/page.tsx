@@ -110,7 +110,6 @@ export default function Home() {
             
             {/* Logos and Flag */}
             <div className="flex flex-col items-center gap-4">
-              <IndianFlag />
               <div className="relative w-full max-w-[150px] h-[80px] sm:max-w-[200px] sm:h-[100px] md:max-w-[500px] md:h-[250px] transition-all duration-700">
                 <Image 
                   src="/niti2.png" 
@@ -119,6 +118,7 @@ export default function Home() {
                   className="object-contain"
                 />
               </div>
+              <IndianFlag />
             </div>
 
             {/* Main Headlines */}
