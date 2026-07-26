@@ -62,6 +62,8 @@ export default function SeoDashboard() {
   const [mounted, setMounted] = useState(false)
   const [isAuditing, setIsAuditing] = useState(false)
   const [isSimulatingAi, setIsSimulatingAi] = useState(false)
+  const [isConnectingSearchConsole, setIsConnectingSearchConsole] = useState(false)
+  const [isConnectingGA4, setIsConnectingGA4] = useState(false)
 
   useEffect(() => {
     setMounted(true)
@@ -77,7 +79,7 @@ export default function SeoDashboard() {
     setIsAuditing(true)
     toast({
       title: "Audit Protocol Initialized",
-      description: "Scanning technical headers, semantic depth, and AI indices.",
+      description: "Scanning technical headers, semantic depth, and AI indices...",
     })
 
     // Simulate enterprise audit processing time
@@ -105,6 +107,38 @@ export default function SeoDashboard() {
         description: "94% Discovery probability confirmed for 'Human Rights India' entities.",
       })
     }, 3000)
+  }
+
+  const handleConnectSearchConsole = () => {
+    setIsConnectingSearchConsole(true)
+    toast({
+      title: "Connecting Search Console",
+      description: "Authenticating with Google Search Console API...",
+    })
+    setTimeout(() => {
+      setIsConnectingSearchConsole(false)
+      toast({
+        title: "Connection Delayed",
+        variant: "destructive",
+        description: "Property 'hrat-india.org' requires DNS verification. Please check environment registry.",
+      })
+    }, 2000)
+  }
+
+  const handleConnectGA4 = () => {
+    setIsConnectingGA4(true)
+    toast({
+      title: "Activating GA4 Node",
+      description: "Initializing global tracking stream for G-XXXXXXXXXX...",
+    })
+    setTimeout(() => {
+      setIsConnectingGA4(false)
+      toast({
+        title: "Configuration Incomplete",
+        variant: "destructive",
+        description: "Measurement ID not found in secure environment vault.",
+      })
+    }, 2000)
   }
 
   if (!mounted || authLoading || !user) {
@@ -497,7 +531,15 @@ export default function SeoDashboard() {
                        <p className="text-sm text-slate-500 leading-relaxed italic">"Direct access to Google's indexing data, clicks, and impressions metadata."</p>
                     </div>
                     <Badge variant="outline" className="bg-slate-100 dark:bg-slate-800 text-slate-400 border-none font-black text-[9px] tracking-widest px-4 h-6">WAITING FOR CONNECTION</Badge>
-                    <Button variant="outline" className="w-full h-12 rounded-xl border-slate-200 font-bold text-xs uppercase tracking-widest">Connect Property</Button>
+                    <Button 
+                      onClick={handleConnectSearchConsole}
+                      disabled={isConnectingSearchConsole}
+                      variant="outline" 
+                      className="w-full h-12 rounded-xl border-slate-200 font-bold text-xs uppercase tracking-widest gap-2"
+                    >
+                      {isConnectingSearchConsole ? <Loader2 className="w-4 h-4 animate-spin" /> : <LinkIcon className="w-4 h-4" />}
+                      {isConnectingSearchConsole ? "Establishing..." : "Connect Property"}
+                    </Button>
                  </Card>
 
                  <Card className="border-none shadow-sm rounded-[2.5rem] bg-white dark:bg-slate-900 p-10 flex flex-col items-center text-center space-y-6">
@@ -509,7 +551,15 @@ export default function SeoDashboard() {
                        <p className="text-sm text-slate-500 leading-relaxed italic">"Real-time event tracking and behavioral flow analytics for all visitors."</p>
                     </div>
                     <Badge variant="outline" className="bg-slate-100 dark:bg-slate-800 text-slate-400 border-none font-black text-[9px] tracking-widest px-4 h-6">WAITING FOR CONNECTION</Badge>
-                    <Button variant="outline" className="w-full h-12 rounded-xl border-slate-200 font-bold text-xs uppercase tracking-widest">Activate GA4 Node</Button>
+                    <Button 
+                      onClick={handleConnectGA4}
+                      disabled={isConnectingGA4}
+                      variant="outline" 
+                      className="w-full h-12 rounded-xl border-slate-200 font-bold text-xs uppercase tracking-widest gap-2"
+                    >
+                      {isConnectingGA4 ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
+                      {isConnectingGA4 ? "Activating..." : "Activate GA4 Node"}
+                    </Button>
                  </Card>
               </div>
            </TabsContent>
