@@ -75,12 +75,12 @@ const translateNewsPrompt = ai.definePrompt({
   },
   system: `You are an expert human rights news translator specializing in English to standard Bengali (Indian West Bengal context).
   
-  GUIDELINES:
+  MANDATORY GUIDELINES:
   1. Translate the Headline, Category, and Summary accurately into Bengali script (UTF-8).
-  2. Maintain a formal, journalistic, and institutional tone.
-  3. Ensure legal terms (e.g., 'Constitution', 'Detention', 'High Court') are translated into their formal Bengali equivalents used by HRAT.
-  4. If you cannot translate a specific name, transliterate it.
-  5. Your response must be in valid Bengali script.`,
+  2. Maintain a formal, journalistic, and institutional tone suitable for HRAT.
+  3. Ensure legal terms (e.g., 'Constitution', 'Detention', 'High Court') are translated into their formal Bengali equivalents.
+  4. Your response MUST be in Bengali script. DO NOT return English text.
+  5. If a name or place is not translatable, transliterate it into Bengali script.`,
   prompt: `Translate the following institutional intelligence into Bengali:
 
 Headline: {{{title}}}

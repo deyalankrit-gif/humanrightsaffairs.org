@@ -182,7 +182,7 @@ export function CurrentNews({ className }: { className?: string }) {
            <History className="w-3 h-3 text-white" />
            <span className="text-[8px] font-black uppercase tracking-widest text-white pr-10">Verified Feed</span>
         </div>
-        <div className="flex items-center gap-2 pr-10">
+        <div className="flex items-center gap-2 pr-24">
            <Zap className={cn("w-3 h-3 text-[#CEFF00]", isSyncing && "animate-ping")} />
            <span className="text-[8px] font-black uppercase tracking-widest text-white">
              {activeNews.translationStatus === 'Success' ? 'Translated' : 'Live Sync'}
