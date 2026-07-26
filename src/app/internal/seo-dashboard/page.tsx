@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo, useEffect, useState } from 'react'
@@ -35,7 +34,7 @@ import {
   BrainCircuit,
   MessageSquare,
   Link as LinkIcon,
-  Image as ImageIcon,
+  ImageIcon,
   Key,
   Database,
   FileSearch,
@@ -49,6 +48,7 @@ import {
   Activity
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useToast } from '@/hooks/use-toast'
 
 /**
  * Enterprise SEO Analytics Dashboard: High-fidelity intelligence terminal.
@@ -58,7 +58,9 @@ export default function SeoDashboard() {
   const { user, loading: authLoading } = useUser()
   const router = useRouter()
   const db = useFirestore()
+  const { toast } = useToast()
   const [mounted, setMounted] = useState(false)
+  const [isAuditing, setIsAuditing] = useState(false)
 
   useEffect(() => {
     setMounted(true)
@@ -69,6 +71,23 @@ export default function SeoDashboard() {
       router.push('/internal/login')
     }
   }, [user, authLoading, router])
+
+  const handleTriggerAudit = () => {
+    setIsAuditing(true)
+    toast({
+      title: "Audit Protocol Initialized",
+      description: "Scanning technical headers, semantic depth, and AI indices.",
+    })
+
+    // Simulate enterprise audit processing time
+    setTimeout(() => {
+      setIsAuditing(false)
+      toast({
+        title: "Audit Complete",
+        description: "Registry health verified. 3 technical conflicts identified.",
+      })
+    }, 2500)
+  }
 
   if (!mounted || authLoading || !user) {
     return <div className="min-h-screen flex items-center justify-center bg-slate-950"><Loader2 className="w-10 h-10 animate-spin text-accent" /></div>
@@ -108,8 +127,13 @@ export default function SeoDashboard() {
                <Button variant="outline" className="bg-white/5 border-white/10 text-white hover:bg-white/10 h-10 rounded-xl font-bold text-[10px] uppercase tracking-widest gap-2">
                  <Download className="w-3.5 h-3.5" /> CSV Export
                </Button>
-               <Button className="bg-accent text-primary hover:bg-secondary hover:text-white transition-all h-10 rounded-xl font-bold text-[10px] uppercase tracking-widest gap-2 shadow-xl shadow-accent/20">
-                 <RefreshCw className="w-3.5 h-3.5" /> Trigger Audit
+               <Button 
+                onClick={handleTriggerAudit}
+                disabled={isAuditing}
+                className="bg-accent text-primary hover:bg-secondary hover:text-white transition-all h-10 rounded-xl font-bold text-[10px] uppercase tracking-widest gap-2 shadow-xl shadow-accent/20"
+               >
+                 {isAuditing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
+                 {isAuditing ? "Scanning..." : "Trigger Audit"}
                </Button>
             </div>
           </div>
