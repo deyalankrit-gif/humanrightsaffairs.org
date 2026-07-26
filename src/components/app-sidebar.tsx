@@ -52,7 +52,9 @@ import {
   HardDrive,
   Building,
   ClipboardList,
-  Newspaper
+  Newspaper,
+  Zap,
+  Search
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -77,6 +79,7 @@ const topAnalyticsLinksConfig = [
   { name: 'Donation Analytics', href: '/internal/analytics', icon: LayoutDashboard, permission: 'analytics' },
   { name: 'Member Analytics', href: '/internal/member-analytics', icon: BarChart, permission: 'memberAnalytics' },
   { name: 'Website Visitors', href: '/internal/visitors', icon: BarChart3, permission: 'visitors' },
+  { name: 'SEO Analytics Hub', href: '/internal/seo-dashboard', icon: Search, permission: 'seoDashboard' },
 ]
 
 const adminLinksConfig = [

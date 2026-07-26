@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useEffect, useState } from 'react'
@@ -5,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { initializeApp, deleteApp } from 'firebase/app'
 import { getAuth, createUserWithEmailAndPassword, updateProfile, deleteUser } from 'firebase/auth'
 import { firebaseConfig } from '@/firebase/config'
-import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase'
+import { useUser, useCollection, useFirestore, useMemoFirebase } from '@/firebase'
 import { collection, query, orderBy, doc, setDoc, deleteDoc, serverTimestamp, updateDoc } from 'firebase/firestore'
 import { Footer } from '@/components/footer'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -63,12 +64,12 @@ const MODULES = [
   { id: 'financeProjects', label: 'Project Accounting' },
   { id: 'financeAssets', label: 'Asset Registry' },
   { id: 'financeCompliance', label: 'Tax & Compliance' },
+  { id: 'seoDashboard', label: 'SEO Analytics Hub' },
   { id: 'analytics', label: 'Donation Analytics' },
   { id: 'memberAnalytics', label: 'Member Analytics' },
   { id: 'visitors', label: 'Website Visitors' },
   { id: 'members', label: 'Member Directory' },
   { id: 'renewals', label: 'Member Renewals' },
-  { id: 'visitors', label: 'Website Visitors' },
   { id: 'accounts', label: 'Accounts Management' },
   { id: 'expenses', label: 'Expenses Tracking' },
   { id: 'applications', label: 'Membership Apps' },
