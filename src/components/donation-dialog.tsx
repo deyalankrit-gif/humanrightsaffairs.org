@@ -51,6 +51,7 @@ import { errorEmitter } from '@/firebase/error-emitter'
 import { FirestorePermissionError, type SecurityRuleContext } from '@/firebase/errors'
 import { PlaceHolderImages } from '@/lib/placeholder-images'
 import { useToast } from '@/hooks/use-toast'
+import { format } from 'path'
 
 const formSchema = z.object({
   name: z.string().min(2, "Name is required"),

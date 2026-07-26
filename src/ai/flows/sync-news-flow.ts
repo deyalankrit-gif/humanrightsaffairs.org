@@ -1,13 +1,13 @@
 'use server';
 /**
  * @fileOverview Hardened News Sync Pipeline with sequential translation.
- * Optimized for industrial reliability using Gemini 2.0 Flash.
+ * Optimized for industrial reliability using Gemini 2.5 Flash.
  */
 
 import {ai} from '@/ai/genkit';
 import {z} from 'zod';
 import Parser from 'rss-parser';
-import { translateNews } from './translate-news-flow';
+import { translateNews, hasBengali } from './translate-news-flow';
 import { googleAI } from '@genkit-ai/google-genai';
 
 const parser = new Parser();
@@ -48,7 +48,7 @@ export async function syncNews(input: { context: string }): Promise<SyncNewsOutp
 
 const syncNewsPrompt = ai.definePrompt({
   name: 'syncNewsPrompt',
-  model: googleAI.model('gemini-2.0-flash'),
+  model: googleAI.model('gemini-2.5-flash'),
   input: { schema: z.object({ rawItems: z.array(z.any()) }) },
   output: { 
     schema: z.object({
@@ -134,8 +134,8 @@ const syncNewsFlow = ai.defineFlow(
         category: item.category || 'Human Rights'
       });
 
-      // Status must match institutional registry enum: ["Success", "Failed", "Pending"]
-      const isSuccess = translation.title !== item.title;
+      // Await the hasBengali check as it is now an async Server Action
+      const isSuccess = (await hasBengali(translation.title)) || (await hasBengali(translation.content));
 
       finalizedNews.push({
         ...item,
@@ -155,7 +155,7 @@ const syncNewsFlow = ai.defineFlow(
       news: finalizedNews,
       diagnostics: {
         status: aiStatus,
-        model: "gemini-2.0-flash",
+        model: "gemini-2.5-flash",
         yield: finalizedNews.length,
         errorSummary: errorMsg
       }

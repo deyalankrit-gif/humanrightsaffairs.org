@@ -24,7 +24,7 @@ export async function inquireLegalAssistant(input: { query: string }): Promise<s
 
 const legalAssistantPrompt = ai.definePrompt({
   name: 'legalAssistantPrompt',
-  model: googleAI.model('gemini-2.0-flash'),
+  model: googleAI.model('gemini-2.5-flash'),
   input: { schema: InquireLegalAssistantInputSchema },
   config: {
     safetySettings: [

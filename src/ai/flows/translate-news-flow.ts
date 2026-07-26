@@ -1,7 +1,7 @@
 'use server';
 /**
  * @fileOverview High-fidelity translation engine for Human Rights news.
- * Optimized for natural, fluent Bengali Unicode generation using Gemini 2.0 Flash.
+ * Optimized for natural, fluent Bengali Unicode generation using Gemini 2.5 Flash.
  */
 
 import {ai} from '@/ai/genkit';
@@ -23,27 +23,41 @@ const TranslateNewsOutputSchema = z.object({
 export type TranslateNewsOutput = z.infer<typeof TranslateNewsOutputSchema>;
 
 /**
+ * Checks whether a string contains any Bengali Unicode script characters.
+ * Made async to comply with Next.js Server Action requirements for exported functions.
+ */
+export async function hasBengali(text: string): Promise<boolean> {
+  return /[\u0980-\u09FF]/.test(text);
+}
+
+/**
  * translateNews - High-fidelity AI translation flow
  */
 export async function translateNews(input: z.infer<typeof TranslateNewsInputSchema>): Promise<TranslateNewsOutput> {
   try {
     const { output } = await translateNewsPrompt(input);
-    
-    if (!output || !output.title || output.title === input.title) {
-      throw new Error("Translation parity detected. AI returned original text.");
+
+    if (!output || !output.title || !output.content) {
+      throw new Error("Empty or malformed output from AI Engine.");
     }
-    
-    return JSON.parse(JSON.stringify(output));
+
+    // Only treat this as a failure if NEITHER title nor content contains
+    // any Bengali script at all.
+    const hasScript = (await hasBengali(output.title)) || (await hasBengali(output.content));
+    if (!hasScript) {
+      throw new Error("Translation parity detected. AI returned non-Bengali text.");
+    }
+
+    return output;
   } catch (error: any) {
     console.error("[TRANSLATE-CRITICAL] AI Engine Error:", error);
-    // Return original if AI fails to prevent UI crash
     return { title: input.title, content: input.content, category: input.category };
   }
 }
 
 const translateNewsPrompt = ai.definePrompt({
   name: 'translateNewsPrompt',
-  model: googleAI.model('gemini-2.0-flash'),
+  model: googleAI.model('gemini-2.5-flash'),
   input: {schema: TranslateNewsInputSchema},
   output: {schema: TranslateNewsOutputSchema},
   config: {

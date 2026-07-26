@@ -41,7 +41,7 @@ export async function aiDocumentSearch(input: z.infer<typeof AiDocumentSearchInp
 
 const aiDocumentSearchPrompt = ai.definePrompt({
   name: 'aiDocumentSearchPrompt',
-  model: googleAI.model('gemini-2.0-flash'),
+  model: googleAI.model('gemini-2.5-flash'),
   input: {schema: AiDocumentSearchInputSchema},
   output: {schema: AiDocumentSearchOutputSchema},
   config: {

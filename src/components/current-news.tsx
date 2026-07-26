@@ -13,7 +13,7 @@ import { cn } from '@/lib/utils';
 /**
  * CurrentNews: Real-time institutional news broadcast node.
  * Features: 2-hour autonomous sync, persistent AI translation, and fixed layout.
- * Updated: Gemini 2.0 Flash integration and refined footer spacing.
+ * Updated: Fixed text collision in footer and upgraded to Gemini 2.5 Flash.
  */
 export function CurrentNews({ className }: { className?: string }) {
   const db = useFirestore();
@@ -106,7 +106,7 @@ export function CurrentNews({ className }: { className?: string }) {
   const handleTranslateToggle = async () => {
     if (isTranslating || !activeNews || !db) return;
 
-    // Check for cached translation first (using original or audit fields)
+    // Check for cached translation first
     const hasTranslation = !!(activeNews.bengaliTranslation?.title || activeNews.translatedTitle);
 
     if (!isBangla && !hasTranslation) {
@@ -120,7 +120,7 @@ export function CurrentNews({ className }: { className?: string }) {
 
         const result = await translateNews(input);
 
-        // Persistent update with audit fields as requested
+        // Persistent update with audit fields
         const newsRef = doc(db, 'current_news', activeNews.id);
         await updateDoc(newsRef, {
           bengaliTranslation: result,
@@ -202,8 +202,9 @@ export function CurrentNews({ className }: { className?: string }) {
         </div>
       </div>
 
-      <div className="flex items-center justify-between pt-3 border-t border-white/10 opacity-60 pr-48 overflow-hidden">
-        <span className="text-[8px] font-black uppercase text-white truncate max-w-[150px] shrink-0">
+      {/* Footer layout with pr-32 and gap-4 to prevent text collision */}
+      <div className="flex items-center justify-between pt-3 border-t border-white/10 opacity-60 pr-32 overflow-hidden gap-4">
+        <span className="text-[8px] font-black uppercase text-white truncate max-w-[120px] shrink-1">
           {activeNews.source}
         </span>
         
