@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo, useState, useEffect } from 'react';
@@ -15,6 +14,7 @@ import { cn } from '@/lib/utils';
  * Features: Fully transparent background, #CFFF04 primary typography, and #FF00FF for "Welcome to HRAT".
  * Optimized for real-time synchronization with the administrative terminal.
  * Updated: Hides automatically when scrolling to prevent overlap with floating navigation.
+ * Note: Positioned with a significant top margin to keep it clear of the elevated news feed.
  */
 export function OccasionBanner() {
   const db = useFirestore();
@@ -76,7 +76,7 @@ export function OccasionBanner() {
   const isDefault = activeOccasion.isDefault === true;
 
   return (
-    <div className="absolute top-full right-0 mt-4 md:mt-8 z-[110] animate-in fade-in slide-in-from-top-4 duration-700 pointer-events-auto w-[320px] sm:w-[450px] lg:w-[500px]">
+    <div className="absolute top-full right-0 mt-20 md:mt-32 z-[110] animate-in fade-in slide-in-from-top-4 duration-700 pointer-events-auto w-[320px] sm:w-[450px] lg:w-[500px]">
       <div className={cn(
         "bg-transparent p-4 md:p-6 flex items-center gap-4 md:gap-7 group transition-all duration-700",
         loading && "opacity-80"
