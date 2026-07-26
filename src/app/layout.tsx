@@ -1,4 +1,3 @@
-
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { FirebaseClientProvider } from '@/firebase';
@@ -6,6 +5,8 @@ import { FirebaseErrorListener } from '@/components/FirebaseErrorListener';
 import { Toaster } from '@/components/ui/toaster';
 import { ThemeProvider } from '@/components/theme-provider';
 import { LayoutWrapper } from '@/components/layout-wrapper';
+import { getOrganizationSchema } from '@/lib/seo-utils';
+import { JsonLd } from '@/components/json-ld';
 
 export const viewport: Viewport = {
   themeColor: '#001f54',
@@ -73,45 +74,13 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'Organization',
-    'name': 'Human Rights Affairs Trust (Justice Shield)',
-    'alternateName': 'HRAT India',
-    'url': 'https://www.hrat-india.org',
-    'logo': 'https://www.hrat-india.org/HRAT%20Logo.jpeg',
-    'contactPoint': [
-      {
-        '@type': 'ContactPoint',
-        'telephone': '+91-89811-52748',
-        'contactType': 'customer service',
-        'areaServed': 'IN',
-        'availableLanguage': ['English', 'Hindi', 'Bengali'],
-      },
-    ],
-    'address': {
-      '@type': 'PostalAddress',
-      'streetAddress': 'Azad Market',
-      'addressLocality': 'Delhi',
-      'postalCode': '110006',
-      'addressCountry': 'IN',
-    },
-    'sameAs': [
-      'https://www.facebook.com/humanrightsaffairstrust',
-      'https://www.instagram.com/humanrightsaffairstrust',
-    ],
-  };
-
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-        />
+        <JsonLd data={getOrganizationSchema()} />
       </head>
       <body className="font-body antialiased">
         <ThemeProvider

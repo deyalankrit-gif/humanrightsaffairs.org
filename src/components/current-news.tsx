@@ -9,11 +9,13 @@ import { syncNews } from '@/ai/flows/sync-news-flow';
 import { translateNews } from '@/ai/flows/translate-news-flow';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { JsonLd } from './json-ld';
+import { getNewsSchema } from '@/lib/seo-utils';
 
 /**
  * CurrentNews: Real-time institutional news broadcast node.
  * Features: 2-hour autonomous sync, persistent AI translation, and fixed layout.
- * Updated: Fixed text collision in footer and upgraded to Gemini 2.5 Flash.
+ * Updated: Integrated NewsArticle JSON-LD for AI Search optimization.
  */
 export function CurrentNews({ className }: { className?: string }) {
   const db = useFirestore();
@@ -57,7 +59,7 @@ export function CurrentNews({ className }: { className?: string }) {
     setIsBangla(false);
   }, [activeNews?.id]);
 
-  // Autonomous Sync Logic using stable primitive dependencies
+  // Autonomous Sync Logic
   const lastSyncTime = (meta as any)?.lastSyncAt?.toDate?.()?.getTime() || 0;
   const activeCount = newsItems?.length || 0;
 
@@ -106,7 +108,6 @@ export function CurrentNews({ className }: { className?: string }) {
   const handleTranslateToggle = async () => {
     if (isTranslating || !activeNews || !db) return;
 
-    // Check for cached translation first
     const hasTranslation = !!(activeNews.bengaliTranslation?.title || activeNews.translatedTitle);
 
     if (!isBangla && !hasTranslation) {
@@ -120,7 +121,6 @@ export function CurrentNews({ className }: { className?: string }) {
 
         const result = await translateNews(input);
 
-        // Persistent update with audit fields
         const newsRef = doc(db, 'current_news', activeNews.id);
         await updateDoc(newsRef, {
           bengaliTranslation: result,
@@ -134,7 +134,6 @@ export function CurrentNews({ className }: { className?: string }) {
         setIsBangla(true);
         toast({ title: "Translation Established", description: "Bengali version cached in registry." });
       } catch (e: any) {
-        console.error("[TRANSLATE-UI] Error:", e);
         toast({ 
           variant: "destructive", 
           title: "Translation Unavailable", 
@@ -163,58 +162,60 @@ export function CurrentNews({ className }: { className?: string }) {
     : (activeNews.originalEnglish || activeNews);
 
   return (
-    <div className={cn("flex flex-col gap-5 p-7 animate-in fade-in duration-1000 max-w-[420px]", className)}>
-      <div className="flex items-center justify-between border-b border-white/20 pb-4">
-        <div className="flex items-center gap-2.5">
-          <TrendingUp className="w-5 h-5 text-[#CEFF00] animate-pulse" />
-          <span className="text-[12px] font-black uppercase tracking-[0.3em] text-[#CEFF00]">
-            {activeNews.scope || 'India'}
-          </span>
-        </div>
-      </div>
-
-      <div className="space-y-4">
-        <h3 className="text-sm md:text-lg font-headline font-bold text-white leading-tight">
-          {displayData.title}
-        </h3>
-        <p className="text-[10px] md:text-xs text-white/80 font-medium leading-relaxed italic border-l-2 border-[#CEFF00]/40 pl-3">
-          {displayData.content}
-        </p>
-        
-        <div className="flex items-center gap-2.5 pt-2">
-          <Button asChild variant="outline" className="h-8 w-fit rounded-xl border-[#CEFF00]/40 bg-[#CEFF00]/5 text-[#CEFF00] hover:bg-[#CEFF00] hover:text-primary text-[10px] font-black uppercase transition-all">
-            <a href={activeNews.url} target="_blank">Examine Story <ExternalLink className="w-3 h-3 ml-1.5" /></a>
-          </Button>
-          
-          <button 
-            onClick={handleTranslateToggle}
-            disabled={isTranslating}
-            className={cn(
-              "h-8 px-4 rounded-xl border transition-all flex items-center gap-1.5 active:scale-95", 
-              isBangla ? "bg-[#CEFF00] text-primary border-[#CEFF00]" : "bg-white/5 text-[#CEFF00] border-white/10 hover:bg-white/10"
-            )}
-          >
-            {isTranslating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Languages className="w-3.5 h-3.5" />}
-            <span className="text-[9px] font-black uppercase tracking-widest">
-              {isTranslating ? '...' : isBangla ? 'ORIGINAL' : 'BN'}
+    <>
+      <JsonLd data={getNewsSchema(activeNews)} />
+      <div className={cn("flex flex-col gap-5 p-7 animate-in fade-in duration-1000 max-w-[420px]", className)}>
+        <div className="flex items-center justify-between border-b border-white/20 pb-4">
+          <div className="flex items-center gap-2.5">
+            <TrendingUp className="w-5 h-5 text-[#CEFF00] animate-pulse" />
+            <span className="text-[12px] font-black uppercase tracking-[0.3em] text-[#CEFF00]">
+              {activeNews.scope || 'India'}
             </span>
-          </button>
+          </div>
         </div>
-      </div>
 
-      {/* Footer layout with pr-32 and gap-4 to prevent text collision */}
-      <div className="flex items-center justify-between pt-3 border-t border-white/10 opacity-60 pr-32 overflow-hidden gap-4">
-        <span className="text-[8px] font-black uppercase text-white truncate max-w-[120px] shrink-1">
-          {activeNews.source}
-        </span>
-        
-        <div className="flex items-center gap-1 shrink-0">
-          <Zap className={cn("w-2.5 h-2.5", isSyncing && "animate-ping")} /> 
-          <span className="text-[8px] font-black uppercase text-white whitespace-nowrap">
-            {isBangla ? 'Translated' : 'Live Sync'}
+        <div className="space-y-4">
+          <h3 className="text-sm md:text-lg font-headline font-bold text-white leading-tight">
+            {displayData.title}
+          </h3>
+          <p className="text-[10px] md:text-xs text-white/80 font-medium leading-relaxed italic border-l-2 border-[#CEFF00]/40 pl-3">
+            {displayData.content}
+          </p>
+          
+          <div className="flex items-center gap-2.5 pt-2">
+            <Button asChild variant="outline" className="h-8 w-fit rounded-xl border-[#CEFF00]/40 bg-[#CEFF00]/5 text-[#CEFF00] hover:bg-[#CEFF00] hover:text-primary text-[10px] font-black uppercase transition-all">
+              <a href={activeNews.url} target="_blank">Examine Story <ExternalLink className="w-3 h-3 ml-1.5" /></a>
+            </Button>
+            
+            <button 
+              onClick={handleTranslateToggle}
+              disabled={isTranslating}
+              className={cn(
+                "h-8 px-4 rounded-xl border transition-all flex items-center gap-1.5 active:scale-95", 
+                isBangla ? "bg-[#CEFF00] text-primary border-[#CEFF00]" : "bg-white/5 text-[#CEFF00] border-white/10 hover:bg-white/10"
+              )}
+            >
+              {isTranslating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Languages className="w-3.5 h-3.5" />}
+              <span className="text-[9px] font-black uppercase tracking-widest">
+                {isTranslating ? '...' : isBangla ? 'ORIGINAL' : 'BN'}
+              </span>
+            </button>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between pt-3 border-t border-white/10 opacity-60 pr-32 overflow-hidden gap-4">
+          <span className="text-[8px] font-black uppercase text-white truncate max-w-[120px] shrink-1">
+            {activeNews.source}
           </span>
+          
+          <div className="flex items-center gap-1 shrink-0">
+            <Zap className={cn("w-2.5 h-2.5", isSyncing && "animate-ping")} /> 
+            <span className="text-[8px] font-black uppercase text-white whitespace-nowrap">
+              {isBangla ? 'Translated' : 'Live Sync'}
+            </span>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
