@@ -12,7 +12,7 @@ import { cn } from '@/lib/utils';
 
 /**
  * CurrentNews: Real-time institutional news broadcast node.
- * Features: 2-hour autonomous sync, on-demand AI translation, and fixed layout.
+ * Features: 2-hour autonomous sync, persistent AI translation, and fixed layout.
  */
 export function CurrentNews({ className }: { className?: string }) {
   const db = useFirestore();
@@ -122,13 +122,23 @@ export function CurrentNews({ className }: { className?: string }) {
         const newsRef = doc(db, 'current_news', activeNews.id);
         await updateDoc(newsRef, {
           bengaliTranslation: result,
-          translationStatus: 'Success'
+          translationStatus: 'Success',
+          // User requested fields for explicit logging
+          translatedTitle: result.title,
+          translatedContent: result.content,
+          translatedLanguage: "bn",
+          translatedAt: serverTimestamp()
         });
 
         setIsBangla(true);
-        toast({ title: "Translation Established" });
+        toast({ title: "Translation Established", description: "Bengali version cached in registry." });
       } catch (e: any) {
-        toast({ variant: "destructive", title: "Translation Failed", description: "AI service busy." });
+        console.error("[TRANSLATE-UI] Error:", e);
+        toast({ 
+          variant: "destructive", 
+          title: "Translation Unavailable", 
+          description: "AI service is temporarily busy. Please try again." 
+        });
       } finally {
         setIsTranslating(false);
       }
@@ -177,28 +187,29 @@ export function CurrentNews({ className }: { className?: string }) {
             onClick={handleTranslateToggle}
             disabled={isTranslating}
             className={cn(
-              "h-8 px-3 rounded-xl border transition-all flex items-center gap-1.5 active:scale-95", 
+              "h-8 px-4 rounded-xl border transition-all flex items-center gap-1.5 active:scale-95", 
               isBangla ? "bg-[#CEFF00] text-primary border-[#CEFF00]" : "bg-white/5 text-[#CEFF00] border-white/10 hover:bg-white/10"
             )}
           >
             {isTranslating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Languages className="w-3.5 h-3.5" />}
-            <span className="text-[9px] font-black uppercase tracking-widest">{isTranslating ? '...' : isBangla ? 'ENG' : 'BN'}</span>
+            <span className="text-[9px] font-black uppercase tracking-widest">
+              {isTranslating ? '...' : isBangla ? 'ORIGINAL' : 'BN'}
+            </span>
           </button>
         </div>
       </div>
 
-      <div className="flex items-center justify-between pt-3 border-t border-white/10 opacity-60">
-        <span className="text-[8px] font-black uppercase text-white truncate max-w-[120px]">{activeNews.source}</span>
+      <div className="flex items-center pt-3 border-t border-white/10 opacity-60 gap-8 overflow-hidden">
+        <span className="text-[8px] font-black uppercase text-white truncate max-w-[150px] shrink-0">
+          {activeNews.source}
+        </span>
         
-        {/* SHIFTED FURTHER LEFT FOR BALANCE - Fixed Collision */}
-        <div className="flex-1 flex justify-center ml-[-40px]">
-          <span className="text-[8px] font-black uppercase text-white flex items-center gap-1">
-            <Zap className={cn("w-2.5 h-2.5", isSyncing && "animate-ping")} /> 
+        <div className="flex items-center gap-1 shrink-0">
+          <Zap className={cn("w-2.5 h-2.5", isSyncing && "animate-ping")} /> 
+          <span className="text-[8px] font-black uppercase text-white">
             {isBangla ? 'Translated' : 'Live Sync'}
           </span>
         </div>
-
-        <div className="w-[80px]" /> {/* Spacer to force left shift while maintaining end alignment */}
       </div>
     </div>
   );
