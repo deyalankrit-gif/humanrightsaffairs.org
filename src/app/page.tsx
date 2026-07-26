@@ -81,8 +81,8 @@ export default function Home() {
           <div className="absolute inset-0 bg-gradient-to-b from-primary/40 via-primary/20 to-primary/60 dark:from-slate-950/70 dark:via-slate-950/50 dark:to-slate-950/80"></div>
         </div>
 
-        {/* Intelligence Node (Elevated News Feed - Higher and further left) */}
-        <div className="absolute top-12 left-12 z-20 hidden md:flex flex-col">
+        {/* Intelligence Node (Elevated News Feed - Repositioned higher and to the left) */}
+        <div className="absolute top-6 left-6 z-20 hidden md:flex flex-col">
           <CurrentNews />
         </div>
 
@@ -150,7 +150,7 @@ export default function Home() {
             </div>
 
             <div className="w-full pt-10 md:pt-20 max-w-4xl mx-auto">
-              <div className="glass-dark rounded-[1.5rem] md:rounded-[2.5rem] p-4 md:p-6 grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 border-white/5">
+              <div className="glass-dark rounded-[2.5rem] md:rounded-[2.5rem] p-4 md:p-6 grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 border-white/5">
                 {[
                   { icon: <Scale className="w-4 h-4 md:w-5 md:h-5 text-accent" />, count: "2k+", label: "Cases Resolved" },
                   { icon: <Users className="w-4 h-4 md:w-5 md:h-5 text-emerald-400" />, count: "50+", label: "Advocates" },
