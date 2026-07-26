@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useMemo, useEffect, useState } from 'react';
@@ -107,7 +108,7 @@ export function CurrentNews({ className }: { className?: string }) {
   }, [db, isSyncing, loading, lastSyncTime, activeCount, registryStatus]);
 
   const handleTranslateToggle = async () => {
-    if (isTranslating || !activeNews) return;
+    if (isTranslating || !activeNews || !db) return;
 
     const hasTranslation = !!(activeNews.bengaliTranslation?.title || activeNews.bengaliTranslation?.content);
 
@@ -194,7 +195,7 @@ export function CurrentNews({ className }: { className?: string }) {
           <button 
             onClick={handleTranslateToggle}
             disabled={isTranslating}
-            title={isTranslating ? "Translating..." : isBangla ? "Switch to English" : "বাংলায় অনুবাদ করুন"}
+            title={isTranslating ? "Translating..." : isBangla ? "Show Original (English)" : "Translate to Bengali (বাংলায় দেখুন)"}
             className={cn(
               "h-8 px-3 rounded-xl border transition-all flex items-center gap-1.5 shadow-md active:scale-95", 
               isBangla 
@@ -215,7 +216,7 @@ export function CurrentNews({ className }: { className?: string }) {
         </div>
       </div>
 
-      <div className="flex items-center justify-between pt-3 border-t border-white/10 opacity-60 pr-48">
+      <div className="flex items-center justify-between pt-3 border-t border-white/10 opacity-60 pr-64">
         <span className="text-[8px] font-black uppercase text-white truncate max-w-[150px]">{activeNews.source}</span>
         <div className="flex items-center">
           <span className="text-[8px] font-black uppercase text-white flex items-center gap-1">
@@ -227,3 +228,4 @@ export function CurrentNews({ className }: { className?: string }) {
     </div>
   );
 }
+
