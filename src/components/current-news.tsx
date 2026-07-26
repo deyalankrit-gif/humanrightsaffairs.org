@@ -108,7 +108,8 @@ export function CurrentNews({ className }: { className?: string }) {
     ) : null;
   }
 
-  const hasBangla = activeNews.bengaliTranslation && activeNews.translationStatus === 'Success';
+  // Show toggle if any translation content exists, regardless of strict status string
+  const hasBangla = !!(activeNews.bengaliTranslation?.title || activeNews.bengaliTranslation?.content);
   const displayData = isBangla && hasBangla ? activeNews.bengaliTranslation : (activeNews.originalEnglish || activeNews);
 
   return (
@@ -124,8 +125,8 @@ export function CurrentNews({ className }: { className?: string }) {
           <button 
             onClick={() => setIsBangla(!isBangla)}
             className={cn(
-              "p-1.5 rounded-lg border transition-all flex items-center gap-1.5", 
-              isBangla ? "bg-[#CEFF00] text-primary" : "bg-white/5 text-[#CEFF00] border-white/10"
+              "p-1.5 rounded-lg border transition-all flex items-center gap-1.5 shadow-lg", 
+              isBangla ? "bg-[#CEFF00] text-primary border-[#CEFF00]" : "bg-white/5 text-[#CEFF00] border-white/10 hover:bg-white/10"
             )}
           >
             <Languages className="w-3.5 h-3.5" />
@@ -148,10 +149,10 @@ export function CurrentNews({ className }: { className?: string }) {
 
       <div className="flex items-center justify-between pt-3 border-t border-white/10 opacity-60">
         <span className="text-[8px] font-black uppercase text-white">{activeNews.source}</span>
-        <div className="flex items-center pr-16">
+        <div className="flex items-center pr-32">
           <span className="text-[8px] font-black uppercase text-white flex items-center gap-1">
             <Zap className={cn("w-2.5 h-2.5", isSyncing && "animate-ping")} /> 
-            {activeNews.translationStatus === 'Success' ? 'Translated' : 'Verified Feed'}
+            {activeNews.translationStatus === 'Success' ? 'Translated' : 'Live Sync'}
           </span>
         </div>
       </div>
