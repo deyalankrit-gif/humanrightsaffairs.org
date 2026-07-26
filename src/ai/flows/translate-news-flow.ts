@@ -2,6 +2,7 @@
 /**
  * @fileOverview Resilient translation engine with exponential backoff retries.
  * Optimized for formal Bengali script generation and zero-failure output.
+ * Updated: Enhanced prompt for proper noun preservation and tactical logging.
  */
 
 import {ai} from '@/ai/genkit';
@@ -23,10 +24,14 @@ const TranslateNewsOutputSchema = z.object({
 export type TranslateNewsOutput = z.infer<typeof TranslateNewsOutputSchema>;
 
 /**
- * translateNews with Exponential Backoff and Parity Check
+ * translateNews with Exponential Backoff and Tactical Logging
  */
 export async function translateNews(input: z.infer<typeof TranslateNewsInputSchema>, attempt = 1): Promise<TranslateNewsOutput> {
+  const startTime = Date.now();
+  
   try {
+    console.log(`[TRANSLATE-AUDIT] Request Started | Model: gemini-1.5-flash | Attempt: ${attempt}`);
+    
     const { output } = await translateNewsPrompt(input);
     
     // Validate output integrity and check for language parity (AI parroting English)
@@ -34,13 +39,20 @@ export async function translateNews(input: z.infer<typeof TranslateNewsInputSche
       throw new Error("Translation parity detected - likely safety block or yield error.");
     }
     
+    const endTime = Date.now();
+    console.log(`[TRANSLATE-AUDIT] Success | Latency: ${endTime - startTime}ms | Yield: Valid Bengali Script`);
+    
     // Explicitly parse to ensure clean object transfer
     return JSON.parse(JSON.stringify(output));
   } catch (error: any) {
+    const endTime = Date.now();
     const delay = Math.pow(2, attempt) * 500;
-    console.warn(`[TRANSLATE-ENGINE] Attempt ${attempt} Failed. Retrying... Error: ${error.message}`);
+    
+    console.error(`[TRANSLATE-AUDIT] Error | Code: ${error.code || 'UNKNOWN'} | Latency: ${endTime - startTime}ms`);
+    console.error(`[TRANSLATE-AUDIT] Trace: ${error.stack}`);
     
     if (attempt < 3) {
+      console.warn(`[TRANSLATE-ENGINE] Retrying in ${delay}ms...`);
       await new Promise(r => setTimeout(r, delay));
       return translateNews(input, attempt + 1);
     }
@@ -66,12 +78,16 @@ const translateNewsPrompt = ai.definePrompt({
   },
   system: `You are a professional Bengali translator for an institutional human rights network. 
   Your mandate is to translate the following news data into formal, high-fidelity Bengali script (Bangla). 
-  Maintain accuracy and a professional tone. 
-  DO NOT include any English characters in the title, content, or category fields.
-  Return only the translated Bengali content in the requested JSON schema.`,
+  
+  STRICT CONSTRAINTS:
+  1. Maintain a professional, journalistic tone.
+  2. DO NOT include any English characters in the title, content, or category fields.
+  3. PRESERVE all formatting, including line breaks and paragraph structure.
+  4. KEEP PROPER NOUNS (Names of people, specific organizations like 'HRAT', specific locations, or official acts) unchanged in their standard Bengali phonetic equivalent or keep them in English if they are technical identifiers.
+  5. Return only the translated Bengali content in the requested JSON schema.`,
   prompt: `
   Target Language: Bengali (Bangla)
-  Source Data:
+  Source Data to Translate:
   - Headline: {{{title}}}
   - Summary: {{{content}}}
   - Category: {{{category}}}

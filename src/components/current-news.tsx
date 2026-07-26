@@ -2,20 +2,23 @@
 
 import React, { useMemo, useEffect, useState } from 'react';
 import { useCollection, useFirestore, useMemoFirebase, useDoc } from '@/firebase';
-import { collection, query, where, doc, writeBatch, serverTimestamp, getDocs } from 'firebase/firestore';
+import { collection, query, where, doc, writeBatch, serverTimestamp, getDocs, updateDoc } from 'firebase/firestore';
 import { Radio, MapPin, Loader2, TrendingUp, ExternalLink, Clock, Zap, Languages, AlertTriangle, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { syncNews } from '@/ai/flows/sync-news-flow';
+import { translateNews } from '@/ai/flows/translate-news-flow';
+import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
 /**
  * CurrentNews: Real-time institutional news broadcast node.
- * Features: 2-hour autonomous sync, English/Bengali toggle, and tactical layout.
- * Resolved: Fixed useEffect dependency array size error and established real-time sync.
+ * Features: 2-hour autonomous sync, on-demand AI translation, and tactical layout.
  */
 export function CurrentNews({ className }: { className?: string }) {
   const db = useFirestore();
+  const { toast } = useToast();
   const [isSyncing, setIsSyncing] = useState(false);
+  const [isTranslating, setIsTranslating] = useState(false);
   const [isBangla, setIsBangla] = useState(false);
   const [errorType, setErrorType] = useState<string | null>(null);
 
@@ -52,7 +55,7 @@ export function CurrentNews({ className }: { className?: string }) {
     setIsBangla(false);
   }, [activeNews?.id]);
 
-  // STABLE DEPENDENCIES: Using primitive values instead of objects/arrays to avoid "changed size" error
+  // STABLE DEPENDENCIES: Using primitive values
   const lastSyncTime = (meta as any)?.lastSyncAt?.toDate?.()?.getTime() || 0;
   const activeCount = newsItems?.length || 0;
   const registryStatus = (meta as any)?.status || 'Idle';
@@ -65,7 +68,6 @@ export function CurrentNews({ className }: { className?: string }) {
       const now = new Date();
       const hoursSinceSync = (now.getTime() - lastSyncDate.getTime()) / (1000 * 60 * 60);
 
-      // Trigger if stale (2hrs) or empty registry
       if (hoursSinceSync >= 2 || activeCount === 0) {
         setIsSyncing(true);
         setErrorType(null);
@@ -73,12 +75,9 @@ export function CurrentNews({ className }: { className?: string }) {
           const output = await syncNews({ context: "Autonomous background sync" });
           if (output?.news?.length > 0) {
             const batch = writeBatch(db);
-            
-            // Deactivate existing news items
             const currentActiveSnap = await getDocs(query(collection(db, 'current_news'), where('isActive', '==', true)));
             currentActiveSnap.docs.forEach(d => batch.update(d.ref, { isActive: false }));
 
-            // Add new processed news items
             output.news.forEach(item => {
               batch.set(doc(collection(db, 'current_news')), { 
                 ...item, 
@@ -87,7 +86,6 @@ export function CurrentNews({ className }: { className?: string }) {
               });
             });
 
-            // Update sync metadata
             batch.set(doc(db, 'current_news_state', 'registry'), { 
               lastSyncAt: serverTimestamp(), 
               status: output.diagnostics.status 
@@ -106,8 +104,49 @@ export function CurrentNews({ className }: { className?: string }) {
     };
 
     if (db) triggerSync();
-    
   }, [db, isSyncing, loading, lastSyncTime, activeCount, registryStatus]);
+
+  const handleTranslateToggle = async () => {
+    if (isTranslating || !activeNews) return;
+
+    const hasTranslation = !!(activeNews.bengaliTranslation?.title || activeNews.bengaliTranslation?.content);
+
+    // If we are trying to view Bangla but it's not translated yet
+    if (!isBangla && !hasTranslation) {
+      setIsTranslating(true);
+      try {
+        const input = {
+          title: activeNews.originalEnglish?.title || activeNews.title || '',
+          content: activeNews.originalEnglish?.content || activeNews.content || '',
+          category: activeNews.originalEnglish?.category || activeNews.category || 'General'
+        };
+
+        const result = await translateNews(input);
+
+        // Persistent update to Firestore registry
+        const newsRef = doc(db, 'current_news', activeNews.id);
+        await updateDoc(newsRef, {
+          bengaliTranslation: result,
+          translationStatus: 'Success'
+        });
+
+        setIsBangla(true);
+        toast({ title: "Translation Established", description: "Article successfully converted to Bengali script." });
+      } catch (e: any) {
+        console.error("[TRANSLATE-UI] Request Failure:", e);
+        toast({ 
+          variant: "destructive", 
+          title: "Translation Unavailable", 
+          description: "AI translation engine is under load. Please retry in a moment." 
+        });
+      } finally {
+        setIsTranslating(false);
+      }
+    } else {
+      // Toggle logic for existing translations
+      setIsBangla(!isBangla);
+    }
+  };
 
   if (loading && !isSyncing) return (
     <div className={cn("flex flex-col gap-2 p-6 animate-pulse", className)}>
@@ -125,8 +164,8 @@ export function CurrentNews({ className }: { className?: string }) {
     ) : null;
   }
 
-  const hasBangla = !!(activeNews.bengaliTranslation?.title || activeNews.bengaliTranslation?.content);
-  const displayData = isBangla && hasBangla ? activeNews.bengaliTranslation : (activeNews.originalEnglish || activeNews);
+  const hasTranslation = !!(activeNews.bengaliTranslation?.title || activeNews.bengaliTranslation?.content);
+  const displayData = isBangla && hasTranslation ? activeNews.bengaliTranslation : (activeNews.originalEnglish || activeNews);
 
   return (
     <div className={cn("flex flex-col gap-5 p-7 animate-in fade-in duration-1000 max-w-[420px]", className)}>
@@ -152,31 +191,36 @@ export function CurrentNews({ className }: { className?: string }) {
             <a href={activeNews.url} target="_blank">Examine Story <ExternalLink className="w-3 h-3 ml-1.5" /></a>
           </Button>
           
-          {hasBangla && (
-            <button 
-              onClick={() => setIsBangla(!isBangla)}
-              title={isBangla ? "Switch to English" : "বাংলায় অনুবাদ করুন"}
-              className={cn(
-                "h-8 px-3 rounded-xl border transition-all flex items-center gap-1.5 shadow-md active:scale-95", 
-                isBangla 
-                  ? "bg-[#CEFF00] text-primary border-[#CEFF00]" 
-                  : "bg-white/5 text-[#CEFF00] border-white/10 hover:bg-white/10"
-              )}
-            >
+          <button 
+            onClick={handleTranslateToggle}
+            disabled={isTranslating}
+            title={isTranslating ? "Translating..." : isBangla ? "Switch to English" : "বাংলায় অনুবাদ করুন"}
+            className={cn(
+              "h-8 px-3 rounded-xl border transition-all flex items-center gap-1.5 shadow-md active:scale-95", 
+              isBangla 
+                ? "bg-[#CEFF00] text-primary border-[#CEFF00]" 
+                : "bg-white/5 text-[#CEFF00] border-white/10 hover:bg-white/10",
+              isTranslating && "opacity-70 cursor-wait"
+            )}
+          >
+            {isTranslating ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : (
               <Languages className="w-3.5 h-3.5" />
-              <span className="text-[9px] font-black uppercase tracking-widest">{isBangla ? 'ENG' : 'BN'}</span>
-            </button>
-          )}
+            )}
+            <span className="text-[9px] font-black uppercase tracking-widest">
+              {isTranslating ? '...' : isBangla ? 'ENG' : 'BN'}
+            </span>
+          </button>
         </div>
       </div>
 
       <div className="flex items-center justify-between pt-3 border-t border-white/10 opacity-60">
         <span className="text-[8px] font-black uppercase text-white truncate max-w-[120px]">{activeNews.source}</span>
-        {/* SHIFT FURTHER TO THE LEFT: increased right padding for the status container */}
         <div className="flex items-center pr-72">
           <span className="text-[8px] font-black uppercase text-white flex items-center gap-1">
             <Zap className={cn("w-2.5 h-2.5", isSyncing && "animate-ping")} /> 
-            {activeNews.translationStatus === 'Success' ? 'Translated' : 'Live Sync'}
+            {hasTranslation ? 'Translated' : 'Live Sync'}
           </span>
         </div>
       </div>
