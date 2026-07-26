@@ -1,9 +1,10 @@
+
 'use client';
 
 import React, { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser, useCollection, useFirestore, useMemoFirebase } from '@/firebase';
-import { collection, query, addDoc, deleteDoc, doc, serverTimestamp, orderBy } from 'firebase/firestore';
+import { collection, query, addDoc, deleteDoc, doc, serverTimestamp, orderBy, writeBatch, getDocs, where } from 'firebase/firestore';
 import { Footer } from '@/components/footer';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -86,13 +87,30 @@ export default function InternalNewsManagement() {
   const publishSuggestion = async (suggestion: any) => {
     if (!db) return;
     try {
-      await addDoc(collection(db, 'current_news'), {
+      const batch = writeBatch(db);
+      
+      // 1. Deactivate existing active news to ensure the "update" is visible
+      const activeSnap = await getDocs(query(collection(db, 'current_news'), where('isActive', '==', true)));
+      activeSnap.docs.forEach(d => batch.update(d.ref, { isActive: false }));
+
+      // 2. Add new doc
+      const newDocRef = doc(collection(db, 'current_news'));
+      batch.set(newDocRef, {
         ...suggestion,
         isActive: true,
         priority: 1,
         createdAt: serverTimestamp(),
         publishedBy: user?.email
       });
+
+      // 3. Update sync registry so background sync doesn't immediate overwrite
+      batch.set(doc(db, 'current_news_state', 'registry'), {
+        lastSyncAt: serverTimestamp(),
+        status: "Manual Authorization"
+      }, { merge: true });
+
+      await batch.commit();
+
       if (harvestResult) {
         setHarvestResult({ ...harvestResult, news: harvestResult.news.filter(s => s.url !== suggestion.url) });
       }
@@ -110,7 +128,15 @@ export default function InternalNewsManagement() {
 
     setIsActionLoading(true);
     try {
-      await addDoc(collection(db, 'current_news'), {
+      const batch = writeBatch(db);
+
+      // 1. Deactivate existing active news
+      const activeSnap = await getDocs(query(collection(db, 'current_news'), where('isActive', '==', true)));
+      activeSnap.docs.forEach(d => batch.update(d.ref, { isActive: false }));
+
+      // 2. Add manual entry
+      const newDocRef = doc(collection(db, 'current_news'));
+      batch.set(newDocRef, {
         originalEnglish: {
           title: manualNews.titleEn,
           content: manualNews.contentEn,
@@ -131,6 +157,15 @@ export default function InternalNewsManagement() {
         createdAt: serverTimestamp(),
         publishedBy: user?.email
       });
+
+      // 3. Update registry to prevent immediate background sync overwrite
+      batch.set(doc(db, 'current_news_state', 'registry'), {
+        lastSyncAt: serverTimestamp(),
+        status: "Manual Entry"
+      }, { merge: true });
+
+      await batch.commit();
+
       toast({ title: "Authorized", description: "Manual article is now live." });
       setIsManualEntryOpen(false);
       setManualNews({
@@ -188,8 +223,8 @@ export default function InternalNewsManagement() {
                   <CardContent className="p-8 flex flex-col md:flex-row gap-8 items-stretch">
                        <div className="md:w-40 text-center flex flex-col items-center justify-center shrink-0 bg-slate-50 dark:bg-slate-800 rounded-2xl">
                           <Badge className="mb-2 bg-primary text-white">{n.scope || 'India'}</Badge>
-                          <span className={cn("text-[8px] font-black uppercase tracking-tighter", n.translationStatus === 'Success' ? 'text-emerald-500' : 'text-slate-400')}>
-                            {n.translationStatus || 'Verified'}
+                          <span className={cn("text-[8px] font-black uppercase tracking-tighter", n.isActive ? 'text-emerald-500' : 'text-slate-400')}>
+                            {n.isActive ? 'Active Broadcast' : 'Archive'}
                           </span>
                        </div>
                        <div className="flex-1 space-y-4">

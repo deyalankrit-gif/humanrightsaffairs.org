@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useMemo, useEffect, useState } from 'react';
@@ -31,11 +32,14 @@ export function CurrentNews({ className }: { className?: string }) {
   const activeNews = useMemo(() => {
     if (!newsItems || newsItems.length === 0) return null;
     return [...newsItems].sort((a: any, b: any) => {
+      // 1. Sort by Scope Priority (1: WB, 2: India, 3: World)
       const pA = a.scopePriority ?? 99;
       const pB = b.scopePriority ?? 99;
       if (pA !== pB) return pA - pB;
-      const dateA = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : 0;
-      const dateB = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : 0;
+      
+      // 2. Sort by Recency (Handle pending server timestamps with Date.now() fallback)
+      const dateA = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : Date.now();
+      const dateB = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : Date.now();
       return dateB - dateA;
     })[0];
   }, [newsItems]);
@@ -108,7 +112,6 @@ export function CurrentNews({ className }: { className?: string }) {
     ) : null;
   }
 
-  // Show toggle if any translation content exists, regardless of strict status string
   const hasBangla = !!(activeNews.bengaliTranslation?.title || activeNews.bengaliTranslation?.content);
   const displayData = isBangla && hasBangla ? activeNews.bengaliTranslation : (activeNews.originalEnglish || activeNews);
 
