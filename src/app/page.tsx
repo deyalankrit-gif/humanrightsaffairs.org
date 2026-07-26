@@ -81,12 +81,12 @@ export default function Home() {
           <div className="absolute inset-0 bg-gradient-to-b from-primary/40 via-primary/20 to-primary/60 dark:from-slate-950/70 dark:via-slate-950/50 dark:to-slate-950/80"></div>
         </div>
 
-        {/* Intelligence Node (Elevated News Feed - Repositioned higher and to the left maximum) */}
+        {/* Intelligence Node (Elevated News Feed - Top Left Maximum) */}
         <div className="absolute top-2 left-0 z-20 hidden md:flex flex-col">
           <CurrentNews />
         </div>
 
-        {/* Institutional Identity Node (Relocated Logo) */}
+        {/* Institutional Identity Node (Top Right) */}
         <div className="absolute top-8 right-8 z-20 hidden md:flex items-center gap-6 animate-in fade-in slide-in-from-right-4 duration-1000">
           <div className="flex flex-col text-white text-right">
             <span className="font-headline font-bold text-2xl md:text-3xl leading-none tracking-tight">HRAT</span>
@@ -101,6 +101,12 @@ export default function Home() {
         <div className="container mx-auto px-0 md:px-4 relative z-10 text-white text-center">
           <div className="max-w-5xl mx-auto space-y-4 md:space-y-6 flex flex-col items-center">
             
+            {/* Top Registration Text */}
+            <p className="text-[#D4AF37] font-bold text-[8px] sm:text-xs md:text-base uppercase tracking-[0.2em] md:tracking-[0.25em] drop-shadow-lg animate-fade-in">
+              Government of India ( Niti Aayog Registered )
+            </p>
+
+            {/* Logos and Flag */}
             <div className="flex flex-col items-center gap-4">
               <IndianFlag />
               <div className="relative w-full max-w-[150px] h-[80px] sm:max-w-[200px] sm:h-[100px] md:max-w-[500px] md:h-[250px] transition-all duration-700">
@@ -113,10 +119,8 @@ export default function Home() {
               </div>
             </div>
 
+            {/* Main Headlines */}
             <div className="flex flex-col items-center gap-2 w-full mt-2 md:mt-4">
-              <p className="text-[#D4AF37] font-bold text-[8px] sm:text-xs md:text-base uppercase tracking-[0.2em] md:tracking-[0.25em] drop-shadow-lg animate-fade-in">
-                Government of India ( Niti Aayog Registered )
-              </p>
               <div className="font-headline font-bold text-lg sm:text-3xl md:text-5xl lg:text-6xl tracking-tight leading-tight min-h-[1.5em] flex justify-center items-center overflow-visible w-full">
                 <h1 className="bg-gradient-to-r from-[#FF9933] via-white to-[#138808] bg-clip-text text-transparent italic block drop-shadow-sm px-2 pb-4 text-center">
                   <Typewriter 
