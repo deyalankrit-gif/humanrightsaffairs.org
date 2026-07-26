@@ -1,9 +1,11 @@
+
 'use server';
 /**
  * @fileOverview News translation AI agent.
- *
- * - translateNews - A function that handles the translation process.
- * - Features: Multilingual support (Bengali), safety filter bypass for news integrity.
+ * 
+ * - translateNews - Handled with high-fidelity Gemini 1.5 Flash.
+ * - Supports Title, Content, and Category translation.
+ * - Includes robust retry logic and technical logging.
  */
 
 import {ai} from '@/ai/genkit';
@@ -12,28 +14,45 @@ import {z} from 'genkit';
 const TranslateNewsInputSchema = z.object({
   title: z.string().describe('The English title of the news.'),
   content: z.string().describe('The English content/summary of the news.'),
+  category: z.string().describe('The English category of the news.')
 });
 export type TranslateNewsInput = z.infer<typeof TranslateNewsInputSchema>;
 
 const TranslateNewsOutputSchema = z.object({
   title: z.string().describe('The Bengali translation of the title.'),
   content: z.string().describe('The Bengali translation of the content.'),
+  category: z.string().describe('The Bengali translation of the category.'),
 });
 export type TranslateNewsOutput = z.infer<typeof TranslateNewsOutputSchema>;
 
 /**
- * translateNews - Robust Server Action for real-time translation.
+ * translateNews - Robust Server Action for real-time translation with retry logic.
  */
-export async function translateNews(input: TranslateNewsInput): Promise<TranslateNewsOutput> {
+export async function translateNews(input: TranslateNewsInput, attempt = 1): Promise<TranslateNewsOutput> {
+  const startTime = Date.now();
+  console.log(`[TRANSLATE-FLOW] Received Article: "${input.title.substring(0, 50)}..." | Attempt: ${attempt}`);
+
   try {
     const result = await translateNewsFlow(input);
-    if (!result || !result.title) throw new Error("AI failed to return translation keys.");
+    if (!result || !result.title) throw new Error("AI returned an empty translation object.");
+    
+    const duration = Date.now() - startTime;
+    console.log(`[TRANSLATE-FLOW] SUCCESS | Time: ${duration}ms | Article: "${input.title.substring(0, 30)}..."`);
+    
     return JSON.parse(JSON.stringify(result));
-  } catch (error) {
-    console.error("Critical Translation System Failure:", error);
+  } catch (error: any) {
+    console.error(`[TRANSLATE-FLOW] FAILURE (Attempt ${attempt}) | Error: ${error.message}`);
+    
+    if (attempt < 3) {
+      const backoff = attempt * 1000;
+      await new Promise(r => setTimeout(r, backoff));
+      return translateNews(input, attempt + 1);
+    }
+
     return {
-      title: "অনুবাদ প্রক্রিয়াটি বর্তমানে বাধাগ্রস্ত হয়েছে",
-      content: "দুঃখিত, এই মুহূর্তে আমাদের অনুবাদ ইঞ্জিনটি প্রতিক্রিয়াহীন। অনুগ্রহ করে কিছুক্ষণ পর আবার চেষ্টা করুন।"
+      title: input.title,
+      content: input.content,
+      category: input.category
     };
   }
 }
@@ -57,10 +76,12 @@ const translateNewsPrompt = ai.definePrompt({
   1. Maintain a formal, journalistic, and institutional tone.
   2. Transliterate proper names (people/places) if they are standard in Bengali media.
   3. Ensure legal terms (e.g., 'Arrest', 'Magistrate', 'Constitutional') are translated into their formal Bengali equivalents.
-  4. Output MUST be valid JSON matching the schema.`,
+  4. Ensure Category (e.g., 'Legal', 'Human Rights', 'Politics') is translated accurately.
+  5. Output MUST be valid JSON matching the schema.`,
   prompt: `Translate the following news intelligence into Bengali:
 
 Headline: {{{title}}}
+Category: {{{category}}}
 Summary: {{{content}}}`,
 });
 
@@ -71,18 +92,8 @@ const translateNewsFlow = ai.defineFlow(
     outputSchema: TranslateNewsOutputSchema,
   },
   async input => {
-    try {
-      const {output} = await translateNewsPrompt(input);
-      if (!output) {
-        return {
-          title: "অনুবাদ ব্যর্থ হয়েছে",
-          content: "এই সংবাদটি অনুবাদ করার সময় সিস্টেম ত্রুটি দেখা দিয়েছে।"
-        };
-      }
-      return output;
-    } catch (e) {
-      console.error("Flow Error:", e);
-      throw e;
-    }
+    const {output} = await translateNewsPrompt(input);
+    if (!output) throw new Error("Gemini returned null output.");
+    return output;
   }
 );

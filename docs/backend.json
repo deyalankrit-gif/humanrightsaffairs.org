@@ -1,3 +1,4 @@
+
 {
   "entities": {
     "UserAccount": {
@@ -52,16 +53,30 @@
     },
     "CurrentNews": {
       "title": "Current News",
-      "description": "Daily news broadcast for the homepage display area with priority scopes.",
+      "description": "Daily news broadcast for the homepage display area with priority scopes and automated translation.",
       "type": "object",
       "properties": {
-        "title": { "type": "string" },
-        "content": { "type": "string" },
+        "originalEnglish": {
+          "type": "object",
+          "properties": {
+            "title": { "type": "string" },
+            "content": { "type": "string" },
+            "category": { "type": "string" }
+          }
+        },
+        "bengaliTranslation": {
+          "type": "object",
+          "properties": {
+            "title": { "type": "string" },
+            "content": { "type": "string" },
+            "category": { "type": "string" }
+          }
+        },
+        "translationStatus": { "type": "string", "enum": ["Success", "Failed", "Pending"] },
         "source": { "type": "string" },
         "url": { "type": "string" },
         "publishedAt": { "type": "string" },
         "author": { "type": "string" },
-        "category": { "type": "string" },
         "imageUrl": { "type": "string" },
         "scope": { "type": "string", "enum": ["West Bengal", "India", "World"] },
         "scopePriority": { "type": "number", "description": "1: WB, 2: India, 3: World" },
