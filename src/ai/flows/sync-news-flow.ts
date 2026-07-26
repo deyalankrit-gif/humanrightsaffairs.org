@@ -1,7 +1,8 @@
+
 'use server';
 /**
- * @fileOverview Hardened News Sync Pipeline with automated translation.
- * Extracts top stories and performs sequential translation before committing to registry.
+ * @fileOverview Hardened News Sync Pipeline with sequential translation.
+ * Optimized for industrial reliability using Gemini 1.5 Flash.
  */
 
 import {ai} from '@/ai/genkit';
@@ -75,7 +76,7 @@ const syncNewsFlow = ai.defineFlow(
   async (input) => {
     let rawItems: any[] = [];
     
-    // 1. Fetch raw news
+    // 1. Fetch raw news from high-fidelity sources
     for (const source of RSS_SOURCES) {
       try {
         const response = await fetch(source.url, { next: { revalidate: 0 } });
@@ -93,10 +94,17 @@ const syncNewsFlow = ai.defineFlow(
     }
 
     if (rawItems.length === 0) {
-      return { news: [], diagnostics: { status: "Network Failure", yield: 0, errorSummary: "No RSS items could be fetched." } };
+      return { 
+        news: [], 
+        diagnostics: { 
+          status: "Network Failure", 
+          yield: 0, 
+          errorSummary: "No RSS items could be fetched from primary sources." 
+        } 
+      };
     }
 
-    // 2. AI Story Extraction
+    // 2. AI Story Extraction & Filtering
     let processedStories = [];
     let aiStatus = "Success";
     let errorMsg = "";
@@ -118,7 +126,7 @@ const syncNewsFlow = ai.defineFlow(
       }));
     }
 
-    // 3. Sequential Translation (Atomic Processing)
+    // 3. Sequential Translation (Prevents Rate-Limit Crashes)
     const finalizedNews = [];
     for (const item of processedStories) {
       const translation = await translateNews({
@@ -127,7 +135,7 @@ const syncNewsFlow = ai.defineFlow(
         category: item.category || 'Human Rights'
       });
 
-      // Status must match backend.json enum: ["Success", "Failed", "Pending"]
+      // Status must match institutional registry enum: ["Success", "Failed", "Pending"]
       const isSuccess = translation.title !== item.title;
 
       finalizedNews.push({

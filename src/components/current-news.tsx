@@ -9,6 +9,10 @@ import { Button } from '@/components/ui/button';
 import { syncNews } from '@/ai/flows/sync-news-flow';
 import { cn } from '@/lib/utils';
 
+/**
+ * CurrentNews: Real-time institutional news broadcast node.
+ * Features: 2-hour autonomous sync, English/Bengali toggle, and tactical layout.
+ */
 export function CurrentNews({ className }: { className?: string }) {
   const db = useFirestore();
   const [isSyncing, setIsSyncing] = useState(false);
@@ -37,18 +41,19 @@ export function CurrentNews({ className }: { className?: string }) {
       const pB = b.scopePriority ?? 99;
       if (pA !== pB) return pA - pB;
       
-      // 2. Sort by Recency (Handle pending server timestamps with Date.now() fallback)
+      // 2. Sort by Recency
       const dateA = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : Date.now();
       const dateB = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : Date.now();
       return dateB - dateA;
     })[0];
   }, [newsItems]);
 
-  // Reset language preference when a new article is loaded
+  // Reset language preference when a new article is cycled
   useEffect(() => {
     setIsBangla(false);
   }, [activeNews?.id]);
 
+  // Unified Sync Logic (Scheduled every 2 hours + Initial load)
   useEffect(() => {
     const triggerSync = async () => {
       if (!db || isSyncing || loading) return;
@@ -72,7 +77,11 @@ export function CurrentNews({ className }: { className?: string }) {
 
             // Add new processed news items
             output.news.forEach(item => {
-              batch.set(doc(collection(db, 'current_news')), { ...item, isActive: true, createdAt: serverTimestamp() });
+              batch.set(doc(collection(db, 'current_news')), { 
+                ...item, 
+                isActive: true, 
+                createdAt: serverTimestamp() 
+              });
             });
 
             // Update sync metadata
@@ -86,7 +95,7 @@ export function CurrentNews({ className }: { className?: string }) {
              setErrorType(output.diagnostics.status);
           }
         } catch (e) {
-          setErrorType('Network Error');
+          setErrorType('Sync Interrupted');
         } finally {
           setIsSyncing(false);
         }
@@ -94,6 +103,8 @@ export function CurrentNews({ className }: { className?: string }) {
     };
 
     if (meta !== undefined) triggerSync();
+    
+    // Dependencies are stable to prevent hook size errors
   }, [db, isSyncing, loading, meta === null ? 'init' : 'stable']);
 
   if (loading && !isSyncing) return (
@@ -151,8 +162,8 @@ export function CurrentNews({ className }: { className?: string }) {
       </div>
 
       <div className="flex items-center justify-between pt-3 border-t border-white/10 opacity-60">
-        <span className="text-[8px] font-black uppercase text-white">{activeNews.source}</span>
-        <div className="flex items-center pr-32">
+        <span className="text-[8px] font-black uppercase text-white truncate max-w-[120px]">{activeNews.source}</span>
+        <div className="flex items-center pr-24">
           <span className="text-[8px] font-black uppercase text-white flex items-center gap-1">
             <Zap className={cn("w-2.5 h-2.5", isSyncing && "animate-ping")} /> 
             {activeNews.translationStatus === 'Success' ? 'Translated' : 'Live Sync'}

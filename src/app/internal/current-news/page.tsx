@@ -4,7 +4,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser, useCollection, useFirestore, useMemoFirebase } from '@/firebase';
-import { collection, query, addDoc, deleteDoc, doc, serverTimestamp, orderBy, writeBatch, getDocs, where } from 'firebase/firestore';
+import { collection, query, addDoc, deleteDoc, doc, serverTimestamp, orderBy, writeBatch, getDocs, where, setDoc } from 'firebase/firestore';
 import { Footer } from '@/components/footer';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -24,6 +24,10 @@ import { useToast } from '@/hooks/use-toast';
 import { syncNews, type SyncNewsOutput } from '@/ai/flows/sync-news-flow';
 import { cn } from '@/lib/utils';
 
+/**
+ * Internal News Management: Mission Control for Homepage Broadcast.
+ * Features: Manual Entry, AI Harvest Audit, and Active Status Governance.
+ */
 export default function InternalNewsManagement() {
   const { user, loading: authLoading } = useUser();
   const router = useRouter();
@@ -89,7 +93,7 @@ export default function InternalNewsManagement() {
     try {
       const batch = writeBatch(db);
       
-      // 1. Deactivate existing active news to ensure the "update" is visible
+      // 1. Deactivate existing active news
       const activeSnap = await getDocs(query(collection(db, 'current_news'), where('isActive', '==', true)));
       activeSnap.docs.forEach(d => batch.update(d.ref, { isActive: false }));
 
@@ -103,7 +107,7 @@ export default function InternalNewsManagement() {
         publishedBy: user?.email
       });
 
-      // 3. Update sync registry so background sync doesn't immediate overwrite
+      // 3. Update sync registry
       batch.set(doc(db, 'current_news_state', 'registry'), {
         lastSyncAt: serverTimestamp(),
         status: "Manual Authorization"
@@ -194,7 +198,7 @@ export default function InternalNewsManagement() {
           <div className="space-y-1">
             <h1 className="text-3xl md:text-4xl font-headline font-bold">News <span className="text-accent italic">Governance</span></h1>
             <p className="text-slate-400 text-[10px] uppercase font-black tracking-widest flex items-center gap-2">
-              <ShieldCheck className="w-3 h-3 text-emerald-500" /> Infrastructure Stability: Stable
+              <ShieldCheck className="w-3 h-3 text-emerald-500" /> Infrastructure Stability: Balanced
             </p>
           </div>
           <div className="flex gap-3">
@@ -325,7 +329,7 @@ export default function InternalNewsManagement() {
       <Dialog open={isViewingSuggestions} onOpenChange={setIsViewingSuggestions}>
          <DialogContent className="max-w-4xl rounded-[3rem] p-0 overflow-hidden bg-slate-50 dark:bg-slate-950 h-[85vh] flex flex-col border-none shadow-2xl">
             <div className="p-8 bg-slate-900 text-white border-b-4 border-accent/20">
-               <DialogTitle className="text-2xl font-headline font-bold">Registry Audit review</DialogTitle>
+               <DialogTitle className="text-2xl font-headline font-bold">Registry Audit Review</DialogTitle>
                <div className="flex items-center gap-4 mt-2">
                  <Badge variant="outline" className="text-emerald-400 border-emerald-400/30">Model: {harvestResult?.diagnostics.model}</Badge>
                  <Badge variant="outline" className="text-accent border-accent/30">Yield: {harvestResult?.diagnostics.yield} Articles</Badge>
@@ -361,6 +365,7 @@ export default function InternalNewsManagement() {
             </div>
          </DialogContent>
       </Dialog>
+      <Footer />
     </main>
   );
 }
