@@ -210,7 +210,7 @@ export function CurrentNews({ className }: { className?: string }) {
            <Button 
             asChild
             variant="outline"
-            className="h-12 rounded-2xl border-[#CEFF00]/40 bg-[#CEFF00]/5 text-[#CEFF00] hover:bg-[#CEFF00] hover:text-primary hover:border-[#CEFF00] text-[11px] font-black uppercase tracking-[0.2em] gap-2 transition-all shadow-2xl group-hover:scale-105"
+            className="h-12 w-fit rounded-2xl border-[#CEFF00]/40 bg-[#CEFF00]/5 text-[#CEFF00] hover:bg-[#CEFF00] hover:text-primary hover:border-[#CEFF00] text-[11px] font-black uppercase tracking-[0.2em] gap-2 transition-all shadow-2xl group-hover:scale-105"
            >
              <a href={activeNews.url} target="_blank" rel="noopener noreferrer">
                Examine Article <ExternalLink className="w-4 h-4" />
