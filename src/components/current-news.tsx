@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo, useEffect, useState } from 'react';
@@ -13,7 +12,7 @@ import { cn } from '@/lib/utils';
 
 /**
  * CurrentNews: Real-time institutional news broadcast node.
- * Features: 2-hour autonomous sync, on-demand AI translation, and tactical layout.
+ * Features: 2-hour autonomous sync, on-demand AI translation, and fixed layout.
  */
 export function CurrentNews({ className }: { className?: string }) {
   const db = useFirestore();
@@ -21,8 +20,8 @@ export function CurrentNews({ className }: { className?: string }) {
   const [isSyncing, setIsSyncing] = useState(false);
   const [isTranslating, setIsTranslating] = useState(false);
   const [isBangla, setIsBangla] = useState(false);
-  const [errorType, setErrorType] = useState<string | null>(null);
 
+  // Registry metadata for sync monitoring
   const metaRef = useMemoFirebase(() => {
     if (!db) return null;
     return doc(db, 'current_news_state', 'registry');
@@ -30,6 +29,7 @@ export function CurrentNews({ className }: { className?: string }) {
 
   const { data: meta } = useDoc(metaRef);
 
+  // Real-time news stream
   const newsQuery = useMemoFirebase(() => {
     if (!db) return null;
     return query(collection(db, 'current_news'), where('isActive', '==', true));
@@ -39,7 +39,7 @@ export function CurrentNews({ className }: { className?: string }) {
 
   const activeNews = useMemo(() => {
     if (!newsItems || newsItems.length === 0) return null;
-    // Sort logic: Prioritize Regional (West Bengal) first, then Recency
+    // Prioritize Regional (West Bengal) first, then Recency
     return [...newsItems].sort((a: any, b: any) => {
       const pA = a.scopePriority ?? 99;
       const pB = b.scopePriority ?? 99;
@@ -51,27 +51,24 @@ export function CurrentNews({ className }: { className?: string }) {
     })[0];
   }, [newsItems]);
 
-  // Reset language preference when a new article is cycled
+  // Reset language view when news content changes
   useEffect(() => {
     setIsBangla(false);
   }, [activeNews?.id]);
 
-  // STABLE DEPENDENCIES: Using primitive values
+  // Autonomous Sync Logic (Primitive dependencies for React Stability)
   const lastSyncTime = (meta as any)?.lastSyncAt?.toDate?.()?.getTime() || 0;
   const activeCount = newsItems?.length || 0;
-  const registryStatus = (meta as any)?.status || 'Idle';
 
   useEffect(() => {
     const triggerSync = async () => {
       if (!db || isSyncing || loading) return;
       
-      const lastSyncDate = new Date(lastSyncTime);
-      const now = new Date();
-      const hoursSinceSync = (now.getTime() - lastSyncDate.getTime()) / (1000 * 60 * 60);
+      const now = new Date().getTime();
+      const hoursSinceSync = (now - lastSyncTime) / (1000 * 60 * 60);
 
       if (hoursSinceSync >= 2 || activeCount === 0) {
         setIsSyncing(true);
-        setErrorType(null);
         try {
           const output = await syncNews({ context: "Autonomous background sync" });
           if (output?.news?.length > 0) {
@@ -93,26 +90,23 @@ export function CurrentNews({ className }: { className?: string }) {
             }, { merge: true });
             
             await batch.commit();
-          } else if (output?.diagnostics?.errorSummary) {
-             setErrorType(output.diagnostics.status);
           }
         } catch (e) {
-          setErrorType('Sync Interrupted');
+          console.error("[SYNC-ERROR]", e);
         } finally {
           setIsSyncing(false);
         }
       }
     };
 
-    if (db) triggerSync();
-  }, [db, isSyncing, loading, lastSyncTime, activeCount, registryStatus]);
+    triggerSync();
+  }, [db, isSyncing, loading, lastSyncTime, activeCount]);
 
   const handleTranslateToggle = async () => {
     if (isTranslating || !activeNews || !db) return;
 
     const hasTranslation = !!(activeNews.bengaliTranslation?.title || activeNews.bengaliTranslation?.content);
 
-    // If we are trying to view Bangla but it's not translated yet
     if (!isBangla && !hasTranslation) {
       setIsTranslating(true);
       try {
@@ -124,7 +118,7 @@ export function CurrentNews({ className }: { className?: string }) {
 
         const result = await translateNews(input);
 
-        // Persistent update to Firestore registry
+        // Persistent update for all users
         const newsRef = doc(db, 'current_news', activeNews.id);
         await updateDoc(newsRef, {
           bengaliTranslation: result,
@@ -132,19 +126,13 @@ export function CurrentNews({ className }: { className?: string }) {
         });
 
         setIsBangla(true);
-        toast({ title: "Translation Established", description: "Article successfully converted to Bengali script." });
+        toast({ title: "Translation Established" });
       } catch (e: any) {
-        console.error("[TRANSLATE-UI] Request Failure:", e);
-        toast({ 
-          variant: "destructive", 
-          title: "Translation Unavailable", 
-          description: "AI translation engine is under load. Please retry in a moment." 
-        });
+        toast({ variant: "destructive", title: "Translation Failed", description: "AI service busy." });
       } finally {
         setIsTranslating(false);
       }
     } else {
-      // Toggle logic for existing translations
       setIsBangla(!isBangla);
     }
   };
@@ -156,14 +144,7 @@ export function CurrentNews({ className }: { className?: string }) {
     </div>
   );
 
-  if (!activeNews) {
-    return errorType ? (
-      <div className={cn("p-6 text-red-400 flex items-center gap-2", className)}>
-        <AlertTriangle className="w-4 h-4" />
-        <span className="text-[10px] font-bold uppercase">{errorType}</span>
-      </div>
-    ) : null;
-  }
+  if (!activeNews) return null;
 
   const hasTranslation = !!(activeNews.bengaliTranslation?.title || activeNews.bengaliTranslation?.content);
   const displayData = isBangla && hasTranslation ? activeNews.bengaliTranslation : (activeNews.originalEnglish || activeNews);
@@ -188,44 +169,37 @@ export function CurrentNews({ className }: { className?: string }) {
         </p>
         
         <div className="flex items-center gap-2.5 pt-2">
-          <Button asChild variant="outline" className="h-8 w-fit rounded-xl border-[#CEFF00]/40 bg-[#CEFF00]/5 text-[#CEFF00] hover:bg-[#CEFF00] hover:text-primary text-[10px] font-black uppercase transition-all shadow-sm">
+          <Button asChild variant="outline" className="h-8 w-fit rounded-xl border-[#CEFF00]/40 bg-[#CEFF00]/5 text-[#CEFF00] hover:bg-[#CEFF00] hover:text-primary text-[10px] font-black uppercase transition-all">
             <a href={activeNews.url} target="_blank">Examine Story <ExternalLink className="w-3 h-3 ml-1.5" /></a>
           </Button>
           
           <button 
             onClick={handleTranslateToggle}
             disabled={isTranslating}
-            title={isTranslating ? "Translating..." : isBangla ? "Show Original (English)" : "Translate to Bengali (বাংলায় দেখুন)"}
             className={cn(
-              "h-8 px-3 rounded-xl border transition-all flex items-center gap-1.5 shadow-md active:scale-95", 
-              isBangla 
-                ? "bg-[#CEFF00] text-primary border-[#CEFF00]" 
-                : "bg-white/5 text-[#CEFF00] border-white/10 hover:bg-white/10",
-              isTranslating && "opacity-70 cursor-wait"
+              "h-8 px-3 rounded-xl border transition-all flex items-center gap-1.5 active:scale-95", 
+              isBangla ? "bg-[#CEFF00] text-primary border-[#CEFF00]" : "bg-white/5 text-[#CEFF00] border-white/10 hover:bg-white/10"
             )}
           >
-            {isTranslating ? (
-              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-            ) : (
-              <Languages className="w-3.5 h-3.5" />
-            )}
-            <span className="text-[9px] font-black uppercase tracking-widest">
-              {isTranslating ? '...' : isBangla ? 'ENG' : 'BN'}
-            </span>
+            {isTranslating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Languages className="w-3.5 h-3.5" />}
+            <span className="text-[9px] font-black uppercase tracking-widest">{isTranslating ? '...' : isBangla ? 'ENG' : 'BN'}</span>
           </button>
         </div>
       </div>
 
-      <div className="flex items-center justify-between pt-3 border-t border-white/10 opacity-60 pr-64">
-        <span className="text-[8px] font-black uppercase text-white truncate max-w-[150px]">{activeNews.source}</span>
-        <div className="flex items-center">
+      <div className="flex items-center justify-between pt-3 border-t border-white/10 opacity-60">
+        <span className="text-[8px] font-black uppercase text-white truncate max-w-[120px]">{activeNews.source}</span>
+        
+        {/* SHIFTED FURTHER LEFT FOR BALANCE - Fixed Collision */}
+        <div className="flex-1 flex justify-center ml-[-40px]">
           <span className="text-[8px] font-black uppercase text-white flex items-center gap-1">
             <Zap className={cn("w-2.5 h-2.5", isSyncing && "animate-ping")} /> 
-            {hasTranslation ? 'Translated' : 'Live Sync'}
+            {isBangla ? 'Translated' : 'Live Sync'}
           </span>
         </div>
+
+        <div className="w-[80px]" /> {/* Spacer to force left shift while maintaining end alignment */}
       </div>
     </div>
   );
 }
-

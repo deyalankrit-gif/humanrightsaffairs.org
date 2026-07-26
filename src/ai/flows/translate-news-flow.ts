@@ -1,8 +1,7 @@
 'use server';
 /**
- * @fileOverview Resilient translation engine with exponential backoff retries.
- * Optimized for formal Bengali script generation and zero-failure output.
- * Updated: Enhanced prompt for proper noun preservation and tactical logging.
+ * @fileOverview High-fidelity translation engine for Human Rights news.
+ * Optimized for natural, fluent Bengali Unicode generation.
  */
 
 import {ai} from '@/ai/genkit';
@@ -24,41 +23,20 @@ const TranslateNewsOutputSchema = z.object({
 export type TranslateNewsOutput = z.infer<typeof TranslateNewsOutputSchema>;
 
 /**
- * translateNews with Exponential Backoff and Tactical Logging
+ * translateNews - High-fidelity AI translation flow
  */
-export async function translateNews(input: z.infer<typeof TranslateNewsInputSchema>, attempt = 1): Promise<TranslateNewsOutput> {
-  const startTime = Date.now();
-  
+export async function translateNews(input: TranslateNewsOutput): Promise<TranslateNewsOutput> {
   try {
-    console.log(`[TRANSLATE-AUDIT] Request Started | Model: gemini-1.5-flash | Attempt: ${attempt}`);
-    
     const { output } = await translateNewsPrompt(input);
     
-    // Validate output integrity and check for language parity (AI parroting English)
     if (!output || !output.title || output.title === input.title) {
-      throw new Error("Translation parity detected - likely safety block or yield error.");
+      throw new Error("Translation parity detected.");
     }
     
-    const endTime = Date.now();
-    console.log(`[TRANSLATE-AUDIT] Success | Latency: ${endTime - startTime}ms | Yield: Valid Bengali Script`);
-    
-    // Explicitly parse to ensure clean object transfer
     return JSON.parse(JSON.stringify(output));
   } catch (error: any) {
-    const endTime = Date.now();
-    const delay = Math.pow(2, attempt) * 500;
-    
-    console.error(`[TRANSLATE-AUDIT] Error | Code: ${error.code || 'UNKNOWN'} | Latency: ${endTime - startTime}ms`);
-    console.error(`[TRANSLATE-AUDIT] Trace: ${error.stack}`);
-    
-    if (attempt < 3) {
-      console.warn(`[TRANSLATE-ENGINE] Retrying in ${delay}ms...`);
-      await new Promise(r => setTimeout(r, delay));
-      return translateNews(input, attempt + 1);
-    }
-    
-    // Hard fallback to original English if all retries fail
-    console.error("[TRANSLATE-ENGINE] Final failure. Returning English fallback.");
+    console.error("[TRANSLATE-CRITICAL] Error:", error);
+    // Return original if AI fails
     return { title: input.title, content: input.content, category: input.category };
   }
 }
@@ -76,18 +54,18 @@ const translateNewsPrompt = ai.definePrompt({
       { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
     ],
   },
-  system: `You are a professional Bengali translator for an institutional human rights network. 
-  Your mandate is to translate the following news data into formal, high-fidelity Bengali script (Bangla). 
+  system: `You are a professional translator specializing in legal and human rights journalism.
   
-  STRICT CONSTRAINTS:
-  1. Maintain a professional, journalistic tone.
-  2. DO NOT include any English characters in the title, content, or category fields.
-  3. PRESERVE all formatting, including line breaks and paragraph structure.
-  4. KEEP PROPER NOUNS (Names of people, specific organizations like 'HRAT', specific locations, or official acts) unchanged in their standard Bengali phonetic equivalent or keep them in English if they are technical identifiers.
-  5. Return only the translated Bengali content in the requested JSON schema.`,
+  TRANSLATION PROTOCOL:
+  1. Translate the complete Headline and Body into natural, fluent Bengali (বাংলা).
+  2. Use proper Bengali Unicode characters only.
+  3. DO NOT summarize, shorten, or omit any information. Translate the full content provided.
+  4. PRESERVE the original meaning, names, numbers, dates, and quotations.
+  5. KEEP paragraph breaks and formatting identical to the source.
+  6. DO NOT translate URLs, source names, or technical identifiers like 'HRAT'.
+  7. Return ONLY the translated JSON. No markdown, no explanations.`,
   prompt: `
-  Target Language: Bengali (Bangla)
-  Source Data to Translate:
+  Translate the following news data:
   - Headline: {{{title}}}
   - Summary: {{{content}}}
   - Category: {{{category}}}
