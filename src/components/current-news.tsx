@@ -145,7 +145,7 @@ export function CurrentNews({ className }: { className?: string }) {
         </p>
         
         <div className="flex items-center gap-3 pt-2">
-          <Button asChild variant="outline" className="h-10 w-fit rounded-xl border-[#CEFF00]/40 bg-[#CEFF00]/5 text-[#CEFF00] hover:bg-[#CEFF00] hover:text-primary text-[10px] font-black uppercase transition-all">
+          <Button asChild variant="outline" className="h-9 w-fit rounded-xl border-[#CEFF00]/40 bg-[#CEFF00]/5 text-[#CEFF00] hover:bg-[#CEFF00] hover:text-primary text-[10px] font-black uppercase transition-all">
             <a href={activeNews.url} target="_blank">Examine Story <ExternalLink className="w-3 h-3 ml-2" /></a>
           </Button>
           
@@ -153,12 +153,12 @@ export function CurrentNews({ className }: { className?: string }) {
             <button 
               onClick={() => setIsBangla(!isBangla)}
               className={cn(
-                "h-10 px-4 rounded-xl border transition-all flex items-center gap-2 shadow-lg", 
+                "h-9 px-3 rounded-xl border transition-all flex items-center gap-2 shadow-lg", 
                 isBangla ? "bg-[#CEFF00] text-primary border-[#CEFF00]" : "bg-white/5 text-[#CEFF00] border-white/10 hover:bg-white/10"
               )}
             >
-              <Languages className="w-4 h-4" />
-              <span className="text-[10px] font-black uppercase tracking-widest">{isBangla ? 'ENG' : 'BN'}</span>
+              <Languages className="w-3.5 h-3.5" />
+              <span className="text-[9px] font-black uppercase tracking-widest">{isBangla ? 'ENG' : 'BN'}</span>
             </button>
           )}
         </div>
@@ -166,7 +166,7 @@ export function CurrentNews({ className }: { className?: string }) {
 
       <div className="flex items-center justify-between pt-3 border-t border-white/10 opacity-60">
         <span className="text-[8px] font-black uppercase text-white truncate max-w-[120px]">{activeNews.source}</span>
-        <div className="flex items-center pr-24">
+        <div className="flex items-center pr-32">
           <span className="text-[8px] font-black uppercase text-white flex items-center gap-1">
             <Zap className={cn("w-2.5 h-2.5", isSyncing && "animate-ping")} /> 
             {activeNews.translationStatus === 'Success' ? 'Translated' : 'Live Sync'}

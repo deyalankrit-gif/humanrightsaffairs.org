@@ -22,11 +22,12 @@ import {
 } from "@/components/ui/dialog";
 import { useToast } from '@/hooks/use-toast';
 import { syncNews, type SyncNewsOutput } from '@/ai/flows/sync-news-flow';
+import { CurrentNews } from '@/components/current-news';
 import { cn } from '@/lib/utils';
 
 /**
  * Internal News Management: Mission Control for Homepage Broadcast.
- * Features: Manual Entry, AI Harvest Audit, and Active Status Governance.
+ * Features: Manual Entry, AI Harvest Audit, and Real-time Live Preview.
  */
 export default function InternalNewsManagement() {
   const { user, loading: authLoading } = useUser();
@@ -93,7 +94,7 @@ export default function InternalNewsManagement() {
     try {
       const batch = writeBatch(db);
       
-      // 1. Deactivate existing active news
+      // 1. Deactivate existing active news to ensure sync
       const activeSnap = await getDocs(query(collection(db, 'current_news'), where('isActive', '==', true)));
       activeSnap.docs.forEach(d => batch.update(d.ref, { isActive: false }));
 
@@ -162,7 +163,7 @@ export default function InternalNewsManagement() {
         publishedBy: user?.email
       });
 
-      // 3. Update registry to prevent immediate background sync overwrite
+      // 3. Update registry
       batch.set(doc(db, 'current_news_state', 'registry'), {
         lastSyncAt: serverTimestamp(),
         status: "Manual Entry"
@@ -213,9 +214,35 @@ export default function InternalNewsManagement() {
       </header>
 
       <section className="py-8 container mx-auto px-4 max-w-5xl">
-         <div className="relative w-full max-w-md mb-8">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <Input placeholder="Filter registry..." className="pl-10 h-11 rounded-xl bg-white dark:bg-slate-900 shadow-sm" value={search} onChange={e => setSearch(e.target.value)} />
+         
+         {/* Live Sync Preview Node */}
+         <div className="mb-12 animate-in fade-in duration-700">
+            <Card className="rounded-[2.5rem] bg-slate-950 border-none shadow-2xl overflow-hidden p-6 md:p-10 relative">
+               <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full -mr-16 -mt-16 blur-2xl"></div>
+               <div className="flex items-center justify-between mb-8 border-b border-white/10 pb-4">
+                  <div className="space-y-1">
+                     <h3 className="text-sm font-black text-accent uppercase tracking-[0.2em] flex items-center gap-2">
+                        <Zap className="w-3.5 h-3.5" /> Live Homepage Preview
+                     </h3>
+                     <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest">Real-time synchronization active</p>
+                  </div>
+                  <Badge variant="outline" className="text-emerald-500 border-emerald-500/30 font-black uppercase text-[8px] animate-pulse">Sync Terminal</Badge>
+               </div>
+               
+               <div className="bg-primary/20 rounded-[2rem] p-4 border border-white/5 flex items-center justify-center min-h-[300px]">
+                  <CurrentNews />
+               </div>
+            </Card>
+         </div>
+
+         <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-8">
+            <h2 className="text-xl font-headline font-bold text-primary dark:text-white flex items-center gap-3">
+               <Newspaper className="w-5 h-5 text-accent" /> Broadcast Registry
+            </h2>
+            <div className="relative w-full max-w-md">
+               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+               <Input placeholder="Filter registry..." className="pl-10 h-11 rounded-xl bg-white dark:bg-slate-900 shadow-sm" value={search} onChange={e => setSearch(e.target.value)} />
+            </div>
          </div>
 
          {dataLoading ? (
@@ -223,21 +250,24 @@ export default function InternalNewsManagement() {
          ) : (
            <div className="grid gap-6">
              {newsItems?.filter(n => (n.originalEnglish?.title || n.title || '').toLowerCase().includes(search.toLowerCase())).map((n: any) => (
-               <Card key={n.id} className="rounded-3xl overflow-hidden border-none shadow-sm bg-white dark:bg-slate-900 group">
+               <Card key={n.id} className={cn(
+                 "rounded-3xl overflow-hidden border transition-all group",
+                 n.isActive ? "bg-white dark:bg-slate-900 border-emerald-500/20 shadow-lg shadow-emerald-500/5" : "bg-white/60 dark:bg-slate-950/60 border-slate-100 dark:border-slate-800 grayscale opacity-60"
+               )}>
                   <CardContent className="p-8 flex flex-col md:flex-row gap-8 items-stretch">
-                       <div className="md:w-40 text-center flex flex-col items-center justify-center shrink-0 bg-slate-50 dark:bg-slate-800 rounded-2xl">
-                          <Badge className="mb-2 bg-primary text-white">{n.scope || 'India'}</Badge>
-                          <span className={cn("text-[8px] font-black uppercase tracking-tighter", n.isActive ? 'text-emerald-500' : 'text-slate-400')}>
-                            {n.isActive ? 'Active Broadcast' : 'Archive'}
+                       <div className="md:w-40 text-center flex flex-col items-center justify-center shrink-0 bg-slate-50 dark:bg-slate-800 rounded-2xl p-4">
+                          <Badge className={cn("mb-2", n.isActive ? "bg-emerald-600" : "bg-primary")}>{n.scope || 'India'}</Badge>
+                          <span className={cn("text-[8px] font-black uppercase tracking-widest", n.isActive ? 'text-emerald-500' : 'text-slate-400')}>
+                            {n.isActive ? 'Active Now' : 'Archive'}
                           </span>
                        </div>
                        <div className="flex-1 space-y-4">
                           <div className="flex justify-between items-start">
                              <h3 className="text-xl font-bold">{n.originalEnglish?.title || n.title}</h3>
-                             <Button variant="ghost" size="icon" onClick={() => handleDelete(n.id)} className="text-slate-300 hover:text-red-500"><Trash2 className="w-4 h-4" /></Button>
+                             <Button variant="ghost" size="icon" onClick={() => handleDelete(n.id)} className="text-slate-300 hover:text-red-500 transition-colors"><Trash2 className="w-4 h-4" /></Button>
                           </div>
-                          <p className="text-sm text-slate-500 line-clamp-3 italic">"{n.originalEnglish?.content || n.content}"</p>
-                          <div className="pt-4 border-t flex justify-between items-center text-[9px] font-black text-slate-400 uppercase">
+                          <p className="text-sm text-slate-500 line-clamp-3 italic leading-relaxed">"{n.originalEnglish?.content || n.content}"</p>
+                          <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center text-[9px] font-black text-slate-400 uppercase tracking-widest">
                              <span className="flex items-center gap-1.5"><Globe className="w-3 h-3 text-accent" /> {n.source}</span>
                              <Badge variant="outline" className="text-[7px] border-slate-100">{n.originalEnglish?.category || n.category}</Badge>
                           </div>
