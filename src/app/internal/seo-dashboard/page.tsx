@@ -45,7 +45,8 @@ import {
   RefreshCw,
   Eye,
   Settings2,
-  Accessibility
+  Accessibility,
+  Activity
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
