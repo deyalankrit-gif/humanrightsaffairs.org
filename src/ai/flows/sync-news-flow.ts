@@ -8,7 +8,7 @@
  */
 
 import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+import {z} from 'zod';
 import Parser from 'rss-parser';
 import { translateNews } from './translate-news-flow';
 import { googleAI } from '@genkit-ai/google-genai';
@@ -109,7 +109,7 @@ export async function syncNews(input: { context: string }): Promise<SyncNewsOutp
 
 const syncNewsPrompt = ai.definePrompt({
   name: 'syncNewsPrompt',
-  model: googleAI.model('gemini-1.5-flash'),
+  model: googleAI.model('gemini-2.0-flash'),
   input: { 
     schema: z.object({
       context: z.string(),

@@ -62,7 +62,7 @@ export async function translateNews(input: TranslateNewsInput, attempt = 1): Pro
 
 const translateNewsPrompt = ai.definePrompt({
   name: 'translateNewsPrompt',
-  model: googleAI.model('gemini-1.5-flash'),
+  model: googleAI.model('gemini-2.0-flash'),
   input: {schema: TranslateNewsInputSchema},
   output: {schema: TranslateNewsOutputSchema},
   config: {

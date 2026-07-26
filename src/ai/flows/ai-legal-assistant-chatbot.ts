@@ -42,7 +42,7 @@ export async function inquireLegalAssistant(
 
 const legalAssistantPrompt = ai.definePrompt({
   name: 'legalAssistantPrompt',
-  model: googleAI.model('gemini-1.5-flash'),
+  model: googleAI.model('gemini-2.0-flash'),
   input: {
     schema: z.object({
       query: z.string()

@@ -48,7 +48,7 @@ export async function aiDocumentSearch(input: AiDocumentSearchInput): Promise<Ai
 
 const aiDocumentSearchPrompt = ai.definePrompt({
   name: 'aiDocumentSearchPrompt',
-  model: googleAI.model('gemini-1.5-flash'),
+  model: googleAI.model('gemini-2.0-flash'),
   input: {schema: AiDocumentSearchInputSchema},
   output: {schema: AiDocumentSearchOutputSchema},
   system: `You are an expert human rights legal analyst. Your task is to analyze a given set of human rights documents and a user's query to identify and extract the most relevant clauses or sections. Provide a concise summary of your findings and specific excerpts from the documents.`,
