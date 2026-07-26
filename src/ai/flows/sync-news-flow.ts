@@ -1,10 +1,10 @@
-
 'use server';
 /**
  * @fileOverview Resilient AI-powered news aggregation flow with automated translation.
  * 
  * - syncNews - Aggregates and automatically translates news from Indian RSS sources.
  * - Features: Sequential translation processing to avoid rate limits, automated fallback.
+ * - Optimized: Limited to 4 high-priority items to prevent Server Action timeouts.
  */
 
 import {ai} from '@/ai/genkit';
@@ -64,13 +64,13 @@ const SyncNewsOutputSchema = z.object({
       content: z.string(),
       category: z.string(),
     }),
-    translationStatus: z.enum(["Success", "Failed", "Pending"]),
+    translationStatus: z.string(), // Use string to prevent Zod enum crashes on AI variation
     source: z.string(),
     url: z.string(),
     publishedAt: z.string().optional().nullable(),
     author: z.string().optional().nullable(),
     imageUrl: z.string().optional().nullable(),
-    scope: z.enum(["West Bengal", "India", "World"]),
+    scope: z.string(), // Use string for ingestion resiliency
     scopePriority: z.number(),
   })),
   diagnostics: z.object({
@@ -126,7 +126,7 @@ const syncNewsPrompt = ai.definePrompt({
         author: z.string().optional().nullable(),
         category: z.string().optional().nullable(),
         imageUrl: z.string().optional().nullable(),
-        scope: z.enum(["West Bengal", "India", "World"]),
+        scope: z.string(),
         scopePriority: z.number(),
       }))
     }) 
@@ -144,7 +144,7 @@ PRIORITY HIERARCHY:
 
 CONSTRAINTS:
 - CONTENT: Concise summary, maximum 8 lines.
-- SCOPE: Accurate classification.`,
+- SCOPE: Classify strictly as "West Bengal", "India", or "World".`,
   prompt: `Current Context: {{{context}}}. 
   
 Intelligence Feed from Multi-Source RSS Harvest:
@@ -154,7 +154,7 @@ Intelligence Feed from Multi-Source RSS Harvest:
   Summary: {{{this.content}}}
 {{/each}}
 
-Please aggregate the top 8 most relevant news items in English.`,
+Please aggregate the top 4 most relevant news items in English.`,
 });
 
 const syncNewsFlow = ai.defineFlow(
@@ -190,16 +190,22 @@ const syncNewsFlow = ai.defineFlow(
     }
 
     // Step 1: AI Selection in English
-    const { output } = await syncNewsPrompt({ context: input.context, rawItems: rawItems.slice(0, 30) });
+    const { output } = await syncNewsPrompt({ context: input.context, rawItems: rawItems.slice(0, 20) });
     const englishNews = output?.news || [];
 
-    // Step 2: Sequential Translation to prevent rate limiting
+    // Step 2: Sequential Translation to prevent rate limiting and timeouts
+    // Limit to 4 items for public sync to ensure stability
     console.log(`[SYNC-FLOW] Selection complete. Starting sequential translation for ${englishNews.length} articles.`);
     const translatedNews = [];
     
-    for (const item of englishNews) {
+    for (const item of englishNews.slice(0, 4)) {
       try {
-        // Call the translation wrapper with its built-in retry logic
+        // Normalizing scope for robustness
+        let normalizedScope = item.scope;
+        if (item.scope.toLowerCase().includes('bengal')) normalizedScope = "West Bengal";
+        else if (item.scope.toLowerCase().includes('india') || item.scope.toLowerCase().includes('national')) normalizedScope = "India";
+        else if (item.scope.toLowerCase().includes('world') || item.scope.toLowerCase().includes('global')) normalizedScope = "World";
+
         const translation = await translateNews({
           title: item.title,
           content: item.content,
@@ -208,13 +214,14 @@ const syncNewsFlow = ai.defineFlow(
 
         translatedNews.push({
           ...item,
+          scope: normalizedScope,
           originalEnglish: {
             title: item.title,
             content: item.content,
             category: item.category || 'General'
           },
           bengaliTranslation: translation,
-          translationStatus: (translation.title !== item.title) ? "Success" as const : "Failed" as const
+          translationStatus: (translation.title !== item.title) ? "Success" : "Failed"
         });
       } catch (e) {
         console.error(`[SYNC-FLOW] Translation error for item: ${item.title.substring(0, 30)}`, e);
@@ -222,7 +229,7 @@ const syncNewsFlow = ai.defineFlow(
           ...item,
           originalEnglish: { title: item.title, content: item.content, category: item.category || 'General' },
           bengaliTranslation: { title: item.title, content: item.content, category: item.category || 'General' },
-          translationStatus: "Failed" as const
+          translationStatus: "Failed"
         });
       }
       

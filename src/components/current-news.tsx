@@ -52,15 +52,14 @@ export function CurrentNews({ className }: { className?: string }) {
       const now = new Date();
       const hoursSinceSync = (now.getTime() - lastSync.getTime()) / (1000 * 60 * 60);
 
-      // Trigger if stale (>6h) OR if active news is missing required translation
-      const needsTranslation = activeNews && (!activeNews.bengaliTranslation || activeNews.translationStatus === 'Pending');
+      // Trigger if stale (>6h) OR if registry is empty
       const isEmpty = !newsItems || newsItems.length === 0;
 
-      if (hoursSinceSync >= 6 || isEmpty || needsTranslation) {
+      if (hoursSinceSync >= 6 || isEmpty) {
         setIsSyncing(true);
         try {
           const output = await syncNews({ context: `Autonomous intelligence sync at ${now.toLocaleTimeString()}` });
-          if (output?.news?.length > 0) {
+          if (output && output.news && output.news.length > 0) {
             const batch = writeBatch(db);
             
             // Mark existing as inactive
@@ -94,8 +93,7 @@ export function CurrentNews({ className }: { className?: string }) {
     };
 
     if (meta !== undefined) triggerSync();
-    // Dependency array fixed to have constant size
-  }, [db, isSyncing, loading, meta, activeNews, newsItems]);
+  }, [db, isSyncing, loading, meta ? 1 : 0]); // Stable dependency on meta presence
 
   if (loading && !isSyncing) {
     return (
