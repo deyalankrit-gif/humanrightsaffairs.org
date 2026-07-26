@@ -82,7 +82,7 @@ export default function Home() {
         </div>
 
         {/* Intelligence Node (Elevated News Feed - Repositioned closer to center) */}
-        <div className="absolute top-28 left-24 z-20 hidden md:flex flex-col">
+        <div className="absolute top-20 left-24 z-20 hidden md:flex flex-col">
           <CurrentNews />
         </div>
 
