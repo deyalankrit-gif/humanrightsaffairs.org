@@ -4,7 +4,7 @@
  * 
  * - syncNews - Aggregates and automatically translates news from Indian RSS sources.
  * - Features: Sequential translation processing to avoid rate limits, automated fallback.
- * - Optimized: Limited to 4 high-priority items to prevent Server Action timeouts.
+ * - Optimized: Limited to 3 high-priority items to ensure Server Action stability.
  */
 
 import {ai} from '@/ai/genkit';
@@ -20,9 +20,9 @@ const parser = new Parser({
 
 const RSS_SOURCES = [
   { name: 'Google News India', url: 'https://news.google.com/rss/headlines/section/topic/NATION?hl=en-IN&gl=IN&ceid=IN:en' },
-  { name: 'Reuters India', url: 'https://news.google.com/rss/search?q=reuters+india&hl=en-IN&gl=IN&ceid=IN:en' },
   { name: 'The Hindu', url: 'https://www.thehindu.com/news/national/feeder/default.rss' },
-  { name: 'Indian Express', url: 'https://indianexpress.com/section/india/feed/' }
+  { name: 'Indian Express', url: 'https://indianexpress.com/section/india/feed/' },
+  { name: 'NDTV India', url: 'https://feeds.feedburner.com/ndtvnews-india-news' }
 ];
 
 async function fetchSource(url: string): Promise<Response> {
@@ -64,13 +64,13 @@ const SyncNewsOutputSchema = z.object({
       content: z.string(),
       category: z.string(),
     }),
-    translationStatus: z.string(), // Use string to prevent Zod enum crashes on AI variation
+    translationStatus: z.string(),
     source: z.string(),
     url: z.string(),
     publishedAt: z.string().optional().nullable(),
     author: z.string().optional().nullable(),
     imageUrl: z.string().optional().nullable(),
-    scope: z.string(), // Use string for ingestion resiliency
+    scope: z.string(),
     scopePriority: z.number(),
   })),
   diagnostics: z.object({
@@ -143,7 +143,7 @@ PRIORITY HIERARCHY:
 3. World (Third Priority)
 
 CONSTRAINTS:
-- CONTENT: Concise summary, maximum 8 lines.
+- CONTENT: Concise summary, maximum 6 lines.
 - SCOPE: Classify strictly as "West Bengal", "India", or "World".`,
   prompt: `Current Context: {{{context}}}. 
   
@@ -154,7 +154,7 @@ Intelligence Feed from Multi-Source RSS Harvest:
   Summary: {{{this.content}}}
 {{/each}}
 
-Please aggregate the top 4 most relevant news items in English.`,
+Please aggregate the top 3 most relevant news items in English.`,
 });
 
 const syncNewsFlow = ai.defineFlow(
@@ -167,40 +167,44 @@ const syncNewsFlow = ai.defineFlow(
     let rawItems: any[] = [];
     let successfulCount = 0;
 
-    for (const source of RSS_SOURCES) {
-      try {
-        const response = await fetchSource(source.url);
-        const xml = await response.text();
-        const data = await parser.parseString(xml);
-        rawItems = rawItems.concat(data.items.map(i => ({
-          title: cleanText(i.title || '', 200),
-          link: i.link || '',
-          pubDate: i.pubDate || '',
-          author: i.creator || i.author || null,
-          content: cleanText(i.contentSnippet || i.content || '', 1000),
-          source: source.name,
-          imageUrl: (i as any).media?.$?.url || null
-        })));
-        successfulCount++;
-      } catch (err) {}
-    }
+    // Phase 1: Harvest RSS Data
+    await ai.run('harvest-rss', async () => {
+      for (const source of RSS_SOURCES) {
+        try {
+          const response = await fetchSource(source.url);
+          const xml = await response.text();
+          const data = await parser.parseString(xml);
+          const mapped = data.items.map(i => ({
+            title: cleanText(i.title || '', 200),
+            link: i.link || '',
+            pubDate: i.pubDate || '',
+            author: i.creator || i.author || null,
+            content: cleanText(i.contentSnippet || i.content || '', 1000),
+            source: source.name,
+            imageUrl: (i as any).media?.$?.url || null
+          }));
+          rawItems = rawItems.concat(mapped);
+          successfulCount++;
+        } catch (err) {
+          console.warn(`[SYNC-FLOW] Source ${source.name} failed:`, err);
+        }
+      }
+    });
 
     if (rawItems.length === 0) {
       return { news: [], diagnostics: { sourcesAttempted: RSS_SOURCES.length, sourcesSuccessful: 0, totalRawItems: 0, translationCount: 0 } };
     }
 
-    // Step 1: AI Selection in English
-    const { output } = await syncNewsPrompt({ context: input.context, rawItems: rawItems.slice(0, 20) });
+    // Phase 2: AI Selection in English
+    const { output } = await syncNewsPrompt({ context: input.context, rawItems: rawItems.slice(0, 25) });
     const englishNews = output?.news || [];
 
-    // Step 2: Sequential Translation to prevent rate limiting and timeouts
-    // Limit to 4 items for public sync to ensure stability
+    // Phase 3: Sequential Translation (Limited to 3 for stability)
     console.log(`[SYNC-FLOW] Selection complete. Starting sequential translation for ${englishNews.length} articles.`);
     const translatedNews = [];
     
-    for (const item of englishNews.slice(0, 4)) {
+    for (const item of englishNews.slice(0, 3)) {
       try {
-        // Normalizing scope for robustness
         let normalizedScope = item.scope;
         if (item.scope.toLowerCase().includes('bengal')) normalizedScope = "West Bengal";
         else if (item.scope.toLowerCase().includes('india') || item.scope.toLowerCase().includes('national')) normalizedScope = "India";
@@ -233,8 +237,8 @@ const syncNewsFlow = ai.defineFlow(
         });
       }
       
-      // Small pause to help with rate limiting
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Small pause to prevent hitting AI burst limits
+      await new Promise(resolve => setTimeout(resolve, 300));
     }
 
     return {
