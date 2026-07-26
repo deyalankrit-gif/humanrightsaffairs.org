@@ -1,10 +1,6 @@
 'use server';
 /**
- * @fileOverview An AI-powered legal assistant chatbot that helps users understand their constitutional rights and legal procedures.
- *
- * - inquireLegalAssistant - A function that handles user queries and returns conversational legal assistance.
- * - InquireLegalAssistantInput - The input type for the inquireLegalAssistant function.
- * - InquireLegalAssistantOutput - The return type for the inquireLegalAssistant function.
+ * @fileOverview An AI-powered legal assistant chatbot.
  */
 
 import {ai} from '@/ai/genkit';
@@ -12,42 +8,24 @@ import {z} from 'genkit';
 import { googleAI } from '@genkit-ai/google-genai';
 
 const InquireLegalAssistantInputSchema = z.object({
-  query: z.string().describe('A user query about constitutional rights or basic legal procedures.')
+  query: z.string()
 });
-export type InquireLegalAssistantInput = z.infer<
-  typeof InquireLegalAssistantInputSchema
->;
+export type InquireLegalAssistantInput = z.infer<typeof InquireLegalAssistantInputSchema>;
 
-const InquireLegalAssistantOutputSchema = z
-  .string()
-  .describe('The AI legal assistant\'s conversational response.');
-export type InquireLegalAssistantOutput = z.infer<
-  typeof InquireLegalAssistantOutputSchema
->;
-
-/**
- * inquireLegalAssistant - Robust Server Action wrapper.
- */
-export async function inquireLegalAssistant(
-  input: InquireLegalAssistantInput
-): Promise<InquireLegalAssistantOutput> {
+export async function inquireLegalAssistant(input: InquireLegalAssistantInput): Promise<string> {
   try {
     const result = await aiLegalAssistantChatbotFlow(input);
-    return JSON.parse(JSON.stringify(result));
+    return String(result);
   } catch (error) {
-    console.error("Server Action Crash (inquireLegalAssistant):", error);
-    return "I am currently offline due to a technical synchronization issue with the national legal database. Please contact our helpline for assistance.";
+    console.error("[CHATBOT] Engine Failure:", error);
+    return "I am currently offline due to a technical synchronization issue. Please contact our helpline.";
   }
 }
 
 const legalAssistantPrompt = ai.definePrompt({
   name: 'legalAssistantPrompt',
-  model: googleAI.model('gemini-2.0-flash'),
-  input: {
-    schema: z.object({
-      query: z.string()
-    })
-  },
+  model: googleAI.model('gemini-1.5-flash'),
+  input: { schema: InquireLegalAssistantInputSchema },
   config: {
     safetySettings: [
       { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
@@ -56,15 +34,7 @@ const legalAssistantPrompt = ai.definePrompt({
       { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
     ],
   },
-  system: `You are an expert AI-powered legal assistant for the Human Rights Affairs Trust (JusticeShield) in India.
-Your goal is to help citizens understand their constitutional rights and standard legal procedures (BNSS/BNS) in a clear, simple, and conversational manner.
-
-Guidelines:
-1. Always address the user's specific question directly. 
-2. If the user asks a question, provide a detailed but accessible answer based on Indian law.
-3. Do not simply provide a greeting.
-4. If you cannot answer a specific question, suggest consulting a legal professional.
-5. Avoid complex legal jargon where possible.`,
+  system: `You are an expert AI-powered legal assistant for the Human Rights Affairs Trust in India. Help citizens understand their rights clearly.`,
   prompt: `User Query: {{{query}}}`,
 });
 
@@ -72,21 +42,10 @@ const aiLegalAssistantChatbotFlow = ai.defineFlow(
   {
     name: 'aiLegalAssistantChatbotFlow',
     inputSchema: InquireLegalAssistantInputSchema,
-    outputSchema: InquireLegalAssistantOutputSchema,
+    outputSchema: z.string(),
   },
   async (input) => {
-    try {
-      const response = await legalAssistantPrompt(input);
-      const finalOutput = response.text;
-      
-      if (!finalOutput || finalOutput.trim().length === 0) {
-        return "I apologize, but I am currently having trouble processing your query. Please rephrase your question or contact our official helpline for urgent assistance.";
-      }
-      
-      return finalOutput;
-    } catch (error) {
-      console.error("AI Chatbot Flow Error:", error);
-      return "I am currently offline due to a technical synchronization issue with the national legal database. Please contact our helpline for assistance.";
-    }
+    const response = await legalAssistantPrompt(input);
+    return response.text || "I am currently having trouble processing your query.";
   }
 );
