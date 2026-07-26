@@ -220,7 +220,7 @@ export function CurrentNews({ className }: { className?: string }) {
       </div>
 
       {/* Footer Tags */}
-      <div className="flex items-center justify-between pt-3 border-t border-white/20 pr-12">
+      <div className="flex items-center justify-between pt-3 border-t border-white/20 pr-20">
         <div className="flex items-center gap-2">
            <History className="w-3 h-3 text-white/60" />
            <span className="text-[8px] font-black uppercase tracking-widest text-white/60 drop-shadow-[0_1px_4px_rgba(0,0,0,1)]">
