@@ -1,9 +1,7 @@
 'use server';
 /**
- * @fileOverview Hardened News Sync Pipeline with AI-failure resilience.
- * - Extracts top 3 stories.
- * - If AI Analysis fails, it serves a raw English feed to prevent UI blackout.
- * - Logs detailed diagnostics for infrastructure audit.
+ * @fileOverview Hardened News Sync Pipeline with automated translation.
+ * Extracts top stories and performs sequential translation before committing to registry.
  */
 
 import {ai} from '@/ai/genkit';
@@ -64,7 +62,7 @@ const syncNewsPrompt = ai.definePrompt({
       }))
     }) 
   },
-  system: `Analyze the intelligence feed. Select the TOP 3 human rights or legal stories for India Chapter. Return a structured JSON list.`,
+  system: `Analyze the news feed. Select exactly 3 stories focusing on human rights, legal changes (BNS/BNSS), or public welfare in India.`,
   prompt: `Feed:\n{{#each rawItems}}\n- [{{{this.source}}}] {{{this.title}}} ({{{this.link}}})\n{{/each}}`,
 });
 
@@ -77,7 +75,7 @@ const syncNewsFlow = ai.defineFlow(
   async (input) => {
     let rawItems: any[] = [];
     
-    // 1. Fetch raw news (Always works regardless of AI status)
+    // 1. Fetch raw news
     for (const source of RSS_SOURCES) {
       try {
         const response = await fetch(source.url, { next: { revalidate: 0 } });
@@ -98,20 +96,18 @@ const syncNewsFlow = ai.defineFlow(
       return { news: [], diagnostics: { status: "Network Failure", yield: 0, errorSummary: "No RSS items could be fetched." } };
     }
 
-    // 2. AI Extraction (With fallback to raw items if AI fails)
+    // 2. AI Story Extraction
     let processedStories = [];
     let aiStatus = "Success";
     let errorMsg = "";
 
     try {
-      const { output } = await syncNewsPrompt({ rawItems: rawItems.slice(0, 20) });
+      const { output } = await syncNewsPrompt({ rawItems: rawItems.slice(0, 15) });
       processedStories = output?.news || [];
-      if (processedStories.length === 0) throw new Error("AI returned zero-length yield.");
     } catch (e: any) {
-      console.warn("[NEWS-SYNC-AI] Model failed. Engaging Raw Fallback Mode.", e.message);
-      aiStatus = "AI Offline (Fallback Active)";
+      console.warn("[NEWS-SYNC-AI] Extraction failed. Using fallback.", e.message);
+      aiStatus = "AI Fallback";
       errorMsg = e.message;
-      // Fallback: Pick first 3 raw items
       processedStories = rawItems.slice(0, 3).map(r => ({
         title: r.title,
         content: r.content,
@@ -122,7 +118,7 @@ const syncNewsFlow = ai.defineFlow(
       }));
     }
 
-    // 3. Sequential Translation (Resilient)
+    // 3. Sequential Translation (Atomic Processing)
     const finalizedNews = [];
     for (const item of processedStories) {
       const translation = await translateNews({
@@ -131,11 +127,18 @@ const syncNewsFlow = ai.defineFlow(
         category: item.category || 'Human Rights'
       });
 
+      // Status must match backend.json enum: ["Success", "Failed", "Pending"]
+      const isSuccess = translation.title !== item.title;
+
       finalizedNews.push({
         ...item,
-        originalEnglish: { title: item.title, content: item.content, category: item.category || 'General' },
+        originalEnglish: { 
+          title: item.title, 
+          content: item.content, 
+          category: item.category || 'General' 
+        },
         bengaliTranslation: translation,
-        translationStatus: translation.title !== item.title ? "Success" : "Fallback (EN)",
+        translationStatus: isSuccess ? "Success" : "Failed",
         scope: item.scope || "India",
         scopePriority: (item.scope || '').includes('Bengal') ? 1 : 2
       });

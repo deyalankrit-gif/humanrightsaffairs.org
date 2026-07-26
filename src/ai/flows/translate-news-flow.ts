@@ -1,7 +1,7 @@
 'use server';
 /**
  * @fileOverview Resilient translation engine with exponential backoff retries.
- * Model: Gemini 1.5 Flash (Stability Standard)
+ * Optimized for formal Bengali script generation and zero-failure output.
  */
 
 import {ai} from '@/ai/genkit';
@@ -23,18 +23,22 @@ const TranslateNewsOutputSchema = z.object({
 export type TranslateNewsOutput = z.infer<typeof TranslateNewsOutputSchema>;
 
 /**
- * translateNews with Exponential Backoff
+ * translateNews with Exponential Backoff and Parity Check
  */
 export async function translateNews(input: z.infer<typeof TranslateNewsInputSchema>, attempt = 1): Promise<TranslateNewsOutput> {
   try {
-    const result = await translateNewsFlow(input);
-    if (!result || !result.title || result.title === input.title) {
+    const { output } = await translateNewsPrompt(input);
+    
+    // Validate output integrity and check for language parity (AI parroting English)
+    if (!output || !output.title || output.title === input.title) {
       throw new Error("Translation parity detected - likely safety block or yield error.");
     }
-    return JSON.parse(JSON.stringify(result));
+    
+    // Explicitly parse to ensure clean object transfer
+    return JSON.parse(JSON.stringify(output));
   } catch (error: any) {
-    const delay = Math.pow(2, attempt) * 500; // 2s, 4s...
-    console.warn(`[TRANSLATE-ENGINE] Attempt ${attempt} Failed. Retrying in ${delay}ms... Error: ${error.message}`);
+    const delay = Math.pow(2, attempt) * 500;
+    console.warn(`[TRANSLATE-ENGINE] Attempt ${attempt} Failed. Retrying... Error: ${error.message}`);
     
     if (attempt < 3) {
       await new Promise(r => setTimeout(r, delay));
@@ -42,7 +46,7 @@ export async function translateNews(input: z.infer<typeof TranslateNewsInputSche
     }
     
     // Hard fallback to original English if all retries fail
-    console.error("[TRANSLATE-ENGINE] Final failure for item. Falling back to EN.");
+    console.error("[TRANSLATE-ENGINE] Final failure. Returning English fallback.");
     return { title: input.title, content: input.content, category: input.category };
   }
 }
@@ -56,22 +60,20 @@ const translateNewsPrompt = ai.definePrompt({
     safetySettings: [
       { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
       { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
+      { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
       { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
     ],
   },
-  system: `Translate the news headline and summary into formal, professional Bengali script. Return ONLY a valid JSON object. DO NOT include English text in the output.`,
-  prompt: `Headline: {{{title}}}\nContent: {{{content}}}\nCategory: {{{category}}}`,
+  system: `You are a professional Bengali translator for an institutional human rights network. 
+  Your mandate is to translate the following news data into formal, high-fidelity Bengali script (Bangla). 
+  Maintain accuracy and a professional tone. 
+  DO NOT include any English characters in the title, content, or category fields.
+  Return only the translated Bengali content in the requested JSON schema.`,
+  prompt: `
+  Target Language: Bengali (Bangla)
+  Source Data:
+  - Headline: {{{title}}}
+  - Summary: {{{content}}}
+  - Category: {{{category}}}
+  `,
 });
-
-const translateNewsFlow = ai.defineFlow(
-  {
-    name: 'translateNewsFlow',
-    inputSchema: TranslateNewsInputSchema,
-    outputSchema: TranslateNewsOutputSchema,
-  },
-  async input => {
-    const {output} = await translateNewsPrompt(input);
-    if (!output) throw new Error("Null AI output from translateNewsPrompt");
-    return output;
-  }
-);
