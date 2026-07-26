@@ -57,8 +57,8 @@ export function CurrentNews({ className }: { className?: string }) {
       const now = new Date();
       const hoursSinceSync = (now.getTime() - lastSync.getTime()) / (1000 * 60 * 60);
 
-      // Trigger if stale (6hrs) or empty registry
-      if (hoursSinceSync >= 6 || (!newsItems || newsItems.length === 0)) {
+      // Trigger if stale (2hrs) or empty registry
+      if (hoursSinceSync >= 2 || (!newsItems || newsItems.length === 0)) {
         setIsSyncing(true);
         setErrorType(null);
         try {
