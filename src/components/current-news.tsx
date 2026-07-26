@@ -104,8 +104,7 @@ export function CurrentNews({ className }: { className?: string }) {
 
     if (meta !== undefined) triggerSync();
     
-    // Dependencies are stable to prevent hook size errors
-  }, [db, isSyncing, loading, meta === null ? 'init' : 'stable']);
+  }, [db, isSyncing, loading, meta]);
 
   if (loading && !isSyncing) return (
     <div className={cn("flex flex-col gap-2 p-6 animate-pulse", className)}>
@@ -135,18 +134,6 @@ export function CurrentNews({ className }: { className?: string }) {
             {activeNews.scope || 'India'}
           </span>
         </div>
-        {hasBangla && (
-          <button 
-            onClick={() => setIsBangla(!isBangla)}
-            className={cn(
-              "p-1.5 rounded-lg border transition-all flex items-center gap-1.5 shadow-lg", 
-              isBangla ? "bg-[#CEFF00] text-primary border-[#CEFF00]" : "bg-white/5 text-[#CEFF00] border-white/10 hover:bg-white/10"
-            )}
-          >
-            <Languages className="w-3.5 h-3.5" />
-            <span className="text-[9px] font-black">{isBangla ? 'ENG' : 'BN'}</span>
-          </button>
-        )}
       </div>
 
       <div className="space-y-4">
@@ -156,9 +143,25 @@ export function CurrentNews({ className }: { className?: string }) {
         <p className="text-[10px] md:text-xs text-white/80 font-medium leading-relaxed italic border-l-2 border-[#CEFF00]/40 pl-3">
           {displayData.content}
         </p>
-        <Button asChild variant="outline" className="h-10 w-fit rounded-xl border-[#CEFF00]/40 bg-[#CEFF00]/5 text-[#CEFF00] hover:bg-[#CEFF00] hover:text-primary text-[10px] font-black uppercase">
-          <a href={activeNews.url} target="_blank">Examine Story <ExternalLink className="w-3 h-3 ml-2" /></a>
-        </Button>
+        
+        <div className="flex items-center gap-3 pt-2">
+          <Button asChild variant="outline" className="h-10 w-fit rounded-xl border-[#CEFF00]/40 bg-[#CEFF00]/5 text-[#CEFF00] hover:bg-[#CEFF00] hover:text-primary text-[10px] font-black uppercase transition-all">
+            <a href={activeNews.url} target="_blank">Examine Story <ExternalLink className="w-3 h-3 ml-2" /></a>
+          </Button>
+          
+          {hasBangla && (
+            <button 
+              onClick={() => setIsBangla(!isBangla)}
+              className={cn(
+                "h-10 px-4 rounded-xl border transition-all flex items-center gap-2 shadow-lg", 
+                isBangla ? "bg-[#CEFF00] text-primary border-[#CEFF00]" : "bg-white/5 text-[#CEFF00] border-white/10 hover:bg-white/10"
+              )}
+            >
+              <Languages className="w-4 h-4" />
+              <span className="text-[10px] font-black uppercase tracking-widest">{isBangla ? 'ENG' : 'BN'}</span>
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="flex items-center justify-between pt-3 border-t border-white/10 opacity-60">
