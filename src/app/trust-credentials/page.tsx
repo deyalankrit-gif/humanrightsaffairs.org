@@ -1,3 +1,4 @@
+
 "use client"
 
 import React from 'react'
@@ -122,7 +123,7 @@ export default function TrustCredentialsPage() {
             <Card className="rounded-[3rem] bg-slate-900 text-white overflow-hidden relative border-none shadow-2xl">
                <div className="absolute top-0 right-0 w-64 h-64 bg-accent/5 rounded-full -mr-32 -mt-32 blur-3xl"></div>
                <CardContent className="p-10 md:p-16 flex flex-col md:flex-row items-center gap-12 relative z-10">
-                  <div className="relative w-40 h-40 md:w-56 md:h-56 shrink-0 bg-white p-4 rounded-[2rem] shadow-2xl rotate-[-3deg]">
+                  <div className="relative w-40 h-40 md:w-56 md:h-56 shrink-0 bg-transparent p-4 rounded-[2rem] shadow-2xl rotate-[-3deg]">
                     <Image src="/HRAT%20Logo.jpeg" alt="Official Logo" fill className="object-contain p-4" />
                   </div>
                   <div className="space-y-6 text-center md:text-left">

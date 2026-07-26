@@ -81,7 +81,7 @@ export default function LoginPage() {
         <Card className="bg-slate-900/80 backdrop-blur-2xl border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)] overflow-hidden border-t-4 border-t-accent">
           <CardHeader className="text-center space-y-4 pb-2">
             <div className="flex justify-center">
-              <div className="relative w-20 h-20 rounded-2xl overflow-hidden shadow-2xl border border-white/10 bg-white p-2">
+              <div className="relative w-20 h-20 rounded-2xl overflow-hidden shadow-2xl border border-white/10 bg-transparent p-2">
                 <Image src="/HRAT%20Logo.jpeg" alt="HRAT Logo" fill className="object-contain" />
               </div>
             </div>
@@ -131,7 +131,7 @@ export default function LoginPage() {
               </div>
               <Button 
                 type="submit" 
-                className="w-full bg-accent text-primary font-bold py-6 text-lg hover:bg-accent/90 shadow-xl shadow-accent/10 group" 
+                className="w-full bg-accent text-primary font-bold py-6 text-lg hover:bg-accent/90 shadow-xl shadow-accent/20 group" 
                 disabled={isLoading}
               >
                 {isLoading ? (

@@ -143,7 +143,7 @@ export default function StaffLoginPage() {
         <Card className="bg-white border-slate-200 shadow-2xl rounded-[2rem] md:rounded-[2.5rem] overflow-hidden border-t-8 border-t-primary">
           <CardHeader className="text-center space-y-4 pb-2 pt-8 md:pt-10">
             <div className="flex justify-center">
-              <div className="relative w-16 h-16 md:w-20 md:h-20 rounded-2xl overflow-hidden shadow-lg border border-slate-100 bg-white p-2">
+              <div className="relative w-16 h-16 md:w-20 md:h-20 rounded-2xl overflow-hidden shadow-lg border border-slate-100 bg-transparent p-2">
                 <Image src="/HRAT%20Logo.jpeg" alt="HRAT Logo" fill className="object-contain" />
               </div>
             </div>

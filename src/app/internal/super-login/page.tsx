@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState } from 'react'
@@ -118,7 +119,7 @@ export default function RootLoginPage() {
         <Card className="bg-slate-900 border-red-900/50 shadow-2xl rounded-[2rem] md:rounded-[2.5rem] overflow-hidden border-t-8 border-t-red-600">
           <CardHeader className="text-center space-y-4 pb-2 pt-8 md:pt-10">
             <div className="flex justify-center">
-              <div className="relative w-16 h-16 md:w-20 md:h-20 rounded-2xl overflow-hidden shadow-2xl border border-white/10 bg-white p-2">
+              <div className="relative w-16 h-16 md:w-20 md:h-20 rounded-2xl overflow-hidden shadow-2xl border border-white/10 bg-transparent p-2">
                 <Image src="/HRAT%20Logo.jpeg" alt="HRAT Logo" fill className="object-contain" />
               </div>
             </div>
