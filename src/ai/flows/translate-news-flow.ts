@@ -1,11 +1,10 @@
 
 'use server';
 /**
- * @fileOverview News translation AI agent.
+ * @fileOverview High-fidelity news translation agent.
  * 
- * - translateNews - Handled with high-fidelity Gemini 1.5 Flash.
- * - Supports Title, Content, and Category translation.
- * - Includes robust retry logic and technical logging.
+ * - translateNews - High-fidelity Bengali translation with automated retry.
+ * - Optimized for human rights and legal terminology.
  */
 
 import {ai} from '@/ai/genkit';
@@ -26,29 +25,33 @@ const TranslateNewsOutputSchema = z.object({
 export type TranslateNewsOutput = z.infer<typeof TranslateNewsOutputSchema>;
 
 /**
- * translateNews - Robust Server Action for real-time translation with retry logic.
+ * translateNews - Robust Server Action for real-time translation with recursive retry logic.
  */
 export async function translateNews(input: TranslateNewsInput, attempt = 1): Promise<TranslateNewsOutput> {
   const startTime = Date.now();
-  console.log(`[TRANSLATE-FLOW] Received Article: "${input.title.substring(0, 50)}..." | Attempt: ${attempt}`);
+  console.log(`[TRANSLATE-AGENT] Processing: "${input.title.substring(0, 40)}..." | Attempt: ${attempt}`);
 
   try {
     const result = await translateNewsFlow(input);
-    if (!result || !result.title) throw new Error("AI returned an empty translation object.");
+    if (!result || !result.title || result.title === input.title) {
+      throw new Error("AI returned English content or null output.");
+    }
     
     const duration = Date.now() - startTime;
-    console.log(`[TRANSLATE-FLOW] SUCCESS | Time: ${duration}ms | Article: "${input.title.substring(0, 30)}..."`);
+    console.log(`[TRANSLATE-AGENT] SUCCESS in ${duration}ms`);
     
     return JSON.parse(JSON.stringify(result));
   } catch (error: any) {
-    console.error(`[TRANSLATE-FLOW] FAILURE (Attempt ${attempt}) | Error: ${error.message}`);
+    console.warn(`[TRANSLATE-AGENT] FAILED (Attempt ${attempt}): ${error.message}`);
     
     if (attempt < 3) {
-      const backoff = attempt * 1000;
+      // Linear backoff with jitter
+      const backoff = attempt * 1000 + Math.random() * 500;
       await new Promise(r => setTimeout(r, backoff));
       return translateNews(input, attempt + 1);
     }
 
+    // Return original English as ultimate fallback
     return {
       title: input.title,
       content: input.content,
@@ -73,12 +76,12 @@ const translateNewsPrompt = ai.definePrompt({
   system: `You are an expert human rights news translator specializing in English to standard Bengali (Indian West Bengal context).
   
   GUIDELINES:
-  1. Maintain a formal, journalistic, and institutional tone.
-  2. Transliterate proper names (people/places) if they are standard in Bengali media.
-  3. Ensure legal terms (e.g., 'Arrest', 'Magistrate', 'Constitutional') are translated into their formal Bengali equivalents.
-  4. Ensure Category (e.g., 'Legal', 'Human Rights', 'Politics') is translated accurately.
-  5. Output MUST be valid JSON matching the schema.`,
-  prompt: `Translate the following news intelligence into Bengali:
+  1. Translate the Headline, Category, and Summary accurately into Bengali script (UTF-8).
+  2. Maintain a formal, journalistic, and institutional tone.
+  3. Ensure legal terms (e.g., 'Constitution', 'Detention', 'High Court') are translated into their formal Bengali equivalents used by HRAT.
+  4. If you cannot translate a specific name, transliterate it.
+  5. Your response must be in valid Bengali script.`,
+  prompt: `Translate the following institutional intelligence into Bengali:
 
 Headline: {{{title}}}
 Category: {{{category}}}
