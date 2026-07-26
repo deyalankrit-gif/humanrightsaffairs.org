@@ -10,6 +10,7 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import { googleAI } from '@genkit-ai/google-genai';
 
 const AiDocumentSearchInputSchema = z.object({
   query: z.string().describe("The natural language query describing the legal information the user is looking for."),
@@ -47,7 +48,7 @@ export async function aiDocumentSearch(input: AiDocumentSearchInput): Promise<Ai
 
 const aiDocumentSearchPrompt = ai.definePrompt({
   name: 'aiDocumentSearchPrompt',
-  model: 'googleai/gemini-1.5-flash',
+  model: googleAI.model('gemini-1.5-flash'),
   input: {schema: AiDocumentSearchInputSchema},
   output: {schema: AiDocumentSearchOutputSchema},
   system: `You are an expert human rights legal analyst. Your task is to analyze a given set of human rights documents and a user's query to identify and extract the most relevant clauses or sections. Provide a concise summary of your findings and specific excerpts from the documents.`,

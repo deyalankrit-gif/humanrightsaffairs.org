@@ -1,4 +1,3 @@
-
 'use server';
 /**
  * @fileOverview High-fidelity news translation agent.
@@ -9,6 +8,7 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import { googleAI } from '@genkit-ai/google-genai';
 
 const TranslateNewsInputSchema = z.object({
   title: z.string().describe('The English title of the news.'),
@@ -62,7 +62,7 @@ export async function translateNews(input: TranslateNewsInput, attempt = 1): Pro
 
 const translateNewsPrompt = ai.definePrompt({
   name: 'translateNewsPrompt',
-  model: 'googleai/gemini-1.5-flash',
+  model: googleAI.model('gemini-1.5-flash'),
   input: {schema: TranslateNewsInputSchema},
   output: {schema: TranslateNewsOutputSchema},
   config: {

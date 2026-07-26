@@ -9,6 +9,7 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import { googleAI } from '@genkit-ai/google-genai';
 
 const InquireLegalAssistantInputSchema = z.object({
   query: z.string().describe('A user query about constitutional rights or basic legal procedures.')
@@ -41,7 +42,7 @@ export async function inquireLegalAssistant(
 
 const legalAssistantPrompt = ai.definePrompt({
   name: 'legalAssistantPrompt',
-  model: 'googleai/gemini-1.5-flash',
+  model: googleAI.model('gemini-1.5-flash'),
   input: {
     schema: z.object({
       query: z.string()
