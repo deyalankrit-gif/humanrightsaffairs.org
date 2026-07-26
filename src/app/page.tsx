@@ -1,4 +1,3 @@
-
 import Image from 'next/image'
 import Link from 'next/link'
 import { ChairmanMessage } from '@/components/chairman-message'
@@ -83,7 +82,7 @@ export default function Home() {
         </div>
 
         {/* Intelligence Node (Elevated News Feed) */}
-        <div className="absolute top-8 left-8 z-20 hidden md:flex flex-col">
+        <div className="absolute top-20 left-12 z-20 hidden md:flex flex-col">
           <CurrentNews />
         </div>
 

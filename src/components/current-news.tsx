@@ -146,7 +146,7 @@ export function CurrentNews({ className }: { className?: string }) {
            </span>
         </div>
 
-        <h3 className="text-base md:text-2xl font-headline font-bold text-white leading-tight drop-shadow-[0_4px_12px_rgba(0,0,0,1)] group-hover:text-[#CEFF00] transition-colors duration-500">
+        <h3 className="text-sm md:text-xl font-headline font-bold text-white leading-tight drop-shadow-[0_4px_12px_rgba(0,0,0,1)] group-hover:text-[#CEFF00] transition-colors duration-500">
           {activeNews.title}
         </h3>
         
