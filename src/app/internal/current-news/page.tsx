@@ -14,7 +14,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { 
   Plus, Search, Trash2, Loader2, Newspaper,
-  Zap, Globe, BrainCircuit, X, Languages, AlertTriangle, ShieldCheck
+  Zap, Globe, BrainCircuit, X, Languages, AlertTriangle, ShieldCheck,
+  Clock, Database, ListChecks, Info
 } from 'lucide-react';
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose
@@ -28,6 +29,7 @@ import { cn } from '@/lib/utils';
  * Internal News Management: Mission Control for Homepage Broadcast.
  * Features: Manual Entry, AI Harvest Audit, and Real-time Live Preview.
  * Hardened: Guaranteed real-time sync with public page via atomic batches.
+ * Updated: Root-exclusive intelligence overlay for sync diagnostics.
  */
 export default function InternalNewsManagement() {
   const { user, loading: authLoading } = useUser();
@@ -41,6 +43,8 @@ export default function InternalNewsManagement() {
   const [harvestResult, setHarvestResult] = useState<SyncNewsOutput | null>(null);
   const [isViewingSuggestions, setIsViewingSuggestions] = useState(false);
   const [isManualEntryOpen, setIsManualEntryOpen] = useState(false);
+
+  const isRoot = user?.email?.toLowerCase() === 'deydhritiman@gmail.com';
 
   const [manualNews, setManualNews] = useState({
     titleEn: '',
@@ -236,6 +240,48 @@ export default function InternalNewsManagement() {
                <div className="bg-primary/20 rounded-[2rem] p-4 border border-white/5 flex items-center justify-center min-h-[300px]">
                   <CurrentNews />
                </div>
+
+               {/* ROOT-EXCLUSIVE INTELLIGENCE NODE */}
+               {isRoot && (
+                 <div className="mt-8 pt-6 border-t border-white/10 grid grid-cols-1 md:grid-cols-3 gap-8 animate-in fade-in duration-1000 slide-in-from-bottom-2">
+                    <div className="space-y-3">
+                       <div className="flex items-center gap-2 text-accent">
+                          <Clock className="w-3.5 h-3.5" />
+                          <span className="text-[10px] font-black uppercase tracking-[0.25em]">Sync Frequency</span>
+                       </div>
+                       <p className="text-[11px] text-slate-400 font-bold leading-relaxed">
+                         Autonomous background harvest executes every <span className="text-white">2 Hours</span> to ensure legislative recency.
+                       </p>
+                    </div>
+                    <div className="space-y-3">
+                       <div className="flex items-center gap-2 text-accent">
+                          <Database className="w-3.5 h-3.5" />
+                          <span className="text-[10px] font-black uppercase tracking-[0.25em]">Audited Sources</span>
+                       </div>
+                       <ul className="text-[11px] text-slate-400 font-bold space-y-1">
+                          <li className="flex items-center gap-2"><div className="w-1 h-1 rounded-full bg-slate-700" /> Google News India (Nation)</li>
+                          <li className="flex items-center gap-2"><div className="w-1 h-1 rounded-full bg-slate-700" /> The Hindu (Legal/Policy)</li>
+                          <li className="flex items-center gap-2"><div className="w-1 h-1 rounded-full bg-slate-700" /> NDTV (Regional/WB)</li>
+                       </ul>
+                    </div>
+                    <div className="space-y-3">
+                       <div className="flex items-center gap-2 text-accent">
+                          <ListChecks className="w-3.5 h-3.5" />
+                          <span className="text-[10px] font-black uppercase tracking-[0.25em]">Priority Logic</span>
+                       </div>
+                       <div className="space-y-2">
+                          <div className="flex items-center gap-2">
+                             <Badge className="bg-emerald-600 text-[7px] h-4">P1</Badge>
+                             <span className="text-[10px] text-white font-bold">Regional Scope (West Bengal)</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                             <Badge className="bg-primary text-[7px] h-4">P2</Badge>
+                             <span className="text-[10px] text-slate-400 font-bold">Chronological Recency (India/World)</span>
+                          </div>
+                       </div>
+                    </div>
+                 </div>
+               )}
             </Card>
          </div>
 
