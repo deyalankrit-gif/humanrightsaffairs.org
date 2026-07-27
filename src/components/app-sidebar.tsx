@@ -104,7 +104,6 @@ const adminLinksConfig = [
 
 const logisticsLinksConfig = [
   { name: 'Kit Tracking', href: '/internal/kit-management', icon: Archive, permission: 'kitManagement' },
-  { name: 'Vendor Registry', href: '/internal/vendors', icon: Truck, permission: 'vendors' },
 ]
 
 const financeLinksConfig = [
@@ -116,6 +115,7 @@ const financeLinksConfig = [
   { name: 'Institutional Donors', href: '/internal/finance/donors', icon: HeartHandshake, permission: 'financeLedger' },
   { name: 'Project Accounting', href: '/internal/finance/projects', icon: Building, permission: 'financeProjects' },
   { name: 'Asset Registry', href: '/internal/finance/assets', icon: HardDrive, permission: 'financeAssets' },
+  { name: 'Vendor Registry', href: '/internal/vendors', icon: Truck, permission: 'vendors' },
   { name: 'Payroll Suite', href: '/internal/finance/payroll', icon: IndianRupee, permission: 'financePayroll' },
   { name: 'Reports Center', href: '/internal/finance/reports', icon: FileSpreadsheet, permission: 'financeDashboard' },
   { name: 'Tax & Compliance', href: '/internal/finance/compliance', icon: Scale, permission: 'financeCompliance' },
