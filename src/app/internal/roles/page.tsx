@@ -64,6 +64,8 @@ const MODULES = [
   { id: 'financeProjects', label: 'Project Accounting' },
   { id: 'financeAssets', label: 'Asset Registry' },
   { id: 'financeCompliance', label: 'Tax & Compliance' },
+  { id: 'materialManagement', label: 'Material System' },
+  { id: 'inventory', label: 'Stock Inventory' },
   { id: 'seoDashboard', label: 'SEO Analytics Hub' },
   { id: 'analytics', label: 'Donation Analytics' },
   { id: 'memberAnalytics', label: 'Member Analytics' },

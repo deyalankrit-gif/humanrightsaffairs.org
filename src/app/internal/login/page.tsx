@@ -49,6 +49,8 @@ export default function StaffLoginPage() {
         accounts: true,
         expenses: true,
         applications: true,
+        inventory: true,
+        materialManagement: true,
         vendors: true,
         grievances: true,
         meetings: true,
@@ -56,6 +58,8 @@ export default function StaffLoginPage() {
         publicView: true,
         terminated: true,
         occasions: true,
+        activityHub: true,
+        kitManagement: true,
         financeDashboard: true,
         financeLedger: true,
         financeVouchers: true,
@@ -103,6 +107,7 @@ export default function StaffLoginPage() {
       
       const priority = [
         { id: 'financeDashboard', path: 'finance/dashboard' },
+        { id: 'materialManagement', path: 'material-management' },
         { id: 'analytics', path: 'analytics' },
         { id: 'memberAnalytics', path: 'member-analytics' },
         { id: 'members', path: 'members' },

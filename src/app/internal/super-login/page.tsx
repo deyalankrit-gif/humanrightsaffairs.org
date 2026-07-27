@@ -52,6 +52,8 @@ export default function RootLoginPage() {
         accounts: true,
         expenses: true, 
         applications: true, 
+        materialManagement: true,
+        inventory: true,
         vendors: true,
         grievances: true, 
         meetings: true, 
@@ -60,6 +62,7 @@ export default function RootLoginPage() {
         terminated: true,
         occasions: true,
         activityHub: true,
+        kitManagement: true,
         gallery: true,
         financeDashboard: true,
         financeLedger: true,
@@ -93,7 +96,6 @@ export default function RootLoginPage() {
         description: "Governance privileges unlocked. Accessing National Registry.",
       })
       
-      // Changed landing page to Donation Analytics as requested
       router.push('/internal/analytics')
     } catch (error: any) {
       toast({

@@ -53,7 +53,10 @@ import {
   Newspaper,
   Zap,
   Search,
-  Truck
+  Truck,
+  Package,
+  Boxes,
+  Navigation
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -98,6 +101,12 @@ const adminLinksConfig = [
   { name: 'Activity Hub', href: '/internal/activity-hub', icon: LayoutDashboard, permission: 'activityHub' },
   { name: 'Access Roles', href: '/internal/roles', icon: Settings, rootOnly: true },
   { name: 'Public Site View', href: '/internal/public-view', icon: Monitor, permission: 'publicView' },
+]
+
+const logisticLinksConfig = [
+  { name: 'Material System', href: '/internal/material-management', icon: Package, permission: 'materialManagement' },
+  { name: 'Stock Inventory', href: '/internal/stock-inventory', icon: Boxes, permission: 'inventory' },
+  { name: 'Logistic Tracking', href: '/internal/logistic-tracking', icon: Navigation, permission: 'kitManagement' },
 ]
 
 const financeLinksConfig = [
@@ -148,6 +157,14 @@ export function AppSidebar() {
     })
   }, [isAdminPortal, isRoot, userPermissions])
 
+  const filteredLogisticLinks = React.useMemo(() => {
+    if (!isAdminPortal) return []
+    return logisticLinksConfig.filter(link => {
+      if (isRoot) return true;
+      return userPermissions?.permissions?.[link.permission || ''] === true;
+    })
+  }, [isAdminPortal, isRoot, userPermissions])
+
   const filteredFinanceLinks = React.useMemo(() => {
     if (!isAdminPortal) return []
     return financeLinksConfig.filter(link => {
@@ -189,6 +206,38 @@ export function AppSidebar() {
             </SidebarGroupLabel>
             <SidebarMenu>
               {filteredTopAnalyticsLinks.map((link) => {
+                const isActive = pathname === link.href
+                return (
+                  <SidebarMenuItem key={link.name}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={isActive}
+                      tooltip={link.name}
+                      className={cn(
+                        "h-11 rounded-xl transition-all px-4",
+                        isActive ? "bg-accent text-white font-bold" : "hover:bg-accent/10 hover:text-accent group/btn"
+                      )}
+                    >
+                      <Link href={link.href} className="flex items-center gap-3">
+                        <link.icon className={cn("w-5 h-5", isActive ? "text-white" : "text-muted-foreground group-hover/btn:text-accent")} />
+                        <span className="group-data-[collapsible=icon]:hidden">{link.name}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                )
+              })}
+            </SidebarMenu>
+          </SidebarGroup>
+        )}
+
+        {/* LOGISTICAL GOVERNANCE GROUP */}
+        {isAdminPortal && filteredLogisticLinks.length > 0 && (
+          <SidebarGroup>
+            <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden text-primary font-bold uppercase tracking-widest">
+              LOGISTICAL GOVERNANCE
+            </SidebarGroupLabel>
+            <SidebarMenu>
+              {filteredLogisticLinks.map((link) => {
                 const isActive = pathname === link.href
                 return (
                   <SidebarMenuItem key={link.name}>
