@@ -1,8 +1,9 @@
+
 'use client';
 
 import React, { useMemo, useState } from 'react';
 import Image from 'next/image';
-import { Mail, Phone, MapPin, Facebook, Twitter, Instagram, Youtube, Bell, Crown, ShieldCheck, Lock, ArrowRight, Loader2, CheckCircle2, Package, Heart } from 'lucide-react';
+import { Mail, Phone, MapPin, Facebook, Twitter, Instagram, Youtube, Bell, Crown, ShieldCheck, Lock, ArrowRight, Loader2, CheckCircle2, Heart } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { DonationDialog } from './donation-dialog';
@@ -25,7 +26,7 @@ import { useToast } from '@/hooks/use-toast';
 
 /**
  * PublicFooter: Optimized for all screen sizes with responsive grids and fluid spacing.
- * Includes a secure email OTP gate for the Required Documents and Kit Management sections.
+ * Includes a secure email OTP gate for the Required Documents section.
  */
 export function PublicFooter() {
   const donationFooterImg = PlaceHolderImages.find(img => img.id === 'donation-footer-image');
@@ -192,14 +193,6 @@ export function PublicFooter() {
                 </button>
               </li>
               <li>
-                <Link 
-                  href="/kit-management" 
-                  className="text-[#CEFF00] hover:text-white transition-colors font-bold flex items-center gap-2 leading-tight text-left"
-                >
-                  Official Kit & Asset Management <Package className="w-3.5 h-3.5" />
-                </Link>
-              </li>
-              <li>
                 <Link href="/legal/quotation-format" className="text-[#CEFF00] hover:text-white transition-colors font-medium leading-tight">
                   Supplier Quotation Format
                 </Link>
@@ -299,7 +292,7 @@ export function PublicFooter() {
                    </div>
                    <div className="space-y-2">
                       <p className="text-xs text-slate-500 leading-relaxed italic">
-                        "Access to high-fidelity institutional logistics and documentation requires multi-factor authentication. A code will be sent to the primary nodal email."
+                        "Access to high-fidelity institutional documentation requires multi-factor authentication. A code will be sent to the primary nodal email."
                       </p>
                       <div className="bg-amber-50 dark:bg-amber-950/20 p-3 rounded-xl border border-amber-100 dark:border-amber-900">
                         <p className="text-[10px] font-bold text-amber-700 dark:text-amber-400 uppercase">
