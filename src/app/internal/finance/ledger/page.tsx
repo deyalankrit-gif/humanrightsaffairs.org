@@ -30,7 +30,10 @@ import {
   User,
   Hash,
   Clock,
-  CheckCircle2
+  CheckCircle2,
+  TrendingDown,
+  TrendingUp,
+  RefreshCw
 } from 'lucide-react'
 import {
   Dialog,
@@ -71,6 +74,10 @@ export default function FinanceLedger() {
     (tx.account || '').toLowerCase().includes(search.toLowerCase())
   )
 
+  const expenseItems = filtered.filter((tx: any) => tx.type === 'Expense');
+  const incomeItems = filtered.filter((tx: any) => tx.type === 'Income' || tx.type === 'Receipt');
+  const internalItems = filtered.filter((tx: any) => tx.type === 'Contra' || tx.type === 'Journal');
+
   const handleExportPDF = () => {
     if (!filtered || filtered.length === 0) {
       toast({
@@ -90,6 +97,43 @@ export default function FinanceLedger() {
       window.print()
     }, 500)
   }
+
+  const renderTxCard = (tx: any) => (
+    <Card key={tx.id} className="border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 group transition-all hover:shadow-lg print:rounded-none print:shadow-none print:border-b">
+      <CardContent className="p-0">
+        <div className="flex flex-col xl:flex-row items-stretch">
+           <div className={cn("p-4 md:w-32 text-center border-r border-slate-100 dark:border-slate-800 flex flex-col items-center justify-center shrink-0 print:w-24", tx.type === 'Income' || tx.type === 'Receipt' ? 'bg-emerald-50/50 dark:bg-emerald-950/10' : 'bg-rose-50/50 dark:bg-rose-950/10')}>
+              <Badge variant="outline" className={cn("text-[8px] font-black px-2 py-0 h-4 rounded-full uppercase border-none mb-2 print:bg-white print:text-black print:border", tx.type === 'Income' || tx.type === 'Receipt' ? 'bg-emerald-500 text-white' : 'bg-rose-500 text-white')}>
+                {tx.type}
+              </Badge>
+              <p className="text-sm font-black text-primary dark:text-white leading-tight print:text-xs">₹{tx.amount.toLocaleString()}</p>
+              <p className="text-[8px] font-bold text-slate-400 uppercase mt-1">{tx.date}</p>
+           </div>
+           <div className="flex-1 p-4 flex flex-col sm:flex-row items-center justify-between gap-4 print:p-2">
+              <div className="space-y-1 text-center sm:text-left flex-1 min-w-0">
+                 <div className="flex items-center justify-center sm:justify-start gap-2">
+                    <h3 className="text-sm font-bold text-primary dark:text-white leading-tight truncate print:text-xs">{tx.particulars}</h3>
+                 </div>
+                 <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 text-[9px] font-bold text-slate-500 uppercase tracking-wide">
+                    <span className="flex items-center gap-1"><Tag className="w-2.5 h-2.5 text-emerald-500" /> {tx.account}</span>
+                    <span className="flex items-center gap-1"><Hash className="w-2.5 h-2.5 text-slate-400" /> {tx.voucherNo}</span>
+                 </div>
+              </div>
+              <div className="flex items-center gap-2 print:hidden">
+                 <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  onClick={() => setSelectedTx(tx)}
+                  className="h-8 w-8 rounded-lg text-slate-300 hover:text-emerald-500 hover:bg-emerald-50"
+                 >
+                   <Eye className="w-4 h-4" />
+                 </Button>
+              </div>
+           </div>
+        </div>
+      </CardContent>
+    </Card>
+  )
 
   if (authLoading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="animate-spin text-emerald-500" /></div>
 
@@ -154,45 +198,54 @@ export default function FinanceLedger() {
          {txLoading ? (
            <div className="text-center py-20 print:hidden"><Loader2 className="w-10 h-10 animate-spin text-emerald-500 mx-auto" /></div>
          ) : (
-           <div className="grid gap-4">
-              {filtered.map((tx: any) => (
-                <Card key={tx.id} className="border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 group transition-all hover:shadow-lg print:rounded-none print:shadow-none print:border-b">
-                  <CardContent className="p-0">
-                    <div className="flex flex-col md:flex-row items-stretch">
-                       <div className={cn("p-6 md:w-44 text-center border-r border-slate-100 dark:border-slate-800 flex flex-col items-center justify-center shrink-0 print:w-32", tx.type === 'Income' ? 'bg-emerald-50/50' : 'bg-rose-50/50')}>
-                          <Badge variant="outline" className={cn("text-[9px] font-black px-2.5 py-0.5 rounded-full uppercase border-none mb-3 print:bg-white print:text-black print:border", tx.type === 'Income' ? 'bg-emerald-500 text-white' : 'bg-rose-500 text-white')}>
-                            {tx.type}
-                          </Badge>
-                          <p className="text-xl font-headline font-bold text-primary dark:text-white leading-tight print:text-sm">₹{tx.amount.toLocaleString()}</p>
-                          <p className="text-[9px] font-bold text-slate-400 uppercase mt-1">{tx.date}</p>
-                       </div>
-                       <div className="flex-1 p-6 flex flex-col md:flex-row items-center justify-between gap-6 print:p-4">
-                          <div className="space-y-2 text-center md:text-left flex-1">
-                             <div className="flex items-center justify-center md:justify-start gap-3">
-                                <h3 className="text-lg font-bold text-primary dark:text-white leading-tight print:text-sm">{tx.particulars}</h3>
-                                {tx.projectId && <Badge variant="outline" className="text-[8px] border-blue-200 text-blue-500 font-bold uppercase">PROJ: {tx.projectId}</Badge>}
-                             </div>
-                             <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-[10px] font-bold text-slate-500 uppercase tracking-wide">
-                                <span className="flex items-center gap-1.5"><Tag className="w-3 h-3 text-emerald-500" /> {tx.account}</span>
-                                <span className="flex items-center gap-1.5"><Wallet className="w-3 h-3 text-emerald-500" /> {tx.paymentMethod}</span>
-                                <span className="flex items-center gap-1.5"><ShieldCheck className="w-3 h-3 text-emerald-500" /> VOUCHER: {tx.voucherNo}</span>
-                             </div>
-                          </div>
-                          <div className="flex items-center gap-2 print:hidden">
-                             <Button 
-                              variant="outline" 
-                              size="sm" 
-                              onClick={() => setSelectedTx(tx)}
-                              className="h-9 rounded-xl text-[10px] font-bold px-5 border-slate-200 hover:bg-emerald-50"
-                             >
-                               <FileText className="w-3.5 h-3.5 mr-2" /> Examine
-                             </Button>
-                          </div>
-                       </div>
+           <div className="space-y-12">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                 {/* EXPENSES COLUMN - LEFT */}
+                 <div className="space-y-6">
+                    <div className="flex items-center gap-3 px-4 py-2 bg-rose-50 dark:bg-rose-950/20 rounded-xl border border-rose-100 dark:border-rose-900/30">
+                       <TrendingDown className="w-5 h-5 text-rose-500" />
+                       <h2 className="text-sm font-black uppercase tracking-widest text-rose-600 dark:text-rose-400">Institutional Expenses</h2>
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
+                    <div className="grid gap-4">
+                      {expenseItems.map(renderTxCard)}
+                      {expenseItems.length === 0 && (
+                        <div className="py-20 text-center opacity-30 bg-white dark:bg-slate-900 rounded-[2rem] border-2 border-dashed border-slate-100">
+                          <p className="text-[10px] font-black uppercase tracking-[0.3em]">No Expense Records</p>
+                        </div>
+                      )}
+                    </div>
+                 </div>
+
+                 {/* INCOME COLUMN - RIGHT */}
+                 <div className="space-y-6">
+                    <div className="flex items-center gap-3 px-4 py-2 bg-emerald-50 dark:bg-emerald-950/20 rounded-xl border border-emerald-100 dark:border-emerald-900/30">
+                       <TrendingUp className="w-5 h-5 text-emerald-500" />
+                       <h2 className="text-sm font-black uppercase tracking-widest text-emerald-600 dark:text-emerald-400">Institutional Income</h2>
+                    </div>
+                    <div className="grid gap-4">
+                      {incomeItems.map(renderTxCard)}
+                      {incomeItems.length === 0 && (
+                        <div className="py-20 text-center opacity-30 bg-white dark:bg-slate-900 rounded-[2rem] border-2 border-dashed border-slate-100">
+                          <p className="text-[10px] font-black uppercase tracking-[0.3em]">No Income Records</p>
+                        </div>
+                      )}
+                    </div>
+                 </div>
+              </div>
+
+              {/* INTERNAL ADJUSTMENTS - FULL WIDTH BOTTOM */}
+              {internalItems.length > 0 && (
+                <div className="space-y-6 pt-8 border-t border-slate-100 dark:border-slate-800">
+                   <div className="flex items-center gap-3 px-4 py-2 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700">
+                      <RefreshCw className="w-5 h-5 text-slate-500" />
+                      <h2 className="text-sm font-black uppercase tracking-widest text-slate-600 dark:text-slate-400">Internal Transfers & Journals</h2>
+                   </div>
+                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {internalItems.map(renderTxCard)}
+                   </div>
+                </div>
+              )}
+
               {filtered.length === 0 && (
                 <div className="text-center py-32 bg-white dark:bg-slate-900 rounded-[3rem] border-4 border-dashed border-slate-100 opacity-40">
                    <ClipboardList className="w-16 h-16 text-slate-300 mx-auto mb-4" />
@@ -208,7 +261,7 @@ export default function FinanceLedger() {
         <DialogContent className="max-w-xl rounded-[2.5rem] bg-white dark:bg-slate-900 border-none shadow-2xl p-0 overflow-hidden [&>button]:hidden">
           {selectedTx && (
             <div className="flex flex-col">
-              <div className={cn("p-8 text-white relative", selectedTx.type === 'Income' ? 'bg-emerald-600' : 'bg-rose-600')}>
+              <div className={cn("p-8 text-white relative", selectedTx.type === 'Income' || selectedTx.type === 'Receipt' ? 'bg-emerald-600' : 'bg-rose-600')}>
                 <div className="absolute right-6 top-6">
                   <DialogClose asChild>
                     <Button variant="ghost" size="icon" className="rounded-full text-white/40 hover:text-white hover:bg-white/10 h-8 w-8">
@@ -232,7 +285,7 @@ export default function FinanceLedger() {
                  <div className="grid grid-cols-2 gap-4">
                     <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-800">
                        <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Transaction Value</p>
-                       <p className={cn("text-2xl font-headline font-bold", selectedTx.type === 'Income' ? 'text-emerald-600' : 'text-rose-600')}>
+                       <p className={cn("text-2xl font-headline font-bold", selectedTx.type === 'Income' || selectedTx.type === 'Receipt' ? 'text-emerald-600' : 'text-rose-600')}>
                          ₹{selectedTx.amount.toLocaleString()}
                        </p>
                     </div>
