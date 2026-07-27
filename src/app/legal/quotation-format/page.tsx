@@ -23,7 +23,7 @@ import { useToast } from '@/hooks/use-toast'
  * SupplierQuotationPage: High-fidelity interactive template for vendor quotes.
  * Optimized for F4 size printing (210mm x 330mm) with absolute minimum margins.
  * Features a Live Editor for administrative personnel.
- * Updated: Significantly increased row height in the quotation registry for better legibility.
+ * Updated: Significantly increased row height in the quotation registry and widened the seal area.
  */
 export default function SupplierQuotationPage() {
   const { toast } = useToast()
@@ -353,7 +353,7 @@ Conditions:
                         <div className="space-y-2">
                            <div className="border-b-2 border-slate-200 w-full h-8 print:border-black"></div>
                            <p className="font-bold text-[9px] uppercase tracking-widest text-slate-400 print:text-black">Supplier Signature</p>
-                           <div className="relative w-40 h-20 border-2 border-dotted border-slate-100 flex items-center justify-center rounded-2xl print:border-black">
+                           <div className="relative w-56 h-20 border-2 border-dotted border-slate-100 flex items-center justify-center rounded-2xl print:border-black">
                               <span className="text-[10px] font-black uppercase text-slate-100 rotate-[-10deg] print:text-slate-200">Company Seal</span>
                            </div>
                         </div>
