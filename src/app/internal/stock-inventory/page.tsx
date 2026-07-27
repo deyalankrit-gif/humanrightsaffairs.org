@@ -1,9 +1,10 @@
+
 "use client"
 
 import React, { useState, useMemo, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase'
-import { collection, query, orderBy, doc, updateDoc, serverTimestamp } from 'firebase/firestore'
+import { collection, query, orderBy, doc, updateDoc, serverTimestamp, increment } from 'firebase/firestore'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -13,15 +14,10 @@ import { Footer } from '@/components/footer'
 import { 
   Boxes, 
   Search, 
-  TrendingUp, 
-  TrendingDown, 
-  AlertCircle, 
   RefreshCw, 
   Loader2, 
   ShieldCheck, 
   History,
-  PackageCheck,
-  ChevronRight,
   Plus,
   Minus,
   Tag,
@@ -44,7 +40,7 @@ import { useToast } from '@/hooks/use-toast'
 /**
  * STOCK INVENTORY HUB
  * Reconciliation terminal for institutional supplies.
- * Synchronized with Material Management Registry.
+ * Synchronized with Material Management Registry and Kit Management Issuances.
  */
 export default function StockInventoryHub() {
   const { user, loading: authLoading } = useUser()
@@ -108,8 +104,8 @@ export default function StockInventoryHub() {
   }
 
   const filtered = (materials || []).filter((m: any) => 
-    m.name?.toLowerCase().includes(search.toLowerCase()) || 
-    m.sku?.toLowerCase().includes(search.toLowerCase())
+    (m.name || '').toLowerCase().includes(search.toLowerCase()) || 
+    (m.sku || '').toLowerCase().includes(search.toLowerCase())
   );
 
   return (

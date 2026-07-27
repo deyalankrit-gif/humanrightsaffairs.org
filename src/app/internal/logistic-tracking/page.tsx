@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useMemo, useEffect } from 'react'
@@ -46,7 +47,7 @@ import { useToast } from '@/hooks/use-toast'
 /**
  * LOGISTIC TRACKING SUITE
  * Terminal for tracking the deployment and movement of organizational materials.
- * Synchronized with the master Material Registry.
+ * Synchronized with the master Material Registry and Kit Management systems.
  */
 export default function LogisticTrackingPage() {
   const { user, loading: authLoading } = useUser()
@@ -103,8 +104,8 @@ export default function LogisticTrackingPage() {
   }
 
   const filtered = (materials || []).filter((m: any) => 
-    m.name?.toLowerCase().includes(search.toLowerCase()) || 
-    m.location?.toLowerCase().includes(search.toLowerCase())
+    (m.name || '').toLowerCase().includes(search.toLowerCase()) || 
+    (m.location || '').toLowerCase().includes(search.toLowerCase())
   );
 
   return (

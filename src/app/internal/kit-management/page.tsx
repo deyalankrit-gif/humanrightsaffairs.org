@@ -4,7 +4,7 @@
 import React, { useEffect, useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { useUser, useCollection, useFirestore, useMemoFirebase, useDoc } from '@/firebase'
-import { collection, query, orderBy, doc, setDoc, serverTimestamp } from 'firebase/firestore'
+import { collection, query, orderBy, doc, setDoc, updateDoc, serverTimestamp, increment, where } from 'firebase/firestore'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -55,6 +55,7 @@ import {
 } from "@/components/ui/dialog"
 import { errorEmitter } from '@/firebase/error-emitter'
 import { FirestorePermissionError, type SecurityRuleContext } from '@/firebase/errors'
+import { Footer } from '@/components/footer'
 
 const INITIAL_KIT_ITEMS = [
   { id: 'identityCard', label: 'Identity Card' },
@@ -146,6 +147,13 @@ export default function MemberKitManagement() {
 
   const { data: kits, loading: kitsLoading } = useCollection(kitsQuery);
 
+  const materialsQuery = useMemoFirebase(() => {
+    if (!db || !user) return null;
+    return query(collection(db, 'materials'), orderBy('name', 'asc'));
+  }, [db, user]);
+
+  const { data: materialsList } = useCollection(materialsQuery);
+
   const kitMap = useMemo(() => {
     const map: Record<string, any> = {};
     (kits || []).forEach((k: any) => {
@@ -171,6 +179,9 @@ export default function MemberKitManagement() {
     if (!db || !selectedMember) return
     setIsSaving(selectedMember.id)
 
+    const oldItems = kitMap[selectedMember.id]?.items || {}
+    const newItems = kitForm.items
+
     const kitData = {
       ...kitForm,
       memberId: selectedMember.memberId,
@@ -180,8 +191,39 @@ export default function MemberKitManagement() {
     }
 
     try {
+      // 1. Update Member Kit Profile
       await setDoc(doc(db, 'member_kits', selectedMember.id), kitData, { merge: true })
-      toast({ title: "Logistics Registry Updated", description: `Kit status for ${selectedMember.name} committed.` })
+      
+      // 2. Synchronize Stock with Inventory
+      for (const kitItem of kitItems) {
+        const wasChecked = !!oldItems[kitItem.id];
+        const isChecked = !!newItems[kitItem.id];
+
+        if (wasChecked === isChecked) continue;
+
+        const delta = isChecked ? -1 : 1;
+        const materialMatch = (materialsList || []).find((m: any) => 
+          m.name.toLowerCase() === kitItem.label.toLowerCase() || 
+          m.sku === kitItem.id
+        );
+
+        if (materialMatch) {
+          const mRef = doc(db, 'materials', materialMatch.id);
+          updateDoc(mRef, {
+            currentStock: increment(delta),
+            updatedAt: serverTimestamp()
+          }).catch(async (error) => {
+            const permissionError = new FirestorePermissionError({
+              path: mRef.path,
+              operation: 'update',
+              requestResourceData: { currentStock: increment(delta) },
+            } satisfies SecurityRuleContext);
+            errorEmitter.emit('permission-error', permissionError);
+          });
+        }
+      }
+
+      toast({ title: "Registry Synchronized", description: `Logistics data and stock levels for ${selectedMember.name} updated.` })
       setSelectedMember(null)
     } catch (e: any) {
       toast({ variant: "destructive", title: "Registry Error", description: e.message })
@@ -447,7 +489,7 @@ export default function MemberKitManagement() {
                 <ShieldCheck className="w-2.5 h-2.5" /> Logistics Oversight
               </div>
               <h1 className="text-3xl md:text-4xl font-headline font-bold">Kit & Asset <span className="text-accent italic">Management</span></h1>
-              <p className="text-slate-400 text-[11px]">Tracking institutional materials and official representation assets.</p>
+              <p className="text-slate-400 text-[11px]">Tracking institutional materials and official representation assets with real-time stock sync.</p>
             </div>
             <div className="flex gap-2">
                <Dialog>
@@ -767,26 +809,36 @@ export default function MemberKitManagement() {
                              <ClipboardList className="w-3.5 h-3.5" /> Eligible Items for {selectedMember.designationCategory || "Member"}
                            </h4>
                            <div className="grid grid-cols-1 gap-2">
-                              {kitItems.filter((item: any) => (eligibilityRules[selectedMember.designationCategory || "General Member"] || []).includes(item.id)).map((item: any) => (
-                                <div key={item.id} className="flex items-center space-x-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 hover:border-accent/30 transition-all">
-                                   <Checkbox 
-                                    id={item.id} 
-                                    checked={kitForm.items[item.id] || false}
-                                    onCheckedChange={(val) => setKitForm({
-                                      ...kitForm,
-                                      items: { ...kitForm.items, [item.id]: !!val }
-                                    })}
-                                    className="border-accent"
-                                   />
-                                   <Label htmlFor={item.id} className="text-xs font-bold text-slate-700 dark:text-slate-300 cursor-pointer flex-1">{item.label}</Label>
-                                   {kitForm.items[item.id] && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />}
-                                </div>
-                              ))}
-                              {kitItems.filter((item: any) => (eligibilityRules[selectedMember.designationCategory || "General Member"] || []).includes(item.id)).length === 0 && (
-                                <div className="text-center py-4 border-2 border-dashed rounded-xl border-slate-100 text-[10px] text-slate-400 uppercase font-bold">
-                                  No items configured for this type.
-                                </div>
-                              )}
+                              {kitItems.filter((item: any) => (eligibilityRules[selectedMember.designationCategory || "General Member"] || []).includes(item.id)).map((item: any) => {
+                                const material = (materialsList || []).find((m: any) => 
+                                  m.name.toLowerCase() === item.label.toLowerCase() || 
+                                  m.sku === item.id
+                                );
+                                const stock = material?.currentStock ?? 'N/A';
+                                return (
+                                  <div key={item.id} className="flex items-center space-x-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 hover:border-accent/30 transition-all">
+                                    <Checkbox 
+                                      id={item.id} 
+                                      checked={kitForm.items[item.id] || false}
+                                      onCheckedChange={(val) => setKitForm({
+                                        ...kitForm,
+                                        items: { ...kitForm.items, [item.id]: !!val }
+                                      })}
+                                      className="border-accent"
+                                    />
+                                    <Label htmlFor={item.id} className="text-xs font-bold text-slate-700 dark:text-slate-300 cursor-pointer flex-1 flex items-center justify-between">
+                                      <span>{item.label}</span>
+                                      <span className={cn(
+                                        "text-[8px] font-black px-1.5 py-0.5 rounded uppercase",
+                                        typeof stock === 'number' && stock <= 0 ? "bg-red-500 text-white" : "bg-slate-200 dark:bg-slate-900 text-slate-500"
+                                      )}>
+                                        Avail: {stock}
+                                      </span>
+                                    </Label>
+                                    {kitForm.items[item.id] && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />}
+                                  </div>
+                                )
+                              })}
                            </div>
                         </div>
 
@@ -848,7 +900,7 @@ export default function MemberKitManagement() {
                      </div>
                      <div className="space-y-2">
                         <h4 className="text-xl font-headline font-bold text-primary dark:text-white">Logistics Node</h4>
-                        <p className="text-sm text-slate-400 leading-relaxed italic">"Select a member to manage their official institutional kit and tracking assets."</p>
+                        <p className="text-sm text-slate-400 leading-relaxed italic">"Select a member to manage their official institutional kit and tracking assets with real-time inventory sync."</p>
                      </div>
                   </div>
                 )}
@@ -914,6 +966,7 @@ export default function MemberKitManagement() {
           </div>
         </DialogContent>
       </Dialog>
+      <Footer />
     </main>
   )
 }

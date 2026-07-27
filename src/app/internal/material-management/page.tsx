@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useEffect, useMemo } from 'react'
@@ -65,7 +66,7 @@ import { cn } from '@/lib/utils'
 /**
  * MATERIAL MANAGEMENT TERMINAL
  * Master registry for institutional assets and logistical supplies.
- * Design language synchronized with Kit & Asset Management.
+ * Synchronized with Kit Management and Stock Inventory modules.
  */
 export default function MaterialManagementPage() {
   const { user, loading: authLoading } = useUser()
@@ -231,7 +232,7 @@ export default function MaterialManagementPage() {
   }
 
   const filtered = (materials || []).filter((m: any) => {
-    const matchesSearch = m.name?.toLowerCase().includes(search.toLowerCase()) || m.sku?.toLowerCase().includes(search.toLowerCase());
+    const matchesSearch = (m.name || '').toLowerCase().includes(search.toLowerCase()) || (m.sku || '').toLowerCase().includes(search.toLowerCase());
     const matchesCategory = categoryFilter === 'All' || m.category === categoryFilter;
     return matchesSearch && matchesCategory;
   })
