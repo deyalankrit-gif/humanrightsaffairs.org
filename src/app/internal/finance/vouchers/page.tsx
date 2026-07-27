@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState } from 'react'
@@ -131,7 +132,7 @@ export default function VoucherHub() {
               </div>
            </div>
            <Button onClick={() => setIsAddOpen(true)} className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold h-11 px-8 rounded-xl shadow-xl">
-             <Plus className="w-5 h-5 mr-2" /> Generate Instrument
+             <Plus className="w-4 h-4 mr-2" /> Generate Instrument
            </Button>
         </div>
       </header>
@@ -213,9 +214,9 @@ export default function VoucherHub() {
             <form onSubmit={handleCreateVoucher} className="p-8 space-y-6">
                <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                     <Label className="text-[10px] font-bold uppercase text-slate-400">Voucher Type</Label>
+                     <Label className="text-[10px] font-black uppercase text-red-600">Voucher Type *</Label>
                      <Select value={formData.type} onValueChange={v => setFormData({...formData, type: v})}>
-                        <SelectTrigger className="h-11 rounded-xl bg-slate-50 dark:bg-slate-950 border-none"><SelectValue /></SelectTrigger>
+                        <SelectTrigger className="h-11 rounded-xl bg-slate-50 dark:bg-slate-950 border-red-100 font-black text-red-600"><SelectValue /></SelectTrigger>
                         <SelectContent className="bg-white">
                            {['Payment', 'Receipt', 'Income', 'Expense', 'Contra', 'Journal'].map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
                         </SelectContent>

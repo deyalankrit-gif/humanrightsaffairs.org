@@ -199,9 +199,9 @@ export default function NewVoucherPage() {
               </h3>
               <div className="grid md:grid-cols-3 gap-6">
                  <div className="space-y-1.5">
-                   <Label className="text-[10px] font-bold uppercase text-slate-400">Voucher Category</Label>
+                   <Label className="text-[10px] font-black uppercase text-red-600">Voucher Category *</Label>
                    <Select value={formData.type} onValueChange={v => setFormData({...formData, type: v})}>
-                      <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
+                      <SelectTrigger className="h-11 rounded-xl font-black text-red-600 border-red-100"><SelectValue /></SelectTrigger>
                       <SelectContent position="popper" className="z-[1000001] bg-white">
                         {Object.keys(VOUCHER_TYPE_CODES).map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
                       </SelectContent>
@@ -290,7 +290,7 @@ export default function NewVoucherPage() {
                  </div>
                  <div className="space-y-1.5">
                    <Label className="text-[10px] font-bold uppercase text-slate-400">Payment Channel</Label>
-                   <Select value={formData.paymentMethod} onValueChange={v => setFormData({...formData, paymentMethod: v})}>
+                   <Select value={formData.paymentMethod} onValueChange={(val: any) => setFormData({...formData, paymentMethod: val})}>
                      <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
                      <SelectContent position="popper" className="z-[1000001] bg-white">
                         {['Cash', 'Bank Transfer', 'UPI', 'Cheque', 'Card'].map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}
