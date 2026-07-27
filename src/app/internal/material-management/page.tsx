@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useEffect, useState, useMemo } from 'react'
@@ -280,7 +279,7 @@ export default function MaterialManagementPage() {
                 <DialogHeader className="relative">
                    <div className="absolute right-0 top-0">
                       <DialogClose asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-slate-400 hover:text-red-500">
+                        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-slate-400 hover:text-primary">
                           <X className="w-4 h-4" />
                         </Button>
                       </DialogClose>
@@ -489,16 +488,41 @@ export default function MaterialManagementPage() {
       </section>
 
       <section className="py-6 border-b bg-white dark:bg-slate-900 sticky top-10 z-30 shadow-sm transition-colors">
-        <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="container mx-auto px-4 space-y-6">
+           {/* TOP: CATEGORY LIST (SCROLLABLE) */}
            <div className="flex gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl overflow-x-auto no-scrollbar">
-              <button onClick={() => setCategoryFilter('All')} className={cn("px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all whitespace-nowrap", categoryFilter === 'All' ? "bg-accent text-primary shadow-md" : "text-slate-500 hover:bg-slate-200")}>All</button>
-              {materialCategories.slice(0, 6).map(cat => (
-                <button key={cat} onClick={() => setCategoryFilter(cat)} className={cn("px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all whitespace-nowrap", categoryFilter === cat ? "bg-accent text-primary shadow-md" : "text-slate-500 hover:bg-slate-200")}>{cat}</button>
+              <button 
+                onClick={() => setCategoryFilter('All')} 
+                className={cn(
+                  "px-6 py-2 rounded-lg text-[10px] font-black uppercase transition-all whitespace-nowrap min-w-[100px]", 
+                  categoryFilter === 'All' ? "bg-accent text-primary shadow-md" : "text-slate-500 hover:bg-slate-200"
+                )}
+              >
+                All Materials
+              </button>
+              {materialCategories.map(cat => (
+                <button 
+                  key={cat} 
+                  onClick={() => setCategoryFilter(cat)} 
+                  className={cn(
+                    "px-6 py-2 rounded-lg text-[10px] font-black uppercase transition-all whitespace-nowrap min-w-[100px]", 
+                    categoryFilter === cat ? "bg-accent text-primary shadow-md" : "text-slate-500 hover:bg-slate-200"
+                  )}
+                >
+                  {cat}
+                </button>
               ))}
            </div>
-           <div className="relative w-full max-lg:max-w-lg">
-             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-             <Input placeholder="Filter by material name or SKU..." className="pl-9 h-11 rounded-xl border-slate-100 bg-slate-50 dark:bg-slate-950 text-sm" value={search} onChange={e => setSearch(e.target.value)} />
+
+           {/* BOTTOM: FILTER FIELD (CENTERED & ENLARGED) */}
+           <div className="relative w-full max-w-2xl mx-auto">
+             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+             <Input 
+                placeholder="Filter by material name or SKU..." 
+                className="pl-12 h-14 rounded-2xl border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-base shadow-inner focus:ring-accent" 
+                value={search} 
+                onChange={e => setSearch(e.target.value)} 
+             />
            </div>
         </div>
       </section>
