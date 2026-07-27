@@ -233,7 +233,7 @@ export function AppSidebar() {
         {/* LOGISTICAL GOVERNANCE GROUP */}
         {isAdminPortal && filteredLogisticLinks.length > 0 && (
           <SidebarGroup>
-            <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden text-primary font-bold uppercase tracking-widest">
+            <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden text-blue-600 font-bold uppercase tracking-widest">
               LOGISTICAL GOVERNANCE
             </SidebarGroupLabel>
             <SidebarMenu>
