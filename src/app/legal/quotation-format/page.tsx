@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState } from 'react'
@@ -23,7 +24,7 @@ import { useToast } from '@/hooks/use-toast'
  * SupplierQuotationPage: High-fidelity interactive template for vendor quotes.
  * Optimized for F4 size printing (210mm x 330mm) with absolute minimum margins.
  * Features a Live Editor for administrative personnel.
- * Updated: Narrowed Specification field width.
+ * Updated: Included specific institutional contact info in header.
  */
 export default function SupplierQuotationPage() {
   const { toast } = useToast()
@@ -190,10 +191,19 @@ Conditions:
                     <div className="relative w-16 h-16 mx-auto mb-2 print:w-12 print:h-12">
                       <Image src="/HRAT%20Logo.jpeg" alt="HRAT Logo" fill className="object-contain" />
                     </div>
-                    <h2 className="text-xl md:text-3xl font-headline font-bold text-primary dark:text-white uppercase tracking-tight print:text-black leading-none">
+                    <h2 className="text-xl md:text-3xl font-headline font-bold text-primary dark:text-white uppercase tracking-tight print:text-black leading-none mb-1">
                       HUMAN RIGHTS AFFAIRS TRUST
                     </h2>
-                    <h3 className="text-sm md:text-lg font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest print:text-black">
+                    <div className="text-[10px] md:text-xs font-bold text-slate-500 print:text-black space-y-0.5">
+                      <p className="uppercase tracking-[0.2em] font-black text-slate-400">State Office (WB)</p>
+                      <p>Biswanathpur, Deganga, 24 Parganas (N), WB</p>
+                      <div className="flex justify-center gap-4">
+                        <p>Phone: +91 70631 11471</p>
+                        <p>Email: hrat.wb.chairman@gmail.com</p>
+                      </div>
+                      <p className="font-mono text-[9px] print:text-[10px]">https://humanrightsaffairs.org</p>
+                    </div>
+                    <h3 className="text-sm md:text-lg font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest print:text-black mt-4">
                       SUPPLIER / VENDOR QUOTATION FORM
                     </h3>
                   </div>
