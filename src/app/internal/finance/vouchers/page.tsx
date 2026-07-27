@@ -198,7 +198,7 @@ export default function VoucherHub() {
          </div>
       </section>
 
-      <Dialog open={isAddOpen} onOpenChange={isAddOpen}>
+      <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
          <DialogContent className="max-w-xl rounded-[2rem] border-none shadow-2xl p-0 overflow-hidden bg-white dark:bg-slate-900 [&>button]:hidden">
             <div className="bg-slate-900 p-8 text-white relative">
                <div className="absolute right-6 top-6">
@@ -226,6 +226,21 @@ export default function VoucherHub() {
                      <Label className="text-[10px] font-bold uppercase text-slate-400">Value (₹)</Label>
                      <Input type="number" value={formData.amount} onChange={e => setFormData({...formData, amount: e.target.value})} className="h-11 rounded-xl font-bold text-lg bg-slate-50 dark:bg-slate-950 border-none" required />
                   </div>
+               </div>
+
+               <div className="space-y-1.5">
+                  <Label className="text-[10px] font-black uppercase text-emerald-600">Account Head *</Label>
+                  <Select value={formData.account} onValueChange={v => setFormData({...formData, account: v})}>
+                    <SelectTrigger className="h-11 rounded-xl bg-slate-50 dark:bg-slate-950 border-emerald-100 font-black text-emerald-600"><SelectValue /></SelectTrigger>
+                    <SelectContent className="bg-white">
+                       <SelectItem value="Project Expenses">Project Expenses</SelectItem>
+                       <SelectItem value="Donations">Donations</SelectItem>
+                       <SelectItem value="Salaries">Salaries</SelectItem>
+                       <SelectItem value="Office Rent">Office Rent</SelectItem>
+                       <SelectItem value="Relief Aid">Relief Aid</SelectItem>
+                       <SelectItem value="Other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
                </div>
 
                <div className="space-y-1.5">
