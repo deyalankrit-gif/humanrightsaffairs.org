@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useEffect } from 'react'
@@ -247,8 +248,8 @@ export default function NewVoucherPage() {
               <h3 className="text-xs font-black uppercase text-accent tracking-[0.2em] flex items-center gap-2 border-b pb-4">
                 <IndianRupee className="w-4 h-4" /> Fiscal Mechanics
               </h3>
-              <div className="grid md:grid-cols-1 lg:grid-cols-4 gap-6">
-                 <div className="space-y-1.5">
+              <div className="grid md:grid-cols-1 lg:grid-cols-10 gap-6">
+                 <div className="space-y-1.5 lg:col-span-2">
                    <Label className="text-[10px] font-bold uppercase text-slate-400">Voucher Date *</Label>
                    <div className="flex gap-2">
                      <Input 
@@ -274,11 +275,11 @@ export default function NewVoucherPage() {
                      </Popover>
                    </div>
                  </div>
-                 <div className="space-y-1.5">
+                 <div className="space-y-1.5 lg:col-span-2">
                    <Label className="text-[10px] font-bold uppercase text-slate-400">Amount (INR) *</Label>
                    <Input type="number" value={formData.amount} onChange={e => setFormData({...formData, amount: e.target.value})} className="h-11 rounded-xl text-lg font-black" required />
                  </div>
-                 <div className="space-y-1.5">
+                 <div className="space-y-1.5 lg:col-span-3">
                    <Label className="text-[10px] font-black uppercase text-emerald-600">Account Head (As per Voucher category) *</Label>
                    <Select value={formData.accountHead} onValueChange={v => setFormData({...formData, accountHead: v})}>
                      <SelectTrigger className="h-11 rounded-xl border-emerald-100 font-black text-emerald-600"><SelectValue /></SelectTrigger>
@@ -287,7 +288,7 @@ export default function NewVoucherPage() {
                      </SelectContent>
                    </Select>
                  </div>
-                 <div className="space-y-1.5">
+                 <div className="space-y-1.5 lg:col-span-3">
                    <Label className="text-[10px] font-bold uppercase text-slate-400">Payment Channel</Label>
                    <Select value={formData.paymentMethod} onValueChange={(val: any) => setFormData({...formData, paymentMethod: val})}>
                      <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
