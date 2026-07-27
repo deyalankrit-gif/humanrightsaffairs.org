@@ -52,7 +52,6 @@ export default function RootLoginPage() {
         accounts: true,
         expenses: true, 
         applications: true, 
-        inventory: true, 
         vendors: true,
         grievances: true, 
         meetings: true, 
@@ -157,7 +156,7 @@ export default function RootLoginPage() {
                     onChange={(e) => setPassword(e.target.value)}
                     required
                   />
-                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-red-900" />
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-red-900" />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}

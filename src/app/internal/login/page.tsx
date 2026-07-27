@@ -49,7 +49,6 @@ export default function StaffLoginPage() {
         accounts: true,
         expenses: true,
         applications: true,
-        inventory: true,
         vendors: true,
         grievances: true,
         meetings: true,

@@ -93,7 +93,6 @@ const adminLinksConfig = [
   { name: 'Terminated', href: '/internal/terminated-members', icon: UserX, permission: 'terminated' },
   { name: 'Occasion Greetings', href: '/internal/occasions', icon: Sparkles, permission: 'occasions' },
   { name: 'Donor Wall Mgmt', href: '/internal/donors', icon: Award, permission: 'donorWall' },
-  { name: 'Inventory', href: '/internal/inventory', icon: Package, permission: 'inventory' },
   { name: 'Grievances', href: '/internal/grievances', icon: MessageSquareWarning, permission: 'grievances' },
   { name: 'Meetings', href: '/internal/meetings', icon: Handshake, permission: 'meetings' },
   { name: 'Events', href: '/internal/events', icon: Calendar, permission: 'events' },
@@ -104,9 +103,7 @@ const adminLinksConfig = [
 ]
 
 const logisticsLinksConfig = [
-  { name: 'Material System', href: '/internal/material-management', icon: Boxes, permission: 'materialManagement' },
   { name: 'Kit Tracking', href: '/internal/kit-management', icon: Archive, permission: 'kitManagement' },
-  { name: 'Stock Inventory', href: '/internal/inventory', icon: Package, permission: 'inventory' },
   { name: 'Vendor Registry', href: '/internal/vendors', icon: Truck, permission: 'vendors' },
 ]
 
