@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useEffect, useState } from 'react'
@@ -392,7 +391,7 @@ export default function AccessRolesPage() {
             <form onSubmit={handleUpdateStaff} className="space-y-6 py-4">
                <div className="space-y-2"><Label className="text-[10px] font-bold uppercase text-slate-500">Official Identity (Registry ID)</Label><Input value={editingUser.email} disabled className="bg-black/30 border-white/5 text-slate-500 rounded-xl h-11" /></div>
                <div className="space-y-2"><Label className="text-[10px] font-bold uppercase text-slate-500">Display Name</Label><Input value={editingUser.name} onChange={e => setEditingUser({ ...editingUser, name: e.target.value })} className="bg-black/50 border-white/5 text-white rounded-xl h-11" /></div>
-               <DialogFooter><Button type="submit" disabled={isUpdating} className="w-full h-12 bg-accent text-primary font-bold rounded-xl shadow-xl shadow-accent/10">{isUpdating ? <Loader2 className="animate-spin" /> : "Commit Profile Refresh"}</Button></DialogFooter>
+               <DialogFooter><Button type="submit" disabled={isUpdating} className="w-full h-12 bg-accent text-primary font-bold rounded-xl shadow-xl shadow-accent/10">{isUpdating ? <Loader2 className="animate-spin w-6 h-6" /> : "Commit Profile Refresh"}</Button></DialogFooter>
             </form>
           )}
         </DialogContent>

@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useMemo, useEffect } from 'react'
@@ -10,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Footer } from '@/components/footer'
 import { 
   Navigation, 
   Search, 
@@ -20,18 +20,16 @@ import {
   ShieldCheck, 
   History, 
   Package, 
-  User,
   ArrowRight,
-  TrendingUp,
   Activity,
   ChevronRight,
   CheckCircle2,
   Clock3,
-  X
+  X,
+  RefreshCw,
+  Info,
+  Hash
 } from 'lucide-react'
-import { 
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue 
-} from '@/components/ui/select'
 import {
   Dialog,
   DialogContent,
@@ -42,14 +40,13 @@ import {
   DialogClose,
   DialogFooter
 } from "@/components/ui/dialog"
-import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
-import { Footer } from '@/components/footer'
+import { useToast } from '@/hooks/use-toast'
 
 /**
  * LOGISTIC TRACKING SUITE
- * High-fidelity terminal for tracking the deployment and movement of organizational materials.
- * Visual design language synchronized with the Kit Management portal.
+ * Terminal for tracking the deployment and movement of organizational materials.
+ * Synchronized with the master Material Registry.
  */
 export default function LogisticTrackingPage() {
   const { user, loading: authLoading } = useUser()
@@ -58,9 +55,14 @@ export default function LogisticTrackingPage() {
   const { toast } = useToast()
   
   const [search, setSearch] = useState('')
-  const [activeTab, setActiveTab] = useState('Deployment')
   const [isActionLoading, setIsActionLoading] = useState(false)
   const [selectedItem, setSelectedItem] = useState<any>(null)
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/internal/login')
+    }
+  }, [user, authLoading, router])
 
   const materialsQuery = useMemoFirebase(() => {
     if (!db || !user) return null;
@@ -72,8 +74,8 @@ export default function LogisticTrackingPage() {
   const stats = useMemo(() => {
     if (!materials) return { deployed: 0, inTransit: 0, pending: 0 };
     return {
-      deployed: materials.length, // Simple mock for total tracked items
-      inTransit: materials.filter((m: any) => (m.currentStock || 0) > 100).length,
+      deployed: materials.length,
+      inTransit: materials.filter((m: any) => (m.currentStock || 0) > 0).length,
       pending: materials.filter((m: any) => m.status === 'Low Stock').length
     }
   }, [materials]);
@@ -116,7 +118,7 @@ export default function LogisticTrackingPage() {
                 <Navigation className="w-2.5 h-2.5" /> Mobility Node
               </div>
               <h1 className="text-3xl md:text-4xl font-headline font-bold">Logistic <span className="text-accent italic">Tracking</span></h1>
-              <p className="text-slate-400 text-[11px] font-bold uppercase tracking-widest">Master Deployment & Distribution Command</p>
+              <p className="text-slate-400 text-[11px] font-bold uppercase tracking-widest">Master Deployment & Distribution Terminal</p>
             </div>
             
             <div className="grid grid-cols-3 gap-3">
@@ -143,13 +145,13 @@ export default function LogisticTrackingPage() {
                  <CardHeader className="p-8 border-b border-slate-50 dark:border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
                        <CardTitle className="text-xl font-headline font-bold flex items-center gap-2">
-                          <Activity className="w-5 h-5 text-accent" /> Active Movement Registry
+                          <Activity className="w-5 h-5 text-accent" /> Deployment Registry
                        </CardTitle>
-                       <CardDescription>Real-time deployment status across regional chapters.</CardDescription>
+                       <CardDescription>Real-time position monitoring across regional chapters.</CardDescription>
                     </div>
                     <div className="relative w-full md:w-64">
                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
-                       <Input placeholder="Search locations..." className="pl-9 h-10 rounded-xl bg-slate-50 dark:bg-slate-950 border-none text-xs" value={search} onChange={e => setSearch(e.target.value)} />
+                       <Input placeholder="Search location..." className="pl-9 h-10 rounded-xl bg-slate-50 dark:bg-slate-950 border-none text-xs" value={search} onChange={e => setSearch(e.target.value)} />
                     </div>
                  </CardHeader>
                  <CardContent className="p-0">
@@ -164,20 +166,13 @@ export default function LogisticTrackingPage() {
                                   <h4 className="font-bold text-primary dark:text-white group-hover:text-accent transition-colors">{item.name}</h4>
                                   <div className="flex items-center gap-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
                                      <span className="flex items-center gap-1.5"><MapPin className="w-3 h-3 text-accent" /> {item.location}</span>
-                                     <span className="flex items-center gap-1.5"><Truck className="w-3 h-3 text-accent" /> Dispatched</span>
+                                     <span className="flex items-center gap-1.5"><Truck className="w-3 h-3 text-accent" /> {item.status}</span>
                                   </div>
                                </div>
                             </div>
                             
                             <div className="flex items-center gap-6">
-                               <div className="text-right">
-                                  <p className="text-[8px] font-black uppercase text-slate-400 tracking-widest mb-1">Deployment Health</p>
-                                  <div className="flex items-center gap-1.5 justify-end">
-                                     <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
-                                     <span className="text-[10px] font-black text-emerald-600 uppercase">Synchronized</span>
-                                  </div>
-                                </div>
-                                <Button onClick={() => setSelectedItem(item)} variant="outline" size="sm" className="h-9 px-6 rounded-xl font-black text-[9px] uppercase tracking-widest border-2 hover:bg-accent hover:text-primary transition-all">Manage Position</Button>
+                                <Button onClick={() => setSelectedItem(item)} variant="outline" size="sm" className="h-9 px-6 rounded-xl font-black text-[9px] uppercase tracking-widest border-2 hover:bg-accent hover:text-primary transition-all">Relocate Asset</Button>
                             </div>
                          </div>
                        ))}
@@ -196,13 +191,13 @@ export default function LogisticTrackingPage() {
               <Card className="border-none shadow-sm rounded-3xl bg-slate-900 text-white p-8 relative overflow-hidden">
                  <div className="absolute top-0 right-0 w-32 h-32 bg-accent/5 rounded-full -mr-16 -mt-16 blur-2xl"></div>
                  <h3 className="text-xs font-black uppercase text-accent tracking-[0.2em] mb-8 flex items-center gap-2">
-                    <History className="w-4 h-4" /> Operational Audit Log
+                    <History className="w-4 h-4" /> Logistics Audit Log
                  </h3>
                  <div className="space-y-6">
                     {[
-                      { action: 'Bulk Disbursement', loc: 'West Bengal Chapter', time: '2h ago', status: 'Delivered' },
-                      { action: 'Asset Repositioning', loc: 'Delhi HQ North', time: '5h ago', status: 'Dispatched' },
-                      { action: 'Procurement Entry', loc: 'National Center', time: 'Yesterday', status: 'Verified' }
+                      { action: 'Registry Sync', loc: 'National HQ', time: '2h ago', status: 'Verified' },
+                      { action: 'Asset Movement', loc: 'WB Chapter', time: '5h ago', status: 'Dispatched' },
+                      { action: 'Audit Completed', loc: 'Central Cell', time: 'Yesterday', status: 'Secure' }
                     ].map((log, i) => (
                       <div key={i} className="flex gap-4 relative">
                          {i < 2 && <div className="absolute left-[15px] top-8 bottom-[-24px] w-0.5 bg-white/10" />}
@@ -226,11 +221,10 @@ export default function LogisticTrackingPage() {
                  <Truck className="w-10 h-10 text-indigo-500 mx-auto" />
                  <h4 className="text-sm font-black uppercase tracking-widest text-indigo-500">Logistics Mandate</h4>
                  <p className="text-[10px] text-slate-500 leading-relaxed font-bold uppercase italic">
-                    "Accuracy in logistical tracking is non-negotiable for statutory audits. Ensure every material movement is recorded with authorized chapter timestamps."
+                    "Accuracy in logistical tracking is mandatory for statutory audits. Ensure every material movement is recorded with authorized chapter timestamps."
                  </p>
               </div>
            </div>
-
         </div>
       </section>
 
@@ -244,7 +238,7 @@ export default function LogisticTrackingPage() {
                   <Badge className="bg-accent text-primary font-black text-[8px] uppercase mb-2">Tracking Node</Badge>
                   <DialogTitle className="text-2xl font-headline font-bold">{selectedItem.name}</DialogTitle>
                   <p className="text-slate-400 text-xs mt-1 uppercase tracking-widest font-bold flex items-center gap-1.5">
-                     <Hash className="w-3.5 h-3.5" /> {selectedItem.sku || 'REF-LOG-NODE'}
+                     <Hash className="w-3.5 h-3.5" /> {selectedItem.sku || 'LOG-REPOS'}
                   </p>
                </div>
                <div className="p-8 space-y-6">
@@ -254,7 +248,7 @@ export default function LogisticTrackingPage() {
                   </div>
                   <div className="p-4 bg-slate-50 rounded-2xl border flex items-start gap-3">
                      <Info className="w-4 h-4 text-blue-500 mt-0.5" />
-                     <p className="text-[10px] text-slate-500 leading-relaxed font-medium">Updating this location will instantly refresh the public facing Kit and Asset registry for all regional chapters.</p>
+                     <p className="text-[10px] text-slate-500 leading-relaxed font-medium">Updating this location will instantly refresh the master material registry for all regional chapters.</p>
                   </div>
                   <Button 
                     onClick={() => {
@@ -276,5 +270,3 @@ export default function LogisticTrackingPage() {
     </main>
   )
 }
-
-import { Hash } from 'lucide-react'

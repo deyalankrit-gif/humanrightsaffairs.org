@@ -1,7 +1,6 @@
-
 "use client"
 
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase'
 import { collection, query, orderBy, doc, updateDoc, serverTimestamp, increment } from 'firebase/firestore'
@@ -10,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Footer } from '@/components/footer'
 import { 
   Boxes, 
   Search, 
@@ -22,19 +22,28 @@ import {
   History,
   PackageCheck,
   ChevronRight,
-  ArrowUpRight,
-  ArrowDownRight,
   Plus,
-  Minus
+  Minus,
+  Tag,
+  MapPin,
+  X
 } from 'lucide-react'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogClose,
+  DialogFooter
+} from "@/components/ui/dialog"
 import { cn } from '@/lib/utils'
 import { useToast } from '@/hooks/use-toast'
-import { Footer } from '@/components/footer'
 
 /**
  * STOCK INVENTORY HUB
- * Tactical reconciliation terminal for organizational supplies.
- * Features: High-speed stock adjustments, automated low-stock warnings, and real-time sync.
+ * Reconciliation terminal for institutional supplies.
+ * Synchronized with Material Management Registry.
  */
 export default function StockInventoryHub() {
   const { user, loading: authLoading } = useUser()
@@ -43,6 +52,12 @@ export default function StockInventoryHub() {
   const { toast } = useToast()
   const [search, setSearch] = useState('')
   const [isAdjusting, setIsAdjusting] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/internal/login')
+    }
+  }, [user, authLoading, router])
 
   const materialsQuery = useMemoFirebase(() => {
     if (!db || !user) return null;
@@ -81,7 +96,7 @@ export default function StockInventoryHub() {
       .then(() => {
         toast({ 
           title: delta > 0 ? "Inventory Replenished" : "Stock Disbursed",
-          description: `${name} current balance updated to ${newStock}.`
+          description: `${name} updated to ${newStock} units.`
         })
       })
       .finally(() => setIsAdjusting(null))
@@ -100,57 +115,38 @@ export default function StockInventoryHub() {
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-20">
       <header className="pt-16 pb-8 bg-slate-900 text-white border-b-8 border-accent/20 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-1/3 h-full bg-accent/5 -skew-x-12"></div>
-        <div className="container mx-auto px-4 relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="space-y-1">
-             <div className="inline-flex items-center gap-2 bg-accent/20 text-accent px-3 py-1 rounded-full text-[9px] font-bold uppercase border border-accent/30 tracking-widest">
-               <ShieldCheck className="w-2.5 h-2.5" /> Inventory Stability Node
-             </div>
-             <h1 className="text-3xl md:text-4xl font-headline font-bold">Stock <span className="text-accent italic">Inventory</span></h1>
-             <p className="text-slate-400 text-[11px] uppercase font-black">Tactical Stock Reconciliation & Forecasting</p>
-          </div>
-          
-          <div className="flex gap-4">
-             <div className="bg-white/5 px-6 py-2 rounded-xl border border-white/10 text-center">
-                <p className="text-[8px] text-slate-500 font-bold uppercase mb-0.5">Critical Alerts</p>
-                <p className="text-lg font-bold text-red-500">{stats.outOfStock + stats.lowStock}</p>
-             </div>
-             <div className="bg-white/5 px-6 py-2 rounded-xl border border-white/10 text-center">
-                <p className="text-[8px] text-slate-500 font-bold uppercase mb-0.5">Registry Nodes</p>
-                <p className="text-lg font-bold text-white">{stats.totalItems}</p>
-             </div>
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="space-y-1">
+               <div className="inline-flex items-center gap-2 bg-accent/20 text-accent px-3 py-1 rounded-full text-[9px] font-bold uppercase border border-accent/30 tracking-widest">
+                 <ShieldCheck className="w-2.5 h-2.5" /> Stability Protocol
+               </div>
+               <h1 className="text-3xl md:text-4xl font-headline font-bold">Stock <span className="text-accent italic">Inventory</span></h1>
+               <p className="text-slate-400 text-[11px] uppercase font-black tracking-widest">Tactical Stock Reconciliation Hub</p>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-3">
+               <div className="bg-white/5 px-6 py-2 rounded-xl border border-white/10 text-center">
+                  <p className="text-[8px] text-slate-500 font-bold uppercase mb-0.5">Critical Alerts</p>
+                  <p className="text-lg font-bold text-red-500">{stats.outOfStock + stats.lowStock}</p>
+               </div>
+               <div className="bg-white/5 px-6 py-2 rounded-xl border border-white/10 text-center">
+                  <p className="text-[8px] text-slate-500 font-bold uppercase mb-0.5">Total Assets</p>
+                  <p className="text-lg font-bold text-white">{stats.totalItems}</p>
+               </div>
+            </div>
           </div>
         </div>
       </header>
 
       <section className="py-8 container mx-auto px-4">
-        <div className="grid lg:grid-cols-4 gap-6 mb-8">
-           {[
-             { label: 'Out of Stock', val: stats.outOfStock, color: 'text-red-500', bg: 'bg-red-50 dark:bg-red-950/20' },
-             { label: 'Low Threshold', val: stats.lowStock, color: 'text-amber-500', bg: 'bg-amber-50 dark:bg-amber-950/20' },
-             { label: 'Adequate Stock', val: stats.totalItems - (stats.outOfStock + stats.lowStock), color: 'text-emerald-500', bg: 'bg-emerald-50 dark:bg-emerald-950/20' },
-             { label: 'Last Reconciliation', val: 'Active', color: 'text-blue-500', bg: 'bg-blue-50 dark:bg-blue-950/20' }
-           ].map((s, i) => (
-             <Card key={i} className="border-none shadow-sm rounded-2xl overflow-hidden bg-white dark:bg-slate-900">
-                <CardContent className="p-5 flex items-center justify-between">
-                   <div className="space-y-1">
-                      <p className="text-[9px] font-black uppercase text-slate-400 tracking-widest">{s.label}</p>
-                      <p className={cn("text-2xl font-black", s.color)}>{s.val}</p>
-                   </div>
-                   <div className={cn("p-2 rounded-xl", s.bg)}>
-                      {i === 0 ? <AlertCircle className="w-5 h-5 text-red-500" /> : <PackageCheck className="w-5 h-5 text-primary-foreground opacity-20" />}
-                   </div>
-                </CardContent>
-             </Card>
-           ))}
-        </div>
-
         <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-8">
            <h2 className="text-xl font-headline font-bold text-primary dark:text-white flex items-center gap-3">
-              <RefreshCcw className="w-5 h-5 text-accent" /> Live Reconciliation Registry
+              <RefreshCw className="w-5 h-5 text-accent" /> Live Reconciliation Registry
            </h2>
            <div className="relative w-full max-w-md">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-              <Input placeholder="Search catalog..." className="pl-10 h-11 rounded-xl bg-white dark:bg-slate-900 shadow-sm border-none" value={search} onChange={e => setSearch(e.target.value)} />
+              <Input placeholder="Search catalog by name or SKU..." className="pl-10 h-11 rounded-xl bg-white dark:bg-slate-900 shadow-sm border-none" value={search} onChange={e => setSearch(e.target.value)} />
            </div>
         </div>
 
@@ -170,7 +166,7 @@ export default function StockInventoryHub() {
                            <p className="text-2xl font-black text-primary dark:text-white leading-none">{item.currentStock}</p>
                            <p className="text-[10px] font-bold text-slate-400 uppercase mt-1">{item.unit}</p>
                            <Badge variant="outline" className={cn(
-                             "mt-3 text-[8px] font-black uppercase tracking-tighter border-none text-white px-3",
+                             "mt-3 text-[8px] font-black uppercase border-none text-white px-3",
                              item.status === 'Available' ? 'bg-emerald-500' : 
                              item.status === 'Low Stock' ? 'bg-amber-500' : 'bg-red-500'
                            )}>{item.status}</Badge>
@@ -213,7 +209,7 @@ export default function StockInventoryHub() {
                            <div className="flex items-center gap-2">
                               <Dialog>
                                  <DialogTrigger asChild>
-                                    <Button variant="outline" className="h-10 px-6 rounded-xl font-bold text-[10px] uppercase tracking-widest border-2">Bulk Add</Button>
+                                    <Button variant="outline" className="h-10 px-6 rounded-xl font-bold text-[10px] uppercase tracking-widest border-2">Bulk Receipt</Button>
                                  </DialogTrigger>
                                  <DialogContent className="max-w-md rounded-[2.5rem] border-none shadow-2xl">
                                     <DialogHeader>
@@ -245,8 +241,8 @@ export default function StockInventoryHub() {
                </Card>
              ))}
              {filtered.length === 0 && (
-                <div className="text-center py-20 opacity-30">
-                   <PackageCheck className="w-16 h-16 mx-auto mb-4" />
+                <div className="text-center py-24 opacity-30">
+                   <Boxes className="w-16 h-16 text-slate-300 mx-auto mb-4" />
                    <p className="text-sm font-bold uppercase tracking-widest">No matching stock nodes found</p>
                 </div>
              )}

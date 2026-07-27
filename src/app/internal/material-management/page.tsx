@@ -1,10 +1,10 @@
-
 "use client"
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import { useUser, useFirestore, useCollection, useMemoFirebase, useDoc } from '@/firebase'
+import { useUser, useCollection, useFirestore, useMemoFirebase, useDoc } from '@/firebase'
 import { collection, query, orderBy, addDoc, deleteDoc, doc, updateDoc, serverTimestamp, setDoc } from 'firebase/firestore'
+import { Footer } from '@/components/footer'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -32,7 +32,9 @@ import {
   RefreshCw,
   Building,
   Truck,
-  X
+  X,
+  Settings2,
+  Check
 } from 'lucide-react'
 import {
   Dialog,
@@ -57,12 +59,11 @@ import {
 } from "@/components/ui/alert-dialog"
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
-import { Footer } from '@/components/footer'
 
 /**
  * MATERIAL MANAGEMENT TERMINAL
- * High-fidelity master registry for institutional assets and logistical supplies.
- * Features: Saffron/Navy visual identity, real-time sync, and category governance.
+ * Master registry for institutional assets and logistical supplies.
+ * Design language synchronized with Kit & Asset Management.
  */
 export default function MaterialManagementPage() {
   const { user, loading: authLoading } = useUser()
@@ -76,6 +77,10 @@ export default function MaterialManagementPage() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [editItem, setEditItem] = useState<any>(null)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+
+  const [newCategoryLabel, setNewCategoryLabel] = useState('')
+  const [editingCategoryIndex, setEditingCategoryIndex] = useState<number | null>(null)
+  const [editingCategoryValue, setEditingCategoryValue] = useState('')
 
   const [newItem, setNewItem] = useState({
     name: '',
@@ -122,6 +127,49 @@ export default function MaterialManagementPage() {
     return query(collection(db, 'vendors'), orderBy('companyName', 'asc'));
   }, [db, user]);
   const { data: vendors } = useCollection(vendorsQuery);
+
+  const handleAddCategory = async () => {
+    if (!newCategoryLabel.trim() || !settingsRef) return;
+    const label = newCategoryLabel.trim();
+    if (categories.includes(label)) {
+      toast({ variant: "destructive", title: "Duplicate Category", description: "This category already exists." });
+      return;
+    }
+    const updatedCustom = [...((settingsData as any)?.categories || []), label];
+    try {
+      await setDoc(settingsRef, { categories: updatedCustom, updatedAt: serverTimestamp() }, { merge: true });
+      setNewCategoryLabel('');
+      toast({ title: "Category Created" });
+    } catch (e) {
+      toast({ variant: "destructive", title: "Update Failed" });
+    }
+  }
+
+  const handleUpdateCategory = async () => {
+    if (editingCategoryIndex === null || !editingCategoryValue.trim() || !settingsRef) return;
+    const updatedCustom = [...((settingsData as any)?.categories || [])];
+    updatedCustom[editingCategoryIndex] = editingCategoryValue.trim();
+    try {
+      await setDoc(settingsRef, { categories: updatedCustom, updatedAt: serverTimestamp() }, { merge: true });
+      setEditingCategoryIndex(null);
+      setEditingCategoryValue('');
+      toast({ title: "Category Updated" });
+    } catch (e) {
+      toast({ variant: "destructive", title: "Update Failed" });
+    }
+  }
+
+  const handleDeleteCategory = async (idx: number) => {
+    if (!settingsRef) return;
+    const updatedCustom = [...((settingsData as any)?.categories || [])];
+    updatedCustom.splice(idx, 1);
+    try {
+      await setDoc(settingsRef, { categories: updatedCustom, updatedAt: serverTimestamp() }, { merge: true });
+      toast({ title: "Category Purged" });
+    } catch (e) {
+      toast({ variant: "destructive", title: "Delete Failed" });
+    }
+  }
 
   const handleAddMaterial = async () => {
     if (!db) return;
@@ -195,17 +243,17 @@ export default function MaterialManagementPage() {
              <div className="inline-flex items-center gap-2 bg-accent/20 text-accent px-3 py-1 rounded-full text-[9px] font-bold uppercase border border-accent/30 tracking-widest">
                <ShieldCheck className="w-2.5 h-2.5" /> Registry Protocol
              </div>
-             <h1 className="text-3xl md:text-4xl font-headline font-bold">Material <span className="text-accent italic">System</span></h1>
-             <p className="text-slate-400 text-[11px] uppercase font-black">Institutional Logistical Asset Registry</p>
+             <h1 className="text-3xl md:text-4xl font-headline font-bold">Material <span className="text-accent italic">Management</span></h1>
+             <p className="text-slate-400 text-[11px] uppercase font-black tracking-widest">Master Institutional Asset Registry</p>
           </div>
           
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-accent text-primary font-bold rounded-xl h-11 px-8 flex gap-2 shadow-2xl shadow-accent/20 hover:bg-secondary hover:text-white transition-all transform hover:scale-105 active:scale-95">
+              <Button className="bg-accent text-primary font-bold rounded-xl h-11 px-8 flex gap-2 shadow-2xl shadow-accent/20 hover:bg-secondary hover:text-white transition-all transform hover:scale-105">
                 <Plus className="w-4 h-4" /> Register New Item
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl rounded-[2rem] max-h-[90vh] overflow-y-auto border-none shadow-2xl [&>button]:hidden">
+            <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="max-w-2xl rounded-[2rem] max-h-[90vh] overflow-y-auto border-none shadow-2xl [&>button]:hidden">
               <DialogHeader className="relative">
                 <div className="absolute right-0 top-0">
                   <DialogClose asChild>
@@ -272,7 +320,7 @@ export default function MaterialManagementPage() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label className="text-[10px] font-bold uppercase text-slate-400">Linked Supplier (Authorized Vendor)</Label>
+                  <Label className="text-[10px] font-bold uppercase text-slate-400">Authorized Vendor</Label>
                   <Select value={newItem.vendorId} onValueChange={v => setNewItem({...newItem, vendorId: v})}>
                     <SelectTrigger className="h-11 rounded-xl"><SelectValue placeholder="Assign Vendor" /></SelectTrigger>
                     <SelectContent className="bg-white">
@@ -289,6 +337,29 @@ export default function MaterialManagementPage() {
                 <div className="space-y-1.5">
                   <Label className="text-[10px] font-bold uppercase text-slate-400">Audit Notes</Label>
                   <Textarea value={newItem.notes} onChange={e => setNewItem({...newItem, notes: e.target.value})} placeholder="Log details, specifications or conditions..." className="min-h-[80px] rounded-xl" />
+                </div>
+
+                {/* Category Management in Dialog */}
+                <div className="p-5 bg-slate-50 dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 space-y-4 shadow-inner">
+                   <div className="space-y-1">
+                      <Label className="text-[9px] font-black uppercase text-accent tracking-widest flex items-center gap-2">
+                        <Settings2 className="w-3 h-3" /> Taxonomy Hub
+                      </Label>
+                      <p className="text-[8px] text-slate-400 font-bold uppercase">Define institutional material categories.</p>
+                   </div>
+                   <div className="flex gap-2">
+                      <Input 
+                        placeholder={editingCategoryIndex !== null ? "Updating..." : "New category..."} 
+                        value={editingCategoryIndex !== null ? editingCategoryValue : newCategoryLabel} 
+                        onChange={e => editingCategoryIndex !== null ? setEditingCategoryValue(e.target.value) : setNewCategoryLabel(e.target.value)}
+                        className="h-10 text-xs rounded-xl"
+                      />
+                      {editingCategoryIndex !== null ? (
+                        <Button onClick={handleUpdateCategory} size="sm" className="bg-emerald-600 text-white px-3 rounded-xl"><Check className="w-4 h-4"/></Button>
+                      ) : (
+                        <Button onClick={handleAddCategory} size="sm" className="bg-accent text-primary px-3 rounded-xl" disabled={!newCategoryLabel.trim()}><Plus className="w-4 h-4"/></Button>
+                      )}
+                   </div>
                 </div>
               </div>
               <DialogFooter>
@@ -307,7 +378,7 @@ export default function MaterialManagementPage() {
                onClick={() => setCategoryFilter('All')}
                className={cn("h-8 px-4 rounded-lg text-[10px] font-black uppercase transition-all", categoryFilter === 'All' ? "bg-accent text-primary shadow-sm" : "text-slate-500")}
              >All</Button>
-             {categories.slice(0, 3).map(c => (
+             {categories.slice(0, 4).map(c => (
                <Button 
                 key={c}
                 variant={categoryFilter === c ? 'default' : 'ghost'} 
@@ -393,7 +464,7 @@ export default function MaterialManagementPage() {
                 ))}
                 {filtered.length === 0 && (
                   <div className="text-center py-32 bg-white dark:bg-slate-900 rounded-[3rem] border-4 border-dashed border-slate-100 opacity-40">
-                     <Boxes className="w-20 h-20 text-slate-200 mx-auto mb-6" />
+                     <Box className="w-20 h-20 text-slate-200 mx-auto mb-6" />
                      <p className="text-lg font-headline font-bold text-slate-400">No active materials identified in the current filter.</p>
                   </div>
                 )}
@@ -438,5 +509,3 @@ export default function MaterialManagementPage() {
     </main>
   )
 }
-
-import { Boxes } from 'lucide-react'
