@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo, useState } from 'react';
@@ -198,6 +197,11 @@ export function PublicFooter() {
                   className="text-[#CEFF00] hover:text-white transition-colors font-bold flex items-center gap-2 leading-tight text-left"
                 >
                   Official Kit & Asset Management <Package className="w-3.5 h-3.5" />
+                </Link>
+              </li>
+              <li>
+                <Link href="/legal/quotation-format" className="text-[#CEFF00] hover:text-white transition-colors font-medium leading-tight">
+                  Supplier Quotation Format
                 </Link>
               </li>
               <li>

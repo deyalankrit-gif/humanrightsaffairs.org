@@ -35,6 +35,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/legal/official-representation',
     '/legal/required-documents',
     '/legal/resolution-format',
+    '/legal/quotation-format',
   ]
 
   return routes.map((route) => ({
