@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useEffect } from 'react'
@@ -41,9 +42,23 @@ import {
 import { cn } from '@/lib/utils'
 
 /**
+ * Account Head Mapping: Defines relevant fiscal accounts per voucher type.
+ */
+const ACCOUNT_HEADS_MAP: Record<string, string[]> = {
+  "Receipt Voucher": ["Grants", "Subsidies", "Interest Income", "General Receipts", "Other Income"],
+  "Payment Voucher": ["Office Rent", "Electricity", "Salaries", "Legal Fees", "Travel", "Maintenance", "Utility Bills"],
+  "Journal Voucher": ["Depreciation", "Accrued Expenses", "Outstanding Liabilities", "Pre-paid Assets", "Adjustment"],
+  "Contra Voucher": ["Cash to Bank", "Bank to Cash", "Bank to Bank Transfer"],
+  "Donation Voucher": ["General Donation", "Corpus Fund", "80G Donation", "CSR Contribution"],
+  "Membership Fee Voucher": ["Annual Membership", "Life Membership", "Volunteer Registration", "Renewal Fee"],
+  "Expense Voucher": ["Stationery", "Printing", "Food & Lodging", "Event Logistics", "Relief Aid"],
+  "Advance Voucher": ["Staff Advance", "Vendor Advance", "Travel Advance"],
+  "Refund Voucher": ["Membership Refund", "Excess Fee Refund", "Security Deposit Refund"]
+};
+
+/**
  * NewVoucherPage: Terminal for generating official financial instruments.
- * Features: Real-time amount-to-words conversion, auto-ID generation, and ledger sync.
- * Updated: Included dynamic fields for Bank, UPI, Cheque, and Card details.
+ * Features: Dynamic Account Heads, real-time amount-to-words, and ledger sync.
  */
 export default function NewVoucherPage() {
   const { user, loading: authLoading } = useUser()
@@ -67,7 +82,7 @@ export default function NewVoucherPage() {
       address: ''
     },
     amount: '',
-    accountHead: 'Project Expenses',
+    accountHead: 'Salaries',
     paymentMethod: 'Bank Transfer',
     bankName: '',
     accountNo: '',
@@ -76,6 +91,14 @@ export default function NewVoucherPage() {
     cardLast4: '',
     narration: ''
   })
+
+  // Sync account head whenever category changes
+  useEffect(() => {
+    const availableHeads = ACCOUNT_HEADS_MAP[formData.type] || [];
+    if (availableHeads.length > 0 && !availableHeads.includes(formData.accountHead)) {
+      setFormData(prev => ({ ...prev, accountHead: availableHeads[0] }));
+    }
+  }, [formData.type]);
 
   useEffect(() => {
     if (!authLoading && !user) router.push('/internal/login')
@@ -148,6 +171,8 @@ export default function NewVoucherPage() {
       </div>
     )
   }
+
+  const currentAvailableHeads = ACCOUNT_HEADS_MAP[formData.type] || [];
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-20">
@@ -258,8 +283,8 @@ export default function NewVoucherPage() {
                    <Label className="text-[10px] font-bold uppercase text-slate-400">Account Head</Label>
                    <Select value={formData.accountHead} onValueChange={v => setFormData({...formData, accountHead: v})}>
                      <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
-                     <SelectContent position="popper" className="z-[1000001] bg-white">
-                        {['Salaries', 'Rent', 'Project Expenses', 'Legal Aid', 'Relief Funds', 'Other'].map(h => <SelectItem key={h} value={h}>{h}</SelectItem>)}
+                     <SelectContent position="popper" className="z-[1000001] bg-white max-h-60 overflow-y-auto">
+                        {currentAvailableHeads.map(h => <SelectItem key={h} value={h}>{h}</SelectItem>)}
                      </SelectContent>
                    </Select>
                  </div>
@@ -331,7 +356,7 @@ export default function NewVoucherPage() {
                   <div className="grid md:grid-cols-2 gap-6">
                     <div className="space-y-1.5">
                       <Label className="text-[10px] font-bold uppercase text-emerald-600 flex items-center gap-2">
-                        <CreditCard className="w-3 h-3" /> Card Last 4 Digits
+                        <CreditCard className="w-4 h-4" /> Card Last 4 Digits
                       </Label>
                       <Input value={formData.cardLast4} onChange={e => setFormData({...formData, cardLast4: e.target.value})} placeholder="XXXX" maxLength={4} className="h-10 rounded-xl font-mono" />
                     </div>
