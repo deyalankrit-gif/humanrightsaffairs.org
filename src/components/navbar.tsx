@@ -58,7 +58,7 @@ export function Navbar() {
 
   return (
     <header className={cn(
-      "flex h-14 md:h-16 shrink-0 items-center transition-all duration-500 z-[100] overflow-visible",
+      "flex h-14 md:h-16 shrink-0 items-center transition-all duration-500 z-[100] overflow-visible print:hidden",
       scrolled 
         ? "fixed top-3 left-1/2 -translate-x-1/2 w-[95%] md:w-[90%] max-w-7xl rounded-full bg-background/70 backdrop-blur-xl border border-white/20 shadow-2xl px-4 md:px-6" 
         : "sticky top-0 w-full px-2 md:px-4 bg-background border-b"
