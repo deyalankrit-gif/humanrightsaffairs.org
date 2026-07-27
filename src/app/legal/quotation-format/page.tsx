@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState } from 'react'
@@ -24,7 +23,7 @@ import { useToast } from '@/hooks/use-toast'
  * SupplierQuotationPage: High-fidelity interactive template for vendor quotes.
  * Optimized for F4 size printing (210mm x 330mm) with absolute minimum margins.
  * Features a Live Editor for administrative personnel.
- * Updated: Increased row height in the quotation registry for better legibility.
+ * Updated: Significantly increased row height in the quotation registry for better legibility.
  */
 export default function SupplierQuotationPage() {
   const { toast } = useToast()
@@ -261,13 +260,13 @@ Conditions:
                           <tbody>
                              {[1, 2, 3, 4, 5].map((idx) => (
                                <tr key={idx} className="text-[11px]">
-                                  <td className="border border-slate-200 dark:border-slate-800 py-4 px-2 text-center print:border-black">{idx}</td>
-                                  <td className="border border-slate-200 dark:border-slate-800 py-4 px-2 print:border-black"><Fillable name={`item${idx}`} placeholder="---" className="w-full font-normal text-[11px]" /></td>
-                                  <td className="border border-slate-200 dark:border-slate-800 py-4 px-2 print:border-black"><Fillable name={`spec${idx}`} placeholder="---" className="w-full font-normal text-[11px]" /></td>
-                                  <td className="border border-slate-200 dark:border-slate-800 py-4 px-2 print:border-black text-center"><Fillable name={`qty${idx}`} placeholder="0" className="w-full text-center font-normal text-[11px]" /></td>
-                                  <td className="border border-slate-200 dark:border-slate-800 py-4 px-2 print:border-black text-center"><Fillable name={`unit${idx}`} placeholder="---" className="w-full text-center font-normal text-[11px]" /></td>
-                                  <td className="border border-slate-200 dark:border-slate-800 py-4 px-2 print:border-black text-right"><Fillable name={`rate${idx}`} placeholder="0.00" className="w-full text-right font-normal text-[11px]" /></td>
-                                  <td className="border border-slate-200 dark:border-slate-800 py-4 px-2 print:border-black text-right"><Fillable name={`total${idx}`} placeholder="0.00" className="w-full text-right font-normal text-[11px]" /></td>
+                                  <td className="border border-slate-200 dark:border-slate-800 py-10 px-2 text-center print:border-black">{idx}</td>
+                                  <td className="border border-slate-200 dark:border-slate-800 py-10 px-2 print:border-black"><Fillable name={`item${idx}`} placeholder="---" className="w-full font-normal text-[11px]" /></td>
+                                  <td className="border border-slate-200 dark:border-slate-800 py-10 px-2 print:border-black"><Fillable name={`spec${idx}`} placeholder="---" className="w-full font-normal text-[11px]" /></td>
+                                  <td className="border border-slate-200 dark:border-slate-800 py-10 px-2 print:border-black text-center"><Fillable name={`qty${idx}`} placeholder="0" className="w-full text-center font-normal text-[11px]" /></td>
+                                  <td className="border border-slate-200 dark:border-slate-800 py-10 px-2 print:border-black text-center"><Fillable name={`unit${idx}`} placeholder="---" className="w-full text-center font-normal text-[11px]" /></td>
+                                  <td className="border border-slate-200 dark:border-slate-800 py-10 px-2 print:border-black text-right"><Fillable name={`rate${idx}`} placeholder="0.00" className="w-full text-right font-normal text-[11px]" /></td>
+                                  <td className="border border-slate-200 dark:border-slate-800 py-10 px-2 print:border-black text-right"><Fillable name={`total${idx}`} placeholder="0.00" className="w-full text-right font-normal text-[11px]" /></td>
                                </tr>
                              ))}
                           </tbody>
