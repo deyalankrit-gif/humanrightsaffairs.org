@@ -593,7 +593,7 @@ export default function MaterialManagementPage() {
                        <div className="flex-1 p-8 flex flex-col lg:flex-row items-center justify-between gap-8">
                           <div className="space-y-2 flex-1 min-w-0">
                              <div className="flex items-center gap-2">
-                                <h3 className="text-2xl font-bold text-primary dark:text-white leading-tight truncate">{item.name}</h3>
+                                <h3 className="text-xl font-bold text-primary dark:text-white leading-tight truncate">{item.name}</h3>
                                 <Badge className="bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400 text-[8px] font-mono h-4">{item.sku}</Badge>
                              </div>
                              <div className="flex flex-wrap gap-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
