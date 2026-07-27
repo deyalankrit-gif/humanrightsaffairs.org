@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useEffect } from 'react'
@@ -280,7 +279,7 @@ export default function NewVoucherPage() {
                    <Input type="number" value={formData.amount} onChange={e => setFormData({...formData, amount: e.target.value})} className="h-11 rounded-xl text-lg font-black" required />
                  </div>
                  <div className="space-y-1.5">
-                   <Label className="text-[10px] font-black uppercase text-emerald-600">Account Head *</Label>
+                   <Label className="text-[10px] font-black uppercase text-emerald-600">Account Head (As per Voucher category) *</Label>
                    <Select value={formData.accountHead} onValueChange={v => setFormData({...formData, accountHead: v})}>
                      <SelectTrigger className="h-11 rounded-xl border-emerald-100 font-black text-emerald-600"><SelectValue /></SelectTrigger>
                      <SelectContent position="popper" className="z-[1000001] bg-white max-h-60 overflow-y-auto">

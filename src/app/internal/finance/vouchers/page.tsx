@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState } from 'react'
@@ -229,7 +228,7 @@ export default function VoucherHub() {
                </div>
 
                <div className="space-y-1.5">
-                  <Label className="text-[10px] font-black uppercase text-emerald-600">Account Head *</Label>
+                  <Label className="text-[10px] font-black uppercase text-emerald-600">Account Head (As per Voucher category) *</Label>
                   <Select value={formData.account} onValueChange={v => setFormData({...formData, account: v})}>
                     <SelectTrigger className="h-11 rounded-xl bg-slate-50 dark:bg-slate-950 border-emerald-100 font-black text-emerald-600"><SelectValue /></SelectTrigger>
                     <SelectContent className="bg-white">
