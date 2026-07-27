@@ -27,6 +27,7 @@ import { useToast } from '@/hooks/use-toast'
  * Updated: Included specific institutional contact info in header.
  * Link refinement: Website link made larger and red.
  * Optimization: Compacted to 2 pages by reducing row height to py-12.
+ * Print Refinement: Added thick top border for print output as requested.
  */
 export default function SupplierQuotationPage() {
   const { toast } = useToast()
@@ -183,7 +184,7 @@ Conditions:
         <div className="container mx-auto print:max-w-none print:p-0 print:m-0">
           <div className="max-w-4xl mx-auto print:max-w-none print:m-0 print:p-0">
             
-            <Card className="rounded-[2.5rem] border-none shadow-2xl overflow-hidden bg-white dark:bg-slate-900 relative print:shadow-none print:rounded-none print:bg-white print:text-black print:p-0 print:w-full">
+            <Card className="rounded-[2.5rem] border-none shadow-2xl overflow-hidden bg-white dark:bg-slate-900 relative print:shadow-none print:rounded-none print:bg-white print:text-black print:p-0 print:w-full print:border-t-8 print:border-accent">
                <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-16 -mt-16 print:hidden"></div>
                <div className="absolute top-0 left-0 w-1.5 h-full bg-accent print:hidden"></div>
                
@@ -299,7 +300,7 @@ Conditions:
                         <span className="font-bold text-[9px] uppercase text-slate-400 print:text-black">GST:</span>
                         <div className="flex items-baseline gap-1 border-b border-slate-200 print:border-black">
                            <span className="font-bold text-[10px]">₹</span>
-                           <Fillable name="gstAmount" placeholder="0.00" className="w-28 text-right text-[10px]" />
+                           <Fillable name="subtotal_gst" placeholder="0.00" className="w-28 text-right text-[10px]" />
                         </div>
                      </div>
                      <div className="flex gap-4 items-baseline">
