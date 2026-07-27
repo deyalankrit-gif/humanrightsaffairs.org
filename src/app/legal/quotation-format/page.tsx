@@ -260,13 +260,13 @@ Conditions:
                           <tbody>
                              {[1, 2, 3, 4, 5].map((idx) => (
                                <tr key={idx} className="text-[11px]">
-                                  <td className="border border-slate-200 dark:border-slate-800 py-10 px-2 text-center print:border-black">{idx}</td>
-                                  <td className="border border-slate-200 dark:border-slate-800 py-10 px-2 print:border-black"><Fillable name={`item${idx}`} placeholder="---" className="w-full font-normal text-[11px]" /></td>
-                                  <td className="border border-slate-200 dark:border-slate-800 py-10 px-2 print:border-black"><Fillable name={`spec${idx}`} placeholder="---" className="w-full font-normal text-[11px]" /></td>
-                                  <td className="border border-slate-200 dark:border-slate-800 py-10 px-2 print:border-black text-center"><Fillable name={`qty${idx}`} placeholder="0" className="w-full text-center font-normal text-[11px]" /></td>
-                                  <td className="border border-slate-200 dark:border-slate-800 py-10 px-2 print:border-black text-center"><Fillable name={`unit${idx}`} placeholder="---" className="w-full text-center font-normal text-[11px]" /></td>
-                                  <td className="border border-slate-200 dark:border-slate-800 py-10 px-2 print:border-black text-right"><Fillable name={`rate${idx}`} placeholder="0.00" className="w-full text-right font-normal text-[11px]" /></td>
-                                  <td className="border border-slate-200 dark:border-slate-800 py-10 px-2 print:border-black text-right"><Fillable name={`total${idx}`} placeholder="0.00" className="w-full text-right font-normal text-[11px]" /></td>
+                                  <td className="border border-slate-200 dark:border-slate-800 py-16 px-2 text-center print:border-black">{idx}</td>
+                                  <td className="border border-slate-200 dark:border-slate-800 py-16 px-2 print:border-black"><Fillable name={`item${idx}`} placeholder="---" className="w-full font-normal text-[11px]" /></td>
+                                  <td className="border border-slate-200 dark:border-slate-800 py-16 px-2 print:border-black"><Fillable name={`spec${idx}`} placeholder="---" className="w-full font-normal text-[11px]" /></td>
+                                  <td className="border border-slate-200 dark:border-slate-800 py-16 px-2 print:border-black text-center"><Fillable name={`qty${idx}`} placeholder="0" className="w-full text-center font-normal text-[11px]" /></td>
+                                  <td className="border border-slate-200 dark:border-slate-800 py-16 px-2 print:border-black text-center"><Fillable name={`unit${idx}`} placeholder="---" className="w-full text-center font-normal text-[11px]" /></td>
+                                  <td className="border border-slate-200 dark:border-slate-800 py-16 px-2 print:border-black text-right"><Fillable name={`rate${idx}`} placeholder="0.00" className="w-full text-right font-normal text-[11px]" /></td>
+                                  <td className="border border-slate-200 dark:border-slate-800 py-16 px-2 print:border-black text-right"><Fillable name={`total${idx}`} placeholder="0.00" className="w-full text-right font-normal text-[11px]" /></td>
                                </tr>
                              ))}
                           </tbody>
@@ -399,7 +399,7 @@ Conditions:
                     </div>
                   </div>
 
-                  {/* Conditions Section */}
+                  {/* Important Conditions Section */}
                   <div className="space-y-2 pt-4 border-t border-slate-100 print:border-black print:pt-2 print:mt-1">
                     <h4 className="font-bold text-primary dark:text-accent border-l-4 border-accent pl-3 uppercase text-[9px] tracking-widest print:text-black print:border-black">Important Conditions</h4>
                     <ol className="list-decimal pl-6 space-y-1 text-[9px] font-medium text-slate-500 print:text-black print:pl-4 print:space-y-0.5">
