@@ -2,8 +2,8 @@
 
 import React, { useEffect, useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import { useUser, useCollection, useFirestore, useMemoFirebase } from '@/firebase'
-import { collection, query, orderBy, addDoc, deleteDoc, doc, updateDoc, serverTimestamp } from 'firebase/firestore'
+import { useUser, useCollection, useFirestore, useMemoFirebase, useDoc } from '@/firebase'
+import { collection, query, orderBy, addDoc, deleteDoc, doc, updateDoc, setDoc, serverTimestamp } from 'firebase/firestore'
 import { Footer } from '@/components/footer'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -33,8 +33,8 @@ import {
   X,
   PlusCircle,
   MinusCircle,
-  Save,
-  CheckCircle2
+  Settings2,
+  Check
 } from 'lucide-react'
 import {
   Dialog,
@@ -65,7 +65,7 @@ type Material = {
   createdAt: any
 }
 
-const CATEGORIES = ["Stationery", "Relief Kits", "Advocacy Manuals", "Electronics", "Uniforms", "Medical Supplies", "Other"];
+const DEFAULT_CATEGORIES = ["Stationery", "Relief Kits", "Advocacy Manuals", "Electronics", "Uniforms", "Medical Supplies", "Other"];
 const UNITS = ["pcs", "kg", "liters", "packs", "boxes", "meters"];
 
 export default function MaterialManagementPage() {
@@ -81,6 +81,11 @@ export default function MaterialManagementPage() {
   const [selectedMaterial, setSelectedMaterial] = useState<Material | null>(null)
   const [adjustmentMode, setAdjustmentMode] = useState<'Inflow' | 'Outflow' | null>(null)
   const [adjustmentAmount, setAdjustmentAmount] = useState('0')
+
+  // Taxonomy Management States
+  const [newCategoryLabel, setNewCategoryLabel] = useState('')
+  const [editingCategoryIndex, setEditingCategoryIndex] = useState<number | null>(null)
+  const [editingCategoryValue, setEditingCategoryValue] = useState('')
 
   const [newItem, setNewItem] = useState({
     name: '',
@@ -99,12 +104,68 @@ export default function MaterialManagementPage() {
     }
   }, [user, authLoading, router])
 
+  // Taxonomy Source
+  const settingsRef = useMemoFirebase(() => {
+    if (!db) return null;
+    return doc(db, 'materials', 'settings');
+  }, [db]);
+
+  const { data: settingsData } = useDoc(settingsRef);
+
+  const materialCategories = useMemo(() => {
+    const custom = (settingsData as any)?.customCategories || [];
+    return Array.from(new Set([...DEFAULT_CATEGORIES, ...custom]));
+  }, [settingsData]);
+
   const materialsQuery = useMemoFirebase(() => {
     if (!db || !user) return null;
     return query(collection(db, 'materials'), orderBy('createdAt', 'desc'));
   }, [db, user]);
 
   const { data: materials, loading: dataLoading } = useCollection(materialsQuery);
+
+  const handleAddCategory = async () => {
+    if (!newCategoryLabel.trim() || !settingsRef) return;
+    const label = newCategoryLabel.trim();
+    if (materialCategories.includes(label)) {
+      toast({ variant: "destructive", title: "Duplicate Category", description: "This category already exists in the registry." });
+      return;
+    }
+    const updatedCustom = [...((settingsData as any)?.customCategories || []), label];
+    try {
+      await setDoc(settingsRef, { customCategories: updatedCustom, updatedAt: serverTimestamp() }, { merge: true });
+      setNewCategoryLabel('');
+      toast({ title: "Category Established" });
+    } catch (e) {
+      toast({ variant: "destructive", title: "Update Failed" });
+    }
+  }
+
+  const handleUpdateCategory = async () => {
+    if (editingCategoryIndex === null || !editingCategoryValue.trim() || !settingsRef) return;
+    const updatedCustom = [...((settingsData as any)?.customCategories || [])];
+    updatedCustom[editingCategoryIndex] = editingCategoryValue.trim();
+    try {
+      await setDoc(settingsRef, { customCategories: updatedCustom, updatedAt: serverTimestamp() }, { merge: true });
+      setEditingCategoryIndex(null);
+      setEditingCategoryValue('');
+      toast({ title: "Category Updated" });
+    } catch (e) {
+      toast({ variant: "destructive", title: "Update Failed" });
+    }
+  }
+
+  const handleDeleteCategory = async (idx: number) => {
+    if (!settingsRef) return;
+    const updatedCustom = [...((settingsData as any)?.customCategories || [])];
+    updatedCustom.splice(idx, 1);
+    try {
+      await setDoc(settingsRef, { customCategories: updatedCustom, updatedAt: serverTimestamp() }, { merge: true });
+      toast({ title: "Category Purged" });
+    } catch (e) {
+      toast({ variant: "destructive", title: "Delete Failed" });
+    }
+  }
 
   const handleAddItem = async () => {
     if (!db) return;
@@ -227,8 +288,8 @@ export default function MaterialManagementPage() {
                       <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Category</Label>
                       <Select value={newItem.category} onValueChange={(val: any) => setNewItem({...newItem, category: val})}>
                         <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
-                        <SelectContent position="popper" className="z-[1000001] bg-white">
-                          {CATEGORIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                        <SelectContent position="popper" className="z-[1000001] bg-white max-h-60 overflow-y-auto">
+                          {materialCategories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                         </SelectContent>
                       </Select>
                     </div>
@@ -269,6 +330,82 @@ export default function MaterialManagementPage() {
                     <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Internal Audit Notes</Label>
                     <Textarea value={newItem.notes} onChange={e => setNewItem({...newItem, notes: e.target.value})} placeholder="Condition or specific deployment details..." className="rounded-xl min-h-[80px]" />
                   </div>
+
+                  {/* Taxonomy Management Hub */}
+                  <div className="p-5 bg-slate-50 dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 space-y-5 shadow-inner mt-4">
+                    <div className="space-y-1">
+                      <Label className="text-[9px] font-black uppercase text-accent tracking-[0.15em] flex items-center gap-2">
+                        <Settings2 className="w-3 h-3" /> Taxonomy Management Hub
+                      </Label>
+                      <p className="text-[8px] text-slate-400 font-bold uppercase leading-tight">Define, modify or purge institutional logistical categories.</p>
+                    </div>
+                    
+                    <div className="flex gap-2">
+                       <div className="relative flex-1">
+                          <Input 
+                            placeholder={editingCategoryIndex !== null ? "Updating label..." : "New category name..."} 
+                            value={editingCategoryIndex !== null ? editingCategoryValue : newCategoryLabel} 
+                            onChange={e => editingCategoryIndex !== null ? setEditingCategoryValue(e.target.value) : setNewCategoryLabel(e.target.value)}
+                            className={cn(
+                              "h-10 text-xs rounded-xl bg-white dark:bg-slate-950",
+                              editingCategoryIndex !== null ? "border-emerald-500 ring-1 ring-emerald-500/20" : "border-slate-200"
+                            )}
+                            onKeyDown={e => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault();
+                                editingCategoryIndex !== null ? handleUpdateCategory() : handleAddCategory();
+                              }
+                            }}
+                          />
+                          {editingCategoryIndex !== null && (
+                            <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                               <Badge className="bg-emerald-500 text-[6px] font-black h-4 uppercase">Edit Mode</Badge>
+                            </div>
+                          )}
+                       </div>
+                       
+                       {editingCategoryIndex !== null ? (
+                         <div className="flex gap-1 shrink-0">
+                           <button onClick={handleUpdateCategory} className="h-10 w-10 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 flex items-center justify-center shadow-sm"><Check className="w-4 h-4"/></button>
+                           <button onClick={() => { setEditingCategoryIndex(null); setEditingCategoryValue(''); }} className="h-10 w-10 rounded-xl bg-slate-200 text-slate-500 hover:bg-slate-300 flex items-center justify-center"><X className="w-4 h-4"/></button>
+                         </div>
+                       ) : (
+                         <Button onClick={handleAddCategory} size="sm" className="h-10 px-4 rounded-xl bg-accent text-primary font-bold shadow-sm" disabled={!newCategoryLabel.trim()}>
+                           <Plus className="w-4 h-4" />
+                         </Button>
+                       )}
+                    </div>
+
+                    <div className="flex flex-wrap gap-2 pt-1">
+                       {((settingsData as any)?.customCategories || []).map((cat: string, idx: number) => (
+                         <Badge key={idx} variant="outline" className={cn(
+                           "text-[9px] font-bold px-3 py-1 flex items-center gap-2 h-8 rounded-xl shadow-sm transition-all group",
+                           editingCategoryIndex === idx ? "border-emerald-500 bg-emerald-50 text-emerald-700" : "border-slate-200 bg-white dark:bg-slate-800 hover:border-accent"
+                         )}>
+                           <span>{cat}</span>
+                           <div className="flex items-center gap-1 opacity-40 group-hover:opacity-100 transition-opacity">
+                              <button 
+                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); setEditingCategoryIndex(idx); setEditingCategoryValue(cat); }} 
+                                className="hover:text-blue-600 transition-colors"
+                              >
+                                <Edit className="w-3 h-3"/>
+                              </button>
+                              <button 
+                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleDeleteCategory(idx); }} 
+                                className="hover:text-red-600 transition-colors"
+                              >
+                                <Trash2 className="w-3 h-3"/>
+                              </button>
+                           </div>
+                         </Badge>
+                       ))}
+                       {(!settingsData || !((settingsData as any)?.customCategories?.length)) && (
+                         <div className="w-full text-center py-4 bg-white/40 dark:bg-slate-950/20 rounded-2xl border-2 border-dashed border-slate-100 dark:border-slate-800">
+                           <p className="text-[8px] text-slate-400 font-bold uppercase tracking-widest italic">No custom logistical categories defined.</p>
+                         </div>
+                       )}
+                    </div>
+                 </div>
                 </div>
 
                 <DialogFooter>
@@ -330,10 +467,10 @@ export default function MaterialManagementPage() {
 
       <section className="py-6 border-b bg-white dark:bg-slate-900 sticky top-10 z-30 shadow-sm transition-colors">
         <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
-           <div className="flex gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
-              <button onClick={() => setCategoryFilter('All')} className={cn("px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all", categoryFilter === 'All' ? "bg-accent text-primary shadow-md" : "text-slate-500 hover:bg-slate-200")}>All</button>
-              {CATEGORIES.slice(0, 3).map(cat => (
-                <button key={cat} onClick={() => setCategoryFilter(cat)} className={cn("px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all", categoryFilter === cat ? "bg-accent text-primary shadow-md" : "text-slate-500 hover:bg-slate-200")}>{cat}</button>
+           <div className="flex gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl overflow-x-auto no-scrollbar">
+              <button onClick={() => setCategoryFilter('All')} className={cn("px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all whitespace-nowrap", categoryFilter === 'All' ? "bg-accent text-primary shadow-md" : "text-slate-500 hover:bg-slate-200")}>All</button>
+              {materialCategories.slice(0, 6).map(cat => (
+                <button key={cat} onClick={() => setCategoryFilter(cat)} className={cn("px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all whitespace-nowrap", categoryFilter === cat ? "bg-accent text-primary shadow-md" : "text-slate-500 hover:bg-slate-200")}>{cat}</button>
               ))}
            </div>
            <div className="relative w-full max-w-lg">
