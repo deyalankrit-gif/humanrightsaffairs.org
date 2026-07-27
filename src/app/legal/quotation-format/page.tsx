@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState } from 'react'
@@ -24,11 +23,7 @@ import { useToast } from '@/hooks/use-toast'
  * SupplierQuotationPage: High-fidelity interactive template for vendor quotes.
  * Optimized for F4 size printing (210mm x 330mm) with absolute minimum margins.
  * Features a Live Editor for administrative personnel.
- * Updated: Included specific institutional contact info in header.
- * Link refinement: Website link made larger and red.
- * Optimization: Compacted to 2 pages by reducing row height to py-12.
- * Print Refinement: Added thick top border for print output as requested.
- * Header Refinement: Moved the separator mark to appear ABOVE the title text.
+ * Updated: Removed serial number 5 row to compact the layout.
  */
 export default function SupplierQuotationPage() {
   const { toast } = useToast()
@@ -42,7 +37,7 @@ export default function SupplierQuotationPage() {
     email: '',
     gstNo: '',
     subtotal: '',
-    gstAmount: '',
+    subtotal_gst: '',
     freight: '',
     otherCharges: '',
     grandTotal: '',
@@ -73,7 +68,7 @@ export default function SupplierQuotationPage() {
 
   const handleCopy = () => {
     const tableHeader = "Sl.|Description|Spec|Qty|Unit|Rate|Total\n"
-    const tableBody = [1,2,3,4,5].map(i => `${i}|--- |--- |0 |--- |0 |0`).join('\n')
+    const tableBody = [1,2,3,4].map(i => `${i}|--- |--- |0 |--- |0 |0`).join('\n')
     
     const text = `
 HUMAN RIGHTS AFFAIRS TRUST
@@ -143,7 +138,7 @@ Conditions:
         <div className="absolute top-0 right-0 w-1/2 h-full bg-accent/5 -skew-x-12"></div>
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-4xl mx-auto">
-            <Link href="/" className="inline-flex items-center gap-2 text-accent font-bold text-xs uppercase tracking-[0.2em] mb-6 hover:translate-x-[-4px] transition-transform">
+            <Link href="/trust-responsibilities" className="inline-flex items-center gap-2 text-accent font-bold text-xs uppercase tracking-[0.2em] mb-6 hover:translate-x-[-4px] transition-transform">
               <ArrowLeft className="w-4 h-4" /> Back to Portal
             </Link>
             <div className="flex items-center gap-4 mb-4">
@@ -185,7 +180,7 @@ Conditions:
         <div className="container mx-auto print:max-w-none print:p-0 print:m-0">
           <div className="max-w-4xl mx-auto print:max-w-none print:m-0 print:p-0">
             
-            <Card className="rounded-[2.5rem] border-none shadow-2xl overflow-hidden bg-white dark:bg-slate-900 relative print:shadow-none print:rounded-none print:bg-white print:text-black print:p-0 print:w-full print:border-t-8 print:border-accent">
+            <Card className="rounded-[2.5rem] border-none shadow-2xl overflow-hidden bg-white dark:bg-slate-900 relative print:shadow-none print:rounded-none print:bg-white print:text-black print:p-0 print:w-full">
                <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-16 -mt-16 print:hidden"></div>
                <div className="absolute top-0 left-0 w-1.5 h-full bg-accent print:hidden"></div>
                
@@ -272,7 +267,7 @@ Conditions:
                              </tr>
                           </thead>
                           <tbody>
-                             {[1, 2, 3, 4, 5].map((idx) => (
+                             {[1, 2, 3, 4].map((idx) => (
                                <tr key={idx} className="text-[11px]">
                                   <td className="border border-slate-200 dark:border-slate-800 py-12 px-2 text-center print:border-black">{idx}</td>
                                   <td className="border border-slate-200 dark:border-slate-800 py-12 px-2 print:border-black"><Fillable name={`item${idx}`} placeholder="---" className="w-full font-normal text-[11px]" /></td>
