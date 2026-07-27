@@ -24,6 +24,7 @@ import { useToast } from '@/hooks/use-toast'
  * SupplierQuotationPage: High-fidelity interactive template for vendor quotes.
  * Optimized for F4 size printing (210mm x 330mm) with absolute minimum margins.
  * Features a Live Editor for administrative personnel.
+ * Updated: Increased row height in the quotation registry for better legibility.
  */
 export default function SupplierQuotationPage() {
   const { toast } = useToast()
@@ -248,25 +249,25 @@ Conditions:
                        <table className="w-full border-collapse border border-slate-200 dark:border-slate-800 print:border-black">
                           <thead className="bg-slate-50 dark:bg-slate-900 print:bg-transparent">
                              <tr className="text-[9px] font-black uppercase tracking-tighter">
-                                <th className="border border-slate-200 dark:border-slate-800 p-1 print:border-black w-8">Sl.</th>
-                                <th className="border border-slate-200 dark:border-slate-800 p-1 print:border-black text-left">Item Description</th>
-                                <th className="border border-slate-200 dark:border-slate-800 p-1 print:border-black text-left">Specification</th>
-                                <th className="border border-slate-200 dark:border-slate-800 p-1 print:border-black text-center w-10">Qty.</th>
-                                <th className="border border-slate-200 dark:border-slate-800 p-1 print:border-black text-center w-10">Unit</th>
-                                <th className="border border-slate-200 dark:border-slate-800 p-1 print:border-black text-right w-20">Rate (₹)</th>
-                                <th className="border border-slate-200 dark:border-slate-800 p-1 print:border-black text-right w-24">Total (₹)</th>
+                                <th className="border border-slate-200 dark:border-slate-800 p-4 print:border-black w-8">Sl.</th>
+                                <th className="border border-slate-200 dark:border-slate-800 p-4 print:border-black text-left">Item Description</th>
+                                <th className="border border-slate-200 dark:border-slate-800 p-4 print:border-black text-left">Specification</th>
+                                <th className="border border-slate-200 dark:border-slate-800 p-4 print:border-black text-center w-10">Qty.</th>
+                                <th className="border border-slate-200 dark:border-slate-800 p-4 print:border-black text-center w-10">Unit</th>
+                                <th className="border border-slate-200 dark:border-slate-800 p-4 print:border-black text-right w-20">Rate (₹)</th>
+                                <th className="border border-slate-200 dark:border-slate-800 p-4 print:border-black text-right w-24">Total (₹)</th>
                              </tr>
                           </thead>
                           <tbody>
                              {[1, 2, 3, 4, 5].map((idx) => (
                                <tr key={idx} className="text-[11px]">
-                                  <td className="border border-slate-200 dark:border-slate-800 p-1 text-center print:border-black">{idx}</td>
-                                  <td className="border border-slate-200 dark:border-slate-800 p-1 print:border-black"><Fillable name={`item${idx}`} placeholder="---" className="w-full font-normal text-[11px]" /></td>
-                                  <td className="border border-slate-200 dark:border-slate-800 p-1 print:border-black"><Fillable name={`spec${idx}`} placeholder="---" className="w-full font-normal text-[11px]" /></td>
-                                  <td className="border border-slate-200 dark:border-slate-800 p-1 print:border-black text-center"><Fillable name={`qty${idx}`} placeholder="0" className="w-full text-center font-normal text-[11px]" /></td>
-                                  <td className="border border-slate-200 dark:border-slate-800 p-1 print:border-black text-center"><Fillable name={`unit${idx}`} placeholder="---" className="w-full text-center font-normal text-[11px]" /></td>
-                                  <td className="border border-slate-200 dark:border-slate-800 p-1 print:border-black text-right"><Fillable name={`rate${idx}`} placeholder="0.00" className="w-full text-right font-normal text-[11px]" /></td>
-                                  <td className="border border-slate-200 dark:border-slate-800 p-1 print:border-black text-right"><Fillable name={`total${idx}`} placeholder="0.00" className="w-full text-right font-normal text-[11px]" /></td>
+                                  <td className="border border-slate-200 dark:border-slate-800 py-4 px-2 text-center print:border-black">{idx}</td>
+                                  <td className="border border-slate-200 dark:border-slate-800 py-4 px-2 print:border-black"><Fillable name={`item${idx}`} placeholder="---" className="w-full font-normal text-[11px]" /></td>
+                                  <td className="border border-slate-200 dark:border-slate-800 py-4 px-2 print:border-black"><Fillable name={`spec${idx}`} placeholder="---" className="w-full font-normal text-[11px]" /></td>
+                                  <td className="border border-slate-200 dark:border-slate-800 py-4 px-2 print:border-black text-center"><Fillable name={`qty${idx}`} placeholder="0" className="w-full text-center font-normal text-[11px]" /></td>
+                                  <td className="border border-slate-200 dark:border-slate-800 py-4 px-2 print:border-black text-center"><Fillable name={`unit${idx}`} placeholder="---" className="w-full text-center font-normal text-[11px]" /></td>
+                                  <td className="border border-slate-200 dark:border-slate-800 py-4 px-2 print:border-black text-right"><Fillable name={`rate${idx}`} placeholder="0.00" className="w-full text-right font-normal text-[11px]" /></td>
+                                  <td className="border border-slate-200 dark:border-slate-800 py-4 px-2 print:border-black text-right"><Fillable name={`total${idx}`} placeholder="0.00" className="w-full text-right font-normal text-[11px]" /></td>
                                </tr>
                              ))}
                           </tbody>
@@ -371,11 +372,11 @@ Conditions:
                     <div className="relative z-10 space-y-4 print:space-y-2">
                        <h4 className="font-black uppercase tracking-[0.4em] text-[9px] text-accent text-center print:text-black">FOR OFFICE USE ONLY</h4>
                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-3 text-[11px] print:gap-y-1">
-                          <div className="flex gap-2"><span>Requisition No.:</span> <Fillable name="requisitionNo" placeholder="_______" className="flex-1 text-white border-white/30 print:text-black" /></div>
-                          <div className="flex gap-2"><span>Received Date:</span> <Fillable name="receivedDate" placeholder="_______" className="flex-1 text-white border-white/30 print:text-black" /></div>
-                          <div className="flex gap-2"><span>Verified By:</span> <Fillable name="verifiedBy" placeholder="_______" className="flex-1 text-white border-white/30 print:text-black" /></div>
+                          <div className="flex gap-2"><span>Purchase Requisition No.:</span> <Fillable name="requisitionNo" placeholder="_______" className="flex-1 text-white border-white/30 print:text-black" /></div>
+                          <div className="flex gap-2"><span>Quotation Received Date:</span> <Fillable name="receivedDate" placeholder="_______" className="flex-1 text-white border-white/30 print:text-black" /></div>
+                          <div className="flex gap-2"><span>Quotation Verified By:</span> <Fillable name="verifiedBy" placeholder="_______" className="flex-1 text-white border-white/30 print:text-black" /></div>
                           <div className="flex items-center gap-4">
-                             <span>Recommended:</span>
+                             <span>Recommended for Approval:</span>
                              <div className="flex gap-3 font-bold text-[10px]">
                                 <span>☐ Yes</span>
                                 <span>☐ No</span>
@@ -403,11 +404,11 @@ Conditions:
                   <div className="space-y-2 pt-4 border-t border-slate-100 print:border-black print:pt-2 print:mt-1">
                     <h4 className="font-bold text-primary dark:text-accent border-l-4 border-accent pl-3 uppercase text-[9px] tracking-widest print:text-black print:border-black">Important Conditions</h4>
                     <ol className="list-decimal pl-6 space-y-1 text-[9px] font-medium text-slate-500 print:text-black print:pl-4 print:space-y-0.5">
-                       <li>Quotation remains valid for at least 30 days.</li>
-                       <li>The Trust reserves the right to accept or reject any quotation without reason.</li>
-                       <li>Payment made only after satisfactory delivery and verification.</li>
-                       <li>All applicable taxes must be clearly mentioned.</li>
-                       <li>Delivery must adhere to the agreed timeline.</li>
+                       <li>This quotation shall remain valid for at least 30 days from the date of submission.</li>
+                       <li>The Trust reserves the right to accept or reject any quotation, wholly or partly, without assigning any reason.</li>
+                       <li>Payment shall be made only after satisfactory delivery and verification of the materials.</li>
+                       <li>Any applicable taxes must be clearly mentioned in the quotation.</li>
+                       <li>Delivery should be completed within the agreed time period.</li>
                     </ol>
                   </div>
 
