@@ -22,6 +22,7 @@
             "expenses": { "type": "boolean" },
             "applications": { "type": "boolean" },
             "inventory": { "type": "boolean" },
+            "materialManagement": { "type": "boolean", "description": "Access to the high-fidelity Material Management System." },
             "vendors": { "type": "boolean" },
             "grievances": { "type": "boolean" },
             "meetings": { "type": "boolean" },
@@ -35,13 +36,13 @@
             "donorWall": { "type": "boolean" },
             "publicComplaints": { "type": "boolean" },
             "kitManagement": { "type": "boolean" },
-            "financeDashboard": { "type": "boolean", "description": "Access to Financial Dashboard & Analytics." },
-            "financeLedger": { "type": "boolean", "description": "Access to General Ledger & Transactions." },
-            "financeVouchers": { "type": "boolean", "description": "Ability to create and approve vouchers." },
-            "financePayroll": { "type": "boolean", "description": "Management of employee salaries." },
-            "financeProjects": { "type": "boolean", "description": "Project-based accounting & fund utilization." },
-            "financeAssets": { "type": "boolean", "description": "Fixed asset management & depreciation." },
-            "financeCompliance": { "type": "boolean", "description": "Tax and statutory compliance records." }
+            "financeDashboard": { "type": "boolean" },
+            "financeLedger": { "type": "boolean" },
+            "financeVouchers": { "type": "boolean" },
+            "financePayroll": { "type": "boolean" },
+            "financeProjects": { "type": "boolean" },
+            "financeAssets": { "type": "boolean" },
+            "financeCompliance": { "type": "boolean" }
           }
         },
         "lastLogin": { "type": "string", "format": "date-time" },
@@ -51,9 +52,28 @@
       },
       "required": ["email", "permissions", "uid", "role"]
     },
+    "MaterialItem": {
+      "title": "Material Item",
+      "description": "Logistical asset or supply in the material management system.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "category": { "type": "string" },
+        "sku": { "type": "string" },
+        "unit": { "type": "string" },
+        "currentStock": { "type": "number" },
+        "lowStockThreshold": { "type": "number" },
+        "status": { "type": "string", "enum": ["Available", "Low Stock", "Out of Stock"] },
+        "location": { "type": "string" },
+        "lastProcured": { "type": "string", "format": "date" },
+        "notes": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      }
+    },
     "CurrentNews": {
       "title": "Current News",
-      "description": "Daily news broadcast for the homepage display area with priority scopes and automated translation.",
+      "description": "Daily news broadcast for the homepage display area.",
       "type": "object",
       "properties": {
         "originalEnglish": {
@@ -72,120 +92,8 @@
             "category": { "type": "string" }
           }
         },
-        "translationStatus": { "type": "string", "enum": ["Success", "Failed", "Pending"] },
-        "source": { "type": "string" },
-        "url": { "type": "string" },
-        "publishedAt": { "type": "string" },
-        "author": { "type": "string" },
-        "imageUrl": { "type": "string" },
-        "scope": { "type": "string", "enum": ["West Bengal", "India", "World"] },
-        "scopePriority": { "type": "number", "description": "1: WB, 2: India, 3: World" },
         "isActive": { "type": "boolean" },
-        "priority": { "type": "number" },
         "createdAt": { "type": "string", "format": "date-time" }
-      }
-    },
-    "FinancialVoucher": {
-      "title": "Financial Voucher",
-      "description": "Comprehensive institutional instrument for financial movements.",
-      "type": "object",
-      "properties": {
-        "voucherNo": { "type": "string" },
-        "date": { "type": "string", "format": "date" },
-        "type": { "type": "string", "enum": ["Receipt Voucher", "Payment Voucher", "Journal Voucher", "Contra Voucher", "Donation Voucher", "Membership Fee Voucher", "Expense Voucher", "Advance Voucher", "Refund Voucher"] },
-        "financialYear": { "type": "string" },
-        "branch": { "type": "string" },
-        "state": { "type": "string" },
-        "district": { "type": "string" },
-        "person": {
-          "type": "object",
-          "properties": {
-            "name": { "type": "string" },
-            "memberId": { "type": "string" },
-            "mobile": { "type": "string" },
-            "email": { "type": "string" },
-            "address": { "type": "string" }
-          }
-        },
-        "amount": { "type": "number" },
-        "amountInWords": { "type": "string" },
-        "accountHead": { "type": "string" },
-        "project": { "type": "string" },
-        "paymentMethod": { "type": "string", "enum": ["Cash", "Bank Transfer", "UPI", "Cheque", "Card"] },
-        "narration": { "type": "string" },
-        "status": { "type": "string", "enum": ["Draft", "Pending Verification", "Verified", "Pending Approval", "Approved", "Rejected", "Cancelled"] },
-        "auditTrail": { "type": "array", "items": { "type": "object" } },
-        "attachments": { "type": "array", "items": { "type": "string" } },
-        "createdAt": { "type": "string", "format": "date-time" },
-        "createdBy": { "type": "string" }
-      }
-    },
-    "FinancialTransaction": {
-      "title": "Financial Transaction",
-      "description": "Core ledger entry for income and expenses.",
-      "type": "object",
-      "properties": {
-        "voucherNo": { "type": "string" },
-        "date": { "type": "string", "format": "date" },
-        "type": { "type": "string", "enum": ["Income", "Expense", "Contra", "Journal"] },
-        "account": { "type": "string", "description": "Account head from Chart of Accounts." },
-        "amount": { "type": "number" },
-        "paymentMethod": { "type": "string", "enum": ["Cash", "Bank", "UPI", "Cheque"] },
-        "reference": { "type": "string" },
-        "particulars": { "type": "string" },
-        "projectId": { "type": "string", "description": "Linked project if applicable." },
-        "status": { "type": "string", "enum": ["Draft", "Submitted", "Approved", "Rejected"] },
-        "attachmentUrl": { "type": "string" },
-        "createdAt": { "type": "string", "format": "date-time" },
-        "createdBy": { "type": "string" },
-        "approvedBy": { "type": "string" }
-      },
-      "required": ["voucherNo", "date", "type", "amount", "status"]
-    },
-    "FinancialProject": {
-      "title": "Financial Project",
-      "description": "Project-based fund tracking.",
-      "type": "object",
-      "properties": {
-        "name": { "type": "string" },
-        "code": { "type": "string" },
-        "description": { "type": "string" },
-        "budget": { "type": "number" },
-        "utilized": { "type": "number" },
-        "startDate": { "type": "string", "format": "date" },
-        "status": { "type": "string", "enum": ["Active", "Completed", "On Hold"] },
-        "createdAt": { "type": "string", "format": "date-time" }
-      }
-    },
-    "FixedAsset": {
-      "title": "Fixed Asset",
-      "description": "Registry of organizational property and equipment.",
-      "type": "object",
-      "properties": {
-        "name": { "type": "string" },
-        "category": { "type": "string" },
-        "purchaseDate": { "type": "string", "format": "date" },
-        "purchaseValue": { "type": "number" },
-        "currentValue": { "type": "number" },
-        "depreciationRate": { "type": "number" },
-        "location": { "type": "string" },
-        "status": { "type": "string", "enum": ["In Use", "Maintenance", "Retired"] }
-      }
-    },
-    "PayrollRecord": {
-      "title": "Payroll Record",
-      "description": "Employee monthly salary details.",
-      "type": "object",
-      "properties": {
-        "employeeId": { "type": "string" },
-        "month": { "type": "string" },
-        "year": { "type": "string" },
-        "baseSalary": { "type": "number" },
-        "allowances": { "type": "number" },
-        "deductions": { "type": "number" },
-        "netPaid": { "type": "number" },
-        "paymentDate": { "type": "string", "format": "date" },
-        "status": { "type": "string", "enum": ["Pending", "Paid"] }
       }
     }
   },
@@ -194,13 +102,7 @@
   },
   "firestore": {
     "/users/{userEmail}": { "schema": "UserAccount", "description": "Permissions registry." },
-    "/current_news/{newsId}": { "schema": "CurrentNews", "description": "Homepage news broadcast." },
-    "/current_news_state/registry": { "schema": "object", "description": "Metadata for news synchronization." },
-    "/finance_transactions/{txId}": { "schema": "FinancialTransaction" },
-    "/finance_vms_vouchers/{vId}": { "schema": "FinancialVoucher" },
-    "/finance_projects/{projectId}": { "schema": "FinancialProject" },
-    "/finance_assets/{assetId}": { "schema": "FixedAsset" },
-    "/finance_payroll/{recordId}": { "schema": "PayrollRecord" },
-    "/finance_summary/state": { "schema": "object", "description": "Global financial state." }
+    "/materials/{materialId}": { "schema": "MaterialItem", "description": "Material management inventory." },
+    "/current_news/{newsId}": { "schema": "CurrentNews", "description": "Homepage news broadcast." }
   }
 }

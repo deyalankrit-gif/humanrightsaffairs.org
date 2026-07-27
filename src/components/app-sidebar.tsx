@@ -54,7 +54,8 @@ import {
   ClipboardList,
   Newspaper,
   Zap,
-  Search
+  Search,
+  Boxes
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -102,11 +103,17 @@ const adminLinksConfig = [
   { name: 'Public Site View', href: '/internal/public-view', icon: Monitor, permission: 'publicView' },
 ]
 
+const logisticsLinksConfig = [
+  { name: 'Material System', href: '/internal/material-management', icon: Boxes, permission: 'materialManagement' },
+  { name: 'Kit Tracking', href: '/internal/kit-management', icon: Archive, permission: 'kitManagement' },
+  { name: 'Stock Inventory', href: '/internal/inventory', icon: Package, permission: 'inventory' },
+  { name: 'Vendor Registry', href: '/internal/vendors', icon: Truck, permission: 'vendors' },
+]
+
 const financeLinksConfig = [
   { name: 'Finance Dashboard', href: '/internal/finance/dashboard', icon: BarChart3, permission: 'financeDashboard' },
   { name: 'Accounts', href: '/internal/accounts', icon: Wallet, permission: 'accounts' },
   { name: 'Expenses', href: '/internal/expenses', icon: TrendingDown, permission: 'expenses' },
-  { name: 'Vendors', href: '/internal/vendors', icon: Truck, permission: 'vendors' },
   { name: 'Voucher System (VMS)', href: '/internal/finance/vms', icon: Receipt, permission: 'financeVouchers' },
   { name: 'General Ledger', href: '/internal/finance/ledger', icon: ClipboardList, permission: 'financeLedger' },
   { name: 'Institutional Donors', href: '/internal/finance/donors', icon: HeartHandshake, permission: 'financeLedger' },
@@ -150,6 +157,14 @@ export function AppSidebar() {
     })
   }, [isAdminPortal, isRoot, userPermissions])
 
+  const filteredLogisticsLinks = React.useMemo(() => {
+    if (!isAdminPortal) return []
+    return logisticsLinksConfig.filter(link => {
+      if (isRoot) return true;
+      return userPermissions?.permissions?.[link.permission || ''] === true;
+    })
+  }, [isAdminPortal, isRoot, userPermissions])
+
   const filteredFinanceLinks = React.useMemo(() => {
     if (!isAdminPortal) return []
     return financeLinksConfig.filter(link => {
@@ -184,7 +199,6 @@ export function AppSidebar() {
       </SidebarHeader>
       
       <SidebarContent className="py-6 no-scrollbar">
-        {/* TOP ANALYTICS MODULE GROUP */}
         {isAdminPortal && filteredTopAnalyticsLinks.length > 0 && (
           <SidebarGroup>
             <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden text-primary font-bold">
@@ -192,6 +206,38 @@ export function AppSidebar() {
             </SidebarGroupLabel>
             <SidebarMenu>
               {filteredTopAnalyticsLinks.map((link) => {
+                const isActive = pathname === link.href
+                return (
+                  <SidebarMenuItem key={link.name}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={isActive}
+                      tooltip={link.name}
+                      className={cn(
+                        "h-11 rounded-xl transition-all px-4",
+                        isActive ? "bg-accent text-white font-bold" : "hover:bg-accent/10 hover:text-accent group/btn"
+                      )}
+                    >
+                      <Link href={link.href} className="flex items-center gap-3">
+                        <link.icon className={cn("w-5 h-5", isActive ? "text-white" : "text-muted-foreground group-hover/btn:text-accent")} />
+                        <span className="group-data-[collapsible=icon]:hidden">{link.name}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                )
+              })}
+            </SidebarMenu>
+          </SidebarGroup>
+        )}
+
+        {/* LOGISTICS MODULE GROUP */}
+        {isAdminPortal && filteredLogisticsLinks.length > 0 && (
+          <SidebarGroup>
+            <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden text-accent font-bold">
+              LOGISTICAL OPERATIONS
+            </SidebarGroupLabel>
+            <SidebarMenu>
+              {filteredLogisticsLinks.map((link) => {
                 const isActive = pathname === link.href
                 return (
                   <SidebarMenuItem key={link.name}>
@@ -312,7 +358,6 @@ export function AppSidebar() {
           </SidebarMenu>
         </SidebarGroup>
 
-        {/* TECHNICAL BROADCAST - ROOT EXCLUSIVE */}
         {isAdminPortal && isRoot && (
           <SidebarGroup className="mt-4 border-t border-white/5 pt-6 group-data-[collapsible=icon]:hidden">
             <SidebarGroupLabel className="flex items-center gap-2">
