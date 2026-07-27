@@ -45,6 +45,17 @@ import {
   DialogTitle, 
   DialogTrigger
 } from '@/components/ui/dialog'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { ActivityForm } from '@/components/activity-hub/activity-form'
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
@@ -168,7 +179,7 @@ export default function ActivityHubAdmin() {
               <div>
                 <h1 className="text-2xl font-headline font-bold">Activity <span className="text-accent italic">Terminal</span></h1>
                 <p className="text-[9px] font-black text-emerald-400 uppercase tracking-widest flex items-center gap-1.5">
-                   <ShieldCheck className="w-3 h-3" /> Root Planning Suite
+                   <ShieldCheck className="w-3.5 h-3.5" /> Root Planning Suite
                 </p>
               </div>
            </div>
@@ -314,9 +325,25 @@ export default function ActivityHubAdmin() {
                   <Button onClick={() => { setIsAddOpen(true); setSelectedEvent(null); }} variant="outline" className="flex-1 h-12 rounded-xl font-bold">
                     <Edit className="w-4 h-4 mr-2" /> Modify Entry
                   </Button>
-                  <Button onClick={() => handleDelete(selectedEvent.id)} variant="destructive" className="flex-1 h-12 rounded-xl font-bold">
-                    <Trash2 className="w-4 h-4 mr-2" /> Purge Record
-                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="destructive" className="flex-1 h-12 rounded-xl font-bold">
+                        <Trash2 className="w-4 h-4 mr-2" /> Purge Record
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent className="rounded-3xl border-none shadow-2xl">
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This will permanently delete the mission record for "{selectedEvent.title}" and all associated data. This action cannot be undone.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => handleDelete(selectedEvent.id)} className="bg-red-600 hover:bg-red-700 rounded-xl">Purge Record</AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                </div>
             </div>
           )}

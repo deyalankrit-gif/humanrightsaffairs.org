@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useEffect, useState, useMemo } from 'react'
@@ -46,6 +47,17 @@ import {
   DialogDescription,
   DialogClose
 } from "@/components/ui/dialog"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
 import { format } from 'date-fns'
@@ -390,12 +402,23 @@ export default function MaterialManagementPage() {
                               >
                                 <Edit className="w-3 h-3"/>
                               </button>
-                              <button 
-                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleDeleteCategory(idx); }} 
-                                className="hover:text-red-600 transition-colors"
-                              >
-                                <Trash2 className="w-3 h-3"/>
-                              </button>
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <button className="hover:text-red-600 transition-colors">
+                                    <Trash2 className="w-3 h-3"/>
+                                  </button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent className="rounded-3xl">
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>Purge category "{cat}"?</AlertDialogTitle>
+                                    <AlertDialogDescription>This will remove the category from the global registry. Current items under this category will remain, but the category choice will be unavailable for new entries.</AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => handleDeleteCategory(idx)} className="bg-red-600 hover:bg-red-700 rounded-xl">Remove Category</AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
                            </div>
                          </Badge>
                        ))}
@@ -473,7 +496,7 @@ export default function MaterialManagementPage() {
                 <button key={cat} onClick={() => setCategoryFilter(cat)} className={cn("px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all whitespace-nowrap", categoryFilter === cat ? "bg-accent text-primary shadow-md" : "text-slate-500 hover:bg-slate-200")}>{cat}</button>
               ))}
            </div>
-           <div className="relative w-full max-w-lg">
+           <div className="relative w-full max-lg:max-w-lg">
              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
              <Input placeholder="Filter by material name or SKU..." className="pl-9 h-11 rounded-xl border-slate-100 bg-slate-50 dark:bg-slate-950 text-sm" value={search} onChange={e => setSearch(e.target.value)} />
            </div>
@@ -525,7 +548,21 @@ export default function MaterialManagementPage() {
                              <Button onClick={() => { setSelectedMaterial(item); setAdjustmentMode('Outflow'); }} variant="outline" className="h-11 rounded-xl border-rose-100 text-rose-600 font-bold hover:bg-rose-50 gap-2">
                                 <TrendingDown className="w-4 h-4" /> Outflow
                              </Button>
-                             <Button variant="ghost" size="icon" onClick={() => handleDelete(item.id)} className="h-11 w-11 text-slate-300 hover:text-red-500 rounded-xl"><Trash2 className="w-4.5 h-4.5" /></Button>
+                             <AlertDialog>
+                               <AlertDialogTrigger asChild>
+                                 <Button variant="ghost" size="icon" className="h-11 w-11 text-slate-300 hover:text-red-500 rounded-xl"><Trash2 className="w-4.5 h-4.5" /></Button>
+                               </AlertDialogTrigger>
+                               <AlertDialogContent className="rounded-[2.5rem] border-none shadow-2xl">
+                                 <AlertDialogHeader>
+                                   <AlertDialogTitle>Purge material record?</AlertDialogTitle>
+                                   <AlertDialogDescription>This will permanently remove "{item.name}" from the logistical management system. This action cannot be undone.</AlertDialogDescription>
+                                 </AlertDialogHeader>
+                                 <AlertDialogFooter>
+                                   <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+                                   <AlertDialogAction onClick={() => handleDelete(item.id)} className="bg-red-600 hover:bg-red-700 rounded-xl">Purge Material</AlertDialogAction>
+                                 </AlertDialogFooter>
+                               </AlertDialogContent>
+                             </AlertDialog>
                           </div>
                        </div>
                     </div>

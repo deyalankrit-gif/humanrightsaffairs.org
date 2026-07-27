@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useEffect, useState } from 'react';
@@ -35,6 +36,17 @@ import {
   DialogFooter,
   DialogDescription,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { useToast } from '@/hooks/use-toast';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
@@ -253,7 +265,21 @@ export default function InternalOccasionsManagement() {
                            </div>
                            <div className="flex items-center gap-2 shrink-0">
                               <Button variant="outline" size="sm" onClick={() => { setEditOccasion(occ); setIsEditDialogOpen(true); }} className="h-10 px-5 rounded-xl text-[10px] font-bold border-slate-200 hover:bg-accent hover:text-primary hover:border-accent transition-all">Modify</Button>
-                              <Button variant="ghost" size="icon" onClick={() => handleDeleteOccasion(occ.id)} className="h-10 w-10 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"><Trash2 className="w-4.5 h-4.5" /></Button>
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button variant="ghost" size="icon" className="h-10 w-10 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"><Trash2 className="w-4.5 h-4.5" /></Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent className="rounded-3xl border-none shadow-2xl">
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>Purge occasion record?</AlertDialogTitle>
+                                    <AlertDialogDescription>This will permanently remove "{occ.title}" from the broadcast registry. The banner will vanish from the homepage instantly.</AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => handleDeleteOccasion(occ.id)} className="bg-red-600 hover:bg-red-700 rounded-xl">Purge Greeting</AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
                            </div>
                         </div>
                         <div className="p-6 bg-slate-50 dark:bg-slate-800 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-inner italic text-sm text-slate-600 dark:text-slate-400 leading-relaxed">

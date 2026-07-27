@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useEffect, useState } from 'react'
@@ -25,15 +26,15 @@ import {
   ShieldCheck,
   Boxes
 } from 'lucide-react'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
   DialogTrigger,
   DialogFooter,
   DialogDescription,
-} from "@/components/ui/dialog"
+} from '@/components/ui/dialog'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -113,6 +114,11 @@ export default function InventoryManagementPage() {
         setIsAddDialogOpen(false)
       })
       .finally(() => setIsActionLoading(false))
+  }
+
+  const handleDelete = async (id: string) => {
+    if (!db) return;
+    deleteDoc(doc(db, 'inventory', id)).then(() => toast({ title: "Record Purged" }));
   }
 
   if (authLoading || !user) {
@@ -216,7 +222,21 @@ export default function InventoryManagementPage() {
                         </div>
                         <div className="flex justify-end gap-2">
                            <Button size="sm" variant="outline" className="h-8 rounded-lg text-[10px] font-bold border-slate-200 hover:bg-secondary hover:text-white transition-colors">Adjust</Button>
-                           <Button variant="ghost" size="sm" className="h-8 w-8 text-slate-300 hover:text-red-500 hover:bg-red-50 transition-colors"><Trash2 className="w-3.5 h-3.5" /></Button>
+                           <AlertDialog>
+                             <AlertDialogTrigger asChild>
+                               <Button variant="ghost" size="sm" className="h-8 w-8 text-slate-300 hover:text-red-500 hover:bg-red-50 transition-colors"><Trash2 className="w-3.5 h-3.5" /></Button>
+                             </AlertDialogTrigger>
+                             <AlertDialogContent className="rounded-3xl border-none shadow-2xl">
+                               <AlertDialogHeader>
+                                 <AlertDialogTitle>Purge record for "{item.name}"?</AlertDialogTitle>
+                                 <AlertDialogDescription>This will permanently remove the item from the institutional inventory registry. This action cannot be undone.</AlertDialogDescription>
+                               </AlertDialogHeader>
+                               <AlertDialogFooter>
+                                 <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+                                 <AlertDialogAction onClick={() => handleDelete(item.id)} className="bg-red-600 hover:bg-red-700 rounded-xl">Purge Record</AlertDialogAction>
+                               </AlertDialogFooter>
+                             </AlertDialogContent>
+                           </AlertDialog>
                         </div>
                       </div>
                     </div>

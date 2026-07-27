@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useEffect, useState, useMemo } from 'react';
@@ -20,6 +21,17 @@ import {
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { useToast } from '@/hooks/use-toast';
 import { syncNews, type SyncNewsOutput } from '@/ai/flows/sync-news-flow';
 import { CurrentNews } from '@/components/current-news';
@@ -304,7 +316,23 @@ export default function InternalNewsManagement() {
                        <div className="flex-1 space-y-4">
                           <div className="flex justify-between items-start">
                              <h3 className="text-xl font-bold">{n.originalEnglish?.title || n.title}</h3>
-                             <Button variant="ghost" size="icon" onClick={() => handleDelete(n.id)} className="text-slate-300 hover:text-red-500 transition-colors"><Trash2 className="w-4 h-4" /></Button>
+                             <AlertDialog>
+                               <AlertDialogTrigger asChild>
+                                 <Button variant="ghost" size="icon" className="text-slate-300 hover:text-red-500 transition-colors"><Trash2 className="w-4 h-4" /></Button>
+                               </AlertDialogTrigger>
+                               <AlertDialogContent className="rounded-3xl border-none shadow-2xl">
+                                 <AlertDialogHeader>
+                                   <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                   <AlertDialogDescription>
+                                     This will permanently delete the news broadcast "{n.originalEnglish?.title || n.title}". This action cannot be undone.
+                                   </AlertDialogDescription>
+                                 </AlertDialogHeader>
+                                 <AlertDialogFooter>
+                                   <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+                                   <AlertDialogAction onClick={() => handleDelete(n.id)} className="bg-red-600 hover:bg-red-700 rounded-xl">Purge Broadcast</AlertDialogAction>
+                                 </AlertDialogFooter>
+                               </AlertDialogContent>
+                             </AlertDialog>
                           </div>
                           <p className="text-sm text-slate-500 line-clamp-3 italic leading-relaxed">"{n.originalEnglish?.content || n.content}"</p>
                           <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center text-[9px] font-black text-slate-400 uppercase tracking-widest">
@@ -364,7 +392,7 @@ export default function InternalNewsManagement() {
               </h3>
               <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-1.5">
-                  <Label className="text-[10px] uppercase font-bold text-slate-400">Geographic Scope</Label>
+                  <Label className="text-[10px] font-bold uppercase text-slate-400">Geographic Scope</Label>
                   <Select value={manualNews.scope} onValueChange={v => setManualNews({...manualNews, scope: v, scopePriority: v === 'West Bengal' ? 1 : v === 'India' ? 2 : 3})}>
                     <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
                     <SelectContent>
@@ -375,11 +403,11 @@ export default function InternalNewsManagement() {
                   </Select>
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-[10px] uppercase font-bold text-slate-400">Official Source</Label>
+                  <Label className="text-[10px] font-bold uppercase text-slate-400">Official Source</Label>
                   <Input value={manualNews.source} onChange={e => setManualNews({...manualNews, source: e.target.value})} className="h-11 rounded-xl" />
                 </div>
                 <div className="space-y-1.5 col-span-2">
-                  <Label className="text-[10px] uppercase font-bold text-slate-400">Reference URL (Optional)</Label>
+                  <Label className="text-[10px] font-bold uppercase text-slate-400">Reference URL (Optional)</Label>
                   <Input value={manualNews.url} onChange={e => setManualNews({...manualNews, url: e.target.value})} placeholder="https://..." className="h-11 rounded-xl" />
                 </div>
               </div>

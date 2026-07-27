@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useEffect, useState } from 'react'
@@ -143,7 +144,7 @@ export default function InternalGrievancesPage() {
                 <Card key={g.id} className="border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900 rounded-2xl border border-slate-100">
                   <CardContent className="p-0">
                     <div className="flex flex-col md:flex-row items-stretch">
-                      <div className="p-5 bg-slate-50 dark:bg-slate-800 md:w-44 text-center border-r border-slate-100 flex flex-col items-center justify-center shrink-0">
+                      <div className="p-5 bg-slate-50 dark:bg-slate-800 md:w-44 text-center border-r border-slate-100 dark:border-slate-700 flex flex-col items-center justify-center shrink-0">
                          <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">TOKEN</span>
                          <span className="text-xl font-headline font-bold text-primary dark:text-white tracking-tighter mb-2">{g.token}</span>
                          <Badge className={cn("text-[8px] font-bold px-2 py-0.5 rounded-full uppercase", g.status === 'Pending' ? 'bg-amber-500' : 'bg-emerald-500')}>
@@ -161,7 +162,21 @@ export default function InternalGrievancesPage() {
                         </div>
                         <div className="flex justify-end gap-2">
                           <Button size="sm" variant="outline" className="h-8 rounded-lg text-[10px] px-3 font-bold" onClick={() => handleUpdateStatus(g.id, 'Resolved')}>Resolve</Button>
-                          <Button size="sm" variant="ghost" onClick={() => handleDelete(g.id)} className="h-8 w-8 text-slate-300 hover:text-red-500"><Trash2 className="w-3.5 h-3.5" /></Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button size="sm" variant="ghost" className="h-8 w-8 text-slate-300 hover:text-red-500"><Trash2 className="w-3.5 h-3.5" /></Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent className="rounded-3xl">
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Purge grievance record?</AlertDialogTitle>
+                                <AlertDialogDescription>This will permanently remove the record for token "{g.token}" from the institutional registry. This action cannot be undone.</AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => handleDelete(g.id)} className="bg-red-600 hover:bg-red-700 rounded-xl">Purge Record</AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
                         </div>
                       </div>
                     </div>

@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useEffect, useState } from 'react'
@@ -41,6 +42,17 @@ import {
   DialogFooter,
   DialogDescription,
 } from "@/components/ui/dialog"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import {
   Popover,
   PopoverContent,
@@ -399,7 +411,21 @@ export default function InternalGalleryManagement() {
                         </div>
                         <div className="flex items-center gap-2">
                            <Button onClick={() => { setEditItem(item); setIsEditDialogOpen(true); }} variant="outline" size="sm" className="h-8 rounded-xl text-[10px] font-bold px-4 border-slate-200">Modify</Button>
-                           <Button onClick={() => handleDeleteItem(item.id)} variant="ghost" size="sm" className="h-8 w-8 text-slate-300 hover:text-red-500"><Trash2 className="w-4 h-4" /></Button>
+                           <AlertDialog>
+                             <AlertDialogTrigger asChild>
+                               <Button variant="ghost" size="sm" className="h-8 w-8 text-slate-300 hover:text-red-500"><Trash2 className="w-4 h-4" /></Button>
+                             </AlertDialogTrigger>
+                             <AlertDialogContent className="rounded-3xl border-none shadow-2xl">
+                               <AlertDialogHeader>
+                                 <AlertDialogTitle>Purge moment from archive?</AlertDialogTitle>
+                                 <AlertDialogDescription>This will permanently remove the record and its media from the visual registry. This action cannot be undone.</AlertDialogDescription>
+                               </AlertDialogHeader>
+                               <AlertDialogFooter>
+                                 <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+                                 <AlertDialogAction onClick={() => handleDeleteItem(item.id)} className="bg-red-600 hover:bg-red-700 rounded-xl">Purge Moment</AlertDialogAction>
+                               </AlertDialogFooter>
+                             </AlertDialogContent>
+                           </AlertDialog>
                         </div>
                       </div>
                     </div>

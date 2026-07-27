@@ -34,7 +34,8 @@ import {
   MoreVertical,
   Baby,
   UserRoundX,
-  ImageIcon
+  ImageIcon,
+  ShieldAlert
 } from 'lucide-react'
 import {
   Dialog,
@@ -45,6 +46,17 @@ import {
   DialogClose,
   DialogFooter
 } from "@/components/ui/dialog"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -226,9 +238,23 @@ export default function PublicComplaintsTerminal() {
                             <Eye className="w-3.5 h-3.5" /> Review Details
                           </Button>
                           {isRoot && (
-                            <Button size="sm" variant="ghost" onClick={() => handleDelete(c.id)} className="h-9 w-9 rounded-xl text-slate-300 hover:text-red-500 transition-colors">
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button size="sm" variant="ghost" className="h-9 w-9 rounded-xl text-slate-300 hover:text-red-500 transition-colors">
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent className="rounded-3xl border-none shadow-2xl">
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Purge permanent record?</AlertDialogTitle>
+                                  <AlertDialogDescription>This will completely erase complaint "{c.token}" and all associated evidence from the national registry. This action is irreversible.</AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+                                  <AlertDialogAction onClick={() => handleDelete(c.id)} className="bg-red-600 hover:bg-red-700 rounded-xl">Purge Record</AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
                           )}
                         </div>
                       </div>
@@ -287,7 +313,7 @@ export default function PublicComplaintsTerminal() {
                     </div>
                   </div>
 
-                  <div className="p-8 md:p-16 space-y-16 pb-24">
+                  <div className="p-8 md:p-16 space-y-12 pb-24">
                      {/* Complainant Grid */}
                      <div className="grid md:grid-cols-2 gap-12">
                         <div className="space-y-6">
@@ -400,9 +426,23 @@ export default function PublicComplaintsTerminal() {
                            </div>
                            <div className="flex gap-3">
                               {isRoot && (
-                                <Button variant="destructive" onClick={() => handleDelete(selectedComplaint.id)} className="h-12 rounded-xl font-bold gap-2 px-8">
-                                   <Trash2 className="w-4 h-4" /> Purge Permanent Record
-                                </Button>
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <Button variant="destructive" className="h-12 rounded-xl font-bold gap-2 px-8">
+                                       <Trash2 className="w-4 h-4" /> Purge Permanent Record
+                                    </Button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent className="rounded-3xl border-none shadow-2xl">
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                      <AlertDialogDescription>This will completely erase complaint "{selectedComplaint.token}" and all associated evidence from the national registry. This action is irreversible.</AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+                                      <AlertDialogAction onClick={() => handleDelete(selectedComplaint.id)} className="bg-red-600 hover:bg-red-700 rounded-xl">Purge Record</AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
                               )}
                               <Button onClick={() => setSelectedComplaint(null)} className="h-12 rounded-xl bg-slate-900 text-white font-bold px-8">
                                  End Review Session

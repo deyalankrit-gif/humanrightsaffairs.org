@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo, useEffect, useState } from 'react'
@@ -36,6 +37,17 @@ import {
   DialogFooter,
   DialogClose
 } from "@/components/ui/dialog"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
 import { format } from 'date-fns'
@@ -322,13 +334,26 @@ export default function ExpensesManagementPage() {
                               >
                                 <Edit className="w-3 h-3"/>
                               </button>
-                              <button 
-                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleDeleteCategory(idx); }} 
-                                className="hover:text-red-600 transition-colors"
-                                title="Purge Category"
-                              >
-                                <Trash2 className="w-3 h-3"/>
-                              </button>
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <button 
+                                    className="hover:text-red-600 transition-colors"
+                                    title="Purge Category"
+                                  >
+                                    <Trash2 className="w-3 h-3"/>
+                                  </button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent className="rounded-3xl">
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>Delete category "{cat}"?</AlertDialogTitle>
+                                    <AlertDialogDescription>This will remove the category from the list. Existing expenses under this category will remain, but the category label will be unavailable for new entries.</AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => handleDeleteCategory(idx)} className="bg-red-600 hover:bg-red-700 rounded-xl">Purge Category</AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
                            </div>
                          </Badge>
                        ))}
@@ -392,7 +417,21 @@ export default function ExpensesManagementPage() {
                            </div>
                       </div>
                       <div className="flex gap-2">
-                         <Button variant="ghost" size="icon" onClick={() => handleDelete(expense.id)} className="h-10 w-10 text-slate-300 hover:text-red-500 hover:bg-red-50 transition-all rounded-xl"><Trash2 className="w-4.5 h-4.5" /></Button>
+                         <AlertDialog>
+                           <AlertDialogTrigger asChild>
+                             <Button variant="ghost" size="icon" className="h-10 w-10 text-slate-300 hover:text-red-500 hover:bg-red-50 transition-all rounded-xl"><Trash2 className="w-4.5 h-4.5" /></Button>
+                           </AlertDialogTrigger>
+                           <AlertDialogContent className="rounded-3xl border-none shadow-2xl">
+                             <AlertDialogHeader>
+                               <AlertDialogTitle>Purge expense record?</AlertDialogTitle>
+                               <AlertDialogDescription>This will permanently remove "{expense.title}" from the registry. Note: This action does not automatically reverse any ledger balances already committed to the treasury summary.</AlertDialogDescription>
+                             </AlertDialogHeader>
+                             <AlertDialogFooter>
+                               <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+                               <AlertDialogAction onClick={() => handleDelete(expense.id)} className="bg-red-600 hover:bg-red-700 rounded-xl">Purge Record</AlertDialogAction>
+                             </AlertDialogFooter>
+                           </AlertDialogContent>
+                         </AlertDialog>
                       </div>
                     </div>
                   </div>

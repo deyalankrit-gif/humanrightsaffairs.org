@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState } from 'react'
@@ -38,6 +39,17 @@ import {
   DialogDescription,
   DialogClose
 } from "@/components/ui/dialog"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
 
@@ -156,7 +168,23 @@ export default function ComplianceHub() {
                                 <td className="px-8 py-6 text-right">
                                    <div className="flex items-center justify-end gap-2">
                                       <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-300 hover:text-emerald-500"><Download className="w-4 h-4" /></Button>
-                                      <Button variant="ghost" size="icon" onClick={() => handleDelete(r.id)} className="h-8 w-8 text-slate-300 hover:text-red-500"><Trash2 className="w-4 h-4" /></Button>
+                                      <AlertDialog>
+                                        <AlertDialogTrigger asChild>
+                                          <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-300 hover:text-red-500"><Trash2 className="w-4 h-4" /></Button>
+                                        </AlertDialogTrigger>
+                                        <AlertDialogContent className="rounded-3xl border-none shadow-2xl">
+                                          <AlertDialogHeader>
+                                            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                              This will permanently remove the statutory record "{r.documentTitle}" from the legal vault.
+                                            </AlertDialogDescription>
+                                          </AlertDialogHeader>
+                                          <AlertDialogFooter>
+                                            <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+                                            <AlertDialogAction onClick={() => handleDelete(r.id)} className="bg-red-600 hover:bg-red-700 rounded-xl">Remove Document</AlertDialogAction>
+                                          </AlertDialogFooter>
+                                        </AlertDialogContent>
+                                      </AlertDialog>
                                    </div>
                                 </td>
                              </tr>
@@ -198,7 +226,7 @@ export default function ComplianceHub() {
                   </div>
                </Card>
 
-               <div className="p-8 rounded-[2.5rem] bg-emerald-50 dark:bg-emerald-950/20 border-2 border-dashed border-emerald-200 dark:border-emerald-900 text-center space-y-4">
+               <div className="p-8 rounded-[2.5rem] bg-emerald-50 dark:bg-emerald-950/20 border-2 border-dashed border-emerald-200 dark:border-emerald-900 text-center space-y-4 shadow-sm">
                   <ShieldCheck className="w-10 h-10 text-emerald-600 mx-auto" />
                   <h4 className="text-sm font-black uppercase tracking-widest text-emerald-700">Audit Disclaimer</h4>
                   <p className="text-[10px] text-emerald-800 dark:text-emerald-400 leading-relaxed font-bold italic">

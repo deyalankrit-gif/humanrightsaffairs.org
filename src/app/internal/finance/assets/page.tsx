@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState } from 'react'
@@ -39,6 +40,17 @@ import {
   DialogDescription,
   DialogClose
 } from "@/components/ui/dialog"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
 
@@ -179,7 +191,23 @@ export default function AssetRegistry() {
                              </div>
                              <div className="flex gap-2">
                                 <Button variant="outline" size="icon" className="h-8 w-8 rounded-lg hover:bg-emerald-50"><Edit className="w-3.5 h-3.5" /></Button>
-                                <Button variant="ghost" size="icon" onClick={() => handleDelete(asset.id)} className="h-8 w-8 text-slate-300 hover:text-red-500"><Trash2 className="w-3.5 h-3.5" /></Button>
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-300 hover:text-red-500"><Trash2 className="w-3.5 h-3.5" /></Button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent className="rounded-3xl border-none shadow-2xl">
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                        This will permanently remove the asset "{asset.name}" from the institutional registry. This action cannot be undone.
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+                                      <AlertDialogAction onClick={() => handleDelete(asset.id)} className="bg-red-600 hover:bg-red-700 rounded-xl">Purge Asset</AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
                              </div>
                           </div>
                        </div>

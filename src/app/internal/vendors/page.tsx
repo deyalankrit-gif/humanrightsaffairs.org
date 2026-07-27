@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useEffect, useState, useMemo } from 'react'
@@ -45,6 +46,17 @@ import {
   DialogDescription,
   DialogClose
 } from "@/components/ui/dialog"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
 
@@ -277,7 +289,21 @@ export default function InternalVendorsPage() {
              <span>{cat}</span>
              <div className="flex items-center gap-1 opacity-40 group-hover:opacity-100 transition-opacity">
                 <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); setEditingCategoryIndex(idx); setEditingCategoryValue(cat); }} className="hover:text-blue-600 transition-colors"><Edit className="w-3 h-3"/></button>
-                <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleDeleteCategory(idx); }} className="hover:text-red-600 transition-colors"><Trash2 className="w-3 h-3"/></button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <button className="hover:text-red-600 transition-colors"><Trash2 className="w-3 h-3"/></button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent className="rounded-3xl">
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Purge category "{cat}"?</AlertDialogTitle>
+                      <AlertDialogDescription>This will remove the category from the list. Existing vendor records will not be deleted, but this category will be unavailable for future assignments.</AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={() => handleDeleteCategory(idx)} className="bg-red-600 hover:bg-red-700 rounded-xl">Remove Category</AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
              </div>
            </Badge>
          ))}
@@ -455,7 +481,7 @@ export default function InternalVendorsPage() {
                          <div className="w-16 h-16 rounded-2xl bg-white dark:bg-slate-800 shadow-sm flex items-center justify-center mb-4">
                            <Building2 className="w-8 h-8 text-accent" />
                          </div>
-                         <Badge variant="outline" className="text-[8px] font-black px-3 py-1 mb-2 uppercase border-accent text-accent">{vendor.vendorType}</Badge>
+                         <Badge variant="outline" className="text-[8px] font-black uppercase px-3 py-1 mb-2 border-accent text-accent">{vendor.vendorType}</Badge>
                          <div className="flex items-center gap-1.5">
                            <div className={cn("w-1.5 h-1.5 rounded-full animate-pulse", vendor.status === 'Active' ? "bg-emerald-500" : "bg-red-500")} />
                            <span className={cn("text-[10px] font-black uppercase tracking-widest", vendor.status === 'Active' ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400")}>{vendor.status}</span>
@@ -494,7 +520,21 @@ export default function InternalVendorsPage() {
                         </div>
                         <div className="flex flex-row lg:flex-col justify-end gap-3 h-full">
                            <Button size="sm" variant="outline" onClick={() => { setEditVendor(vendor); setIsEditDialogOpen(true); }} className="flex-1 lg:flex-none h-11 rounded-xl text-[10px] font-bold uppercase tracking-widest border-slate-200 hover:bg-primary hover:text-white transition-all">Modify</Button>
-                           <Button size="sm" variant="ghost" onClick={() => handleDeleteVendor(vendor.id)} className="h-11 w-11 rounded-xl text-slate-300 hover:text-red-500 hover:bg-red-50 transition-all"><Trash2 className="w-5 h-5" /></Button>
+                           <AlertDialog>
+                             <AlertDialogTrigger asChild>
+                               <Button size="sm" variant="ghost" className="h-11 w-11 rounded-xl text-slate-300 hover:text-red-500 hover:bg-red-50 transition-all"><Trash2 className="w-5 h-5" /></Button>
+                             </AlertDialogTrigger>
+                             <AlertDialogContent className="rounded-[2.5rem] border-none shadow-2xl">
+                               <AlertDialogHeader>
+                                 <AlertDialogTitle>Purge vendor record?</AlertDialogTitle>
+                                 <AlertDialogDescription>This will permanently remove the record for "{vendor.companyName}" from the institutional vendor registry. This action is irreversible.</AlertDialogDescription>
+                               </AlertDialogHeader>
+                               <AlertDialogFooter>
+                                 <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+                                 <AlertDialogAction onClick={() => handleDeleteVendor(vendor.id)} className="bg-red-600 hover:bg-red-700 rounded-xl">Remove Record</AlertDialogAction>
+                               </AlertDialogFooter>
+                             </AlertDialogContent>
+                           </AlertDialog>
                         </div>
                       </div>
                     </div>

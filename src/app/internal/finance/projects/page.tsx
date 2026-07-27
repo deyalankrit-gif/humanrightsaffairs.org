@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useMemo } from 'react'
@@ -38,6 +39,17 @@ import {
   DialogDescription,
   DialogClose
 } from "@/components/ui/dialog"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
 
@@ -120,7 +132,7 @@ export default function ProjectAccounting() {
               </div>
            </div>
            <Button onClick={() => setIsAddOpen(true)} className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold h-11 px-8 rounded-xl shadow-xl">
-             <Plus className="w-4 h-4 mr-2" /> Initialize Mission Project
+             <Plus className="w-5 h-5 mr-2" /> Initialize Mission Project
            </Button>
         </div>
       </header>
@@ -154,7 +166,21 @@ export default function ProjectAccounting() {
                         </div>
                         <CardTitle className="text-2xl font-headline font-bold text-primary dark:text-white pt-2">{proj.name}</CardTitle>
                      </div>
-                     <Button variant="ghost" size="icon" onClick={() => handleDelete(proj.id)} className="h-9 w-9 rounded-xl text-slate-300 hover:text-red-500"><Trash2 className="w-4.5 h-4.5" /></Button>
+                     <AlertDialog>
+                       <AlertDialogTrigger asChild>
+                         <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl text-slate-300 hover:text-red-500"><Trash2 className="w-4.5 h-4.5" /></Button>
+                       </AlertDialogTrigger>
+                       <AlertDialogContent className="rounded-3xl border-none shadow-2xl">
+                         <AlertDialogHeader>
+                           <AlertDialogTitle>Archive project "{proj.name}"?</AlertDialogTitle>
+                           <AlertDialogDescription>This will permanently remove the strategic accounting node for this mission. All budget data will be purged.</AlertDialogDescription>
+                         </AlertDialogHeader>
+                         <AlertDialogFooter>
+                           <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+                           <AlertDialogAction onClick={() => handleDelete(proj.id)} className="bg-red-600 hover:bg-red-700 rounded-xl">Archive Project</AlertDialogAction>
+                         </AlertDialogFooter>
+                       </AlertDialogContent>
+                     </AlertDialog>
                   </CardHeader>
                   <CardContent className="p-8 space-y-6">
                     <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-2 italic">"{proj.description || 'No strategic overview recorded.'}"</p>

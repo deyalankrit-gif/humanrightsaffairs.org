@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useEffect, useState } from 'react'
@@ -37,6 +38,17 @@ import {
   DialogDescription,
   DialogClose
 } from "@/components/ui/dialog"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
 
@@ -287,7 +299,23 @@ export default function InternalDonorsManagement() {
                                </div>
                                <div className="flex items-center gap-2 shrink-0">
                                   <Button variant="outline" size="sm" onClick={() => { setEditTier(tier); setIsEditDialogOpen(true); }} className="h-10 px-5 rounded-xl text-[10px] font-bold border-slate-200 hover:bg-primary hover:text-white transition-all">Modify</Button>
-                                  <Button variant="ghost" size="icon" onClick={() => handleDeleteTier(tier.id)} className="h-10 w-10 text-slate-300 hover:text-red-500 transition-all rounded-xl"><Trash2 className="w-4.5 h-4.5" /></Button>
+                                  <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                      <Button variant="ghost" size="icon" className="h-10 w-10 text-slate-300 hover:text-red-500 transition-all rounded-xl"><Trash2 className="w-4.5 h-4.5" /></Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent className="rounded-3xl border-none shadow-2xl">
+                                      <AlertDialogHeader>
+                                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                          This will permanently delete the recognition circle "{tier.title}". This action cannot be undone and it will be removed from the public Wall of Gratitude.
+                                        </AlertDialogDescription>
+                                      </AlertDialogHeader>
+                                      <AlertDialogFooter>
+                                        <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+                                        <AlertDialogAction onClick={() => handleDeleteTier(tier.id)} className="bg-red-600 hover:bg-red-700 rounded-xl">Purge Tier</AlertDialogAction>
+                                      </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                  </AlertDialog>
                                </div>
                             </div>
                          </div>
