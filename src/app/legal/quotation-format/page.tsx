@@ -28,6 +28,7 @@ import { useToast } from '@/hooks/use-toast'
  * Link refinement: Website link made larger and red.
  * Optimization: Compacted to 2 pages by reducing row height to py-12.
  * Print Refinement: Added thick top border for print output as requested.
+ * Header Refinement: Moved the separator mark to appear ABOVE the title text.
  */
 export default function SupplierQuotationPage() {
   const { toast } = useToast()
@@ -190,7 +191,7 @@ Conditions:
                
                <CardContent className="p-8 md:p-12 space-y-6 text-slate-800 dark:text-slate-200 font-sans leading-relaxed text-sm md:text-base print:text-black print:p-4 print:space-y-4">
                   {/* Letterhead */}
-                  <div className="text-center space-y-2 pb-6 border-b-2 border-slate-100 print:border-black print:pb-4">
+                  <div className="text-center space-y-2 pb-6 print:pb-4">
                     <div className="relative w-16 h-16 mx-auto mb-2 print:w-12 print:h-12">
                       <Image src="/HRAT%20Logo.jpeg" alt="HRAT Logo" fill className="object-contain" />
                     </div>
@@ -206,7 +207,7 @@ Conditions:
                       </div>
                       <p className="font-mono text-[11px] md:text-sm print:text-[12px] text-red-600 font-black">https://humanrightsaffairs.org</p>
                     </div>
-                    <h3 className="text-sm md:text-lg font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest print:text-black mt-4">
+                    <h3 className="text-sm md:text-lg font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest print:text-black mt-4 pt-4 border-t-2 border-slate-100 print:border-black">
                       SUPPLIER / VENDOR QUOTATION FORM
                     </h3>
                   </div>
