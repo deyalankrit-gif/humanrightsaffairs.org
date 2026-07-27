@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useMemo, useEffect } from 'react'
@@ -9,7 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Footer } from '@/components/footer'
+import { AdminFooter } from '@/components/admin-footer'
 import { 
   Navigation, 
   Search, 
@@ -266,7 +267,7 @@ export default function LogisticTrackingPage() {
         </DialogContent>
       </Dialog>
 
-      <Footer />
+      <AdminFooter />
     </main>
   )
 }

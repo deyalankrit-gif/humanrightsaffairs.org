@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useMemo, useEffect } from 'react'
@@ -9,14 +10,14 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Footer } from '@/components/footer'
+import { AdminFooter } from '@/components/admin-footer'
 import { 
   Boxes, 
   Search, 
   TrendingUp, 
   TrendingDown, 
   AlertCircle, 
-  RefreshCcw, 
+  RefreshCw, 
   Loader2, 
   ShieldCheck, 
   History,
@@ -250,7 +251,7 @@ export default function StockInventoryHub() {
         )}
       </section>
 
-      <Footer />
+      <AdminFooter />
     </main>
   )
 }

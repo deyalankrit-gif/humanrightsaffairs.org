@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useEffect, useMemo } from 'react'
@@ -34,7 +35,9 @@ import {
   Truck,
   X,
   Settings2,
-  Check
+  Check,
+  Hash,
+  MapPin
 } from 'lucide-react'
 import {
   Dialog,
@@ -387,7 +390,7 @@ export default function MaterialManagementPage() {
                >{c}</Button>
              ))}
           </div>
-          <div className="relative w-full max-w-md">
+          <div className="relative w-full max-md:max-w-full max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <Input placeholder="Search materials, SKUs or locations..." className="pl-10 h-11 rounded-xl border-slate-100 bg-slate-50 dark:bg-slate-950 text-sm" value={search} onChange={e => setSearch(e.target.value)} />
           </div>
@@ -505,7 +508,9 @@ export default function MaterialManagementPage() {
         </DialogContent>
       </Dialog>
       
-      <Footer />
+      <AdminFooter />
     </main>
   )
 }
+
+import { AdminFooter } from '@/components/admin-footer'
