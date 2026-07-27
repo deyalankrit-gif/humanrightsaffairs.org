@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState } from 'react'
@@ -25,6 +26,7 @@ import { useToast } from '@/hooks/use-toast'
  * Features a Live Editor for administrative personnel.
  * Updated: Included specific institutional contact info in header.
  * Link refinement: Website link made larger and red.
+ * Optimization: Compacted to 2 pages by reducing row height to py-12.
  */
 export default function SupplierQuotationPage() {
   const { toast } = useToast()
@@ -185,7 +187,7 @@ Conditions:
                <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-16 -mt-16 print:hidden"></div>
                <div className="absolute top-0 left-0 w-1.5 h-full bg-accent print:hidden"></div>
                
-               <CardContent className="p-8 md:p-12 space-y-8 text-slate-800 dark:text-slate-200 font-sans leading-relaxed text-sm md:text-base print:text-black print:p-4 print:space-y-4">
+               <CardContent className="p-8 md:p-12 space-y-6 text-slate-800 dark:text-slate-200 font-sans leading-relaxed text-sm md:text-base print:text-black print:p-4 print:space-y-4">
                   {/* Letterhead */}
                   <div className="text-center space-y-2 pb-6 border-b-2 border-slate-100 print:border-black print:pb-4">
                     <div className="relative w-16 h-16 mx-auto mb-2 print:w-12 print:h-12">
@@ -270,13 +272,13 @@ Conditions:
                           <tbody>
                              {[1, 2, 3, 4, 5].map((idx) => (
                                <tr key={idx} className="text-[11px]">
-                                  <td className="border border-slate-200 dark:border-slate-800 py-16 px-2 text-center print:border-black">{idx}</td>
-                                  <td className="border border-slate-200 dark:border-slate-800 py-16 px-2 print:border-black"><Fillable name={`item${idx}`} placeholder="---" className="w-full font-normal text-[11px]" /></td>
-                                  <td className="border border-slate-200 dark:border-slate-800 py-16 px-2 print:border-black w-32 md:w-40"><Fillable name={`spec${idx}`} placeholder="---" className="w-full font-normal text-[11px]" /></td>
-                                  <td className="border border-slate-200 dark:border-slate-800 py-16 px-2 print:border-black text-center"><Fillable name={`qty${idx}`} placeholder="0" className="w-full text-center font-normal text-[11px]" /></td>
-                                  <td className="border border-slate-200 dark:border-slate-800 py-16 px-2 print:border-black text-center"><Fillable name={`unit${idx}`} placeholder="---" className="w-full text-center font-normal text-[11px]" /></td>
-                                  <td className="border border-slate-200 dark:border-slate-800 py-16 px-2 print:border-black text-right"><Fillable name={`rate${idx}`} placeholder="0.00" className="w-full text-right font-normal text-[11px]" /></td>
-                                  <td className="border border-slate-200 dark:border-slate-800 py-16 px-2 print:border-black text-right"><Fillable name={`total${idx}`} placeholder="0.00" className="w-full text-right font-normal text-[11px]" /></td>
+                                  <td className="border border-slate-200 dark:border-slate-800 py-12 px-2 text-center print:border-black">{idx}</td>
+                                  <td className="border border-slate-200 dark:border-slate-800 py-12 px-2 print:border-black"><Fillable name={`item${idx}`} placeholder="---" className="w-full font-normal text-[11px]" /></td>
+                                  <td className="border border-slate-200 dark:border-slate-800 py-12 px-2 print:border-black w-32 md:w-40"><Fillable name={`spec${idx}`} placeholder="---" className="w-full font-normal text-[11px]" /></td>
+                                  <td className="border border-slate-200 dark:border-slate-800 py-12 px-2 print:border-black text-center"><Fillable name={`qty${idx}`} placeholder="0" className="w-full text-center font-normal text-[11px]" /></td>
+                                  <td className="border border-slate-200 dark:border-slate-800 py-12 px-2 print:border-black text-center"><Fillable name={`unit${idx}`} placeholder="---" className="w-full text-center font-normal text-[11px]" /></td>
+                                  <td className="border border-slate-200 dark:border-slate-800 py-12 px-2 print:border-black text-right"><Fillable name={`rate${idx}`} placeholder="0.00" className="w-full text-right font-normal text-[11px]" /></td>
+                                  <td className="border border-slate-200 dark:border-slate-800 py-12 px-2 print:border-black text-right"><Fillable name={`total${idx}`} placeholder="0.00" className="w-full text-right font-normal text-[11px]" /></td>
                                </tr>
                              ))}
                           </tbody>
