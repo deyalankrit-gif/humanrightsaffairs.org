@@ -1,10 +1,9 @@
-
 "use client"
 
 import React, { useState, useMemo, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase'
-import { collection, query, orderBy, doc, updateDoc, serverTimestamp, increment } from 'firebase/firestore'
+import { collection, query, orderBy, doc, updateDoc, serverTimestamp } from 'firebase/firestore'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -34,6 +33,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
   DialogDescription,
   DialogClose,
   DialogFooter
@@ -233,6 +233,11 @@ export default function StockInventoryHub() {
                                          {isAdjusting === item.id ? <Loader2 className="animate-spin" /> : "Authorize Receipt"}
                                        </Button>
                                     </div>
+                                    <DialogFooter>
+                                       <DialogClose asChild>
+                                          <Button variant="ghost" className="w-full text-slate-400 font-bold uppercase text-[10px]">Cancel</Button>
+                                       </DialogClose>
+                                    </DialogFooter>
                                  </DialogContent>
                               </Dialog>
                            </div>
