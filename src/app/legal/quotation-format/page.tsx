@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState } from 'react'
@@ -25,6 +24,7 @@ import { useToast } from '@/hooks/use-toast'
  * Optimized for F4 size printing (210mm x 330mm) with absolute minimum margins.
  * Features a Live Editor for administrative personnel.
  * Updated: Included specific institutional contact info in header.
+ * Link refinement: Website link made larger and red.
  */
 export default function SupplierQuotationPage() {
   const { toast } = useToast()
@@ -201,7 +201,7 @@ Conditions:
                         <p>Phone: +91 70631 11471</p>
                         <p>Email: hrat.wb.chairman@gmail.com</p>
                       </div>
-                      <p className="font-mono text-[9px] print:text-[10px]">https://humanrightsaffairs.org</p>
+                      <p className="font-mono text-[11px] md:text-sm print:text-[12px] text-red-600 font-black">https://humanrightsaffairs.org</p>
                     </div>
                     <h3 className="text-sm md:text-lg font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest print:text-black mt-4">
                       SUPPLIER / VENDOR QUOTATION FORM
@@ -401,7 +401,7 @@ Conditions:
                              <div className="border-b border-white/30 h-8 print:border-black"></div>
                              <p className="text-[8px] font-bold uppercase text-slate-500 print:text-black">Signature</p>
                           </div>
-                          <div className="space-y-1 text-right">
+                          <div className="text-right">
                              <div className="border-b border-white/30 h-8 print:border-black"></div>
                              <p className="text-[8px] font-bold uppercase text-slate-500 print:text-black">Date</p>
                           </div>
