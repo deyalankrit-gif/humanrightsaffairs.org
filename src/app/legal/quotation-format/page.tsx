@@ -349,12 +349,12 @@ Conditions:
                           I/We certify that the above information is true and that the quoted prices are valid until the date mentioned. We agree to supply the above materials as per the specifications and terms stated in this quotation.
                         </p>
                      </div>
-                     <div className="grid grid-cols-2 gap-20 pt-1 print:gap-10">
+                     <div className="grid grid-cols-2 gap-20 pt-2 print:gap-10">
                         <div className="space-y-2">
                            <div className="border-b-2 border-slate-200 w-full h-8 print:border-black"></div>
                            <p className="font-bold text-[9px] uppercase tracking-widest text-slate-400 print:text-black">Supplier Signature</p>
-                           <div className="relative w-28 h-10 border-2 border-dotted border-slate-100 flex items-center justify-center rounded-lg print:border-black">
-                              <span className="text-[7px] font-black uppercase text-slate-200 rotate-[-10deg] print:text-black">Company Seal</span>
+                           <div className="relative w-40 h-20 border-2 border-dotted border-slate-100 flex items-center justify-center rounded-2xl print:border-black">
+                              <span className="text-[10px] font-black uppercase text-slate-100 rotate-[-10deg] print:text-slate-200">Company Seal</span>
                            </div>
                         </div>
                         <div className="space-y-1.5 text-[11px] print:space-y-1">
