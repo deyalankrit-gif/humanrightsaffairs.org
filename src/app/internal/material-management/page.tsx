@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Progress } from '@/components/ui/progress'
 import { 
   Package, 
   Plus, 
@@ -89,6 +90,7 @@ export default function MaterialManagementPage() {
   const [categoryFilter, setCategoryFilter] = useState('All')
   const [isActionLoading, setIsActionLoading] = useState(false)
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [selectedMaterial, setSelectedMaterial] = useState<Material | null>(null)
   const [adjustmentMode, setAdjustmentMode] = useState<'Inflow' | 'Outflow' | null>(null)
   const [adjustmentAmount, setAdjustmentAmount] = useState('0')
@@ -108,6 +110,8 @@ export default function MaterialManagementPage() {
     location: 'National HQ',
     notes: ''
   })
+
+  const [editForm, setEditForm] = useState<Partial<Material>>({})
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -202,6 +206,43 @@ export default function MaterialManagementPage() {
       setIsAddDialogOpen(false)
     } catch (e) {
       toast({ variant: "destructive", title: "Archival Error" })
+    } finally {
+      setIsActionLoading(false)
+    }
+  }
+
+  const handleStartEdit = (material: Material) => {
+    setEditForm(material)
+    setIsEditDialogOpen(true)
+  }
+
+  const handleUpdateMaterial = async () => {
+    if (!db || !editForm.id) return;
+    if (!editForm.name?.trim()) {
+      toast({ variant: "destructive", title: "Validation Error", description: "Material name is mandatory." });
+      return;
+    }
+
+    setIsActionLoading(true)
+    const stock = Number(editForm.currentStock || 0)
+    const threshold = Number(editForm.lowStockThreshold || 0)
+    const status = stock <= 0 ? "Out of Stock" : stock <= threshold ? "Low Stock" : "Available";
+
+    const updateData = {
+      ...editForm,
+      currentStock: stock,
+      lowStockThreshold: threshold,
+      status,
+      updatedAt: serverTimestamp()
+    }
+
+    try {
+      await updateDoc(doc(db, 'materials', editForm.id), updateData)
+      toast({ title: "Material Updated", description: "Registry record refreshed successfully." })
+      setIsEditDialogOpen(false)
+      setEditForm({})
+    } catch (e) {
+      toast({ variant: "destructive", title: "Update Failed" })
     } finally {
       setIsActionLoading(false)
     }
@@ -342,7 +383,6 @@ export default function MaterialManagementPage() {
                     <Textarea value={newItem.notes} onChange={e => setNewItem({...newItem, notes: e.target.value})} placeholder="Condition or specific deployment details..." className="rounded-xl min-h-[80px]" />
                   </div>
 
-                  {/* Taxonomy Management Hub */}
                   <div className="p-5 bg-slate-50 dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 space-y-5 shadow-inner mt-4">
                     <div className="space-y-1">
                       <Label className="text-[9px] font-black uppercase text-accent tracking-[0.15em] flex items-center gap-2">
@@ -489,7 +529,6 @@ export default function MaterialManagementPage() {
 
       <section className="py-6 border-b bg-white dark:bg-slate-900 sticky top-10 z-30 shadow-sm transition-colors">
         <div className="container mx-auto px-4 space-y-6">
-           {/* TOP: CATEGORY LIST (SCROLLABLE) */}
            <div className="flex gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl overflow-x-auto no-scrollbar">
               <button 
                 onClick={() => setCategoryFilter('All')} 
@@ -514,7 +553,6 @@ export default function MaterialManagementPage() {
               ))}
            </div>
 
-           {/* BOTTOM: FILTER FIELD (CENTERED & ENLARGED) */}
            <div className="relative w-full max-w-2xl mx-auto">
              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
              <Input 
@@ -572,6 +610,11 @@ export default function MaterialManagementPage() {
                              <Button onClick={() => { setSelectedMaterial(item); setAdjustmentMode('Outflow'); }} variant="outline" className="h-11 rounded-xl border-rose-100 text-rose-600 font-bold hover:bg-rose-50 gap-2">
                                 <TrendingDown className="w-4 h-4" /> Outflow
                              </Button>
+                             
+                             <Button onClick={() => handleStartEdit(item)} variant="outline" size="icon" className="h-11 w-11 rounded-xl text-slate-400 hover:text-blue-600 border-slate-200">
+                                <Edit className="w-4.5 h-4.5" />
+                             </Button>
+
                              <AlertDialog>
                                <AlertDialogTrigger asChild>
                                  <Button variant="ghost" size="icon" className="h-11 w-11 text-slate-300 hover:text-red-500 rounded-xl"><Trash2 className="w-4.5 h-4.5" /></Button>
@@ -603,6 +646,84 @@ export default function MaterialManagementPage() {
            </div>
          )}
       </section>
+
+      {/* Edit Material Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="max-w-xl rounded-[2.5rem] max-h-[90vh] overflow-y-auto border-none shadow-2xl [&>button]:hidden">
+          <DialogHeader className="relative">
+             <div className="absolute right-0 top-0">
+                <DialogClose asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-slate-400 hover:text-primary">
+                    <X className="w-4 h-4" />
+                  </Button>
+                </DialogClose>
+             </div>
+             <DialogTitle className="text-2xl font-headline font-bold text-primary dark:text-white">Modify Material Record</DialogTitle>
+             <DialogDescription className="text-[10px] font-black uppercase tracking-widest text-slate-400">Logistical Profile Update</DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-6 py-4">
+            <div className="space-y-1.5">
+              <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Material Designation *</Label>
+              <Input value={editForm.name || ''} onChange={e => setEditForm({...editForm, name: e.target.value})} className="h-11 rounded-xl" />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Category</Label>
+                <Select value={editForm.category} onValueChange={(val: any) => setEditForm({...editForm, category: val})}>
+                  <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
+                  <SelectContent position="popper" className="z-[1000001] bg-white max-h-60 overflow-y-auto">
+                    {materialCategories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Stock SKU / ID</Label>
+                <Input value={editForm.sku || ''} onChange={e => setEditForm({...editForm, sku: e.target.value.toUpperCase()})} className="h-11 rounded-xl font-mono" />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Unit of Measure</Label>
+                <Select value={editForm.unit} onValueChange={(val: any) => setEditForm({...editForm, unit: val})}>
+                  <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
+                  <SelectContent position="popper" className="z-[1000001] bg-white">
+                    {UNITS.map(u => <SelectItem key={u} value={u}>{u}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Safety Threshold</Label>
+                <Input type="number" value={editForm.lowStockThreshold || 0} onChange={e => setEditForm({...editForm, lowStockThreshold: Number(e.target.value)})} className="h-11 rounded-xl" />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Current Stock</Label>
+                <Input type="number" value={editForm.currentStock || 0} onChange={e => setEditForm({...editForm, currentStock: Number(e.target.value)})} className="h-11 rounded-xl font-black text-emerald-600" />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Nodal Location</Label>
+                <Input value={editForm.location || ''} onChange={e => setEditForm({...editForm, location: e.target.value})} className="h-11 rounded-xl" />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Internal Audit Notes</Label>
+              <Textarea value={editForm.notes || ''} onChange={e => setEditForm({...editForm, notes: e.target.value})} className="rounded-xl min-h-[80px]" />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button onClick={handleUpdateMaterial} disabled={isActionLoading} className="w-full h-14 rounded-2xl bg-primary text-white font-bold text-lg hover:bg-secondary transition-all shadow-xl shadow-primary/20">
+              {isActionLoading ? <Loader2 className="animate-spin" /> : "Commit Profile Refresh"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Adjustment Dialog */}
       <Dialog open={!!adjustmentMode} onOpenChange={val => !val && setAdjustmentMode(null)}>
