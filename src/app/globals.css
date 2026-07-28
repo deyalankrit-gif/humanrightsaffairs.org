@@ -158,7 +158,7 @@
   .animate-marquee {
     display: flex;
     width: max-content;
-    animation: marquee 80s linear infinite;
+    animation: marquee 150s linear infinite;
   }
 
   .pause {
