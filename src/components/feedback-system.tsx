@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import { useFirestore, useCollection, useMemoFirebase } from '@/firebase'
 import { collection, query, orderBy, addDoc, serverTimestamp } from 'firebase/firestore'
 import { Card, CardContent } from '@/components/ui/card'
@@ -20,6 +20,33 @@ import {
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
+
+/**
+ * DEMI_TESTIMONIALS: High-fidelity institutional seed data.
+ * Represents a diverse cross-section of Indian citizens and their feedback.
+ */
+const DEMI_TESTIMONIALS = [
+  { id: 'd1', name: "Arindam Das", address: "Kolkata, West Bengal", comment: "The Legal Aid Cell provided me with incredible support during my family's property dispute. Truly a shield for the common man.", rating: 5 },
+  { id: 'd2', name: "Meena Iyer", address: "Chennai, Tamil Nadu", comment: "Excellent initiative for constitutional literacy. The awareness programs in our block have empowered many women.", rating: 4 },
+  { id: 'd3', name: "Biren Baruah", address: "Guwahati, Assam", comment: "Highly professional approach to human rights advocacy. Their intervention in my workplace grievance was swift and effective.", rating: 5 },
+  { id: 'd4', name: "Rajesh Mohanty", address: "Bhubaneswar, Odisha", comment: "The documentation assistance for filing an FIR was very helpful, though the response time at the district office could be improved.", rating: 3 },
+  { id: 'd5', name: "Priya Sharma", address: "New Delhi", comment: "The AI-Enhanced Rights Explorer is a game changer for students and law professionals alike. Highly accurate!", rating: 5 },
+  { id: 'd6', name: "Amit Singh", address: "Lucknow, Uttar Pradesh", comment: "HRAT is doing a great job in North India. I appreciate their dedication to labor rights and fair wages.", rating: 4 },
+  { id: 'd7', name: "Sunita Patil", address: "Mumbai, Maharashtra", comment: "The Women and Child Protection Cell is a blessing. They helped me secure my rights with absolute dignity.", rating: 5 },
+  { id: 'd8', name: "Karthik V", address: "Bengaluru, Karnataka", comment: "Very impressed with the technical transparency. The digital ID card verification is very secure.", rating: 4 },
+  { id: 'd9', name: "Lipika Roy", address: "Siliguri, West Bengal", comment: "Justice Shield-এর আইনি পরামর্শ আমাদের গ্রামের অনেক মানুষকে সাহায্য করেছে। অসংখ্য ধন্যবাদ!", rating: 5 },
+  { id: 'd10', name: "Debashish Patra", address: "Cuttack, Odisha", comment: "Reliable guidance on government schemes. They helped me get the benefits my elderly parents were entitled to.", rating: 4 },
+  { id: 'd11', name: "Anjali Devi", address: "Ranchi, Jharkhand", comment: "The grievance portal is a good step towards accountability. My issue was recorded and I received a tracking token.", rating: 3 },
+  { id: 'd12', name: "Manjunath Reddy", address: "Hyderabad, Telangana", comment: "Excellent work in promoting legal literacy. Their simple language manuals are perfect for non-legal backgrounds.", rating: 5 },
+  { id: 'd13', name: "Sangita Borah", address: "Jorhat, Assam", comment: "The pro-bono services are a lifesaver for marginalized sections. The advocates are very compassionate.", rating: 4 },
+  { id: 'd14', name: "Thangavelu M", address: "Madurai, Tamil Nadu", comment: "I received justice through their intervention in a land encroachment case. Faith in humanity restored.", rating: 5 },
+  { id: 'd15', name: "Rahul Gupta", address: "Jaipur, Rajasthan", comment: "Good platform for rights awareness. The RTI assistant helped me draft my application perfectly.", rating: 4 },
+  { id: 'd16', name: "Swapna Barman", address: "Cooch Behar, West Bengal", comment: "সংগঠনের কাজের স্বচ্ছতা ও সততা আমাকে মুগ্ধ করেছে। প্রান্তিক মানুষের লড়াইয়ে আপনারা সবসময় পাশে থাকুন।", rating: 5 },
+  { id: 'd17', name: "Naveen Kumar", address: "Amritsar, Punjab", comment: "Great intent and vision. I hope to see more local centers in the border regions soon.", rating: 3 },
+  { id: 'd18', name: "Divya Reddy", address: "Kochi, Kerala", comment: "The most high-fidelity NGO portal I have encountered. The data security measures are top-notch.", rating: 5 },
+  { id: 'd19', name: "Sanjay Raut", address: "Pune, Maharashtra", comment: "Professional leadership and clear communication. Their newsletters keep us well informed.", rating: 4 },
+  { id: 'd20', name: "Tapas Jena", address: "Puri, Odisha", comment: "The real shield for voiceless people. Their commitment to human rights is truly inspiring for everyone.", rating: 5 }
+];
 
 /**
  * Community Feedback System: Elevated Public Voice module.
@@ -42,7 +69,13 @@ export function FeedbackSystem() {
     return query(collection(db, 'feedback'), orderBy('createdAt', 'desc'));
   }, [db]);
 
-  const { data: feedbackItems, loading } = useCollection(feedbackQuery);
+  const { data: firestoreFeedback, loading } = useCollection(feedbackQuery);
+
+  // Merge Firestore data with Demi-Testimonials for a rich initial view
+  const feedbackItems = useMemo(() => {
+    const liveItems = firestoreFeedback || [];
+    return [...liveItems, ...DEMI_TESTIMONIALS];
+  }, [firestoreFeedback]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -67,17 +100,15 @@ export function FeedbackSystem() {
     }
   }
 
-  // Predefined colorful gradient themes for the floating boxes
   const themes = [
-    "from-orange-500 via-amber-400 to-yellow-500", // Saffron-Gold
-    "from-emerald-500 via-teal-400 to-cyan-500",   // Emerald-Teal
-    "from-indigo-600 via-purple-500 to-pink-500",  // Indigo-Purple
-    "from-rose-500 via-red-400 to-orange-500",     // Rose-Pink
+    "from-orange-500 via-amber-400 to-yellow-500",
+    "from-emerald-500 via-teal-400 to-cyan-500",
+    "from-indigo-600 via-purple-500 to-pink-500",
+    "from-rose-500 via-red-400 to-orange-500",
   ];
 
   return (
     <section className="py-20 bg-slate-50 dark:bg-slate-950 border-t border-slate-100 dark:border-slate-800 relative overflow-hidden">
-      {/* Decorative Background Elements */}
       <div className="absolute top-0 right-0 w-96 h-96 bg-accent/5 rounded-full blur-[100px] pointer-events-none"></div>
       <div className="absolute bottom-0 left-0 w-96 h-96 bg-primary/5 rounded-full blur-[100px] pointer-events-none"></div>
 
@@ -94,11 +125,9 @@ export function FeedbackSystem() {
           </p>
         </div>
 
-        {/* Marquee Feedback Display */}
         <div className="relative overflow-hidden w-full h-80 flex items-center mb-16">
           <div className="flex animate-marquee hover:pause whitespace-nowrap gap-8">
-            {feedbackItems && feedbackItems.length > 0 ? (
-              // Double the items to create seamless loop
+            {feedbackItems.length > 0 ? (
               [...feedbackItems, ...feedbackItems].map((item: any, idx) => {
                 const themeClass = themes[idx % themes.length];
                 return (
@@ -156,15 +185,10 @@ export function FeedbackSystem() {
               <div className="flex items-center gap-3 text-slate-400 font-bold uppercase tracking-widest text-xs px-10 py-8 bg-white dark:bg-slate-900 rounded-3xl border-2 border-dashed">
                 <Loader2 className="w-5 h-5 animate-spin text-accent" /> Synchronizing Verified Voices...
               </div>
-            ) : (
-              <div className="flex items-center gap-3 text-slate-400 font-bold uppercase tracking-widest text-xs px-10 py-8 bg-white dark:bg-slate-900 rounded-3xl border-2 border-dashed">
-                <MessageSquare className="w-5 h-5 text-slate-300" /> No feedback recorded yet. Be the first to share your experience.
-              </div>
-            )}
+            ) : null}
           </div>
         </div>
 
-        {/* Submission Form Card */}
         <Card className="max-w-2xl mx-auto rounded-[3rem] border-none shadow-2xl bg-white dark:bg-slate-950 p-8 md:p-14 relative overflow-hidden">
           <div className="absolute top-0 left-0 w-2 h-full bg-accent"></div>
           <div className="relative z-10 space-y-8">
@@ -197,7 +221,6 @@ export function FeedbackSystem() {
                 </div>
               </div>
 
-              {/* Star Rating Selector */}
               <div className="space-y-3">
                 <Label className="text-[11px] font-black uppercase text-slate-400 tracking-widest ml-1">Rate Our Mission / রেটিং দিন *</Label>
                 <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-900 p-4 rounded-xl w-fit shadow-inner">
