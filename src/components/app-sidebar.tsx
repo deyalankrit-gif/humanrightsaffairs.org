@@ -167,26 +167,27 @@ export function AppSidebar() {
   }, []);
 
   const togglePin = (href: string) => {
-    setPinnedHrefs(prev => {
-      let updated: string[];
-      if (prev.includes(href)) {
-        updated = prev.filter(h => h !== href);
-        toast({ title: "Menu Unpinned", description: "Shortcut removed from the Pinned section." });
-      } else {
-        if (prev.length >= 6) {
-          toast({ 
-            variant: "destructive", 
-            title: "Pin Limit Reached", 
-            description: "You can pin a maximum of 6 menus for optimal focus." 
-          });
-          return prev;
-        }
-        updated = [...prev, href];
-        toast({ title: "Menu Pinned", description: "Shortcut added to '📌 Menus' section." });
-      }
+    const isPinned = pinnedHrefs.includes(href);
+    
+    if (isPinned) {
+      const updated = pinnedHrefs.filter(h => h !== href);
+      setPinnedHrefs(updated);
       localStorage.setItem('hrat_pinned_menus', JSON.stringify(updated));
-      return updated;
-    });
+      toast({ title: "Menu Unpinned", description: "Shortcut removed from the Pinned section." });
+    } else {
+      if (pinnedHrefs.length >= 6) {
+        toast({ 
+          variant: "destructive", 
+          title: "Pin Limit Reached", 
+          description: "You can pin a maximum of 6 menus for optimal focus." 
+        });
+        return;
+      }
+      const updated = [...pinnedHrefs, href];
+      setPinnedHrefs(updated);
+      localStorage.setItem('hrat_pinned_menus', JSON.stringify(updated));
+      toast({ title: "Menu Pinned", description: "Shortcut added to '📌 Menus' section." });
+    }
   };
 
   // Centering logic
@@ -348,7 +349,7 @@ export function AppSidebar() {
                   {pinnedItems.map((link) => {
                     const isActive = pathname === link.href
                     return (
-                      <SidebarMenuItem key={link.name + "-pin"}>
+                      <SidebarMenuItem key={link.name} ref={isActive ? activeItemRef : null}>
                         <SidebarMenuButton
                           asChild
                           isActive={isActive}
