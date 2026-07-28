@@ -141,7 +141,7 @@ export function PublicFooter() {
                 ))}
               </div>
               
-              {/* Bengali Hyperlink */}
+              {/* Bengali Orange Hyperlink */}
               <Link 
                 href="/legal/police-duties" 
                 className="text-accent hover:underline font-bold text-xl md:text-2xl mt-4 block transition-all"
@@ -263,7 +263,7 @@ export function PublicFooter() {
                   <p className="text-xs text-primary-foreground/80 font-bold">Kolkata 700157</p>
                 </div>
 
-                {/* Repositioned Donation Call to Action Image */}
+                {/* Repositioned Donation Call to Action Image under Registered Office */}
                 <div className="pt-6">
                   <DonationDialog initialStep="qr">
                     <button className="block w-32 md:w-40 h-24 md:h-28 relative group cursor-pointer overflow-hidden rounded-xl bg-transparent border-none p-0 outline-none transition-all duration-500 hover:scale-[1.5] active:scale-95 origin-left hover:z-50">
