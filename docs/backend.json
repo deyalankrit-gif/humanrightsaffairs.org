@@ -102,11 +102,12 @@
       "type": "object",
       "properties": {
         "name": { "type": "string" },
+        "address": { "type": "string" },
         "comment": { "type": "string" },
         "rating": { "type": "number" },
         "createdAt": { "type": "string", "format": "date-time" }
       },
-      "required": ["name", "comment"]
+      "required": ["name", "address", "comment"]
     }
   },
   "auth": {

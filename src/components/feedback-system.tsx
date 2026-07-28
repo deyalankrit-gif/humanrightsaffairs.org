@@ -14,7 +14,7 @@ import {
   Send, 
   Loader2, 
   User, 
-  Star,
+  MapPin,
   Quote
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
@@ -24,7 +24,7 @@ export function FeedbackSystem() {
   const db = useFirestore()
   const { toast } = useToast()
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [formData, setFormData] = useState({ name: '', comment: '' })
+  const [formData, setFormData] = useState({ name: '', address: '', comment: '' })
 
   const feedbackQuery = useMemoFirebase(() => {
     if (!db) return null;
@@ -36,8 +36,8 @@ export function FeedbackSystem() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!db) return
-    if (!formData.name.trim() || !formData.comment.trim()) {
-      toast({ variant: "destructive", title: "Validation Error", description: "Name and comment are required." })
+    if (!formData.name.trim() || !formData.address.trim() || !formData.comment.trim()) {
+      toast({ variant: "destructive", title: "Validation Error", description: "All fields including address are required." })
       return
     }
 
@@ -48,7 +48,7 @@ export function FeedbackSystem() {
         createdAt: serverTimestamp()
       })
       toast({ title: "Feedback Recorded", description: "Thank you for your valuable input." })
-      setFormData({ name: '', comment: '' })
+      setFormData({ name: '', address: '', comment: '' })
     } catch (e: any) {
       toast({ variant: "destructive", title: "Submission Failed" })
     } finally {
@@ -68,7 +68,7 @@ export function FeedbackSystem() {
         </div>
 
         {/* Marquee Feedback Display */}
-        <div className="relative overflow-hidden w-full h-48 flex items-center mb-12">
+        <div className="relative overflow-hidden w-full h-56 flex items-center mb-12">
           <div className="flex animate-marquee hover:pause whitespace-nowrap gap-6">
             {feedbackItems && feedbackItems.length > 0 ? (
               // Double the items to create seamless loop
@@ -76,14 +76,16 @@ export function FeedbackSystem() {
                 <Card key={`${item.id}-${idx}`} className="inline-block min-w-[300px] md:min-w-[400px] border-none shadow-sm rounded-2xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-6 relative">
                   <Quote className="absolute top-4 right-4 w-10 h-10 text-slate-50 dark:text-slate-800" />
                   <CardContent className="p-0 space-y-4">
-                    <p className="text-sm italic text-slate-600 dark:text-slate-300 leading-relaxed line-clamp-3">"{item.comment}"</p>
-                    <div className="flex items-center gap-3 pt-2 border-t border-slate-50 dark:border-slate-800">
-                      <div className="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center text-accent">
-                        <User className="w-4 h-4" />
+                    <p className="text-sm italic text-slate-600 dark:text-slate-300 leading-relaxed line-clamp-3 whitespace-normal">"{item.comment}"</p>
+                    <div className="flex items-center gap-3 pt-3 border-t border-slate-50 dark:border-slate-800">
+                      <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center text-accent shrink-0">
+                        <User className="w-5 h-5" />
                       </div>
-                      <div>
-                        <p className="text-xs font-bold text-primary dark:text-white">{item.name}</p>
-                        <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Verified Citizen</p>
+                      <div className="min-w-0">
+                        <p className="text-xs font-bold text-primary dark:text-white truncate">{item.name}</p>
+                        <p className="text-[9px] text-slate-400 font-bold uppercase tracking-tight flex items-center gap-1 truncate">
+                          <MapPin className="w-2.5 h-2.5" /> {item.address}
+                        </p>
                       </div>
                     </div>
                   </CardContent>
@@ -91,7 +93,7 @@ export function FeedbackSystem() {
               ))
             ) : loading ? (
               <div className="flex items-center gap-2 text-slate-400 font-bold uppercase tracking-widest text-[10px]">
-                <Loader2 className="w-4 h-4 animate-spin" /> Synchronizing Feedback...
+                <Loader2 className="w-4 h-4 animate-spin text-accent" /> Synchronizing Feedback...
               </div>
             ) : (
               <div className="flex items-center gap-2 text-slate-400 font-bold uppercase tracking-widest text-[10px]">
@@ -103,7 +105,7 @@ export function FeedbackSystem() {
 
         {/* Submission Form */}
         <Card className="max-w-xl mx-auto rounded-[2.5rem] border-none shadow-xl bg-white dark:bg-slate-950 p-8 md:p-10">
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
               <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Full Name / নাম</Label>
               <Input 
@@ -114,12 +116,21 @@ export function FeedbackSystem() {
               />
             </div>
             <div className="space-y-2">
+              <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Address / ঠিকানা</Label>
+              <Input 
+                value={formData.address} 
+                onChange={e => setFormData({...formData, address: e.target.value})} 
+                placeholder="District, State (e.g. Kolkata, WB)" 
+                className="h-12 rounded-xl"
+              />
+            </div>
+            <div className="space-y-2">
               <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Your Experience / আপনার মতামত</Label>
               <Textarea 
                 value={formData.comment} 
                 onChange={e => setFormData({...formData, comment: e.target.value})} 
                 placeholder="Share your thoughts on our services..." 
-                className="rounded-2xl min-h-[120px]"
+                className="rounded-2xl min-h-[100px]"
               />
             </div>
             <Button 
