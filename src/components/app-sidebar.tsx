@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -16,6 +17,11 @@ import {
   SidebarGroupLabel,
   SidebarGroupContent,
 } from "@/components/ui/sidebar"
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible"
 import {
   Home,
   Handshake,
@@ -56,7 +62,9 @@ import {
   Package,
   Boxes,
   Navigation,
-  Bell
+  Bell,
+  ChevronDown,
+  ChevronRight
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -151,10 +159,9 @@ export function AppSidebar() {
       const itemRect = activeItemRef.current.getBoundingClientRect();
       const containerRect = scrollContainer.getBoundingClientRect();
 
-      // Avoid unnecessary scrolling if already close to the center and fully visible
       const itemCenter = itemRect.top + itemRect.height / 2;
       const containerCenter = containerRect.top + containerRect.height / 2;
-      const threshold = containerRect.height * 0.15; // 15% tolerance
+      const threshold = containerRect.height * 0.15;
 
       const isOptimallyPositioned = (
         itemRect.top >= containerRect.top + 50 &&
@@ -170,7 +177,6 @@ export function AppSidebar() {
       }
     };
 
-    // Small delay to ensure route transitions and DOM layout are completed
     const timer = setTimeout(scrollActiveItem, 150);
     return () => clearTimeout(timer);
   }, [pathname, activeHash]);
@@ -234,162 +240,203 @@ export function AppSidebar() {
       </SidebarHeader>
       
       <SidebarContent className="py-6 custom-scrollbar scroll-smooth">
-        {isAdminPortal && filteredTopAnalyticsLinks.length > 0 && (
-          <SidebarGroup>
-            <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden text-primary font-bold">
-              INSTITUTIONAL INTELLIGENCE
-            </SidebarGroupLabel>
-            <SidebarMenu>
-              {filteredTopAnalyticsLinks.map((link) => {
-                const isActive = pathname === link.href
-                return (
-                  <SidebarMenuItem key={link.name} ref={isActive ? activeItemRef : null}>
-                    <SidebarMenuButton
-                      asChild
-                      isActive={isActive}
-                      tooltip={link.name}
-                      className={cn(
-                        "h-11 rounded-xl transition-all px-4",
-                        isActive ? "bg-accent text-white font-bold" : "hover:bg-accent/10 hover:text-accent group/btn"
-                      )}
-                    >
-                      <Link href={link.href} className="flex items-center gap-3">
-                        <link.icon className={cn("w-5 h-5", isActive ? "text-white" : "text-muted-foreground group-hover/btn:text-accent")} />
-                        <span className="group-data-[collapsible=icon]:hidden">{link.name}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                )
-              })}
-            </SidebarMenu>
-          </SidebarGroup>
-        )}
-
-        {isAdminPortal && filteredLogisticLinks.length > 0 && (
-          <SidebarGroup>
-            <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden text-blue-600 font-bold uppercase tracking-widest">
-              LOGISTICAL GOVERNANCE
-            </SidebarGroupLabel>
-            <SidebarMenu>
-              {filteredLogisticLinks.map((link) => {
-                const isActive = pathname === link.href
-                return (
-                  <SidebarMenuItem key={link.name} ref={isActive ? activeItemRef : null}>
-                    <SidebarMenuButton
-                      asChild
-                      isActive={isActive}
-                      tooltip={link.name}
-                      className={cn(
-                        "h-11 rounded-xl transition-all px-4",
-                        isActive ? "bg-accent text-white font-bold" : "hover:bg-accent/10 hover:text-accent group/btn"
-                      )}
-                    >
-                      <Link href={link.href} className="flex items-center gap-3">
-                        <link.icon className={cn("w-5 h-5", isActive ? "text-white" : "text-muted-foreground group-hover/btn:text-accent")} />
-                        <span className="group-data-[collapsible=icon]:hidden">{link.name}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                )
-              })}
-            </SidebarMenu>
-          </SidebarGroup>
-        )}
-
-        {isAdminPortal && filteredFinanceLinks.length > 0 && (
-          <SidebarGroup>
-            <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden text-red-600 font-bold">
-              FINANCIAL GOVERNANCE
-            </SidebarGroupLabel>
-            <SidebarMenu>
-              {filteredFinanceLinks.map((link) => {
-                const isActive = pathname === link.href || (link.href !== '/' && pathname.startsWith(link.href))
-                return (
-                  <SidebarMenuItem key={link.name} ref={isActive ? activeItemRef : null}>
-                    <SidebarMenuButton
-                      asChild
-                      isActive={isActive}
-                      tooltip={link.name}
-                      className={cn(
-                        "h-11 rounded-xl transition-all px-4",
-                        isActive ? "bg-emerald-600 text-white font-bold" : "hover:bg-emerald-500/10 hover:text-emerald-500 group/btn"
-                      )}
-                    >
-                      <Link href={link.href} className="flex items-center gap-3">
-                        <link.icon className={cn("w-5 h-5", isActive ? "text-white" : "text-muted-foreground group-hover/btn:text-emerald-500")} />
-                        <span className="group-data-[collapsible=icon]:hidden">{link.name}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                )
-              })}
-            </SidebarMenu>
-          </SidebarGroup>
-        )}
-
-        <SidebarGroup>
-          <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">
-            {isAdminPortal ? (
-              isRoot ? (
-                <span className="text-emerald-500 font-bold uppercase tracking-widest">Route Governance</span>
-              ) : (
-                "STAFF OPERATIONS"
-              )
-            ) : (
-              "NAVIGATION"
+        {isAdminPortal ? (
+          <>
+            {/* Intelligence Section */}
+            {filteredTopAnalyticsLinks.length > 0 && (
+              <Collapsible defaultOpen className="group/collapsible">
+                <SidebarGroup>
+                  <CollapsibleTrigger asChild>
+                    <SidebarGroupLabel className="cursor-pointer hover:bg-accent/5 transition-colors group-data-[collapsible=icon]:hidden text-primary font-bold flex items-center justify-between w-full pr-2">
+                      INSTITUTIONAL INTELLIGENCE
+                      <ChevronDown className="ml-auto h-3 w-3 transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                    </SidebarGroupLabel>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenu>
+                      {filteredTopAnalyticsLinks.map((link) => {
+                        const isActive = pathname === link.href
+                        return (
+                          <SidebarMenuItem key={link.name} ref={isActive ? activeItemRef : null}>
+                            <SidebarMenuButton
+                              asChild
+                              isActive={isActive}
+                              tooltip={link.name}
+                              className={cn(
+                                "h-11 rounded-xl transition-all px-4",
+                                isActive ? "bg-accent text-white font-bold" : "hover:bg-accent/10 hover:text-accent group/btn"
+                              )}
+                            >
+                              <Link href={link.href} className="flex items-center gap-3">
+                                <link.icon className={cn("w-5 h-5", isActive ? "text-white" : "text-muted-foreground group-hover/btn:text-accent")} />
+                                <span className="group-data-[collapsible=icon]:hidden">{link.name}</span>
+                              </Link>
+                            </SidebarMenuButton>
+                          </SidebarMenuItem>
+                        )
+                      })}
+                    </SidebarMenu>
+                  </CollapsibleContent>
+                </SidebarGroup>
+              </Collapsible>
             )}
-          </SidebarGroupLabel>
-          <SidebarMenu>
-            {(isAdminPortal ? filteredAdminLinks : publicLinks).map((link) => {
-              let isActive = false
-              
-              if (isAdminPortal) {
-                isActive = pathname === link.href || (link.href !== '/' && pathname.startsWith(link.href))
-              } else {
+
+            {/* Logistics Section */}
+            {filteredLogisticLinks.length > 0 && (
+              <Collapsible defaultOpen={filteredLogisticLinks.some(l => pathname === l.href)} className="group/collapsible">
+                <SidebarGroup>
+                  <CollapsibleTrigger asChild>
+                    <SidebarGroupLabel className="cursor-pointer hover:bg-blue-500/5 transition-colors group-data-[collapsible=icon]:hidden text-blue-600 font-bold uppercase tracking-widest flex items-center justify-between w-full pr-2">
+                      LOGISTICAL GOVERNANCE
+                      <ChevronDown className="ml-auto h-3 w-3 transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                    </SidebarGroupLabel>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenu>
+                      {filteredLogisticLinks.map((link) => {
+                        const isActive = pathname === link.href
+                        return (
+                          <SidebarMenuItem key={link.name} ref={isActive ? activeItemRef : null}>
+                            <SidebarMenuButton
+                              asChild
+                              isActive={isActive}
+                              tooltip={link.name}
+                              className={cn(
+                                "h-11 rounded-xl transition-all px-4",
+                                isActive ? "bg-accent text-white font-bold" : "hover:bg-accent/10 hover:text-accent group/btn"
+                              )}
+                            >
+                              <Link href={link.href} className="flex items-center gap-3">
+                                <link.icon className={cn("w-5 h-5", isActive ? "text-white" : "text-muted-foreground group-hover/btn:text-accent")} />
+                                <span className="group-data-[collapsible=icon]:hidden">{link.name}</span>
+                              </Link>
+                            </SidebarMenuButton>
+                          </SidebarMenuItem>
+                        )
+                      })}
+                    </SidebarMenu>
+                  </CollapsibleContent>
+                </SidebarGroup>
+              </Collapsible>
+            )}
+
+            {/* Finance Section */}
+            {filteredFinanceLinks.length > 0 && (
+              <Collapsible defaultOpen={filteredFinanceLinks.some(l => pathname === l.href || pathname.startsWith(l.href))} className="group/collapsible">
+                <SidebarGroup>
+                  <CollapsibleTrigger asChild>
+                    <SidebarGroupLabel className="cursor-pointer hover:bg-red-500/5 transition-colors group-data-[collapsible=icon]:hidden text-red-600 font-bold flex items-center justify-between w-full pr-2">
+                      FINANCIAL GOVERNANCE
+                      <ChevronDown className="ml-auto h-3 w-3 transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                    </SidebarGroupLabel>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenu>
+                      {filteredFinanceLinks.map((link) => {
+                        const isActive = pathname === link.href || (link.href !== '/' && pathname.startsWith(link.href))
+                        return (
+                          <SidebarMenuItem key={link.name} ref={isActive ? activeItemRef : null}>
+                            <SidebarMenuButton
+                              asChild
+                              isActive={isActive}
+                              tooltip={link.name}
+                              className={cn(
+                                "h-11 rounded-xl transition-all px-4",
+                                isActive ? "bg-emerald-600 text-white font-bold" : "hover:bg-emerald-500/10 hover:text-emerald-500 group/btn"
+                              )}
+                            >
+                              <Link href={link.href} className="flex items-center gap-3">
+                                <link.icon className={cn("w-5 h-5", isActive ? "text-white" : "text-muted-foreground group-hover/btn:text-emerald-500")} />
+                                <span className="group-data-[collapsible=icon]:hidden">{link.name}</span>
+                              </Link>
+                            </SidebarMenuButton>
+                          </SidebarMenuItem>
+                        )
+                      })}
+                    </SidebarMenu>
+                  </CollapsibleContent>
+                </SidebarGroup>
+              </Collapsible>
+            )}
+
+            {/* Operations Section */}
+            {filteredAdminLinks.length > 0 && (
+              <Collapsible defaultOpen className="group/collapsible">
+                <SidebarGroup>
+                  <CollapsibleTrigger asChild>
+                    <SidebarGroupLabel className="cursor-pointer hover:bg-accent/5 transition-colors group-data-[collapsible=icon]:hidden text-primary font-bold flex items-center justify-between w-full pr-2">
+                      {isRoot ? "ROUTE GOVERNANCE" : "STAFF OPERATIONS"}
+                      <ChevronDown className="ml-auto h-3 w-3 transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                    </SidebarGroupLabel>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenu>
+                      {filteredAdminLinks.map((link) => {
+                        const isActive = pathname === link.href || (link.href !== '/' && pathname.startsWith(link.href))
+                        return (
+                          <SidebarMenuItem key={link.name} ref={isActive ? activeItemRef : null}>
+                            <SidebarMenuButton
+                              asChild
+                              isActive={isActive}
+                              tooltip={link.name}
+                              className={cn(
+                                "h-11 rounded-xl transition-all px-4",
+                                isActive 
+                                  ? (isRoot ? "bg-red-600 text-white font-bold" : "bg-accent text-white font-bold")
+                                  : "hover:bg-secondary/10 hover:text-secondary group/btn"
+                              )}
+                            >
+                              <Link href={link.href} className="flex items-center gap-3">
+                                <link.icon className={cn("w-5 h-5", isActive ? "text-white" : "text-muted-foreground group-hover/btn:text-secondary")} />
+                                <span className="group-data-[collapsible=icon]:hidden">{link.name}</span>
+                              </Link>
+                            </SidebarMenuButton>
+                          </SidebarMenuItem>
+                        )
+                      })}
+                    </SidebarMenu>
+                  </CollapsibleContent>
+                </SidebarGroup>
+              </Collapsible>
+            )}
+          </>
+        ) : (
+          /* Public Portal Sidebar (Simplified) */
+          <SidebarGroup>
+            <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">NAVIGATION</SidebarGroupLabel>
+            <SidebarMenu>
+              {publicLinks.map((link) => {
                 const isHashLink = link.href.includes('#')
                 const linkPath = isHashLink ? link.href.split('#')[0] || '/' : link.href
                 const linkHash = isHashLink ? '#' + link.href.split('#')[1] : ''
-                
-                if (isHashLink) {
-                  isActive = pathname === linkPath && activeHash === linkHash
-                } else {
-                  isActive = pathname === link.href && activeHash === ''
-                }
-              }
+                const isActive = isHashLink ? (pathname === linkPath && activeHash === linkHash) : (pathname === link.href && activeHash === '')
 
-              return (
-                <SidebarMenuItem key={link.name} ref={isActive ? activeItemRef : null}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={isActive}
-                    tooltip={link.name}
-                    className={cn(
-                      "h-11 rounded-xl transition-all px-4",
-                      isActive 
-                        ? (isAdminPortal && isRoot ? "bg-red-600 text-white font-bold" : "bg-accent text-white font-bold")
-                        : "hover:bg-secondary/10 hover:text-secondary group/btn"
-                    )}
-                  >
-                    <Link 
-                      href={link.href}
-                      onClick={() => {
-                        if (!isAdminPortal && link.href.includes('#')) setActiveHash('#' + link.href.split('#')[1])
-                        else if (!isAdminPortal) setActiveHash('')
-                      }}
-                      className="flex items-center gap-3"
+                return (
+                  <SidebarMenuItem key={link.name} ref={isActive ? activeItemRef : null}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={isActive}
+                      tooltip={link.name}
+                      className={cn(
+                        "h-11 rounded-xl transition-all px-4",
+                        isActive ? "bg-accent text-white font-bold" : "hover:bg-secondary/10 hover:text-secondary group/btn"
+                      )}
                     >
-                      <link.icon className={cn(
-                        "w-5 h-5", 
-                        isActive ? "text-white" : "text-muted-foreground group-hover/btn:text-secondary"
-                      )} />
-                      <span className="group-data-[collapsible=icon]:hidden">{link.name}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              )
-            })}
-          </SidebarMenu>
-        </SidebarGroup>
+                      <Link 
+                        href={link.href}
+                        onClick={() => setActiveHash(isHashLink ? linkHash : '')}
+                        className="flex items-center gap-3"
+                      >
+                        <link.icon className={cn("w-5 h-5", isActive ? "text-white" : "text-muted-foreground group-hover/btn:text-secondary")} />
+                        <span className="group-data-[collapsible=icon]:hidden">{link.name}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                )
+              })}
+            </SidebarMenu>
+          </SidebarGroup>
+        )}
 
         {isAdminPortal && isRoot && (
           <SidebarGroup className="mt-4 border-t border-white/5 pt-6 group-data-[collapsible=icon]:hidden">
