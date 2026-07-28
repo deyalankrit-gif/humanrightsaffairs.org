@@ -16,6 +16,7 @@ import {
   SidebarGroup,
   SidebarGroupLabel,
   SidebarGroupContent,
+  SidebarMenuAction,
 } from "@/components/ui/sidebar"
 import {
   Collapsible,
@@ -64,7 +65,8 @@ import {
   Navigation,
   Bell,
   ChevronDown,
-  ChevronRight
+  Pin,
+  PinOff
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -72,6 +74,7 @@ import { DonationDialog } from "./donation-dialog"
 import { useFirestore, useDoc, useUser, useMemoFirebase } from '@/firebase'
 import { doc } from 'firebase/firestore'
 import { SidebarAudioStation } from "./sidebar-audio-station"
+import { useToast } from "@/hooks/use-toast"
 
 const publicLinks = [
   { name: 'Home', href: '/', icon: Home },
@@ -132,13 +135,18 @@ const financeLinksConfig = [
   { name: 'Tax & Compliance', href: '/internal/finance/compliance', icon: Scale, permission: 'financeCompliance' },
 ]
 
+const ALL_ADMIN_LINKS = [...topAnalyticsLinksConfig, ...adminLinksConfig, ...logisticLinksConfig, ...financeLinksConfig];
+
 export function AppSidebar() {
   const pathname = usePathname()
   const [activeHash, setActiveHash] = React.useState('')
   const activeItemRef = React.useRef<HTMLLIElement | null>(null)
   const db = useFirestore()
   const { user } = useUser()
+  const { toast } = useToast()
   const isAdminPortal = pathname?.startsWith('/internal')
+
+  const [pinnedHrefs, setPinnedHrefs] = React.useState<string[]>([])
 
   const userDocRef = useMemoFirebase(() => {
     if (!db || !user?.email) return null;
@@ -148,7 +156,40 @@ export function AppSidebar() {
   const { data: userPermissions } = useDoc(userDocRef);
   const isRoot = user?.email?.toLowerCase() === 'deydhritiman@gmail.com';
 
-  // NAVIGATION PANEL AUTO-CENTERING BEHAVIOR
+  // Persistence logic for pinned menus
+  React.useEffect(() => {
+    const saved = localStorage.getItem('hrat_pinned_menus');
+    if (saved) {
+      try {
+        setPinnedHrefs(JSON.parse(saved));
+      } catch (e) {}
+    }
+  }, []);
+
+  const togglePin = (href: string) => {
+    setPinnedHrefs(prev => {
+      let updated: string[];
+      if (prev.includes(href)) {
+        updated = prev.filter(h => h !== href);
+        toast({ title: "Menu Unpinned", description: "Shortcut removed from the Pinned section." });
+      } else {
+        if (prev.length >= 6) {
+          toast({ 
+            variant: "destructive", 
+            title: "Pin Limit Reached", 
+            description: "You can pin a maximum of 6 menus for optimal focus." 
+          });
+          return prev;
+        }
+        updated = [...prev, href];
+        toast({ title: "Menu Pinned", description: "Shortcut added to '📌 Menus' section." });
+      }
+      localStorage.setItem('hrat_pinned_menus', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  // Centering logic
   React.useEffect(() => {
     const scrollActiveItem = () => {
       if (!activeItemRef.current) return;
@@ -214,6 +255,10 @@ export function AppSidebar() {
     })
   }, [isAdminPortal, isRoot, userPermissions])
 
+  const pinnedItems = React.useMemo(() => {
+    return ALL_ADMIN_LINKS.filter(link => pinnedHrefs.includes(link.href));
+  }, [pinnedHrefs]);
+
   React.useEffect(() => {
     if (typeof window !== 'undefined') {
       const handleHashChange = () => {
@@ -256,6 +301,7 @@ export function AppSidebar() {
                     <SidebarMenu>
                       {filteredTopAnalyticsLinks.map((link) => {
                         const isActive = pathname === link.href
+                        const isPinned = pinnedHrefs.includes(link.href)
                         return (
                           <SidebarMenuItem key={link.name} ref={isActive ? activeItemRef : null}>
                             <SidebarMenuButton
@@ -272,6 +318,17 @@ export function AppSidebar() {
                                 <span className="group-data-[collapsible=icon]:hidden">{link.name}</span>
                               </Link>
                             </SidebarMenuButton>
+                            {isRoot && (
+                              <SidebarMenuAction 
+                                onClick={() => togglePin(link.href)}
+                                className={cn(
+                                  "opacity-0 group-hover/menu-item:opacity-100 transition-opacity",
+                                  isPinned ? "text-accent" : "text-slate-400"
+                                )}
+                              >
+                                {isPinned ? <Pin className="fill-current" /> : <Pin />}
+                              </SidebarMenuAction>
+                            )}
                           </SidebarMenuItem>
                         )
                       })}
@@ -279,6 +336,44 @@ export function AppSidebar() {
                   </CollapsibleContent>
                 </SidebarGroup>
               </Collapsible>
+            )}
+
+            {/* PINNED MENUS SECTION */}
+            {isRoot && pinnedItems.length > 0 && (
+              <SidebarGroup className="animate-in fade-in slide-in-from-left-2 duration-500">
+                <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden text-accent font-black tracking-widest flex items-center gap-2">
+                  📌 MENUS
+                </SidebarGroupLabel>
+                <SidebarMenu>
+                  {pinnedItems.map((link) => {
+                    const isActive = pathname === link.href
+                    return (
+                      <SidebarMenuItem key={link.name + "-pin"}>
+                        <SidebarMenuButton
+                          asChild
+                          isActive={isActive}
+                          tooltip={link.name}
+                          className={cn(
+                            "h-10 rounded-xl transition-all px-4 border border-transparent",
+                            isActive ? "bg-accent text-primary font-bold shadow-lg border-accent/20" : "bg-accent/5 text-accent hover:bg-accent/10"
+                          )}
+                        >
+                          <Link href={link.href} className="flex items-center gap-3">
+                            <link.icon className="w-4.5 h-4.5" />
+                            <span className="group-data-[collapsible=icon]:hidden text-[11px] font-bold uppercase">{link.name}</span>
+                          </Link>
+                        </SidebarMenuButton>
+                        <SidebarMenuAction 
+                          onClick={() => togglePin(link.href)}
+                          className="opacity-0 group-hover/menu-item:opacity-100 text-accent"
+                        >
+                          <PinOff className="w-3 h-3" />
+                        </SidebarMenuAction>
+                      </SidebarMenuItem>
+                    )
+                  })}
+                </SidebarMenu>
+              </SidebarGroup>
             )}
 
             {/* Logistics Section */}
@@ -295,6 +390,7 @@ export function AppSidebar() {
                     <SidebarMenu>
                       {filteredLogisticLinks.map((link) => {
                         const isActive = pathname === link.href
+                        const isPinned = pinnedHrefs.includes(link.href)
                         return (
                           <SidebarMenuItem key={link.name} ref={isActive ? activeItemRef : null}>
                             <SidebarMenuButton
@@ -311,6 +407,17 @@ export function AppSidebar() {
                                 <span className="group-data-[collapsible=icon]:hidden">{link.name}</span>
                               </Link>
                             </SidebarMenuButton>
+                            {isRoot && (
+                              <SidebarMenuAction 
+                                onClick={() => togglePin(link.href)}
+                                className={cn(
+                                  "opacity-0 group-hover/menu-item:opacity-100 transition-opacity",
+                                  isPinned ? "text-accent" : "text-slate-400"
+                                )}
+                              >
+                                {isPinned ? <Pin className="fill-current" /> : <Pin />}
+                              </SidebarMenuAction>
+                            )}
                           </SidebarMenuItem>
                         )
                       })}
@@ -334,6 +441,7 @@ export function AppSidebar() {
                     <SidebarMenu>
                       {filteredFinanceLinks.map((link) => {
                         const isActive = pathname === link.href || (link.href !== '/' && pathname.startsWith(link.href))
+                        const isPinned = pinnedHrefs.includes(link.href)
                         return (
                           <SidebarMenuItem key={link.name} ref={isActive ? activeItemRef : null}>
                             <SidebarMenuButton
@@ -350,6 +458,17 @@ export function AppSidebar() {
                                 <span className="group-data-[collapsible=icon]:hidden">{link.name}</span>
                               </Link>
                             </SidebarMenuButton>
+                            {isRoot && (
+                              <SidebarMenuAction 
+                                onClick={() => togglePin(link.href)}
+                                className={cn(
+                                  "opacity-0 group-hover/menu-item:opacity-100 transition-opacity",
+                                  isPinned ? "text-accent" : "text-slate-400"
+                                )}
+                              >
+                                {isPinned ? <Pin className="fill-current" /> : <Pin />}
+                              </SidebarMenuAction>
+                            )}
                           </SidebarMenuItem>
                         )
                       })}
@@ -373,6 +492,7 @@ export function AppSidebar() {
                     <SidebarMenu>
                       {filteredAdminLinks.map((link) => {
                         const isActive = pathname === link.href || (link.href !== '/' && pathname.startsWith(link.href))
+                        const isPinned = pinnedHrefs.includes(link.href)
                         return (
                           <SidebarMenuItem key={link.name} ref={isActive ? activeItemRef : null}>
                             <SidebarMenuButton
@@ -391,6 +511,17 @@ export function AppSidebar() {
                                 <span className="group-data-[collapsible=icon]:hidden">{link.name}</span>
                               </Link>
                             </SidebarMenuButton>
+                            {isRoot && (
+                              <SidebarMenuAction 
+                                onClick={() => togglePin(link.href)}
+                                className={cn(
+                                  "opacity-0 group-hover/menu-item:opacity-100 transition-opacity",
+                                  isPinned ? "text-accent" : "text-slate-400"
+                                )}
+                              >
+                                {isPinned ? <Pin className="fill-current" /> : <Pin />}
+                              </SidebarMenuAction>
+                            )}
                           </SidebarMenuItem>
                         )
                       })}
