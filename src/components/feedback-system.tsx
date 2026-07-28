@@ -1,7 +1,6 @@
-
 "use client"
 
-import React, { useState, useMemo } from 'react'
+import React, { useState } from 'react'
 import { useFirestore, useCollection, useMemoFirebase } from '@/firebase'
 import { collection, query, orderBy, addDoc, serverTimestamp } from 'firebase/firestore'
 import { Card, CardContent } from '@/components/ui/card'
@@ -15,11 +14,16 @@ import {
   Loader2, 
   User, 
   MapPin,
-  Quote
+  Quote,
+  Sparkles
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
 
+/**
+ * Community Feedback System: Elevated Public Voice module.
+ * Features: Animated colorful marquee, glassmorphism, and real-time registry sync.
+ */
 export function FeedbackSystem() {
   const db = useFirestore()
   const { toast } = useToast()
@@ -56,91 +60,148 @@ export function FeedbackSystem() {
     }
   }
 
+  // Predefined colorful gradient themes for the floating boxes
+  const themes = [
+    "from-orange-500 via-amber-400 to-yellow-500", // Saffron-Gold
+    "from-emerald-500 via-teal-400 to-cyan-500",   // Emerald-Teal
+    "from-indigo-600 via-purple-500 to-pink-500",  // Indigo-Purple
+    "from-rose-500 via-red-400 to-orange-500",     // Rose-Pink
+  ];
+
   return (
-    <section className="py-12 bg-slate-50 dark:bg-slate-900/30 border-t border-slate-100 dark:border-slate-800">
-      <div className="container mx-auto px-4">
-        <div className="text-center max-w-2xl mx-auto mb-10">
-          <div className="inline-flex items-center gap-2 bg-accent/20 text-accent px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border border-accent/30 mb-4">
-            <MessageSquare className="w-3.5 h-3.5" /> Public Voice
+    <section className="py-20 bg-slate-50 dark:bg-slate-950 border-t border-slate-100 dark:border-slate-800 relative overflow-hidden">
+      {/* Decorative Background Elements */}
+      <div className="absolute top-0 right-0 w-96 h-96 bg-accent/5 rounded-full blur-[100px] pointer-events-none"></div>
+      <div className="absolute bottom-0 left-0 w-96 h-96 bg-primary/5 rounded-full blur-[100px] pointer-events-none"></div>
+
+      <div className="container mx-auto px-4 relative z-10">
+        <div className="text-center max-w-2xl mx-auto mb-16">
+          <div className="inline-flex items-center gap-2 bg-accent/20 text-accent px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] border border-accent/30 mb-4 animate-pulse">
+            <Sparkles className="w-3.5 h-3.5" /> Public Voice Hub
           </div>
-          <h2 className="text-3xl font-headline font-bold text-primary dark:text-white">Community <span className="text-accent italic">Feedback</span></h2>
-          <p className="text-slate-500 dark:text-slate-400 text-sm mt-2">Your insights help us strengthen the shield of justice.</p>
+          <h2 className="text-4xl md:text-5xl font-headline font-bold text-primary dark:text-white leading-tight">
+            Community <span className="text-accent italic">Testimonials</span>
+          </h2>
+          <p className="text-slate-500 dark:text-slate-400 text-sm md:text-lg mt-4 max-w-xl mx-auto">
+            Real-time voices from citizens across India supporting the mission of Justice Shield.
+          </p>
         </div>
 
-        {/* Marquee Feedback Display */}
-        <div className="relative overflow-hidden w-full h-56 flex items-center mb-12">
-          <div className="flex animate-marquee hover:pause whitespace-nowrap gap-6">
+        {/* Marquee Feedback Display with Colorful Animated Gradients */}
+        <div className="relative overflow-hidden w-full h-72 flex items-center mb-16">
+          <div className="flex animate-marquee hover:pause whitespace-nowrap gap-8">
             {feedbackItems && feedbackItems.length > 0 ? (
               // Double the items to create seamless loop
-              [...feedbackItems, ...feedbackItems].map((item: any, idx) => (
-                <Card key={`${item.id}-${idx}`} className="inline-block min-w-[300px] md:min-w-[400px] border-none shadow-sm rounded-2xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-6 relative">
-                  <Quote className="absolute top-4 right-4 w-10 h-10 text-slate-50 dark:text-slate-800" />
-                  <CardContent className="p-0 space-y-4">
-                    <p className="text-sm italic text-slate-600 dark:text-slate-300 leading-relaxed line-clamp-3 whitespace-normal">"{item.comment}"</p>
-                    <div className="flex items-center gap-3 pt-3 border-t border-slate-50 dark:border-slate-800">
-                      <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center text-accent shrink-0">
-                        <User className="w-5 h-5" />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-xs font-bold text-primary dark:text-white truncate">{item.name}</p>
-                        <p className="text-[9px] text-slate-400 font-bold uppercase tracking-tight flex items-center gap-1 truncate">
-                          <MapPin className="w-2.5 h-2.5" /> {item.address}
+              [...feedbackItems, ...feedbackItems].map((item: any, idx) => {
+                const themeClass = themes[idx % themes.length];
+                return (
+                  <Card 
+                    key={`${item.id}-${idx}`} 
+                    className={cn(
+                      "inline-block min-w-[320px] md:min-w-[450px] border-none shadow-2xl rounded-[2.5rem] p-0 relative overflow-hidden transform hover:scale-105 transition-all duration-500"
+                    )}
+                  >
+                    {/* Animated Background Layer */}
+                    <div className={cn(
+                      "absolute inset-0 bg-gradient-to-r bg-[length:200%_auto] animate-gradient-x opacity-10 dark:opacity-20",
+                      themeClass
+                    )}></div>
+                    
+                    {/* Glassmorphism Inner Content */}
+                    <div className="relative z-10 p-8 md:p-10 h-full flex flex-col justify-between bg-white/40 dark:bg-slate-900/60 backdrop-blur-sm border border-white/20 dark:border-white/5">
+                      <Quote className="absolute top-6 right-8 w-12 h-12 text-primary/5 dark:text-white/5" />
+                      
+                      <CardContent className="p-0 space-y-6">
+                        <p className="text-base md:text-lg font-medium italic text-primary dark:text-slate-100 leading-relaxed whitespace-normal line-clamp-3">
+                          "{item.comment}"
                         </p>
-                      </div>
+                        
+                        <div className="flex items-center gap-4 pt-4 border-t border-primary/10 dark:border-white/10">
+                          <div className={cn(
+                            "w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-lg shrink-0 bg-gradient-to-br animate-gradient-x bg-[length:200%_auto]",
+                            themeClass
+                          )}>
+                            <User className="w-6 h-6" />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-sm font-black text-primary dark:text-white truncate uppercase tracking-tight">{item.name}</p>
+                            <p className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-[0.1em] flex items-center gap-1.5 truncate">
+                              <MapPin className="w-3 h-3 text-accent" /> {item.address}
+                            </p>
+                          </div>
+                        </div>
+                      </CardContent>
                     </div>
-                  </CardContent>
-                </Card>
-              ))
+                  </Card>
+                );
+              })
             ) : loading ? (
-              <div className="flex items-center gap-2 text-slate-400 font-bold uppercase tracking-widest text-[10px]">
-                <Loader2 className="w-4 h-4 animate-spin text-accent" /> Synchronizing Feedback...
+              <div className="flex items-center gap-3 text-slate-400 font-bold uppercase tracking-widest text-xs px-10 py-8 bg-white dark:bg-slate-900 rounded-3xl border-2 border-dashed">
+                <Loader2 className="w-5 h-5 animate-spin text-accent" /> Synchronizing Verified Voices...
               </div>
             ) : (
-              <div className="flex items-center gap-2 text-slate-400 font-bold uppercase tracking-widest text-[10px]">
-                No feedback recorded yet. Be the first to share your experience.
+              <div className="flex items-center gap-3 text-slate-400 font-bold uppercase tracking-widest text-xs px-10 py-8 bg-white dark:bg-slate-900 rounded-3xl border-2 border-dashed">
+                <MessageSquare className="w-5 h-5 text-slate-300" /> No feedback recorded yet. Be the first to share your experience.
               </div>
             )}
           </div>
         </div>
 
-        {/* Submission Form */}
-        <Card className="max-w-xl mx-auto rounded-[2.5rem] border-none shadow-xl bg-white dark:bg-slate-950 p-8 md:p-10">
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div className="space-y-2">
-              <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Full Name / নাম</Label>
-              <Input 
-                value={formData.name} 
-                onChange={e => setFormData({...formData, name: e.target.value})} 
-                placeholder="Jayanta Paul" 
-                className="h-12 rounded-xl"
-              />
+        {/* Submission Form Card */}
+        <Card className="max-w-2xl mx-auto rounded-[3rem] border-none shadow-2xl bg-white dark:bg-slate-950 p-8 md:p-14 relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-2 h-full bg-accent"></div>
+          <div className="relative z-10 space-y-8">
+            <div className="space-y-1">
+              <h3 className="text-xl font-headline font-bold text-primary dark:text-white">Share Your Experience</h3>
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">আমরা আপনার মতামতের গুরুত্ব দিই</p>
             </div>
-            <div className="space-y-2">
-              <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Address / ঠিকানা</Label>
-              <Input 
-                value={formData.address} 
-                onChange={e => setFormData({...formData, address: e.target.value})} 
-                placeholder="District, State (e.g. Kolkata, WB)" 
-                className="h-12 rounded-xl"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Your Experience / আপনার মতামত</Label>
-              <Textarea 
-                value={formData.comment} 
-                onChange={e => setFormData({...formData, comment: e.target.value})} 
-                placeholder="Share your thoughts on our services..." 
-                className="rounded-2xl min-h-[100px]"
-              />
-            </div>
-            <Button 
-              type="submit" 
-              disabled={isSubmitting} 
-              className="w-full h-14 rounded-2xl bg-primary text-white font-bold text-lg hover:bg-secondary transition-all flex gap-2"
-            >
-              {isSubmitting ? <Loader2 className="animate-spin" /> : <><Send className="w-5 h-5" /> Submit Feedback</>}
-            </Button>
-          </form>
+            
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label className="text-[11px] font-black uppercase text-slate-400 tracking-widest ml-1">Full Name / নাম *</Label>
+                  <Input 
+                    value={formData.name} 
+                    onChange={e => setFormData({...formData, name: e.target.value})} 
+                    placeholder="Enter your name" 
+                    className="h-12 rounded-xl bg-slate-50 dark:bg-slate-900 border-none shadow-inner text-sm font-bold"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-[11px] font-black uppercase text-slate-400 tracking-widest ml-1">Address / ঠিকানা *</Label>
+                  <Input 
+                    value={formData.address} 
+                    onChange={e => setFormData({...formData, address: e.target.value})} 
+                    placeholder="City, State" 
+                    className="h-12 rounded-xl bg-slate-50 dark:bg-slate-900 border-none shadow-inner text-sm font-bold"
+                    required
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-[11px] font-black uppercase text-slate-400 tracking-widest ml-1">Your Comment / আপনার মতামত *</Label>
+                <Textarea 
+                  value={formData.comment} 
+                  onChange={e => setFormData({...formData, comment: e.target.value})} 
+                  placeholder="Tell us about the impact of Justice Shield in your life..." 
+                  className="rounded-[1.5rem] min-h-[120px] bg-slate-50 dark:bg-slate-900 border-none shadow-inner text-sm font-medium p-4 leading-relaxed"
+                  required
+                />
+              </div>
+              <Button 
+                type="submit" 
+                disabled={isSubmitting} 
+                className="w-full h-16 rounded-2xl bg-primary text-white font-bold text-lg hover:bg-secondary transition-all shadow-xl shadow-primary/20 flex gap-3 group"
+              >
+                {isSubmitting ? (
+                  <Loader2 className="animate-spin w-6 h-6" />
+                ) : (
+                  <>Submit Feedback <Send className="w-5 h-5 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" /></>
+                )}
+              </Button>
+            </form>
+          </div>
         </Card>
       </div>
     </section>
