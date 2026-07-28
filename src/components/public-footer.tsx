@@ -140,7 +140,7 @@ export function PublicFooter() {
               </DonationDialog>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-4">
               <div className="flex gap-4">
                 {[Facebook, Twitter, Instagram, Youtube].map((Icon, idx) => (
                   <a key={idx} href="#" className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-accent transition-colors">
@@ -148,7 +148,12 @@ export function PublicFooter() {
                   </a>
                 ))}
               </div>
-              <p className="text-[14px] font-bold text-white mt-2">প্রয়োজনীয় কিছু তথ্য</p>
+              <div className="pt-2">
+                <p className="text-lg md:text-xl font-bold text-white">প্রয়োজনীয় কিছু তথ্য</p>
+                <Link href="/legal/police-duties" className="text-accent hover:underline text-xs md:text-sm font-bold block mt-3">
+                  গ্রেপ্তার করার সময় পুলিশের অবশ্য পালনীয় কর্তব্য
+                </Link>
+              </div>
             </div>
           </div>
 
