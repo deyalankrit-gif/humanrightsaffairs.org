@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from "react"
@@ -168,9 +167,10 @@ export function AppSidebar() {
 
   const togglePin = (href: string) => {
     const isPinned = pinnedHrefs.includes(href);
+    let updated: string[];
     
     if (isPinned) {
-      const updated = pinnedHrefs.filter(h => h !== href);
+      updated = pinnedHrefs.filter(h => h !== href);
       setPinnedHrefs(updated);
       localStorage.setItem('hrat_pinned_menus', JSON.stringify(updated));
       toast({ title: "Menu Unpinned", description: "Shortcut removed from the Pinned section." });
@@ -183,7 +183,7 @@ export function AppSidebar() {
         });
         return;
       }
-      const updated = [...pinnedHrefs, href];
+      updated = [...pinnedHrefs, href];
       setPinnedHrefs(updated);
       localStorage.setItem('hrat_pinned_menus', JSON.stringify(updated));
       toast({ title: "Menu Pinned", description: "Shortcut added to '📌 Menus' section." });
@@ -339,14 +339,14 @@ export function AppSidebar() {
               </Collapsible>
             )}
 
-            {/* PINNED MENUS SECTION */}
-            {isRoot && pinnedItems.length > 0 && (
+            {/* PINNED MENUS SECTION - Always visible for Root */}
+            {isRoot && (
               <SidebarGroup className="animate-in fade-in slide-in-from-left-2 duration-500">
                 <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden text-accent font-black tracking-widest flex items-center gap-2">
                   📌 MENUS
                 </SidebarGroupLabel>
                 <SidebarMenu>
-                  {pinnedItems.map((link) => {
+                  {pinnedItems.length > 0 ? pinnedItems.map((link) => {
                     const isActive = pathname === link.href
                     return (
                       <SidebarMenuItem key={link.name} ref={isActive ? activeItemRef : null}>
@@ -372,7 +372,11 @@ export function AppSidebar() {
                         </SidebarMenuAction>
                       </SidebarMenuItem>
                     )
-                  })}
+                  }) : (
+                    <div className="px-4 py-3 group-data-[collapsible=icon]:hidden">
+                      <p className="text-[10px] text-slate-500 italic">No pinned menus. Hover over an item to pin it.</p>
+                    </div>
+                  )}
                 </SidebarMenu>
               </SidebarGroup>
             )}
@@ -559,7 +563,7 @@ export function AppSidebar() {
                         onClick={() => setActiveHash(isHashLink ? linkHash : '')}
                         className="flex items-center gap-3"
                       >
-                        <link.icon className={cn("w-5 h-5", isActive ? "text-white" : "text-muted-foreground group-hover/btn:text-secondary")} />
+                        <link.icon className={cn("w-3 h-3 md:w-3.5 md:h-3.5 transition-colors", isActive ? "text-white" : "text-muted-foreground group-hover:text-white")} />
                         <span className="group-data-[collapsible=icon]:hidden">{link.name}</span>
                       </Link>
                     </SidebarMenuButton>
