@@ -4,7 +4,7 @@ import { MetadataRoute } from 'next'
  * Dynamic Sitemap Generator: Enterprise level routing coverage.
  * Automatically covers all institutional portals, legal formats, and hub nodes.
  */
-export default function sitemap(): MetadataRoute.Sitemap {
+export function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = 'https://www.hrat-india.org'
   const lastModified = new Date()
 
@@ -36,7 +36,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/legal/required-documents',
     '/legal/resolution-format',
     '/legal/quotation-format',
-    '/legal/police-duties',
   ]
 
   return routes.map((route) => ({

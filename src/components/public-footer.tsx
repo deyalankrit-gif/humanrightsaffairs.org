@@ -148,12 +148,6 @@ export function PublicFooter() {
                   </a>
                 ))}
               </div>
-              <div className="pt-2">
-                <p className="text-lg md:text-xl font-bold text-white">প্রয়োজনীয় কিছু তথ্য</p>
-                <Link href="/legal/police-duties" className="text-accent hover:underline text-xs md:text-sm font-bold block mt-3">
-                  গ্রেপ্তার করার সময় পুলিশের অবশ্য পালনীয় কর্তব্য
-                </Link>
-              </div>
             </div>
           </div>
 
