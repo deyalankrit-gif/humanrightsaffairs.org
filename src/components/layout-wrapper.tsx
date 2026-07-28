@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useEffect, useState } from 'react';
@@ -10,6 +11,7 @@ import { Separator } from '@/components/ui/separator';
 import { VisitorTracker } from '@/components/visitor-tracker';
 import { PublicFooter } from '@/components/public-footer';
 import { AdminFooter } from '@/components/admin-footer';
+import { FeedbackSystem } from '@/components/feedback-system';
 import { useUser } from '@/firebase';
 import { cn } from '@/lib/utils';
 
@@ -80,7 +82,8 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
       <div className="flex-1 w-full">
         {children}
       </div>
-      {!isLoginPage && <PublicFooter />}
+      {!isAdmin && !isLoginPage && <FeedbackSystem />}
+      {!isLoginPage && (isAdmin ? <AdminFooter /> : <PublicFooter />)}
     </div>
   );
 }

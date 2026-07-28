@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -147,5 +148,20 @@
   .admin-scrollbar {
     scrollbar-width: thin;
     scrollbar-color: hsl(var(--accent)) transparent;
+  }
+
+  @keyframes marquee {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  .animate-marquee {
+    display: flex;
+    width: max-content;
+    animation: marquee 40s linear infinite;
+  }
+
+  .pause {
+    animation-play-state: paused;
   }
 }

@@ -95,6 +95,18 @@
         "isActive": { "type": "boolean" },
         "createdAt": { "type": "string", "format": "date-time" }
       }
+    },
+    "Feedback": {
+      "title": "Public Feedback",
+      "description": "Feedback submitted by users on the website.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "comment": { "type": "string" },
+        "rating": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "comment"]
     }
   },
   "auth": {
@@ -103,6 +115,7 @@
   "firestore": {
     "/users/{userEmail}": { "schema": "UserAccount", "description": "Permissions registry." },
     "/materials/{materialId}": { "schema": "MaterialItem", "description": "Material management inventory." },
-    "/current_news/{newsId}": { "schema": "CurrentNews", "description": "Homepage news broadcast." }
+    "/current_news/{newsId}": { "schema": "CurrentNews", "description": "Homepage news broadcast." },
+    "/feedback/{feedbackId}": { "schema": "Feedback", "description": "User feedback collection." }
   }
 }

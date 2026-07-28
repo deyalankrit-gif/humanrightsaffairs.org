@@ -94,6 +94,11 @@ service cloud.firestore {
       allow write: if hasPermission('activityHub');
     }
 
+    match /feedback/{feedbackId} {
+      allow read: if true;
+      allow create: if true;
+    }
+
     // 4. SECURE USER REGISTRY
     match /users/{userEmail} {
       allow read: if isAuthenticated() && (
