@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo, useState } from 'react';
@@ -141,12 +140,15 @@ export function PublicFooter() {
               </DonationDialog>
             </div>
 
-            <div className="flex gap-4">
-              {[Facebook, Twitter, Instagram, Youtube].map((Icon, idx) => (
-                <a key={idx} href="#" className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-accent transition-colors">
-                  <Icon className="w-4 h-4 md:w-5 md:h-5" />
-                </a>
-              ))}
+            <div className="space-y-2">
+              <div className="flex gap-4">
+                {[Facebook, Twitter, Instagram, Youtube].map((Icon, idx) => (
+                  <a key={idx} href="#" className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-accent transition-colors">
+                    <Icon className="w-4 h-4 md:w-5 md:h-5" />
+                  </a>
+                ))}
+              </div>
+              <p className="text-[14px] font-bold text-white mt-2">প্রয়োজনীয় কিছু তথ্য</p>
             </div>
           </div>
 
@@ -259,7 +261,7 @@ export function PublicFooter() {
 
                 <div className="pt-4 space-y-1">
                   <p className="font-bold text-accent uppercase tracking-widest text-[10px]">Registered Office</p>
-                  <p className="text-xs text-primary-foreground/80">Kolkata 700157</p>
+                  <p className="text-xs text-primary-foreground/80 font-bold">Kolkata 700157</p>
                 </div>
               </div>
             </div>
