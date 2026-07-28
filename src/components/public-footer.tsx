@@ -26,7 +26,8 @@ import { useToast } from '@/hooks/use-toast';
 /**
  * PublicFooter: Optimized for all screen sizes with responsive grids and fluid spacing.
  * Includes a secure email OTP gate for the Required Documents section.
- * Featuring the requested Bengali orange hyperlink below social icons.
+ * Featuring the Bengali orange hyperlink "প্রয়োজনীয় কিছু তথ্য" leading to legal guides.
+ * Repositioned donation CTA image under the Registered Office block on the right.
  */
 export function PublicFooter() {
   const donationFooterImg = PlaceHolderImages.find(img => img.id === 'donation-footer-image');
@@ -35,7 +36,6 @@ export function PublicFooter() {
   const router = useRouter();
   const { toast } = useToast();
 
-  // OTP Gate States
   const [isOtpOpen, setIsOtpOpen] = useState(false);
   const [otpValue, setOtpValue] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
@@ -45,7 +45,6 @@ export function PublicFooter() {
   const TARGET_EMAIL = "humanrightsaffairstrust@gmail.com";
   const DEMO_OTP = "123456";
 
-  // Email Masking Logic: hu[exact count of X]st@gmail.com
   const maskedEmail = useMemo(() => {
     const [userPart, domain] = TARGET_EMAIL.split('@');
     if (userPart.length <= 4) return TARGET_EMAIL;
@@ -64,13 +63,12 @@ export function PublicFooter() {
 
   const handleSendOtp = () => {
     setIsVerifying(true);
-    // Simulate API delay
     setTimeout(() => {
       setOtpStep('verify');
       setIsVerifying(false);
       toast({
         title: "Security Code Dispatched",
-        description: `A code has been sent to ${maskedEmail}. For prototype testing, use: 123456`,
+        description: `A code has been sent to ${maskedEmail}. For testing: 123456`,
       });
     }, 1500);
   };
@@ -81,16 +79,8 @@ export function PublicFooter() {
       if (otpValue === DEMO_OTP) {
         setIsOtpOpen(false);
         router.push(targetPath);
-        toast({
-          title: "Access Granted",
-          description: "Institutional clearance verified.",
-        });
       } else {
-        toast({
-          variant: "destructive",
-          title: "Verification Failed",
-          description: "The security code you entered is invalid.",
-        });
+        toast({ variant: "destructive", title: "Verification Failed" });
       }
       setIsVerifying(false);
     }, 1000);
@@ -158,56 +148,16 @@ export function PublicFooter() {
               <li><Link href="/#knowledge" className="hover:text-accent transition-colors font-medium">Rights Center</Link></li>
               <li><Link href="/#membership" className="hover:text-accent transition-colors font-medium">Be A Member</Link></li>
               <li><Link href="/#helpline" className="hover:text-accent transition-colors font-medium">Emergency Contacts</Link></li>
-              <li>
-                <Link href="/donors" className="hover:text-accent transition-colors font-medium flex items-center gap-2">
-                  Wall of Donors <Heart className="w-3.5 h-3.5 text-red-500 fill-red-500/20" />
-                </Link>
-              </li>
-              <li>
-                <Link href="/trust-credentials" className="hover:text-accent transition-colors font-medium flex items-center gap-2">
-                  Trust Credentials <Crown className="w-3.5 h-3.5 text-[#D4AF37] fill-[#D4AF37]/20" />
-                </Link>
-              </li>
-              <li>
-                <Link href="/activity-hub" className="text-emerald-400 font-bold hover:text-white transition-colors flex items-center gap-2">
-                  <Bell className={cn("w-3 h-3 md:w-4 md:h-4 text-red-500", hasReminders && "animate-ring")} />
-                  <span>Activity Hub</span>
-                </Link>
-              </li>
+              <li><Link href="/donors" className="hover:text-accent transition-colors font-medium flex items-center gap-2">Wall of Donors <Heart className="w-3.5 h-3.5 text-red-500 fill-red-500/20" /></Link></li>
+              <li><Link href="/trust-credentials" className="hover:text-accent transition-colors font-medium flex items-center gap-2">Trust Credentials <Crown className="w-3.5 h-3.5 text-[#D4AF37] fill-[#D4AF37]/20" /></Link></li>
+              <li><Link href="/activity-hub" className="text-emerald-400 font-bold hover:text-white transition-colors flex items-center gap-2"><Bell className={cn("w-3 h-3 md:w-4 md:h-4 text-red-500", hasReminders && "animate-ring")} /><span>Activity Hub</span></Link></li>
               <li className="pt-2"><span className="text-[#CEFF00] font-black text-sm md:text-lg uppercase tracking-tighter">Office Use Only</span></li>
-              <li>
-                <Link href="/legal/official-representation" className="text-[#CEFF00] hover:text-white transition-colors font-bold flex flex-col leading-tight">
-                  <span>Official Representation</span>
-                </Link>
-              </li>
-              <li>
-                <Link href="/trust-responsibilities" className="text-[#CEFF00] hover:text-white transition-colors font-medium leading-tight">
-                  Duties & Responsibilities
-                </Link>
-              </li>
-              <li>
-                <button 
-                  onClick={handleOpenGate('/legal/required-documents')}
-                  className="text-[#CEFF00] hover:text-white transition-colors font-medium leading-tight text-left"
-                >
-                  Required Documents
-                </button>
-              </li>
-              <li>
-                <Link href="/legal/quotation-format" className="text-[#CEFF00] hover:text-white transition-colors font-medium leading-tight">
-                  Supplier Quotation Format
-                </Link>
-              </li>
-              <li>
-                <Link href="/meetings" className="text-[#CEFF00] hover:text-white transition-colors font-medium leading-tight">
-                  Organizations Meeting
-                </Link>
-              </li>
-              <li>
-                <Link href="/#grievances" className="text-[#CEFF00] hover:text-white transition-colors font-medium leading-tight">
-                  Organizations Grievances
-                </Link>
-              </li>
+              <li><Link href="/legal/official-representation" className="text-[#CEFF00] hover:text-white transition-colors font-bold flex flex-col leading-tight"><span>Official Representation</span></Link></li>
+              <li><Link href="/trust-responsibilities" className="text-[#CEFF00] hover:text-white transition-colors font-medium leading-tight">Duties & Responsibilities</Link></li>
+              <li><button onClick={handleOpenGate('/legal/required-documents')} className="text-[#CEFF00] hover:text-white transition-colors font-medium leading-tight text-left">Required Documents</button></li>
+              <li><Link href="/legal/quotation-format" className="text-[#CEFF00] hover:text-white transition-colors font-medium leading-tight">Supplier Quotation Format</Link></li>
+              <li><Link href="/meetings" className="text-[#CEFF00] hover:text-white transition-colors font-medium leading-tight">Organizations Meeting</Link></li>
+              <li><Link href="/#grievances" className="text-[#CEFF00] hover:text-white transition-colors font-medium leading-tight">Organizations Grievances</Link></li>
             </ul>
           </div>
 
@@ -219,11 +169,7 @@ export function PublicFooter() {
               <li><Link href="/legal/rti-assistant" className="hover:text-accent transition-colors font-medium">RTI Assistant</Link></li>
               <li><Link href="/legal/bail-procedure" className="hover:text-accent transition-colors font-medium">Bail Procedures</Link></li>
               <li><Link href="/legal/privacy-policy" className="hover:text-accent transition-colors font-medium">Privacy Policy</Link></li>
-              <li>
-                <Link href="/complaint-form" className="text-[#FF00FF] hover:text-white transition-colors font-bold">
-                  Complaint Submission Form
-                </Link>
-              </li>
+              <li><Link href="/complaint-form" className="text-[#FF00FF] hover:text-white transition-colors font-bold">Complaint Submission Form</Link></li>
             </ul>
             <div className="scale-90 md:scale-100 origin-left mt-6">
               <FooterMusicPlayer />
@@ -235,35 +181,22 @@ export function PublicFooter() {
               <h4 className="text-base md:text-lg font-headline font-bold mb-4 text-accent">National Head Office</h4>
               <div className="space-y-3 text-primary-foreground/80 text-xs md:text-sm">
                 <div className="flex gap-3"><MapPin className="w-4 h-4 text-accent shrink-0 mt-0.5" /><span>Azad Market, Delhi - 110006</span></div>
-                <div className="flex gap-3">
-                  <Phone className="w-4 h-4 text-accent shrink-0 mt-0.5" />
-                  <a href="tel:+918981152748" className="hover:text-accent transition-colors">+91 89811 52748</a>
-                </div>
-                <div className="flex gap-3">
-                  <Mail className="w-4 h-4 text-accent shrink-0 mt-0.5" />
-                  <a href="mailto:humanrightsaffairstrust@gmail.com" className="hover:text-accent font-bold truncate">humanrightsaffairstrust@gmail.com</a>
-                </div>
+                <div className="flex gap-3"><Phone className="w-4 h-4 text-accent shrink-0 mt-0.5" /><a href="tel:+918981152748" className="hover:text-accent transition-colors">+91 89811 52748</a></div>
+                <div className="flex gap-3"><Mail className="w-4 h-4 text-accent shrink-0 mt-0.5" /><a href="mailto:humanrightsaffairstrust@gmail.com" className="hover:text-accent font-bold truncate">humanrightsaffairstrust@gmail.com</a></div>
               </div>
             </div>
             <div>
               <h4 className="text-base md:text-lg font-headline font-bold mb-4 text-accent">State Office (WB)</h4>
               <div className="space-y-3 text-primary-foreground/80 text-xs md:text-sm">
                 <div className="flex gap-3"><MapPin className="w-4 h-4 text-accent shrink-0 mt-0.5" /><span>Biswanathpur, Deganga, 24 Parganas (N), WB</span></div>
-                <div className="flex gap-3">
-                  <Phone className="w-4 h-4 text-accent shrink-0 mt-0.5" />
-                  <a href="tel:+917063111471" className="hover:text-accent transition-colors">+91 70631 11471</a>
-                </div>
-                <div className="flex gap-3">
-                  <Mail className="w-4 h-4 text-accent shrink-0 mt-0.5" />
-                  <a href="mailto:hrat.wb.chairman@gmail.com" className="hover:text-accent font-bold truncate">hrat.wb.chairman@gmail.com</a>
-                </div>
+                <div className="flex gap-3"><Phone className="w-4 h-4 text-accent shrink-0 mt-0.5" /><a href="tel:+917063111471" className="hover:text-accent transition-colors">+91 70631 11471</a></div>
+                <div className="flex gap-3"><Mail className="w-4 h-4 text-accent shrink-0 mt-0.5" /><a href="mailto:hrat.wb.chairman@gmail.com" className="hover:text-accent font-bold truncate">hrat.wb.chairman@gmail.com</a></div>
 
                 <div className="pt-4 space-y-1">
                   <p className="font-bold text-accent uppercase tracking-widest text-[10px]">Registered Office</p>
                   <p className="text-xs text-primary-foreground/80 font-bold">Kolkata 700157</p>
                 </div>
 
-                {/* Repositioned Donation Call to Action Image under Registered Office */}
                 <div className="pt-6">
                   <DonationDialog initialStep="qr">
                     <button className="block w-32 md:w-40 h-24 md:h-28 relative group cursor-pointer overflow-hidden rounded-xl bg-transparent border-none p-0 outline-none transition-all duration-500 hover:scale-[1.5] active:scale-95 origin-left hover:z-50">
@@ -290,15 +223,10 @@ export function PublicFooter() {
       <Dialog open={isOtpOpen} onOpenChange={setIsOtpOpen}>
         <DialogContent className="max-w-md rounded-[2rem] border-none shadow-2xl bg-white dark:bg-slate-900 p-8">
            <DialogHeader className="items-center text-center space-y-4">
-              <div className="w-16 h-16 bg-accent/10 rounded-2xl flex items-center justify-center text-accent">
-                 <Lock className="w-8 h-8" />
-              </div>
+              <div className="w-16 h-16 bg-accent/10 rounded-2xl flex items-center justify-center text-accent"><Lock className="w-8 h-8" /></div>
               <DialogTitle className="text-2xl font-headline font-bold">Secure Access Terminal</DialogTitle>
-              <DialogDescription className="text-xs font-bold uppercase tracking-widest text-slate-400">
-                 Institutional Protocol Verification
-              </DialogDescription>
+              <DialogDescription className="text-xs font-bold uppercase tracking-widest text-slate-400">Institutional Protocol Verification</DialogDescription>
            </DialogHeader>
-
            <div className="py-6 space-y-6">
               {otpStep === 'send' ? (
                 <div className="space-y-6 text-center">
@@ -306,21 +234,7 @@ export function PublicFooter() {
                       <p className="text-[10px] font-black uppercase text-slate-400 mb-2">Authorized Official Email</p>
                       <p className="text-sm font-bold text-primary dark:text-white break-all">{maskedEmail}</p>
                    </div>
-                   <div className="space-y-2">
-                      <p className="text-xs text-slate-500 leading-relaxed italic">
-                        "Access to high-fidelity institutional documentation requires multi-factor authentication. A code will be sent to the primary nodal email."
-                      </p>
-                      <div className="bg-amber-50 dark:bg-amber-950/20 p-3 rounded-xl border border-amber-100 dark:border-amber-900">
-                        <p className="text-[10px] font-bold text-amber-700 dark:text-amber-400 uppercase">
-                          Prototype Mode: Click below to simulate sending.
-                        </p>
-                      </div>
-                   </div>
-                   <Button 
-                    onClick={handleSendOtp} 
-                    disabled={isVerifying}
-                    className="w-full h-12 bg-primary text-white font-bold rounded-xl hover:bg-secondary transition-all shadow-xl shadow-primary/20"
-                   >
+                   <Button onClick={handleSendOtp} disabled={isVerifying} className="w-full h-12 bg-primary text-white font-bold rounded-xl hover:bg-secondary">
                      {isVerifying ? <Loader2 className="animate-spin w-5 h-5" /> : <>Request Email OTP <ArrowRight className="ml-2 w-4 h-4" /></>}
                    </Button>
                 </div>
@@ -328,37 +242,16 @@ export function PublicFooter() {
                 <div className="space-y-6">
                    <div className="space-y-2">
                       <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Enter Security Code</Label>
-                      <Input 
-                        placeholder="••••••" 
-                        maxLength={6}
-                        value={otpValue}
-                        onChange={(e) => setOtpValue(e.target.value)}
-                        className="h-14 text-center text-3xl font-bold tracking-[0.5em] rounded-xl border-2 focus:ring-accent"
-                      />
-                      <p className="text-[10px] text-center text-accent font-black uppercase tracking-widest mt-2">
-                        Testing Code: 123456
-                      </p>
+                      <Input placeholder="••••••" maxLength={6} value={otpValue} onChange={(e) => setOtpValue(e.target.value)} className="h-14 text-center text-3xl font-bold tracking-[0.5em] rounded-xl border-2 focus:ring-accent" />
+                      <p className="text-[10px] text-center text-accent font-black uppercase mt-2">Testing Code: 123456</p>
                    </div>
-                   <div className="bg-emerald-50 dark:bg-emerald-900/20 p-3 rounded-xl border border-emerald-100 dark:border-emerald-900 flex items-center gap-3">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                      <p className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 uppercase">OTP Sent to Email</p>
-                   </div>
-                   <Button 
-                    onClick={handleVerifyOtp} 
-                    disabled={isVerifying || otpValue.length < 6}
-                    className="w-full h-12 bg-accent text-primary font-bold rounded-xl hover:bg-secondary hover:text-white transition-all shadow-xl shadow-primary/20"
-                   >
+                   <Button onClick={handleVerifyOtp} disabled={isVerifying || otpValue.length < 6} className="w-full h-12 bg-accent text-primary font-bold rounded-xl hover:bg-secondary transition-all">
                      {isVerifying ? <Loader2 className="animate-spin w-5 h-5" /> : "Verify Identity"}
                    </Button>
                 </div>
               )}
            </div>
-
-           <div className="pt-4 border-t border-slate-100 dark:border-slate-800 text-center">
-              <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">
-                 National Security Cell • Human Rights Affairs Trust
-              </p>
-           </div>
+           <div className="pt-4 border-t border-slate-100 dark:border-slate-800 text-center"><p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">National Security Cell • HRAT</p></div>
         </DialogContent>
       </Dialog>
     </footer>
