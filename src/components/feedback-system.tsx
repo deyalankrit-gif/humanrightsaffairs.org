@@ -15,20 +15,27 @@ import {
   User, 
   MapPin,
   Quote,
-  Sparkles
+  Sparkles,
+  Star
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
 
 /**
  * Community Feedback System: Elevated Public Voice module.
- * Features: Animated colorful marquee, glassmorphism, and real-time registry sync.
+ * Features: 5-Star rating system, animated colorful marquee, and real-time registry sync.
  */
 export function FeedbackSystem() {
   const db = useFirestore()
   const { toast } = useToast()
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [formData, setFormData] = useState({ name: '', address: '', comment: '' })
+  const [hoverRating, setHoverRating] = useState(0)
+  const [formData, setFormData] = useState({ 
+    name: '', 
+    address: '', 
+    comment: '',
+    rating: 5 
+  })
 
   const feedbackQuery = useMemoFirebase(() => {
     if (!db) return null;
@@ -41,7 +48,7 @@ export function FeedbackSystem() {
     e.preventDefault()
     if (!db) return
     if (!formData.name.trim() || !formData.address.trim() || !formData.comment.trim()) {
-      toast({ variant: "destructive", title: "Validation Error", description: "All fields including address are required." })
+      toast({ variant: "destructive", title: "Validation Error", description: "All fields are required." })
       return
     }
 
@@ -52,7 +59,7 @@ export function FeedbackSystem() {
         createdAt: serverTimestamp()
       })
       toast({ title: "Feedback Recorded", description: "Thank you for your valuable input." })
-      setFormData({ name: '', address: '', comment: '' })
+      setFormData({ name: '', address: '', comment: '', rating: 5 })
     } catch (e: any) {
       toast({ variant: "destructive", title: "Submission Failed" })
     } finally {
@@ -83,12 +90,12 @@ export function FeedbackSystem() {
             Community <span className="text-accent italic">Testimonials</span>
           </h2>
           <p className="text-slate-500 dark:text-slate-400 text-sm md:text-lg mt-4 max-w-xl mx-auto">
-            Real-time voices from citizens across India supporting the mission of Justice Shield.
+            Real-time voices and ratings from citizens across India supporting the mission of Justice Shield.
           </p>
         </div>
 
-        {/* Marquee Feedback Display with Colorful Animated Gradients */}
-        <div className="relative overflow-hidden w-full h-72 flex items-center mb-16">
+        {/* Marquee Feedback Display */}
+        <div className="relative overflow-hidden w-full h-80 flex items-center mb-16">
           <div className="flex animate-marquee hover:pause whitespace-nowrap gap-8">
             {feedbackItems && feedbackItems.length > 0 ? (
               // Double the items to create seamless loop
@@ -101,17 +108,27 @@ export function FeedbackSystem() {
                       "inline-block min-w-[320px] md:min-w-[450px] border-none shadow-2xl rounded-[2.5rem] p-0 relative overflow-hidden transform hover:scale-105 transition-all duration-500"
                     )}
                   >
-                    {/* Animated Background Layer */}
                     <div className={cn(
                       "absolute inset-0 bg-gradient-to-r bg-[length:200%_auto] animate-gradient-x opacity-10 dark:opacity-20",
                       themeClass
                     )}></div>
                     
-                    {/* Glassmorphism Inner Content */}
                     <div className="relative z-10 p-8 md:p-10 h-full flex flex-col justify-between bg-white/40 dark:bg-slate-900/60 backdrop-blur-sm border border-white/20 dark:border-white/5">
                       <Quote className="absolute top-6 right-8 w-12 h-12 text-primary/5 dark:text-white/5" />
                       
-                      <CardContent className="p-0 space-y-6">
+                      <CardContent className="p-0 space-y-4">
+                        <div className="flex gap-1 mb-2">
+                          {[...Array(5)].map((_, i) => (
+                            <Star 
+                              key={i} 
+                              className={cn(
+                                "w-4 h-4", 
+                                i < (item.rating || 5) ? "fill-accent text-accent" : "text-slate-200 dark:text-slate-700"
+                              )} 
+                            />
+                          ))}
+                        </div>
+
                         <p className="text-base md:text-lg font-medium italic text-primary dark:text-slate-100 leading-relaxed whitespace-normal line-clamp-3">
                           "{item.comment}"
                         </p>
@@ -179,6 +196,36 @@ export function FeedbackSystem() {
                   />
                 </div>
               </div>
+
+              {/* Star Rating Selector */}
+              <div className="space-y-3">
+                <Label className="text-[11px] font-black uppercase text-slate-400 tracking-widest ml-1">Rate Our Mission / রেটিং দিন *</Label>
+                <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-900 p-4 rounded-xl w-fit shadow-inner">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      onMouseEnter={() => setHoverRating(star)}
+                      onMouseLeave={() => setHoverRating(0)}
+                      onClick={() => setFormData({...formData, rating: star})}
+                      className="transition-all hover:scale-125 active:scale-95 p-1"
+                    >
+                      <Star 
+                        className={cn(
+                          "w-8 h-8 transition-colors",
+                          star <= (hoverRating || formData.rating) 
+                            ? "fill-accent text-accent" 
+                            : "text-slate-300 dark:text-slate-700"
+                        )} 
+                      />
+                    </button>
+                  ))}
+                  <span className="ml-4 text-xs font-black text-slate-400 uppercase tracking-widest">
+                    {formData.rating}/5 Stars
+                  </span>
+                </div>
+              </div>
+
               <div className="space-y-2">
                 <Label className="text-[11px] font-black uppercase text-slate-400 tracking-widest ml-1">Your Comment / আপনার মতামত *</Label>
                 <Textarea 
