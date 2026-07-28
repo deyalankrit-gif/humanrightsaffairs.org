@@ -132,31 +132,22 @@ export function PublicFooter() {
               Human Rights Affairs Trust (Justice Shield) is a Central Government Registered Human Rights Organization in India <a href="https://ngodarpan.gov.in/#/search-ngo" target="_blank" rel="noopener noreferrer" className="font-bold text-accent hover:underline decoration-accent/50 underline-offset-4">(Reg. No. WB/2025/0762605)</a>. Dedicated to constitutional literacy & legal aid & Social Justice.
             </p>
             
-            <div className="space-y-6">
-              <div className="flex flex-col gap-4">
-                <div className="flex gap-4">
-                  {[Facebook, Twitter, Instagram, Youtube].map((Icon, idx) => (
-                    <a key={idx} href="#" className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-accent transition-colors">
-                      <Icon className="w-4 h-4 md:w-5 md:h-5" />
-                    </a>
-                  ))}
-                </div>
-                
-                {/* Requested Bengali Hyperlink */}
-                <Link 
-                  href="/legal/police-duties" 
-                  className="text-accent hover:underline font-bold text-xl md:text-2xl mt-4 block transition-all"
-                >
-                  প্রয়োজনীয় কিছু তথ্য
-                </Link>
+            <div className="flex flex-col gap-4">
+              <div className="flex gap-4">
+                {[Facebook, Twitter, Instagram, Youtube].map((Icon, idx) => (
+                  <a key={idx} href="#" className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-accent transition-colors">
+                    <Icon className="w-4 h-4 md:w-5 md:h-5" />
+                  </a>
+                ))}
               </div>
-
-              <DonationDialog initialStep="qr">
-                <button className="block w-32 md:w-40 h-24 md:h-28 relative group cursor-pointer overflow-hidden rounded-xl bg-transparent border-none p-0 outline-none transition-all duration-500 hover:scale-[1.5] active:scale-95 origin-center hover:z-50">
-                  <Image src={donationFooterImg?.imageUrl || "/HRAT%20Donate.jpeg"} alt="Donate" fill className="object-contain" />
-                  <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                </button>
-              </DonationDialog>
+              
+              {/* Bengali Hyperlink */}
+              <Link 
+                href="/legal/police-duties" 
+                className="text-accent hover:underline font-bold text-xl md:text-2xl mt-4 block transition-all"
+              >
+                প্রয়োজনীয় কিছু তথ্য
+              </Link>
             </div>
           </div>
 
@@ -270,6 +261,16 @@ export function PublicFooter() {
                 <div className="pt-4 space-y-1">
                   <p className="font-bold text-accent uppercase tracking-widest text-[10px]">Registered Office</p>
                   <p className="text-xs text-primary-foreground/80 font-bold">Kolkata 700157</p>
+                </div>
+
+                {/* Repositioned Donation Call to Action Image */}
+                <div className="pt-6">
+                  <DonationDialog initialStep="qr">
+                    <button className="block w-32 md:w-40 h-24 md:h-28 relative group cursor-pointer overflow-hidden rounded-xl bg-transparent border-none p-0 outline-none transition-all duration-500 hover:scale-[1.5] active:scale-95 origin-left hover:z-50">
+                      <Image src={donationFooterImg?.imageUrl || "/HRAT%20Donate.jpeg"} alt="Donate" fill className="object-contain" />
+                      <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    </button>
+                  </DonationDialog>
                 </div>
               </div>
             </div>
