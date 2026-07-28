@@ -147,7 +147,7 @@ export default {
         'flag-ripple': 'flag-ripple 5s linear infinite',
         'flag-ripple-alt': 'flag-ripple-alt 4s linear infinite',
         'gradient-x': 'gradient-x 5s ease infinite',
-        'marquee': 'marquee 40s linear infinite',
+        'marquee': 'marquee 80s linear infinite',
       },
     },
   },
