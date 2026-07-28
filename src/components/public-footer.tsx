@@ -256,6 +256,11 @@ export function PublicFooter() {
                   <Mail className="w-4 h-4 text-accent shrink-0 mt-0.5" />
                   <a href="mailto:hrat.wb.chairman@gmail.com" className="hover:text-accent font-bold truncate">hrat.wb.chairman@gmail.com</a>
                 </div>
+
+                <div className="pt-4 space-y-1">
+                  <p className="font-bold text-accent uppercase tracking-widest text-[10px]">Registered Office</p>
+                  <p className="text-xs text-primary-foreground/80">Kolkata 700157</p>
+                </div>
               </div>
             </div>
           </div>
