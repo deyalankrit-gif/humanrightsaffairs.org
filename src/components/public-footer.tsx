@@ -26,6 +26,7 @@ import { useToast } from '@/hooks/use-toast';
 /**
  * PublicFooter: Optimized for all screen sizes with responsive grids and fluid spacing.
  * Includes a secure email OTP gate for the Required Documents section.
+ * Featuring the requested Bengali orange hyperlink below social icons.
  */
 export function PublicFooter() {
   const donationFooterImg = PlaceHolderImages.find(img => img.id === 'donation-footer-image');
@@ -131,23 +132,31 @@ export function PublicFooter() {
               Human Rights Affairs Trust (Justice Shield) is a Central Government Registered Human Rights Organization in India <a href="https://ngodarpan.gov.in/#/search-ngo" target="_blank" rel="noopener noreferrer" className="font-bold text-accent hover:underline decoration-accent/50 underline-offset-4">(Reg. No. WB/2025/0762605)</a>. Dedicated to constitutional literacy & legal aid & Social Justice.
             </p>
             
-            <div className="space-y-4">
+            <div className="space-y-6">
+              <div className="flex flex-col gap-4">
+                <div className="flex gap-4">
+                  {[Facebook, Twitter, Instagram, Youtube].map((Icon, idx) => (
+                    <a key={idx} href="#" className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-accent transition-colors">
+                      <Icon className="w-4 h-4 md:w-5 md:h-5" />
+                    </a>
+                  ))}
+                </div>
+                
+                {/* Requested Bengali Hyperlink */}
+                <Link 
+                  href="/legal/police-duties" 
+                  className="text-accent hover:underline font-bold text-xl md:text-2xl mt-4 block transition-all"
+                >
+                  প্রয়োজনীয় কিছু তথ্য
+                </Link>
+              </div>
+
               <DonationDialog initialStep="qr">
                 <button className="block w-32 md:w-40 h-24 md:h-28 relative group cursor-pointer overflow-hidden rounded-xl bg-transparent border-none p-0 outline-none transition-all duration-500 hover:scale-[1.5] active:scale-95 origin-center hover:z-50">
                   <Image src={donationFooterImg?.imageUrl || "/HRAT%20Donate.jpeg"} alt="Donate" fill className="object-contain" />
                   <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                 </button>
               </DonationDialog>
-            </div>
-
-            <div className="space-y-4">
-              <div className="flex gap-4">
-                {[Facebook, Twitter, Instagram, Youtube].map((Icon, idx) => (
-                  <a key={idx} href="#" className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-accent transition-colors">
-                    <Icon className="w-4 h-4 md:w-5 md:h-5" />
-                  </a>
-                ))}
-              </div>
             </div>
           </div>
 
@@ -336,7 +345,7 @@ export function PublicFooter() {
                    <Button 
                     onClick={handleVerifyOtp} 
                     disabled={isVerifying || otpValue.length < 6}
-                    className="w-full h-12 bg-accent text-primary font-bold rounded-xl hover:bg-secondary hover:text-white transition-all shadow-xl shadow-accent/20"
+                    className="w-full h-12 bg-accent text-primary font-bold rounded-xl hover:bg-secondary hover:text-white transition-all shadow-xl shadow-primary/20"
                    >
                      {isVerifying ? <Loader2 className="animate-spin w-5 h-5" /> : "Verify Identity"}
                    </Button>

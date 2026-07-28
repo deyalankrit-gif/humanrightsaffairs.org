@@ -19,13 +19,17 @@ import {
   Search,
   Eye,
   Camera,
-  BookOpen
+  BookOpen,
+  Activity
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Footer } from '@/components/footer'
 import { Badge } from '@/components/ui/badge'
 
+/**
+ * PoliceDutiesPage: High-fidelity legal resource detailing D.K. Basu guidelines.
+ * Focuses on empowering citizens with knowledge of police obligations during arrest.
+ */
 export default function PoliceDutiesPage() {
   const handlePrint = () => {
     window.print()
@@ -91,7 +95,7 @@ export default function PoliceDutiesPage() {
             </Link>
             <div className="flex items-center gap-4 mb-4">
               <div className="p-3 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20">
-                <ShieldAlert className="w-8 h-8 text-accent" />
+                <ShieldAlert className="w-10 h-10 text-accent animate-pulse" />
               </div>
               <Badge className="bg-emerald-500 text-white font-bold px-3 py-1">DK Basu Guidelines</Badge>
             </div>
@@ -189,10 +193,6 @@ export default function PoliceDutiesPage() {
           </div>
         </div>
       </section>
-
-      <Footer />
     </main>
   )
 }
-
-import { Activity } from 'lucide-react'
