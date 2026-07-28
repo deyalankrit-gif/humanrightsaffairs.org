@@ -209,7 +209,7 @@ export function AppSidebar() {
         </Link>
       </SidebarHeader>
       
-      <SidebarContent className="py-6 no-scrollbar scroll-smooth">
+      <SidebarContent className="py-6 custom-scrollbar scroll-smooth">
         {isAdminPortal && filteredTopAnalyticsLinks.length > 0 && (
           <SidebarGroup>
             <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden text-primary font-bold">
