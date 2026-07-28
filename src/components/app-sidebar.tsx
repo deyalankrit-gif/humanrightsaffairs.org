@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from "react"
@@ -56,7 +55,8 @@ import {
   Truck,
   Package,
   Boxes,
-  Navigation
+  Navigation,
+  Bell
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -138,18 +138,42 @@ export function AppSidebar() {
   }, [db, user?.email]);
 
   const { data: userPermissions } = useDoc(userDocRef);
-
   const isRoot = user?.email?.toLowerCase() === 'deydhritiman@gmail.com';
 
-  // Automatically scroll active item into view (middle of sidebar)
+  // NAVIGATION PANEL AUTO-CENTERING BEHAVIOR
   React.useEffect(() => {
-    if (activeItemRef.current) {
-      activeItemRef.current.scrollIntoView({
-        behavior: 'smooth',
-        block: 'center'
-      });
-    }
-  }, [pathname]);
+    const scrollActiveItem = () => {
+      if (!activeItemRef.current) return;
+      
+      const scrollContainer = activeItemRef.current.closest('[data-sidebar="content"]');
+      if (!scrollContainer) return;
+
+      const itemRect = activeItemRef.current.getBoundingClientRect();
+      const containerRect = scrollContainer.getBoundingClientRect();
+
+      // Avoid unnecessary scrolling if already close to the center and fully visible
+      const itemCenter = itemRect.top + itemRect.height / 2;
+      const containerCenter = containerRect.top + containerRect.height / 2;
+      const threshold = containerRect.height * 0.15; // 15% tolerance
+
+      const isOptimallyPositioned = (
+        itemRect.top >= containerRect.top + 50 &&
+        itemRect.bottom <= containerRect.bottom - 50 &&
+        Math.abs(itemCenter - containerCenter) < threshold
+      );
+
+      if (!isOptimallyPositioned) {
+        activeItemRef.current.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center'
+        });
+      }
+    };
+
+    // Small delay to ensure route transitions and DOM layout are completed
+    const timer = setTimeout(scrollActiveItem, 150);
+    return () => clearTimeout(timer);
+  }, [pathname, activeHash]);
 
   const filteredTopAnalyticsLinks = React.useMemo(() => {
     if (!isAdminPortal) return []
@@ -241,7 +265,6 @@ export function AppSidebar() {
           </SidebarGroup>
         )}
 
-        {/* LOGISTICAL GOVERNANCE GROUP */}
         {isAdminPortal && filteredLogisticLinks.length > 0 && (
           <SidebarGroup>
             <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden text-blue-600 font-bold uppercase tracking-widest">
@@ -273,7 +296,6 @@ export function AppSidebar() {
           </SidebarGroup>
         )}
 
-        {/* FINANCE MODULE GROUP */}
         {isAdminPortal && filteredFinanceLinks.length > 0 && (
           <SidebarGroup>
             <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden text-red-600 font-bold">

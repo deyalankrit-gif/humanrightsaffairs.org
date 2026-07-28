@@ -16,7 +16,7 @@ import { useToast } from '@/hooks/use-toast';
 
 /**
  * Technical Broadcast Manager: Root-exclusive file management system.
- * Replaces the active player with a facility to select and insert MP3 files.
+ * Enhanced visibility for empty state and high-fidelity archival.
  */
 export function SidebarAudioStation() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -137,10 +137,10 @@ export function SidebarAudioStation() {
               </button>
             </div>
           )) : (
-            <div className="text-center py-10 bg-black/40 rounded-[2rem] border-2 border-dashed border-white/10 shadow-inner ring-1 ring-white/5">
-              <FileAudio className="w-10 h-10 text-white/10 mx-auto mb-3" />
-              <p className="text-[11px] font-black text-white/80 uppercase tracking-[0.25em]">Queue Empty</p>
-              <p className="text-[8px] text-white/40 font-bold uppercase mt-1.5 tracking-wider">No technical assets loaded</p>
+            <div className="text-center py-10 bg-black/60 rounded-[2rem] border-2 border-dashed border-orange-500/40 shadow-inner ring-1 ring-white/10 animate-in fade-in duration-700">
+              <FileAudio className="w-10 h-10 text-orange-500/60 mx-auto mb-3" />
+              <p className="text-[11px] font-black text-white uppercase tracking-[0.25em]">Queue Empty</p>
+              <p className="text-[9px] text-slate-300 font-bold uppercase mt-1.5 tracking-wider">No technical assets loaded</p>
             </div>
           )}
         </div>
