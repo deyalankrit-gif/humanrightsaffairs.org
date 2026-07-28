@@ -1,7 +1,7 @@
 
 "use client"
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
@@ -36,6 +36,7 @@ export function Navbar() {
   const pathname = usePathname()
   const [activeHash, setActiveHash] = useState('')
   const [scrolled, setScrolled] = useState(false)
+  const activeLinkRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -55,6 +56,17 @@ export function Navbar() {
       }
     }
   }, [])
+
+  // Center active item in the horizontal scrollable navbar
+  useEffect(() => {
+    if (activeLinkRef.current) {
+      activeLinkRef.current.scrollIntoView({
+        behavior: 'smooth',
+        inline: 'center',
+        block: 'nearest'
+      });
+    }
+  }, [pathname, activeHash]);
 
   return (
     <header className={cn(
@@ -90,7 +102,7 @@ export function Navbar() {
             }
 
             return (
-              <div key={link.name} className="relative h-full flex items-center shrink-0">
+              <div key={link.name} ref={isActive ? activeLinkRef : null} className="relative h-full flex items-center shrink-0">
                 <Link 
                   href={link.href}
                   onClick={() => {

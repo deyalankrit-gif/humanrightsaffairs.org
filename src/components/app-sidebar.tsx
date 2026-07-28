@@ -127,6 +127,7 @@ const financeLinksConfig = [
 export function AppSidebar() {
   const pathname = usePathname()
   const [activeHash, setActiveHash] = React.useState('')
+  const activeItemRef = React.useRef<HTMLLIElement | null>(null)
   const db = useFirestore()
   const { user } = useUser()
   const isAdminPortal = pathname?.startsWith('/internal')
@@ -139,6 +140,16 @@ export function AppSidebar() {
   const { data: userPermissions } = useDoc(userDocRef);
 
   const isRoot = user?.email?.toLowerCase() === 'deydhritiman@gmail.com';
+
+  // Automatically scroll active item into view (middle of sidebar)
+  React.useEffect(() => {
+    if (activeItemRef.current) {
+      activeItemRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center'
+      });
+    }
+  }, [pathname]);
 
   const filteredTopAnalyticsLinks = React.useMemo(() => {
     if (!isAdminPortal) return []
@@ -198,7 +209,7 @@ export function AppSidebar() {
         </Link>
       </SidebarHeader>
       
-      <SidebarContent className="py-6 no-scrollbar">
+      <SidebarContent className="py-6 no-scrollbar scroll-smooth">
         {isAdminPortal && filteredTopAnalyticsLinks.length > 0 && (
           <SidebarGroup>
             <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden text-primary font-bold">
@@ -208,7 +219,7 @@ export function AppSidebar() {
               {filteredTopAnalyticsLinks.map((link) => {
                 const isActive = pathname === link.href
                 return (
-                  <SidebarMenuItem key={link.name}>
+                  <SidebarMenuItem key={link.name} ref={isActive ? activeItemRef : null}>
                     <SidebarMenuButton
                       asChild
                       isActive={isActive}
@@ -240,7 +251,7 @@ export function AppSidebar() {
               {filteredLogisticLinks.map((link) => {
                 const isActive = pathname === link.href
                 return (
-                  <SidebarMenuItem key={link.name}>
+                  <SidebarMenuItem key={link.name} ref={isActive ? activeItemRef : null}>
                     <SidebarMenuButton
                       asChild
                       isActive={isActive}
@@ -272,7 +283,7 @@ export function AppSidebar() {
               {filteredFinanceLinks.map((link) => {
                 const isActive = pathname === link.href || (link.href !== '/' && pathname.startsWith(link.href))
                 return (
-                  <SidebarMenuItem key={link.name}>
+                  <SidebarMenuItem key={link.name} ref={isActive ? activeItemRef : null}>
                     <SidebarMenuButton
                       asChild
                       isActive={isActive}
@@ -325,7 +336,7 @@ export function AppSidebar() {
               }
 
               return (
-                <SidebarMenuItem key={link.name}>
+                <SidebarMenuItem key={link.name} ref={isActive ? activeItemRef : null}>
                   <SidebarMenuButton
                     asChild
                     isActive={isActive}

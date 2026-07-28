@@ -1,6 +1,7 @@
+
 'use client';
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { useUser } from '@/firebase'
 import { 
@@ -35,18 +36,31 @@ const publicLinks = [
 
 /**
  * PublicViewPage provides an internal viewer for the public-facing site.
+ * Enhanced: Horizontal navigation now centers the active item automatically.
  */
 export default function PublicViewPage() {
   const { user, loading: authLoading } = useUser()
   const router = useRouter()
   const [iframeKey, setIframeKey] = useState(0)
   const [currentUrl, setCurrentUrl] = useState('/')
+  const activeBtnRef = useRef<HTMLButtonElement | null>(null)
 
   useEffect(() => {
     if (!authLoading && !user) {
       router.push('/internal/login')
     }
   }, [user, authLoading, router])
+
+  // Center the active button in the horizontal navigation tray
+  useEffect(() => {
+    if (activeBtnRef.current) {
+      activeBtnRef.current.scrollIntoView({
+        behavior: 'smooth',
+        inline: 'center',
+        block: 'nearest'
+      });
+    }
+  }, [currentUrl]);
 
   if (authLoading || !user) {
     return (
@@ -97,22 +111,26 @@ export default function PublicViewPage() {
         </div>
 
         {/* Scrollable Navigation Area with Visible Scrollbar */}
-        <nav className="flex items-center overflow-x-auto admin-scrollbar px-4 py-2.5 gap-3 bg-slate-50/50 dark:bg-slate-900/50 scroll-smooth">
-          {publicLinks.map((link) => (
-            <button
-              key={link.name}
-              onClick={() => navigateMirror(link.href)}
-              className={cn(
-                "whitespace-nowrap flex items-center gap-2 px-4 py-1.5 rounded-md text-[11px] font-bold uppercase tracking-wider transition-all border shrink-0",
-                currentUrl === link.href
-                  ? "bg-accent text-primary border-accent shadow-sm"
-                  : "bg-white dark:bg-slate-800 text-slate-500 border-slate-100 dark:border-slate-700 hover:border-accent hover:text-accent"
-              )}
-            >
-              <link.icon className="w-3.5 h-3.5" />
-              {link.name}
-            </button>
-          ))}
+        <nav className="flex items-center overflow-x-auto admin-scrollbar px-4 py-2.5 gap-3 bg-slate-50/50 dark:bg-slate-900/50 scroll-smooth no-scrollbar">
+          {publicLinks.map((link) => {
+            const isActive = currentUrl === link.href;
+            return (
+              <button
+                key={link.name}
+                ref={isActive ? activeBtnRef : null}
+                onClick={() => navigateMirror(link.href)}
+                className={cn(
+                  "whitespace-nowrap flex items-center gap-2 px-4 py-1.5 rounded-md text-[11px] font-bold uppercase tracking-wider transition-all border shrink-0",
+                  isActive
+                    ? "bg-accent text-primary border-accent shadow-sm"
+                    : "bg-white dark:bg-slate-800 text-slate-500 border-slate-100 dark:border-slate-700 hover:border-accent hover:text-accent"
+                )}
+              >
+                <link.icon className={cn("w-3.5 h-3.5", isActive ? "text-primary" : "text-slate-400")} />
+                {link.name}
+              </button>
+            );
+          })}
         </nav>
       </div>
 
