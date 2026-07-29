@@ -423,7 +423,7 @@ export default function MembersPage() {
           title === "Central Committee" 
             ? "text-3xl sm:text-5xl md:text-7xl bg-gradient-to-r from-red-600 via-orange-500 to-red-600 bg-[length:200%_auto] bg-clip-text text-transparent animate-gradient-x py-2 drop-shadow-lg" 
             : title === "State Chapters"
-            ? "text-2xl sm:text-4xl md:text-5xl bg-gradient-to-r from-emerald-600 via-sky-500 to-emerald-600 bg-[length:200%_auto] bg-clip-text text-transparent animate-gradient-x py-1.5 drop-shadow-md"
+            ? "text-3xl sm:text-5xl md:text-6xl bg-gradient-to-r from-emerald-600 via-sky-500 to-emerald-600 bg-[length:200%_auto] bg-clip-text text-transparent animate-gradient-x py-1.5 drop-shadow-md"
             : "text-lg md:text-3xl text-primary dark:text-white"
         )}>
           {title}
