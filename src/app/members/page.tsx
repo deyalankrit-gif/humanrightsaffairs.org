@@ -76,7 +76,7 @@ type Member = {
   stateName?: string
   districtName?: string
   imageId?: string
-  gender?: 'male' | 'female'
+  gender?: string
   email?: string
   phone?: string
   status?: string
@@ -116,7 +116,7 @@ export default function MembersPage() {
     profession: '',
     education: '',
     experience: '',
-    gender: 'male' as 'male' | 'female',
+    gender: 'male',
     bloodGroup: '',
     email: '',
     phone: '',
@@ -328,8 +328,15 @@ export default function MembersPage() {
   const MemberGrid = ({ items }: { items: Member[] }) => (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-8 xl:grid-cols-10 gap-2 md:gap-3">
       {items.map((member) => {
-        const fallback = member.gender?.toLowerCase() === 'female' ? '/dummy w.png' : '/dummy m.png'
-        const displayImg = member.imageId?.startsWith('data:') ? member.imageId : (PlaceHolderImages.find(i => i.id === member.imageId)?.imageUrl || fallback)
+        const genderKey = (member.gender || '').toLowerCase();
+        const fallback = (genderKey === 'female' || genderKey === 'f') ? '/dummy w.png' : '/dummy m.png'
+        
+        const isDataUrl = member.imageId?.startsWith('data:');
+        const isExternalUrl = member.imageId?.startsWith('http');
+        const placeholder = PlaceHolderImages.find(i => i.id === member.imageId)?.imageUrl;
+        
+        const displayImg = isDataUrl || isExternalUrl ? member.imageId : (placeholder || fallback)
+        
         const isOfficeBearer = member.designationCategory === 'Office-bearing Member';
         
         const getStarColor = (level: string) => {
@@ -366,7 +373,7 @@ export default function MembersPage() {
             <CardHeader className="p-0">
               <div className="relative aspect-square overflow-hidden bg-slate-100 dark:bg-slate-800 rounded-t-2xl">
                 <Image 
-                  src={displayImg} 
+                  src={displayImg!} 
                   alt={member.name} 
                   fill 
                   className={cn(
@@ -497,7 +504,7 @@ export default function MembersPage() {
                             <Label className="text-[10px] uppercase font-bold text-slate-400">Gender *</Label>
                             <Select value={newMember.gender} onValueChange={(val: any) => setNewMember({...newMember, gender: val})}>
                               <SelectTrigger className="h-11 rounded-xl"><SelectValue placeholder="Select" /></SelectTrigger>
-                              <SelectContent position="popper" className="z-[1000001] bg-white"><SelectItem value="Male">Male</SelectItem><SelectItem value="Female">Female</SelectItem></SelectContent>
+                              <SelectContent position="popper" className="z-[1000001] bg-white"><SelectItem value="male">Male</SelectItem><SelectItem value="female">Female</SelectItem></SelectContent>
                             </Select>
                           </div>
                           <div className="space-y-1">

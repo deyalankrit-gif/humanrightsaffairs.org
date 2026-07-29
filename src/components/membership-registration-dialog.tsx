@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState } from 'react'
@@ -327,7 +328,7 @@ export function MembershipRegistrationDialog({ children }: { children: React.Rea
                   <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Gender</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl><SelectTrigger className="h-11 rounded-xl"><SelectValue placeholder="Select" /></SelectTrigger></FormControl>
-                    <SelectContent position="popper" className="z-[1000000] bg-white"><SelectItem value="Male">Male</SelectItem><SelectItem value="Female">Female</SelectItem></SelectContent>
+                    <SelectContent position="popper" className="z-[1000000] bg-white"><SelectItem value="male">Male</SelectItem><SelectItem value="female">Female</SelectItem></SelectContent>
                   </Select>
                   <FormMessage />
                 </FormItem>

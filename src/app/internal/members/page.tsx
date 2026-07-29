@@ -75,7 +75,7 @@ export default function InternalMembersDirectory() {
     designationCategory: 'General Member',
     designation: 'General Member',
     profession: '',
-    gender: '',
+    gender: 'male',
     bloodGroup: '',
     email: '',
     phone: '',
@@ -202,7 +202,7 @@ export default function InternalMembersDirectory() {
       setIsAddingDialogOpen(false)
       setNewMember({
         honorific: '',
-        name: '', designationCategory: 'General Member', designation: 'General Member', profession: '', gender: '', bloodGroup: '',
+        name: '', designationCategory: 'General Member', designation: 'General Member', profession: '', gender: 'male', bloodGroup: '',
         email: '', phone: '', address: '', postOffice: '', policeStation: '', pinCode: '',
         level: 'National', status: 'Active',
         memberId: '', stateName: '', districtName: '', joiningDate: '', expiryDate: '',
@@ -306,7 +306,7 @@ export default function InternalMembersDirectory() {
                   setDeleteDialogStep('warning');
                 }}
               >
-                <Trash2 className="w-3 h-3" /> Delete
+                <Trash2 className="w-3 i-3" /> Delete
               </Button>
             </div>
           </div>
@@ -342,7 +342,7 @@ export default function InternalMembersDirectory() {
                 <div className="space-y-6 py-4">
                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
                       <div className="flex flex-col items-center gap-3">
-                        <div className="relative w-32 h-32 rounded-full bg-slate-50 dark:bg-slate-800 overflow-hidden border-2 border-dashed border-slate-300 flex items-center justify-center overflow-hidden group cursor-pointer hover:border-accent transition-colors shadow-inner">
+                        <div className="relative w-32 h-32 rounded-full bg-slate-50 dark:bg-slate-800 border-2 border-dashed border-slate-300 flex items-center justify-center overflow-hidden group cursor-pointer hover:border-accent transition-colors shadow-inner">
                           {newMember.imageId ? (
                             <Image src={newMember.imageId} alt="Preview" fill className="object-cover" />
                           ) : (
@@ -354,7 +354,7 @@ export default function InternalMembersDirectory() {
                       </div>
                       <div className="md:col-span-2 space-y-4">
                         <div className="space-y-1">
-                          <Label className="text-[10px] uppercase font-bold text-slate-400">Full Legal Name <span className="text-red-500">*</span></Label>
+                          <Label className="text-[10px] uppercase font-bold text-slate-400">Full Legal Name *</Label>
                           <div className="flex gap-2">
                              <Select value={newMember.honorific} onValueChange={val => setNewMember({...newMember, honorific: val})}>
                                 <SelectTrigger className="w-24 h-11 rounded-xl bg-white dark:bg-slate-900 border-slate-200"><SelectValue placeholder="Title" /></SelectTrigger>
@@ -377,7 +377,7 @@ export default function InternalMembersDirectory() {
                             <Label className="text-[10px] uppercase font-bold text-slate-400">Gender *</Label>
                             <Select value={newMember.gender} onValueChange={(val: any) => setNewMember({...newMember, gender: val})}>
                               <SelectTrigger className="h-11 rounded-xl"><SelectValue placeholder="Select" /></SelectTrigger>
-                              <SelectContent position="popper" className="z-[1000001] bg-white"><SelectItem value="Male">Male</SelectItem><SelectItem value="Female">Female</SelectItem></SelectContent>
+                              <SelectContent position="popper" className="z-[1000001] bg-white"><SelectItem value="male">Male</SelectItem><SelectItem value="female">Female</SelectItem></SelectContent>
                             </Select>
                           </div>
                           <div className="space-y-1">
@@ -399,7 +399,7 @@ export default function InternalMembersDirectory() {
 
                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 rounded-3xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
                       <div className="space-y-1">
-                        <Label className="text-[10px] uppercase font-bold text-accent">Designation Category <span className="text-red-500">*</span></Label>
+                        <Label className="text-[10px] uppercase font-bold text-accent">Designation Category *</Label>
                         <Select value={newMember.designationCategory} onValueChange={(val: any) => {
                           const isFixed = val === 'General Member' || val === 'Board Member' || val === 'Volunteer';
                           setNewMember({
@@ -419,7 +419,7 @@ export default function InternalMembersDirectory() {
                       </div>
                       {newMember.designationCategory === 'Office-bearing Member' && (
                         <div className="space-y-1 animate-in fade-in slide-in-from-left-2">
-                          <Label className="text-[10px] uppercase font-bold text-accent">Manual Designation <span className="text-red-500">*</span></Label>
+                          <Label className="text-[10px] uppercase font-bold text-accent">Manual Designation *</Label>
                           <Input placeholder="e.g. Secretary, Treasurer" value={newMember.designation} onChange={e => setNewMember({...newMember, designation: e.target.value})} className="rounded-xl border-accent/20 h-11" />
                         </div>
                       )}
@@ -428,7 +428,7 @@ export default function InternalMembersDirectory() {
                    <div className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-3xl space-y-4 border border-slate-100 dark:border-slate-800 shadow-inner">
                       <div className="grid grid-cols-1 gap-4">
                         <div className="space-y-2">
-                          <Label className="text-[10px] uppercase font-bold text-slate-400">Commissioned Member ID <span className="text-red-500">*</span></Label>
+                          <Label className="text-[10px] uppercase font-bold text-slate-400">Commissioned Member ID *</Label>
                           <div className="flex gap-2">
                             <Input 
                               placeholder="ABCDEF1234" 
@@ -452,7 +452,7 @@ export default function InternalMembersDirectory() {
                       
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div className="space-y-2">
-                          <Label className="text-[10px] uppercase font-bold text-slate-400">Duration <span className="text-red-500">*</span></Label>
+                          <Label className="text-[10px] uppercase font-bold text-slate-400">Duration *</Label>
                           <Select value={newMember.membershipDuration} onValueChange={val => setNewMember({...newMember, membershipDuration: val as any})}>
                             <SelectTrigger className="h-11 rounded-xl bg-white dark:bg-slate-900"><SelectValue /></SelectTrigger>
                             <SelectContent position="popper" className="z-[1000001] bg-white">
@@ -463,7 +463,7 @@ export default function InternalMembersDirectory() {
                           </Select>
                         </div>
                         <div className="space-y-2">
-                          <Label className="text-[10px] uppercase font-bold text-slate-400">Issue Date <span className="text-red-500">*</span></Label>
+                          <Label className="text-[10px] uppercase font-bold text-slate-400">Issue Date *</Label>
                           <Popover>
                             <PopoverTrigger asChild>
                               <Button variant="outline" className={cn("w-full justify-start text-left font-normal h-11 rounded-xl bg-white dark:bg-slate-900", !newMember.joiningDate && "text-muted-foreground")}>
@@ -486,20 +486,20 @@ export default function InternalMembersDirectory() {
                    <div className="space-y-4">
                       <div className="grid grid-cols-2 gap-4">
                          <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">Official Email</Label><Input type="email" placeholder="name@hrat.org" value={newMember.email} onChange={e => setNewMember({...newMember, email: e.target.value})} className="h-11 rounded-xl" /></div>
-                         <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">Phone Number <span className="text-red-500">*</span></Label><Input placeholder="+91" value={newMember.phone} onChange={e => setNewMember({...newMember, phone: e.target.value})} className="h-11 rounded-xl" /></div>
+                         <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">Phone Number *</Label><Input placeholder="+91" value={newMember.phone} onChange={e => setNewMember({...newMember, phone: e.target.value})} className="h-11 rounded-xl" /></div>
                       </div>
                       <div className="space-y-1">
-                        <Label className="text-[10px] uppercase font-bold text-slate-400">Verified Residential Address <span className="text-red-500">*</span></Label>
+                        <Label className="text-[10px] uppercase font-bold text-slate-400">Verified Residential Address *</Label>
                         <Input placeholder="House No, Village, Lane" value={newMember.address} onChange={e => setNewMember({...newMember, address: e.target.value})} className="h-11 rounded-xl" />
                       </div>
                       <div className="grid grid-cols-3 gap-4">
-                        <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">Post Office <span className="text-red-500">*</span></Label><Input placeholder="PO Name" value={newMember.postOffice} onChange={e => setNewMember({...newMember, postOffice: e.target.value})} className="h-11 rounded-xl" /></div>
-                        <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">Police Station <span className="text-red-500">*</span></Label><Input placeholder="PS Name" value={newMember.policeStation} onChange={e => setNewMember({...newMember, policeStation: e.target.value})} className="h-11 rounded-xl" /></div>
-                        <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">PIN Code <span className="text-red-500">*</span></Label><Input placeholder="6 digits" maxLength={6} value={newMember.pinCode} onChange={e => setNewMember({...newMember, pinCode: e.target.value})} className="h-11 rounded-xl font-mono" /></div>
+                        <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">Post Office *</Label><Input placeholder="PO Name" value={newMember.postOffice} onChange={e => setNewMember({...newMember, postOffice: e.target.value})} className="h-11 rounded-xl" /></div>
+                        <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">Police Station *</Label><Input placeholder="PS Name" value={newMember.policeStation} onChange={e => setNewMember({...newMember, policeStation: e.target.value})} className="h-11 rounded-xl" /></div>
+                        <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">PIN Code *</Label><Input placeholder="6 digits" maxLength={6} value={newMember.pinCode} onChange={e => setNewMember({...newMember, pinCode: e.target.value})} className="h-11 rounded-xl font-mono" /></div>
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1">
-                          <Label className="text-[10px] uppercase font-bold text-slate-400">Operational Level <span className="text-red-500">*</span></Label>
+                          <Label className="text-[10px] uppercase font-bold text-slate-400">Operational Level *</Label>
                           <Select value={newMember.level} onValueChange={(val: any) => setNewMember({...newMember, level: val, stateName: '', districtName: ''})}>
                             <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
                             <SelectContent position="popper" className="z-[1000001] bg-white"><SelectItem value="National">Central Council</SelectItem><SelectItem value="State">State Level</SelectItem><SelectItem value="District">District Level</SelectItem></SelectContent>
