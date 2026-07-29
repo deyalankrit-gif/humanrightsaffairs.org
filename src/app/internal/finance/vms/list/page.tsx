@@ -67,16 +67,16 @@ export default function VoucherRegistry() {
         </div>
       </header>
 
-      <section className="py-6 border-b bg-white sticky top-[64px] z-30 shadow-sm">
+      <section className="py-6 border-b bg-white dark:bg-slate-900 sticky top-[64px] z-30 shadow-sm">
         <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
-           <div className="flex gap-2 p-1 bg-slate-100 rounded-xl">
+           <div className="flex gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
               {['All', 'Draft', 'Pending Verification', 'Approved'].map(st => (
                 <button key={st} onClick={() => setStatusFilter(st)} className={cn("px-4 py-1.5 rounded-lg text-[9px] font-black uppercase transition-all", statusFilter === st ? "bg-emerald-600 text-white" : "text-slate-500 hover:bg-slate-200")}>{st}</button>
               ))}
            </div>
            <div className="relative w-full max-w-lg">
              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-             <Input placeholder="Filter by voucher ID or recipient name..." className="pl-9 h-11 rounded-xl bg-slate-50 border-none" value={search} onChange={e => setSearch(e.target.value)} />
+             <Input placeholder="Filter by voucher ID or recipient name..." className="pl-9 h-11 rounded-xl bg-slate-50 dark:bg-slate-800 border-none" value={search} onChange={e => setSearch(e.target.value)} />
            </div>
         </div>
       </section>
@@ -86,32 +86,48 @@ export default function VoucherRegistry() {
            <div className="text-center py-20"><Loader2 className="w-10 h-10 animate-spin text-emerald-500 mx-auto" /></div>
          ) : (
            <div className="grid gap-4">
-              {filtered.map((v: any) => (
-                <Card key={v.id} className="border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900 rounded-3xl group transition-all hover:shadow-lg">
-                  <CardContent className="p-0">
-                    <div className="flex flex-col md:flex-row items-stretch">
-                       <div className="p-6 md:w-56 text-center border-r bg-slate-50 flex flex-col items-center justify-center shrink-0">
-                          <Badge variant="outline" className="text-[10px] font-black px-3 py-1 mb-2 border-emerald-100 text-emerald-600 uppercase">{v.voucherNo}</Badge>
-                          <p className="text-xl font-headline font-bold text-primary">₹{v.amount.toLocaleString()}</p>
-                          <p className="text-[9px] font-bold text-slate-400 uppercase mt-1">{v.date}</p>
-                       </div>
-                       <div className="flex-1 p-6 flex flex-col md:flex-row items-center justify-between gap-6">
-                          <div className="space-y-1.5 flex-1">
-                             <h3 className="text-xl font-bold text-primary leading-tight">{v.person?.name}</h3>
-                             <div className="flex flex-wrap gap-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
-                                <span>{v.type}</span>
-                                <span>{v.paymentMethod}</span>
-                                <Badge className={cn("text-[8px] h-5", v.status === 'Approved' ? 'bg-emerald-500' : 'bg-amber-500')}>{v.status}</Badge>
-                             </div>
-                          </div>
-                          <Link href={`/internal/finance/vms/${v.id}`}>
-                             <Button variant="outline" className="h-10 px-8 rounded-xl font-bold border-2 hover:bg-emerald-50 transition-all">Examine</Button>
-                          </Link>
-                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+              {filtered.map((v: any) => {
+                const type = (v.type || '').toLowerCase();
+                const isIncome = type.includes('income') || type.includes('receipt') || type.includes('donation') || type.includes('membership');
+                const isExpense = type.includes('payment') || type.includes('expense') || type.includes('refund') || type.includes('advance');
+
+                return (
+                  <Card key={v.id} className="border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900 rounded-3xl group transition-all hover:shadow-lg">
+                    <CardContent className="p-0">
+                      <div className="flex flex-col md:flex-row items-stretch">
+                         <div className="p-6 md:w-56 text-center border-r bg-slate-50 dark:bg-slate-800/50 flex flex-col items-center justify-center shrink-0">
+                            <Badge 
+                              variant="outline" 
+                              className={cn(
+                                "text-[10px] font-black px-3 py-1 mb-2 uppercase",
+                                isIncome ? "border-emerald-100 text-emerald-600 dark:border-emerald-900/30 dark:text-emerald-400" :
+                                isExpense ? "border-red-100 text-red-600 dark:border-red-900/30 dark:text-red-400" :
+                                "border-slate-200 text-slate-500"
+                              )}
+                            >
+                               {isIncome && "🟢 "}{isExpense && "🔴 "}{v.voucherNo}
+                            </Badge>
+                            <p className="text-xl font-headline font-bold text-primary dark:text-white">₹{v.amount.toLocaleString()}</p>
+                            <p className="text-[9px] font-bold text-slate-400 uppercase mt-1">{v.date}</p>
+                         </div>
+                         <div className="flex-1 p-6 flex flex-col md:flex-row items-center justify-between gap-6">
+                            <div className="space-y-1.5 flex-1 text-center md:text-left">
+                               <h3 className="text-xl font-bold text-primary dark:text-white leading-tight">{v.person?.name}</h3>
+                               <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                                  <span>{v.type}</span>
+                                  <span>{v.paymentMethod}</span>
+                                  <Badge className={cn("text-[8px] h-5", v.status === 'Approved' ? 'bg-emerald-500' : 'bg-amber-500')}>{v.status}</Badge>
+                               </div>
+                            </div>
+                            <Link href={`/internal/finance/vms/${v.id}`}>
+                               <Button variant="outline" className="h-10 px-8 rounded-xl font-bold border-2 hover:bg-emerald-50 dark:hover:bg-emerald-950 transition-all">Examine</Button>
+                            </Link>
+                         </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
            </div>
          )}
       </section>

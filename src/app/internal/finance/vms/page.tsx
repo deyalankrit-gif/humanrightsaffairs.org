@@ -187,30 +187,46 @@ export default function VMSDashboard() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50">
-                   {(recentVouchers || []).map((v: any) => (
-                     <tr key={v.id} className="hover:bg-slate-50 transition-colors">
-                        <td className="px-8 py-6">
-                           <Badge variant="outline" className="font-mono text-[10px] border-emerald-100 text-emerald-600 uppercase">{v.voucherNo}</Badge>
-                           <p className="text-[8px] text-slate-400 mt-1 font-bold">{v.date}</p>
-                        </td>
-                        <td className="px-8 py-6">
-                           <p className="text-sm font-bold">{v.person?.name}</p>
-                           <p className="text-[9px] text-slate-400 uppercase">{v.type}</p>
-                        </td>
-                        <td className="px-8 py-6 font-black text-primary">₹{v.amount.toLocaleString()}</td>
-                        <td className="px-8 py-6">
-                           <Badge className={cn(
-                             "text-[8px] font-black uppercase",
-                             v.status === 'Approved' ? 'bg-emerald-500' : 'bg-amber-500'
-                           )}>{v.status}</Badge>
-                        </td>
-                        <td className="px-8 py-6 text-right">
-                           <Link href={`/internal/finance/vms/${v.id}`}>
-                              <Button variant="ghost" size="sm" className="h-8 rounded-lg text-[10px] font-bold border-slate-100">Details</Button>
-                           </Link>
-                        </td>
-                     </tr>
-                   ))}
+                   {(recentVouchers || []).map((v: any) => {
+                     const type = (v.type || '').toLowerCase();
+                     const isIncome = type.includes('income') || type.includes('receipt') || type.includes('donation') || type.includes('membership');
+                     const isExpense = type.includes('payment') || type.includes('expense') || type.includes('refund') || type.includes('advance');
+
+                     return (
+                       <tr key={v.id} className="hover:bg-slate-50 transition-colors">
+                          <td className="px-8 py-6">
+                             <Badge 
+                               variant="outline" 
+                               className={cn(
+                                 "font-mono text-[10px] uppercase",
+                                 isIncome ? "border-emerald-100 text-emerald-600 dark:border-emerald-900/30 dark:text-emerald-400" :
+                                 isExpense ? "border-red-100 text-red-600 dark:border-red-900/30 dark:text-red-400" :
+                                 "border-slate-200 text-slate-500"
+                               )}
+                             >
+                               {isIncome && "🟢 "}{isExpense && "🔴 "}{v.voucherNo}
+                             </Badge>
+                             <p className="text-[8px] text-slate-400 mt-1 font-bold">{v.date}</p>
+                          </td>
+                          <td className="px-8 py-6">
+                             <p className="text-sm font-bold text-primary dark:text-white leading-none">{v.person?.name}</p>
+                             <p className="text-[9px] text-slate-400 uppercase font-medium mt-1">{v.type}</p>
+                          </td>
+                          <td className="px-8 py-6 font-black text-primary dark:text-white">₹{v.amount.toLocaleString()}</td>
+                          <td className="px-8 py-6">
+                             <Badge className={cn(
+                               "text-[8px] font-black uppercase",
+                               v.status === 'Approved' ? 'bg-emerald-500' : 'bg-amber-500'
+                             )}>{v.status}</Badge>
+                          </td>
+                          <td className="px-8 py-6 text-right">
+                             <Link href={`/internal/finance/vms/${v.id}`}>
+                                <Button variant="ghost" size="sm" className="h-8 rounded-lg text-[10px] font-bold border-slate-100">Details</Button>
+                             </Link>
+                          </td>
+                       </tr>
+                     );
+                   })}
                 </tbody>
               </table>
            </CardContent>
