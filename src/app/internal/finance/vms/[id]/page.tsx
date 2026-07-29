@@ -5,7 +5,7 @@ import React, { useRef, useMemo } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { useDoc, useFirestore, useUser, useMemoFirebase } from '@/firebase'
-import { doc, updateDoc, serverTimestamp, increment, collection, query, where, getDocs } from 'firebase/firestore'
+import { doc, updateDoc, serverTimestamp, increment, collection, query, where, getDocs, addDoc, setDoc } from 'firebase/firestore'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -77,10 +77,12 @@ export default function VoucherDetailPage() {
         const summaryRef = doc(db, 'finance_summary', 'state');
         const isIncome = v.type.includes('Receipt') || v.type.includes('Donation') || v.type.includes('Membership');
         
-        await updateDoc(summaryRef, {
+        // Use setDoc with merge: true to ensure it works even if the state doc is missing
+        await setDoc(summaryRef, {
           [isIncome ? 'totalIncome' : 'totalExpense']: increment(v.amount),
-          [v.paymentMethod === 'Bank' ? 'bankBalance' : 'cashInHand']: increment(isIncome ? v.amount : -v.amount)
-        });
+          [v.paymentMethod === 'Bank' ? 'bankBalance' : 'cashInHand']: increment(isIncome ? v.amount : -v.amount),
+          updatedAt: serverTimestamp()
+        }, { merge: true });
 
         // 2. Propagate Approval to General Ledger (finance_transactions)
         const txQuery = query(collection(db, 'finance_transactions'), where('voucherNo', '==', v.voucherNo));
@@ -111,6 +113,7 @@ export default function VoucherDetailPage() {
       await updateDoc(docRef, updateData);
       toast({ title: `Status: ${newStatus}`, description: "Voucher and Ledger successfully synchronized." });
     } catch (e: any) {
+      console.error("[VMS-ACTION-ERROR]", e);
       toast({ variant: "destructive", title: "Action Failed", description: "Could not synchronize with national ledger." });
     }
   }
