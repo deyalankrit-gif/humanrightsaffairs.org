@@ -233,7 +233,7 @@ export default function MembersPage() {
         ...data,
         name: finalName,
         createdAt: serverTimestamp(),
-        isDemi: false // Ensure explicit marking as non-demi
+        isDemi: false
       })
       toast({ title: "Success", description: "New member record established." })
       setIsAdding(false)
@@ -265,9 +265,9 @@ export default function MembersPage() {
     }
   }
 
-  // DATA ISOLATION: Explicitly filter out demi members in memory for high-fidelity isolation
+  // Public directory includes both live and demi members for a populated visual experience.
   const members = React.useMemo(() => {
-    return ((firestoreMembers || []) as Member[]).filter(m => m.isDemi !== true);
+    return (firestoreMembers || []) as Member[];
   }, [firestoreMembers]);
 
   const filteredMembers = members.filter(m => {
