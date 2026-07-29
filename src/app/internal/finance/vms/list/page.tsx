@@ -30,6 +30,7 @@ import Link from 'next/link'
 /**
  * VoucherRegistry: Master list of all generated institutional financial instruments.
  * Updated: Included flow-based arrows (↓ for inflow, ↑ for outflow) for registry items.
+ * Added: Pulsating attention mechanism for 'Pending Verification' status.
  */
 export default function VoucherRegistry() {
   const { user, loading: authLoading } = useUser()
@@ -96,6 +97,7 @@ export default function VoucherRegistry() {
                 const type = (v.type || '').toLowerCase();
                 const isIncome = type.includes('income') || type.includes('receipt') || type.includes('donation') || type.includes('membership');
                 const isExpense = type.includes('payment') || type.includes('expense') || type.includes('refund') || type.includes('advance');
+                const isPending = v.status === 'Pending Verification';
 
                 return (
                   <Card key={v.id} className="border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900 rounded-3xl group transition-all hover:shadow-lg">
@@ -124,7 +126,11 @@ export default function VoucherRegistry() {
                                <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
                                   <span>{v.type}</span>
                                   <span>{v.paymentMethod}</span>
-                                  <Badge className={cn("text-[8px] h-5", v.status === 'Approved' ? 'bg-emerald-500' : 'bg-amber-500')}>{v.status}</Badge>
+                                  <Badge className={cn(
+                                    "text-[8px] h-5 transition-all", 
+                                    v.status === 'Approved' ? 'bg-emerald-500' : 'bg-amber-500',
+                                    isPending && "animate-pulse shadow-[0_0_12px_rgba(245,158,11,0.4)]"
+                                  )}>{v.status}</Badge>
                                </div>
                             </div>
                             <Link href={`/internal/finance/vms/${v.id}`}>

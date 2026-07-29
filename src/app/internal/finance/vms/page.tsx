@@ -25,6 +25,7 @@ import Link from 'next/link'
 /**
  * VMS Dashboard: Tactical overview of the institutional Voucher Management System.
  * Updated: Included flow-based arrows (↓ for inflow, ↑ for outflow) for recent instruments.
+ * Added: Pulsating attention mechanism for 'Pending Verification' status.
  */
 export default function VMSDashboard() {
   const { user, loading: authLoading } = useUser()
@@ -193,6 +194,7 @@ export default function VMSDashboard() {
                      const type = (v.type || '').toLowerCase();
                      const isIncome = type.includes('income') || type.includes('receipt') || type.includes('donation') || type.includes('membership');
                      const isExpense = type.includes('payment') || type.includes('expense') || type.includes('refund') || type.includes('advance');
+                     const isPending = v.status === 'Pending Verification';
 
                      return (
                        <tr key={v.id} className="hover:bg-slate-50 transition-colors">
@@ -219,8 +221,9 @@ export default function VMSDashboard() {
                           <td className="px-8 py-6 font-black text-primary dark:text-white">₹{v.amount.toLocaleString()}</td>
                           <td className="px-8 py-6">
                              <Badge className={cn(
-                               "text-[8px] font-black uppercase",
-                               v.status === 'Approved' ? 'bg-emerald-500' : 'bg-amber-500'
+                               "text-[8px] font-black uppercase transition-all",
+                               v.status === 'Approved' ? 'bg-emerald-500' : 'bg-amber-500',
+                               isPending && "animate-pulse shadow-[0_0_12px_rgba(245,158,11,0.4)]"
                              )}>{v.status}</Badge>
                           </td>
                           <td className="px-8 py-6 text-right">
