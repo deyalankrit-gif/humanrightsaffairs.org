@@ -26,7 +26,10 @@ import {
   Trash2,
   AlertTriangle,
   ShieldAlert,
-  Hash
+  Hash,
+  Globe,
+  Building2,
+  ShieldCheck
 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { 
@@ -192,7 +195,7 @@ export default function InternalMembersDirectory() {
         ...data, 
         name: finalName,
         createdAt: serverTimestamp(),
-        isDemi: false // Ensure explicit marking as non-demi
+        isDemi: false 
       })
       toast({ title: "Success", description: "Member record established." })
       setIsAdding(false)
@@ -236,15 +239,81 @@ export default function InternalMembersDirectory() {
     }
   }
 
-  if (authLoading || !user) {
-    return <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950"><Loader2 className="w-10 h-10 animate-spin text-accent" /></div>
-  }
-
   const filtered = profiles.filter((m: any) => {
     const matchesSearch = (m.name || '').toLowerCase().includes(search.toLowerCase()) || 
       (m.memberId || '').toLowerCase().includes(search.toLowerCase());
     return matchesSearch && (levelFilter === 'All' || m.level === levelFilter);
   })
+
+  const groupings = React.useMemo(() => {
+    const central = filtered.filter(m => m.level === 'National');
+    
+    const stateGroups = filtered
+      .filter(m => m.level === 'State')
+      .reduce((acc, m) => {
+        const state = (m.stateName || 'Unspecified State').toUpperCase();
+        if (!acc[state]) acc[state] = [];
+        acc[state].push(m);
+        return acc;
+      }, {} as Record<string, any[]>);
+
+    const districtGroups = filtered
+      .filter(m => m.level === 'District')
+      .reduce((acc, m) => {
+        const state = (m.stateName || 'Unspecified State').toUpperCase();
+        const district = (m.districtName || 'Unspecified District').toUpperCase();
+        if (!acc[state]) acc[state] = {};
+        if (!acc[state][district]) acc[state][district] = [];
+        acc[state][district].push(m);
+        return acc;
+      }, {} as Record<string, Record<string, any[]>>);
+
+    return { central, stateGroups, districtGroups };
+  }, [filtered]);
+
+  const renderMemberCard = (member: any) => (
+    <Card key={member.id} className="border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800">
+      <CardContent className="p-0">
+        <div className="flex flex-col md:flex-row items-stretch">
+          <div className="p-5 bg-slate-50 dark:bg-slate-800 md:w-44 text-center border-r border-slate-100 dark:border-slate-700 flex flex-col items-center justify-center shrink-0">
+             <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">ID</span>
+             <span className="text-xl font-headline font-bold text-primary dark:text-white tracking-tighter">{member.memberId || 'PENDING'}</span>
+          </div>
+          <div className="flex-1 p-5 flex items-center justify-between">
+            <div className="space-y-2">
+              <h3 className="text-lg font-bold text-primary dark:text-white leading-tight">{member.name}</h3>
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[10px] text-slate-500 font-bold uppercase">
+                 <span className="text-accent">{member.designation}</span>
+                 <span className="flex items-center gap-1"><MapPin className="w-2.5 h-2.5" /> {member.stateName || 'National'}</span>
+                 <span className="flex items-center gap-1"><Phone className="w-2.5 h-2.5 text-accent" /> {member.phone || 'N/A'}</span>
+                 <span className="flex items-center gap-1 normal-case font-medium"><Mail className="w-2.5 h-2.5 text-accent" /> {member.email || 'N/A'}</span>
+                 <span className="flex items-center gap-1"><Hash className="w-2.5 h-2.5 text-accent" /> Aadhaar: {member.aadhaar || 'N/A'}</span>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 ml-4">
+              <Link href={`/internal/members/${member.id}`}>
+                <Button size="sm" className="h-8 rounded-lg text-[10px] px-3 font-bold hover:bg-secondary hover:text-white transition-all">
+                  Profile
+                </Button>
+              </Link>
+              
+              <Button 
+                variant="destructive" 
+                size="sm" 
+                className="h-8 rounded-lg text-[10px] px-3 font-bold flex gap-1.5"
+                onClick={() => {
+                  setMemberToDelete(member);
+                  setDeleteDialogStep('warning');
+                }}
+              >
+                <Trash2 className="w-3 h-3" /> Delete
+              </Button>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  )
 
   const states = Object.keys(INDIA_DATA).sort()
 
@@ -285,7 +354,7 @@ export default function InternalMembersDirectory() {
                       </div>
                       <div className="md:col-span-2 space-y-4">
                         <div className="space-y-1">
-                          <Label className="text-[10px] uppercase font-bold text-slate-400">Full Name <span className="text-red-500">*</span></Label>
+                          <Label className="text-[10px] uppercase font-bold text-slate-400">Full Legal Name <span className="text-red-500">*</span></Label>
                           <div className="flex gap-2">
                              <Select value={newMember.honorific} onValueChange={val => setNewMember({...newMember, honorific: val})}>
                                 <SelectTrigger className="w-24 h-11 rounded-xl bg-white dark:bg-slate-900 border-slate-200"><SelectValue placeholder="Title" /></SelectTrigger>
@@ -491,54 +560,77 @@ export default function InternalMembersDirectory() {
       </section>
 
       <section className="py-8">
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto px-4 space-y-12 pb-24">
           {profilesLoading ? (
-            <div className="text-center py-20"><Loader2 className="w-8 h-8 animate-spin text-accent mx-auto mb-4" /><p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Fetching Live Directory...</p></div>
-          ) : (
-            <div className="grid gap-4">
-              {filtered.map((member: any) => (
-                <Card key={member.id} className="border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800">
-                  <CardContent className="p-0">
-                    <div className="flex flex-col md:flex-row items-stretch">
-                      <div className="p-5 bg-slate-50 dark:bg-slate-800 md:w-44 text-center border-r border-slate-100 dark:border-slate-700 flex flex-col items-center justify-center shrink-0">
-                         <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">ID</span>
-                         <span className="text-xl font-headline font-bold text-primary dark:text-white tracking-tighter">{member.memberId || 'PENDING'}</span>
+            <div className="text-center py-20">
+              <Loader2 className="w-8 h-8 animate-spin text-accent mx-auto mb-4" />
+              <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Fetching Live Directory...</p>
+            </div>
+          ) : filtered.length > 0 ? (
+            <>
+              {/* National Group */}
+              {groupings.central.length > 0 && (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3 px-2">
+                    <ShieldCheck className="w-5 h-5 text-red-600" />
+                    <h4 className="text-sm font-black uppercase tracking-[0.25em] text-primary dark:text-white">Central Committee</h4>
+                    <div className="h-px flex-1 bg-slate-200 dark:bg-slate-800"></div>
+                  </div>
+                  <div className="grid gap-4">
+                    {groupings.central.map(renderMemberCard)}
+                  </div>
+                </div>
+              )}
+
+              {/* State Groups */}
+              {Object.keys(groupings.stateGroups).length > 0 && (
+                <div className="space-y-10">
+                  {Object.keys(groupings.stateGroups).sort().map(state => (
+                    <div key={state} className="space-y-4">
+                      <div className="flex items-center gap-3 px-2">
+                        <Globe className="w-6 h-6 text-emerald-600" />
+                        <h4 className="text-base font-black uppercase tracking-[0.2em] text-primary dark:text-white">
+                          {state} <span className="text-emerald-500 font-bold ml-2">State Committee</span>
+                        </h4>
+                        <div className="h-px flex-1 bg-slate-200 dark:bg-slate-800"></div>
                       </div>
-                      <div className="flex-1 p-5 flex items-center justify-between">
-                        <div className="space-y-2">
-                          <h3 className="text-lg font-bold text-primary dark:text-white leading-tight">{member.name}</h3>
-                          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[10px] text-slate-500 font-bold uppercase">
-                             <span className="text-accent">{member.designation}</span>
-                             <span className="flex items-center gap-1"><MapPin className="w-2.5 h-2.5" /> {member.stateName || 'National'}</span>
-                             <span className="flex items-center gap-1"><Phone className="w-2.5 h-2.5 text-accent" /> {member.phone || 'N/A'}</span>
-                             <span className="flex items-center gap-1 normal-case font-medium"><Mail className="w-2.5 h-2.5 text-accent" /> {member.email || 'N/A'}</span>
-                             <span className="flex items-center gap-1"><Hash className="w-2.5 h-2.5 text-accent" /> Aadhaar: {member.aadhaar || 'N/A'}</span>
-                          </div>
-                        </div>
-                        <div className="flex justify-end gap-2 ml-4">
-                          <Link href={`/internal/members/${member.id}`}>
-                            <Button size="sm" className="h-8 rounded-lg text-[10px] px-3 font-bold hover:bg-secondary hover:text-white transition-colors">
-                              Profile
-                            </Button>
-                          </Link>
-                          
-                          <Button 
-                            variant="destructive" 
-                            size="sm" 
-                            className="h-8 rounded-lg text-[10px] px-3 font-bold flex gap-1.5"
-                            onClick={() => {
-                              setMemberToDelete(member);
-                              setDeleteDialogStep('warning');
-                            }}
-                          >
-                            <Trash2 className="w-3 h-3" /> Delete
-                          </Button>
-                        </div>
+                      <div className="grid gap-4">
+                        {groupings.stateGroups[state].map(renderMemberCard)}
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
+                  ))}
+                </div>
+              )}
+
+              {/* District Groups */}
+              {Object.keys(groupings.districtGroups).length > 0 && (
+                <div className="space-y-16">
+                  {Object.keys(groupings.districtGroups).sort().map(state => (
+                    <div key={state} className="space-y-12">
+                      {Object.keys(groupings.districtGroups[state]).sort().map(district => (
+                        <div key={district} className="space-y-4">
+                          <div className="flex items-center gap-3 px-2">
+                            <Building2 className="w-6 h-6 text-blue-600" />
+                            <h4 className="text-base font-black uppercase tracking-[0.2em] text-primary dark:text-white">
+                              {district} <span className="text-blue-500 font-bold ml-2">District Cell</span>
+                              <span className="text-[10px] text-slate-400 font-medium ml-2">({state})</span>
+                            </h4>
+                            <div className="h-px flex-1 bg-slate-200 dark:bg-slate-800"></div>
+                          </div>
+                          <div className="grid gap-4">
+                            {groupings.districtGroups[state][district].map(renderMemberCard)}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="text-center py-32 opacity-30">
+               <User className="w-16 h-16 mx-auto mb-4" />
+               <p className="text-lg font-headline font-bold">No records matching criteria.</p>
             </div>
           )}
         </div>
@@ -546,7 +638,7 @@ export default function InternalMembersDirectory() {
 
       {/* Two-Stage Deletion Dialog */}
       <Dialog open={!!deleteDialogStep} onOpenChange={(open) => !open && setDeleteDialogStep(null)}>
-        <DialogContent className="max-w-md rounded-[2rem] border-none shadow-2xl p-0 overflow-hidden">
+        <DialogContent className="max-w-md rounded-[2rem] border-none shadow-2xl p-0 overflow-hidden bg-white dark:bg-slate-900">
           {deleteDialogStep === 'warning' && (
             <div className="p-8 space-y-6">
               <div className="flex flex-col items-center text-center space-y-4">
