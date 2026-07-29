@@ -149,7 +149,10 @@ export default function MembersPage() {
         const years = parseInt(newMember.membershipDuration);
         if (!isNaN(years)) {
           const expiry = addYears(joinDate, years);
-          setNewMember(prev => ({ ...prev, expiryDate: format(expiry, "PPP") }));
+          const formattedExpiry = format(expiry, "PPP");
+          if (newMember.expiryDate !== formattedExpiry) {
+            setNewMember(prev => ({ ...prev, expiryDate: formattedExpiry }));
+          }
         }
       } catch (e) {}
     }
@@ -415,7 +418,14 @@ export default function MembersPage() {
         <Icon className="w-5 h-5 md:w-8 md:h-8" />
       </div>
       <div>
-        <h2 className="text-lg md:text-3xl font-headline font-bold text-primary dark:text-white leading-none">{title}</h2>
+        <h2 className={cn(
+          "font-headline font-bold leading-tight transition-all",
+          title === "Central Committee" 
+            ? "text-3xl sm:text-5xl md:text-7xl bg-gradient-to-r from-red-600 via-orange-500 to-red-600 bg-[length:200%_auto] bg-clip-text text-transparent animate-gradient-x py-2 drop-shadow-lg" 
+            : "text-lg md:text-3xl text-primary dark:text-white"
+        )}>
+          {title}
+        </h2>
         <p className="text-[7px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
           {subtitle || "Official Organizational Tier"}
         </p>
@@ -469,7 +479,7 @@ export default function MembersPage() {
                       </div>
                       <div className="md:col-span-2 space-y-4">
                         <div className="space-y-1">
-                          <Label className="text-[10px] uppercase font-bold text-slate-400">Full Name *</Label>
+                          <Label className="text-[10px] uppercase font-bold text-slate-400">Full Legal Name *</Label>
                           <div className="flex gap-2">
                              <Select value={newMember.honorific} onValueChange={val => setNewMember({...newMember, honorific: val})}>
                                 <SelectTrigger className="w-20 sm:w-24 h-11 rounded-xl bg-white dark:bg-slate-900 border-slate-200"><SelectValue placeholder="Title" /></SelectTrigger>
