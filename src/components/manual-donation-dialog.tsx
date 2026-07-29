@@ -34,7 +34,7 @@ import {
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { Loader2, Plus, IndianRupee, User, Mail, Phone, MapPin, Hash, CreditCard, X } from 'lucide-react'
-import { doc, setDoc, serverTimestamp, increment, collection, addDoc } from 'firebase/firestore'
+import { doc, setDoc, serverTimestamp, increment, addDoc, collection } from 'firebase/firestore'
 import { useFirestore } from '@/firebase'
 import { useToast } from '@/hooks/use-toast'
 import { format } from 'date-fns'
@@ -96,7 +96,7 @@ export function ManualDonationDialog({ children }: { children: React.ReactNode }
       // 2. Synchronize with Transaction Ledger
       await addDoc(collection(db, 'finance_transactions'), {
         voucherNo: `M${new Date().getFullYear()}${Math.floor(1000 + Math.random() * 9000)}`,
-        date: format(new Date(), 'yyyy-MM-dd'),
+        date: new Date().toISOString().split('T')[0],
         type: 'Income',
         account: 'Donations',
         amount: values.amount,
@@ -151,7 +151,7 @@ export function ManualDonationDialog({ children }: { children: React.ReactNode }
               <FormField control={form.control} name="donorName" render={({ field }) => (
                 <FormItem>
                   <FormLabel className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-400"><User className="w-3 h-3" /> Full Name</FormLabel>
-                  <FormControl><Input placeholder="Jayanta Paul" className="h-11 rounded-xl" {...field} /></FormControl>
+                  <FormControl><Input placeholder="Nirmal Paul" className="h-11 rounded-xl" {...field} /></FormControl>
                   <FormMessage />
                 </FormItem>
               )} />
@@ -159,7 +159,7 @@ export function ManualDonationDialog({ children }: { children: React.ReactNode }
               <FormField control={form.control} name="donorEmail" render={({ field }) => (
                 <FormItem>
                   <FormLabel className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-400"><Mail className="w-3 h-3" /> Email</FormLabel>
-                  <FormControl><Input placeholder="donor@example.com" type="email" className="h-11 rounded-xl" {...field} /></FormControl>
+                  <FormControl><Input placeholder="nirmal@example.com" type="email" className="h-11 rounded-xl" {...field} /></FormControl>
                   <FormMessage />
                 </FormItem>
               )} />

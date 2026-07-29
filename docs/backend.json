@@ -1,3 +1,4 @@
+
 {
   "entities": {
     "UserAccount": {
@@ -51,6 +52,23 @@
         "createdBy": { "type": "string" }
       },
       "required": ["email", "permissions", "uid", "role"]
+    },
+    "MemberProfile": {
+      "title": "Member Profile",
+      "description": "Official personnel record for Trust members and volunteers.",
+      "type": "object",
+      "properties": {
+        "memberId": { "type": "string" },
+        "name": { "type": "string" },
+        "designation": { "type": "string" },
+        "designationCategory": { "type": "string" },
+        "level": { "type": "string", "enum": ["National", "State", "District"] },
+        "stateName": { "type": "string" },
+        "districtName": { "type": "string" },
+        "gender": { "type": "string" },
+        "isDemi": { "type": "boolean", "description": "Flag for simulated personnel records." },
+        "createdAt": { "type": "string", "format": "date-time" }
+      }
     },
     "MaterialItem": {
       "title": "Material Item",
@@ -115,6 +133,7 @@
   },
   "firestore": {
     "/users/{userEmail}": { "schema": "UserAccount", "description": "Permissions registry." },
+    "/memberProfiles/{memberId}": { "schema": "MemberProfile", "description": "Personnel registry." },
     "/materials/{materialId}": { "schema": "MaterialItem", "description": "Material management inventory." },
     "/current_news/{newsId}": { "schema": "CurrentNews", "description": "Homepage news broadcast." },
     "/feedback/{feedbackId}": { "schema": "Feedback", "description": "User feedback collection." }

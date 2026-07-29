@@ -152,7 +152,7 @@ export function DonationDialog({ children, defaultAmount, initialStep = 'details
       // 2. Synchronize with Financial Hub Transaction Ledger
       await addDoc(collection(db, 'finance_transactions'), {
         voucherNo: `D${new Date().getFullYear()}${Math.floor(1000 + Math.random() * 9000)}`,
-        date: format(new Date(), 'yyyy-MM-dd'),
+        date: new Date().toISOString().split('T')[0],
         type: 'Income',
         account: 'Donations',
         amount: amountNum,
@@ -266,14 +266,14 @@ export function DonationDialog({ children, defaultAmount, initialStep = 'details
                 <FormField control={form.control} name="name" render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-xs font-bold uppercase tracking-wider text-slate-400">Full Legal Name *</FormLabel>
-                    <FormControl><Input placeholder="Jayanta Kumar Paul" className="h-11 rounded-xl" {...field} /></FormControl>
+                    <FormControl><Input placeholder="Pradip Kumar Paul" className="h-11 rounded-xl" {...field} /></FormControl>
                     <FormMessage />
                   </FormItem>
                 )} />
                 <FormField control={form.control} name="email" render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-xs font-bold uppercase tracking-wider text-slate-400">Email Address *</FormLabel>
-                    <FormControl><Input placeholder="jayanta@example.com" className="h-11 rounded-xl" {...field} /></FormControl>
+                    <FormControl><Input placeholder="pradip@example.com" className="h-11 rounded-xl" {...field} /></FormControl>
                     <FormMessage />
                   </FormItem>
                 )} />

@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useEffect } from 'react'
@@ -214,7 +215,7 @@ export default function TerminatedMembersPage() {
                   </div>
                   <div className="space-y-2">
                     <Label>Full Name</Label>
-                    <Input value={newMember.name} onChange={e => setNewMember({...newMember, name: e.target.value})} placeholder="e.g. Subhashis Ganguly" className="h-12 rounded-xl" />
+                    <Input value={newMember.name} onChange={e => setNewMember({...newMember, name: e.target.value})} placeholder="e.g. Gourab Ganguly" className="h-12 rounded-xl" />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
@@ -397,7 +398,7 @@ export default function TerminatedMembersPage() {
                           <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
                             <Dialog>
                               <DialogTrigger asChild>
-                                <Button onClick={() => setEditMember(member)} size="icon" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white hover:bg-secondary hover:text-white rounded-full shadow-lg border border-white/20">
+                                <Button onClick={() => setEditMember(member)} size="icon" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-full shadow-lg border border-white/20">
                                   <Edit className="w-4 h-4" />
                                 </Button>
                               </DialogTrigger>

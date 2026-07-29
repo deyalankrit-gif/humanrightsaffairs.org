@@ -103,6 +103,7 @@ const adminLinksConfig = [
   { name: 'Current News', href: '/internal/current-news', icon: Newspaper, permission: 'occasions' },
   { name: 'Kit Management', href: '/internal/kit-management', icon: Archive, permission: 'kitManagement' },
   { name: 'Members', href: '/internal/members', icon: Users, permission: 'members' },
+  { name: 'Demi Members', href: '/internal/demi-members', icon: Sparkles, rootOnly: true },
   { name: 'Renewals', href: '/internal/renewals', icon: RefreshCw, permission: 'renewals' },
   { name: 'Terminated', href: '/internal/terminated-members', icon: UserX, permission: 'terminated' },
   { name: 'Occasion Greetings', href: '/internal/occasions', icon: Sparkles, permission: 'occasions' },

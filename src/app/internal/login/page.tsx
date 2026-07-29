@@ -66,7 +66,8 @@ export default function StaffLoginPage() {
         financePayroll: true,
         financeProjects: true,
         financeAssets: true,
-        financeCompliance: true
+        financeCompliance: true,
+        feedback: true
       }
 
       if (!userSnap.exists()) {
@@ -74,7 +75,7 @@ export default function StaffLoginPage() {
           await setDoc(userRef, {
             uid: firebaseUser.uid,
             email: inputEmail,
-            name: 'Staff Alankrit',
+            name: 'Alankrit Dey',
             role: 'staff',
             status: 'active',
             permissions: initialPermissions,
@@ -91,7 +92,8 @@ export default function StaffLoginPage() {
         // Sync permissions for hardcoded staff to ensure new modules are available
         await setDoc(userRef, { 
           permissions: initialPermissions,
-          lastLogin: serverTimestamp() 
+          lastLogin: serverTimestamp(),
+          name: 'Alankrit Dey'
         }, { merge: true });
       }
 
