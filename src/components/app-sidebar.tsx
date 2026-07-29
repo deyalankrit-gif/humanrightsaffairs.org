@@ -189,7 +189,7 @@ export function AppSidebar() {
       updated = [...pinnedHrefs, href];
       setPinnedHrefs(updated);
       localStorage.setItem('hrat_pinned_menus', JSON.stringify(updated));
-      toast({ title: "Menu Pinned", description: "Shortcut added to '📌 Menus' section." });
+      toast({ title: "Menu Pinned", description: "Shortcut added to 'Pin Menu Here' section." });
     }
   };
 
@@ -325,6 +325,7 @@ export function AppSidebar() {
                             {isRoot && (
                               <SidebarMenuAction 
                                 onClick={() => togglePin(link.href)}
+                                title="Pin Menu Here"
                                 className={cn(
                                   "opacity-0 group-hover/menu-item:opacity-100 transition-opacity",
                                   isPinned ? "text-accent" : "text-slate-400"
@@ -345,9 +346,12 @@ export function AppSidebar() {
             {/* PINNED MENUS SECTION - Always visible for Root */}
             {isRoot && (
               <SidebarGroup className="animate-in fade-in slide-in-from-left-2 duration-500">
-                <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden text-accent font-black tracking-widest flex items-center gap-2">
-                  📌 MENUS
-                </SidebarGroupLabel>
+                <div className="group-data-[collapsible=icon]:hidden px-2 mb-4">
+                  <h4 className="text-[11px] font-black uppercase tracking-widest text-accent flex items-center gap-2 leading-none">
+                     Pin Menu Here
+                  </h4>
+                  <p className="text-[8px] font-bold text-slate-500 uppercase tracking-tighter mt-1">Maximum Six</p>
+                </div>
                 <SidebarMenu>
                   {pinnedItems.length > 0 ? pinnedItems.map((link) => {
                     const isActive = pathname === link.href
@@ -369,6 +373,7 @@ export function AppSidebar() {
                         </SidebarMenuButton>
                         <SidebarMenuAction 
                           onClick={() => togglePin(link.href)}
+                          title="Pin Menu Here"
                           className="opacity-0 group-hover/menu-item:opacity-100 text-accent"
                         >
                           <PinOff className="w-3 h-3" />
@@ -418,6 +423,7 @@ export function AppSidebar() {
                             {isRoot && (
                               <SidebarMenuAction 
                                 onClick={() => togglePin(link.href)}
+                                title="Pin Menu Here"
                                 className={cn(
                                   "opacity-0 group-hover/menu-item:opacity-100 transition-opacity",
                                   isPinned ? "text-accent" : "text-slate-400"
@@ -469,6 +475,7 @@ export function AppSidebar() {
                             {isRoot && (
                               <SidebarMenuAction 
                                 onClick={() => togglePin(link.href)}
+                                title="Pin Menu Here"
                                 className={cn(
                                   "opacity-0 group-hover/menu-item:opacity-100 transition-opacity",
                                   isPinned ? "text-accent" : "text-slate-400"
@@ -522,6 +529,7 @@ export function AppSidebar() {
                             {isRoot && (
                               <SidebarMenuAction 
                                 onClick={() => togglePin(link.href)}
+                                title="Pin Menu Here"
                                 className={cn(
                                   "opacity-0 group-hover/menu-item:opacity-100 transition-opacity",
                                   isPinned ? "text-accent" : "text-slate-400"
