@@ -10,14 +10,28 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { 
-  ArrowLeft, Printer, ShieldCheck, CheckCircle2, XCircle, Clock, 
-  Loader2, Download, Building, MapPin, Globe, Phone, Mail, Hash
+  ArrowLeft, 
+  Printer, 
+  ShieldCheck, 
+  CheckCircle2, 
+  XCircle, 
+  Clock, 
+  Loader2, 
+  Download, 
+  Building, 
+  MapPin, 
+  Globe, 
+  Phone, 
+  Mail, 
+  Hash,
+  X
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
 
 /**
  * VoucherDetail: High-fidelity print-ready layout for institutional financial instruments.
+ * Enhanced with a dedicated Close mechanism for administrative workflow.
  */
 export default function VoucherDetailPage() {
   const { id } = useParams()
@@ -36,6 +50,15 @@ export default function VoucherDetailPage() {
 
   const handlePrint = () => window.print();
 
+  const handleClose = () => {
+    // If we have history, go back; otherwise go to the VMS list
+    if (window.history.length > 1) {
+      router.back();
+    } else {
+      router.push('/internal/finance/vms/list');
+    }
+  };
+
   const handleAction = async (newStatus: string) => {
     if (!db || !docRef || !user) return;
     try {
@@ -51,7 +74,7 @@ export default function VoucherDetailPage() {
       };
 
       if (newStatus === 'Approved') {
-        // Atomic ledger sync logic here
+        // Atomic ledger sync logic
         const summaryRef = doc(db, 'finance_summary', 'state');
         const isReceipt = v.type.includes('Receipt') || v.type.includes('Donation');
         
@@ -68,31 +91,37 @@ export default function VoucherDetailPage() {
     }
   }
 
-  if (authLoading || dataLoading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="animate-spin" /></div>
-  if (!v) return <div className="p-20 text-center">Record not found in National Registry.</div>
+  if (authLoading || dataLoading) return <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950"><Loader2 className="animate-spin text-emerald-500" /></div>
+  if (!v) return <div className="p-20 text-center font-bold text-slate-400 uppercase tracking-widest">Record not found in National Registry.</div>
 
   return (
-    <main className="min-h-screen bg-slate-100 p-4 md:p-8 print:p-0 print:bg-white flex flex-col items-center">
+    <main className="min-h-screen bg-slate-100 dark:bg-slate-950 p-4 md:p-8 print:p-0 print:bg-white flex flex-col items-center pb-24">
+      
+      {/* Top Header Actions */}
       <div className="w-full max-w-4xl flex items-center justify-between mb-8 print:hidden">
-        <Button variant="ghost" onClick={() => router.back()} className="gap-2 font-bold uppercase text-xs">
-          <ArrowLeft className="w-4 h-4" /> Back to Registry
+        <Button variant="ghost" onClick={handleClose} className="gap-2 font-bold uppercase text-[10px] tracking-widest text-slate-500 hover:text-primary transition-all">
+          <ArrowLeft className="w-4 h-4" /> Close & Return
         </Button>
-        <div className="flex gap-4">
+        <div className="flex gap-3">
            {v.status !== 'Approved' && (
-             <Button onClick={() => handleAction('Approved')} className="bg-emerald-600 text-white font-bold h-12 rounded-xl px-8 shadow-xl">Approve Instrument</Button>
+             <Button onClick={() => handleAction('Approved')} className="bg-emerald-600 text-white hover:bg-emerald-500 font-bold h-11 rounded-xl px-8 shadow-xl">
+               <CheckCircle2 className="w-4 h-4 mr-2" /> Approve Instrument
+             </Button>
            )}
-           <Button onClick={handlePrint} variant="outline" className="h-12 px-8 rounded-xl font-bold bg-white border-2 border-slate-200"><Printer className="w-4 h-4 mr-2" /> Print Instrument</Button>
+           <Button onClick={handlePrint} variant="outline" className="h-11 px-8 rounded-xl font-bold bg-white border-2 border-slate-200">
+             <Printer className="w-4 h-4 mr-2" /> Print Instrument
+           </Button>
         </div>
       </div>
 
       {/* PRINT LAYOUT */}
-      <div ref={printRef} className="w-full max-w-4xl bg-white shadow-2xl p-12 md:p-20 print:shadow-none print:p-8 relative overflow-hidden border border-slate-200">
+      <div ref={printRef} className="w-full max-w-4xl bg-white shadow-2xl p-10 md:p-20 print:shadow-none print:p-8 relative overflow-hidden border border-slate-200 dark:text-slate-900">
          <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full -mr-16 -mt-16 print:hidden"></div>
          
          <div className="border-b-4 border-slate-900 pb-10 mb-10 flex items-center justify-between">
             <div className="flex items-center gap-6">
                <div className="relative w-24 h-24">
-                  <Image src="/HRAT%20Logo.jpeg" alt="Logo" fill className="object-contain" />
+                  <Image src="/HRAT%20Logo.jpeg" alt="Institutional Logo" fill className="object-contain" />
                </div>
                <div>
                   <h1 className="text-3xl font-black text-primary tracking-tighter uppercase leading-none">Human Rights Affairs Trust</h1>
@@ -140,7 +169,7 @@ export default function VoucherDetailPage() {
             </div>
             <div className="text-center space-y-2">
                <div className="relative w-24 h-24 mx-auto opacity-10">
-                  <Image src="/HRAT%20Logo.jpeg" alt="Seal" fill className="object-contain grayscale" />
+                  <Image src="/HRAT%20Logo.jpeg" alt="Trust Seal" fill className="object-contain grayscale" />
                </div>
                <p className="text-[9px] font-black uppercase text-slate-400">Institutional Seal</p>
             </div>
@@ -153,7 +182,7 @@ export default function VoucherDetailPage() {
          <div className="mt-16 flex items-center justify-between pt-10 border-t border-slate-100">
             <div className="flex items-center gap-4">
                <div className="w-16 h-16 bg-white border p-1 rounded-lg">
-                  <Image src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=HRAT-VERIFY-VOUCHER-${v.voucherNo}`} alt="QR" width={60} height={60} />
+                  <Image src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=HRAT-VERIFY-VOUCHER-${v.voucherNo}`} alt="QR Verification" width={60} height={60} />
                </div>
                <div className="space-y-1">
                   <p className="text-[8px] font-black uppercase text-slate-400">Audit Verification Node</p>
@@ -162,6 +191,18 @@ export default function VoucherDetailPage() {
             </div>
             <p className="text-[7px] font-bold text-slate-300 uppercase tracking-widest">HRAT VMS Terminal v1.0 • South Asia Region</p>
          </div>
+      </div>
+
+      {/* Final Bottom Close Mechanism */}
+      <div className="mt-12 w-full max-w-4xl flex flex-col items-center gap-4 print:hidden">
+         <Button 
+           onClick={handleClose}
+           className="w-full h-16 rounded-2xl bg-slate-900 text-white dark:bg-white dark:text-slate-950 font-bold text-lg hover:bg-slate-800 transition-all shadow-2xl flex items-center justify-center gap-3 group"
+         >
+            <X className="w-6 h-6 group-hover:rotate-90 transition-transform duration-300" /> 
+            Close Instrument Review
+         </Button>
+         <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.4em]">Official Audit Node • HRAT India</p>
       </div>
     </main>
   )
