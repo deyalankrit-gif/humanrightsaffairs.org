@@ -3,7 +3,7 @@
 
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase'
+import { useUser, useCollection, useFirestore, useMemoFirebase } from '@/firebase'
 import { collection, query, orderBy, where } from 'firebase/firestore'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -25,6 +25,10 @@ import {
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
 
+/**
+ * VoucherRegistry: Master list of all generated institutional financial instruments.
+ * Updated: Included flow-based color coding (🔴/🟢) for registry items.
+ */
 export default function VoucherRegistry() {
   const { user, loading: authLoading } = useUser()
   const db = useFirestore()

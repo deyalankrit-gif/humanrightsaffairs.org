@@ -23,6 +23,7 @@ import Link from 'next/link'
 
 /**
  * VMS Dashboard: Tactical overview of the institutional Voucher Management System.
+ * Updated: Included flow-based color coding (🔴/🟢) for recent instruments.
  */
 export default function VMSDashboard() {
   const { user, loading: authLoading } = useUser()
