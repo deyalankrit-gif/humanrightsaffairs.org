@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useEffect, useState } from 'react'
@@ -402,7 +403,10 @@ export default function InternalApplicationsPage() {
           ) : (
             <div className="grid gap-4">
               {filtered.map((a: any) => {
-                const fallback = a.gender?.toLowerCase() === 'female' ? '/dummy w.png' : '/dummy m.png'
+                const gender = (a.gender || '').trim().toLowerCase();
+                let fallback = '/dummy m.png';
+                if (gender === 'female' || gender === 'f' || gender === 'woman') fallback = '/dummy w.png';
+                
                 return (
                   <Card key={a.id} className="border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 relative group">
                     <CardContent className="p-0">
@@ -549,7 +553,7 @@ export default function InternalApplicationsPage() {
                   <div className="relative z-10 flex flex-col md:flex-row items-center gap-8">
                     <div className="relative w-32 h-32 md:w-40 md:h-40 rounded-[2rem] overflow-hidden border-4 border-white/20 shadow-2xl bg-slate-800">
                       <Image 
-                        src={selectedAppForDetails.photoDataUri || (selectedAppForDetails.gender?.toLowerCase() === 'female' ? '/dummy w.png' : '/dummy m.png')} 
+                        src={selectedAppForDetails.photoDataUri || (selectedAppForDetails.gender?.trim().toLowerCase() === 'female' || selectedAppForDetails.gender?.trim().toLowerCase() === 'f' ? '/dummy w.png' : '/dummy m.png')} 
                         alt={selectedAppForDetails.name} 
                         fill 
                         className="object-cover" 
@@ -709,258 +713,6 @@ export default function InternalApplicationsPage() {
               </div>
             </div>
           )}
-        </DialogContent>
-      </Dialog>
-
-      {/* Commissioning Dialog */}
-      <Dialog open={isCommissioningOpen} onOpenChange={setIsCommissioningOpen}>
-        <DialogContent className="max-w-2xl rounded-[2.5rem] max-h-[90vh] overflow-y-auto border-none shadow-2xl">
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-headline font-bold text-primary dark:text-white">Personnel Commissioning</DialogTitle>
-            <DialogDescription>Convert approved application to official member record.</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-6 py-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
-                <div className="flex flex-col items-center gap-3">
-                  <div className="relative w-32 h-32 rounded-full bg-slate-50 dark:bg-slate-800 overflow-hidden border-2 border-dashed border-slate-300">
-                    {newMember.imageId ? (
-                      <Image src={newMember.imageId} alt="Preview" fill className="object-cover" />
-                    ) : (
-                      <Image src={newMember.gender === 'female' ? '/dummy w.png' : '/dummy m.png'} alt="Dummy" fill className="object-cover" />
-                    )}
-                    <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={handleFileChange} />
-                  </div>
-                  <Label className="text-[10px] uppercase font-bold text-slate-400">Commissioning Photo</Label>
-                </div>
-                <div className="md:col-span-2 space-y-4">
-                  <div className="space-y-1">
-                    <Label className="text-[10px] uppercase font-bold text-slate-400">Full Legal Name <span className="text-red-500">*</span></Label>
-                    <div className="flex gap-2">
-                       <Select value={newMember.honorific} onValueChange={val => setNewMember({...newMember, honorific: val})}>
-                          <SelectTrigger className="w-24 h-11 rounded-xl bg-white dark:bg-slate-900 border-slate-200"><SelectValue placeholder="Title" /></SelectTrigger>
-                          <SelectContent position="popper" className="z-[1000001] bg-white">
-                            <SelectItem value="Mr.">Mr.</SelectItem>
-                            <SelectItem value="Ms.">Ms.</SelectItem>
-                            <SelectItem value="Mrs.">Mrs.</SelectItem>
-                            <SelectItem value="Dr.">Dr.</SelectItem>
-                            <SelectItem value="Adv.">Adv.</SelectItem>
-                            <SelectItem value="Prof.">Prof.</SelectItem>
-                            <SelectItem value="Hon.">Hon.</SelectItem>
-                            <SelectItem value="Rev.">Rev.</SelectItem>
-                          </SelectContent>
-                       </Select>
-                       <Input placeholder="Full Legal Name" value={newMember.name} onChange={e => setNewMember({...newMember, name: e.target.value})} className="h-11 rounded-xl flex-1" />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-1">
-                      <Label className="text-[10px] uppercase font-bold text-slate-400">Gender <span className="text-red-500">*</span></Label>
-                      <Select value={newMember.gender} onValueChange={(val: any) => setNewMember({...newMember, gender: val})}>
-                        <SelectTrigger className="h-11 rounded-xl"><SelectValue placeholder="Select" /></SelectTrigger>
-                        <SelectContent position="popper" className="z-[1000001] bg-white"><SelectItem value="male">Male</SelectItem><SelectItem value="female">Female</SelectItem></SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-1">
-                      <Label className="text-[10px] uppercase font-bold text-slate-400">Blood Group</Label>
-                      <Select value={newMember.bloodGroup} onValueChange={val => setNewMember({...newMember, bloodGroup: val})}>
-                        <SelectTrigger className="h-11 rounded-xl"><SelectValue placeholder="Select" /></SelectTrigger>
-                        <SelectContent position="popper" className="z-[1000001] bg-white">
-                          {["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].map(bg => <SelectItem key={bg} value={bg}>{bg}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-[10px] uppercase font-bold text-slate-400">Current Profession</Label>
-                    <Input placeholder="e.g. Advocate, Teacher" value={newMember.profession} onChange={e => setNewMember({...newMember, profession: e.target.value})} className="h-11 rounded-xl" />
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 rounded-3xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
-                <div className="space-y-1">
-                  <Label className="text-[10px] uppercase font-bold text-accent">Designation Category <span className="text-red-500">*</span></Label>
-                  <Select value={newMember.designationCategory} onValueChange={(val: any) => {
-                    const isFixed = val === 'General Member' || val === 'Board Member' || val === 'Volunteer';
-                    setNewMember({
-                      ...newMember, 
-                      designationCategory: val, 
-                      designation: isFixed ? val : ''
-                    });
-                  }}>
-                    <SelectTrigger className="rounded-xl border-accent/20 bg-white dark:bg-slate-800"><SelectValue /></SelectTrigger>
-                    <SelectContent position="popper" className="z-[1000001] bg-white">
-                      <SelectItem value="General Member">General Member</SelectItem>
-                      <SelectItem value="Board Member">Board Member</SelectItem>
-                      <SelectItem value="Office-bearing Member">Office-bearing Member</SelectItem>
-                      <SelectItem value="Volunteer">Volunteer</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                {newMember.designationCategory === 'Office-bearing Member' && (
-                  <div className="space-y-1 animate-in fade-in slide-in-from-left-2">
-                    <Label className="text-[10px] uppercase font-bold text-accent">Manual Designation <span className="text-red-500">*</span></Label>
-                    <Input placeholder="e.g. Secretary, Treasurer" value={newMember.designation} onChange={e => setNewMember({...newMember, designation: e.target.value})} className="rounded-xl border-accent/20 h-11" />
-                  </div>
-                )}
-              </div>
-
-              <div className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-3xl space-y-4 border border-slate-100 dark:border-slate-800 shadow-inner">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label className="text-[10px] uppercase font-bold text-slate-400">Commissioned Member ID <span className="text-red-500">*</span></Label>
-                    <div className="flex gap-2">
-                      <Input 
-                        placeholder="ABCDEF1234" 
-                        value={newMember.memberId} 
-                        onChange={e => setNewMember({...newMember, memberId: e.target.value.toUpperCase()})} 
-                        className="h-11 rounded-xl font-mono bg-white dark:bg-slate-900"
-                        maxLength={10}
-                      />
-                      <Button 
-                        type="button" 
-                        variant="outline" 
-                        size="icon" 
-                        className="h-11 w-11 shrink-0 rounded-xl border-dashed hover:bg-accent/10"
-                        onClick={() => setNewMember({...newMember, memberId: generateMemberId()})}
-                      >
-                        <Sparkles className="w-4 h-4 text-accent" />
-                      </Button>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label className="text-[10px] font-bold uppercase text-emerald-500">Term Governance</Label>
-                    <div className="flex items-center space-x-3 bg-white dark:bg-slate-900 h-11 px-4 rounded-xl border border-emerald-100">
-                       <Checkbox 
-                        id="isRenewed" 
-                        checked={newMember.isRenewed} 
-                        onCheckedChange={(val) => setNewMember({...newMember, isRenewed: !!val, renewalCount: val ? 1 : 0})} 
-                        className="border-emerald-500"
-                       />
-                       <Label htmlFor="isRenewed" className="text-xs font-bold text-emerald-600 cursor-pointer">Mark as Term Renewal</Label>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="space-y-2">
-                    <Label className="text-[10px] uppercase font-bold text-slate-400">Duration <span className="text-red-500">*</span></Label>
-                    <Select value={newMember.membershipDuration} onValueChange={val => setNewMember({...newMember, membershipDuration: val as any})}>
-                      <SelectTrigger className="h-11 rounded-xl bg-white dark:bg-slate-900"><SelectValue /></SelectTrigger>
-                      <SelectContent position="popper" className="z-[1000001] bg-white">
-                        <SelectItem value="1 Year">1 Year Term</SelectItem>
-                        <SelectItem value="2 Years">2 Years Term</SelectItem>
-                        <SelectItem value="3 Years">3 Years Term</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-[10px] uppercase font-bold text-slate-400">Issue Date <span className="text-red-500">*</span></Label>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button variant="outline" className={cn("w-full justify-start text-left font-normal h-11 rounded-xl bg-white dark:bg-slate-900", !newMember.joiningDate && "text-muted-foreground")}>
-                          <CalendarIcon className="mr-2 h-4 w-4" />
-                          {newMember.joiningDate ? newMember.joiningDate : "Pick date"}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0 z-[1000002]" align="start">
-                        <Calendar mode="single" selected={parseMemberDate(newMember.joiningDate)} onSelect={(date) => setNewMember({...newMember, joiningDate: date ? format(date, "PPP") : ''})} initialFocus />
-                      </PopoverContent>
-                    </Popover>
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-[10px] uppercase font-bold text-slate-400">Expiry Date</Label>
-                    <Input disabled value={newMember.expiryDate} className="h-11 rounded-xl bg-slate-100/50 dark:bg-slate-950/50" />
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">Official Email</Label><Input type="email" placeholder="name@hrat.org" value={newMember.email} onChange={e => setNewMember({...newMember, email: e.target.value})} className="h-11 rounded-xl" /></div>
-                    <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">Phone Number <span className="text-red-500">*</span></Label><Input placeholder="+91" value={newMember.phone} onChange={e => setNewMember({...newMember, phone: e.target.value})} className="h-11 rounded-xl" /></div>
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-[10px] uppercase font-bold text-slate-400">Verified Residential Address <span className="text-red-500">*</span></Label>
-                  <Input placeholder="House No, Village, Lane" value={newMember.address} onChange={e => setNewMember({...newMember, address: e.target.value})} className="h-11 rounded-xl" />
-                </div>
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">Post Office <span className="text-red-500">*</span></Label><Input placeholder="PO Name" value={newMember.postOffice} onChange={e => setNewMember({...newMember, postOffice: e.target.value})} className="h-11 rounded-xl" /></div>
-                  <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">Police Station <span className="text-red-500">*</span></Label><Input placeholder="PS Name" value={newMember.policeStation} onChange={e => setNewMember({...newMember, policeStation: e.target.value})} className="h-11 rounded-xl" /></div>
-                  <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">PIN Code <span className="text-red-500">*</span></Label><Input placeholder="6 digits" maxLength={6} value={newMember.pinCode} onChange={e => setNewMember({...newMember, pinCode: e.target.value})} className="h-11 rounded-xl font-mono" /></div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                    <Label className="text-[10px] uppercase font-bold text-slate-400">Operational Level <span className="text-red-500">*</span></Label>
-                    <Select value={newMember.level} onValueChange={(val: any) => setNewMember({...newMember, level: val, stateName: '', districtName: ''})}>
-                      <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
-                      <SelectContent position="popper" className="z-[1000001] bg-white"><SelectItem value="National">Central Council</SelectItem><SelectItem value="State">State Level</SelectItem><SelectItem value="District">District Level</SelectItem></SelectContent>
-                    </Select>
-                  </div>
-                  {(newMember.level === 'State' || newMember.level === 'District') && (
-                    <div className="space-y-1 animate-in fade-in slide-in-from-top-1">
-                      <Label className="text-[10px] uppercase font-bold text-slate-400">Regional Chapter (State)</Label>
-                      <Select value={newMember.stateName} onValueChange={val => setNewMember({...newMember, stateName: val, districtName: ''})}>
-                        <SelectTrigger className="h-11 rounded-xl bg-white dark:bg-slate-900"><SelectValue placeholder="Choose State" /></SelectTrigger>
-                        <SelectContent position="popper" className="max-h-60 z-[1000001] bg-white">{statesList.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
-                      </Select>
-                    </div>
-                  )}
-                </div>
-                {newMember.level === 'District' && newMember.stateName && (
-                  <div className="space-y-1 animate-in fade-in slide-in-from-top-1">
-                    <Label className="text-[10px] uppercase font-bold text-slate-400">District Committee</Label>
-                    <Select value={newMember.districtName} onValueChange={val => setNewMember({...newMember, districtName: val})}>
-                      <SelectTrigger className="h-11 rounded-xl bg-white dark:bg-slate-900"><SelectValue placeholder="Choose District" /></SelectTrigger>
-                      <SelectContent position="popper" className="max-h-60 z-[1000001] bg-white">{(INDIA_DATA[newMember.stateName] || []).map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
-                    </Select>
-                  </div>
-                )}
-              </div>
-          </div>
-          <DialogFooter>
-            <Button 
-              onClick={handleAddMember} 
-              disabled={isAddingMember} 
-              className="w-full h-12 rounded-xl bg-accent text-primary font-bold text-lg shadow-xl shadow-accent/20 hover:bg-secondary hover:text-white transition-all"
-            >
-              {isAddingMember ? <Loader2 className="animate-spin" /> : "Establish Official Record"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={actionDialog.open} onOpenChange={(val) => setActionDialog(prev => ({ ...prev, open: val }))}>
-        <DialogContent className="max-w-md rounded-[2rem] border-none shadow-2xl">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-               <RefreshCw className="w-5 h-5 text-accent" /> Change Record Status
-            </DialogTitle>
-            <DialogDescription>
-              Transitioning application to <span className={cn("font-bold", getStatusTextColor(actionDialog.status))}>{actionDialog.status}</span>.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-             <div className="space-y-2">
-               <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Status Change Justification *</Label>
-               <Textarea 
-                placeholder="Record the reasoning for this personnel decision..." 
-                className="rounded-xl min-h-[100px]"
-                value={actionDialog.reason}
-                onChange={(e) => setActionDialog(prev => ({ ...prev, reason: e.target.value }))}
-               />
-             </div>
-          </div>
-          <DialogFooter>
-            <Button 
-              onClick={handleUpdateStatus} 
-              disabled={isActionLoading || !actionDialog.reason.trim()}
-              className={cn("w-full h-12 rounded-xl font-bold transition-all", getStatusColor(actionDialog.status))}
-            >
-              {isActionLoading ? <Loader2 className="animate-spin" /> : "Commit Decision to Registry"}
-            </Button>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
 

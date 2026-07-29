@@ -183,7 +183,7 @@ export default function TerminatedMembersPage() {
             <Dialog>
               <DialogTrigger asChild>
                 <Button className="bg-red-500 text-white font-bold rounded-2xl h-14 px-10 flex gap-2 hover:bg-secondary hover:text-white shadow-2xl shadow-red-500/20 mx-auto transition-all">
-                  <Plus className="w-6 h-6" /> Add Termination Entry
+                  <Plus className="w-4 h-4" /> Add Termination Entry
                 </Button>
               </DialogTrigger>
               <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="max-w-md bg-white dark:bg-slate-900 rounded-[2rem] max-h-[90vh] overflow-y-auto">
@@ -196,7 +196,7 @@ export default function TerminatedMembersPage() {
                     <div className="flex flex-col items-center gap-4 p-4 border-2 border-dashed rounded-2xl">
                       <div className="relative w-24 h-24 bg-slate-100 dark:bg-slate-800 rounded-2xl overflow-hidden grayscale">
                         <Image 
-                          src={newMember.imageId?.startsWith('data:') ? newMember.imageId : (newMember.gender.toLowerCase() === 'female' ? '/dummy w.png' : '/dummy m.png')} 
+                          src={newMember.imageId?.startsWith('data:') ? newMember.imageId : (newMember.gender?.trim().toLowerCase() === 'female' || newMember.gender?.trim().toLowerCase() === 'f' ? '/dummy w.png' : '/dummy m.png')} 
                           alt="Preview" 
                           fill 
                           className="object-cover"
@@ -337,8 +337,15 @@ export default function TerminatedMembersPage() {
               <div className="grid gap-6">
                 {filtered.length > 0 ? (
                   filtered.map((member) => {
-                    const fallback = member.gender?.toLowerCase() === 'female' ? '/dummy w.png' : '/dummy m.png'
-                    const displayImg = member.imageId?.startsWith('data:') ? member.imageId : (PlaceHolderImages.find(i => i.id === member.imageId)?.imageUrl || fallback)
+                    const genderKey = (member.gender || '').trim().toLowerCase();
+                    let fallback = '/dummy m.png';
+                    if (genderKey === 'female' || genderKey === 'f' || genderKey === 'woman') fallback = '/dummy w.png';
+                    
+                    const isCustomPhoto = member.imageId && (member.imageId.startsWith('data:') || member.imageId.startsWith('http'));
+                    const placeholder = PlaceHolderImages.find(i => i.id === member.imageId)?.imageUrl;
+                    
+                    const displayImg = isCustomPhoto ? member.imageId : (placeholder || fallback)
+
                     return (
                       <Card key={member.id} className="group border-none shadow-sm hover:shadow-xl transition-all duration-500 rounded-[2.5rem] overflow-hidden bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 relative">
                         <CardContent className="p-0">
@@ -346,7 +353,7 @@ export default function TerminatedMembersPage() {
                             <div className="p-8 bg-slate-50 dark:bg-slate-800 md:w-48 flex flex-col items-center justify-center border-r border-slate-100 dark:border-slate-700 text-center shrink-0">
                               <div className="relative w-24 h-24 rounded-2xl overflow-hidden mb-3 grayscale opacity-70 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-700">
                                 <Image 
-                                  src={displayImg} 
+                                  src={displayImg!} 
                                   alt={member.name} 
                                   fill 
                                   className="object-cover"
@@ -413,7 +420,7 @@ export default function TerminatedMembersPage() {
                                       <div className="flex flex-col items-center gap-4 p-4 border-2 border-dashed rounded-2xl">
                                         <div className="relative w-24 h-24 bg-slate-100 dark:bg-slate-800 rounded-2xl overflow-hidden grayscale">
                                           <Image 
-                                            src={editMember.imageId?.startsWith('data:') ? editMember.imageId : (editMember.gender.toLowerCase() === 'female' ? '/dummy w.png' : '/dummy m.png')} 
+                                            src={editMember.imageId?.startsWith('data:') ? editMember.imageId : (editMember.gender?.trim().toLowerCase() === 'female' || editMember.gender?.trim().toLowerCase() === 'f' ? '/dummy w.png' : '/dummy m.png')} 
                                             alt="Preview" 
                                             fill 
                                             className="object-cover"
@@ -437,7 +444,7 @@ export default function TerminatedMembersPage() {
                                     <div className="grid grid-cols-2 gap-4">
                                       <div className="space-y-1">
                                         <Label>Operational Level</Label>
-                                        <Select value={editMember.level} onValueChange={(val: any) => editMember({...editMember, level: val})}>
+                                        <Select value={editMember.level} onValueChange={(val: any) => setEditMember({...editMember, level: val})}>
                                           <SelectTrigger className="h-12 rounded-xl"><SelectValue /></SelectTrigger>
                                           <SelectContent>
                                             <SelectItem value="National">Central Council</SelectItem>

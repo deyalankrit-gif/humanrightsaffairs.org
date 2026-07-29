@@ -202,6 +202,14 @@ export function MembershipRegistrationDialog({ children }: { children: React.Rea
     )
   }
 
+  const genderKey = (selectedGender || '').trim().toLowerCase();
+  let fallback = '/dummy m.png';
+  if (genderKey === 'female' || genderKey === 'f' || genderKey === 'woman') {
+    fallback = '/dummy w.png';
+  } else if (genderKey === 'male' || genderKey === 'm' || genderKey === 'man') {
+    fallback = '/dummy m.png';
+  }
+
   return (
     <Dialog open={open} onOpenChange={(val) => { setOpen(val); if(!val) { form.reset(); setPhoto(null); } }}>
       <DialogTrigger asChild>{children}</DialogTrigger>
@@ -222,7 +230,7 @@ export function MembershipRegistrationDialog({ children }: { children: React.Rea
                 {photo ? (
                   <Image src={photo} alt="Preview" fill className="object-cover" />
                 ) : (
-                  <Image src={selectedGender?.toLowerCase() === 'female' ? '/dummy w.png' : '/dummy m.png'} alt="Placeholder" fill className="object-cover" />
+                  <Image src={fallback} alt="Placeholder" fill className="object-cover" />
                 )}
                 <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={handleFileChange} />
               </div>

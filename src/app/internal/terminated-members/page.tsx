@@ -167,7 +167,7 @@ export default function InternalTerminatedMembers() {
     try {
       await deleteDoc(doc(db, 'terminatedMembers', id))
       toast({ title: "Record Purged" })
-    } catch (e: any) {
+    } catch (e) {
       toast({ variant: "destructive", title: "Purge Denied" })
     }
   }
@@ -215,7 +215,12 @@ export default function InternalTerminatedMembers() {
                 <div className="space-y-4 py-2">
                   <div className="flex flex-col items-center gap-4 p-4 border-2 border-dashed rounded-2xl">
                     <div className="relative w-24 h-24 bg-slate-100 dark:bg-slate-800 rounded-2xl overflow-hidden grayscale opacity-50">
-                      {newMember.imageId ? <Image src={newMember.imageId} alt="Preview" fill className="object-cover" /> : <UserX className="w-10 h-10 text-slate-300 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />}
+                      {newMember.imageId ? <Image src={newMember.imageId} alt="Preview" fill className="object-cover" /> : (
+                        <div className="flex flex-col items-center justify-center h-full gap-1">
+                          <UserX className="w-10 h-10 text-slate-300" />
+                          <span className="text-[8px] font-bold text-slate-400">SELECT IMAGE</span>
+                        </div>
+                      )}
                       <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => handleFileChange(e, false)} />
                     </div>
                     <Label className="text-[10px] uppercase font-bold text-slate-400">Profile Reference Photo</Label>
@@ -252,34 +257,40 @@ export default function InternalTerminatedMembers() {
             <div className="text-center py-20"><Loader2 className="w-10 h-10 animate-spin text-accent mx-auto" /></div>
           ) : (
             <div className="grid gap-4 max-w-4xl mx-auto">
-              {filtered.map((m: any) => (
-                <Card key={m.id} className="border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 group">
-                  <CardContent className="p-0">
-                    <div className="flex flex-col md:flex-row items-stretch">
-                      <div className="p-5 bg-red-50 dark:bg-red-950/20 md:w-44 text-center border-r border-slate-100 dark:border-slate-800 flex flex-col items-center justify-center shrink-0">
-                         <div className="relative w-16 h-16 rounded-2xl overflow-hidden mb-2 grayscale opacity-50">
-                           <Image src={m.imageId || (m.gender === 'female' ? '/dummy w.png' : '/dummy m.png')} alt="Thumb" fill className="object-cover" />
-                         </div>
-                         <Badge variant="destructive" className="text-[8px] font-bold px-2 py-0.5 uppercase">{m.status}</Badge>
-                         <p className="text-[9px] font-bold text-red-600 mt-2">{m.terminationDate}</p>
-                      </div>
-                      <div className="flex-1 p-6 flex flex-col md:flex-row items-center justify-between gap-6">
-                        <div className="space-y-1 text-center md:text-left">
-                           <h3 className="text-xl font-bold text-primary dark:text-white leading-tight">{m.name}</h3>
-                           <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{m.designation || "EX-MEMBER"}</p>
-                           <p className="text-xs text-slate-400 italic mt-2 line-clamp-1">"{m.reason}"</p>
+              {filtered.map((m: any) => {
+                const gender = (m.gender || '').trim().toLowerCase();
+                let fallback = '/dummy m.png';
+                if (gender === 'female' || gender === 'f' || gender === 'woman') fallback = '/dummy w.png';
+                
+                return (
+                  <Card key={m.id} className="border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 group">
+                    <CardContent className="p-0">
+                      <div className="flex flex-col md:flex-row items-stretch">
+                        <div className="p-5 bg-red-50 dark:bg-red-950/20 md:w-44 text-center border-r border-slate-100 dark:border-slate-800 flex flex-col items-center justify-center shrink-0">
+                           <div className="relative w-16 h-16 rounded-2xl overflow-hidden mb-2 grayscale opacity-50">
+                             <Image src={m.imageId || fallback} alt="Thumb" fill className="object-cover" />
+                           </div>
+                           <Badge variant="destructive" className="text-[8px] font-bold px-2 py-0.5 uppercase">{m.status}</Badge>
+                           <p className="text-[9px] font-bold text-red-600 mt-2">{m.terminationDate}</p>
                         </div>
-                        <div className="flex items-center gap-2">
-                           <Button onClick={() => { setEditMember(m); setIsEditDialogOpen(true); }} variant="outline" size="sm" className="h-8 rounded-xl text-[10px] font-bold px-4 border-slate-200">Modify</Button>
-                           {isRoot && (
-                             <Button onClick={() => handleDelete(m.id)} variant="ghost" size="sm" className="h-8 w-8 text-slate-300 hover:text-red-500"><Trash2 className="w-4 h-4" /></Button>
-                           )}
+                        <div className="flex-1 p-6 flex flex-col md:flex-row items-center justify-between gap-6">
+                          <div className="space-y-1 text-center md:text-left">
+                             <h3 className="text-xl font-bold text-primary dark:text-white leading-tight">{m.name}</h3>
+                             <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{m.designation || "EX-MEMBER"}</p>
+                             <p className="text-xs text-slate-400 italic mt-2 line-clamp-1">"{m.reason}"</p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                             <Button onClick={() => { setEditMember(m); setIsEditDialogOpen(true); }} variant="outline" size="sm" className="h-8 rounded-xl text-[10px] font-bold px-4 border-slate-200">Modify</Button>
+                             {isRoot && (
+                               <Button onClick={() => handleDelete(m.id)} variant="ghost" size="sm" className="h-8 w-8 text-slate-300 hover:text-red-500"><Trash2 className="w-4 h-4" /></Button>
+                             )}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                    </CardContent>
+                  </Card>
+                )
+              })}
 
               {filtered.length === 0 && (
                 <div className="text-center py-20 bg-white dark:bg-slate-900 rounded-[3rem] border-2 border-dashed">
@@ -300,7 +311,7 @@ export default function InternalTerminatedMembers() {
             <div className="space-y-4 py-2">
                <div className="flex flex-col items-center gap-4 p-4 border-2 border-dashed rounded-2xl">
                   <div className="relative w-24 h-24 bg-slate-100 dark:bg-slate-800 rounded-2xl overflow-hidden grayscale opacity-50">
-                    <Image src={editMember.imageId || (editMember.gender === 'female' ? '/dummy w.png' : '/dummy m.png')} alt="Preview" fill className="object-cover" />
+                    <Image src={editMember.imageId || (editMember.gender?.trim().toLowerCase() === 'female' || editMember.gender?.trim().toLowerCase() === 'f' ? '/dummy w.png' : '/dummy m.png')} alt="Preview" fill className="object-cover" />
                     <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => handleFileChange(e, true)} />
                   </div>
                 </div>

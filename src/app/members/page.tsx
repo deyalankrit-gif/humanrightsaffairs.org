@@ -29,7 +29,8 @@ import {
   ShieldCheck,
   Building2,
   ChevronRight,
-  GraduationCap
+  GraduationCap,
+  BadgeCheck as BadgeCheckIcon
 } from 'lucide-react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -208,13 +209,29 @@ export default function MembersPage() {
   }
 
   const handleAddMember = async () => {
-    if (!newMember.name || !newMember.email || !newMember.memberId || !newMember.joiningDate) {
+    const mandatoryFields = [
+      { val: newMember.name, label: "Full Name" },
+      { val: newMember.gender, label: "Gender" },
+      { val: newMember.designationCategory, label: "Designation Category" },
+      { val: newMember.memberId, label: "Member ID" },
+      { val: newMember.membershipDuration, label: "Duration" },
+      { val: newMember.joiningDate, label: "Issue Date" },
+      { val: newMember.phone, label: "Phone Number" },
+      { val: newMember.address, label: "Verified Residential Address" },
+      { val: newMember.postOffice, label: "Post Office" },
+      { val: newMember.policeStation, label: "Police Station" },
+      { val: newMember.pinCode, label: "PIN Code" },
+      { val: newMember.level, label: "Operational Level" }
+    ];
+
+    const missing = mandatoryFields.find(f => !f.val);
+    if (missing) {
       toast({ 
         variant: "destructive", 
-        title: "Validation Error", 
-        description: "Name, Email, Member ID, and Membership Issue Date are required." 
-      })
-      return
+        title: "Missing Information", 
+        description: `${missing.label} is mandatory for personnel commissioning.` 
+      });
+      return;
     }
 
     const idPattern = /^[A-Z]{6}[0-9]{4}$/;
@@ -268,7 +285,6 @@ export default function MembersPage() {
     }
   }
 
-  // Public directory includes both live and demi members for a populated visual experience.
   const members = React.useMemo(() => {
     return (firestoreMembers || []) as Member[];
   }, [firestoreMembers]);
@@ -328,14 +344,18 @@ export default function MembersPage() {
   const MemberGrid = ({ items }: { items: Member[] }) => (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-8 xl:grid-cols-10 gap-2 md:gap-3">
       {items.map((member) => {
-        const genderKey = (member.gender || '').toLowerCase();
-        const fallback = (genderKey === 'female' || genderKey === 'f') ? '/dummy w.png' : '/dummy m.png'
+        const genderKey = (member.gender || '').trim().toLowerCase();
+        let fallback = '/dummy m.png'; // Default
+        if (genderKey === 'female' || genderKey === 'f' || genderKey === 'woman') {
+          fallback = '/dummy w.png';
+        } else if (genderKey === 'male' || genderKey === 'm' || genderKey === 'man') {
+          fallback = '/dummy m.png';
+        }
         
-        const isDataUrl = member.imageId?.startsWith('data:');
-        const isExternalUrl = member.imageId?.startsWith('http');
+        const isCustomPhoto = member.imageId && (member.imageId.startsWith('data:') || member.imageId.startsWith('http'));
         const placeholder = PlaceHolderImages.find(i => i.id === member.imageId)?.imageUrl;
         
-        const displayImg = isDataUrl || isExternalUrl ? member.imageId : (placeholder || fallback)
+        const displayImg = isCustomPhoto ? member.imageId : (placeholder || fallback)
         
         const isOfficeBearer = member.designationCategory === 'Office-bearing Member';
         
@@ -397,7 +417,7 @@ export default function MembersPage() {
             </CardHeader>
             <CardContent className="p-1 sm:p-1.5 md:p-2 space-y-0.5 sm:space-y-1">
               <div className="flex items-start gap-0.5 sm:gap-1">
-                 <BadgeCheck className="w-2 md:w-2.5 h-2 md:h-2.5 text-accent shrink-0 mt-0.5" />
+                 <BadgeCheckIcon className="w-2 md:w-2.5 h-2 md:h-2.5 text-accent shrink-0 mt-0.5" />
                  <div className="min-w-0">
                    <h3 className="font-headline font-bold text-[7px] sm:text-[9px] md:text-[10px] text-primary dark:text-white leading-tight truncate">{member.name}</h3>
                  </div>

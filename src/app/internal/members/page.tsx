@@ -51,6 +51,7 @@ import Link from 'next/link'
 import { INDIA_DATA } from '@/lib/india-data'
 import { cn } from '@/lib/utils'
 import Image from 'next/image'
+import { PlaceHolderImages } from '@/lib/placeholder-images'
 
 export default function InternalMembersDirectory() {
   const { user, loading: authLoading } = useUser()
@@ -359,14 +360,7 @@ export default function InternalMembersDirectory() {
                              <Select value={newMember.honorific} onValueChange={val => setNewMember({...newMember, honorific: val})}>
                                 <SelectTrigger className="w-24 h-11 rounded-xl bg-white dark:bg-slate-900 border-slate-200"><SelectValue placeholder="Title" /></SelectTrigger>
                                 <SelectContent position="popper" className="z-[1000001] bg-white">
-                                  <SelectItem value="Mr.">Mr.</SelectItem>
-                                  <SelectItem value="Ms.">Ms.</SelectItem>
-                                  <SelectItem value="Mrs.">Mrs.</SelectItem>
-                                  <SelectItem value="Dr.">Dr.</SelectItem>
-                                  <SelectItem value="Adv.">Adv.</SelectItem>
-                                  <SelectItem value="Prof.">Prof.</SelectItem>
-                                  <SelectItem value="Hon.">Hon.</SelectItem>
-                                  <SelectItem value="Rev.">Rev.</SelectItem>
+                                  {["Mr.", "Ms.", "Mrs.", "Dr.", "Adv.", "Prof.", "Hon.", "Rev."].map(h => <SelectItem key={h} value={h}>{h}</SelectItem>)}
                                 </SelectContent>
                              </Select>
                              <Input placeholder="Full Legal Name" value={newMember.name} onChange={e => setNewMember({...newMember, name: e.target.value})} className="h-11 rounded-xl flex-1" />

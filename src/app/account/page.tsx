@@ -58,6 +58,7 @@ import { collection, query, where, orderBy } from 'firebase/firestore'
 import { Footer } from '@/components/footer'
 import { cn } from '@/lib/utils'
 import { format, parseISO, differenceInDays } from 'date-fns'
+import { PlaceHolderImages } from '@/lib/placeholder-images'
 
 /**
  * Account Dashboard: Premium user interface for Human Rights Affairs Trust members.
@@ -137,7 +138,18 @@ export default function UserAccountDashboard() {
     )
   }
 
-  const fallbackImg = profile?.gender?.toLowerCase() === 'female' ? '/dummy w.png' : '/dummy m.png';
+  const genderKey = (profile?.gender || '').trim().toLowerCase();
+  let fallbackImg = '/dummy m.png';
+  if (genderKey === 'female' || genderKey === 'f' || genderKey === 'woman') {
+    fallbackImg = '/dummy w.png';
+  } else if (genderKey === 'male' || genderKey === 'm' || genderKey === 'man') {
+    fallbackImg = '/dummy m.png';
+  }
+  
+  const isCustomPhoto = profile?.imageId && (profile.imageId.startsWith('data:') || profile.imageId.startsWith('http'));
+  const placeholder = PlaceHolderImages.find(i => i.id === profile?.imageId)?.imageUrl;
+  
+  const finalDisplayImg = isCustomPhoto ? profile.imageId : (placeholder || user.photoURL || fallbackImg);
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
@@ -177,7 +189,7 @@ export default function UserAccountDashboard() {
                         <div className="absolute -inset-2 bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-xl"></div>
                         <div className="relative w-full h-full rounded-[2rem] overflow-hidden border-4 border-white dark:border-slate-800 shadow-lg">
                            <Image 
-                             src={profile?.imageId || user.photoURL || fallbackImg} 
+                             src={finalDisplayImg!} 
                              alt={user.displayName || 'User'} 
                              fill 
                              className="object-cover group-hover:scale-110 transition-transform duration-700" 
@@ -263,7 +275,7 @@ export default function UserAccountDashboard() {
                   <div className="grid grid-cols-2 gap-3">
                      {[
                        { label: 'Renew Term', icon: RefreshCw, color: 'text-blue-500' },
-                       { label: 'Download ID', icon: IdCard, color: 'text-emerald-500' },
+                       { label: 'Download ID', icon: FileText, color: 'text-emerald-500' },
                        { label: 'Request Aid', icon: HelpCircle, color: 'text-accent' },
                        { label: 'Share ID', icon: Share2, color: 'text-indigo-500' }
                      ].map((act, i) => (
@@ -512,7 +524,7 @@ export default function UserAccountDashboard() {
                               <div className="space-y-4">
                                  <Link href={profile?.id ? `/internal/members/${profile.id}/id-card` : '#'} className="block">
                                     <Button variant="outline" className="w-full h-14 rounded-xl border-white/20 bg-white/5 hover:bg-accent hover:text-primary transition-all text-xs font-bold uppercase tracking-widest gap-3 justify-start">
-                                       <IdCard className="w-4 h-4 text-accent" /> Member ID Card
+                                       <FileText className="w-4 h-4 text-accent" /> Member ID Card
                                     </Button>
                                  </Link>
                                  <Link href={profile?.id ? `/internal/members/${profile.id}/certificate` : '#'} className="block">
@@ -695,27 +707,3 @@ function Circle({ className, ...props }: React.SVGProps<SVGSVGElement>) {
     </svg>
   )
 }
-
-function IdCard({ className, ...props }: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-      {...props}
-    >
-      <rect width="18" height="14" x="3" y="5" rx="2" />
-      <path d="M7 9h2" />
-      <path d="M7 12h10" />
-      <path d="M7 15h6" />
-    </svg>
-  )
-}
-

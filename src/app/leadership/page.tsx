@@ -36,8 +36,14 @@ type Leader = {
 }
 
 function LeaderCard({ leader, variant = "default", isAdmin, onEdit, onDelete }: { leader: Leader, variant?: "xl" | "large" | "default" | "small", isAdmin?: boolean, onEdit?: (l: Leader) => void, onDelete?: (id: string) => void }) {
-  const fallback = leader.gender.toLowerCase() === 'female' ? '/dummy w.png' : '/dummy m.png'
-  const img = leader.imageId?.startsWith('data:') ? leader.imageId : (PlaceHolderImages.find(i => i.id === leader.imageId)?.imageUrl || fallback)
+  const genderKey = (leader.gender || '').trim().toLowerCase();
+  let fallback = '/dummy m.png';
+  if (genderKey === 'female' || genderKey === 'f' || genderKey === 'woman') fallback = '/dummy w.png';
+  
+  const isCustomPhoto = leader.imageId && (leader.imageId.startsWith('data:') || leader.imageId.startsWith('http'));
+  const placeholder = PlaceHolderImages.find(i => i.id === leader.imageId)?.imageUrl;
+  
+  const img = isCustomPhoto ? leader.imageId : (placeholder || fallback)
   
   const sizeClasses = {
     xl: "w-64 h-80 md:w-80 md:h-[420px]", // Central Chairman
@@ -51,7 +57,7 @@ function LeaderCard({ leader, variant = "default", isAdmin, onEdit, onDelete }: 
   return (
     <div className="flex flex-col items-center group relative">
       <div className={`relative ${sizeClasses[variant]} rounded-2xl overflow-hidden shadow-xl border-2 md:border-4 border-white group-hover:border-secondary transition-all duration-500 bg-slate-100 dark:bg-slate-800`}>
-        <Image src={img} alt={leader.name} fill className="object-cover group-hover:scale-110 transition-transform duration-700" />
+        <Image src={img!} alt={leader.name} fill className="object-cover group-hover:scale-110 transition-transform duration-700" />
         <div className="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-10">
           {isAdmin && (
             <div className="flex gap-2">
@@ -151,7 +157,7 @@ export default function LeadershipPage() {
   }, [firestoreLeaders]);
   
   const allStates = Object.keys(INDIA_DATA).sort()
-  const allDistrictsInState = activeState ? INDIA_DATA[activeState] : []
+  const districtsInState = activeState ? INDIA_DATA[activeState] : []
 
   const centralTeam = leaders.filter(l => l.level === 'Central')
   
@@ -374,7 +380,7 @@ export default function LeadershipPage() {
                                   <SelectValue placeholder="Select District" />
                                 </SelectTrigger>
                                 <SelectContent className="max-h-80">
-                                  {allDistrictsInState.map(d => <SelectItem key={d} value={d} className="text-[10px] font-bold">{d}</SelectItem>)}
+                                  {districtsInState.map(d => <SelectItem key={d} value={d} className="text-[10px] font-bold">{d}</SelectItem>)}
                                 </SelectContent>
                               </Select>
                             </div>
@@ -431,7 +437,7 @@ export default function LeadershipPage() {
             <div className="space-y-4 py-4">
               <div className="flex flex-col items-center gap-4 p-4 border-2 border-dashed rounded-2xl">
                 <div className="relative w-32 h-40 bg-slate-100 dark:bg-slate-800 rounded-xl overflow-hidden border">
-                  <Image src={editLeader.imageId?.startsWith('data:') ? editLeader.imageId : (editLeader.gender.toLowerCase() === 'female' ? '/dummy w.png' : '/dummy m.png')} alt="Preview" fill className="object-cover" />
+                  <Image src={editLeader.imageId?.startsWith('data:') ? editLeader.imageId : (editLeader.gender?.trim().toLowerCase() === 'female' || editLeader.gender?.trim().toLowerCase() === 'f' ? '/dummy w.png' : '/dummy m.png')} alt="Preview" fill className="object-cover" />
                 </div>
                 <Button variant="outline" className="w-full relative h-12 rounded-xl"><Upload className="w-4 h-4 mr-2" /> Change Photo<input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => handleFileChange(e, true)} /></Button>
               </div>
@@ -455,7 +461,7 @@ export default function LeadershipPage() {
                 <div className="space-y-2">
                   <Label className="text-primary dark:text-white">State / UT</Label>
                   <Select value={editLeader.parentRegion} onValueChange={(val) => setEditLeader({...editLeader, parentRegion: val, districtName: ''})}>
-                    <SelectTrigger><SelectValue placeholder="Choose State" /></SelectTrigger>
+                    <SelectTrigger className="h-11 rounded-xl"><SelectValue placeholder="Choose State" /></SelectTrigger>
                     <SelectContent className="max-h-60">{allStates.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
                   </Select>
                 </div>
@@ -464,7 +470,7 @@ export default function LeadershipPage() {
                 <div className="space-y-2">
                   <Label className="text-primary dark:text-white">District</Label>
                   <Select value={editLeader.districtName} onValueChange={(val) => setEditLeader({...editLeader, districtName: val})}>
-                    <SelectTrigger><SelectValue placeholder="Choose District" /></SelectTrigger>
+                    <SelectTrigger className="h-11 rounded-xl"><SelectValue placeholder="Choose District" /></SelectTrigger>
                     <SelectContent className="max-h-60">{(INDIA_DATA[editLeader.parentRegion] || []).map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
                   </Select>
                 </div>

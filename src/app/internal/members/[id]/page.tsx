@@ -158,8 +158,18 @@ export default function MemberDetailsPage() {
     )
   }
 
-  const fallback = profile.gender?.toLowerCase() === 'female' ? '/dummy w.png' : '/dummy m.png'
-  const displayImg = profile.imageId?.startsWith('data:') ? profile.imageId : (PlaceHolderImages.find(i => i.id === profile.imageId)?.imageUrl || fallback)
+  const genderKey = (profile.gender || '').trim().toLowerCase();
+  let fallback = '/dummy m.png';
+  if (genderKey === 'female' || genderKey === 'f' || genderKey === 'woman') {
+    fallback = '/dummy w.png';
+  } else if (genderKey === 'male' || genderKey === 'm' || genderKey === 'man') {
+    fallback = '/dummy m.png';
+  }
+  
+  const isCustomPhoto = profile.imageId && (profile.imageId.startsWith('data:') || profile.imageId.startsWith('http'));
+  const placeholder = PlaceHolderImages.find(i => i.id === profile.imageId)?.imageUrl;
+  
+  const displayImg = isCustomPhoto ? profile.imageId : (placeholder || fallback)
   
   const states = Object.keys(INDIA_DATA).sort()
 
