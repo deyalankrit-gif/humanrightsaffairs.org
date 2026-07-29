@@ -348,7 +348,7 @@ export function AppSidebar() {
               <SidebarGroup className="animate-in fade-in slide-in-from-left-2 duration-500">
                 <div className="group-data-[collapsible=icon]:hidden px-2 mb-4">
                   <h4 className="text-[11px] font-black uppercase tracking-widest text-accent flex items-center gap-2 leading-none">
-                     Pin Menu Here
+                     📌 Pin Menu Here
                   </h4>
                   <p className="text-[8px] font-bold text-slate-500 uppercase tracking-tighter mt-1">Maximum Six</p>
                 </div>
