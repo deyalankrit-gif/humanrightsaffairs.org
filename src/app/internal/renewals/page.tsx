@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useEffect, useMemo, useState } from 'react'
@@ -50,7 +51,7 @@ export default function MembershipRenewalsPage() {
 
   const renewalData = useMemo(() => {
     if (!profiles) return []
-    return (profiles as any[]).map(member => {
+    return (profiles as any[]).filter(m => m.isDemi !== true).map(member => {
       let expiryDate: Date | null = null
       let status: 'Safe' | 'Due' | 'Expired' = 'Safe'
       let daysRemaining = 0

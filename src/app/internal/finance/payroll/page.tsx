@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useMemo } from 'react'
@@ -40,7 +41,11 @@ export default function PayrollSuite() {
     if (!db || !user) return null;
     return query(collection(db, 'memberProfiles'), orderBy('name', 'asc'));
   }, [db, user]);
-  const { data: members, loading: membersLoading } = useCollection(membersQuery);
+  const { data: firestoreMembers, loading: membersLoading } = useCollection(membersQuery);
+
+  const members = React.useMemo(() => {
+    return ((firestoreMembers || []) as any[]).filter(m => m.isDemi !== true);
+  }, [firestoreMembers]);
 
   const payrollQuery = useMemoFirebase(() => {
     if (!db || !user) return null;
