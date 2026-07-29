@@ -107,7 +107,7 @@ export default function MemberKitManagement() {
     items: {} as Record<string, boolean>,
     dispatchDate: '',
     courierDetails: '',
-    deliveryStatus: 'Pending' as const,
+    deliveryStatus: 'Pending Verification' as const,
     acknowledgementReceived: false,
     notes: ''
   })
@@ -174,7 +174,7 @@ export default function MemberKitManagement() {
       items: existingKit.items || {},
       dispatchDate: existingKit.dispatchDate || '',
       courierDetails: existingKit.courierDetails || '',
-      deliveryStatus: existingKit.deliveryStatus || 'Pending',
+      deliveryStatus: existingKit.deliveryStatus || 'Pending Verification',
       acknowledgementReceived: existingKit.acknowledgementReceived || false,
       notes: existingKit.notes || ''
     })
@@ -322,7 +322,7 @@ export default function MemberKitManagement() {
     const matchesSearch = (m.name || '').toLowerCase().includes(search.toLowerCase()) || 
                           (m.memberId || '').toLowerCase().includes(search.toLowerCase());
     const kit = kitMap[m.id];
-    const status = kit?.deliveryStatus || 'Pending';
+    const status = kit?.deliveryStatus || 'Pending Verification';
     const matchesStatus = statusFilter === 'All' || status === statusFilter;
     return matchesSearch && matchesStatus;
   })
@@ -385,7 +385,7 @@ export default function MemberKitManagement() {
 
   const renderMemberCard = (m: any) => {
     const kit = kitMap[m.id];
-    const status = kit?.deliveryStatus || 'Pending';
+    const status = kit?.deliveryStatus || 'Pending Verification';
     const category = m.designationCategory || "General Member";
     const eligibleItemIds = eligibilityRules[category] || [];
     const eligibleItems = kitItems.filter((item: any) => eligibleItemIds.includes(item.id));
@@ -410,9 +410,10 @@ export default function MemberKitManagement() {
           <div className="flex flex-col md:flex-row items-stretch">
              <div className="p-5 bg-slate-50 dark:bg-slate-800 md:w-44 text-center border-r border-slate-100 dark:border-slate-700 flex flex-col items-center justify-center shrink-0">
                 <Badge variant="outline" className={cn(
-                  "text-[8px] font-bold px-3 py-1 rounded-full uppercase border-none",
+                  "text-[8px] font-bold px-3 py-1 rounded-full uppercase border-none transition-all",
                   status === 'Delivered' ? "bg-emerald-500 text-white" : 
-                  status === 'Dispatched' ? "bg-blue-500 text-white" : "bg-amber-500 text-white"
+                  status === 'Dispatched' ? "bg-blue-500 text-white" : 
+                  status === 'Returned' ? "bg-red-500 text-white" : "bg-amber-500 text-white animate-pulse"
                 )}>
                   {status}
                 </Badge>
@@ -711,10 +712,10 @@ export default function MemberKitManagement() {
         </div>
       </section>
 
-      <section className="py-6 border-b bg-white dark:bg-slate-900 sticky top-10 z-30 shadow-sm">
+      <section className="py-6 border-b bg-white dark:bg-slate-900 sticky top-10 z-40 shadow-sm">
         <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
-             {['All', 'Pending', 'In Progress', 'Resolved'].map(st => (
+             {['All', 'Pending Verification', 'Dispatched', 'Delivered', 'Returned'].map(st => (
                <button 
                 key={st} 
                 onClick={() => setStatusFilter(st)}
@@ -861,8 +862,8 @@ export default function MemberKitManagement() {
                                  <Label className="text-[9px] font-bold text-slate-400 uppercase">Delivery Status</Label>
                                  <Select value={kitForm.deliveryStatus} onValueChange={(val: any) => setKitForm({...kitForm, deliveryStatus: val})}>
                                     <SelectTrigger className="h-10 rounded-xl"><SelectValue /></SelectTrigger>
-                                    <SelectContent className="bg-white">
-                                       {['Pending', 'Dispatched', 'In Transit', 'Delivered', 'Returned'].map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                                    <SelectContent position="popper" className="z-[1000000] bg-white">
+                                       {['Pending Verification', 'Dispatched', 'In Transit', 'Delivered', 'Returned'].map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
                                     </SelectContent>
                                  </Select>
                               </div>
