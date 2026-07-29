@@ -76,172 +76,22 @@ type Vendor = {
   createdAt: any
 }
 
-export default function InternalVendorsPage() {
-  const { user, loading: authLoading } = useUser()
-  const router = useRouter()
-  const db = useFirestore()
-  const { toast } = useToast()
-  
-  const [search, setSearch] = useState('')
-  const [typeFilter, setTypeFilter] = useState('All')
-  const [isActionLoading, setIsActionLoading] = useState(false)
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
-  const [editVendor, setEditVendor] = useState<Vendor | null>(null)
-  
-  const [newCategoryLabel, setNewCategoryLabel] = useState('')
-  const [editingCategoryIndex, setEditingCategoryIndex] = useState<number | null>(null)
-  const [editingCategoryValue, setEditingCategoryValue] = useState('')
-  
-  const [newVendor, setNewVendor] = useState<Partial<Vendor>>({
-    companyName: '',
-    vendorType: 'Printing',
-    particularFunction: '',
-    contactPerson: '',
-    email: '',
-    phone: '',
-    address: '',
-    gstin: '',
-    status: 'Active'
-  })
-
-  useEffect(() => {
-    if (!authLoading && !user) {
-      router.push('/internal/login')
-    }
-  }, [user, authLoading, router])
-
-  const settingsRef = useMemoFirebase(() => {
-    if (!db) return null;
-    return doc(db, 'vendors', 'settings');
-  }, [db]);
-
-  const { data: settingsData } = useDoc(settingsRef);
-
-  const vendorTypes = useMemo(() => {
-    const custom = (settingsData as any)?.customCategories || [];
-    return Array.from(new Set([...DEFAULT_VENDOR_TYPES, ...custom]));
-  }, [settingsData]);
-
-  const vendorsQuery = useMemoFirebase(() => {
-    if (!db || !user) return null;
-    return query(collection(db, 'vendors'), orderBy('companyName', 'asc'));
-  }, [db, user]);
-
-  const { data: vendors, loading: dataLoading } = useCollection(vendorsQuery);
-
-  const handleAddCategory = async () => {
-    if (!newCategoryLabel.trim() || !settingsRef) return;
-    
-    const label = newCategoryLabel.trim();
-    if (vendorTypes.includes(label)) {
-      toast({ variant: "destructive", title: "Duplicate Category", description: "This category already exists in the registry." });
-      return;
-    }
-
-    const updatedCustom = [...((settingsData as any)?.customCategories || []), label];
-    
-    try {
-      await setDoc(settingsRef, {
-        customCategories: updatedCustom,
-        updatedAt: serverTimestamp(),
-        updatedBy: user?.email
-      }, { merge: true });
-      
-      setNewCategoryLabel('');
-      toast({ title: "Category Established", description: `${label} added to institutional categories.` });
-    } catch (e: any) {
-      toast({ variant: "destructive", title: "Save Failed" });
-    }
-  }
-
-  const handleUpdateCategory = async () => {
-    if (editingCategoryIndex === null || !editingCategoryValue.trim() || !settingsRef) return;
-    
-    const updatedCustom = [...((settingsData as any)?.customCategories || [])];
-    updatedCustom[editingCategoryIndex] = editingCategoryValue.trim();
-    
-    try {
-      await setDoc(settingsRef, {
-        customCategories: updatedCustom,
-        updatedAt: serverTimestamp(),
-        updatedBy: user?.email
-      }, { merge: true });
-      
-      setEditingCategoryIndex(null);
-      setEditingCategoryValue('');
-      toast({ title: "Category Updated" });
-    } catch (e: any) {
-      toast({ variant: "destructive", title: "Update Failed" });
-    }
-  }
-
-  const handleDeleteCategory = async (idx: number) => {
-    if (!settingsRef) return;
-    
-    const updatedCustom = [...((settingsData as any)?.customCategories || [])];
-    updatedCustom.splice(idx, 1);
-    
-    try {
-      await setDoc(settingsRef, {
-        customCategories: updatedCustom,
-        updatedAt: serverTimestamp(),
-        updatedBy: user?.email
-      }, { merge: true });
-      
-      toast({ title: "Category Purged" });
-    } catch (e: any) {
-      toast({ variant: "destructive", title: "Delete Failed" });
-    }
-  }
-
-  const handleAddVendor = async () => {
-    if (!db) return;
-    if (!newVendor.companyName?.trim()) {
-      toast({ variant: "destructive", title: "Validation Error", description: "Company Name is mandatory." });
-      return;
-    }
-    setIsActionLoading(true)
-    addDoc(collection(db, 'vendors'), { ...newVendor, createdAt: serverTimestamp() })
-      .then(() => {
-        toast({ title: "Vendor Registered", description: "Official entry committed to organizational registry." })
-        setNewVendor({ companyName: '', vendorType: 'Printing', particularFunction: '', contactPerson: '', email: '', phone: '', address: '', gstin: '', status: 'Active' })
-        setIsAddDialogOpen(false)
-      })
-      .finally(() => setIsActionLoading(false))
-  }
-
-  const handleUpdateVendor = async () => {
-    if (!db || !editVendor) return;
-    setIsActionLoading(true)
-    const { id, ...data } = editVendor;
-    updateDoc(doc(db, 'vendors', id), { ...data, updatedAt: serverTimestamp() })
-      .then(() => {
-        toast({ title: "Registry Updated" })
-        setIsEditDialogOpen(false)
-        setEditVendor(null)
-      })
-      .finally(() => setIsActionLoading(false))
-  }
-
-  const handleDeleteVendor = async (id: string) => {
-    if (!db) return;
-    deleteDoc(doc(db, 'vendors', id)).then(() => toast({ title: "Vendor Purged" }));
-  }
-
-  if (authLoading || !user) {
-    return <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950"><Loader2 className="w-10 h-10 animate-spin text-accent" /></div>
-  }
-
-  const filtered = (vendors as Vendor[] || []).filter(v => {
-    const matchesSearch = v.companyName?.toLowerCase().includes(search.toLowerCase()) || 
-                          v.contactPerson?.toLowerCase().includes(search.toLowerCase());
-    const matchesType = typeFilter === 'All' || v.vendorType === typeFilter;
-    return matchesSearch && matchesType;
-  })
-
-  // UI Components
-  const CategoryManagement = () => (
+/**
+ * CategoryManagement: Standalone component for taxonomy management.
+ */
+function CategoryManagement({ 
+  newCategoryLabel, 
+  setNewCategoryLabel, 
+  editingCategoryIndex, 
+  setEditingCategoryIndex, 
+  editingCategoryValue, 
+  setEditingCategoryValue, 
+  customCategories,
+  onAdd,
+  onUpdate,
+  onDelete
+}: any) {
+  return (
     <div className="p-5 bg-slate-50 dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 space-y-5 shadow-inner mt-6">
       <div className="space-y-1">
         <Label className="text-[9px] font-black uppercase text-accent tracking-widest flex items-center gap-2">
@@ -260,28 +110,22 @@ export default function InternalVendorsPage() {
                 "h-10 text-xs rounded-xl bg-white dark:bg-slate-950",
                 editingCategoryIndex !== null ? "border-emerald-500 ring-1 ring-emerald-500/20" : "border-slate-200"
               )}
-              onKeyDown={e => {
-                if (e.key === 'Enter') {
-                  e.preventDefault();
-                  editingCategoryIndex !== null ? handleUpdateCategory() : handleAddCategory();
-                }
-              }}
             />
          </div>
          {editingCategoryIndex !== null ? (
            <div className="flex gap-1 shrink-0">
-             <Button onClick={handleUpdateCategory} size="sm" className="h-10 px-3 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm"><Check className="w-4 h-4"/></Button>
+             <Button onClick={onUpdate} size="sm" className="h-10 px-3 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm"><Check className="w-4 h-4"/></Button>
              <Button onClick={() => { setEditingCategoryIndex(null); setEditingCategoryValue(''); }} size="sm" variant="outline" className="h-10 px-3 rounded-xl border-slate-200"><X className="w-4 h-4 text-slate-400"/></Button>
            </div>
          ) : (
-           <Button onClick={handleAddCategory} size="sm" className="h-10 px-4 rounded-xl bg-accent text-primary font-bold shadow-sm" disabled={!newCategoryLabel.trim()}>
+           <Button onClick={onAdd} size="sm" className="h-10 px-4 rounded-xl bg-accent text-primary font-bold shadow-sm" disabled={!newCategoryLabel.trim()}>
              <Plus className="w-4 h-4" />
            </Button>
          )}
       </div>
 
       <div className="flex flex-wrap gap-2 pt-1">
-         {((settingsData as any)?.customCategories || []).map((cat: string, idx: number) => (
+         {customCategories.map((cat: string, idx: number) => (
            <Badge key={idx} variant="outline" className={cn(
              "text-[9px] font-bold px-3 py-1 flex items-center gap-2 h-8 rounded-xl shadow-sm transition-all group",
              editingCategoryIndex === idx ? "border-emerald-500 bg-emerald-50 text-emerald-700" : "border-slate-200 bg-white dark:bg-slate-800 hover:border-accent"
@@ -296,25 +140,30 @@ export default function InternalVendorsPage() {
                   <AlertDialogContent className="rounded-3xl">
                     <AlertDialogHeader>
                       <AlertDialogTitle>Purge category "{cat}"?</AlertDialogTitle>
-                      <AlertDialogDescription>This will remove the category from the list. Existing vendor records will not be deleted, but this category will be unavailable for future assignments.</AlertDialogDescription>
+                      <AlertDialogDescription>This will remove the category from the list. Existing vendor records will not be deleted.</AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                       <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
-                      <AlertDialogAction onClick={() => handleDeleteCategory(idx)} className="bg-red-600 hover:bg-red-700 rounded-xl">Remove Category</AlertDialogAction>
+                      <AlertDialogAction onClick={() => onDelete(idx)} className="bg-red-600 hover:bg-red-700 rounded-xl">Remove Category</AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>
                 </AlertDialog>
              </div>
            </Badge>
          ))}
-         {(!settingsData || !((settingsData as any)?.customCategories?.length)) && (
+         {customCategories.length === 0 && (
            <p className="text-[8px] text-slate-400 font-bold uppercase italic px-2">No custom categories established.</p>
          )}
       </div>
     </div>
   )
+}
 
-  const VendorFormFields = ({ data, setData }: { data: any, setData: (d: any) => void }) => (
+/**
+ * VendorFormFields: Standalone component for vendor profile inputs.
+ */
+function VendorFormFields({ data, setData, vendorTypes }: { data: any, setData: (d: any) => void, vendorTypes: string[] }) {
+  return (
     <div className="space-y-6 py-4">
       <div className="grid md:grid-cols-2 gap-6">
         <div className="space-y-1">
@@ -324,7 +173,9 @@ export default function InternalVendorsPage() {
         <div className="space-y-1">
           <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Vendor Category *</Label>
           <Select value={data.vendorType} onValueChange={(v: any) => setData({...data, vendorType: v})}>
-            <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="h-11 rounded-xl">
+              <SelectValue placeholder="Select Type" />
+            </SelectTrigger>
             <SelectContent position="popper" className="z-[1000001] bg-white max-h-60">
               {vendorTypes.map(type => <SelectItem key={type} value={type}>{type}</SelectItem>)}
             </SelectContent>
@@ -393,51 +244,206 @@ export default function InternalVendorsPage() {
           </Select>
         </div>
       </div>
-      
-      <CategoryManagement />
     </div>
   )
+}
+
+export default function InternalVendorsPage() {
+  const { user, loading: authLoading } = useUser()
+  const router = useRouter()
+  const db = useFirestore()
+  const { toast } = useToast()
+  
+  const [search, setSearch] = useState('')
+  const [typeFilter, setTypeFilter] = useState('All')
+  const [isActionLoading, setIsActionLoading] = useState(false)
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+  const [editVendor, setEditVendor] = useState<Vendor | null>(null)
+  
+  const [newCategoryLabel, setNewCategoryLabel] = useState('')
+  const [editingCategoryIndex, setEditingCategoryIndex] = useState<number | null>(null)
+  const [editingCategoryValue, setEditingCategoryValue] = useState('')
+  
+  const [newVendor, setNewVendor] = useState<Partial<Vendor>>({
+    companyName: '',
+    vendorType: 'Printing',
+    particularFunction: '',
+    contactPerson: '',
+    email: '',
+    phone: '',
+    address: '',
+    gstin: '',
+    status: 'Active'
+  })
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/internal/login')
+    }
+  }, [user, authLoading, router])
+
+  const settingsRef = useMemoFirebase(() => {
+    if (!db) return null;
+    return doc(db, 'vendors', 'settings');
+  }, [db]);
+
+  const { data: settingsData } = useDoc(settingsRef);
+
+  const vendorTypes = useMemo(() => {
+    const custom = (settingsData as any)?.customCategories || [];
+    return Array.from(new Set([...DEFAULT_VENDOR_TYPES, ...custom]));
+  }, [settingsData]);
+
+  const vendorsQuery = useMemoFirebase(() => {
+    if (!db || !user) return null;
+    return query(collection(db, 'vendors'), orderBy('companyName', 'asc'));
+  }, [db, user]);
+
+  const { data: vendors, loading: dataLoading } = useCollection(vendorsQuery);
+
+  const handleAddCategory = async () => {
+    if (!newCategoryLabel.trim() || !settingsRef) return;
+    const label = newCategoryLabel.trim();
+    if (vendorTypes.includes(label)) {
+      toast({ variant: "destructive", title: "Duplicate Category" });
+      return;
+    }
+    const updatedCustom = [...((settingsData as any)?.customCategories || []), label];
+    try {
+      await setDoc(settingsRef, { customCategories: updatedCustom, updatedAt: serverTimestamp(), updatedBy: user?.email }, { merge: true });
+      setNewCategoryLabel('');
+      toast({ title: "Category Established" });
+    } catch (e: any) {
+      toast({ variant: "destructive", title: "Save Failed" });
+    }
+  }
+
+  const handleUpdateCategory = async () => {
+    if (editingCategoryIndex === null || !editingCategoryValue.trim() || !settingsRef) return;
+    const updatedCustom = [...((settingsData as any)?.customCategories || [])];
+    updatedCustom[editingCategoryIndex] = editingCategoryValue.trim();
+    try {
+      await setDoc(settingsRef, { customCategories: updatedCustom, updatedAt: serverTimestamp(), updatedBy: user?.email }, { merge: true });
+      setEditingCategoryIndex(null);
+      setEditingCategoryValue('');
+      toast({ title: "Category Updated" });
+    } catch (e: any) {
+      toast({ variant: "destructive", title: "Update Failed" });
+    }
+  }
+
+  const handleDeleteCategory = async (idx: number) => {
+    if (!settingsRef) return;
+    const updatedCustom = [...((settingsData as any)?.customCategories || [])];
+    updatedCustom.splice(idx, 1);
+    try {
+      await setDoc(settingsRef, { customCategories: updatedCustom, updatedAt: serverTimestamp(), updatedBy: user?.email }, { merge: true });
+      toast({ title: "Category Purged" });
+    } catch (e: any) {
+      toast({ variant: "destructive", title: "Delete Failed" });
+    }
+  }
+
+  const handleAddVendor = async () => {
+    if (!db) return;
+    if (!newVendor.companyName?.trim()) {
+      toast({ variant: "destructive", title: "Validation Error", description: "Company Name is mandatory." });
+      return;
+    }
+    setIsActionLoading(true)
+    addDoc(collection(db, 'vendors'), { ...newVendor, createdAt: serverTimestamp() })
+      .then(() => {
+        toast({ title: "Vendor Registered", description: "Official entry committed to organizational registry." })
+        setNewVendor({ companyName: '', vendorType: 'Printing', particularFunction: '', contactPerson: '', email: '', phone: '', address: '', gstin: '', status: 'Active' })
+        setIsAddDialogOpen(false)
+      })
+      .finally(() => setIsActionLoading(false))
+  }
+
+  const handleUpdateVendor = async () => {
+    if (!db || !editVendor) return;
+    setIsActionLoading(true)
+    const { id, ...data } = editVendor;
+    updateDoc(doc(db, 'vendors', id), { ...data, updatedAt: serverTimestamp() })
+      .then(() => {
+        toast({ title: "Registry Updated" })
+        setIsEditDialogOpen(false)
+        setEditVendor(null)
+      })
+      .finally(() => setIsActionLoading(false))
+  }
+
+  const handleDeleteVendor = async (id: string) => {
+    if (!db) return;
+    deleteDoc(doc(db, 'vendors', id)).then(() => toast({ title: "Vendor Purged" }));
+  }
+
+  if (authLoading || !user) {
+    return <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950"><Loader2 className="w-10 h-10 animate-spin text-accent" /></div>
+  }
+
+  const filtered = (vendors as Vendor[] || []).filter(v => {
+    const matchesSearch = v.companyName?.toLowerCase().includes(search.toLowerCase()) || 
+                          v.contactPerson?.toLowerCase().includes(search.toLowerCase());
+    const matchesType = typeFilter === 'All' || v.vendorType === typeFilter;
+    return matchesSearch && matchesType;
+  })
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
-      <section className="pt-16 pb-8 bg-slate-900 text-white border-b-8 border-accent/20">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="space-y-1">
-              <div className="inline-flex items-center gap-2 bg-accent/20 text-accent px-3 py-1 rounded-full text-[9px] font-bold uppercase border border-accent/30 tracking-[0.2em]">
-                <ShieldCheck className="w-2.5 h-2.5" /> External Governance
-              </div>
-              <h1 className="text-3xl md:text-4xl font-headline font-bold">Vendor <span className="text-accent italic">Registry</span></h1>
-              <p className="text-slate-400 text-[11px] font-bold uppercase tracking-widest">Management of organizational service providers</p>
-            </div>
-            
-            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-              <DialogTrigger asChild>
-                <Button size="sm" className="bg-accent text-primary font-bold rounded-xl h-11 px-6 flex gap-2 shadow-lg hover:bg-secondary hover:text-white transition-all shadow-xl shadow-accent/20">
-                  <Plus className="w-4 h-4" /> Register New Provider
-                </Button>
-              </DialogTrigger>
-              <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="max-w-2xl rounded-[2rem] max-h-[90vh] overflow-y-auto border-none shadow-2xl [&>button]:hidden">
-                <DialogHeader className="relative">
-                  <div className="absolute right-0 top-0">
-                    <DialogClose asChild>
-                      <Button variant="ghost" size="icon" className="rounded-full text-slate-400 hover:text-primary h-8 w-8">
-                        <X className="w-5 h-5" />
-                      </Button>
-                    </DialogClose>
-                  </div>
-                  <DialogTitle className="text-2xl font-headline font-bold text-primary dark:text-white">Register Institutional Vendor</DialogTitle>
-                  <DialogDescription>Establish a new service provider entry in the national registry.</DialogDescription>
-                </DialogHeader>
-                <VendorFormFields data={newVendor} setData={setNewVendor} />
-                <DialogFooter className="mt-8">
-                  <Button onClick={handleAddVendor} disabled={isActionLoading} className="w-full h-14 rounded-2xl bg-primary text-white hover:bg-secondary transition-all font-bold text-lg shadow-xl shadow-primary/10">
-                    {isActionLoading ? <Loader2 className="animate-spin" /> : "Commit to National Registry"}
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
+      <section className="pt-16 pb-8 bg-slate-900 text-white border-b-8 border-accent/20 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-1/3 h-full bg-accent/5 -skew-x-12"></div>
+        <div className="container mx-auto px-4 relative z-10 flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="space-y-1">
+             <div className="inline-flex items-center gap-2 bg-accent/20 text-accent px-3 py-1 rounded-full text-[9px] font-bold uppercase border border-accent/30 tracking-[0.2em]">
+               <ShieldCheck className="w-2.5 h-2.5" /> External Governance
+             </div>
+             <h1 className="text-3xl md:text-4xl font-headline font-bold">Vendor <span className="text-accent italic">Registry</span></h1>
+             <p className="text-slate-400 text-[11px] uppercase font-black tracking-widest">Management of organizational service providers</p>
           </div>
+          
+          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+            <DialogTrigger asChild>
+              <Button size="sm" className="bg-accent text-primary font-bold rounded-xl h-11 px-8 flex gap-2 shadow-lg hover:bg-secondary hover:text-white transition-all shadow-xl shadow-accent/20">
+                <Plus className="w-4 h-4" /> Register New Provider
+              </Button>
+            </DialogTrigger>
+            <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="max-w-2xl rounded-[2rem] max-h-[90vh] overflow-y-auto border-none shadow-2xl [&>button]:hidden">
+              <DialogHeader className="relative">
+                <div className="absolute right-0 top-0">
+                  <DialogClose asChild>
+                    <Button variant="ghost" size="icon" className="rounded-full text-slate-400 hover:text-primary h-8 w-8">
+                      <X className="w-5 h-5" />
+                    </Button>
+                  </DialogClose>
+                </div>
+                <DialogTitle className="text-2xl font-headline font-bold text-primary dark:text-white">Register Institutional Vendor</DialogTitle>
+                <DialogDescription>Establish a new service provider entry in the national registry.</DialogDescription>
+              </DialogHeader>
+              
+              <VendorFormFields data={newVendor} setData={setNewVendor} vendorTypes={vendorTypes} />
+              
+              <CategoryManagement 
+                newCategoryLabel={newCategoryLabel}
+                setNewCategoryLabel={setNewCategoryLabel}
+                editingCategoryIndex={editingCategoryIndex}
+                setEditingCategoryIndex={setEditingCategoryIndex}
+                editingCategoryValue={editingCategoryValue}
+                setEditingCategoryValue={setEditingCategoryValue}
+                customCategories={(settingsData as any)?.customCategories || []}
+                onAdd={handleAddCategory}
+                onUpdate={handleUpdateCategory}
+                onDelete={handleDeleteCategory}
+              />
+
+              <DialogFooter className="mt-8">
+                <Button onClick={handleAddVendor} disabled={isActionLoading} className="w-full h-14 rounded-2xl bg-primary text-white hover:bg-secondary transition-all font-bold text-lg shadow-xl shadow-primary/10">
+                  {isActionLoading ? <Loader2 className="animate-spin" /> : "Commit to National Registry"}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
       </section>
 
@@ -445,7 +451,15 @@ export default function InternalVendorsPage() {
         <div className="container mx-auto px-4">
           <div className="flex flex-col lg:flex-row items-center justify-between gap-4">
             <div className="flex flex-wrap items-center gap-1.5 p-1 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700">
-              {["All", ...DEFAULT_VENDOR_TYPES.slice(0, 4)].map((t) => (
+              <Button 
+                variant={typeFilter === 'All' ? "default" : "ghost"} 
+                onClick={() => setTypeFilter('All')} 
+                className={cn(
+                  "h-8 rounded-lg px-6 text-[10px] font-bold uppercase tracking-widest transition-all", 
+                  typeFilter === 'All' ? "bg-accent text-primary shadow-sm hover:bg-secondary hover:text-white" : "text-slate-500 hover:bg-slate-100"
+                )}
+              >All</Button>
+              {DEFAULT_VENDOR_TYPES.slice(0, 4).map((t) => (
                 <Button 
                   key={t} 
                   variant={typeFilter === t ? "default" : "ghost"} 
@@ -522,7 +536,7 @@ export default function InternalVendorsPage() {
                            <Button size="sm" variant="outline" onClick={() => { setEditVendor(vendor); setIsEditDialogOpen(true); }} className="flex-1 lg:flex-none h-11 rounded-xl text-[10px] font-bold uppercase tracking-widest border-slate-200 hover:bg-primary hover:text-white transition-all">Modify</Button>
                            <AlertDialog>
                              <AlertDialogTrigger asChild>
-                               <Button size="sm" variant="ghost" className="h-11 w-11 rounded-xl text-slate-300 hover:text-red-500 hover:bg-red-50 transition-all"><Trash2 className="w-5 h-5" /></Button>
+                               <Button size="sm" variant="ghost" className="h-11 w-11 rounded-xl text-slate-300 hover:text-red-500 transition-all"><Trash2 className="w-5 h-5" /></Button>
                              </AlertDialogTrigger>
                              <AlertDialogContent className="rounded-[2.5rem] border-none shadow-2xl">
                                <AlertDialogHeader>
@@ -561,7 +575,21 @@ export default function InternalVendorsPage() {
           </DialogHeader>
           {editVendor && (
             <>
-              <VendorFormFields data={editVendor} setData={setEditVendor} />
+              <VendorFormFields data={editVendor} setData={setEditVendor} vendorTypes={vendorTypes} />
+              
+              <CategoryManagement 
+                newCategoryLabel={newCategoryLabel}
+                setNewCategoryLabel={setNewCategoryLabel}
+                editingCategoryIndex={editingCategoryIndex}
+                setEditingCategoryIndex={setEditingCategoryIndex}
+                editingCategoryValue={editingCategoryValue}
+                setEditingCategoryValue={setEditingCategoryValue}
+                customCategories={(settingsData as any)?.customCategories || []}
+                onAdd={handleAddCategory}
+                onUpdate={handleUpdateCategory}
+                onDelete={handleDeleteCategory}
+              />
+
               <DialogFooter className="mt-8">
                 <Button onClick={handleUpdateVendor} disabled={isActionLoading} className="w-full h-14 rounded-2xl bg-primary text-white hover:bg-secondary transition-all font-bold text-lg">
                   {isActionLoading ? <Loader2 className="animate-spin" /> : "Commit Profile Refresh"}
