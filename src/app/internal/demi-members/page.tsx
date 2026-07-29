@@ -1,10 +1,9 @@
-
 "use client"
 
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useUser, useCollection, useFirestore, useMemoFirebase } from '@/firebase'
-import { collection, query, orderBy, addDoc, deleteDoc, doc, serverTimestamp, writeBatch, getDocs, where } from 'firebase/firestore'
+import { collection, query, orderBy, addDoc, deleteDoc, doc, updateDoc, serverTimestamp, writeBatch, getDocs, where } from 'firebase/firestore'
 import { Footer } from '@/components/footer'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -18,10 +17,12 @@ import {
   UserPlus, 
   Search, 
   Users, 
+  User,
   MapPin, 
   Star,
   RefreshCw,
-  AlertTriangle
+  AlertTriangle,
+  CheckCircle2
 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import {
