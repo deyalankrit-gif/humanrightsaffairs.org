@@ -153,6 +153,23 @@ export default function DemiMembersTerminal() {
     }
   }
 
+  const handleDeleteGroup = async (membersToDelete: any[], groupName: string) => {
+    if (!db || !isRoot || !membersToDelete.length) return
+    setIsActionLoading(true)
+    try {
+      const batch = writeBatch(db)
+      membersToDelete.forEach((m: any) => {
+        batch.delete(doc(db, 'memberProfiles', m.id))
+      })
+      await batch.commit()
+      toast({ title: "Group Purged", description: `Simulated members for ${groupName} removed.` })
+    } catch (e: any) {
+      toast({ variant: "destructive", title: "Purge Failed" })
+    } finally {
+      setIsActionLoading(false)
+    }
+  }
+
   const filtered = (demiMembers || []).filter((m: any) => 
     (m.name || '').toLowerCase().includes(search.toLowerCase()) || 
     (m.districtName || '').toLowerCase().includes(search.toLowerCase()) ||
@@ -228,6 +245,30 @@ export default function DemiMembersTerminal() {
         </div>
       </CardContent>
     </Card>
+  )
+
+  const PurgeButton = ({ members, label }: { members: any[], label: string }) => (
+    <AlertDialog>
+      <AlertDialogTrigger asChild>
+        <Button variant="ghost" size="sm" className="h-8 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 px-3 font-bold text-[9px] uppercase tracking-widest gap-2 transition-all">
+          <Trash2 className="w-3.5 h-3.5" /> Purge {label}
+        </Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent className="rounded-[2.5rem] border-none shadow-2xl bg-white dark:bg-slate-900">
+        <AlertDialogHeader>
+          <AlertDialogTitle className="flex items-center gap-2 text-red-500">
+            <AlertTriangle className="w-6 h-6" /> Purge Chapter Group?
+          </AlertDialogTitle>
+          <AlertDialogDescription className="text-sm font-medium leading-relaxed">
+            This will permanently remove all <strong>{members.length}</strong> simulated members currently listed under <strong>{label}</strong>. This operation is specific and will not affect other jurisdictional nodes.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter className="mt-6">
+          <AlertDialogCancel className="rounded-xl h-11 font-bold">Cancel</AlertDialogCancel>
+          <AlertDialogAction onClick={() => handleDeleteGroup(members, label)} className="bg-red-600 hover:bg-red-700 rounded-xl h-11 font-bold">Purge Group</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   )
 
   const allStates = Object.keys(INDIA_DATA).sort()
@@ -345,11 +386,14 @@ export default function DemiMembersTerminal() {
               {/* National Group */}
               {groupings.central.length > 0 && (
                 <div className="space-y-6">
-                  <div className="flex items-center gap-3 px-2">
-                    <ShieldCheck className="w-5 h-5 text-red-600" />
-                    <h4 className="text-sm font-black uppercase tracking-[0.25em] text-primary dark:text-white">Central Committee</h4>
-                    <div className="h-px flex-1 bg-slate-200 dark:bg-slate-800"></div>
+                  <div className="flex items-center justify-between px-2">
+                    <div className="flex items-center gap-3">
+                      <ShieldCheck className="w-5 h-5 text-red-600" />
+                      <h4 className="text-sm font-black uppercase tracking-[0.25em] text-primary dark:text-white">Central Committee</h4>
+                    </div>
+                    <PurgeButton members={groupings.central} label="Central Council" />
                   </div>
+                  <div className="h-px w-full bg-slate-200 dark:bg-slate-800 mb-6"></div>
                   <div className="grid gap-4">
                     {groupings.central.map(renderMemberCard)}
                   </div>
@@ -361,13 +405,16 @@ export default function DemiMembersTerminal() {
                 <div className="space-y-12">
                   {Object.keys(groupings.stateGroups).sort().map(state => (
                     <div key={state} className="space-y-4">
-                      <div className="flex items-center gap-3 px-2">
-                        <Globe className="w-6 h-6 text-emerald-600" />
-                        <h4 className="text-base font-black uppercase tracking-[0.2em] text-primary dark:text-white">
-                          {state} <span className="text-emerald-500 font-bold ml-2">State Chapter</span>
-                        </h4>
-                        <div className="h-px flex-1 bg-slate-200 dark:bg-slate-800"></div>
+                      <div className="flex items-center justify-between px-2">
+                        <div className="flex items-center gap-3">
+                          <Globe className="w-6 h-6 text-emerald-600" />
+                          <h4 className="text-base font-black uppercase tracking-[0.2em] text-primary dark:text-white">
+                            {state} <span className="text-emerald-500 font-bold ml-2">State Chapter</span>
+                          </h4>
+                        </div>
+                        <PurgeButton members={groupings.stateGroups[state]} label={state} />
                       </div>
+                      <div className="h-px w-full bg-slate-200 dark:bg-slate-800 mb-6"></div>
                       <div className="grid gap-4">
                         {groupings.stateGroups[state].map(renderMemberCard)}
                       </div>
@@ -383,14 +430,17 @@ export default function DemiMembersTerminal() {
                     <div key={state} className="space-y-12">
                       {Object.keys(groupings.districtGroups[state]).sort().map(district => (
                         <div key={district} className="space-y-4">
-                          <div className="flex items-center gap-3 px-2">
-                            <Building2 className="w-6 h-6 text-blue-600" />
-                            <h4 className="text-base font-black uppercase tracking-[0.2em] text-primary dark:text-white">
-                              {district} <span className="text-blue-500 font-bold ml-2">District Cell</span>
-                              <span className="text-[10px] text-slate-400 font-medium ml-2">({state})</span>
-                            </h4>
-                            <div className="h-px flex-1 bg-slate-200 dark:bg-slate-800"></div>
+                          <div className="flex items-center justify-between px-2">
+                            <div className="flex items-center gap-3">
+                              <Building2 className="w-6 h-6 text-blue-600" />
+                              <h4 className="text-base font-black uppercase tracking-[0.2em] text-primary dark:text-white">
+                                {district} <span className="text-blue-500 font-bold ml-2">District Cell</span>
+                                <span className="text-[10px] text-slate-400 font-medium ml-2">({state})</span>
+                              </h4>
+                            </div>
+                            <PurgeButton members={groupings.districtGroups[state][district]} label={`${district} (${state})`} />
                           </div>
+                          <div className="h-px w-full bg-slate-200 dark:bg-slate-800 mb-6"></div>
                           <div className="grid gap-4">
                             {groupings.districtGroups[state][district].map(renderMemberCard)}
                           </div>
