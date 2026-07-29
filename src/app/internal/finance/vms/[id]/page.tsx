@@ -5,7 +5,7 @@ import React, { useRef, useMemo } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { useDoc, useFirestore, useUser, useMemoFirebase } from '@/firebase'
-import { doc, updateDoc, serverTimestamp, increment } from 'firebase/firestore'
+import { doc, updateDoc, serverTimestamp, increment, collection, query, where, getDocs } from 'firebase/firestore'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -31,7 +31,7 @@ import { cn } from '@/lib/utils'
 
 /**
  * VoucherDetail: High-fidelity print-ready layout for institutional financial instruments.
- * Enhanced with a dedicated Close mechanism for administrative workflow.
+ * Enhanced with a dedicated Close mechanism and real-time ledger synchronization.
  */
 export default function VoucherDetailPage() {
   const { id } = useParams()
@@ -51,7 +51,6 @@ export default function VoucherDetailPage() {
   const handlePrint = () => window.print();
 
   const handleClose = () => {
-    // If we have history, go back; otherwise go to the VMS list
     if (window.history.length > 1) {
       router.back();
     } else {
@@ -60,7 +59,7 @@ export default function VoucherDetailPage() {
   };
 
   const handleAction = async (newStatus: string) => {
-    if (!db || !docRef || !user) return;
+    if (!db || !docRef || !user || !v) return;
     try {
       const trailUpdate = {
         action: `Voucher ${newStatus}`,
@@ -74,20 +73,45 @@ export default function VoucherDetailPage() {
       };
 
       if (newStatus === 'Approved') {
-        // Atomic ledger sync logic
+        // 1. Atomic summary sync
         const summaryRef = doc(db, 'finance_summary', 'state');
-        const isReceipt = v.type.includes('Receipt') || v.type.includes('Donation');
+        const isIncome = v.type.includes('Receipt') || v.type.includes('Donation') || v.type.includes('Membership');
         
         await updateDoc(summaryRef, {
-          [isReceipt ? 'totalIncome' : 'totalExpense']: increment(v.amount),
-          [v.paymentMethod === 'Bank' ? 'bankBalance' : 'cashInHand']: increment(isReceipt ? v.amount : -v.amount)
+          [isIncome ? 'totalIncome' : 'totalExpense']: increment(v.amount),
+          [v.paymentMethod === 'Bank' ? 'bankBalance' : 'cashInHand']: increment(isIncome ? v.amount : -v.amount)
         });
+
+        // 2. Propagate Approval to General Ledger (finance_transactions)
+        const txQuery = query(collection(db, 'finance_transactions'), where('voucherNo', '==', v.voucherNo));
+        const txSnap = await getDocs(txQuery);
+        
+        if (!txSnap.empty) {
+          await updateDoc(txSnap.docs[0].ref, { 
+            status: 'Approved',
+            updatedAt: serverTimestamp() 
+          });
+        } else {
+          // Create missing transaction if audit gap detected
+          await addDoc(collection(db, 'finance_transactions'), {
+            voucherNo: v.voucherNo,
+            date: v.date,
+            type: isIncome ? 'Income' : 'Expense',
+            account: v.accountHead,
+            amount: v.amount,
+            paymentMethod: v.paymentMethod,
+            particulars: v.narration || `Voucher: ${v.type} for ${v.person?.name}`,
+            status: 'Approved',
+            createdAt: serverTimestamp(),
+            createdBy: user.email
+          });
+        }
       }
 
       await updateDoc(docRef, updateData);
-      toast({ title: `Status: ${newStatus}` });
+      toast({ title: `Status: ${newStatus}`, description: "Voucher and Ledger successfully synchronized." });
     } catch (e: any) {
-      toast({ variant: "destructive", title: "Action Failed" });
+      toast({ variant: "destructive", title: "Action Failed", description: "Could not synchronize with national ledger." });
     }
   }
 

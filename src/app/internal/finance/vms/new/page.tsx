@@ -125,10 +125,13 @@ export default function NewVoucherPage() {
 
     try {
       const voucherNo = await handleGenerateId(formData.type);
+      const amountNum = Number(formData.amount);
+      const isIncome = formData.type.includes('Receipt') || formData.type.includes('Donation') || formData.type.includes('Membership');
+
       const payload = {
         ...formData,
-        amount: Number(formData.amount),
-        amountInWords: amountToWords(Number(formData.amount)),
+        amount: amountNum,
+        amountInWords: amountToWords(amountNum),
         voucherNo,
         status,
         createdAt: serverTimestamp(),
@@ -140,8 +143,24 @@ export default function NewVoucherPage() {
         }]
       };
 
+      // 1. Establish Master Voucher Record
       await addDoc(collection(db, 'finance_vms_vouchers'), payload);
-      toast({ title: "Voucher Saved", description: `Instrument ${voucherNo} established successfully.` });
+
+      // 2. Synchronize with General Ledger (finance_transactions)
+      await addDoc(collection(db, 'finance_transactions'), {
+        voucherNo,
+        date: formData.date,
+        type: isIncome ? 'Income' : 'Expense',
+        account: formData.accountHead,
+        amount: amountNum,
+        paymentMethod: formData.paymentMethod,
+        particulars: formData.narration || `Voucher: ${formData.type} for ${formData.person.name}`,
+        status: status === 'Approved' ? 'Approved' : 'Pending',
+        createdAt: serverTimestamp(),
+        createdBy: user.email
+      });
+
+      toast({ title: "Voucher & Ledger Synced", description: `Instrument ${voucherNo} established successfully.` });
       router.push('/internal/finance/vms/list');
     } catch (e: any) {
       toast({ variant: "destructive", title: "Sync Failed", description: e.message });
