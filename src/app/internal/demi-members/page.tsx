@@ -160,7 +160,7 @@ export default function DemiMembersTerminal() {
   )
 
   const groupings = React.useMemo(() => {
-    const central = filtered.filter(m => m.level === 'National');
+    const central = filtered.filter(m => m.level === 'National' || m.level === 'Central');
     
     const stateGroups = filtered
       .filter(m => m.level === 'State')
@@ -234,7 +234,7 @@ export default function DemiMembersTerminal() {
   const districtsInState = INDIA_DATA[seedOptions.state] || []
 
   if (authLoading || !isRoot) {
-    return <div className="min-h-screen flex items-center justify-center bg-slate-950"><Loader2 className="w-10 h-10 animate-spin text-accent" /></div>
+    return <div className="min-h-screen flex items-center justify-center bg-slate-950"><Loader2 className="w-10 h-10 animate-spin text-red-600" /></div>
   }
 
   return (
@@ -278,7 +278,7 @@ export default function DemiMembersTerminal() {
                     <Plus className="w-4 h-4" /> Seed Chapter Data
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-md rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden">
+                <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="max-w-md rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden">
                    <div className="bg-slate-900 p-8 text-white">
                       <DialogTitle className="text-2xl font-headline font-bold">Seed Protocol</DialogTitle>
                       <DialogDescription className="text-slate-400 mt-1">Select the target chapter for population simulation.</DialogDescription>
@@ -289,7 +289,7 @@ export default function DemiMembersTerminal() {
                             <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Chapter Level</Label>
                             <Select value={seedOptions.level} onValueChange={(val: any) => setSeedOptions({...seedOptions, level: val})}>
                                <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
-                               <SelectContent className="bg-white">
+                               <SelectContent position="popper" className="bg-white z-[1000001]">
                                   <SelectItem value="National">Central Council</SelectItem>
                                   <SelectItem value="State">State Chapter</SelectItem>
                                   <SelectItem value="District">District Cell</SelectItem>
@@ -302,7 +302,7 @@ export default function DemiMembersTerminal() {
                               <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Target State</Label>
                               <Select value={seedOptions.state} onValueChange={(val) => setSeedOptions({...seedOptions, state: val})}>
                                  <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
-                                 <SelectContent className="bg-white max-h-60">{allStates.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+                                 <SelectContent position="popper" className="bg-white max-h-60 z-[1000001]">{allStates.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
                               </Select>
                            </div>
                          )}
@@ -312,7 +312,7 @@ export default function DemiMembersTerminal() {
                               <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Target District</Label>
                               <Select value={seedOptions.district} onValueChange={(val) => setSeedOptions({...seedOptions, district: val})}>
                                  <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
-                                 <SelectContent className="bg-white max-h-60">{districtsInState.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
+                                 <SelectContent position="popper" className="bg-white max-h-60 z-[1000001]">{districtsInState.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
                               </Select>
                            </div>
                          )}
@@ -339,7 +339,7 @@ export default function DemiMembersTerminal() {
          </div>
 
          {dataLoading ? (
-           <div className="text-center py-20"><Loader2 className="w-10 h-10 animate-spin text-accent mx-auto" /></div>
+           <div className="text-center py-20"><Loader2 className="w-10 h-10 animate-spin text-red-600 mx-auto" /></div>
          ) : (
            <div className="space-y-16">
               {/* National Group */}
