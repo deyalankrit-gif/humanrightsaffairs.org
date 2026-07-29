@@ -412,6 +412,7 @@ export default function MemberKitManagement() {
                 <Badge variant="outline" className={cn(
                   "text-[8px] font-bold px-3 py-1 rounded-full uppercase border-none transition-all",
                   status === 'Delivered' ? "bg-emerald-500 text-white" : 
+                  status === 'In Transit' ? "bg-indigo-500 text-white" :
                   status === 'Dispatched' ? "bg-blue-500 text-white" : 
                   status === 'Returned' ? "bg-red-500 text-white" : "bg-amber-500 text-white animate-pulse"
                 )}>
@@ -715,7 +716,7 @@ export default function MemberKitManagement() {
       <section className="py-6 border-b bg-white dark:bg-slate-900 sticky top-10 z-40 shadow-sm">
         <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
-             {['All', 'Pending Verification', 'Dispatched', 'Delivered', 'Returned'].map(st => (
+             {['All', 'Pending Verification', 'Dispatched', 'In Transit', 'Delivered', 'Returned'].map(st => (
                <button 
                 key={st} 
                 onClick={() => setStatusFilter(st)}
