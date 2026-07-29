@@ -153,18 +153,89 @@ export default function DemiMembersTerminal() {
     }
   }
 
-  if (authLoading || !isRoot) {
-    return <div className="min-h-screen flex items-center justify-center bg-slate-950"><Loader2 className="w-10 h-10 animate-spin text-accent" /></div>
-  }
-
   const filtered = (demiMembers || []).filter((m: any) => 
     (m.name || '').toLowerCase().includes(search.toLowerCase()) || 
     (m.districtName || '').toLowerCase().includes(search.toLowerCase()) ||
     (m.stateName || '').toLowerCase().includes(search.toLowerCase())
   )
 
+  const groupings = React.useMemo(() => {
+    const central = filtered.filter(m => m.level === 'National');
+    
+    const stateGroups = filtered
+      .filter(m => m.level === 'State')
+      .reduce((acc, m) => {
+        const state = (m.stateName || 'Unspecified State').toUpperCase();
+        if (!acc[state]) acc[state] = [];
+        acc[state].push(m);
+        return acc;
+      }, {} as Record<string, any[]>);
+
+    const districtGroups = filtered
+      .filter(m => m.level === 'District')
+      .reduce((acc, m) => {
+        const state = (m.stateName || 'Unspecified State').toUpperCase();
+        const district = (m.districtName || 'Unspecified District').toUpperCase();
+        if (!acc[state]) acc[state] = {};
+        if (!acc[state][district]) acc[state][district] = [];
+        acc[state][district].push(m);
+        return acc;
+      }, {} as Record<string, Record<string, any[]>>);
+
+    return { central, stateGroups, districtGroups };
+  }, [filtered]);
+
+  const renderMemberCard = (m: any) => (
+    <Card key={m.id} className="border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 group transition-all hover:shadow-lg">
+      <CardContent className="p-0">
+        <div className="flex flex-col md:flex-row items-stretch">
+           <div className="p-6 md:w-48 text-center border-r bg-slate-50 dark:bg-slate-800/50 flex flex-col items-center justify-center shrink-0">
+              <Badge variant="outline" className="text-[8px] font-black uppercase tracking-widest border-accent text-accent mb-2">
+                 {m.memberId}
+              </Badge>
+              <div className="w-12 h-12 rounded-2xl bg-white dark:bg-slate-800 shadow-sm flex items-center justify-center text-slate-300">
+                 <User className="w-6 h-6" />
+              </div>
+           </div>
+           <div className="flex-1 p-6 flex flex-col md:flex-row items-center justify-between gap-6">
+              <div className="space-y-1 text-center md:text-left flex-1">
+                 <h3 className="text-xl font-bold text-primary dark:text-white leading-tight">{m.name}</h3>
+                 <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-2">
+                    <span className="flex items-center gap-1.5"><Star className="w-3 h-3 text-accent fill-accent" /> {m.designation}</span>
+                    <span className="flex items-center gap-1.5"><Globe className="w-3 h-3 text-accent" /> {m.stateName}</span>
+                    {m.districtName && <span className="flex items-center gap-1.5"><MapPin className="w-3 h-3 text-accent" /> {m.districtName}</span>}
+                    <span className="flex items-center gap-1.5 text-emerald-600"><CheckCircle2 className="w-3 h-3" /> Simulated Profile</span>
+                 </div>
+              </div>
+              <div className="flex items-center gap-3">
+                 <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                       <button className="h-10 w-10 text-slate-300 hover:text-red-500 transition-all rounded-xl flex items-center justify-center"><Trash2 className="w-5 h-5" /></button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent className="rounded-3xl bg-white dark:bg-slate-900 border-none shadow-2xl">
+                       <AlertDialogHeader>
+                          <AlertDialogTitle>Purge Record?</AlertDialogTitle>
+                          <AlertDialogDescription>Remove "{m.name}" from the simulated registry?</AlertDialogDescription>
+                       </AlertDialogHeader>
+                       <AlertDialogFooter>
+                          <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+                          <AlertDialogAction onClick={() => deleteDoc(doc(db, 'memberProfiles', m.id))} className="bg-red-600 hover:bg-red-700 rounded-xl">Confirm Delete</AlertDialogAction>
+                       </AlertDialogFooter>
+                    </AlertDialogContent>
+                 </AlertDialog>
+              </div>
+           </div>
+        </div>
+      </CardContent>
+    </Card>
+  )
+
   const allStates = Object.keys(INDIA_DATA).sort()
   const districtsInState = INDIA_DATA[seedOptions.state] || []
+
+  if (authLoading || !isRoot) {
+    return <div className="min-h-screen flex items-center justify-center bg-slate-950"><Loader2 className="w-10 h-10 animate-spin text-accent" /></div>
+  }
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-20">
@@ -257,7 +328,7 @@ export default function DemiMembersTerminal() {
       </header>
 
       <section className="py-8 container mx-auto px-4 max-w-5xl">
-         <div className="relative mb-8">
+         <div className="relative mb-12">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <Input 
               placeholder="Search demi members by name, state or district..." 
@@ -270,51 +341,66 @@ export default function DemiMembersTerminal() {
          {dataLoading ? (
            <div className="text-center py-20"><Loader2 className="w-10 h-10 animate-spin text-accent mx-auto" /></div>
          ) : (
-           <div className="grid gap-4">
-              {filtered.map((m: any) => (
-                <Card key={m.id} className="border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 group transition-all hover:shadow-lg">
-                  <CardContent className="p-0">
-                    <div className="flex flex-col md:flex-row items-stretch">
-                       <div className="p-6 md:w-48 text-center border-r bg-slate-50 dark:bg-slate-800/50 flex flex-col items-center justify-center shrink-0">
-                          <Badge variant="outline" className="text-[8px] font-black uppercase tracking-widest border-accent text-accent mb-2">
-                             {m.memberId}
-                          </Badge>
-                          <div className="w-12 h-12 rounded-2xl bg-white dark:bg-slate-800 shadow-sm flex items-center justify-center text-slate-300">
-                             <User className="w-6 h-6" />
-                          </div>
-                       </div>
-                       <div className="flex-1 p-6 flex flex-col md:flex-row items-center justify-between gap-6">
-                          <div className="space-y-1 text-center md:text-left flex-1">
-                             <h3 className="text-xl font-bold text-primary dark:text-white leading-tight">{m.name}</h3>
-                             <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-2">
-                                <span className="flex items-center gap-1.5"><Star className="w-3 h-3 text-accent fill-accent" /> {m.designation}</span>
-                                <span className="flex items-center gap-1.5"><Globe className="w-3 h-3 text-accent" /> {m.stateName}</span>
-                                {m.districtName && <span className="flex items-center gap-1.5"><MapPin className="w-3 h-3 text-accent" /> {m.districtName}</span>}
-                                <span className="flex items-center gap-1.5 text-emerald-600"><CheckCircle2 className="w-3 h-3" /> Simulated Profile</span>
-                             </div>
-                          </div>
-                          <div className="flex items-center gap-3">
-                             <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                   <Button variant="ghost" size="icon" className="h-10 w-10 text-slate-300 hover:text-red-500 transition-all rounded-xl"><Trash2 className="w-5 h-5" /></Button>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent className="rounded-3xl bg-white dark:bg-slate-900 border-none shadow-2xl">
-                                   <AlertDialogHeader>
-                                      <AlertDialogTitle>Purge Record?</AlertDialogTitle>
-                                      <AlertDialogDescription>Remove "{m.name}" from the simulated registry?</AlertDialogDescription>
-                                   </AlertDialogHeader>
-                                   <AlertDialogFooter>
-                                      <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
-                                      <AlertDialogAction onClick={() => deleteDoc(doc(db, 'memberProfiles', m.id))} className="bg-red-600 hover:bg-red-700 rounded-xl">Confirm Delete</AlertDialogAction>
-                                   </AlertDialogFooter>
-                                </AlertDialogContent>
-                             </AlertDialog>
-                          </div>
-                       </div>
+           <div className="space-y-16">
+              {/* National Group */}
+              {groupings.central.length > 0 && (
+                <div className="space-y-6">
+                  <div className="flex items-center gap-3 px-2">
+                    <ShieldCheck className="w-5 h-5 text-red-600" />
+                    <h4 className="text-sm font-black uppercase tracking-[0.25em] text-primary dark:text-white">Central Committee</h4>
+                    <div className="h-px flex-1 bg-slate-200 dark:bg-slate-800"></div>
+                  </div>
+                  <div className="grid gap-4">
+                    {groupings.central.map(renderMemberCard)}
+                  </div>
+                </div>
+              )}
+
+              {/* State Groups */}
+              {Object.keys(groupings.stateGroups).length > 0 && (
+                <div className="space-y-12">
+                  {Object.keys(groupings.stateGroups).sort().map(state => (
+                    <div key={state} className="space-y-4">
+                      <div className="flex items-center gap-3 px-2">
+                        <Globe className="w-6 h-6 text-emerald-600" />
+                        <h4 className="text-base font-black uppercase tracking-[0.2em] text-primary dark:text-white">
+                          {state} <span className="text-emerald-500 font-bold ml-2">State Chapter</span>
+                        </h4>
+                        <div className="h-px flex-1 bg-slate-200 dark:bg-slate-800"></div>
+                      </div>
+                      <div className="grid gap-4">
+                        {groupings.stateGroups[state].map(renderMemberCard)}
+                      </div>
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
+                  ))}
+                </div>
+              )}
+
+              {/* District Groups */}
+              {Object.keys(groupings.districtGroups).length > 0 && (
+                <div className="space-y-20">
+                  {Object.keys(groupings.districtGroups).sort().map(state => (
+                    <div key={state} className="space-y-12">
+                      {Object.keys(groupings.districtGroups[state]).sort().map(district => (
+                        <div key={district} className="space-y-4">
+                          <div className="flex items-center gap-3 px-2">
+                            <Building2 className="w-6 h-6 text-blue-600" />
+                            <h4 className="text-base font-black uppercase tracking-[0.2em] text-primary dark:text-white">
+                              {district} <span className="text-blue-500 font-bold ml-2">District Cell</span>
+                              <span className="text-[10px] text-slate-400 font-medium ml-2">({state})</span>
+                            </h4>
+                            <div className="h-px flex-1 bg-slate-200 dark:bg-slate-800"></div>
+                          </div>
+                          <div className="grid gap-4">
+                            {groupings.districtGroups[state][district].map(renderMemberCard)}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              )}
+
               {filtered.length === 0 && (
                 <div className="text-center py-32 opacity-30">
                    <Users className="w-16 h-16 text-slate-300 mx-auto mb-4" />
