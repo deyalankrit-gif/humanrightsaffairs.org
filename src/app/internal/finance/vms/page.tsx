@@ -16,14 +16,15 @@ import {
 import { 
   IndianRupee, TrendingUp, TrendingDown, Wallet, Building, 
   ArrowUpRight, ArrowDownRight, Clock, ShieldCheck, 
-  Loader2, FileSpreadsheet, Download, RefreshCw, Layers, Plus, Receipt
+  Loader2, FileSpreadsheet, Download, RefreshCw, Layers, Plus, Receipt,
+  ArrowDown, ArrowUp
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
 
 /**
  * VMS Dashboard: Tactical overview of the institutional Voucher Management System.
- * Updated: Included flow-based color coding (🔴/🟢) for recent instruments.
+ * Updated: Included flow-based arrows (↓ for inflow, ↑ for outflow) for recent instruments.
  */
 export default function VMSDashboard() {
   const { user, loading: authLoading } = useUser()
@@ -199,13 +200,15 @@ export default function VMSDashboard() {
                              <Badge 
                                variant="outline" 
                                className={cn(
-                                 "font-mono text-[10px] uppercase",
+                                 "font-mono text-[10px] uppercase flex items-center gap-1.5",
                                  isIncome ? "border-emerald-100 text-emerald-600 dark:border-emerald-900/30 dark:text-emerald-400" :
                                  isExpense ? "border-red-100 text-red-600 dark:border-red-900/30 dark:text-red-400" :
                                  "border-slate-200 text-slate-500"
                                )}
                              >
-                               {isIncome && "🟢 "}{isExpense && "🔴 "}{v.voucherNo}
+                               {isIncome && <ArrowDown className="w-3 h-3" />}
+                               {isExpense && <ArrowUp className="w-3 h-3" />}
+                               {v.voucherNo}
                              </Badge>
                              <p className="text-[8px] text-slate-400 mt-1 font-bold">{v.date}</p>
                           </td>

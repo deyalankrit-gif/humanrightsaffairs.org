@@ -20,14 +20,16 @@ import {
   Loader2, 
   ChevronRight, 
   ShieldCheck,
-  Plus
+  Plus,
+  ArrowDown,
+  ArrowUp
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
 
 /**
  * VoucherRegistry: Master list of all generated institutional financial instruments.
- * Updated: Included flow-based color coding (🔴/🟢) for registry items.
+ * Updated: Included flow-based arrows (↓ for inflow, ↑ for outflow) for registry items.
  */
 export default function VoucherRegistry() {
   const { user, loading: authLoading } = useUser()
@@ -103,13 +105,15 @@ export default function VoucherRegistry() {
                             <Badge 
                               variant="outline" 
                               className={cn(
-                                "text-[10px] font-black px-3 py-1 mb-2 uppercase",
+                                "font-mono text-[10px] uppercase flex items-center gap-1.5",
                                 isIncome ? "border-emerald-100 text-emerald-600 dark:border-emerald-900/30 dark:text-emerald-400" :
                                 isExpense ? "border-red-100 text-red-600 dark:border-red-900/30 dark:text-red-400" :
                                 "border-slate-200 text-slate-500"
                               )}
                             >
-                               {isIncome && "🟢 "}{isExpense && "🔴 "}{v.voucherNo}
+                               {isIncome && <ArrowDown className="w-3 h-3" />}
+                               {isExpense && <ArrowUp className="w-3 h-3" />}
+                               {v.voucherNo}
                             </Badge>
                             <p className="text-xl font-headline font-bold text-primary dark:text-white">₹{v.amount.toLocaleString()}</p>
                             <p className="text-[9px] font-bold text-slate-400 uppercase mt-1">{v.date}</p>
