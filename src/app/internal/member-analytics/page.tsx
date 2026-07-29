@@ -54,7 +54,12 @@ export default function MemberAnalyticsPage() {
     return query(collection(db, 'memberProfiles'), orderBy('createdAt', 'desc'));
   }, [db, user]);
 
-  const { data: members, loading: dataLoading } = useCollection(profilesQuery);
+  const { data: firestoreMembers, loading: dataLoading } = useCollection(profilesQuery);
+
+  // DATA ISOLATION: Explicitly filter out demi members in memory for high-fidelity isolation
+  const members = React.useMemo(() => {
+    return ((firestoreMembers || []) as any[]).filter(m => m.isDemi !== true);
+  }, [firestoreMembers]);
 
   useEffect(() => {
     if (!authLoading && !user) {

@@ -138,7 +138,12 @@ export default function MemberKitManagement() {
     return query(collection(db, 'memberProfiles'), orderBy('name', 'asc'));
   }, [db, user]);
 
-  const { data: members, loading: membersLoading } = useCollection(membersQuery);
+  const { data: firestoreMembers, loading: membersLoading } = useCollection(membersQuery);
+
+  // DATA ISOLATION: Explicitly filter out demi members in memory for high-fidelity isolation
+  const members = React.useMemo(() => {
+    return ((firestoreMembers || []) as any[]).filter(m => m.isDemi !== true);
+  }, [firestoreMembers]);
 
   const kitsQuery = useMemoFirebase(() => {
     if (!db || !user) return null;

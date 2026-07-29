@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useEffect, useState } from 'react'
@@ -97,6 +98,11 @@ export default function InternalMembersDirectory() {
 
   const { data: firestoreProfiles, loading: profilesLoading } = useCollection(profilesQuery);
 
+  // DATA ISOLATION: Filter out demi members in memory for high-fidelity isolation
+  const profiles = React.useMemo(() => {
+    return ((firestoreProfiles || []) as any[]).filter(m => m.isDemi !== true);
+  }, [firestoreProfiles]);
+
   useEffect(() => {
     if (!authLoading && !user) {
       router.push('/internal/login')
@@ -167,15 +173,6 @@ export default function InternalMembersDirectory() {
       return;
     }
 
-    if (newMember.designationCategory === 'Office-bearing Member' && !newMember.designation) {
-      toast({ 
-        variant: "destructive", 
-        title: "Missing Information", 
-        description: `Specific designation is mandatory for Office-bearing Members.` 
-      });
-      return;
-    }
-
     const idPattern = /^[A-Z]{6}[0-9]{4}$/;
     if (!idPattern.test(newMember.memberId)) {
       toast({ 
@@ -194,7 +191,8 @@ export default function InternalMembersDirectory() {
       await addDoc(collection(db, 'memberProfiles'), { 
         ...data, 
         name: finalName,
-        createdAt: serverTimestamp() 
+        createdAt: serverTimestamp(),
+        isDemi: false // Ensure explicit marking as non-demi
       })
       toast({ title: "Success", description: "Member record established." })
       setIsAdding(false)
@@ -242,7 +240,7 @@ export default function InternalMembersDirectory() {
     return <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950"><Loader2 className="w-10 h-10 animate-spin text-accent" /></div>
   }
 
-  const filtered = (firestoreProfiles || []).filter((m: any) => {
+  const filtered = profiles.filter((m: any) => {
     const matchesSearch = (m.name || '').toLowerCase().includes(search.toLowerCase()) || 
       (m.memberId || '').toLowerCase().includes(search.toLowerCase());
     return matchesSearch && (levelFilter === 'All' || m.level === levelFilter);
@@ -275,7 +273,7 @@ export default function InternalMembersDirectory() {
                 <div className="space-y-6 py-4">
                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
                       <div className="flex flex-col items-center gap-3">
-                        <div className="relative w-32 h-32 rounded-full bg-slate-50 dark:bg-slate-800 overflow-hidden border-2 border-dashed border-slate-300">
+                        <div className="relative w-32 h-32 rounded-full bg-slate-50 dark:bg-slate-800 overflow-hidden border-2 border-dashed border-slate-300 flex items-center justify-center overflow-hidden group cursor-pointer hover:border-accent transition-colors shadow-inner">
                           {newMember.imageId ? (
                             <Image src={newMember.imageId} alt="Preview" fill className="object-cover" />
                           ) : (
@@ -307,7 +305,7 @@ export default function InternalMembersDirectory() {
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                           <div className="space-y-1">
-                            <Label className="text-[10px] uppercase font-bold text-slate-400">Gender <span className="text-red-500">*</span></Label>
+                            <Label className="text-[10px] uppercase font-bold text-slate-400">Gender *</Label>
                             <Select value={newMember.gender} onValueChange={(val: any) => setNewMember({...newMember, gender: val})}>
                               <SelectTrigger className="h-11 rounded-xl"><SelectValue placeholder="Select" /></SelectTrigger>
                               <SelectContent position="popper" className="z-[1000001] bg-white"><SelectItem value="Male">Male</SelectItem><SelectItem value="Female">Female</SelectItem></SelectContent>

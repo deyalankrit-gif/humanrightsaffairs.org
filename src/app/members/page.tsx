@@ -57,7 +57,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { Calendar } from "@/components/ui/calendar"
+import { Calendar as CalendarComponent } from "@/components/ui/calendar"
 import { format, parse, addYears } from "date-fns"
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -91,6 +91,7 @@ type Member = {
   profession?: string
   education?: string
   experience?: string
+  isDemi?: boolean
 }
 
 export default function MembersPage() {
@@ -232,6 +233,7 @@ export default function MembersPage() {
         ...data,
         name: finalName,
         createdAt: serverTimestamp(),
+        isDemi: false // Ensure explicit marking as non-demi
       })
       toast({ title: "Success", description: "New member record established." })
       setIsAdding(false)
@@ -263,7 +265,10 @@ export default function MembersPage() {
     }
   }
 
-  const members = (firestoreMembers || []) as Member[]
+  // DATA ISOLATION: Explicitly filter out demi members in memory for high-fidelity isolation
+  const members = React.useMemo(() => {
+    return ((firestoreMembers || []) as Member[]).filter(m => m.isDemi !== true);
+  }, [firestoreMembers]);
 
   const filteredMembers = members.filter(m => {
     const matchesSearch = 
