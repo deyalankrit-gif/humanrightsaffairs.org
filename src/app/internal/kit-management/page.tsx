@@ -5,7 +5,7 @@ import React, { useEffect, useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { useUser, useCollection, useFirestore, useMemoFirebase, useDoc } from '@/firebase'
 import { collection, query, orderBy, doc, setDoc, updateDoc, serverTimestamp, increment, where } from 'firebase/firestore'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
@@ -738,7 +738,7 @@ export default function MemberKitManagement() {
           {membersLoading || kitsLoading || configLoading ? (
             <div className="text-center py-20"><Loader2 className="w-10 h-10 animate-spin text-accent mx-auto" /></div>
           ) : (
-            <div className="grid lg:grid-cols-3 gap-8 items-start">
+            <div className="grid lg:grid-cols-3 gap-8">
               <div className="lg:col-span-2 space-y-12 pb-20">
                 {groupings.central.length > 0 && (
                   <div className="space-y-4">
@@ -800,97 +800,99 @@ export default function MemberKitManagement() {
               </div>
 
               <div className="lg:col-span-1">
-                {selectedMember ? (
-                  <Card className="rounded-[2.5rem] bg-white dark:bg-slate-900 border-none shadow-2xl sticky top-32 overflow-hidden animate-in slide-in-from-right-4 duration-500">
-                     <CardHeader className="bg-slate-900 text-white p-8 border-b-4 border-accent/20">
-                        <div className="flex items-center justify-between mb-4">
-                           <Badge className="bg-accent text-primary font-black text-[8px] tracking-widest">{selectedMember.memberId}</Badge>
-                           <button onClick={() => setSelectedMember(null)} className="text-white/40 hover:text-white transition-colors"><X className="w-5 h-5" /></button>
-                        </div>
-                        <CardTitle className="text-2xl font-headline font-bold">{selectedMember.name}</CardTitle>
-                        <CardDescription className="text-slate-400 text-xs font-bold uppercase tracking-widest mt-1">Personnel Logistics Registry</CardDescription>
-                     </CardHeader>
-                     <CardContent className="p-8 space-y-8">
-                        <div className="space-y-4">
-                           <h4 className="text-[10px] font-black uppercase tracking-widest text-accent flex items-center gap-2">
-                             <ClipboardList className="w-3.5 h-3.5" /> Eligible Items for {selectedMember.designationCategory || "Member"}
-                           </h4>
-                           <div className="grid grid-cols-1 gap-2">
-                              {kitItems.filter((item: any) => (eligibilityRules[selectedMember.designationCategory || "General Member"] || []).includes(item.id)).map((item: any) => {
-                                const material = (materialsList || []).find((m: any) => 
-                                  m.name.toLowerCase() === item.label.toLowerCase() || 
-                                  m.sku === item.id
-                                );
-                                const stock = material?.currentStock ?? 'N/A';
-                                return (
-                                  <div key={item.id} className="flex items-center space-x-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 hover:border-accent/30 transition-all">
-                                    <Checkbox 
-                                      id={item.id} 
-                                      checked={kitForm.items[item.id] || false}
-                                      onCheckedChange={(val) => setKitForm({
-                                        ...kitForm,
-                                        items: { ...kitForm.items, [item.id]: !!val }
-                                      })}
-                                      className="border-accent"
-                                    />
-                                    <Label htmlFor={item.id} className="text-xs font-bold text-slate-700 dark:text-slate-300 cursor-pointer flex-1 flex items-center justify-between">
-                                      <span>{item.label}</span>
-                                      <span className={cn(
-                                        "text-[8px] font-black px-1.5 py-0.5 rounded uppercase",
-                                        typeof stock === 'number' && stock <= 0 ? "bg-red-500 text-white" : "bg-slate-200 dark:bg-slate-900 text-slate-500"
-                                      )}>
-                                        Avail: {stock}
-                                      </span>
-                                    </Label>
-                                    {kitForm.items[item.id] && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />}
-                                  </div>
-                                )
-                              })}
-                           </div>
-                        </div>
+                <div className="sticky top-32 space-y-6">
+                  {selectedMember ? (
+                    <Card className="rounded-[2.5rem] bg-white dark:bg-slate-900 border-none shadow-2xl overflow-hidden animate-in slide-in-from-right-4 duration-500">
+                      <CardHeader className="bg-slate-900 text-white p-8 border-b-4 border-accent/20">
+                          <div className="flex items-center justify-between mb-4">
+                            <Badge className="bg-accent text-primary font-black text-[8px] tracking-widest">{selectedMember.memberId}</Badge>
+                            <button onClick={() => setSelectedMember(null)} className="text-white/40 hover:text-white transition-colors"><X className="w-5 h-5" /></button>
+                          </div>
+                          <CardTitle className="text-2xl font-headline font-bold">{selectedMember.name}</CardTitle>
+                          <CardDescription className="text-slate-400 text-xs font-bold uppercase tracking-widest mt-1">Personnel Logistics Registry</CardDescription>
+                      </CardHeader>
+                      <CardContent className="p-8 space-y-8 max-h-[calc(100vh-25rem)] overflow-y-auto custom-scrollbar">
+                          <div className="space-y-4">
+                            <h4 className="text-[10px] font-black uppercase tracking-widest text-accent flex items-center gap-2">
+                              <ClipboardList className="w-3.5 h-3.5" /> Eligible Items for {selectedMember.designationCategory || "Member"}
+                            </h4>
+                            <div className="grid grid-cols-1 gap-2">
+                                {kitItems.filter((item: any) => (eligibilityRules[selectedMember.designationCategory || "General Member"] || []).includes(item.id)).map((item: any) => {
+                                  const material = (materialsList || []).find((m: any) => 
+                                    m.name.toLowerCase() === item.label.toLowerCase() || 
+                                    m.sku === item.id
+                                  );
+                                  const stock = material?.currentStock ?? 'N/A';
+                                  return (
+                                    <div key={item.id} className="flex items-center space-x-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 hover:border-accent/30 transition-all">
+                                      <Checkbox 
+                                        id={item.id} 
+                                        checked={kitForm.items[item.id] || false}
+                                        onCheckedChange={(val) => setKitForm({
+                                          ...kitForm,
+                                          items: { ...kitForm.items, [item.id]: !!val }
+                                        })}
+                                        className="border-accent"
+                                      />
+                                      <Label htmlFor={item.id} className="text-xs font-bold text-slate-700 dark:text-slate-300 cursor-pointer flex-1 flex items-center justify-between">
+                                        <span>{item.label}</span>
+                                        <span className={cn(
+                                          "text-[8px] font-black px-1.5 py-0.5 rounded uppercase",
+                                          typeof stock === 'number' && stock <= 0 ? "bg-red-500 text-white" : "bg-slate-200 dark:bg-slate-900 text-slate-500"
+                                        )}>
+                                          Avail: {stock}
+                                        </span>
+                                      </Label>
+                                      {kitForm.items[item.id] && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />}
+                                    </div>
+                                  )
+                                })}
+                            </div>
+                          </div>
 
-                        <div className="space-y-6 pt-6 border-t border-slate-100 dark:border-slate-800">
-                           <h4 className="text-[10px] font-black uppercase tracking-widest text-indigo-500 flex items-center gap-2">
-                             <Truck className="w-3.5 h-3.5" /> Dispatch Particulars
-                           </h4>
-                           
-                           <div className="grid grid-cols-2 gap-4">
-                              <div className="space-y-1.5">
-                                 <Label className="text-[9px] font-bold text-slate-400 uppercase">Dispatch Date</Label>
-                                 <Input type="date" value={kitForm.dispatchDate} onChange={e => setKitForm({...kitForm, dispatchDate: e.target.value})} className="h-10 rounded-xl" />
-                              </div>
-                              <div className="space-y-1.5">
-                                 <Label className="text-[9px] font-bold text-slate-400 uppercase">Delivery Status</Label>
-                                 <Select value={kitForm.deliveryStatus} onValueChange={(val: any) => setKitForm({...kitForm, deliveryStatus: val})}>
-                                    <SelectTrigger className="h-10 rounded-xl"><SelectValue /></SelectTrigger>
-                                    <SelectContent position="popper" className="z-[1000000] bg-white">
-                                       {['Pending Verification', 'Dispatched', 'In Transit', 'Delivered', 'Returned'].map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-                                    </SelectContent>
-                                 </Select>
-                              </div>
-                           </div>
+                          <div className="space-y-6 pt-6 border-t border-slate-100 dark:border-slate-800">
+                            <h4 className="text-[10px] font-black uppercase tracking-widest text-indigo-500 flex items-center gap-2">
+                              <Truck className="w-3.5 h-3.5" /> Dispatch Particulars
+                            </h4>
+                            
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-1.5">
+                                  <Label className="text-[9px] font-bold text-slate-400 uppercase">Dispatch Date</Label>
+                                  <Input type="date" value={kitForm.dispatchDate} onChange={e => setKitForm({...kitForm, dispatchDate: e.target.value})} className="h-10 rounded-xl" />
+                                </div>
+                                <div className="space-y-1.5">
+                                  <Label className="text-[9px] font-bold text-slate-400 uppercase">Delivery Status</Label>
+                                  <Select value={kitForm.deliveryStatus} onValueChange={(val: any) => setKitForm({...kitForm, deliveryStatus: val})}>
+                                      <SelectTrigger className="h-10 rounded-xl"><SelectValue /></SelectTrigger>
+                                      <SelectContent position="popper" className="z-[1000000] bg-white">
+                                        {['Pending Verification', 'Dispatched', 'In Transit', 'Delivered', 'Returned'].map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                                      </SelectContent>
+                                  </Select>
+                                </div>
+                            </div>
 
-                           <div className="space-y-1.5">
-                              <Label className="text-[9px] font-bold text-slate-400 uppercase">AWB / Courier Info</Label>
-                              <Input placeholder="e.g. Speed Post - EW123456789IN" value={kitForm.courierDetails} onChange={e => setKitForm({...kitForm, courierDetails: e.target.value})} className="h-10 rounded-xl" />
-                           </div>
+                            <div className="space-y-1.5">
+                                <Label className="text-[9px] font-bold text-slate-400 uppercase">AWB / Courier Info</Label>
+                                <Input placeholder="e.g. Speed Post - EW123456789IN" value={kitForm.courierDetails} onChange={e => setKitForm({...kitForm, courierDetails: e.target.value})} className="h-10 rounded-xl" />
+                            </div>
 
-                           <div className="flex items-center space-x-3 p-4 bg-emerald-50/50 dark:bg-emerald-950/20 rounded-2xl border border-emerald-100 dark:border-emerald-900">
-                              <Checkbox 
-                                id="ack" 
-                                checked={kitForm.acknowledgementReceived} 
-                                onCheckedChange={(val) => setKitForm({...kitForm, acknowledgementReceived: !!val})}
-                                className="border-emerald-500 h-5 w-5"
-                              />
-                              <Label htmlFor="ack" className="text-xs font-black text-emerald-700 dark:text-emerald-400 cursor-pointer uppercase tracking-tight">Ack. Received</Label>
-                           </div>
+                            <div className="flex items-center space-x-3 p-4 bg-emerald-50/50 dark:bg-emerald-950/20 rounded-2xl border border-emerald-100 dark:border-emerald-900">
+                                <Checkbox 
+                                  id="ack" 
+                                  checked={kitForm.acknowledgementReceived} 
+                                  onCheckedChange={(val) => setKitForm({...kitForm, acknowledgementReceived: !!val})}
+                                  className="border-emerald-500 h-5 w-5"
+                                />
+                                <Label htmlFor="ack" className="text-xs font-black text-emerald-700 dark:text-emerald-400 cursor-pointer uppercase tracking-tight">Ack. Received</Label>
+                            </div>
 
-                           <div className="space-y-1.5">
-                              <Label className="text-[9px] font-bold text-slate-400 uppercase">Registry Notes</Label>
-                              <Textarea value={kitForm.notes} onChange={e => setKitForm({...kitForm, notes: e.target.value})} placeholder="Internal notes..." className="rounded-xl min-h-[80px]" />
-                           </div>
-                        </div>
-
+                            <div className="space-y-1.5">
+                                <Label className="text-[9px] font-bold text-slate-400 uppercase">Registry Notes</Label>
+                                <Textarea value={kitForm.notes} onChange={e => setKitForm({...kitForm, notes: e.target.value})} placeholder="Internal notes..." className="rounded-xl min-h-[80px]" />
+                            </div>
+                          </div>
+                      </CardContent>
+                      <CardFooter className="p-8 border-t bg-white dark:bg-slate-900 shrink-0">
                         <Button 
                           onClick={handleSaveKit} 
                           disabled={isSaving === selectedMember.id}
@@ -898,19 +900,20 @@ export default function MemberKitManagement() {
                         >
                           {isSaving === selectedMember.id ? <Loader2 className="animate-spin w-5 h-5" /> : <><Save className="w-5 h-5" /> Commit Logistics Data</>}
                         </Button>
-                     </CardContent>
-                  </Card>
-                ) : (
-                  <div className="bg-white dark:bg-slate-900 p-10 rounded-[3rem] border border-slate-100 dark:border-slate-800 text-center space-y-6 sticky top-32 shadow-sm">
-                     <div className="w-20 h-20 bg-slate-50 dark:bg-slate-800 rounded-3xl flex items-center justify-center mx-auto border-2 border-dashed border-slate-200">
-                        <UserCheck className="w-10 h-10 text-slate-300" />
-                     </div>
-                     <div className="space-y-2">
-                        <h4 className="text-xl font-headline font-bold text-primary dark:text-white">Logistics Node</h4>
-                        <p className="text-sm text-slate-400 leading-relaxed italic">"Select a member to manage their official institutional kit and tracking assets with real-time inventory sync."</p>
-                     </div>
-                  </div>
-                )}
+                      </CardFooter>
+                    </Card>
+                  ) : (
+                    <div className="bg-white dark:bg-slate-900 p-10 rounded-[3rem] border border-slate-100 dark:border-slate-800 text-center space-y-6 shadow-sm">
+                      <div className="w-20 h-20 bg-slate-50 dark:bg-slate-800 rounded-3xl flex items-center justify-center mx-auto border-2 border-dashed border-slate-200">
+                          <UserCheck className="w-10 h-10 text-slate-300" />
+                      </div>
+                      <div className="space-y-2">
+                          <h4 className="text-xl font-headline font-bold text-primary dark:text-white">Logistics Node</h4>
+                          <p className="text-sm text-slate-400 leading-relaxed italic">"Select a member to manage their official institutional kit and tracking assets with real-time inventory sync."</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           )}
@@ -967,10 +970,12 @@ export default function MemberKitManagement() {
              </div>
           </div>
           
-          <div className="p-6 border-t bg-slate-50 dark:bg-slate-900/50 flex justify-between items-center shrink-0">
+          <DialogFooter className="p-6 border-t bg-slate-50 dark:bg-slate-900/50 flex justify-between items-center shrink-0">
              <p className="text-[10px] font-black uppercase text-slate-400">Total Issued: {viewingItemMembers?.members.length}</p>
-             <button onClick={() => setViewingItemMembers(null)} className="text-[10px] font-black uppercase tracking-widest text-accent hover:bg-accent/10 p-2 rounded-lg transition-colors">Close Registry</button>
-          </div>
+             <DialogClose asChild>
+               <Button variant="ghost" className="text-[10px] font-black uppercase tracking-widest text-accent hover:bg-accent/10">Close Registry</Button>
+             </DialogClose>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
       <Footer />

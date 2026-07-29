@@ -21,7 +21,10 @@ import {
   Star,
   RefreshCw,
   AlertTriangle,
-  CheckCircle2
+  CheckCircle2,
+  Globe,
+  Building2,
+  X
 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import {
@@ -35,31 +38,26 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+  DialogDescription,
+  DialogClose
+} from "@/components/ui/dialog"
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
 import { Footer } from '@/components/footer'
+import { INDIA_DATA } from '@/lib/india-data'
 
-const DEMI_SEED_DATA = [
-  // North 24 Parganas
-  { name: "Sourav Chatterjee", designation: "District Observer", level: "District", stateName: "West Bengal", districtName: "North 24 Parganas", category: "Office-bearing Member", gender: "male" },
-  { name: "Fatema Khatun", designation: "General Member", level: "District", stateName: "West Bengal", districtName: "North 24 Parganas", category: "General Member", gender: "female" },
-  { name: "Buddhadeb Sardar", designation: "Volunteer", level: "District", stateName: "West Bengal", districtName: "North 24 Parganas", category: "Volunteer", gender: "male" },
-  { name: "Harpreet Singh Dhillon", designation: "Executive Member", level: "District", stateName: "West Bengal", districtName: "North 24 Parganas", category: "General Member", gender: "male" },
-  { name: "Anjali Mukhopadhyay", designation: "Publicity Secretary", level: "District", stateName: "West Bengal", districtName: "North 24 Parganas", category: "Office-bearing Member", gender: "female" },
-  { name: "Zakir Hossain Molla", designation: "Volunteer", level: "District", stateName: "West Bengal", districtName: "North 24 Parganas", category: "Volunteer", gender: "male" },
-  { name: "Sujata Mondal", designation: "General Member", level: "District", stateName: "West Bengal", districtName: "North 24 Parganas", category: "General Member", gender: "female" },
-  { name: "David D'Souza", designation: "District Advisor", level: "District", stateName: "West Bengal", districtName: "North 24 Parganas", category: "Board Member", gender: "male" },
-  
-  // South 24 Parganas
-  { name: "Abhishek Bhattacharya", designation: "District Secretary", level: "District", stateName: "West Bengal", districtName: "South 24 Parganas", category: "Office-bearing Member", gender: "male" },
-  { name: "Rumpa Naskar", designation: "General Member", level: "District", stateName: "West Bengal", districtName: "South 24 Parganas", category: "General Member", gender: "female" },
-  { name: "Sahil Sheikh", designation: "Volunteer", level: "District", stateName: "West Bengal", districtName: "South 24 Parganas", category: "Volunteer", gender: "male" },
-  { name: "Gurpreet Kaur", designation: "Executive Member", level: "District", stateName: "West Bengal", districtName: "South 24 Parganas", category: "General Member", gender: "female" },
-  { name: "Bikash Halder", designation: "Treasurer", level: "District", stateName: "West Bengal", districtName: "South 24 Parganas", category: "Office-bearing Member", gender: "male" },
-  { name: "Krishna Biswas", designation: "Volunteer", level: "District", stateName: "West Bengal", districtName: "South 24 Parganas", category: "Volunteer", gender: "female" },
-  { name: "Subhankar Roy", designation: "General Member", level: "District", stateName: "West Bengal", districtName: "South 24 Parganas", category: "General Member", gender: "male" },
-  { name: "Anthony Gomes", designation: "Board Member", level: "District", stateName: "West Bengal", districtName: "South 24 Parganas", category: "Board Member", gender: "male" },
-];
+const FIRST_NAMES = ["Sourav", "Abhishek", "Rumpa", "Sahil", "Gurpreet", "Bikash", "Krishna", "Subhankar", "Anthony", "Anjali", "Zakir", "Sujata", "David", "Fatema", "Buddhadeb", "Harpreet", "Arpan", "Mousumi", "Tanmoy", "Savita", "Mayank", "Piyush", "Rajeshwari", "Vikram", "Indranil", "Meenakshi", "Ritam", "Pallavi", "Amarendra", "Alok", "Suchitra", "Amita", "Krishnamurthy", "Sanjeev", "Pankaj", "Atanu", "Debjani", "Nirmal", "Deepali", "Jishnu", "Tarun", "Tapasya"]
+const LAST_NAMES = ["Chatterjee", "Bhattacharya", "Naskar", "Sheikh", "Kaur", "Halder", "Biswas", "Roy", "Gomes", "Mukhopadhyay", "Molla", "Mondal", "D'Souza", "Khatun", "Sardar", "Dhillon", "Sengupta", "Das", "Biswas", "Kumari", "Tiwari", "Mahanta", "Khanna", "Singh", "Iyer", "Mohanty", "Sharma", "Bhardwaj", "Patil", "Patra", "V", "Yadav", "Joshi", "Sarkar", "Rawat", "Kumar", "Reddy", "Dutta", "Jena"]
+const DESIGNATIONS = ["District Observer", "General Member", "Volunteer", "Executive Member", "Publicity Secretary", "District Secretary", "Treasurer", "Board Member", "Chapter Advisor"]
 
 export default function DemiMembersTerminal() {
   const { user, loading: authLoading } = useUser()
@@ -69,6 +67,13 @@ export default function DemiMembersTerminal() {
   
   const [search, setSearch] = useState('')
   const [isActionLoading, setIsActionLoading] = useState(false)
+  const [isSeedOpen, setIsSeedOpen] = useState(false)
+
+  const [seedOptions, setSeedOptions] = useState({
+    level: 'District' as 'National' | 'State' | 'District',
+    state: 'West Bengal',
+    district: 'North 24 Parganas'
+  })
 
   const isRoot = user?.email?.toLowerCase() === 'deydhritiman@gmail.com'
 
@@ -91,24 +96,39 @@ export default function DemiMembersTerminal() {
     
     try {
       const batch = writeBatch(db)
+      const count = seedOptions.level === 'National' ? 5 : 10;
       
-      DEMI_SEED_DATA.forEach((member, i) => {
-        const id = `DEMI-${member.districtName.replace(/\s+/g, '')}-${i}`
-        const docRef = doc(db, 'memberProfiles', id)
+      for (let i = 0; i < count; i++) {
+        const firstName = FIRST_NAMES[Math.floor(Math.random() * FIRST_NAMES.length)];
+        const lastName = LAST_NAMES[Math.floor(Math.random() * LAST_NAMES.length)];
+        const name = `${firstName} ${lastName}`;
+        const designation = DESIGNATIONS[Math.floor(Math.random() * DESIGNATIONS.length)];
+        const gender = ['male', 'female'][Math.floor(Math.random() * 2)] as 'male' | 'female';
+        
+        const memberId = `${seedOptions.level === 'National' ? 'NAT' : seedOptions.state.substring(0,3).toUpperCase()}DEM${Math.floor(1000 + Math.random() * 9000)}`;
+        
+        const docRef = doc(collection(db, 'memberProfiles'))
         batch.set(docRef, {
-          ...member,
-          memberId: `${member.districtName.substring(0,3).toUpperCase()}DEM${i.toString().padStart(3, '0')}`,
+          name,
+          designation,
+          level: seedOptions.level === 'National' ? 'National' : seedOptions.level,
+          stateName: seedOptions.level === 'National' ? 'Central Council' : seedOptions.state,
+          districtName: seedOptions.level === 'District' ? seedOptions.district : '',
+          designationCategory: designation === 'Volunteer' ? 'Volunteer' : 'General Member',
+          gender,
+          memberId,
           isDemi: true,
           status: 'Active',
           joiningDate: 'Jan 2025',
           expiryDate: 'Jan 2026',
           membershipDuration: '1 Year',
           createdAt: serverTimestamp()
-        }, { merge: true })
-      })
+        })
+      }
 
       await batch.commit()
-      toast({ title: "Seed Successful", description: "16 unique demi members have been added to the registry." })
+      toast({ title: "Seed Successful", description: `Simulated members established for ${seedOptions.level} level.` })
+      setIsSeedOpen(false)
     } catch (e: any) {
       toast({ variant: "destructive", title: "Seed Failed", description: e.message })
     } finally {
@@ -139,8 +159,12 @@ export default function DemiMembersTerminal() {
 
   const filtered = (demiMembers || []).filter((m: any) => 
     (m.name || '').toLowerCase().includes(search.toLowerCase()) || 
-    (m.districtName || '').toLowerCase().includes(search.toLowerCase())
+    (m.districtName || '').toLowerCase().includes(search.toLowerCase()) ||
+    (m.stateName || '').toLowerCase().includes(search.toLowerCase())
   )
+
+  const allStates = Object.keys(INDIA_DATA).sort()
+  const districtsInState = INDIA_DATA[seedOptions.state] || []
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-20">
@@ -167,7 +191,7 @@ export default function DemiMembersTerminal() {
                         <AlertTriangle className="w-6 h-6" /> Revoke All Demi Access?
                       </AlertDialogTitle>
                       <AlertDialogDescription className="text-sm font-medium">
-                        This action will permanently delete every simulated personnel record from North and South 24 Parganas cells.
+                        This action will permanently delete every simulated personnel record from the registry.
                       </AlertDialogDescription>
                    </AlertDialogHeader>
                    <AlertDialogFooter>
@@ -177,9 +201,57 @@ export default function DemiMembersTerminal() {
                 </AlertDialogContent>
              </AlertDialog>
 
-             <Button onClick={handleSeedData} disabled={isActionLoading} className="bg-accent text-primary font-bold rounded-xl h-11 px-8 flex gap-2 shadow-xl shadow-accent/20 hover:bg-secondary hover:text-white transition-all">
-                {isActionLoading ? <Loader2 className="animate-spin w-4 h-4" /> : <RefreshCw className="w-4 h-4" />} Seed Chapter Data
-             </Button>
+             <Dialog open={isSeedOpen} onOpenChange={setIsSeedOpen}>
+                <DialogTrigger asChild>
+                  <Button className="bg-accent text-primary font-bold rounded-xl h-11 px-8 flex gap-2 shadow-xl shadow-accent/20 hover:bg-secondary hover:text-white transition-all">
+                    <Plus className="w-4 h-4" /> Seed Chapter Data
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-md rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden">
+                   <div className="bg-slate-900 p-8 text-white">
+                      <DialogTitle className="text-2xl font-headline font-bold">Seed Protocol</DialogTitle>
+                      <DialogDescription className="text-slate-400 mt-1">Select the target chapter for population simulation.</DialogDescription>
+                   </div>
+                   <div className="p-8 space-y-6">
+                      <div className="space-y-4">
+                         <div className="space-y-2">
+                            <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Chapter Level</Label>
+                            <Select value={seedOptions.level} onValueChange={(val: any) => setSeedOptions({...seedOptions, level: val})}>
+                               <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
+                               <SelectContent className="bg-white">
+                                  <SelectItem value="National">Central Council</SelectItem>
+                                  <SelectItem value="State">State Chapter</SelectItem>
+                                  <SelectItem value="District">District Cell</SelectItem>
+                               </SelectContent>
+                            </Select>
+                         </div>
+
+                         {seedOptions.level !== 'National' && (
+                           <div className="space-y-2 animate-in fade-in slide-in-from-top-1">
+                              <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Target State</Label>
+                              <Select value={seedOptions.state} onValueChange={(val) => setSeedOptions({...seedOptions, state: val})}>
+                                 <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
+                                 <SelectContent className="bg-white max-h-60">{allStates.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+                              </Select>
+                           </div>
+                         )}
+
+                         {seedOptions.level === 'District' && (
+                           <div className="space-y-2 animate-in fade-in slide-in-from-top-1">
+                              <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Target District</Label>
+                              <Select value={seedOptions.district} onValueChange={(val) => setSeedOptions({...seedOptions, district: val})}>
+                                 <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
+                                 <SelectContent className="bg-white max-h-60">{districtsInState.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
+                              </Select>
+                           </div>
+                         )}
+                      </div>
+                      <Button onClick={handleSeedData} disabled={isActionLoading} className="w-full h-12 bg-primary text-white font-bold rounded-xl shadow-lg">
+                         {isActionLoading ? <Loader2 className="animate-spin" /> : "Authorize Seeding"}
+                      </Button>
+                   </div>
+                </DialogContent>
+             </Dialog>
           </div>
         </div>
       </header>
@@ -188,7 +260,7 @@ export default function DemiMembersTerminal() {
          <div className="relative mb-8">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <Input 
-              placeholder="Search demi members by name or district..." 
+              placeholder="Search demi members by name, state or district..." 
               className="pl-10 h-12 rounded-xl bg-white dark:bg-slate-900 shadow-sm border-none"
               value={search}
               onChange={e => setSearch(e.target.value)}
@@ -216,7 +288,8 @@ export default function DemiMembersTerminal() {
                              <h3 className="text-xl font-bold text-primary dark:text-white leading-tight">{m.name}</h3>
                              <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-2">
                                 <span className="flex items-center gap-1.5"><Star className="w-3 h-3 text-accent fill-accent" /> {m.designation}</span>
-                                <span className="flex items-center gap-1.5"><MapPin className="w-3 h-3 text-accent" /> {m.districtName}</span>
+                                <span className="flex items-center gap-1.5"><Globe className="w-3 h-3 text-accent" /> {m.stateName}</span>
+                                {m.districtName && <span className="flex items-center gap-1.5"><MapPin className="w-3 h-3 text-accent" /> {m.districtName}</span>}
                                 <span className="flex items-center gap-1.5 text-emerald-600"><CheckCircle2 className="w-3 h-3" /> Simulated Profile</span>
                              </div>
                           </div>
@@ -225,7 +298,7 @@ export default function DemiMembersTerminal() {
                                 <AlertDialogTrigger asChild>
                                    <Button variant="ghost" size="icon" className="h-10 w-10 text-slate-300 hover:text-red-500 transition-all rounded-xl"><Trash2 className="w-5 h-5" /></Button>
                                 </AlertDialogTrigger>
-                                <AlertDialogContent className="rounded-3xl">
+                                <AlertDialogContent className="rounded-3xl bg-white dark:bg-slate-900 border-none shadow-2xl">
                                    <AlertDialogHeader>
                                       <AlertDialogTitle>Purge Record?</AlertDialogTitle>
                                       <AlertDialogDescription>Remove "{m.name}" from the simulated registry?</AlertDialogDescription>
