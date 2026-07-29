@@ -368,7 +368,10 @@ export function AppSidebar() {
                         >
                           <Link href={link.href} className="flex items-center gap-3">
                             <link.icon className="w-4.5 h-4.5" />
-                            <span className="group-data-[collapsible=icon]:hidden text-[11px] font-bold uppercase">{link.name}</span>
+                            <div className="flex items-center gap-1.5 group-data-[collapsible=icon]:hidden">
+                              <Pin className="w-3 h-3 fill-current opacity-70" />
+                              <span className="text-[11px] font-bold uppercase">{link.name}</span>
+                            </div>
                           </Link>
                         </SidebarMenuButton>
                         <SidebarMenuAction 
