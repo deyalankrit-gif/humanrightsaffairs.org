@@ -376,14 +376,14 @@ export default function MembersPage() {
               setEnlargedId(enlargedId === member.id ? null : member.id);
             }}
             className={cn(
-              "group border-none shadow-sm hover:shadow-2xl transition-all duration-300 rounded-2xl overflow-visible bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 relative hover:scale-105 sm:hover:scale-110 md:hover:scale-125 hover:z-50 cursor-pointer",
-              enlargedId === member.id && "scale-110 sm:scale-125 md:scale-150 z-[100] shadow-2xl"
+              "group border-none shadow-sm hover:shadow-2xl transition-all duration-300 rounded-2xl overflow-visible bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 relative hover:scale-150 sm:hover:scale-175 md:hover:scale-[2.5] hover:z-50 cursor-pointer",
+              enlargedId === member.id && "scale-150 sm:scale-175 md:scale-[2.5] z-[100] shadow-2xl"
             )}
           >
             <div className="p-1.5 md:p-2 pb-0 text-center">
                <p className={cn(
                    "text-[5px] sm:text-[6px] md:text-[7px] uppercase tracking-widest leading-tight",
-                   enlargedId === member.id ? "whitespace-normal line-clamp-2" : "truncate",
+                   enlargedId === member.id ? "whitespace-normal" : "truncate group-hover:whitespace-normal",
                    isOfficeBearer ? "font-black text-accent" : "font-bold text-accent/80"
                  )}
                >
@@ -419,13 +419,21 @@ export default function MembersPage() {
               <div className="flex items-start gap-0.5 sm:gap-1">
                  <BadgeCheckIcon className="w-2 md:w-2.5 h-2 md:h-2.5 text-accent shrink-0 mt-0.5" />
                  <div className="min-w-0">
-                   <h3 className="font-headline font-bold text-[7px] sm:text-[9px] md:text-[10px] text-primary dark:text-white leading-tight truncate">{member.name}</h3>
+                   <h3 className={cn(
+                     "font-headline font-bold text-[7px] sm:text-[9px] md:text-[10px] text-primary dark:text-white leading-tight",
+                     enlargedId === member.id ? "whitespace-normal" : "truncate group-hover:whitespace-normal"
+                   )}>
+                     {member.name}
+                   </h3>
                  </div>
               </div>
               <div className="space-y-0.5 pt-0.5 sm:pt-1 border-t border-slate-100 dark:border-slate-800">
                 <div className="flex items-center gap-0.5 sm:gap-1 text-[5px] sm:text-[7px] md:text-[8px] text-muted-foreground">
                   <MapPin className="w-1.5 md:w-2 h-1.5 md:h-2 text-slate-400 shrink-0" />
-                  <span className="truncate">{member.districtName ? `${member.districtName}, ` : ''}{member.stateName || 'National'}</span>
+                  <span className={cn(
+                    "truncate group-hover:whitespace-normal",
+                    enlargedId === member.id && "whitespace-normal"
+                  )}>{member.districtName ? `${member.districtName}, ` : ''}{member.stateName || 'National'}</span>
                 </div>
                 <div className="flex items-center gap-0.5 sm:gap-1 text-[5px] sm:text-[7px] md:text-[8px] text-muted-foreground">
                   <Briefcase className="w-1.5 md:w-2 h-1.5 md:h-2 text-slate-400 shrink-0" />
@@ -489,14 +497,14 @@ export default function MembersPage() {
                   <Plus className="w-4 h-4 md:w-6 md:h-6" /> Commission Membership
                 </Button>
               </DialogTrigger>
-              <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="max-w-2xl bg-white dark:bg-slate-900 rounded-[2rem] border-none shadow-2xl max-h-[90vh] overflow-y-auto w-[95vw]">
+              <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="max-w-2xl bg-white dark:bg-slate-900 rounded-[2rem] border-none shadow-2xl max-h-[95vh] overflow-y-auto w-[95vw]">
                 <DialogHeader>
                   <DialogTitle className="text-xl md:text-2xl font-headline font-bold text-primary dark:text-white text-center sm:text-left">Personnel Commissioning</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-6 py-4">
                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
                       <div className="flex flex-col items-center gap-3">
-                        <div className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-slate-50 dark:bg-slate-800 border-2 border-dashed border-slate-200 flex items-center justify-center overflow-hidden group cursor-pointer hover:border-accent transition-colors shadow-inner">
+                        <div className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-slate-50 border-2 border-dashed border-slate-200 flex items-center justify-center overflow-hidden group cursor-pointer hover:border-accent transition-colors shadow-inner">
                           {newMember.imageId ? (
                             <Image src={newMember.imageId} alt="Preview" fill className="object-cover" />
                           ) : (
