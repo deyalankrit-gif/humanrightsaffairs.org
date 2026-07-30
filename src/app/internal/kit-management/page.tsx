@@ -140,7 +140,6 @@ export default function MemberKitManagement() {
 
   const { data: firestoreMembers, loading: membersLoading } = useCollection(membersQuery);
 
-  // DATA ISOLATION: Explicitly filter out demi members in memory for high-fidelity isolation
   const members = React.useMemo(() => {
     return ((firestoreMembers || []) as any[]).filter(m => m.isDemi !== true);
   }, [firestoreMembers]);
@@ -178,6 +177,12 @@ export default function MemberKitManagement() {
       acknowledgementReceived: existingKit.acknowledgementReceived || false,
       notes: existingKit.notes || ''
     })
+    // Auto-scroll to form on mobile
+    if (window.innerWidth < 1024) {
+      setTimeout(() => {
+        document.getElementById('logistics-form-anchor')?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    }
   }
 
   const handleSaveKit = async () => {
@@ -196,10 +201,8 @@ export default function MemberKitManagement() {
     }
 
     try {
-      // 1. Update Member Kit Profile
       await setDoc(doc(db, 'member_kits', selectedMember.id), kitData, { merge: true })
       
-      // 2. Synchronize Stock with Inventory
       for (const kitItem of kitItems) {
         const wasChecked = !!oldItems[kitItem.id];
         const isChecked = !!newItems[kitItem.id];
@@ -217,18 +220,11 @@ export default function MemberKitManagement() {
           updateDoc(mRef, {
             currentStock: increment(delta),
             updatedAt: serverTimestamp()
-          }).catch(async (error) => {
-            const permissionError = new FirestorePermissionError({
-              path: mRef.path,
-              operation: 'update',
-              requestResourceData: { currentStock: increment(delta) },
-            } satisfies SecurityRuleContext);
-            errorEmitter.emit('permission-error', permissionError);
           });
         }
       }
 
-      toast({ title: "Registry Synchronized", description: `Logistics data and stock levels for ${selectedMember.name} updated.` })
+      toast({ title: "Registry Synchronized", description: `Logistics data for ${selectedMember.name} updated.` })
       setSelectedMember(null)
     } catch (e: any) {
       toast({ variant: "destructive", title: "Registry Error", description: e.message })
@@ -246,31 +242,20 @@ export default function MemberKitManagement() {
       updatedBy: user?.email
     };
     
-    setDoc(doc(db, 'member_kits', 'settings'), updateData, { merge: true })
-      .catch(async (error) => {
-        const permissionError = new FirestorePermissionError({
-          path: 'member_kits/settings',
-          operation: 'update',
-          requestResourceData: updateData,
-        } satisfies SecurityRuleContext);
-        errorEmitter.emit('permission-error', permissionError);
-      });
+    setDoc(doc(db, 'member_kits', 'settings'), updateData, { merge: true });
   }
 
   const handleCreateKitItem = () => {
     if (!newItemLabel.trim()) return
     const id = newItemLabel.toLowerCase().replace(/\s+/g, '')
     if (kitItems.find((i: any) => i.id === id)) {
-      toast({ variant: "destructive", title: "Duplicate Entry", description: "This item already exists in the institutional registry." })
+      toast({ variant: "destructive", title: "Duplicate Entry" })
       return
     }
 
-    const newItem = { id, label: newItemLabel.trim() }
-    const updatedItems = [...kitItems, newItem];
-    
+    const updatedItems = [...kitItems, { id, label: newItemLabel.trim() }];
     saveLogisticsConfig(updatedItems, eligibilityRules);
     setNewItemLabel('')
-    toast({ title: "Item Created", description: `${newItem.label} added to logistical scope.` })
   }
 
   const handleStartEditItem = (item: {id: string, label: string}) => {
@@ -283,19 +268,12 @@ export default function MemberKitManagement() {
     const updatedItems = kitItems.map((item: any) => 
       item.id === editingItemId ? { ...item, label: editingItemLabel.trim() } : item
     )
-    
     saveLogisticsConfig(updatedItems, eligibilityRules);
     setEditingItemId(null)
     setEditingItemLabel('')
-    toast({ title: "Item Updated", description: "Registry label modified successfully." })
   }
 
   const handleDeleteKitItem = (id: string) => {
-    if (editingItemId === id) {
-      setEditingItemId(null)
-      setEditingItemLabel('')
-    }
-
     const updatedItems = kitItems.filter((item: any) => item.id !== id);
     const updatedEligibility = { ...eligibilityRules };
     MEMBER_CATEGORIES.forEach(cat => {
@@ -303,9 +281,7 @@ export default function MemberKitManagement() {
         updatedEligibility[cat] = updatedEligibility[cat].filter((itemId: string) => itemId !== id)
       }
     })
-    
     saveLogisticsConfig(updatedItems, updatedEligibility);
-    toast({ title: "Item Purged", description: "Item removed from global registry and all eligibility lists." })
   }
 
   const toggleEligibility = (category: string, itemId: string) => {
@@ -313,9 +289,7 @@ export default function MemberKitManagement() {
     const updated = current.includes(itemId) 
       ? current.filter((id: string) => id !== itemId) 
       : [...current, itemId];
-    
-    const updatedEligibility = { ...eligibilityRules, [category]: updated };
-    saveLogisticsConfig(kitItems, updatedEligibility);
+    saveLogisticsConfig(kitItems, { ...eligibilityRules, [category]: updated });
   };
 
   const filteredMembers = (members || []).filter(m => {
@@ -339,18 +313,14 @@ export default function MemberKitManagement() {
     kitItems.forEach((item: any) => {
       stats[item.id] = { issued: 0, total: 0 };
     });
-
     members?.forEach(m => {
       const category = m.designationCategory || "General Member";
       const eligibleItemsList = eligibilityRules[category] || [];
       const kit = kitMap[m.id];
-
       kitItems.forEach((item: any) => {
         if (eligibleItemsList.includes(item.id)) {
           stats[item.id].total += 1;
-          if (kit?.items?.[item.id]) {
-            stats[item.id].issued += 1;
-          }
+          if (kit?.items?.[item.id]) stats[item.id].issued += 1;
         }
       });
     });
@@ -359,7 +329,6 @@ export default function MemberKitManagement() {
 
   const groupings = useMemo(() => {
     const central = filteredMembers.filter(m => m.level === 'National');
-    
     const stateGroups = filteredMembers
       .filter(m => m.level === 'State')
       .reduce((acc, m) => {
@@ -368,7 +337,6 @@ export default function MemberKitManagement() {
         acc[state].push(m);
         return acc;
       }, {} as Record<string, any[]>);
-
     const districtGroups = filteredMembers
       .filter(m => m.level === 'District')
       .reduce((acc, m) => {
@@ -379,7 +347,6 @@ export default function MemberKitManagement() {
         acc[state][district].push(m);
         return acc;
       }, {} as Record<string, Record<string, any[]>>);
-
     return { central, stateGroups, districtGroups };
   }, [filteredMembers]);
 
@@ -390,11 +357,7 @@ export default function MemberKitManagement() {
     const eligibleItemIds = eligibilityRules[category] || [];
     const eligibleItems = kitItems.filter((item: any) => eligibleItemIds.includes(item.id));
     const isOfficeBearer = category === 'Office-bearing Member';
-
-    // Dynamic car plate detection logic
-    const carPlateItemIds = kitItems
-      .filter((item: any) => item.label.toLowerCase().includes('car plate'))
-      .map((item: any) => item.id);
+    const carPlateItemIds = kitItems.filter((item: any) => item.label.toLowerCase().includes('car plate')).map((item: any) => item.id);
     const isCarPlateIssued = carPlateItemIds.some((id: string) => kit?.items?.[id]);
 
     return (
@@ -402,15 +365,15 @@ export default function MemberKitManagement() {
         key={m.id} 
         onClick={() => handleSelectMember(m)}
         className={cn(
-          "border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 relative group cursor-pointer transition-all hover:scale-[1.01]",
-          selectedMember?.id === m.id && "ring-2 ring-accent"
+          "border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 relative group cursor-pointer transition-all active:scale-[0.98]",
+          selectedMember?.id === m.id && "ring-2 ring-accent lg:scale-[1.01]"
         )}
       >
         <CardContent className="p-0">
           <div className="flex flex-col md:flex-row items-stretch">
              <div className="p-5 bg-slate-50 dark:bg-slate-800 md:w-44 text-center border-r border-slate-100 dark:border-slate-700 flex flex-col items-center justify-center shrink-0">
                 <Badge variant="outline" className={cn(
-                  "text-[8px] font-bold px-3 py-1 rounded-full uppercase border-none transition-all",
+                  "text-[8px] font-bold px-3 py-1 rounded-full uppercase border-none",
                   status === 'Delivered' ? "bg-emerald-500 text-white" : 
                   status === 'In Transit' ? "bg-indigo-500 text-white" :
                   status === 'Dispatched' ? "bg-blue-500 text-white" : 
@@ -420,19 +383,18 @@ export default function MemberKitManagement() {
                 </Badge>
                 <p className="text-[9px] font-bold text-slate-400 mt-2 uppercase tracking-widest">{m.memberId || 'NO ID'}</p>
              </div>
-             <div className="flex-1 p-6 flex items-center justify-between">
-                <div className="space-y-2">
-                   <div className="flex flex-wrap items-center gap-3">
-                     <h3 className="text-xl font-bold text-primary dark:text-white leading-tight group-hover:text-accent transition-colors">{m.name}</h3>
+             <div className="flex-1 p-5 md:p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="space-y-2 text-center sm:text-left w-full sm:w-auto">
+                   <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+                     <h3 className="text-lg md:text-xl font-bold text-primary dark:text-white leading-tight group-hover:text-accent transition-colors">{m.name}</h3>
                      <Badge className={cn(
-                       "text-[8px] font-black uppercase tracking-wider h-5 px-3",
+                       "text-[7px] md:text-[8px] font-black uppercase tracking-wider h-5 px-3",
                        isOfficeBearer ? "bg-accent text-primary shadow-sm" : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400"
                      )}>
-                       {isOfficeBearer && <Star className="w-2.5 h-2.5 mr-1 fill-primary" />}
                        {category}
                      </Badge>
                    </div>
-                   <div className="flex flex-wrap gap-4 text-[11px] font-bold text-slate-500 uppercase tracking-wide">
+                   <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 text-[10px] font-bold text-slate-500 uppercase tracking-wide">
                       <span className="flex items-center gap-1.5 text-primary dark:text-slate-200">
                         <Briefcase className="w-3 h-3 text-accent" /> {m.designation}
                       </span>
@@ -440,39 +402,24 @@ export default function MemberKitManagement() {
                         <MapPin className="w-3 h-3 text-accent" /> 
                         {m.level === 'District' ? `${m.districtName}, ${m.stateName}` : m.stateName || 'National Center'}
                       </span>
-                      {kit?.dispatchDate && (
-                        <span className="flex items-center gap-1.5 text-blue-500">
-                          <Clock className="w-3 h-3" /> {kit.dispatchDate}
-                        </span>
-                      )}
-                      {isCarPlateIssued && (
-                        <span className="flex items-center gap-1.5 text-red-600 animate-pulse" title="Metal Designation Car Plate Issued">
-                          <Car className="w-3.5 h-3.5" />
-                        </span>
-                      )}
-                      {kit?.notes && (
-                        <span className="flex items-center gap-1.5 text-slate-400 italic font-medium max-w-[200px] truncate">
-                          <FileText className="w-3 h-3" /> {kit.notes}
-                        </span>
-                      )}
+                      {isCarPlateIssued && <Car className="w-3.5 h-3.5 text-red-600 animate-pulse" />}
                    </div>
                 </div>
-                <div className="flex items-center gap-6">
-                   <div className="flex flex-wrap gap-1.5 justify-end max-w-[160px] md:max-w-[240px]">
+                <div className="flex items-center gap-4 shrink-0">
+                   <div className="flex flex-wrap gap-1 justify-end max-w-[120px] md:max-w-[240px]">
                       {eligibleItems.map((item: any) => (
                         <div 
                           key={item.id} 
                           className={cn(
-                            "w-5 h-5 rounded-full flex items-center justify-center text-[6px] font-black uppercase transition-all shadow-sm border shrink-0",
-                            kit?.items?.[item.id] ? "bg-emerald-500 text-white border-emerald-600" : "bg-yellow-100 text-yellow-600 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-500 dark:border-yellow-800"
+                            "w-5 h-5 rounded-full flex items-center justify-center text-[7px] font-black uppercase transition-all shadow-sm border shrink-0",
+                            kit?.items?.[item.id] ? "bg-emerald-500 text-white border-emerald-600" : "bg-slate-100 text-slate-300 dark:bg-slate-900 border-slate-200"
                           )}
-                          title={item.label}
                         >
                           {item.label[0]}
                         </div>
                       ))}
                    </div>
-                   <ChevronRight className="w-4 h-4 text-slate-950 dark:text-white stroke-[3px] group-hover:translate-x-1 transition-transform shrink-0" />
+                   <ChevronRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform" />
                 </div>
              </div>
           </div>
@@ -490,114 +437,63 @@ export default function MemberKitManagement() {
       <header className="pt-16 pb-8 bg-slate-900 text-white border-b-8 border-accent/20 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-1/3 h-full bg-accent/5 -skew-x-12"></div>
         <div className="container mx-auto px-4 relative z-10">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="space-y-1">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="space-y-1 text-center md:text-left">
               <div className="inline-flex items-center gap-2 bg-accent/20 text-accent px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-[0.2em] border border-accent/30">
                 <ShieldCheck className="w-2.5 h-2.5" /> Logistics Oversight
               </div>
               <h1 className="text-3xl md:text-4xl font-headline font-bold">Kit & Asset <span className="text-accent italic">Management</span></h1>
               <p className="text-slate-400 text-[11px]">Tracking institutional materials and official representation assets with real-time stock sync.</p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex w-full md:w-auto gap-2">
                <Dialog>
                  <DialogTrigger asChild>
-                   <Button variant="outline" className="bg-white/5 border-accent/30 text-accent h-10 rounded-xl text-[10px] font-black uppercase tracking-widest gap-2 hover:bg-accent hover:text-primary transition-all">
+                   <Button variant="outline" className="flex-1 md:flex-none bg-white/5 border-accent/30 text-accent h-11 md:h-10 rounded-xl text-[10px] font-black uppercase tracking-widest gap-2 hover:bg-accent hover:text-primary transition-all">
                       <Settings2 className="w-4 h-4" /> Eligibility Configuration
                    </Button>
                  </DialogTrigger>
-                 <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto rounded-[2rem] border-none shadow-2xl">
+                 <DialogContent className="max-w-4xl max-h-[90vh] w-[95vw] overflow-y-auto rounded-[2rem] border-none shadow-2xl p-4 md:p-10">
                     <DialogHeader>
-                       <DialogTitle>Member Item Eligibility Protocol</DialogTitle>
-                       <DialogDescription>Define which institutional items each category of member is entitled to receive.</DialogDescription>
+                       <DialogTitle>Item Eligibility Protocol</DialogTitle>
+                       <DialogDescription>Define mandatory items for each member category.</DialogDescription>
                     </DialogHeader>
-                    
-                    <div className="py-6 space-y-8">
+                    <div className="py-4 space-y-8">
                        <div className="p-6 bg-slate-50 dark:bg-slate-900 rounded-3xl border-2 border-dashed border-slate-200 dark:border-slate-800 space-y-6">
                           <div className="space-y-4">
-                            <div className="flex items-center gap-2">
-                               {editingItemId ? <Edit className="w-4 h-4 text-accent" /> : <Plus className="w-4 h-4 text-accent" />}
-                               <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-500">
-                                 {editingItemId ? "Modify Registry Entry" : "Create New Institutional Item"}
-                               </h4>
-                            </div>
-                            <div className="flex gap-3">
+                            <Label className="text-[10px] font-black uppercase text-slate-500">Registry Maintenance</Label>
+                            <div className="flex flex-col sm:flex-row gap-3">
                                <Input 
-                                  placeholder="e.g. Official Blazer, ID Case" 
+                                  placeholder="e.g. Official Blazer" 
                                   value={editingItemId ? editingItemLabel : newItemLabel}
                                   onChange={e => editingItemId ? setEditingItemLabel(e.target.value) : setNewItemLabel(e.target.value)}
-                                  className={cn(
-                                    "h-11 rounded-xl bg-white dark:bg-slate-950",
-                                    editingItemId && "border-accent ring-1 ring-accent"
-                                  )}
-                                  onKeyDown={e => {
-                                    if (e.key === 'Enter') {
-                                      editingItemId ? handleSaveEditItem() : handleCreateKitItem();
-                                    }
-                                  }}
+                                  className="h-11 rounded-xl"
                                />
-                               {editingItemId ? (
-                                 <div className="flex gap-2">
-                                   <Button onClick={handleSaveEditItem} className="h-11 px-6 rounded-xl font-bold bg-emerald-600 text-white hover:bg-emerald-700">
-                                      Commit
-                                   </Button>
-                                   <Button onClick={() => setEditingItemId(null)} variant="ghost" className="h-11 px-4 rounded-xl font-bold text-slate-500">
-                                      Cancel
-                                   </Button>
-                                 </div>
-                               ) : (
-                                 <Button onClick={handleCreateKitItem} className="h-11 px-6 rounded-xl font-bold bg-accent text-primary hover:bg-secondary hover:text-white transition-all">
-                                    Establish Item
-                                 </Button>
-                               )}
+                               <Button onClick={editingItemId ? handleSaveEditItem : handleCreateKitItem} className="h-11 px-8 rounded-xl font-bold bg-accent text-primary">
+                                  {editingItemId ? "Commit" : "Add Item"}
+                               </Button>
                             </div>
                           </div>
-
-                          <div className="space-y-3">
-                            <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">Global Item Registry Management</p>
-                            <div className="flex flex-wrap gap-3">
-                               {kitItems.map((item: any) => (
-                                 <div 
-                                   key={item.id} 
-                                   className={cn(
-                                     "flex items-center gap-3 bg-white dark:bg-slate-950 border pl-4 pr-1 py-1 rounded-xl transition-all shadow-sm",
-                                     editingItemId === item.id ? "border-accent ring-2 ring-accent/20" : "border-slate-100 dark:border-slate-800"
-                                   )}
-                                 >
-                                    <span className={cn(
-                                      "text-[10px] font-bold",
-                                      editingItemId === item.id ? "text-accent" : "text-primary dark:text-white"
-                                    )}>
-                                      {item.label}
-                                    </span>
-                                    <div className="flex items-center gap-1 ml-2">
-                                       <button 
-                                         onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleStartEditItem(item); }}
-                                         className={cn(
-                                           "h-8 w-8 rounded-lg transition-all flex items-center justify-center",
-                                           editingItemId === item.id ? "text-accent bg-accent/10" : "text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20"
-                                         )}
-                                       >
-                                         <Edit className="w-4 h-4" />
-                                       </button>
-                                       <button 
-                                         onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleDeleteKitItem(item.id); }}
-                                         className="h-8 w-8 rounded-lg text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all flex items-center justify-center"
-                                       >
-                                         <Trash2 className="w-4 h-4" />
-                                       </button>
-                                    </div>
-                                 </div>
-                               ))}
-                            </div>
+                          <div className="flex flex-wrap gap-2">
+                             {kitItems.map((item: any) => (
+                               <Badge key={item.id} variant="outline" className={cn(
+                                 "pl-4 pr-1 py-1 rounded-xl h-10 border-slate-200 bg-white dark:bg-slate-800 gap-3",
+                                 editingItemId === item.id && "border-accent ring-1 ring-accent"
+                               )}>
+                                  <span className="text-[10px] font-bold">{item.label}</span>
+                                  <div className="flex gap-1">
+                                    <button onClick={() => handleStartEditItem(item)} className="p-1 hover:text-blue-600"><Edit className="w-3.5 h-3.5"/></button>
+                                    <button onClick={() => handleDeleteKitItem(item.id)} className="p-1 hover:text-red-600"><Trash2 className="w-3.5 h-3.5"/></button>
+                                  </div>
+                               </Badge>
+                             ))}
                           </div>
                        </div>
-
                        {MEMBER_CATEGORIES.map(category => (
                          <div key={category} className="space-y-4">
                             <h4 className="text-sm font-black uppercase tracking-widest text-primary border-b pb-2 flex items-center gap-2">
                                <UserCheck className="w-4 h-4 text-accent" /> {category}
                             </h4>
-                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
                                {kitItems.map((item: any) => {
                                  const isEligible = (eligibilityRules[category] || []).includes(item.id);
                                  return (
@@ -605,11 +501,11 @@ export default function MemberKitManagement() {
                                     key={item.id} 
                                     onClick={() => toggleEligibility(category, item.id)}
                                     className={cn(
-                                      "flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer select-none",
-                                      isEligible ? "bg-accent/10 border-accent/40 text-primary font-bold shadow-sm" : "bg-slate-50 border-slate-100 text-slate-400"
+                                      "flex items-center gap-2 p-3 rounded-xl border transition-all cursor-pointer select-none",
+                                      isEligible ? "bg-accent/10 border-accent/40 text-primary font-bold" : "bg-slate-50 border-slate-100 text-slate-400"
                                     )}
                                    >
-                                      <Checkbox checked={isEligible} onCheckedChange={() => toggleEligibility(category, item.id)} className="border-accent" />
+                                      <Checkbox checked={isEligible} className="border-accent" />
                                       <span className="text-[10px] uppercase truncate">{item.label}</span>
                                    </div>
                                  )
@@ -619,9 +515,7 @@ export default function MemberKitManagement() {
                        ))}
                     </div>
                     <DialogFooter>
-                       <DialogClose asChild>
-                         <Button className="w-full h-12 rounded-xl font-bold bg-primary text-white hover:bg-secondary">Close Configuration</Button>
-                       </DialogClose>
+                       <DialogClose asChild><Button className="w-full h-12 rounded-xl font-bold bg-primary text-white">Save Changes</Button></DialogClose>
                     </DialogFooter>
                  </DialogContent>
                </Dialog>
@@ -632,119 +526,53 @@ export default function MemberKitManagement() {
 
       <section className="py-8 bg-white dark:bg-slate-900 border-b shadow-sm">
         <div className="container mx-auto px-4">
-           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Card className="border-none shadow-sm rounded-3xl bg-slate-50 dark:bg-slate-800/50 p-6 flex items-center gap-6 group hover:bg-slate-100 transition-colors">
-                 <div className="w-14 h-14 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-600 shrink-0">
-                    <Users className="w-7 h-7" />
-                 </div>
-                 <div className="space-y-1">
-                    <p className="text-[9px] font-black uppercase text-slate-400 tracking-widest">Total Force</p>
-                    <p className="text-3xl font-headline font-bold text-primary dark:text-white leading-none">{globalStats.total}</p>
-                    <p className="text-[8px] font-bold text-slate-500">Registered Members</p>
-                 </div>
-              </Card>
-
-              <Card className="border-none shadow-sm rounded-3xl bg-emerald-50 dark:bg-emerald-950/20 p-6 flex items-center gap-6 group hover:bg-emerald-50 transition-colors">
-                 <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-600 shrink-0">
-                    <CheckCircle2 className="w-7 h-7" />
-                 </div>
-                 <div className="space-y-1">
-                    <p className="text-[9px] font-black uppercase text-emerald-600 tracking-widest">Kit Delivered</p>
-                    <p className="text-3xl font-headline font-bold text-emerald-700 dark:text-emerald-400 leading-none">{globalStats.delivered}</p>
-                    <p className="text-[8px] font-bold text-emerald-600/60 uppercase">Distribution Successful</p>
-                 </div>
-              </Card>
-
-              <Card className="border-none shadow-sm rounded-3xl bg-amber-50 dark:bg-amber-950/20 p-6 flex items-center gap-6 group hover:bg-amber-50 transition-colors">
-                 <div className="w-14 h-14 rounded-2xl bg-amber-500/10 flex items-center justify-center text-amber-600 shrink-0">
-                    <Truck className="w-7 h-7" />
-                 </div>
-                 <div className="space-y-1">
-                    <p className="text-[9px] font-black uppercase text-amber-600 tracking-widest">Pending Delivery</p>
-                    <p className="text-3xl font-headline font-bold text-amber-700 dark:text-amber-400 leading-none">{globalStats.notDelivered}</p>
-                    <p className="text-[8px] font-bold text-amber-600/60 uppercase">Logistics in Pipeline</p>
-                 </div>
-              </Card>
+           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
+              {[
+                { label: 'Total Force', val: globalStats.total, icon: <Users className="w-6 h-6 text-blue-600" />, bg: 'bg-blue-50/50' },
+                { label: 'Kit Delivered', val: globalStats.delivered, icon: <CheckCircle2 className="w-6 h-6 text-emerald-600" />, bg: 'bg-emerald-50/50' },
+                { label: 'Pending Delivery', val: globalStats.notDelivered, icon: <Truck className="w-6 h-6 text-amber-600" />, bg: 'bg-amber-50/50' }
+              ].map((s, i) => (
+                <Card key={i} className={cn("border-none shadow-sm rounded-3xl p-6 flex items-center gap-5", s.bg)}>
+                   <div className="p-3 bg-white dark:bg-slate-800 rounded-2xl shadow-sm">{s.icon}</div>
+                   <div>
+                      <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest leading-none mb-1">{s.label}</p>
+                      <p className="text-3xl font-headline font-bold text-primary dark:text-white leading-none">{s.val}</p>
+                   </div>
+                </Card>
+              ))}
            </div>
-        </div>
-      </section>
-
-      <section className="py-6 border-b bg-white dark:bg-slate-900 shadow-sm animate-in fade-in duration-700">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center gap-3 mb-6">
-             <Activity className="w-4 h-4 text-accent" />
-             <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Eligibility-Based Issuance Breakdown</h2>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 xl:grid-cols-11 gap-3">
-             {kitItems.map((item: any) => {
-               const s = itemStats[item.id] || { issued: 0, total: 0 };
-               const percentage = Math.round((s.issued / (s.total || 1)) * 100);
-               return (
-                 <div 
-                  key={item.id} 
-                  onClick={() => {
-                    const issuedMembers = (members || []).filter(m => kitMap[m.id]?.items?.[item.id]);
-                    setViewingItemMembers({ item, members: issuedMembers });
-                  }}
-                  className="p-3 rounded-2xl border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50 flex flex-col justify-between group hover:border-accent/40 transition-colors cursor-pointer hover:shadow-md"
-                 >
-                    <p className="text-[7px] font-black uppercase text-slate-400 mb-2 truncate group-hover:text-primary dark:group-hover:text-accent transition-colors" title={item.label}>
-                      {item.label}
-                    </p>
-                    <div className="space-y-1.5">
-                       <div className="flex justify-between items-baseline">
-                          <span className="text-sm font-black text-primary dark:text-white">{s.issued}</span>
-                          <span className="text-[8px] font-bold text-slate-400">/ {s.total}</span>
-                       </div>
-                       <div className="h-1 w-full bg-slate-200 dark:bg-sidebar-border rounded-full overflow-hidden">
-                          <div 
-                            className={cn(
-                              "h-full transition-all duration-1000",
-                              percentage === 100 ? "bg-emerald-500" : percentage > 50 ? "bg-accent" : "bg-blue-500"
-                            )} 
-                            style={{ width: `${percentage}%` }} 
-                          />
-                       </div>
-                    </div>
-                 </div>
-               )
-             })}
-          </div>
         </div>
       </section>
 
       <section className="py-6 border-b bg-white dark:bg-slate-900 sticky top-10 z-40 shadow-sm">
         <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
+          <div className="flex w-full overflow-x-auto no-scrollbar gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl border">
              {['All', 'Pending Verification', 'Dispatched', 'In Transit', 'Delivered', 'Returned'].map(st => (
                <button 
                 key={st} 
                 onClick={() => setStatusFilter(st)}
-                className={cn("px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all", statusFilter === st ? "bg-accent text-primary shadow-md" : "text-slate-500 hover:bg-slate-200")}
+                className={cn("whitespace-nowrap px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all", statusFilter === st ? "bg-accent text-primary shadow-md" : "text-slate-500 hover:bg-slate-200")}
                >
                  {st}
                </button>
              ))}
           </div>
-          <div className="relative w-full max-lg:max-w-full max-w-lg">
+          <div className="relative w-full max-lg:max-w-full max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <Input placeholder="Search member name or ID..." className="pl-9 h-11 rounded-xl border-slate-200 text-sm" value={search} onChange={e => setSearch(e.target.value)} />
+            <Input placeholder="Search member name or ID..." className="pl-9 h-12 md:h-11 rounded-xl border-slate-200 text-sm" value={search} onChange={e => setSearch(e.target.value)} />
           </div>
         </div>
       </section>
 
       <section className="py-8 flex-1">
         <div className="container mx-auto px-4">
-          {membersLoading || kitsLoading || configLoading ? (
-            <div className="text-center py-20"><Loader2 className="w-10 h-10 animate-spin text-accent mx-auto" /></div>
-          ) : (
-            <div className="grid lg:grid-cols-3 gap-8">
-              <div className="lg:col-span-2 space-y-12 pb-20">
+          <div className="grid lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2 space-y-12 pb-20">
                 {groupings.central.length > 0 && (
                   <div className="space-y-4">
                     <div className="flex items-center gap-3 px-2">
                        <ShieldCheck className="w-5 h-5 text-red-600" />
-                       <h4 className="text-sm font-black uppercase tracking-[0.25em] text-primary dark:text-white">Central Committee Registry</h4>
+                       <h4 className="text-sm font-black uppercase tracking-[0.25em] text-primary dark:text-white">National Registry</h4>
                        <div className="h-px flex-1 bg-slate-200 dark:bg-slate-800"></div>
                     </div>
                     {groupings.central.map(renderMemberCard)}
@@ -758,11 +586,11 @@ export default function MemberKitManagement() {
                         <div className="flex items-center gap-3 px-2">
                            <Globe className="w-6 h-6 text-emerald-600" />
                            <h4 className="text-base font-black uppercase tracking-[0.2em] text-primary dark:text-white">
-                             {state} <span className="text-emerald-500 font-bold ml-2">State Committee</span>
+                             {state} <span className="text-emerald-500 font-bold ml-2">Chapter</span>
                            </h4>
                            <div className="h-px flex-1 bg-slate-200 dark:bg-slate-800"></div>
                         </div>
-                        {groupings.stateGroups[state].map(renderMemberCard)}
+                        <div className="grid gap-3">{groupings.stateGroups[state].map(renderMemberCard)}</div>
                       </div>
                     ))}
                   </div>
@@ -777,13 +605,11 @@ export default function MemberKitManagement() {
                             <div className="flex items-center gap-3 px-2">
                                <Building2 className="w-6 h-6 text-blue-600" />
                                <h4 className="text-base font-black uppercase tracking-[0.2em] text-primary dark:text-white">
-                                 {district} <span className="text-blue-500 font-bold ml-2">District Cell</span>
+                                 {district} <span className="text-blue-500 font-bold ml-2">Cell</span>
                                </h4>
                                <div className="h-px flex-1 bg-slate-200 dark:bg-slate-800"></div>
                             </div>
-                            <div className="grid gap-4">
-                               {groupings.districtGroups[state][district].map(renderMemberCard)}
-                            </div>
+                            <div className="grid gap-3">{groupings.districtGroups[state][district].map(renderMemberCard)}</div>
                           </div>
                         ))}
                       </div>
@@ -794,56 +620,46 @@ export default function MemberKitManagement() {
                 {filteredMembers.length === 0 && (
                   <div className="text-center py-24 opacity-30">
                      <Package className="w-16 h-16 mx-auto mb-4" />
-                     <p className="text-lg font-headline font-bold">No records matching criteria.</p>
+                     <p className="text-lg font-headline font-bold">No matching records.</p>
                   </div>
                 )}
-              </div>
+            </div>
 
-              <div className="lg:col-span-1">
-                <div className="sticky top-32 space-y-6">
+            <div className="lg:col-span-1" id="logistics-form-anchor">
+              <div className="sticky top-12 lg:top-32 space-y-6">
                   {selectedMember ? (
-                    <Card className="rounded-[2.5rem] bg-white dark:bg-slate-900 border-none shadow-2xl overflow-hidden animate-in slide-in-from-right-4 duration-500">
-                      <CardHeader className="bg-slate-900 text-white p-8 border-b-4 border-accent/20">
+                    <Card className="rounded-[2.5rem] bg-white dark:bg-slate-900 border-none shadow-2xl overflow-hidden animate-in slide-in-from-bottom-4 md:slide-in-from-right-4 duration-500">
+                      <CardHeader className="bg-slate-900 text-white p-6 md:p-8 border-b-4 border-accent/20">
                           <div className="flex items-center justify-between mb-4">
                             <Badge className="bg-accent text-primary font-black text-[8px] tracking-widest">{selectedMember.memberId}</Badge>
-                            <button onClick={() => setSelectedMember(null)} className="text-white/40 hover:text-white transition-colors"><X className="w-5 h-5" /></button>
+                            <button onClick={() => setSelectedMember(null)} className="text-white/40 hover:text-white transition-colors h-10 w-10 flex items-center justify-center"><X className="w-5 h-5" /></button>
                           </div>
-                          <CardTitle className="text-2xl font-headline font-bold">{selectedMember.name}</CardTitle>
-                          <CardDescription className="text-slate-400 text-xs font-bold uppercase tracking-widest mt-1">Personnel Logistics Registry</CardDescription>
+                          <CardTitle className="text-2xl font-headline font-bold leading-tight">{selectedMember.name}</CardTitle>
+                          <CardDescription className="text-slate-400 text-xs font-bold uppercase mt-1">Logistics Registry Profile</CardDescription>
                       </CardHeader>
-                      <CardContent className="p-8 space-y-8 max-h-[calc(100vh-25rem)] overflow-y-auto custom-scrollbar">
+                      <CardContent className="p-6 md:p-8 space-y-8 max-h-[60vh] lg:max-h-[calc(100vh-25rem)] overflow-y-auto custom-scrollbar">
                           <div className="space-y-4">
                             <h4 className="text-[10px] font-black uppercase tracking-widest text-accent flex items-center gap-2">
-                              <ClipboardList className="w-3.5 h-3.5" /> Eligible Items for {selectedMember.designationCategory || "Member"}
+                              <ClipboardList className="w-3.5 h-3.5" /> Entitled Logistics
                             </h4>
                             <div className="grid grid-cols-1 gap-2">
                                 {kitItems.filter((item: any) => (eligibilityRules[selectedMember.designationCategory || "General Member"] || []).includes(item.id)).map((item: any) => {
                                   const material = (materialsList || []).find((m: any) => 
-                                    m.name.toLowerCase() === item.label.toLowerCase() || 
-                                    m.sku === item.id
+                                    m.name.toLowerCase() === item.label.toLowerCase() || m.sku === item.id
                                   );
                                   const stock = material?.currentStock ?? 'N/A';
                                   return (
-                                    <div key={item.id} className="flex items-center space-x-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 hover:border-accent/30 transition-all">
+                                    <div key={item.id} className="flex items-center space-x-3 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 hover:border-accent/40 transition-all cursor-pointer" onClick={() => setKitForm({...kitForm, items: {...kitForm.items, [item.id]: !kitForm.items[item.id]}})}>
                                       <Checkbox 
-                                        id={item.id} 
                                         checked={kitForm.items[item.id] || false}
-                                        onCheckedChange={(val) => setKitForm({
-                                          ...kitForm,
-                                          items: { ...kitForm.items, [item.id]: !!val }
-                                        })}
-                                        className="border-accent"
+                                        onCheckedChange={(val) => setKitForm({...kitForm, items: { ...kitForm.items, [item.id]: !!val }})}
+                                        className="border-accent h-5 w-5"
                                       />
-                                      <Label htmlFor={item.id} className="text-xs font-bold text-slate-700 dark:text-slate-300 cursor-pointer flex-1 flex items-center justify-between">
-                                        <span>{item.label}</span>
-                                        <span className={cn(
-                                          "text-[8px] font-black px-1.5 py-0.5 rounded uppercase",
-                                          typeof stock === 'number' && stock <= 0 ? "bg-red-500 text-white" : "bg-slate-200 dark:bg-slate-900 text-slate-500"
-                                        )}>
-                                          Avail: {stock}
-                                        </span>
-                                      </Label>
-                                      {kitForm.items[item.id] && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />}
+                                      <div className="flex-1 flex flex-col">
+                                        <span className="text-xs font-bold text-primary dark:text-white leading-none">{item.label}</span>
+                                        <span className="text-[8px] font-black uppercase text-slate-400 mt-1">Available Units: {stock}</span>
+                                      </div>
+                                      {kitForm.items[item.id] && <CheckCircle2 className="w-4 h-4 text-emerald-500" />}
                                     </div>
                                   )
                                 })}
@@ -852,132 +668,45 @@ export default function MemberKitManagement() {
 
                           <div className="space-y-6 pt-6 border-t border-slate-100 dark:border-slate-800">
                             <h4 className="text-[10px] font-black uppercase tracking-widest text-indigo-500 flex items-center gap-2">
-                              <Truck className="w-3.5 h-3.5" /> Dispatch Particulars
+                              <Truck className="w-3.5 h-3.5" /> Distribution Trail
                             </h4>
-                            
                             <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-1.5">
-                                  <Label className="text-[9px] font-bold text-slate-400 uppercase">Dispatch Date</Label>
-                                  <Input type="date" value={kitForm.dispatchDate} onChange={e => setKitForm({...kitForm, dispatchDate: e.target.value})} className="h-10 rounded-xl" />
-                                </div>
-                                <div className="space-y-1.5">
-                                  <Label className="text-[9px] font-bold text-slate-400 uppercase">Delivery Status</Label>
+                                <div className="space-y-1.5"><Label className="text-[9px] font-bold text-slate-400 uppercase">Date</Label><Input type="date" value={kitForm.dispatchDate} onChange={e => setKitForm({...kitForm, dispatchDate: e.target.value})} className="h-10 rounded-xl" /></div>
+                                <div className="space-y-1.5"><Label className="text-[9px] font-bold text-slate-400 uppercase">Status</Label>
                                   <Select value={kitForm.deliveryStatus} onValueChange={(val: any) => setKitForm({...kitForm, deliveryStatus: val})}>
                                       <SelectTrigger className="h-10 rounded-xl"><SelectValue /></SelectTrigger>
-                                      <SelectContent position="popper" className="z-[1000000] bg-white">
-                                        {['Pending Verification', 'Dispatched', 'In Transit', 'Delivered', 'Returned'].map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-                                      </SelectContent>
+                                      <SelectContent position="popper" className="z-[1000000] bg-white">{['Pending Verification', 'Dispatched', 'In Transit', 'Delivered', 'Returned'].map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
                                   </Select>
                                 </div>
                             </div>
-
-                            <div className="space-y-1.5">
-                                <Label className="text-[9px] font-bold text-slate-400 uppercase">AWB / Courier Info</Label>
-                                <Input placeholder="e.g. Speed Post - EW123456789IN" value={kitForm.courierDetails} onChange={e => setKitForm({...kitForm, courierDetails: e.target.value})} className="h-10 rounded-xl" />
+                            <div className="space-y-1.5"><Label className="text-[9px] font-bold text-slate-400 uppercase">Tracking Details</Label><Input placeholder="AWB / Courier Ref" value={kitForm.courierDetails} onChange={e => setKitForm({...kitForm, courierDetails: e.target.value})} className="h-10 rounded-xl" /></div>
+                            <div className="flex items-center space-x-3 p-4 bg-emerald-50/50 dark:bg-emerald-950/20 rounded-2xl border border-emerald-100">
+                                <Checkbox checked={kitForm.acknowledgementReceived} onCheckedChange={(val) => setKitForm({...kitForm, acknowledgementReceived: !!val})} className="border-emerald-500 h-5 w-5" />
+                                <Label className="text-[10px] font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-tight">Ack. Received</Label>
                             </div>
-
-                            <div className="flex items-center space-x-3 p-4 bg-emerald-50/50 dark:bg-emerald-950/20 rounded-2xl border border-emerald-100 dark:border-emerald-900">
-                                <Checkbox 
-                                  id="ack" 
-                                  checked={kitForm.acknowledgementReceived} 
-                                  onCheckedChange={(val) => setKitForm({...kitForm, acknowledgementReceived: !!val})}
-                                  className="border-emerald-500 h-5 w-5"
-                                />
-                                <Label htmlFor="ack" className="text-xs font-black text-emerald-700 dark:text-emerald-400 cursor-pointer uppercase tracking-tight">Ack. Received</Label>
-                            </div>
-
-                            <div className="space-y-1.5">
-                                <Label className="text-[9px] font-bold text-slate-400 uppercase">Registry Notes</Label>
-                                <Textarea value={kitForm.notes} onChange={e => setKitForm({...kitForm, notes: e.target.value})} placeholder="Internal notes..." className="rounded-xl min-h-[80px]" />
-                            </div>
+                            <div className="space-y-1.5"><Label className="text-[9px] font-bold text-slate-400 uppercase">Audit Notes</Label><Textarea value={kitForm.notes} onChange={e => setKitForm({...kitForm, notes: e.target.value})} placeholder="Internal logistics context..." className="rounded-xl min-h-[80px]" /></div>
                           </div>
                       </CardContent>
-                      <CardFooter className="p-8 border-t bg-white dark:bg-slate-900 shrink-0">
-                        <Button 
-                          onClick={handleSaveKit} 
-                          disabled={isSaving === selectedMember.id}
-                          className="w-full h-14 rounded-2xl bg-primary text-white font-bold text-lg hover:bg-secondary shadow-xl shadow-primary/20 transition-all flex gap-2"
-                        >
-                          {isSaving === selectedMember.id ? <Loader2 className="animate-spin w-5 h-5" /> : <><Save className="w-5 h-5" /> Commit Logistics Data</>}
+                      <CardFooter className="p-6 md:p-8 border-t bg-white dark:bg-slate-900">
+                        <Button onClick={handleSaveKit} disabled={!!isSaving} className="w-full h-14 rounded-2xl bg-primary text-white font-bold text-lg hover:bg-secondary transition-all shadow-xl flex gap-2">
+                          {isSaving ? <Loader2 className="animate-spin w-5 h-5" /> : <><Save className="w-5 h-5" /> Commit Audit Log</>}
                         </Button>
                       </CardFooter>
                     </Card>
                   ) : (
                     <div className="bg-white dark:bg-slate-900 p-10 rounded-[3rem] border border-slate-100 dark:border-slate-800 text-center space-y-6 shadow-sm">
                       <div className="w-20 h-20 bg-slate-50 dark:bg-slate-800 rounded-3xl flex items-center justify-center mx-auto border-2 border-dashed border-slate-200">
-                          <UserCheck className="w-10 h-10 text-slate-300" />
+                          <Package className="w-10 h-10 text-slate-300" />
                       </div>
-                      <div className="space-y-2">
-                          <h4 className="text-xl font-headline font-bold text-primary dark:text-white">Logistics Node</h4>
-                          <p className="text-sm text-slate-400 leading-relaxed italic">"Select a member to manage their official institutional kit and tracking assets with real-time inventory sync."</p>
-                      </div>
+                      <h4 className="text-xl font-headline font-bold text-primary dark:text-white">Registry Node</h4>
+                      <p className="text-sm text-slate-400 leading-relaxed italic">Select a personnel file to manage institutional representation materials.</p>
                     </div>
                   )}
-                </div>
               </div>
             </div>
-          )}
+          </div>
         </div>
       </section>
-
-      {/* Issuance Breakdown Members Modal */}
-      <Dialog open={!!viewingItemMembers} onOpenChange={(val) => !val && setViewingItemMembers(null)}>
-        <DialogContent className="max-w-2xl rounded-[2rem] border-none shadow-2xl bg-white dark:bg-slate-900 p-0 overflow-hidden flex flex-col h-[80vh]">
-          <DialogHeader className="p-8 bg-slate-900 text-white border-b-4 border-accent/20 shrink-0">
-             <div className="flex items-center justify-between mb-2">
-                <Badge className="bg-accent text-primary font-black text-[8px] tracking-[0.2em]">Issued Personnel Registry</Badge>
-                <DialogClose asChild><button className="text-white/40 hover:text-white transition-colors"><X className="w-5 h-5" /></button></DialogClose>
-             </div>
-             <DialogTitle className="text-2xl font-headline font-bold">
-               {viewingItemMembers?.item?.label} Breakdown
-             </DialogTitle>
-             <DialogDescription className="text-slate-400 text-xs font-bold uppercase">
-               Authorized officials who have received this institutional asset.
-             </DialogDescription>
-          </DialogHeader>
-          
-          <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar">
-             <div className="p-6 space-y-3">
-                {viewingItemMembers?.members.map((m: any) => (
-                  <div 
-                    key={m.id} 
-                    onClick={() => { handleSelectMember(m); setViewingItemMembers(null); }}
-                    className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800 group hover:border-accent/40 transition-all cursor-pointer"
-                  >
-                     <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-full bg-white dark:bg-slate-800 flex items-center justify-center border border-slate-100 group-hover:border-accent transition-colors">
-                           <UserCheck className="w-5 h-5 text-accent" />
-                        </div>
-                        <div>
-                           <p className="text-sm font-bold text-primary dark:text-white leading-none">{m.name}</p>
-                           <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-1">{m.memberId}</p>
-                        </div>
-                     </div>
-                     <div className="flex flex-col items-end gap-1">
-                        <Badge variant="outline" className="text-[7px] font-bold border-slate-200 text-slate-500 uppercase">
-                          {m.level} Level
-                        </Badge>
-                        <p className="text-[8px] font-bold text-slate-400 uppercase">{m.stateName || 'National Center'}</p>
-                     </div>
-                  </div>
-                ))}
-                {viewingItemMembers?.members.length === 0 && (
-                  <div className="text-center py-20 opacity-30">
-                     <Package className="w-12 h-12 mx-auto mb-3" />
-                     <p className="text-sm font-bold uppercase tracking-widest">No issuances recorded.</p>
-                  </div>
-                )}
-             </div>
-          </div>
-          
-          <DialogFooter className="p-6 border-t bg-slate-50 dark:bg-slate-900/50 flex justify-between items-center shrink-0">
-             <p className="text-[10px] font-black uppercase text-slate-400">Total Issued: {viewingItemMembers?.members.length}</p>
-             <DialogClose asChild>
-               <Button variant="ghost" className="text-[10px] font-black uppercase tracking-widest text-accent hover:bg-accent/10">Close Registry</Button>
-             </DialogClose>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
       <Footer />
     </main>
   )

@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo, useEffect, useState } from 'react'
@@ -128,19 +129,20 @@ export default function DonationAnalyticsPage() {
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
-      <section className="pt-10 md:pt-16 pb-8 bg-primary text-primary-foreground border-b-8 border-accent/20">
-        <div className="container mx-auto px-4">
+      <section className="pt-10 md:pt-16 pb-8 bg-primary text-primary-foreground border-b-8 border-accent/20 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-1/3 h-full bg-accent/5 -skew-x-12"></div>
+        <div className="container mx-auto px-4 relative z-10">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="space-y-1 text-center md:text-left">
               <div className="inline-flex items-center gap-2 bg-accent/20 text-accent px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-[0.2em] border border-accent/30">
                 <ShieldCheck className="w-2.5 h-2.5" /> Secure Governance
               </div>
-              <h1 className="text-2xl md:text-4xl font-headline font-bold">Donation <span className="text-accent italic">Analytics</span></h1>
-              <p className="opacity-70 text-[10px] md:text-[11px]">Financial oversight of the Human Rights Affairs Trust.</p>
+              <h1 className="text-3xl md:text-4xl font-headline font-bold leading-tight">Donation <span className="text-accent italic">Analytics</span></h1>
+              <p className="opacity-70 text-[11px]">Financial oversight of the Human Rights Affairs Trust.</p>
             </div>
 
             <ManualDonationDialog>
-              <Button size="sm" className="w-full md:w-auto bg-accent text-primary font-bold rounded-xl h-11 px-6 flex gap-2 hover:bg-secondary hover:text-white transition-all shadow-lg shadow-accent/20">
+              <Button className="w-full md:w-auto bg-accent text-primary font-bold rounded-xl h-12 md:h-11 px-8 flex gap-2 hover:bg-secondary hover:text-white transition-all shadow-lg shadow-accent/20">
                 <Plus className="w-4 h-4" /> Record Manual Donation
               </Button>
             </ManualDonationDialog>
@@ -157,41 +159,41 @@ export default function DonationAnalyticsPage() {
             </div>
           ) : (
             <div className="space-y-6 md:space-y-8">
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {[
-                  { label: "Total Revenue", value: `₹${stats.total.toLocaleString()}`, icon: <IndianRupee className="w-4 h-4 text-emerald-500" />, trend: "+12%" },
-                  { label: "Transactions", value: stats.count, icon: <TrendingUp className="w-4 h-4 text-accent" />, trend: "Live" },
-                  { label: "Avg Ticket", value: `₹${stats.count ? Math.round(stats.total / stats.count).toLocaleString() : 0}`, icon: <ArrowUpRight className="w-4 h-4 text-indigo-500" />, trend: "Steady" },
-                  { label: "Reconciliation", value: "Live", icon: <Calendar className="w-4 h-4 text-pink-500" />, trend: "OK" }
+                  { label: "Total Revenue", value: `₹${stats.total.toLocaleString()}`, icon: <IndianRupee className="w-5 h-5 text-emerald-500" />, trend: "+12%" },
+                  { label: "Transactions", value: stats.count, icon: <TrendingUp className="w-5 h-5 text-accent" />, trend: "Live" },
+                  { label: "Avg Ticket", value: `₹${stats.count ? Math.round(stats.total / stats.count).toLocaleString() : 0}`, icon: <ArrowUpRight className="w-5 h-5 text-indigo-500" />, trend: "Steady" },
+                  { label: "Reconciliation", value: "Live", icon: <Calendar className="w-5 h-5 text-pink-500" />, trend: "OK" }
                 ].map((stat, i) => (
                   <Card key={i} className="border-none shadow-sm rounded-2xl overflow-hidden group">
-                    <CardContent className="p-4">
-                      <div className="flex justify-between items-start mb-2">
-                        <div className="p-2 bg-muted dark:bg-slate-800 rounded-xl group-hover:bg-accent/10 transition-colors">
+                    <CardContent className="p-6">
+                      <div className="flex justify-between items-start mb-4">
+                        <div className="p-3 bg-muted dark:bg-slate-800 rounded-xl group-hover:bg-accent/10 transition-colors">
                           {stat.icon}
                         </div>
-                        <span className="text-[7px] md:text-[8px] font-bold text-emerald-500 bg-emerald-50 dark:bg-emerald-500/10 px-1.5 py-0.5 rounded-full">{stat.trend}</span>
+                        <Badge variant="outline" className="text-[9px] font-bold text-emerald-500 border-emerald-500/20 bg-emerald-50/50">{stat.trend}</Badge>
                       </div>
-                      <p className="text-base md:text-lg font-bold text-foreground leading-none mb-1">{stat.value}</p>
-                      <p className="text-[7px] md:text-[8px] font-bold text-muted-foreground uppercase tracking-widest">{stat.label}</p>
+                      <p className="text-2xl font-bold text-foreground leading-none mb-1">{stat.value}</p>
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{stat.label}</p>
                     </CardContent>
                   </Card>
                 ))}
               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <Card className="lg:col-span-2 border-none shadow-sm rounded-3xl bg-card dark:bg-slate-900 overflow-hidden">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
+                <Card className="lg:col-span-2 border-none shadow-sm rounded-[2rem] bg-card dark:bg-slate-900 overflow-hidden">
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-base md:text-lg font-headline font-bold">Revenue Timeline</CardTitle>
+                    <CardTitle className="text-lg font-headline font-bold">Revenue Timeline</CardTitle>
                   </CardHeader>
-                  <CardContent className="h-[250px] md:h-[300px] pb-6">
+                  <CardContent className="h-[300px] md:h-[350px] pb-6">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={stats.chartData}>
                         <CartesianGrid strokeDasharray="3 3" stroke="currentColor" opacity={0.1} vertical={false} />
-                        <XAxis dataKey="name" fontSize={9} axisLine={false} tickLine={false} />
-                        <YAxis fontSize={9} axisLine={false} tickLine={false} />
+                        <XAxis dataKey="name" fontSize={10} axisLine={false} tickLine={false} />
+                        <YAxis fontSize={10} axisLine={false} tickLine={false} />
                         <Tooltip 
-                          contentStyle={{ borderRadius: '0.75rem', border: 'none', fontSize: '10px', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', backgroundColor: 'hsl(var(--card))' }}
+                          contentStyle={{ borderRadius: '1rem', border: 'none', fontSize: '11px', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
                           cursor={{ fill: 'currentColor', opacity: 0.05 }}
                         />
                         <Bar dataKey="amount" fill="#D4AF37" radius={[6, 6, 0, 0]} />
@@ -200,20 +202,20 @@ export default function DonationAnalyticsPage() {
                   </CardContent>
                 </Card>
 
-                <Card className="border-none shadow-sm rounded-3xl bg-card dark:bg-slate-900 overflow-hidden">
+                <Card className="border-none shadow-sm rounded-[2rem] bg-card dark:bg-slate-900 overflow-hidden">
                   <CardHeader className="pb-0">
-                    <CardTitle className="text-base md:text-lg font-headline font-bold">Channels</CardTitle>
+                    <CardTitle className="text-lg font-headline font-bold">Channel Mix</CardTitle>
                   </CardHeader>
-                  <CardContent className="h-[220px] md:h-[280px]">
+                  <CardContent className="h-[250px] md:h-[300px]">
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
                         <Pie
                           data={stats.methods}
                           cx="50%"
                           cy="50%"
-                          innerRadius={50}
-                          outerRadius={70}
-                          paddingAngle={4}
+                          innerRadius={60}
+                          outerRadius={80}
+                          paddingAngle={5}
                           dataKey="value"
                         >
                           {stats.methods.map((entry, index) => (
@@ -223,11 +225,11 @@ export default function DonationAnalyticsPage() {
                         <Tooltip />
                       </PieChart>
                     </ResponsiveContainer>
-                    <div className="flex flex-wrap gap-2 md:gap-3 justify-center mt-2">
+                    <div className="flex flex-wrap gap-4 justify-center mt-4">
                       {stats.methods.map((m, i) => (
                         <div key={i} className="flex items-center gap-1.5">
-                          <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: COLORS[i % COLORS.length] }}></div>
-                          <span className="text-[7px] md:text-[8px] font-bold text-muted-foreground uppercase">{m.name}</span>
+                          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: COLORS[i % COLORS.length] }}></div>
+                          <span className="text-[10px] font-bold text-muted-foreground uppercase">{m.name}</span>
                         </div>
                       ))}
                     </div>
@@ -235,56 +237,62 @@ export default function DonationAnalyticsPage() {
                 </Card>
               </div>
 
-              <Card className="border-none shadow-sm rounded-3xl bg-card dark:bg-slate-900 overflow-hidden">
-                <CardHeader className="bg-muted dark:bg-slate-800/50 border-b p-4 px-6">
-                  <CardTitle className="text-base md:text-lg font-headline font-bold flex items-center gap-2">
-                    <FileText className="w-4 h-4 text-accent" /> Contribution Ledger
+              <Card className="border-none shadow-sm rounded-[2rem] bg-card dark:bg-slate-900 overflow-hidden">
+                <CardHeader className="bg-muted/50 dark:bg-slate-800/50 border-b p-6">
+                  <CardTitle className="text-xl font-headline font-bold flex items-center gap-3">
+                    <FileText className="w-5 h-5 text-accent" /> Master Contribution Ledger
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="p-0 overflow-x-auto">
-                  <div className="min-w-full inline-block align-middle">
-                    <div className="overflow-hidden">
-                      <table className="w-full text-left min-w-[600px]">
-                        <thead className="bg-muted/30 dark:bg-slate-800/50 text-[8px] md:text-[9px] font-bold text-muted-foreground uppercase tracking-widest border-b dark:border-slate-700">
-                          <tr>
-                            <th className="px-6 py-4">Donor Name</th>
-                            <th className="px-6 py-4">Amount</th>
-                            <th className="px-6 py-4">Method</th>
-                            <th className="px-6 py-4">Ref/PAN</th>
-                            <th className="px-6 py-4 text-right">Action</th>
+                <CardContent className="p-0">
+                  <div className="overflow-x-auto w-full">
+                    <table className="w-full text-left min-w-[700px]">
+                      <thead className="bg-muted/30 dark:bg-slate-800/50 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b dark:border-slate-700">
+                        <tr>
+                          <th className="px-8 py-5">Donor Name</th>
+                          <th className="px-8 py-5">Amount</th>
+                          <th className="px-8 py-5">Method</th>
+                          <th className="px-8 py-5">Ref / PAN</th>
+                          <th className="px-8 py-5 text-right">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-border dark:divide-slate-800">
+                        {donations && donations.map((d: any) => (
+                          <tr key={d.id} className="hover:bg-muted/20 dark:hover:bg-slate-800/30 transition-colors">
+                            <td className="px-8 py-6 font-bold text-sm">{d.donorName || d.name}</td>
+                            <td className="px-8 py-6 text-emerald-600 dark:text-emerald-400 font-bold text-sm">₹{d.amount.toLocaleString()}</td>
+                            <td className="px-8 py-6 text-[10px] font-bold text-muted-foreground uppercase">{d.paymentMethod}</td>
+                            <td className="px-8 py-6 font-mono text-[10px] text-slate-400">{d.pan || d.transactionId?.slice(-8)}</td>
+                            <td className="px-8 py-6 text-right">
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button variant="ghost" size="icon" className="h-9 w-9 text-slate-300 hover:text-red-500 rounded-xl">
+                                    <Trash2 className="w-4 h-4" />
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent className="rounded-[2rem] border-none shadow-2xl w-[95vw] md:w-full">
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle className="text-xl">Purge Record?</AlertDialogTitle>
+                                    <AlertDialogDescription className="text-sm">Permanent deletion of this contribution from the master ledger. This action is irreversible.</AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter className="mt-4">
+                                    <AlertDialogCancel className="rounded-xl h-12">Cancel</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => handleDelete(d.id)} className="bg-red-500 hover:bg-red-600 rounded-xl h-12">Purge Transaction</AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            </td>
                           </tr>
-                        </thead>
-                        <tbody className="divide-y divide-border dark:divide-slate-800">
-                          {donations && donations.map((d: any) => (
-                            <tr key={d.id} className="hover:bg-muted/20 dark:hover:bg-slate-800/30 transition-colors">
-                              <td className="px-6 py-4 font-bold text-[11px] md:text-xs">{d.donorName || d.name}</td>
-                              <td className="px-6 py-4 text-emerald-600 dark:text-emerald-400 font-bold text-[11px] md:text-xs">₹{d.amount}</td>
-                              <td className="px-6 py-4 text-[9px] md:text-[10px] font-bold text-muted-foreground uppercase">{d.paymentMethod}</td>
-                              <td className="px-6 py-4 font-mono text-[9px] md:text-[10px] text-slate-400">{d.pan || d.transactionId?.slice(-6)}</td>
-                              <td className="px-6 py-4 text-right">
-                                <AlertDialog>
-                                  <AlertDialogTrigger asChild>
-                                    <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-300 hover:text-red-500 rounded-full">
-                                      <Trash2 className="w-3.5 h-3.5" />
-                                    </Button>
-                                  </AlertDialogTrigger>
-                                  <AlertDialogContent className="rounded-3xl max-w-[90vw] md:max-w-sm">
-                                    <AlertDialogHeader>
-                                      <AlertDialogTitle className="text-lg">Delete Record?</AlertDialogTitle>
-                                      <AlertDialogDescription className="text-xs">Permanent deletion from the master ledger.</AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter className="flex-row gap-2 mt-4">
-                                      <AlertDialogCancel className="rounded-xl h-9 text-xs flex-1 mt-0">Cancel</AlertDialogCancel>
-                                      <AlertDialogAction onClick={() => handleDelete(d.id)} className="bg-red-500 hover:bg-red-600 border-none rounded-xl h-9 text-xs text-white flex-1">Confirm</AlertDialogAction>
-                                    </AlertDialogFooter>
-                                  </AlertDialogContent>
-                                </AlertDialog>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
+                        ))}
+                        {(!donations || donations.length === 0) && (
+                          <tr>
+                            <td colSpan={5} className="py-20 text-center opacity-30">
+                               <FileText className="w-12 h-12 mx-auto mb-4" />
+                               <p className="text-sm font-bold uppercase tracking-widest">No transaction records found</p>
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
                   </div>
                 </CardContent>
               </Card>

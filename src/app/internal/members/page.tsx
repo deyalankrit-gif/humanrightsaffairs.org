@@ -29,7 +29,8 @@ import {
   Hash,
   Globe,
   Building2,
-  ShieldCheck
+  ShieldCheck,
+  X
 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { 
@@ -39,7 +40,8 @@ import {
   DialogTitle, 
   DialogTrigger,
   DialogFooter,
-  DialogDescription
+  DialogDescription,
+  DialogClose
 } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -102,7 +104,6 @@ export default function InternalMembersDirectory() {
 
   const { data: firestoreProfiles, loading: profilesLoading } = useCollection(profilesQuery);
 
-  // DATA ISOLATION: Filter out demi members in memory for high-fidelity isolation
   const profiles = React.useMemo(() => {
     return ((firestoreProfiles || []) as any[]).filter(m => m.isDemi !== true);
   }, [firestoreProfiles]);
@@ -177,16 +178,6 @@ export default function InternalMembersDirectory() {
       return;
     }
 
-    const idPattern = /^[A-Z]{6}[0-9]{4}$/;
-    if (!idPattern.test(newMember.memberId)) {
-      toast({ 
-        variant: "destructive", 
-        title: "Invalid Member ID", 
-        description: "ID must be 10 characters: 6 uppercase letters followed by 4 digits." 
-      })
-      return
-    }
-
     setIsAdding(true)
     try {
       const { honorific, ...data } = newMember;
@@ -220,12 +211,12 @@ export default function InternalMembersDirectory() {
     setIsDeleting(true)
     try {
       await deleteDoc(doc(db, 'memberProfiles', memberToDelete.id))
-      toast({ title: "Record Purged", description: "Personnel file has been removed from the registry." })
+      toast({ title: "Record Purged" })
       setDeleteDialogStep(null)
       setMemberToDelete(null)
       setDeleteInputText('')
     } catch (error: any) {
-      toast({ variant: "destructive", title: "System Error", description: "Failed to purge record." })
+      toast({ variant: "destructive", title: "System Error" })
     } finally {
       setIsDeleting(false)
     }
@@ -248,7 +239,6 @@ export default function InternalMembersDirectory() {
 
   const groupings = React.useMemo(() => {
     const central = filtered.filter(m => m.level === 'National');
-    
     const stateGroups = filtered
       .filter(m => m.level === 'State')
       .reduce((acc, m) => {
@@ -257,7 +247,6 @@ export default function InternalMembersDirectory() {
         acc[state].push(m);
         return acc;
       }, {} as Record<string, any[]>);
-
     const districtGroups = filtered
       .filter(m => m.level === 'District')
       .reduce((acc, m) => {
@@ -268,46 +257,39 @@ export default function InternalMembersDirectory() {
         acc[state][district].push(m);
         return acc;
       }, {} as Record<string, Record<string, any[]>>);
-
     return { central, stateGroups, districtGroups };
   }, [filtered]);
 
   const renderMemberCard = (member: any) => (
-    <Card key={member.id} className="border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800">
+    <Card key={member.id} className="border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800">
       <CardContent className="p-0">
         <div className="flex flex-col md:flex-row items-stretch">
           <div className="p-5 bg-slate-50 dark:bg-slate-800 md:w-44 text-center border-r border-slate-100 dark:border-slate-700 flex flex-col items-center justify-center shrink-0">
              <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">ID</span>
              <span className="text-xl font-headline font-bold text-primary dark:text-white tracking-tighter">{member.memberId || 'PENDING'}</span>
           </div>
-          <div className="flex-1 p-5 flex items-center justify-between">
-            <div className="space-y-2">
+          <div className="flex-1 p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="space-y-2 text-center sm:text-left w-full sm:w-auto">
               <h3 className="text-lg font-bold text-primary dark:text-white leading-tight">{member.name}</h3>
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[10px] text-slate-500 font-bold uppercase">
+              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-x-4 gap-y-1 text-[10px] text-slate-500 font-bold uppercase">
                  <span className="text-accent">{member.designation}</span>
                  <span className="flex items-center gap-1"><MapPin className="w-2.5 h-2.5" /> {member.stateName || 'National'}</span>
                  <span className="flex items-center gap-1"><Phone className="w-2.5 h-2.5 text-accent" /> {member.phone || 'N/A'}</span>
-                 <span className="flex items-center gap-1 normal-case font-medium"><Mail className="w-2.5 h-2.5 text-accent" /> {member.email || 'N/A'}</span>
-                 <span className="flex items-center gap-1"><Hash className="w-2.5 h-2.5 text-accent" /> Aadhaar: {member.aadhaar || 'N/A'}</span>
               </div>
             </div>
-            <div className="flex justify-end gap-2 ml-4">
-              <Link href={`/internal/members/${member.id}`}>
-                <Button size="sm" className="h-8 rounded-lg text-[10px] px-3 font-bold hover:bg-secondary hover:text-white transition-all">
+            <div className="flex justify-end gap-2 shrink-0">
+              <Link href={`/internal/members/${member.id}`} className="flex-1 sm:flex-none">
+                <Button size="sm" className="w-full sm:w-auto h-9 rounded-xl text-[10px] px-5 font-black uppercase tracking-widest hover:bg-secondary hover:text-white transition-all">
                   Profile
                 </Button>
               </Link>
-              
               <Button 
                 variant="destructive" 
                 size="sm" 
-                className="h-8 rounded-lg text-[10px] px-3 font-bold flex gap-1.5"
-                onClick={() => {
-                  setMemberToDelete(member);
-                  setDeleteDialogStep('warning');
-                }}
+                className="w-full sm:w-auto h-9 rounded-xl text-[10px] px-4 font-black uppercase tracking-widest flex gap-2"
+                onClick={() => { setMemberToDelete(member); setDeleteDialogStep('warning'); }}
               >
-                <Trash2 className="w-3 i-3" /> Delete
+                <Trash2 className="w-3.5 h-3.5" /> Delete
               </Button>
             </div>
           </div>
@@ -316,93 +298,94 @@ export default function InternalMembersDirectory() {
     </Card>
   )
 
-  const states = Object.keys(INDIA_DATA).sort()
+  const statesList = Object.keys(INDIA_DATA).sort()
+
+  if (authLoading || (user && profilesLoading)) {
+    return <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950"><Loader2 className="w-10 h-10 animate-spin text-accent" /></div>
+  }
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
-      <section className="pt-12 pb-8 bg-slate-900 text-white relative overflow-hidden">
+      <section className="pt-16 pb-8 bg-slate-900 text-white relative overflow-hidden border-b-8 border-accent/20">
         <div className="absolute top-0 right-0 w-1/3 h-full bg-accent/5 -skew-x-12"></div>
         <div className="container mx-auto px-4 relative z-10">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="space-y-1">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="space-y-1 text-center md:text-left">
               <div className="inline-flex items-center gap-2 bg-red-500/20 text-red-400 px-3 py-1 rounded-full text-[9px] font-bold border border-red-500/30 uppercase tracking-[0.2em]">
                 <Lock className="w-2.5 h-2.5" /> Members Directory
               </div>
-              <h1 className="text-3xl md:text-4xl font-headline font-bold">Secure <span className="text-accent italic">Members</span></h1>
-              <p className="text-slate-400 text-[11px] max-w-xl">Internal dashboard for managing operational contact protocols.</p>
+              <h1 className="text-3xl md:text-4xl font-headline font-bold">Secure <span className="text-accent italic">Registry</span></h1>
+              <p className="text-slate-400 text-[11px] max-w-xl font-bold uppercase tracking-widest">Internal dashboard for managing operational force contact protocols.</p>
             </div>
             
             <Dialog open={isDialogOpen} onOpenChange={setIsAddingDialogOpen}>
               <DialogTrigger asChild>
-                <Button size="sm" className="bg-accent text-primary font-bold rounded-xl h-11 px-6 flex gap-2 shadow-lg hover:bg-secondary hover:text-white transition-all">
-                  <UserPlus className="w-4 h-4" /> Commission Member
+                <Button className="w-full md:w-auto bg-accent text-primary font-bold rounded-xl h-14 md:h-12 px-8 flex gap-2 shadow-lg hover:bg-secondary hover:text-white transition-all transform hover:scale-105 active:scale-95">
+                  <UserPlus className="w-5 h-5" /> Commission Member
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-2xl rounded-[2.5rem] max-h-[90vh] overflow-y-auto border-none shadow-2xl">
-                <DialogHeader><DialogTitle className="text-2xl font-headline font-bold text-primary dark:text-white">Personnel Commissioning</DialogTitle></DialogHeader>
-                <div className="space-y-6 py-4">
-                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+              <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="max-w-2xl rounded-[2.5rem] max-h-[95vh] overflow-y-auto border-none shadow-2xl w-[95vw] md:w-full">
+                <DialogHeader className="p-2">
+                  <div className="flex items-center justify-between mb-4">
+                    <DialogTitle className="text-2xl font-headline font-bold text-primary dark:text-white">Personnel Commissioning</DialogTitle>
+                    <DialogClose asChild><Button variant="ghost" size="icon" className="rounded-full h-10 w-10"><X className="w-5 h-5" /></Button></DialogClose>
+                  </div>
+                </DialogHeader>
+                <div className="space-y-6 py-4 px-2">
+                   <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
                       <div className="flex flex-col items-center gap-3">
                         <div className="relative w-32 h-32 rounded-full bg-slate-50 dark:bg-slate-800 border-2 border-dashed border-slate-300 flex items-center justify-center overflow-hidden group cursor-pointer hover:border-accent transition-colors shadow-inner">
                           {newMember.imageId ? (
                             <Image src={newMember.imageId} alt="Preview" fill className="object-cover" />
                           ) : (
-                            <div className="flex items-center justify-center h-full"><User className="w-10 h-10 text-slate-300" /></div>
+                            <div className="flex flex-col items-center gap-1"><Camera className="w-8 h-8 text-slate-300" /><span className="text-[8px] font-bold text-slate-400 uppercase">PHOTO</span></div>
                           )}
                           <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={handleFileChange} />
                         </div>
-                        <Label className="text-[10px] uppercase font-bold text-slate-400">Commissioning Photo</Label>
+                        <Label className="text-[10px] uppercase font-bold text-slate-400">Commissioning Image</Label>
                       </div>
-                      <div className="md:col-span-2 space-y-4">
-                        <div className="space-y-1">
+                      <div className="md:col-span-2 space-y-5">
+                        <div className="space-y-2">
                           <Label className="text-[10px] uppercase font-bold text-slate-400">Full Legal Name *</Label>
                           <div className="flex gap-2">
                              <Select value={newMember.honorific} onValueChange={val => setNewMember({...newMember, honorific: val})}>
-                                <SelectTrigger className="w-24 h-11 rounded-xl bg-white dark:bg-slate-900 border-slate-200"><SelectValue placeholder="Title" /></SelectTrigger>
+                                <SelectTrigger className="w-24 h-12 rounded-xl bg-white dark:bg-slate-900 border-slate-200"><SelectValue placeholder="Title" /></SelectTrigger>
                                 <SelectContent position="popper" className="z-[1000001] bg-white">
                                   {["Mr.", "Ms.", "Mrs.", "Dr.", "Adv.", "Prof.", "Hon.", "Rev."].map(h => <SelectItem key={h} value={h}>{h}</SelectItem>)}
                                 </SelectContent>
                              </Select>
-                             <Input placeholder="Full Legal Name" value={newMember.name} onChange={e => setNewMember({...newMember, name: e.target.value})} className="h-11 rounded-xl flex-1" />
+                             <Input placeholder="Legal Identity Name" value={newMember.name} onChange={e => setNewMember({...newMember, name: e.target.value})} className="h-12 rounded-xl flex-1" />
                           </div>
                         </div>
                         <div className="grid grid-cols-2 gap-4">
-                          <div className="space-y-1">
+                          <div className="space-y-2">
                             <Label className="text-[10px] uppercase font-bold text-slate-400">Gender *</Label>
                             <Select value={newMember.gender} onValueChange={(val: any) => setNewMember({...newMember, gender: val})}>
-                              <SelectTrigger className="h-11 rounded-xl"><SelectValue placeholder="Select" /></SelectTrigger>
+                              <SelectTrigger className="h-12 rounded-xl"><SelectValue placeholder="Select" /></SelectTrigger>
                               <SelectContent position="popper" className="z-[1000001] bg-white"><SelectItem value="male">Male</SelectItem><SelectItem value="female">Female</SelectItem></SelectContent>
                             </Select>
                           </div>
-                          <div className="space-y-1">
+                          <div className="space-y-2">
                             <Label className="text-[10px] uppercase font-bold text-slate-400">Blood Group</Label>
                             <Select value={newMember.bloodGroup} onValueChange={val => setNewMember({...newMember, bloodGroup: val})}>
-                              <SelectTrigger className="h-11 rounded-xl"><SelectValue placeholder="Select" /></SelectTrigger>
+                              <SelectTrigger className="h-12 rounded-xl"><SelectValue placeholder="Select" /></SelectTrigger>
                               <SelectContent position="popper" className="z-[1000001] bg-white">
                                 {["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].map(bg => <SelectItem key={bg} value={bg}>{bg}</SelectItem>)}
                               </SelectContent>
                             </Select>
                           </div>
                         </div>
-                        <div className="space-y-1">
-                          <Label className="text-[10px] uppercase font-bold text-slate-400">Current Profession</Label>
-                          <Input placeholder="e.g. Advocate, Teacher" value={newMember.profession} onChange={e => setNewMember({...newMember, profession: e.target.value})} className="h-11 rounded-xl" />
-                        </div>
                       </div>
                    </div>
 
                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 rounded-3xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
-                      <div className="space-y-1">
+                      <div className="space-y-2">
                         <Label className="text-[10px] uppercase font-bold text-accent">Designation Category *</Label>
                         <Select value={newMember.designationCategory} onValueChange={(val: any) => {
                           const isFixed = val === 'General Member' || val === 'Board Member' || val === 'Volunteer';
-                          setNewMember({
-                            ...newMember, 
-                            designationCategory: val, 
-                            designation: isFixed ? val : ''
-                          });
+                          setNewMember({ ...newMember, designationCategory: val, designation: isFixed ? val : '' });
                         }}>
-                          <SelectTrigger className="rounded-xl border-accent/20 bg-white dark:bg-slate-800"><SelectValue /></SelectTrigger>
+                          <SelectTrigger className="rounded-xl border-accent/20 bg-white dark:bg-slate-800 h-11"><SelectValue /></SelectTrigger>
                           <SelectContent position="popper" className="z-[1000001] bg-white">
                             <SelectItem value="General Member">General Member</SelectItem>
                             <SelectItem value="Board Member">Board Member</SelectItem>
@@ -412,48 +395,35 @@ export default function InternalMembersDirectory() {
                         </Select>
                       </div>
                       {newMember.designationCategory === 'Office-bearing Member' && (
-                        <div className="space-y-1 animate-in fade-in slide-in-from-left-2">
+                        <div className="space-y-2 animate-in fade-in slide-in-from-left-2">
                           <Label className="text-[10px] uppercase font-bold text-accent">Manual Designation *</Label>
                           <Input placeholder="e.g. Secretary, Treasurer" value={newMember.designation} onChange={e => setNewMember({...newMember, designation: e.target.value})} className="rounded-xl border-accent/20 h-11" />
                         </div>
                       )}
                    </div>
 
-                   <div className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-3xl space-y-4 border border-slate-100 dark:border-slate-800 shadow-inner">
-                      <div className="grid grid-cols-1 gap-4">
-                        <div className="space-y-2">
-                          <Label className="text-[10px] uppercase font-bold text-slate-400">Commissioned Member ID *</Label>
-                          <div className="flex gap-2">
-                            <Input 
-                              placeholder="ABCDEF1234" 
-                              value={newMember.memberId} 
-                              onChange={e => setNewMember({...newMember, memberId: e.target.value.toUpperCase()})} 
-                              className="h-11 rounded-xl font-mono bg-white dark:bg-slate-900"
-                              maxLength={10}
-                            />
-                            <Button 
-                              type="button" 
-                              variant="outline" 
-                              size="icon" 
-                              className="h-11 w-11 shrink-0 rounded-xl border-dashed hover:bg-accent/10"
-                              onClick={() => setNewMember({...newMember, memberId: generateMemberId()})}
-                            >
-                              <Sparkles className="w-4 h-4 text-accent" />
-                            </Button>
-                          </div>
+                   <div className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-3xl space-y-5 border border-slate-100 dark:border-slate-800 shadow-inner">
+                      <div className="space-y-2">
+                        <Label className="text-[10px] uppercase font-bold text-slate-400">Commissioned Member ID *</Label>
+                        <div className="flex gap-2">
+                          <Input 
+                            placeholder="ABCDEF1234" 
+                            value={newMember.memberId} 
+                            onChange={e => setNewMember({...newMember, memberId: e.target.value.toUpperCase()})} 
+                            className="h-12 rounded-xl font-mono bg-white dark:bg-slate-900"
+                            maxLength={10}
+                          />
+                          <Button type="button" variant="outline" size="icon" className="h-12 w-12 shrink-0 rounded-xl border-dashed hover:bg-accent/10" onClick={() => setNewMember({...newMember, memberId: generateMemberId()})}>
+                            <Sparkles className="w-5 h-5 text-accent" />
+                          </Button>
                         </div>
                       </div>
-                      
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div className="space-y-2">
-                          <Label className="text-[10px] uppercase font-bold text-slate-400">Duration *</Label>
+                          <Label className="text-[10px] uppercase font-bold text-slate-400">Term Duration *</Label>
                           <Select value={newMember.membershipDuration} onValueChange={val => setNewMember({...newMember, membershipDuration: val as any})}>
                             <SelectTrigger className="h-11 rounded-xl bg-white dark:bg-slate-900"><SelectValue /></SelectTrigger>
-                            <SelectContent position="popper" className="z-[1000001] bg-white">
-                              <SelectItem value="1 Year">1 Year Term</SelectItem>
-                              <SelectItem value="2 Years">2 Years Term</SelectItem>
-                              <SelectItem value="3 Years">3 Years Term</SelectItem>
-                            </SelectContent>
+                            <SelectContent position="popper" className="z-[1000001] bg-white"><SelectItem value="1 Year">1 Year</SelectItem><SelectItem value="2 Years">2 Years</SelectItem><SelectItem value="3 Years">3 Years</SelectItem></SelectContent>
                           </Select>
                         </div>
                         <div className="space-y-2">
@@ -477,50 +447,42 @@ export default function InternalMembersDirectory() {
                       </div>
                    </div>
 
-                   <div className="space-y-4">
-                      <div className="grid grid-cols-2 gap-4">
-                         <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">Official Email</Label><Input type="email" placeholder="name@hrat.org" value={newMember.email} onChange={e => setNewMember({...newMember, email: e.target.value})} className="h-11 rounded-xl" /></div>
-                         <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">Phone Number *</Label><Input placeholder="+91" value={newMember.phone} onChange={e => setNewMember({...newMember, phone: e.target.value})} className="h-11 rounded-xl" /></div>
+                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-2"><Label className="text-[10px] uppercase font-bold text-slate-400">Official Email</Label><Input type="email" value={newMember.email} onChange={e => setNewMember({...newMember, email: e.target.value})} className="h-11 rounded-xl" /></div>
+                      <div className="space-y-2"><Label className="text-[10px] uppercase font-bold text-slate-400">Mobile Phone *</Label><Input value={newMember.phone} onChange={e => setNewMember({...newMember, phone: e.target.value})} className="h-11 rounded-xl" /></div>
+                   </div>
+
+                   <div className="space-y-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+                      <div className="space-y-2"><Label className="text-[10px] uppercase font-bold text-slate-400">Residential Address *</Label><Input value={newMember.address} onChange={e => setNewMember({...newMember, address: e.target.value})} className="h-11 rounded-xl" /></div>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="space-y-2"><Label className="text-[10px] uppercase font-bold text-slate-400">Post Office</Label><Input value={newMember.postOffice} onChange={e => setNewMember({...newMember, postOffice: e.target.value})} className="h-11 rounded-xl" /></div>
+                        <div className="space-y-2"><Label className="text-[10px] uppercase font-bold text-slate-400">Police Station</Label><Input value={newMember.policeStation} onChange={e => setNewMember({...newMember, policeStation: e.target.value})} className="h-11 rounded-xl" /></div>
+                        <div className="space-y-2"><Label className="text-[10px] uppercase font-bold text-slate-400">PIN Code</Label><Input maxLength={6} value={newMember.pinCode} onChange={e => setNewMember({...newMember, pinCode: e.target.value})} className="h-11 rounded-xl font-mono" /></div>
                       </div>
-                      <div className="space-y-1">
-                        <Label className="text-[10px] uppercase font-bold text-slate-400">Verified Residential Address *</Label>
-                        <Input placeholder="House No, Village, Lane" value={newMember.address} onChange={e => setNewMember({...newMember, address: e.target.value})} className="h-11 rounded-xl" />
+                   </div>
+
+                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <Label className="text-[10px] uppercase font-bold text-slate-400">Operational Level *</Label>
+                        <Select value={newMember.level} onValueChange={(val: any) => setNewMember({...newMember, level: val, stateName: '', districtName: ''})}>
+                          <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
+                          <SelectContent position="popper" className="z-[1000001] bg-white"><SelectItem value="National">National Level</SelectItem><SelectItem value="State">State Level</SelectItem><SelectItem value="District">District Level</SelectItem></SelectContent>
+                        </Select>
                       </div>
-                      <div className="grid grid-cols-3 gap-4">
-                        <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">Post Office *</Label><Input placeholder="PO Name" value={newMember.postOffice} onChange={e => setNewMember({...newMember, postOffice: e.target.value})} className="h-11 rounded-xl" /></div>
-                        <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">Police Station *</Label><Input placeholder="PS Name" value={newMember.policeStation} onChange={e => setNewMember({...newMember, policeStation: e.target.value})} className="h-11 rounded-xl" /></div>
-                        <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">PIN Code *</Label><Input placeholder="6 digits" maxLength={6} value={newMember.pinCode} onChange={e => setNewMember({...newMember, pinCode: e.target.value})} className="h-11 rounded-xl font-mono" /></div>
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-1">
-                          <Label className="text-[10px] uppercase font-bold text-slate-400">Operational Level *</Label>
-                          <Select value={newMember.level} onValueChange={(val: any) => setNewMember({...newMember, level: val, stateName: '', districtName: ''})}>
-                            <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
-                            <SelectContent position="popper" className="z-[1000001] bg-white"><SelectItem value="National">Central Council</SelectItem><SelectItem value="State">State Level</SelectItem><SelectItem value="District">District Level</SelectItem></SelectContent>
-                          </Select>
-                        </div>
-                        {(newMember.level === 'State' || newMember.level === 'District') && (
-                          <div className="space-y-1 animate-in fade-in slide-in-from-top-1">
-                            <Label className="text-[10px] uppercase font-bold text-slate-400">Regional Chapter (State)</Label>
-                            <Select value={newMember.stateName} onValueChange={val => setNewMember({...newMember, stateName: val, districtName: ''})}>
-                              <SelectTrigger className="h-11 rounded-xl bg-white dark:bg-slate-900"><SelectValue placeholder="Choose State" /></SelectTrigger>
-                              <SelectContent position="popper" className="max-h-60 z-[1000001] bg-white">{states.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
-                            </Select>
-                          </div>
-                        )}
-                      </div>
-                      {newMember.level === 'District' && newMember.stateName && (
-                        <div className="space-y-1 animate-in fade-in slide-in-from-top-1">
-                          <Label className="text-[10px] uppercase font-bold text-slate-400">District Committee</Label>
-                          <Select value={newMember.districtName} onValueChange={val => setNewMember({...newMember, districtName: val})}>
-                            <SelectTrigger className="h-11 rounded-xl bg-white dark:bg-slate-900"><SelectValue placeholder="Choose District" /></SelectTrigger>
-                            <SelectContent position="popper" className="max-h-60 z-[1000001] bg-white">{(INDIA_DATA[newMember.stateName] || []).map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
+                      {(newMember.level === 'State' || newMember.level === 'District') && (
+                        <div className="space-y-2 animate-in fade-in slide-in-from-top-1">
+                          <Label className="text-[10px] uppercase font-bold text-slate-400">Chapter State</Label>
+                          <Select value={newMember.stateName} onValueChange={val => setNewMember({...newMember, stateName: val, districtName: ''})}>
+                            <SelectTrigger className="h-11 rounded-xl bg-white dark:bg-slate-900 border-accent/20"><SelectValue placeholder="Choose State" /></SelectTrigger>
+                            <SelectContent position="popper" className="max-h-60 z-[1000001] bg-white">{statesList.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
                           </Select>
                         </div>
                       )}
                    </div>
                 </div>
-                <DialogFooter><Button onClick={handleAddMember} disabled={isAdding} className="w-full h-12 rounded-xl bg-accent text-primary font-bold text-lg shadow-xl shadow-accent/20 hover:bg-secondary hover:text-white transition-all">Establish Official Record</Button></DialogFooter>
+                <DialogFooter className="px-2 pb-2">
+                  <Button onClick={handleAddMember} disabled={isAdding} className="w-full h-14 rounded-2xl bg-accent text-primary font-bold text-lg shadow-xl shadow-accent/20 hover:bg-secondary hover:text-white transition-all">Establish Force Record</Button>
+                </DialogFooter>
               </DialogContent>
             </Dialog>
           </div>
@@ -530,24 +492,14 @@ export default function InternalMembersDirectory() {
       <section className="py-6 border-b bg-white dark:bg-slate-900 sticky top-10 z-30 shadow-sm transition-colors">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-            <div className="flex flex-wrap gap-1.5 p-1 bg-slate-50 dark:bg-slate-800 rounded-lg">
+            <div className="flex w-full md:w-auto overflow-x-auto no-scrollbar gap-1.5 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
               {["All", "National", "State", "District"].map((lvl) => (
-                <Button 
-                  key={lvl} 
-                  variant={levelFilter === lvl ? "default" : "ghost"} 
-                  onClick={() => setLevelFilter(lvl)} 
-                  className={cn(
-                    "h-7 rounded-md px-4 text-[10px] font-bold uppercase transition-colors", 
-                    levelFilter === lvl ? "bg-accent text-primary shadow-sm hover:bg-secondary hover:text-white" : "text-slate-500 hover:bg-slate-100"
-                  )}
-                >
-                  {lvl}
-                </Button>
+                <button key={lvl} onClick={() => setLevelFilter(lvl)} className={cn("whitespace-nowrap h-8 rounded-lg px-4 text-[10px] font-black uppercase transition-all", levelFilter === lvl ? "bg-accent text-primary shadow-sm hover:text-primary" : "text-slate-500 hover:bg-slate-200")}>{lvl}</button>
               ))}
             </div>
-            <div className="relative w-full max-w-xs">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
-              <Input placeholder="Search database..." className="pl-8 h-9 rounded-lg text-xs border-slate-100 dark:border-slate-800" value={search} onChange={(e) => setSearch(e.target.value)} />
+            <div className="relative w-full max-md:max-w-full max-w-md">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <Input placeholder="Filter by name, ID or location..." className="pl-10 h-12 md:h-11 rounded-2xl border-slate-200 text-sm shadow-inner bg-slate-50 dark:bg-slate-950" value={search} onChange={(e) => setSearch(e.target.value)} />
             </div>
           </div>
         </div>
@@ -556,47 +508,35 @@ export default function InternalMembersDirectory() {
       <section className="py-8">
         <div className="container mx-auto px-4 space-y-12 pb-24">
           {profilesLoading ? (
-            <div className="text-center py-20">
-              <Loader2 className="w-8 h-8 animate-spin text-accent mx-auto mb-4" />
-              <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Fetching Live Directory...</p>
-            </div>
+            <div className="text-center py-24"><Loader2 className="w-10 h-10 animate-spin text-accent mx-auto mb-4" /><p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Synchronizing Live Feed...</p></div>
           ) : filtered.length > 0 ? (
             <>
-              {/* National Group */}
               {groupings.central.length > 0 && (
-                <div className="space-y-4">
+                <div className="space-y-6">
                   <div className="flex items-center gap-3 px-2">
                     <ShieldCheck className="w-5 h-5 text-red-600" />
-                    <h4 className="text-sm font-black uppercase tracking-[0.25em] text-primary dark:text-white">Central Committee</h4>
+                    <h4 className="text-sm font-black uppercase tracking-[0.25em] text-primary dark:text-white">National Registry</h4>
                     <div className="h-px flex-1 bg-slate-200 dark:bg-slate-800"></div>
                   </div>
-                  <div className="grid gap-4">
-                    {groupings.central.map(renderMemberCard)}
-                  </div>
+                  <div className="grid gap-4">{groupings.central.map(renderMemberCard)}</div>
                 </div>
               )}
 
-              {/* State Groups */}
               {Object.keys(groupings.stateGroups).length > 0 && (
-                <div className="space-y-10">
+                <div className="space-y-12">
                   {Object.keys(groupings.stateGroups).sort().map(state => (
                     <div key={state} className="space-y-4">
                       <div className="flex items-center gap-3 px-2">
                         <Globe className="w-6 h-6 text-emerald-600" />
-                        <h4 className="text-base font-black uppercase tracking-[0.2em] text-primary dark:text-white">
-                          {state} <span className="text-emerald-500 font-bold ml-2">State Committee</span>
-                        </h4>
+                        <h4 className="text-base font-black uppercase tracking-[0.2em] text-primary dark:text-white">{state} <span className="text-emerald-500 font-bold ml-2">Chapter</span></h4>
                         <div className="h-px flex-1 bg-slate-200 dark:bg-slate-800"></div>
                       </div>
-                      <div className="grid gap-4">
-                        {groupings.stateGroups[state].map(renderMemberCard)}
-                      </div>
+                      <div className="grid gap-4">{groupings.stateGroups[state].map(renderMemberCard)}</div>
                     </div>
                   ))}
                 </div>
               )}
 
-              {/* District Groups */}
               {Object.keys(groupings.districtGroups).length > 0 && (
                 <div className="space-y-16">
                   {Object.keys(groupings.districtGroups).sort().map(state => (
@@ -605,15 +545,10 @@ export default function InternalMembersDirectory() {
                         <div key={district} className="space-y-4">
                           <div className="flex items-center gap-3 px-2">
                             <Building2 className="w-6 h-6 text-blue-600" />
-                            <h4 className="text-base font-black uppercase tracking-[0.2em] text-primary dark:text-white">
-                              {district} <span className="text-blue-500 font-bold ml-2">District Cell</span>
-                              <span className="text-[10px] text-slate-400 font-medium ml-2">({state})</span>
-                            </h4>
+                            <h4 className="text-base font-black uppercase tracking-[0.2em] text-primary dark:text-white">{district} <span className="text-blue-500 font-bold ml-2">Cell</span> <span className="text-[10px] text-slate-400 font-medium ml-2">({state})</span></h4>
                             <div className="h-px flex-1 bg-slate-200 dark:bg-slate-800"></div>
                           </div>
-                          <div className="grid gap-4">
-                            {groupings.districtGroups[state][district].map(renderMemberCard)}
-                          </div>
+                          <div className="grid gap-4">{groupings.districtGroups[state][district].map(renderMemberCard)}</div>
                         </div>
                       ))}
                     </div>
@@ -622,75 +557,49 @@ export default function InternalMembersDirectory() {
               )}
             </>
           ) : (
-            <div className="text-center py-32 opacity-30">
-               <User className="w-16 h-16 mx-auto mb-4" />
-               <p className="text-lg font-headline font-bold">No records matching criteria.</p>
-            </div>
+            <div className="text-center py-40 opacity-30"><User className="w-20 h-20 mx-auto mb-6" /><p className="text-xl font-headline font-bold uppercase tracking-widest">No matching records</p></div>
           )}
         </div>
       </section>
 
-      {/* Two-Stage Deletion Dialog */}
+      {/* Deletion Dialog */}
       <Dialog open={!!deleteDialogStep} onOpenChange={(open) => !open && setDeleteDialogStep(null)}>
-        <DialogContent className="max-w-md rounded-[2rem] border-none shadow-2xl p-0 overflow-hidden bg-white dark:bg-slate-900">
+        <DialogContent className="max-w-md rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden bg-white dark:bg-slate-900 w-[95vw]">
           {deleteDialogStep === 'warning' && (
             <div className="p-8 space-y-6">
               <div className="flex flex-col items-center text-center space-y-4">
-                <div className="w-20 h-20 bg-red-50 dark:bg-red-950/30 text-red-500 rounded-full flex items-center justify-center animate-pulse">
-                  <ShieldAlert className="w-10 h-10" />
-                </div>
+                <div className="w-20 h-20 bg-red-50 dark:bg-red-950/30 text-red-500 rounded-full flex items-center justify-center animate-pulse"><ShieldAlert className="w-10 h-10" /></div>
                 <div className="space-y-2">
                   <DialogTitle className="text-2xl font-headline font-bold text-primary dark:text-white">Security Warning</DialogTitle>
-                  <DialogDescription className="text-sm text-slate-500 leading-relaxed font-medium">
-                    You are attempting to permanently purge the record for <strong className="text-primary dark:text-white">{memberToDelete?.name}</strong>. This action will erase all credentials and operational history associated with ID: <span className="font-mono font-bold text-red-500">{memberToDelete?.memberId}</span>.
-                  </DialogDescription>
+                  <DialogDescription className="text-sm text-slate-500 leading-relaxed font-medium">You are attempting to permanently purge the record for <strong className="text-primary dark:text-white">{memberToDelete?.name}</strong>. This action will erase all credentials associated with ID: <span className="font-mono font-bold text-red-500">{memberToDelete?.memberId}</span>.</DialogDescription>
                 </div>
               </div>
               <div className="flex gap-3">
-                <Button variant="outline" onClick={() => setDeleteDialogStep(null)} className="flex-1 h-12 rounded-xl font-bold">No, Cancel</Button>
-                <Button variant="destructive" onClick={() => setDeleteDialogStep('verify')} className="flex-1 h-12 rounded-xl font-bold bg-red-600 hover:bg-red-700">Yes, Proceed</Button>
+                <Button variant="outline" onClick={() => setDeleteDialogStep(null)} className="flex-1 h-12 rounded-xl font-bold">Cancel</Button>
+                <Button variant="destructive" onClick={() => setDeleteDialogStep('verify')} className="flex-1 h-12 rounded-xl font-bold">Proceed</Button>
               </div>
             </div>
           )}
-
           {deleteDialogStep === 'verify' && (
             <div className="p-8 space-y-6">
-              <div className="space-y-4">
-                <div className="inline-flex items-center gap-2 bg-amber-50 dark:bg-amber-950/30 text-amber-600 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border border-amber-100">
-                  <AlertTriangle className="w-3 h-3" /> Final Confirmation Required
-                </div>
+              <div className="space-y-4 text-center">
+                <div className="inline-flex items-center gap-2 bg-amber-50 dark:bg-amber-950/30 text-amber-600 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border border-amber-100"><AlertTriangle className="w-3 h-3" /> Verification Protocol</div>
                 <div className="space-y-1">
-                  <DialogTitle className="text-xl font-headline font-bold">Verification Protocol</DialogTitle>
-                  <p className="text-sm text-slate-500">To prevent accidental deletion, please type the word <strong className="text-red-600 uppercase">Delete</strong> in the field below to confirm.</p>
+                  <DialogTitle className="text-xl font-headline font-bold">Confirm Delete</DialogTitle>
+                  <p className="text-xs text-slate-500">To prevent accidental deletion, please type <strong className="text-red-600 uppercase">Delete</strong> below.</p>
                 </div>
               </div>
-              
               <div className="space-y-2">
-                <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Confirmation Text</Label>
-                <Input 
-                  placeholder="Type 'Delete' here..." 
-                  value={deleteInputText} 
-                  onChange={(e) => setDeleteInputText(e.target.value)} 
-                  className="h-12 rounded-xl border-2 focus:ring-red-500 font-bold"
-                />
+                <Input placeholder="Type 'Delete'..." value={deleteInputText} onChange={(e) => setDeleteInputText(e.target.value)} className="h-12 rounded-xl border-2 focus:ring-red-500 font-bold text-center" />
               </div>
-
               <div className="flex gap-3">
                 <Button variant="ghost" onClick={() => setDeleteDialogStep(null)} className="flex-1 h-12 rounded-xl text-slate-400 font-bold">Abort</Button>
-                <Button 
-                  variant="destructive" 
-                  disabled={deleteInputText !== 'Delete' || isDeleting} 
-                  onClick={handleDeleteMember}
-                  className="flex-1 h-12 rounded-xl font-bold bg-red-600 hover:bg-red-700 shadow-xl shadow-red-600/20"
-                >
-                  {isDeleting ? <Loader2 className="animate-spin" /> : "Permanent Purge"}
-                </Button>
+                <Button variant="destructive" disabled={deleteInputText !== 'Delete' || isDeleting} onClick={handleDeleteMember} className="flex-1 h-12 rounded-xl font-bold bg-red-600 hover:bg-red-700 shadow-xl shadow-red-600/20">{isDeleting ? <Loader2 className="animate-spin" /> : "Permanent Purge"}</Button>
               </div>
             </div>
           )}
         </DialogContent>
       </Dialog>
-
       <Footer />
     </main>
   )

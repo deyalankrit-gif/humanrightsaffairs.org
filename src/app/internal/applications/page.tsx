@@ -227,16 +227,6 @@ export default function InternalApplicationsPage() {
       return;
     }
 
-    const idPattern = /^[A-Z]{6}[0-9]{4}$/;
-    if (!idPattern.test(newMember.memberId)) {
-      toast({ 
-        variant: "destructive", 
-        title: "Invalid Member ID", 
-        description: "ID must be 10 characters: 6 uppercase letters followed by 4 digits." 
-      })
-      return
-    }
-
     setIsAddingMember(true)
     try {
       const { honorific, ...data } = newMember;
@@ -245,7 +235,8 @@ export default function InternalApplicationsPage() {
       await addDoc(collection(db, 'memberProfiles'), { 
         ...data, 
         name: finalName,
-        createdAt: serverTimestamp() 
+        createdAt: serverTimestamp(),
+        isDemi: false 
       })
       toast({ title: "Personnel Commissioned", description: "Record established in national registry." })
       setIsAddingMember(false)
@@ -274,26 +265,17 @@ export default function InternalApplicationsPage() {
         setIsActionLoading(false)
       })
       .catch(() => {
-        toast({ variant: "destructive", title: "Update Failed", description: "Could not sync status with national database." })
+        toast({ variant: "destructive", title: "Update Failed" })
         setIsActionLoading(false)
       })
   }
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'Approved': return 'bg-emerald-500 text-white hover:bg-emerald-600 hover:text-white'
-      case 'Rejected': return 'bg-red-500 text-white hover:bg-red-600 hover:text-white'
-      case 'Archived': return 'bg-blue-500 text-white hover:bg-blue-600 hover:text-white'
-      default: return 'bg-amber-500 text-white hover:bg-amber-600 hover:text-white'
-    }
-  }
-
-  const getStatusTextColor = (status: string) => {
-    switch (status) {
-      case 'Approved': return 'text-emerald-400'
-      case 'Rejected': return 'text-red-400'
-      case 'Archived': return 'text-blue-400'
-      default: return 'text-amber-400'
+      case 'Approved': return 'bg-emerald-500 text-white'
+      case 'Rejected': return 'bg-red-500 text-white'
+      case 'Archived': return 'bg-blue-500 text-white'
+      default: return 'bg-amber-500 text-white'
     }
   }
 
@@ -302,22 +284,15 @@ export default function InternalApplicationsPage() {
     try { return parse(dateStr, "PPP", new Date()); } catch { return undefined; }
   }
 
-  if (authLoading || !user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
-        <div className="text-center space-y-4">
-          <Loader2 className="w-10 h-10 animate-spin text-accent mx-auto" />
-          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Verifying Personnel Credentials...</p>
-        </div>
-      </div>
-    )
+  if (authLoading || (user && dataLoading)) {
+    return <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950"><Loader2 className="w-10 h-10 animate-spin text-accent" /></div>
   }
 
   const filtered = (applications || []).filter((a: any) => {
-    const matchesSearch = a.name?.toLowerCase().includes(search.toLowerCase()) || 
-      a.email?.toLowerCase().includes(search.toLowerCase()) ||
-      a.phone?.toLowerCase().includes(search.toLowerCase()) ||
-      a.referenceId?.toLowerCase().includes(search.toLowerCase());
+    const matchesSearch = (a.name || '').toLowerCase().includes(search.toLowerCase()) || 
+      (a.email || '').toLowerCase().includes(search.toLowerCase()) ||
+      (a.phone || '').toLowerCase().includes(search.toLowerCase()) ||
+      (a.referenceId || '').toLowerCase().includes(search.toLowerCase());
     
     if (activeFilter === 'All') return matchesSearch;
     return matchesSearch && a.status === activeFilter;
@@ -330,32 +305,30 @@ export default function InternalApplicationsPage() {
     archived: (applications || []).filter((a: any) => a.status === 'Archived').length,
   }
 
-  const statesList = Object.keys(INDIA_DATA).sort()
-
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
       <section className="pt-16 pb-8 bg-slate-900 text-white border-b-8 border-accent/20 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-1/3 h-full bg-accent/5 -skew-x-12"></div>
         <div className="container mx-auto px-4 relative z-10">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="space-y-1">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="space-y-1 text-center md:text-left">
               <div className="inline-flex items-center gap-2 bg-accent/20 text-accent px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-[0.2em] border border-accent/30">
                 <ShieldCheck className="w-2.5 h-2.5" /> Member Vetting
               </div>
               <h1 className="text-3xl md:text-4xl font-headline font-bold">New <span className="text-accent italic">Applications</span></h1>
-              <p className="text-slate-400 text-[11px]">Review and commission prospective members and volunteers.</p>
+              <p className="text-slate-400 text-[11px] font-bold uppercase tracking-widest">Review and commission prospective members and volunteers.</p>
             </div>
             
-            <div className="flex gap-2">
+            <div className="flex gap-2 w-full md:w-auto overflow-x-auto no-scrollbar pb-2 md:pb-0">
                {[
                  { label: 'PND', count: stats.pending, color: 'text-amber-400' },
-                 { label: 'APR', count: stats.approved, count_color: 'text-emerald-400' },
-                 { label: 'REJ', count: stats.rejected, count_color: 'text-red-400' },
-                 { label: 'ARC', count: stats.archived, count_color: 'text-blue-400' },
+                 { label: 'APR', count: stats.approved, color: 'text-emerald-400' },
+                 { label: 'REJ', count: stats.rejected, color: 'text-red-400' },
+                 { label: 'ARC', count: stats.archived, color: 'text-blue-400' },
                ].map((s) => (
-                 <div key={s.label} className="bg-white/5 px-4 py-2 rounded-xl border border-white/10 text-center min-w-[70px]">
+                 <div key={s.label} className="bg-white/5 px-4 py-2 rounded-xl border border-white/10 text-center min-w-[70px] flex-1 md:flex-none">
                    <p className="text-[8px] text-slate-500 font-bold uppercase mb-0.5">{s.label}</p>
-                   <p className={cn("text-lg font-bold leading-none", s.color || s.count_color)}>{s.count}</p>
+                   <p className={cn("text-lg font-bold leading-none", s.color)}>{s.count}</p>
                  </div>
                ))}
             </div>
@@ -366,16 +339,14 @@ export default function InternalApplicationsPage() {
       <section className="py-4 border-b bg-white dark:bg-slate-900 sticky top-10 z-30 shadow-sm transition-colors">
         <div className="container mx-auto px-4">
           <div className="flex flex-col lg:flex-row items-center justify-between gap-4">
-            <div className="flex flex-wrap items-center gap-1.5 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
+            <div className="flex w-full md:w-auto overflow-x-auto no-scrollbar items-center gap-1.5 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl border">
                {(['All', 'Pending', 'Approved', 'Rejected', 'Archived'] as AppStatus[]).map((st) => (
                  <button
                    key={st}
                    onClick={() => setActiveFilter(st)}
                    className={cn(
-                     "rounded-lg px-4 font-bold h-8 text-[11px] transition-all",
-                     activeFilter === st 
-                       ? "bg-accent text-primary shadow-sm hover:text-primary" 
-                       : "text-slate-500 hover:bg-slate-200"
+                     "whitespace-nowrap rounded-lg px-4 font-bold h-8 text-[10px] uppercase transition-all",
+                     activeFilter === st ? "bg-accent text-primary shadow-sm" : "text-slate-500 hover:bg-slate-200"
                    )}
                  >
                    {st}
@@ -383,11 +354,11 @@ export default function InternalApplicationsPage() {
                ))}
             </div>
 
-            <div className="relative w-full max-md:max-w-full max-w-md">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <div className="relative w-full max-lg:max-w-full max-w-md">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <Input 
-                placeholder="Search candidates..." 
-                className="pl-9 h-10 rounded-xl border-slate-200 text-xs"
+                placeholder="Search candidates, emails or IDs..." 
+                className="pl-10 h-12 md:h-11 rounded-2xl border-slate-200 text-sm shadow-inner bg-slate-50 dark:bg-slate-950"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
@@ -398,142 +369,126 @@ export default function InternalApplicationsPage() {
 
       <section className="py-8">
         <div className="container mx-auto px-4">
-          {dataLoading ? (
-            <div className="text-center py-20"><Loader2 className="w-10 h-10 animate-spin text-accent mx-auto" /></div>
-          ) : (
-            <div className="grid gap-4">
-              {filtered.map((a: any) => {
-                const gender = (a.gender || '').trim().toLowerCase();
-                let fallback = '/dummy m.png';
-                if (gender === 'female' || gender === 'f' || gender === 'woman') fallback = '/dummy w.png';
-                
-                return (
-                  <Card key={a.id} className="border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 relative group">
-                    <CardContent className="p-0">
-                      <div className="flex flex-col md:flex-row items-stretch">
-                        <div className="p-6 bg-slate-50 dark:bg-slate-800 md:w-56 text-center border-r border-slate-100 flex flex-col items-center justify-center shrink-0">
-                           <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-white shadow-lg mb-3 bg-slate-200">
-                              <Image src={a.photoDataUri || fallback} alt={a.name} fill className="object-cover" />
-                           </div>
-                           <div className="mb-2">
-                              <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">REF ID</p>
-                              <p className="font-bold text-sm tracking-tighter text-primary dark:text-white leading-none">{a.referenceId || 'N/A'}</p>
-                           </div>
-                           <Badge className={cn("text-[8px] font-bold px-2.5 py-0.5 rounded-full uppercase border-none hover:text-white transition-colors", getStatusColor(a.status))}>
-                             {a.status}
-                           </Badge>
-                        </div>
-                        
-                        <div className="flex-1 p-6 grid lg:grid-cols-4 gap-6 items-start">
-                          <div className="lg:col-span-3 space-y-4">
-                            <div className="flex flex-col md:flex-row md:items-center gap-3">
-                              <div className="flex items-center gap-2">
-                                <h3 className="text-xl font-bold text-primary dark:text-white leading-tight">{a.name}</h3>
-                                {a.isRenewal && (
-                                  <Badge className="bg-emerald-500 text-white text-[7px] font-black uppercase tracking-tighter h-4">Renewal</Badge>
-                                )}
-                              </div>
-                              <div className="flex gap-2">
+          <div className="grid gap-4 max-w-5xl mx-auto">
+            {filtered.map((a: any) => {
+              const gender = (a.gender || '').trim().toLowerCase();
+              let fallback = '/dummy m.png';
+              if (gender === 'female' || gender === 'f' || gender === 'woman') fallback = '/dummy w.png';
+              
+              return (
+                <Card key={a.id} className="border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 relative group">
+                  <CardContent className="p-0">
+                    <div className="flex flex-col md:flex-row items-stretch">
+                      <div className="p-6 bg-slate-50 dark:bg-slate-800 md:w-56 text-center border-r border-slate-100 flex flex-col items-center justify-center shrink-0">
+                         <div className="relative w-20 h-20 rounded-full overflow-hidden border-2 border-white shadow-lg mb-3 bg-slate-200">
+                            <Image src={a.photoDataUri || fallback} alt={a.name} fill className="object-cover" />
+                         </div>
+                         <div className="mb-2">
+                            <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">REF ID</p>
+                            <p className="font-bold text-sm tracking-tighter text-primary dark:text-white leading-none">{a.referenceId || 'N/A'}</p>
+                         </div>
+                         <Badge className={cn("text-[9px] font-black uppercase px-3 py-0.5 rounded-full border-none", getStatusColor(a.status))}>
+                           {a.status}
+                         </Badge>
+                      </div>
+                      
+                      <div className="flex-1 p-6 flex flex-col justify-between gap-6">
+                        <div className="space-y-4">
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                            <div className="flex items-center gap-2">
+                              <h3 className="text-xl font-bold text-primary dark:text-white leading-tight">{a.name}</h3>
+                              {a.isRenewal && <Badge className="bg-emerald-500 text-white text-[7px] font-black uppercase h-4 px-2">Renewal</Badge>}
+                            </div>
+                            <div className="flex gap-2">
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                onClick={() => setSelectedAppForDetails(a)}
+                                className="h-8 px-4 text-[10px] font-black uppercase tracking-widest rounded-xl border-2 hover:bg-slate-50"
+                              >
+                                <Eye className="w-3.5 h-3.5 mr-1.5" /> Details
+                              </Button>
+                              {a.status === 'Approved' && (
                                 <Button 
                                   variant="outline" 
                                   size="sm" 
-                                  onClick={() => setSelectedAppForDetails(a)}
-                                  className="h-7 px-3 text-[10px] font-black uppercase tracking-widest text-primary hover:bg-slate-100 transition-all rounded-full"
+                                  onClick={() => handleStartCommissioning(a)}
+                                  className="h-8 px-4 text-[10px] font-black uppercase tracking-widest rounded-xl border-emerald-100 bg-emerald-50/30 text-emerald-600 hover:bg-emerald-100"
                                 >
-                                  <Eye className="w-3 h-3 mr-1.5" /> View Details
+                                  <UserPlus className="w-3.5 h-3.5 mr-1.5" /> Commission
                                 </Button>
-                                {a.status === 'Approved' && (
-                                  <Button 
-                                    variant="outline" 
-                                    size="sm" 
-                                    onClick={() => handleStartCommissioning(a)}
-                                    className="h-7 px-3 text-[10px] font-black uppercase tracking-widest text-emerald-600 border-emerald-100 bg-emerald-50/50 hover:bg-emerald-100 transition-all rounded-full"
-                                  >
-                                    <UserPlus className="w-3 h-3 mr-1.5" /> Convert to New Member
-                                  </Button>
-                                )}
-                              </div>
+                              )}
                             </div>
-                            
-                            <div className="flex flex-wrap gap-3 text-[10px] font-bold text-slate-500 mt-1">
-                                 <span className="flex items-center gap-1"><Mail className="w-2.5 h-2.5 text-accent" /> {a.email}</span>
-                                 <span className="flex items-center gap-1"><Phone className="w-2.5 h-2.5 text-accent" /> {a.phone}</span>
-                                 <span className="flex items-center gap-1"><ShieldCheck className="w-2.5 h-2.5 text-accent" /> {a.memberType}</span>
-                            </div>
-                            
-                            <div className="grid md:grid-cols-2 gap-4">
-                               <div className="bg-slate-50 dark:bg-slate-950 p-4 rounded-2xl border border-slate-100 space-y-2">
-                                  <div>
-                                    <p className="text-[8px] font-bold text-slate-400 uppercase mb-0.5">Education</p>
-                                    <p className="text-[11px] font-bold text-slate-700 dark:text-slate-300">{a.education || 'N/A'}</p>
-                                  </div>
-                                  <div>
-                                    <p className="text-[8px] font-bold text-slate-400 uppercase mb-0.5">Experience</p>
-                                    <p className="text-[11px] font-bold text-slate-700 dark:text-slate-300">{a.experience || 'N/A'}</p>
-                                  </div>
-                               </div>
-                               <div className="bg-slate-50 dark:bg-slate-950 p-4 rounded-2xl border border-slate-100 flex items-center justify-center">
-                                  <p className="text-[10px] leading-relaxed text-slate-500 italic text-center">"{a.address}"</p>
-                               </div>
-                            </div>
-                            
-                            {a.statusUpdateReason && (
-                              <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 flex items-start gap-2">
-                                <MessageSquare className="w-3 h-3 text-slate-400 mt-0.5" />
-                                <p className="text-[10px] text-slate-500 font-medium">Log: {a.statusUpdateReason}</p>
-                              </div>
-                            )}
                           </div>
+                          
+                          <div className="flex flex-wrap gap-4 text-[10px] font-bold text-slate-500 uppercase tracking-wide">
+                               <span className="flex items-center gap-1.5"><Mail className="w-3.5 h-3.5 text-accent" /> {a.email || 'No Email'}</span>
+                               <span className="flex items-center gap-1.5"><Phone className="w-3.5 h-3.5 text-accent" /> {a.phone}</span>
+                               <span className="flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5 text-accent" /> {a.memberType}</span>
+                          </div>
+                          
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                             <div className="bg-slate-50 dark:bg-slate-950 p-4 rounded-2xl border border-slate-100">
+                                <div className="space-y-2">
+                                  <p className="text-[8px] font-bold text-slate-400 uppercase leading-none">Education</p>
+                                  <p className="text-xs font-bold text-slate-700 dark:text-slate-300">{a.education || 'N/A'}</p>
+                                  <div className="h-px bg-slate-200 dark:bg-slate-800 my-1"></div>
+                                  <p className="text-[8px] font-bold text-slate-400 uppercase leading-none">Experience</p>
+                                  <p className="text-xs font-bold text-slate-700 dark:text-slate-300">{a.experience || 'N/A'}</p>
+                                </div>
+                             </div>
+                             <div className="bg-slate-50 dark:bg-slate-950 p-4 rounded-2xl border border-slate-100 flex items-center justify-center text-center">
+                                <p className="text-[11px] leading-relaxed text-slate-500 italic font-medium">"{a.address}"</p>
+                             </div>
+                          </div>
+                        </div>
 
-                          <div className="flex flex-col items-end gap-2 h-full justify-center">
-                            <div className="w-full space-y-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest text-center mb-1">Update Status</p>
-                              <div className="grid grid-cols-2 gap-2">
-                                <Button 
-                                  size="sm" 
-                                  onClick={() => setActionDialog({ open: true, status: 'Approved', applicationId: a.id, reason: '' })} 
-                                  className="bg-emerald-500 text-white font-bold h-8 rounded-lg text-[9px] hover:bg-emerald-600 hover:text-white px-1"
-                                >
-                                  <Check className="w-2.5 h-2.5 mr-1" /> Approve
-                                </Button>
-                                <Button 
-                                  size="sm" 
-                                  onClick={() => setActionDialog({ open: true, status: 'Rejected', applicationId: a.id, reason: '' })} 
-                                  className="bg-red-500 text-white font-bold h-8 rounded-lg text-[9px] hover:bg-red-600 hover:text-white px-1"
-                                >
-                                  <X className="w-2.5 h-2.5 mr-1" /> Reject
-                                </Button>
-                                <Button 
-                                  size="sm" 
-                                  onClick={() => setActionDialog({ open: true, status: 'Archived', applicationId: a.id, reason: '' })} 
-                                  className="bg-blue-500 text-white font-bold h-8 rounded-lg text-[9px] hover:bg-blue-600 hover:text-white px-1"
-                                >
-                                  <Archive className="w-2.5 h-2.5 mr-1" /> Archive
-                                </Button>
-                                <Button 
-                                  size="sm" 
-                                  onClick={() => setActionDialog({ open: true, status: 'Pending', applicationId: a.id, reason: '' })} 
-                                  className="bg-amber-500 text-white font-bold h-8 rounded-lg text-[9px] hover:bg-amber-600 hover:text-white px-1"
-                                >
-                                  <Clock className="w-2.5 h-2.5 mr-1" /> Pending
-                                </Button>
-                              </div>
-                            </div>
+                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-3 pt-4 border-t border-slate-50 dark:border-slate-800">
+                          <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest hidden sm:block">Decision Console:</p>
+                          <div className="grid grid-cols-2 sm:flex gap-2">
+                            <Button size="sm" onClick={() => setActionDialog({ open: true, status: 'Approved', applicationId: a.id, reason: '' })} className="bg-emerald-500 text-white font-bold h-9 rounded-xl text-[9px] uppercase tracking-widest flex-1">Approve</Button>
+                            <Button size="sm" onClick={() => setActionDialog({ open: true, status: 'Rejected', applicationId: a.id, reason: '' })} className="bg-red-500 text-white font-bold h-9 rounded-xl text-[9px] uppercase tracking-widest flex-1">Reject</Button>
+                            <Button size="sm" onClick={() => setActionDialog({ open: true, status: 'Archived', applicationId: a.id, reason: '' })} className="bg-blue-500 text-white font-bold h-9 rounded-xl text-[9px] uppercase tracking-widest flex-1">Archive</Button>
+                            <Button size="sm" onClick={() => setActionDialog({ open: true, status: 'Pending', applicationId: a.id, reason: '' })} className="bg-amber-500 text-white font-bold h-9 rounded-xl text-[9px] uppercase tracking-widest flex-1">Pending</Button>
                           </div>
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
-                )
-              })}
-            </div>
-          )}
+                    </div>
+                  </CardContent>
+                </Card>
+              )
+            })}
+            {filtered.length === 0 && (
+              <div className="text-center py-32 opacity-30"><Users className="w-20 h-20 mx-auto mb-6" /><p className="text-xl font-headline font-bold uppercase tracking-widest">Registry Empty</p></div>
+            )}
+          </div>
         </div>
       </section>
 
+      {/* Action Dialog */}
+      <Dialog open={actionDialog.open} onOpenChange={(val) => setActionDialog(prev => ({...prev, open: val}))}>
+        <DialogContent className="max-w-md rounded-[2.5rem] border-none shadow-2xl w-[95vw]">
+           <DialogHeader>
+              <DialogTitle className="text-2xl font-headline font-bold">Action: {actionDialog.status}</DialogTitle>
+              <DialogDescription className="text-xs font-bold uppercase tracking-widest text-slate-400">Decision Audit Documentation</DialogDescription>
+           </DialogHeader>
+           <div className="py-6 space-y-4">
+              <div className="space-y-1.5">
+                 <Label className="text-[10px] font-bold uppercase text-slate-500">Official Justification</Label>
+                 <Textarea value={actionDialog.reason} onChange={e => setActionDialog({...actionDialog, reason: e.target.value})} placeholder="Provide administrative reasoning for this decision..." className="min-h-[120px] rounded-2xl" />
+              </div>
+           </div>
+           <DialogFooter>
+              <Button onClick={handleUpdateStatus} disabled={isActionLoading} className="w-full h-14 rounded-2xl bg-primary text-white font-bold text-lg hover:bg-secondary">
+                {isActionLoading ? <Loader2 className="animate-spin" /> : "Commit Decision"}
+              </Button>
+           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* View Details Dialog */}
       <Dialog open={!!selectedAppForDetails} onOpenChange={(open) => !open && setSelectedAppForDetails(null)}>
-        <DialogContent className="max-w-4xl p-0 border-none shadow-2xl rounded-[2.5rem] overflow-hidden bg-white dark:bg-slate-950 flex flex-col [&>button]:hidden max-h-[90vh]">
+        <DialogContent className="max-w-4xl p-0 border-none shadow-2xl rounded-[2.5rem] overflow-hidden bg-white dark:bg-slate-950 flex flex-col [&>button]:hidden w-[95vw] max-h-[90vh]">
           <DialogHeader className="sr-only">
             <DialogTitle>Applicant Profile: {selectedAppForDetails?.name}</DialogTitle>
             <DialogDescription>Full application data for vetting.</DialogDescription>
@@ -548,171 +503,135 @@ export default function InternalApplicationsPage() {
           {selectedAppForDetails && (
             <div className="flex-1 overflow-y-auto custom-scrollbar">
               <div className="flex flex-col">
-                <div className="relative bg-slate-900 p-12 md:p-16 text-white overflow-hidden border-b-8 border-accent/20">
+                <div className="relative bg-slate-900 p-8 md:p-16 text-white overflow-hidden border-b-8 border-accent/20">
                   <div className="absolute top-0 right-0 opacity-10 pointer-events-none transform translate-x-12 translate-y-[-20px]"><ShieldCheck className="w-64 h-64 md:w-96 md:h-96" /></div>
                   <div className="relative z-10 flex flex-col md:flex-row items-center gap-8">
                     <div className="relative w-32 h-32 md:w-40 md:h-40 rounded-[2rem] overflow-hidden border-4 border-white/20 shadow-2xl bg-slate-800">
-                      <Image 
-                        src={selectedAppForDetails.photoDataUri || (selectedAppForDetails.gender?.trim().toLowerCase() === 'female' || selectedAppForDetails.gender?.trim().toLowerCase() === 'f' ? '/dummy w.png' : '/dummy m.png')} 
-                        alt={selectedAppForDetails.name} 
-                        fill 
-                        className="object-cover" 
-                      />
+                      <Image src={selectedAppForDetails.photoDataUri || '/dummy m.png'} alt={selectedAppForDetails.name} fill className="object-cover" />
                     </div>
                     <div className="space-y-2 text-center md:text-left">
                       <div className="inline-flex items-center gap-2 bg-accent/20 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/20">
                         <BadgeCheck className="w-4 h-4 text-accent" />
                         <span className="text-[10px] font-black uppercase tracking-[0.2em] text-accent">{selectedAppForDetails.memberType} Candidate</span>
                       </div>
-                      <h2 className="text-4xl md:text-6xl font-headline font-bold drop-shadow-xl">{selectedAppForDetails.name}</h2>
-                      <div className="flex items-center gap-4">
-                        <p className="text-white/60 font-bold uppercase tracking-widest text-xs flex items-center justify-center md:justify-start gap-2">
-                          <Hash className="w-3.5 h-3.5" /> {selectedAppForDetails.referenceId}
-                        </p>
-                        {selectedAppForDetails.isRenewal && (
-                          <Badge className="bg-emerald-500 text-white text-[8px] font-black h-5 px-3">TERM RENEWAL</Badge>
-                        )}
-                      </div>
+                      <h2 className="text-3xl md:text-6xl font-headline font-bold drop-shadow-xl">{selectedAppForDetails.name}</h2>
+                      <p className="text-white/60 font-bold uppercase tracking-widest text-[10px] md:text-xs">Ref: {selectedAppForDetails.referenceId}</p>
                     </div>
                   </div>
                 </div>
 
-                <div className="p-8 md:p-16 space-y-12 pb-24">
-                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div className="p-6 md:p-16 space-y-12 pb-24">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                      <div className="space-y-4">
-                        <h4 className="text-[10px] font-black uppercase tracking-widest text-accent flex items-center gap-2"><Phone className="w-3 h-3" /> Contact Protocol</h4>
+                        <h4 className="text-[10px] font-black uppercase tracking-widest text-accent flex items-center gap-2"><Phone className="w-3 h-3" /> Contact Info</h4>
                         <div className="space-y-3">
-                           <div className="p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800">
-                              <p className="text-[8px] font-bold text-slate-400 uppercase mb-1">Official Mobile</p>
-                              <p className="text-sm font-bold text-primary dark:text-white">{selectedAppForDetails.phone}</p>
+                           <div className="p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100">
+                              <p className="text-[8px] font-bold text-slate-400 uppercase mb-1">Mobile</p>
+                              <p className="text-sm font-bold">{selectedAppForDetails.phone}</p>
                            </div>
-                           <div className="p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800">
-                              <p className="text-[8px] font-bold text-slate-400 uppercase mb-1">Email ID</p>
-                              <p className="text-sm font-bold text-primary dark:text-white truncate">{selectedAppForDetails.email || 'Not Provided'}</p>
+                           <div className="p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100">
+                              <p className="text-[8px] font-bold text-slate-400 uppercase mb-1">Email</p>
+                              <p className="text-sm font-bold truncate">{selectedAppForDetails.email || 'N/A'}</p>
                            </div>
                         </div>
                      </div>
-
                      <div className="space-y-4">
-                        <h4 className="text-[10px] font-black uppercase tracking-widest text-accent flex items-center gap-2"><MapPin className="w-3 h-3" /> Jurisdictional Scope</h4>
+                        <h4 className="text-[10px] font-black uppercase tracking-widest text-accent flex items-center gap-2"><MapPin className="w-3 h-3" /> Jurisdiction</h4>
                         <div className="space-y-3">
-                           <div className="p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800">
-                              <p className="text-[8px] font-bold text-slate-400 uppercase mb-1">Operational Level</p>
-                              <p className="text-sm font-bold text-primary dark:text-white">{selectedAppForDetails.level} Council</p>
+                           <div className="p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100">
+                              <p className="text-[8px] font-bold text-slate-400 uppercase mb-1">Level</p>
+                              <p className="text-sm font-bold">{selectedAppForDetails.level} Council</p>
                            </div>
-                           <div className="p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800">
-                              <p className="text-[8px] font-bold text-slate-400 uppercase mb-1">Assigned Region</p>
-                              <p className="text-sm font-bold text-primary dark:text-white">
-                                 {selectedAppForDetails.districtName ? `${selectedAppForDetails.districtName}, ` : ''}{selectedAppForDetails.stateName || 'National Center'}
-                              </p>
+                           <div className="p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100">
+                              <p className="text-[8px] font-bold text-slate-400 uppercase mb-1">Region</p>
+                              <p className="text-sm font-bold">{selectedAppForDetails.districtName ? `${selectedAppForDetails.districtName}, ` : ''}{selectedAppForDetails.stateName || 'National'}</p>
                            </div>
                         </div>
                      </div>
-
                      <div className="space-y-4">
-                        <h4 className="text-[10px] font-black uppercase tracking-widest text-accent flex items-center gap-2"><Briefcase className="w-3 h-3" /> Credentials</h4>
+                        <h4 className="text-[10px] font-black uppercase tracking-widest text-accent flex items-center gap-2"><Briefcase className="w-3 h-3" /> Documents</h4>
                         <div className="space-y-3">
-                           <div className="p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800">
-                              <p className="text-[8px] font-bold text-slate-400 uppercase mb-1">Primary Aadhaar</p>
-                              <p className="text-sm font-bold text-primary dark:text-white font-mono tracking-tighter">{selectedAppForDetails.aadhaar || 'Pending Verification'}</p>
+                           <div className="p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100">
+                              <p className="text-[8px] font-bold text-slate-400 uppercase mb-1">Aadhaar</p>
+                              <p className="text-sm font-bold font-mono">{selectedAppForDetails.aadhaar}</p>
                            </div>
-                           <div className="p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800">
-                              <p className="text-[8px] font-bold text-slate-400 uppercase mb-1">Permanent PAN</p>
-                              <p className="text-sm font-bold text-primary dark:text-white font-mono uppercase">{selectedAppForDetails.pan || 'N/A'}</p>
+                           <div className="p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100">
+                              <p className="text-[8px] font-bold text-slate-400 uppercase mb-1">PAN</p>
+                              <p className="text-sm font-bold font-mono uppercase">{selectedAppForDetails.pan || 'N/A'}</p>
                            </div>
                         </div>
                      </div>
                   </div>
 
-                  <div className="grid md:grid-cols-2 gap-8">
-                     <div className="space-y-6">
-                        <h4 className="text-[10px] font-black uppercase tracking-widest text-primary dark:text-white flex items-center gap-2"><GraduationCap className="w-4 h-4 text-emerald-500" /> Education & Background</h4>
-                        <div className="bg-slate-50 dark:bg-slate-900 p-8 rounded-[2rem] border border-slate-100 dark:border-slate-800 space-y-6">
-                           <div>
-                              <p className="text-[9px] font-bold text-slate-400 uppercase mb-2">Academic Qualifications</p>
-                              <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed font-medium">"{selectedAppForDetails.education || 'Data missing from application profile.'}"</p>
-                           </div>
-                           <div className="h-px bg-slate-200 dark:bg-slate-800"></div>
-                           <div>
-                              <p className="text-[9px] font-bold text-slate-400 uppercase mb-2">Professional Experience</p>
-                              <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed font-medium">"{selectedAppForDetails.experience || 'No experience recorded.'}"</p>
-                           </div>
-                        </div>
-                     </div>
-
-                     <div className="space-y-6">
-                        <h4 className="text-[10px] font-black uppercase tracking-widest text-primary dark:text-white flex items-center gap-2"><Home className="w-4 h-4 text-indigo-500" /> Verified Residence</h4>
-                        <div className="bg-white dark:bg-slate-900 p-8 rounded-[2rem] border-2 border-slate-100 dark:border-slate-800 shadow-sm space-y-6">
-                           <div className="flex gap-4">
-                              <MapPin className="w-5 h-5 text-accent shrink-0 mt-1" />
-                              <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed italic">"{selectedAppForDetails.address}"</p>
-                           </div>
-                           <div className="grid grid-cols-3 gap-4 pt-4 border-t border-slate-100">
-                              <div><p className="text-[8px] font-bold text-slate-400 uppercase">Post Office</p><p className="text-xs font-bold">{selectedAppForDetails.postOffice}</p></div>
-                              <div><p className="text-[8px] font-bold text-slate-400 uppercase">Police Station</p><p className="text-xs font-bold">{selectedAppForDetails.policeStation}</p></div>
-                              <div><p className="text-[8px] font-bold text-slate-400 uppercase">PIN Code</p><p className="text-xs font-mono font-bold">{selectedAppForDetails.pinCode}</p></div>
-                           </div>
-                        </div>
+                  <div className="space-y-6">
+                     <h4 className="text-[10px] font-black uppercase tracking-widest text-primary dark:text-white flex items-center gap-2"><Scale className="w-4 h-4 text-emerald-500" /> Background Context</h4>
+                     <div className="bg-slate-50 dark:bg-slate-900 p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 space-y-6">
+                        <div><p className="text-[8px] font-bold text-slate-400 uppercase mb-2">Academic Qualifications</p><p className="text-sm font-medium leading-relaxed">"{selectedAppForDetails.education || 'N/A'}"</p></div>
+                        <div className="h-px bg-slate-200 dark:bg-slate-800"></div>
+                        <div><p className="text-[8px] font-bold text-slate-400 uppercase mb-2">Professional Summary</p><p className="text-sm font-medium leading-relaxed">"{selectedAppForDetails.experience || 'N/A'}"</p></div>
                      </div>
                   </div>
 
-                  <div className="bg-slate-950 p-10 rounded-[3rem] text-white space-y-8 relative overflow-hidden">
-                     <div className="absolute top-0 right-0 w-48 h-48 bg-accent/10 rounded-full -mr-24 -mt-24 blur-3xl"></div>
-                     <h4 className="text-[10px] font-black uppercase tracking-widest text-accent flex items-center gap-2"><Gavel className="w-4 h-4" /> Legal Affirmations & Metadata</h4>
-                     <div className="grid md:grid-cols-2 gap-10">
-                        <div className="space-y-4">
-                           <div className="flex items-start gap-4">
-                              <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0 mt-1" />
-                              <div className="space-y-1">
-                                 <p className="text-xs font-bold">Affidavit: No Criminal Record</p>
-                                 <p className="text-[10px] text-slate-400 leading-relaxed">The applicant has formally declared that they possess no prior criminal background or human rights violations.</p>
-                              </div>
-                           </div>
-                           <div className="flex items-start gap-4">
-                              <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0 mt-1" />
-                              <div className="space-y-1">
-                                 <p className="text-xs font-bold">Institutional Declaration</p>
-                                 <p className="text-[10px] text-slate-400 leading-relaxed">The applicant has agreed to abide by organizational rules and accepts the Trust's suspension policy.</p>
-                              </div>
-                           </div>
-                        </div>
-                        <div className="space-y-4 bg-white/5 p-6 rounded-2xl border border-white/10">
-                           <div className="flex justify-between items-center text-[10px] font-bold">
-                              <span className="text-slate-500 uppercase">Application Date</span>
-                              <span>{selectedAppForDetails.createdAt?.toDate ? selectedAppForDetails.createdAt.toDate().toLocaleDateString() : 'Real-time Entry'}</span>
-                           </div>
-                           <div className="flex justify-between items-center text-[10px] font-bold">
-                              <span className="text-slate-500 uppercase">Membership Term</span>
-                              <span className="text-accent">{selectedAppForDetails.membershipDuration}</span>
-                           </div>
-                           <div className="flex justify-between items-center text-[10px] font-bold">
-                              <span className="text-slate-500 uppercase">Gender</span>
-                              <span>{selectedAppForDetails.gender}</span>
-                           </div>
-                           <div className="flex justify-between items-center text-[10px] font-bold">
-                              <span className="text-slate-500 uppercase">Blood Group</span>
-                              <span className="text-red-400">{selectedAppForDetails.bloodGroup || 'N/A'}</span>
-                           </div>
-                        </div>
-                     </div>
-                  </div>
-
-                  <div className="pt-8 flex flex-col gap-4 items-center">
-                    <Button 
-                      size="lg" 
-                      onClick={() => setSelectedAppForDetails(null)}
-                      className="w-full bg-primary text-primary-foreground font-bold h-16 rounded-2xl text-lg hover:bg-secondary transition-all shadow-xl shadow-primary/20"
-                    >
-                      Close Profile
-                    </Button>
-                    <p className="text-center text-[10px] font-bold text-slate-400 uppercase tracking-[0.25em] mt-4">
-                      Official Personnel Application • Human Rights Affairs Trust
-                    </p>
+                  <div className="pt-8 flex flex-col gap-4">
+                    <Button size="lg" onClick={() => setSelectedAppForDetails(null)} className="w-full h-16 rounded-2xl bg-primary text-white font-bold text-lg hover:bg-secondary transition-all shadow-xl">Close Profile</Button>
+                    <p className="text-center text-[9px] font-black text-slate-400 uppercase tracking-[0.4em]">Official National Vetting Node • HRAT INDIA</p>
                   </div>
                 </div>
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Commissioning Dialog */}
+      <Dialog open={isCommissioningOpen} onOpenChange={setIsCommissioningOpen}>
+        <DialogContent className="max-w-2xl rounded-[2.5rem] border-none shadow-2xl w-[95vw] max-h-[95vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-headline font-bold text-primary dark:text-white">Final Commissioning</DialogTitle>
+            <DialogDescription className="text-xs font-bold uppercase text-slate-400">Personnel Registry Data Entry</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-1.5">
+                   <Label className="text-[10px] font-bold uppercase text-slate-400">Commissioned Name</Label>
+                   <div className="flex gap-2">
+                      <Select value={newMember.honorific} onValueChange={val => setNewMember({...newMember, honorific: val})}>
+                        <SelectTrigger className="w-20 rounded-xl h-11"><SelectValue placeholder="Ti" /></SelectTrigger>
+                        <SelectContent position="popper" className="z-[1000001] bg-white">{["Mr.", "Ms.", "Mrs.", "Dr.", "Adv.", "Prof.", "Hon."].map(h => <SelectItem key={h} value={h}>{h}</SelectItem>)}</SelectContent>
+                      </Select>
+                      <Input value={newMember.name} onChange={e => setNewMember({...newMember, name: e.target.value})} className="h-11 rounded-xl flex-1" />
+                   </div>
+                </div>
+                <div className="space-y-1.5">
+                   <Label className="text-[10px] font-bold uppercase text-slate-400">Member ID *</Label>
+                   <Input value={newMember.memberId} onChange={e => setNewMember({...newMember, memberId: e.target.value.toUpperCase()})} className="h-11 rounded-xl font-mono" />
+                </div>
+             </div>
+             
+             <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-1.5"><Label className="text-[10px] font-bold uppercase text-slate-400">Term</Label><Select value={newMember.membershipDuration} onValueChange={v => setNewMember({...newMember, membershipDuration: v})}><SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger><SelectContent position="popper" className="z-[1000001] bg-white">{(["1 Year", "2 Years", "3 Years"]).map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent></Select></div>
+                <div className="space-y-1.5"><Label className="text-[10px] font-bold uppercase text-slate-400">Expiry Date</Label><Input disabled value={newMember.expiryDate} className="h-11 rounded-xl bg-slate-50" /></div>
+             </div>
+
+             <div className="space-y-6 pt-4 border-t border-slate-100">
+                <div className="grid md:grid-cols-2 gap-6">
+                   <div className="space-y-1.5">
+                      <Label className="text-[10px] font-bold uppercase text-slate-400">Designation Category</Label>
+                      <Select value={newMember.designationCategory} onValueChange={(val: any) => setNewMember({...newMember, designationCategory: val, designation: val === 'Office-bearing Member' ? '' : val})}>
+                        <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
+                        <SelectContent position="popper" className="z-[1000001] bg-white">{["General Member", "Board Member", "Office-bearing Member", "Volunteer"].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+                      </Select>
+                   </div>
+                   {newMember.designationCategory === 'Office-bearing Member' && (
+                     <div className="space-y-1.5 animate-in fade-in slide-in-from-left-2"><Label className="text-[10px] font-bold uppercase text-slate-400">Specific Designation</Label><Input value={newMember.designation} onChange={e => setNewMember({...newMember, designation: e.target.value})} className="h-11 rounded-xl" /></div>
+                   )}
+                </div>
+             </div>
+
+             <Button onClick={handleAddMember} disabled={isAddingMember} className="w-full h-14 rounded-2xl bg-emerald-600 text-white font-bold text-lg hover:bg-emerald-700">
+               {isAddingMember ? <Loader2 className="animate-spin" /> : "Verify & Commission Personnel"}
+             </Button>
+          </div>
         </DialogContent>
       </Dialog>
 

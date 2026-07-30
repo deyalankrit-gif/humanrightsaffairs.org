@@ -77,21 +77,21 @@ export default function FinanceDashboard() {
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-20">
-      <header className="pt-10 pb-8 bg-slate-900 text-white border-b-8 border-emerald-500/20 relative overflow-hidden">
+      <header className="pt-10 md:pt-16 pb-8 bg-slate-900 text-white border-b-8 border-emerald-500/20 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-1/3 h-full bg-emerald-500/5 -skew-x-12"></div>
         <div className="container mx-auto px-4 relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="space-y-1 text-center md:text-left">
             <div className="inline-flex items-center gap-2 bg-emerald-500/20 text-emerald-400 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.2em] border border-emerald-500/30">
               <ShieldCheck className="w-3 h-3" /> Treasury Governance
             </div>
-            <h1 className="text-3xl md:text-5xl font-headline font-bold">Financial <span className="text-emerald-400 italic">Intelligence</span></h1>
+            <h1 className="text-3xl md:text-5xl font-headline font-bold leading-tight">Financial <span className="text-emerald-400 italic">Intelligence</span></h1>
             <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">Enterprise Fund Oversight Node</p>
           </div>
-          <div className="flex gap-2">
-            <Button variant="outline" className="bg-white/5 border-white/10 text-white hover:bg-emerald-600 transition-all font-bold text-xs h-11 px-6 rounded-xl">
+          <div className="flex flex-col sm:flex-row w-full md:w-auto gap-3">
+            <Button variant="outline" className="flex-1 md:flex-none bg-white/5 border-white/10 text-white hover:bg-emerald-600 transition-all font-bold text-[10px] uppercase h-12 md:h-11 px-6 rounded-xl">
               <FileSpreadsheet className="w-4 h-4 mr-2" /> Annual Report
             </Button>
-            <Button className="bg-emerald-600 text-white hover:bg-emerald-500 shadow-xl shadow-emerald-900/20 font-bold text-xs h-11 px-6 rounded-xl">
+            <Button className="flex-1 md:flex-none bg-emerald-600 text-white hover:bg-emerald-500 shadow-xl shadow-emerald-900/20 font-bold text-[10px] uppercase h-12 md:h-11 px-6 rounded-xl">
               <Download className="w-4 h-4 mr-2" /> Export Ledgers
             </Button>
           </div>
@@ -99,7 +99,7 @@ export default function FinanceDashboard() {
       </header>
 
       <section className="py-8 container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
           {[
             { label: 'Net Treasury Balance', val: stats.net, icon: Wallet, color: 'text-blue-500', trend: '+5.2%', up: true },
             { label: 'Total Mission Income', val: stats.income, icon: TrendingUp, color: 'text-emerald-500', trend: '+12.4%', up: true },
@@ -117,22 +117,22 @@ export default function FinanceDashboard() {
                       {stat.trend}
                     </Badge>
                  </div>
-                 <p className="text-3xl font-headline font-bold text-primary dark:text-white mb-1">₹{stat.val.toLocaleString()}</p>
+                 <p className="text-2xl md:text-3xl font-headline font-bold text-primary dark:text-white mb-1">₹{stat.val.toLocaleString()}</p>
                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">{stat.label}</p>
               </CardContent>
             </Card>
           ))}
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-8 mt-10">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8 mt-10">
           <Card className="lg:col-span-2 border-none shadow-sm rounded-[2.5rem] overflow-hidden bg-white dark:bg-slate-900">
-            <CardHeader className="p-8 pb-0">
+            <CardHeader className="p-6 md:p-8 pb-0">
                <CardTitle className="text-xl font-headline font-bold flex items-center gap-3">
                  <RefreshCw className="w-5 h-5 text-emerald-500" /> Operational Cash Flow
                </CardTitle>
                <CardDescription>Monthly Income vs. Expenditure Analysis</CardDescription>
             </CardHeader>
-            <CardContent className="h-[400px] p-8">
+            <CardContent className="h-[300px] md:h-[400px] p-4 md:p-8">
                <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={stats.charts}>
                     <defs>
@@ -160,13 +160,13 @@ export default function FinanceDashboard() {
           </Card>
 
           <Card className="border-none shadow-sm rounded-[2.5rem] overflow-hidden bg-white dark:bg-slate-900">
-            <CardHeader className="p-8 pb-0">
+            <CardHeader className="p-6 md:p-8 pb-0">
                <CardTitle className="text-xl font-headline font-bold flex items-center gap-3">
                  <Layers className="w-5 h-5 text-emerald-500" /> Fund Utilization
                </CardTitle>
                <CardDescription>Expenditure Distribution by Category</CardDescription>
             </CardHeader>
-            <CardContent className="h-[300px] p-8">
+            <CardContent className="h-[250px] md:h-[300px] p-6 md:p-8">
                <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
@@ -174,7 +174,7 @@ export default function FinanceDashboard() {
                       cx="50%"
                       cy="50%"
                       innerRadius={60}
-                      outerRadius={100}
+                      outerRadius={90}
                       paddingAngle={5}
                       dataKey="value"
                     >
@@ -185,11 +185,11 @@ export default function FinanceDashboard() {
                     <Tooltip />
                   </PieChart>
                </ResponsiveContainer>
-               <div className="grid grid-cols-2 gap-2 mt-4">
+               <div className="grid grid-cols-2 gap-3 mt-6">
                   {stats.pie.map((entry: any, i: number) => (
-                    <div key={i} className="flex items-center gap-2 text-[10px] font-bold uppercase text-slate-500">
-                       <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }}></div>
-                       <span>{entry.name}</span>
+                    <div key={i} className="flex items-center gap-2 text-[9px] font-bold uppercase text-slate-500">
+                       <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: entry.color }}></div>
+                       <span className="truncate">{entry.name}</span>
                     </div>
                   ))}
                </div>
@@ -198,37 +198,36 @@ export default function FinanceDashboard() {
         </div>
 
         <Card className="mt-10 border-none shadow-sm rounded-[2.5rem] overflow-hidden bg-white dark:bg-slate-900">
-           <CardHeader className="p-8 border-b border-slate-50 dark:border-slate-800">
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="text-xl font-headline font-bold">Recent Institutional Ledger</CardTitle>
-                  <CardDescription>The latest validated financial financial movements across all councils.</CardDescription>
-                </div>
-                <Button variant="ghost" onClick={() => router.push('/internal/finance/ledger')} className="text-xs font-bold text-emerald-600 uppercase tracking-widest">
-                  View Full Ledger <ArrowUpRight className="w-4 h-4 ml-1" />
-                </Button>
+           <CardHeader className="p-6 md:p-8 border-b border-slate-50 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="text-center sm:text-left">
+                <CardTitle className="text-xl font-headline font-bold">Recent Institutional Ledger</CardTitle>
+                <CardDescription>The latest validated financial movements across all councils.</CardDescription>
               </div>
+              <Button variant="ghost" onClick={() => router.push('/internal/finance/ledger')} className="w-full sm:w-auto h-10 rounded-xl text-[10px] font-black uppercase tracking-widest text-emerald-600 gap-2 border border-emerald-100 hover:bg-emerald-50">
+                View Full Ledger <ArrowUpRight className="w-4 h-4" />
+              </Button>
            </CardHeader>
-           <CardContent className="p-0 overflow-x-auto">
-              <table className="w-full text-left">
-                <thead className="bg-slate-50 dark:bg-slate-800/50 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b dark:border-slate-800">
-                  <tr>
-                    <th className="px-8 py-5">Voucher</th>
-                    <th className="px-8 py-5">Transaction Details</th>
-                    <th className="px-8 py-5">Amount</th>
-                    <th className="px-8 py-5">Status</th>
-                    <th className="px-8 py-5 text-right">Date</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
-                   {(recentTransactions || []).map((tx: any) => (
-                     <tr key={tx.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
+           <CardContent className="p-0">
+              <div className="overflow-x-auto w-full">
+                <table className="w-full text-left min-w-[700px]">
+                  <thead className="bg-slate-50 dark:bg-slate-800/50 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b dark:border-slate-800">
+                    <tr>
+                      <th className="px-8 py-5">Voucher</th>
+                      <th className="px-8 py-5">Transaction Details</th>
+                      <th className="px-8 py-5">Amount</th>
+                      <th className="px-8 py-5">Status</th>
+                      <th className="px-8 py-5 text-right">Date</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
+                    {(recentTransactions || []).map((tx: any) => (
+                      <tr key={tx.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
                         <td className="px-8 py-6">
-                           <Badge variant="outline" className="font-mono text-[11px] border-emerald-100 text-emerald-600">{tx.voucherNo}</Badge>
+                           <Badge variant="outline" className="font-mono text-[10px] border-emerald-100 text-emerald-600 uppercase">{tx.voucherNo}</Badge>
                         </td>
                         <td className="px-8 py-6">
                            <p className="text-sm font-bold text-primary dark:text-white leading-none">{tx.particulars}</p>
-                           <p className="text-[10px] text-slate-400 font-bold uppercase mt-1">{tx.account} • {tx.paymentMethod}</p>
+                           <p className="text-[10px] text-slate-400 font-bold uppercase mt-1.5">{tx.account} • {tx.paymentMethod}</p>
                         </td>
                         <td className="px-8 py-6">
                            <span className={cn("text-lg font-black", tx.type === 'Income' ? 'text-emerald-500' : 'text-rose-500')}>
@@ -243,21 +242,22 @@ export default function FinanceDashboard() {
                              {tx.status}
                            </Badge>
                         </td>
-                        <td className="px-8 py-6 text-right text-[11px] font-bold text-slate-500">
+                        <td className="px-8 py-6 text-right text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                            {tx.date}
                         </td>
-                     </tr>
-                   ))}
-                   {(!recentTransactions || recentTransactions.length === 0) && !txLoading && (
-                     <tr>
-                       <td colSpan={5} className="py-20 text-center opacity-30">
-                          <IndianRupee className="w-12 h-12 mx-auto mb-4" />
-                          <p className="text-sm font-bold uppercase tracking-widest">No active transactions in the current cycle.</p>
-                       </td>
-                     </tr>
-                   )}
-                </tbody>
-              </table>
+                      </tr>
+                    ))}
+                    {(!recentTransactions || recentTransactions.length === 0) && !txLoading && (
+                      <tr>
+                        <td colSpan={5} className="py-24 text-center opacity-30">
+                           <IndianRupee className="w-16 h-16 mx-auto mb-4" />
+                           <p className="text-sm font-black uppercase tracking-[0.3em]">Ledger Cycle Idle</p>
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
            </CardContent>
         </Card>
       </section>
