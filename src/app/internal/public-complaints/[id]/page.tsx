@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useEffect, useState, useMemo } from 'react'
@@ -25,7 +24,8 @@ import {
   Plus, X, Send, Network, Target, BookOpenCheck, FileAudio, FileIcon, Video,
   RefreshCw, MailCheck, MailWarning, MailQuestion,
   UserRoundCheck,
-  UserPlus
+  UserPlus,
+  Users
 } from 'lucide-react'
 import {
   Dialog,
@@ -95,7 +95,6 @@ export default function CaseHubPage() {
     if (caseData?.assignedOfficers) {
       setOfficers(caseData.assignedOfficers);
     } else if (caseData?.assignedTo) {
-      // Migrate legacy single assignment if necessary
       setOfficers([{
         name: caseData.assignedTo,
         phone: '',
@@ -105,7 +104,6 @@ export default function CaseHubPage() {
     }
   }, [caseData?.assignedOfficers, caseData?.assignedTo]);
 
-  // Utility: Dispatches the automated email update and logs it
   const dispatchEmailUpdate = async (action: string, remark: string) => {
     if (!caseData?.email || !caseData?.fullName || !docRef || !user) return null;
     
@@ -194,7 +192,6 @@ export default function CaseHubPage() {
 
       await updateDoc(docRef, { 
         assignedOfficers: activeOfficers,
-        // Keep assignedTo as the first name for legacy compatibility
         assignedTo: activeOfficers.length > 0 ? activeOfficers[0].name : '',
         assignedAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
@@ -427,6 +424,64 @@ export default function CaseHubPage() {
     reader.readAsDataURL(file);
   };
 
+  const handleManualEmailReport = async () => {
+    if (!caseData?.email || !user) return;
+    setIsActionLoading(true);
+    const reportLabel = REPORT_TEMPLATES.find(t => t.id === selectedReportType)?.label || selectedReportType;
+    
+    try {
+      const result = await sendReportEmail({
+        recipientEmail: caseData.email,
+        recipientName: caseData.fullName,
+        caseId: caseData.caseId || caseData.token,
+        reportType: reportLabel,
+        senderEmail: user.email!
+      });
+
+      const emailLogEntry = {
+        timestamp: new Date().toLocaleString('en-IN'),
+        subject: `Formal Report: ${reportLabel}`,
+        recipient: caseData.email,
+        status: result.success ? 'Success' : 'Failed',
+        sender: user.email,
+        traceId: result.traceId,
+        type: 'Manual-Report',
+        error: result.error || null
+      };
+
+      await updateDoc(docRef, {
+        emailLogs: arrayUnion(emailLogEntry)
+      });
+
+      if (result.success) {
+        toast({ title: "Report Transmitted" });
+      } else {
+        throw new Error(result.error);
+      }
+    } catch (e: any) {
+      toast({ variant: "destructive", title: "Transmission Failed", description: "Log generated. You can retry from the overview tab." });
+    } finally {
+      setIsActionLoading(false);
+    }
+  };
+
+  const handleManualTimelineEmail = async (entry: any) => {
+    if (!caseData?.email || !user) return;
+    setIsActionLoading(true);
+    try {
+      const mailLog = await dispatchEmailUpdate(entry.action, entry.remark);
+      if (mailLog?.status === 'Success') {
+        toast({ title: "Notice Dispatched" });
+      } else {
+        toast({ variant: "destructive", title: "Relay Failed" });
+      }
+    } catch (e) {
+      toast({ variant: "destructive", title: "System Error" });
+    } finally {
+      setIsActionLoading(false);
+    }
+  };
+
   if (authLoading || dataLoading) return <div className="min-h-screen flex items-center justify-center bg-slate-50"><Loader2 className="w-12 h-12 animate-spin text-accent" /></div>
   if (!caseData) return <div className="p-20 text-center text-slate-400 font-bold uppercase">Record not identified in National Registry.</div>
 
@@ -502,7 +557,7 @@ export default function CaseHubPage() {
                        <CardHeader className="bg-slate-50 dark:bg-slate-800 p-8 border-b"><div className="flex items-center justify-between"><CardTitle className="text-lg font-headline font-bold flex items-center gap-3"><MailCheck className="w-5 h-5 text-accent" /> Communication Registry</CardTitle><Badge variant="outline" className="text-[8px] font-black uppercase border-slate-200">Session Secure</Badge></div></CardHeader>
                        <CardContent className="p-0"><div className="overflow-x-auto"><table className="w-full text-left"><thead className="bg-slate-50 dark:bg-slate-800/50 text-[8px] font-black text-slate-400 uppercase border-b"><tr><th className="px-8 py-4">Status</th><th className="px-8 py-4">Transmission</th><th className="px-8 py-4">Timestamp</th><th className="px-8 py-4 text-right">Action</th></tr></thead><tbody className="divide-y divide-slate-50">{(caseData.emailLogs || []).length > 0 ? [...caseData.emailLogs].reverse().map((log: any, i: number) => (<tr key={i} className="hover:bg-slate-50/50">
                                <td className="px-8 py-4"><Badge className={cn("text-[7px] uppercase", log.status === 'Success' ? 'bg-emerald-500' : 'bg-red-500')}>{log.status}</Badge></td>
-                               <td className="px-8 py-4"><p className="text-xs font-bold truncate max-w-[200px]">{log.subject}</p><p className="text-[8px] text-slate-400 mt-1 uppercase">To: {log.recipient}</p></td>
+                               <td className="px-8 py-4"><p className="text-xs font-bold truncate max-w-[200px]">{log.subject}</p><p className="text-[8px] text-slate-400 mt-1 uppercase">To: {log.recipient} | From: {log.sender}</p></td>
                                <td className="px-8 py-4"><span className="text-[10px] font-bold text-slate-500">{log.timestamp}</span></td>
                                <td className="px-8 py-4 text-right"><Button variant="ghost" size="sm" className="h-7 text-[8px] font-black uppercase text-accent">Retry</Button></td>
                              </tr>)) : (<tr><td colSpan={4} className="py-12 text-center text-slate-300 font-bold text-[9px] uppercase">No logs recorded</td></tr>)}</tbody></table></div></CardContent>
