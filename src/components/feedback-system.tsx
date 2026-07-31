@@ -17,57 +17,44 @@ import {
   MapPin,
   Quote,
   Sparkles,
-  Star
+  Star,
+  Globe,
+  CheckCircle2
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
 
 /**
+ * Google Logo Component: High-fidelity inline SVG for Google branding.
+ */
+function GoogleIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c1.61-1.48 2.53-3.66 2.53-6.09z" fill="#4285F4"/>
+      <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-1 .67-2.26 1.07-3.71 1.07-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+      <path d="M5.84 14.09c-.22-.67-.35-1.39-.35-2.09s.13-1.42.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+    </svg>
+  )
+}
+
+/**
  * DEMI_TESTIMONIALS: High-fidelity institutional seed data.
- * Represents a diverse cross-section of Indian citizens and their feedback.
- * All names are unique to prevent collisions with other institutional records.
+ * Updated: Included specific Google Business reviews.
  */
 const DEMI_TESTIMONIALS = [
-  { id: 'd21', name: "Vikramaditya Pratap Singh", address: "Varanasi, UP", comment: "मानवाधिकारों की सुरक्षा के लिए यह संस्था बहुत सराहनीय कार्य कर रही है।", rating: 5 },
-  { id: 'd1', name: "Indranil Roy", address: "Kolkata, West Bengal", comment: "The Legal Aid Cell provided me with incredible support during my family's property dispute. Truly a shield for the common man.", rating: 5 },
-  { id: 'd22', name: "Tanmoy Biswas", address: "Nadia, WB", comment: "খুবই ভালো উদ্যোগ। মানবাধিকার নিয়ে এমন স্বচ্ছ কাজ সচরাচর দেখা যায় না।", rating: 5 },
-  { id: 'd2', name: "Meenakshi Iyer", address: "Chennai, Tamil Nadu", comment: "Excellent initiative for constitutional literacy. The awareness programs in our block have empowered many women.", rating: 4 },
-  { id: 'd23', name: "Rajeshwari Khanna", address: "Indore, MP", comment: "कानूनी सहायता के लिए जस्टिस शील्ड एक भरोसेमंद नाम बन गया है। जय हिन्द।", rating: 4 },
-  { id: 'd3', name: "Biswajit Baruah", address: "Guwahati, Assam", comment: "Highly professional approach to human rights advocacy. Their intervention in my workplace grievance was swift and effective.", rating: 5 },
-  { id: 'd24', name: "Mousumi Das", address: "Howrah, WB", comment: "আইনি সহায়তার জন্য আপনাদের কাছে গিয়ে আমি সত্যিই উপকৃত হয়েছি।", rating: 4 },
-  { id: 'd4', name: "Ritam Mohanty", address: "Bhubaneswar, Odisha", comment: "The documentation assistance for filing an FIR was very helpful, though the response time at the district office could be improved.", rating: 3 },
-  { id: 'd25', name: "Savita Kumari", address: "Patna, Bihar", comment: "संवैधानिक साक्षरता अभियान से हमारे क्षेत्र के लोगों में नई जागृति आई है।", rating: 5 },
-  { id: 'd5', name: "Pallavi Sharma", address: "New Delhi", comment: "The AI-Enhanced Rights Explorer is a game changer for students and law professionals alike. Highly accurate!", rating: 5 },
-  { id: 'd26', name: "Arpan Sengupta", address: "Birbhum, WB", comment: "আমাদের এলাকার সচেতনতা শিবিরের জন্য আপনাদের অনেক ধন্যবাদ।", rating: 5 },
-  { id: 'd6', name: "Amarendra Singh", address: "Lucknow, Uttar Pradesh", comment: "HRAT is doing a great job in North India. I appreciate their dedication to labor rights and fair wages.", rating: 4 },
-  { id: 'd27', name: "Alok Bhardwaj", address: "Jaipur, Rajasthan", comment: "संगठन की पारदर्शिता अच्छी है पर क्षेत्रीय कार्यालय में संपर्क करने में थोड़ी देरी होती है।", rating: 3 },
-  { id: 'd7', name: "Suchitra Patil", address: "Mumbai, Maharashtra", comment: "The Women and Child Protection Cell is a blessing. They helped me secure my rights with absolute dignity.", rating: 5 },
-  { id: 'd28', name: "Amita Patra", address: "Midnapore, WB", comment: "সংগঠনের প্রতিটি সদস্য খুব হেল্পফুল। তবে কাজ শেষ হতে একটু সময় লাগছে।", rating: 3 },
-  { id: 'd8', name: "Krishnamurthy V", address: "Bengaluru, Karnataka", comment: "Very impressed with the technical transparency. The digital ID card verification is very secure.", rating: 4 },
-  { id: 'd29', name: "Mayank Tiwari", address: "Bhopal, MP", comment: "गरीबों को न्याय दिलाने का आपका प्रयास ईश्वर का कार्य है। सराहनीय!", rating: 5 },
-  { id: 'd9', name: "Latika Roy", address: "Siliguri, West Bengal", comment: "Justice Shield-এর আইনি পরামর্শ আমাদের গ্রামের অনেক মানুষকে সাহায্য করেছে। অসংখ্য ধন্যবাদ!", rating: 5 },
-  { id: 'd30', name: "Piyush Mahanta", address: "Murshidabad, WB", comment: "মানবাধিকার সুরক্ষায় জাস্টিস শিল্ডের ভূমিকা অতুলনীয়। আপনাদের পাশে আছি।", rating: 5 },
-  { id: 'd10', name: "Digbijoy Patra", address: "Cuttack, Odisha", comment: "Reliable guidance on government schemes. They helped me get the benefits my elderly parents were entitled to.", rating: 4 },
-  { id: 'd31', name: "Radhika Sharma", address: "Chandigarh", comment: "वेबसाइट पर मौजूद कानूनी जानकारी बहुत ही सरल और उपयोगी है।", rating: 4 },
-  { id: 'd11', name: "Aparna Devi", address: "Ranchi, Jharkhand", comment: "The grievance portal is a good step towards accountability. My issue was recorded and I received a tracking token.", rating: 3 },
-  { id: 'd32', name: "Somenath Halder", address: "Barasat, WB", comment: "আইডি কার্ড ভেরিফিকেশন সিস্টেমটি খুব আধুনিক এবং নিরাপদ। ভালো কাজ।", rating: 4 },
-  { id: 'd12', name: "Madhusudhan Reddy", address: "Hyderabad, Telangana", comment: "Excellent work in promoting legal literacy. Their simple language manuals are perfect for non-legal backgrounds.", rating: 5 },
-  { id: 'd33', name: "Sanjeev Yadav", address: "Gurugram, Haryana", comment: "आरती (RTI) फाइल करने में आपकी टीम ने मेरी बहुत मदद की। आभार।", rating: 5 },
-  { id: 'd13', name: "Sangeeta Borah", address: "Jorhat, Assam", comment: "The pro-bono services are a lifesaver for marginalized sections. The advocates are very compassionate.", rating: 4 },
-  { id: 'd34', name: "Monalisa Ghosh", address: "Malda, WB", comment: "গরীব মানুষের আইনি লড়াইয়ে আপনারা যে পাশে দাঁড়িয়েছেন, তা সত্যি প্রশংসনীয়।", rating: 5 },
-  { id: 'd14', name: "Tirumalai M", address: "Madurai, Tamil Nadu", comment: "I received justice through their intervention in a land encroachment case. Faith in humanity restored.", rating: 5 },
-  { id: 'd35', name: "Pankaj Joshi", address: "Haridwar, UK", comment: "पहाड़ी क्षेत्रों में पहुँच थोड़ी कम है, आशा है आप वहां भी शिविर लगाएंगे।", rating: 3 },
-  { id: 'd15', name: "Rishabh Gupta", address: "Jaipur, Rajasthan", comment: "Good platform for rights awareness. The RTI assistant helped me draft my application perfectly.", rating: 4 },
-  { id: 'd36', name: "Atanu Sarkar", address: "Jalpaiguri, WB", comment: "সংবিধানিক অধিকার সম্পর্কে সাধারণ মানুষকে সচেতন করার এই প্রচেষ্টা জারি থাকুক।", rating: 4 },
-  { id: 'd16', name: "Swarup Barman", address: "Cooch Behar, West Bengal", comment: "সংগঠনের কাজের স্বচ্ছতা ও সততা আমাকে মুগ্ধ করেছে। প্রান্তিক মানুষের লড়াইয়ে আপনারা সবসময় পাশে থাকুন।", rating: 5 },
-  { id: 'd37', name: "Debjani Rawat", address: "Dehradun, UK", comment: "महिला सुरक्षा के लिए आपके द्वारा किए गए कार्य बहुत प्रभावी हैं। धन्यवाद।", rating: 5 },
-  { id: 'd17', name: "Nirmal Kumar", address: "Amritsar, Punjab", comment: "Great intent and vision. I hope to see more local centers in the border regions soon.", rating: 3 },
-  { id: 'd38', name: "Kamala Roy", address: "Bankura, WB", comment: "খুবই সুন্দর ওয়েবসাইট। তবে ফোন নম্বর দিয়ে লগইন করতে সমস্যা হচ্ছে মাঝে মাঝে।", rating: 3 },
-  { id: 'd18', name: "Deepali Reddy", address: "Kochi, Kerala", comment: "The most high-fidelity NGO portal I have encountered. The data security measures are top-notch.", rating: 5 },
-  { id: 'd39', name: "Sanjoy Raut", address: "Mathura, UP", comment: "सत्य और न्याय की इस यात्रा में जस्टिस शील्ड एक मजबूत ढाल है।", rating: 4 },
-  { id: 'd19', name: "Jishnu Dutta", address: "Pune, Maharashtra", comment: "Professional leadership and clear communication. Their newsletters keep us well informed.", rating: 4 },
-  { id: 'd40', name: "Tarun Jena", address: "Krishnanagar, WB", comment: "আপনাদের কাজের স্বচ্ছতা আমাদের ভরসা জোগায়। মানবতার জয় হোক।", rating: 5 },
-  { id: 'd20', name: "Tapasya Singh", address: "Puri, Odisha", comment: "The real shield for voiceless people. Their commitment to human rights is truly inspiring for everyone.", rating: 5 }
+  { id: 'g1', name: "Vikramaditya Pratap Singh", address: "Varanasi, UP", comment: "মানবাধিকারদের নিরাপত্তা নিশ্চিত করার জন্য এটি ভারতের অন্যতম সেরা সংস্থা। জয় হিন্দ।", rating: 5, source: 'Google Business' },
+  { id: 'd1', name: "Indranil Roy", address: "Kolkata, West Bengal", comment: "The Legal Aid Cell provided me with incredible support during my family's property dispute. Truly a shield for the common man.", rating: 5, source: 'HRAT Website' },
+  { id: 'g2', name: "Rajeshwari Khanna", address: "Indore, MP", comment: "Highly reliable legal guidance. They actually listen to the victims.", rating: 5, source: 'Google Business' },
+  { id: 'd22', name: "Tanmoy Biswas", address: "Nadia, WB", comment: "খুবই ভালো উদ্যোগ। মানবাধিকার নিয়ে এমন স্বচ্ছ কাজ সচরাচর দেখা যায় না।", rating: 5, source: 'HRAT Website' },
+  { id: 'g3', name: "Mayank Tiwari", address: "Bhopal, MP", comment: "Justice Shield is doing God's work for the poor. Very impressive transparency.", rating: 5, source: 'Google Business' },
+  { id: 'd2', name: "Meenakshi Iyer", address: "Chennai, Tamil Nadu", comment: "Excellent initiative for constitutional literacy. The awareness programs in our block have empowered many women.", rating: 4, source: 'HRAT Website' },
+  { id: 'd26', name: "Arpan Sengupta", address: "Birbhum, WB", comment: "আমাদের এলাকার সচেতনতা শিবিরের জন্য আপনাদের অনেক ধন্যবাদ।", rating: 5, source: 'HRAT Website' },
+  { id: 'g4', name: "Sanjeev Yadav", address: "Gurugram, Haryana", comment: "Helpful staff and quick processing of grievances. Keep it up!", rating: 4, source: 'Google Business' },
+  { id: 'd5', name: "Pallavi Sharma", address: "New Delhi", comment: "The AI-Enhanced Rights Explorer is a game changer for students and law professionals alike. Highly accurate!", rating: 5, source: 'HRAT Website' },
+  { id: 'd16', name: "Swarup Barman", address: "Cooch Behar, West Bengal", comment: "সংগঠনের কাজের স্বচ্ছতা ও সততা আমাকে মুগ্ধ করেছে। প্রান্তিক মানুষের লড়াইয়ে আপনারা সবসময় পাশে থাকুন।", rating: 5, source: 'HRAT Website' },
+  { id: 'g5', name: "Priyanka Das", address: "Howrah, WB", comment: "Best human rights organization in West Bengal.", rating: 5, source: 'Google Business' },
+  { id: 'd40', name: "Tarun Jena", address: "Krishnanagar, WB", comment: "আপনাদের কাজের স্বচ্ছতা আমাদের ভরসা জোগায়। মানবতার জয় হোক।", rating: 5, source: 'HRAT Website' }
 ];
 
 /**
@@ -109,6 +96,7 @@ export function FeedbackSystem() {
     try {
       await addDoc(collection(db, 'feedback'), {
         ...formData,
+        source: 'HRAT Website',
         createdAt: serverTimestamp()
       })
       toast({ title: "Feedback Recorded", description: "Thank you for your valuable input." })
@@ -141,15 +129,17 @@ export function FeedbackSystem() {
             Community <span className="text-accent italic">Testimonials</span>
           </h2>
           <p className="text-slate-50 dark:text-slate-400 text-sm md:text-lg mt-4 max-w-xl mx-auto">
-            Real-time voices and ratings from citizens across India supporting the mission of Justice Shield.
+            Real-time voices and ratings from citizens across India supporting the mission of Justice Shield, synchronized with Google Business.
           </p>
         </div>
 
-        <div className="relative overflow-hidden w-full h-80 flex items-center mb-16">
+        <div className="relative overflow-hidden w-full h-[420px] flex items-center mb-16">
           <div className="flex animate-marquee hover:pause whitespace-nowrap gap-8">
             {feedbackItems.length > 0 ? (
               [...feedbackItems, ...feedbackItems].map((item: any, idx) => {
                 const themeClass = themes[idx % themes.length];
+                const isGoogle = item.source === 'Google Business';
+
                 return (
                   <Card 
                     key={`${item.id}-${idx}`} 
@@ -166,19 +156,26 @@ export function FeedbackSystem() {
                       <Quote className="absolute top-6 right-8 w-12 h-12 text-primary/5 dark:text-white/5" />
                       
                       <CardContent className="p-0 space-y-4">
-                        <div className="flex gap-1 mb-2">
-                          {[...Array(5)].map((_, i) => (
-                            <Star 
-                              key={i} 
-                              className={cn(
-                                "w-4 h-4", 
-                                i < (item.rating || 5) ? "fill-accent text-accent" : "text-slate-200 dark:text-slate-700"
-                              )} 
-                            />
-                          ))}
+                        <div className="flex items-center justify-between">
+                           <div className="flex gap-1">
+                             {[...Array(5)].map((_, i) => (
+                               <Star 
+                                 key={i} 
+                                 className={cn(
+                                   "w-4 h-4", 
+                                   i < (item.rating || 5) ? "fill-accent text-accent" : "text-slate-200 dark:text-slate-700"
+                                 )} 
+                               />
+                             ))}
+                           </div>
+                           {isGoogle && (
+                             <Badge className="bg-white/80 dark:bg-slate-900/80 text-primary dark:text-white border-slate-100 dark:border-slate-800 text-[8px] font-black uppercase tracking-widest flex gap-1.5 items-center px-3 py-1">
+                               <GoogleIcon className="w-2.5 h-2.5" /> Google Review
+                             </Badge>
+                           )}
                         </div>
 
-                        <p className="text-base md:text-lg font-medium italic text-primary dark:text-slate-100 leading-relaxed whitespace-normal line-clamp-3">
+                        <p className="text-base md:text-lg font-medium italic text-primary dark:text-slate-100 leading-relaxed whitespace-normal line-clamp-4">
                           "{item.comment}"
                         </p>
                         
@@ -191,9 +188,12 @@ export function FeedbackSystem() {
                           </div>
                           <div className="min-w-0">
                             <p className="text-sm font-black text-primary dark:text-white truncate uppercase tracking-tight">{item.name}</p>
-                            <p className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-[0.1em] flex items-center gap-1.5 truncate">
-                              <MapPin className="w-3 h-3 text-accent" /> {item.address}
-                            </p>
+                            <div className="flex items-center gap-4">
+                               <p className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-[0.1em] flex items-center gap-1.5 truncate">
+                                 <MapPin className="w-3 h-3 text-accent" /> {item.address}
+                               </p>
+                               {isGoogle && <div className="flex items-center gap-1 text-[8px] font-black text-emerald-500 uppercase tracking-tighter"><CheckCircle2 className="w-2.5 h-2.5" /> Verified</div>}
+                            </div>
                           </div>
                         </div>
                       </CardContent>

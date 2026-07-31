@@ -25,7 +25,8 @@ import {
   X, 
   Check,
   FilterX,
-  History
+  History,
+  Globe
 } from 'lucide-react'
 import {
   Dialog,
@@ -156,7 +157,7 @@ export default function FeedbackManagementPage() {
 
       <section className="py-6 border-b bg-white dark:bg-slate-900 sticky top-10 z-30 shadow-sm">
         <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="relative w-full max-w-lg">
+          <div className="relative w-full max-lg:max-w-full max-w-lg">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <Input placeholder="Search testimonials by name, region or content..." className="pl-9 h-11 rounded-xl border-slate-200 text-sm" value={search} onChange={(e) => setSearch(e.target.value)} />
           </div>
@@ -184,6 +185,7 @@ export default function FeedbackManagementPage() {
                          </div>
                          <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mt-1">Rating</p>
                          <p className="text-lg font-black text-primary dark:text-white leading-none mt-1">{t.rating || 5}/5</p>
+                         <Badge variant="outline" className="mt-3 text-[7px] font-bold border-slate-200 uppercase tracking-tighter h-5">{t.source || 'HRAT Website'}</Badge>
                       </div>
                       <div className="flex-1 p-6 flex flex-col md:flex-row items-center justify-between gap-6">
                         <div className="space-y-2 flex-1">
@@ -196,6 +198,7 @@ export default function FeedbackManagementPage() {
                            <p className="text-sm text-slate-600 dark:text-slate-400 italic leading-relaxed line-clamp-2">"{t.comment}"</p>
                            <div className="pt-2 flex items-center gap-4 text-[9px] font-bold text-slate-400 uppercase tracking-widest">
                              <span className="flex items-center gap-1.5"><History className="w-3 h-3" /> {t.createdAt?.toDate ? t.createdAt.toDate().toLocaleDateString() : 'Real-time'}</span>
+                             <span className="flex items-center gap-1.5"><Globe className="w-3 h-3" /> Source: {t.source || 'Web'}</span>
                            </div>
                         </div>
                         <div className="flex gap-2 shrink-0">
@@ -251,7 +254,7 @@ export default function FeedbackManagementPage() {
                   <div className="absolute right-6 top-6"><DialogClose asChild><Button variant="ghost" size="icon" className="rounded-full text-white/40 h-8 w-8"><X className="w-4 h-4" /></Button></DialogClose></div>
                   <Badge className="bg-accent text-primary font-black text-[8px] uppercase mb-2">Audit Editor</Badge>
                   <DialogTitle className="text-2xl font-headline font-bold">Modify Public Feedback</DialogTitle>
-                  <DialogDescription className="text-slate-400">Updating verified citizen record for {editItem.name}.</DialogDescription>
+                  <DialogDescription className="text-slate-400">Updating verified record for {editItem.name}.</DialogDescription>
                </div>
                
                <div className="p-8 space-y-6">
@@ -266,19 +269,32 @@ export default function FeedbackManagementPage() {
                      </div>
                   </div>
 
-                  <div className="space-y-1.5">
-                     <Label className="text-[10px] font-bold uppercase text-slate-400">Rating Scale</Label>
-                     <div className="flex gap-2 p-2 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-100 dark:border-slate-800 w-fit">
-                        {[1, 2, 3, 4, 5].map(star => (
-                           <button 
-                             key={star} 
-                             onClick={() => setEditItem({...editItem, rating: star})}
-                             className="p-1 hover:scale-110 transition-transform"
-                           >
-                              <Star className={cn("w-6 h-6", star <= editItem.rating ? "fill-accent text-accent" : "text-slate-200 dark:text-slate-800")} />
-                           </button>
-                        ))}
-                     </div>
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div className="space-y-1.5">
+                      <Label className="text-[10px] font-bold uppercase text-slate-400">Rating Scale</Label>
+                      <div className="flex gap-2 p-2 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-100 dark:border-slate-800 w-fit">
+                          {[1, 2, 3, 4, 5].map(star => (
+                            <button 
+                              key={star} 
+                              onClick={() => setEditItem({...editItem, rating: star})}
+                              className="p-1 hover:scale-110 transition-transform"
+                            >
+                                <Star className={cn("w-6 h-6", star <= editItem.rating ? "fill-accent text-accent" : "text-slate-200 dark:text-slate-800")} />
+                            </button>
+                          ))}
+                      </div>
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-[10px] font-bold uppercase text-slate-400">Source Registry</Label>
+                      <Select value={editItem.source || 'HRAT Website'} onValueChange={v => setEditItem({...editItem, source: v})}>
+                        <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
+                        <SelectContent position="popper" className="z-[1000001] bg-white">
+                          <SelectItem value="HRAT Website">HRAT Website</SelectItem>
+                          <SelectItem value="Google Business">Google Business</SelectItem>
+                          <SelectItem value="Offline Audit">Offline Audit</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
 
                   <div className="space-y-1.5">
