@@ -4,8 +4,8 @@
 import React, { useEffect, useState, useMemo } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Image from 'next/image'
-import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase'
-import { doc, updateDoc, serverTimestamp, arrayUnion, collection, addDoc, query, where, orderBy } from 'firebase/firestore'
+import { useUser, useFirestore, useDoc, useMemoFirebase, useCollection } from '@/firebase'
+import { doc, updateDoc, serverTimestamp, arrayUnion, collection, query, orderBy, where } from 'firebase/firestore'
 import { Footer } from '@/components/footer'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -32,7 +32,7 @@ import {
   DialogTrigger,
   DialogDescription,
   DialogClose,
-  DialogFooter
+  DialogFooter as UiDialogFooter
 } from "@/components/ui/dialog"
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
@@ -62,12 +62,30 @@ export default function CaseHubPage() {
     directives: ''
   })
 
+  // Data Fetching: Target Case
   const docRef = useMemoFirebase(() => {
     if (!db || !id) return null;
     return doc(db, 'public_complaints', id as string);
   }, [db, id]);
 
   const { data: caseData, loading: dataLoading } = useDoc(docRef);
+
+  // Data Fetching: Available Personnel for Assignment
+  const usersQuery = useMemoFirebase(() => {
+    if (!db) return null;
+    return query(collection(db, 'users'), where('status', '==', 'active'));
+  }, [db]);
+
+  const { data: systemUsers } = useCollection(usersQuery);
+
+  const availablePersonnel = useMemo(() => {
+    if (!systemUsers) return [];
+    return systemUsers.map((u: any) => ({
+      email: u.email || u.id,
+      name: u.name || (u.email || u.id).split('@')[0],
+      role: u.role
+    }));
+  }, [systemUsers]);
 
   // Status Lifecycle Update
   const updateCaseStatus = async (newStatus: string) => {
@@ -88,6 +106,30 @@ export default function CaseHubPage() {
       toast({ title: "Lifecycle Updated", description: `Case transitioned to ${newStatus}.` });
     } catch (e) {
       toast({ variant: "destructive", title: "Transition Denied" });
+    } finally {
+      setIsActionLoading(false);
+    }
+  };
+
+  const handleAssignment = async (personName: string) => {
+    if (!docRef || !user) return;
+    setIsActionLoading(true);
+    try {
+      const entry = {
+        action: "Investigator Assignment",
+        user: user.email,
+        timestamp: new Date().toISOString(),
+        remark: `Case assigned to ${personName} for detailed investigation.`
+      };
+      await updateDoc(docRef, { 
+        assignedTo: personName,
+        assignedAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+        timeline: arrayUnion(entry)
+      });
+      toast({ title: "Officer Assigned", description: `Case file transferred to ${personName}.` });
+    } catch (e) {
+      toast({ variant: "destructive", title: "Assignment Failed" });
     } finally {
       setIsActionLoading(false);
     }
@@ -379,16 +421,12 @@ export default function CaseHubPage() {
                           <div className="space-y-4">
                              <div className="space-y-2">
                                 <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Assigned Investigator</Label>
-                                <Select value={caseData.assignedTo || 'Unassigned'} onValueChange={async (v) => {
-                                   await updateDoc(docRef!, { assignedTo: v, assignedAt: serverTimestamp() });
-                                   toast({ title: "Officer Assigned" });
-                                }}>
-                                   <SelectTrigger className="rounded-xl h-11"><SelectValue /></SelectTrigger>
+                                <Select value={caseData.assignedTo || 'Unassigned'} onValueChange={handleAssignment}>
+                                   <SelectTrigger className="rounded-xl h-11"><SelectValue placeholder="Choose Officer" /></SelectTrigger>
                                    <SelectContent className="bg-white">
-                                      <SelectItem value="Dhritiman Dey">Dhritiman Dey (Chairman)</SelectItem>
-                                      <SelectItem value="Alankrit Dey">Alankrit Dey (Admin)</SelectItem>
-                                      <SelectItem value="Regional Director">Regional Director</SelectItem>
-                                      <SelectItem value="Legal Cell Officer">Legal Cell Officer</SelectItem>
+                                      {availablePersonnel.map((p, idx) => (
+                                        <SelectItem key={idx} value={p.name}>{p.name} ({p.role})</SelectItem>
+                                      ))}
                                    </SelectContent>
                                 </Select>
                              </div>

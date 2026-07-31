@@ -4,7 +4,7 @@
 import React, { useEffect, useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { useUser, useCollection, useFirestore, useMemoFirebase, useDoc } from '@/firebase'
-import { collection, query, orderBy, deleteDoc, doc, updateDoc, writeBatch } from 'firebase/firestore'
+import { collection, query, orderBy, deleteDoc, doc, updateDoc, writeBatch, where } from 'firebase/firestore'
 import { Footer } from '@/components/footer'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -68,6 +68,7 @@ export default function PublicComplaintsTerminal() {
   
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('All')
+  const [investigatorFilter, setInvestigatorFilter] = useState('All')
   const [isActionLoading, setIsActionLoading] = useState(false)
 
   const userRegistryRef = useMemoFirebase(() => {
@@ -96,6 +97,18 @@ export default function PublicComplaintsTerminal() {
   }, [db, user, hasAccess]);
 
   const { data: complaints, loading: dataLoading } = useCollection(complaintsQuery);
+
+  const usersQuery = useMemoFirebase(() => {
+    if (!db) return null;
+    return query(collection(db, 'users'), where('status', '==', 'active'));
+  }, [db]);
+
+  const { data: systemUsers } = useCollection(usersQuery);
+
+  const investigators = useMemo(() => {
+    if (!systemUsers) return [];
+    return Array.from(new Set(systemUsers.map((u: any) => u.name).filter(Boolean)));
+  }, [systemUsers]);
 
   // Stats Logic
   const stats = useMemo(() => {
@@ -153,7 +166,11 @@ export default function PublicComplaintsTerminal() {
     (c.token || '').toLowerCase().includes(search.toLowerCase()) ||
     (c.caseId || '').toLowerCase().includes(search.toLowerCase()) ||
     (c.subject || '').toLowerCase().includes(search.toLowerCase())
-  ).filter((c: any) => statusFilter === 'All' || c.status === statusFilter)
+  ).filter((c: any) => {
+    const matchesStatus = statusFilter === 'All' || c.status === statusFilter;
+    const matchesInvestigator = investigatorFilter === 'All' || c.assignedTo === investigatorFilter;
+    return matchesStatus && matchesInvestigator;
+  })
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
@@ -203,14 +220,27 @@ export default function PublicComplaintsTerminal() {
                  </button>
                ))}
             </div>
-            <div className="relative w-full max-md:max-w-full max-w-lg">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-              <Input 
-                placeholder="Examine Case ID, Token, Full Name or Subject..." 
-                className="pl-12 h-12 md:h-14 rounded-2xl border-slate-200 text-sm shadow-inner bg-slate-50 dark:bg-slate-950 font-medium"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
+            
+            <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto items-center">
+              <Select value={investigatorFilter} onValueChange={setInvestigatorFilter}>
+                <SelectTrigger className="w-full sm:w-48 h-12 md:h-14 rounded-2xl border-slate-200 bg-white dark:bg-slate-950 font-bold text-[10px] uppercase tracking-widest">
+                  <SelectValue placeholder="Investigator" />
+                </SelectTrigger>
+                <SelectContent className="bg-white z-[1000000]">
+                  <SelectItem value="All">All Officers</SelectItem>
+                  {investigators.map(name => <SelectItem key={name} value={name}>{name}</SelectItem>)}
+                </SelectContent>
+              </Select>
+
+              <div className="relative w-full max-md:max-w-full max-w-sm">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <Input 
+                  placeholder="Case ID, Token, Name..." 
+                  className="pl-12 h-12 md:h-14 rounded-2xl border-slate-200 text-sm shadow-inner bg-slate-50 dark:bg-slate-950 font-medium"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -265,8 +295,10 @@ export default function PublicComplaintsTerminal() {
                                 <p className="text-xs font-bold flex items-center gap-1.5"><Clock className="w-3 h-3 text-accent" /> {c.createdAt?.toDate ? c.createdAt.toDate().toLocaleDateString('en-IN') : 'Just now'}</p>
                              </div>
                              <div className="space-y-1">
-                                <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Assigned To</p>
-                                <p className="text-xs font-black text-primary dark:text-emerald-400 uppercase">{c.assignedTo || 'Unassigned'}</p>
+                                <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Assigned Investigator</p>
+                                <p className="text-xs font-black text-emerald-600 uppercase flex items-center gap-1.5">
+                                   <Briefcase className="w-3 h-3" /> {c.assignedTo || 'Unassigned'}
+                                </p>
                              </div>
                           </div>
                         </div>
