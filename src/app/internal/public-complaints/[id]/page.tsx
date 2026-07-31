@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useEffect, useState, useMemo } from 'react'
@@ -21,7 +22,7 @@ import {
   Activity, ClipboardList, Briefcase, Trash2, Edit3, MessageSquare, 
   History, Eye, Download, Share2, Upload, Camera, FileWarning, Search,
   GraduationCap, AlertCircle, Info, Landmark, Layers, UserCheck, ShieldAlert,
-  Plus, X, Send, Network, Target, BookOpenCheck
+  Plus, X, Send, Network, Target, BookOpenCheck, FileAudio, FileIcon, Video
 } from 'lucide-react'
 import {
   Dialog,
@@ -300,6 +301,63 @@ export default function CaseHubPage() {
     } finally {
       setIsActionLoading(false);
     }
+  };
+
+  const handleUploadEvidence = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !docRef || !user) return;
+
+    if (file.size > 307200) { // 300KB limit for base64 storage
+      toast({
+        variant: "destructive",
+        title: "File Too Large",
+        description: "Please upload files under 300KB to stay within database performance limits."
+      });
+      return;
+    }
+
+    setIsActionLoading(true);
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      const dataUri = reader.result as string;
+      const fileType = file.type.startsWith('image') ? 'image' : 
+                      file.type.startsWith('audio') ? 'audio' : 
+                      file.type.startsWith('video') ? 'video' : 'document';
+      
+      const evidenceItem = {
+        url: dataUri,
+        type: fileType,
+        name: file.name,
+        timestamp: new Date().toISOString(),
+        uploadedBy: user.email
+      };
+
+      const timelineEntry = {
+        action: "Evidence Appended to Vault",
+        user: user.email,
+        timestamp: new Date().toISOString(),
+        remark: `Secured investigative ${fileType}: ${file.name}`,
+        type: 'evidence'
+      };
+
+      try {
+        await updateDoc(docRef, {
+          investigativeEvidence: arrayUnion(evidenceItem),
+          timeline: arrayUnion(timelineEntry),
+          updatedAt: serverTimestamp()
+        });
+        
+        toast({ title: "Evidence Secured", description: "The asset has been archived in the secure vault." });
+        
+        // Notify Complainant
+        dispatchEmailUpdate(`Case File Updated: Evidence Appended`, `New investigative ${fileType} documentation has been added to your case file.`);
+      } catch (err) {
+        toast({ variant: "destructive", title: "Upload Failed" });
+      } finally {
+        setIsActionLoading(false);
+      }
+    };
+    reader.readAsDataURL(file);
   };
 
   if (authLoading || dataLoading) {
@@ -837,15 +895,60 @@ export default function CaseHubPage() {
                       </div>
                    </Card>
                  ))}
+
+                 {/* Investigative Evidence Vault Items */}
+                 {(caseData.investigativeEvidence || []).map((item: any, i: number) => (
+                   <Card key={`inv-${i}`} className="rounded-3xl overflow-hidden border border-slate-100 dark:border-slate-800 shadow-xl group bg-white dark:bg-slate-900">
+                      <div className="relative aspect-square">
+                        {item.type === 'image' ? (
+                          <Image src={item.url} alt={item.name} fill className="object-cover group-hover:scale-110 transition-transform duration-700" />
+                        ) : (
+                          <div className="w-full h-full flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-950 gap-4">
+                             {item.type === 'audio' ? <FileAudio className="w-16 h-16 text-indigo-500" /> : 
+                              item.type === 'video' ? <Video className="w-16 h-16 text-rose-500" /> : 
+                              <FileIcon className="w-16 h-16 text-emerald-500" />}
+                             <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest px-4 text-center truncate w-full">{item.name}</p>
+                          </div>
+                        )}
+                        <div className="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity p-6 flex flex-col justify-end">
+                           <Badge className="bg-emerald-500 text-white font-black text-[8px] uppercase w-fit mb-2">Investigative Vault</Badge>
+                           <div className="space-y-1">
+                              <p className="text-white text-xs font-bold truncate">{item.name}</p>
+                              <p className="text-[8px] text-white/60 uppercase font-bold">{new Date(item.timestamp).toLocaleString('en-IN')}</p>
+                           </div>
+                           <div className="flex gap-2 mt-4">
+                              <Button asChild size="sm" variant="outline" className="h-8 rounded-lg bg-white/10 border-white/20 text-white text-[8px] uppercase font-bold">
+                                 <a href={item.url} download={item.name}>Download Asset</a>
+                              </Button>
+                           </div>
+                        </div>
+                      </div>
+                   </Card>
+                 ))}
                  
-                 <Card className="rounded-3xl border-2 border-dashed border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center p-12 text-center space-y-4 hover:border-accent transition-all cursor-pointer group">
+                 <Card className="rounded-3xl border-2 border-dashed border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center p-12 text-center space-y-4 hover:border-accent transition-all cursor-pointer group relative overflow-hidden">
+                    <input 
+                      type="file" 
+                      onChange={handleUploadEvidence}
+                      className="absolute inset-0 opacity-0 cursor-pointer z-10"
+                      disabled={isActionLoading}
+                      accept="image/*,audio/*,video/*,application/pdf,.doc,.docx"
+                    />
                     <div className="w-16 h-16 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-300 group-hover:bg-accent group-hover:text-white transition-all">
-                       <Plus className="w-8 h-8" />
+                       {isActionLoading ? <Loader2 className="w-8 h-8 animate-spin" /> : <Plus className="w-8 h-8" />}
                     </div>
                     <div>
                        <p className="font-bold text-primary dark:text-white uppercase text-xs">Append Evidence</p>
                        <p className="text-[10px] text-slate-400 mt-1">Upload verified findings, audio or documents.</p>
                     </div>
+                    {isActionLoading && (
+                      <div className="absolute inset-0 bg-white/60 dark:bg-slate-900/60 flex items-center justify-center z-20">
+                         <div className="flex flex-col items-center gap-2">
+                           <Loader2 className="w-8 h-8 animate-spin text-accent" />
+                           <span className="text-[10px] font-black uppercase text-accent">Securing Asset...</span>
+                         </div>
+                      </div>
+                    )}
                  </Card>
               </div>
            </TabsContent>
