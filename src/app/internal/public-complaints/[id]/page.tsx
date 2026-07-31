@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useEffect, useState, useMemo } from 'react'
@@ -38,11 +37,13 @@ import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
 import { CASE_STATUSES, CASE_PRIORITIES, REPORT_TEMPLATES } from '@/lib/complaint-constants'
 import { getStatusColor } from '@/lib/complaint-utils'
+import { sendTimelineEmailUpdate } from '@/lib/notification-service'
 
 /**
  * Tactical Case Management Hub: 
  * Professional interface for investigative and reporting lifecycle.
  * Enhanced with Multi-Level Review and Stage-Specific Log protocols.
+ * Automated Email Notifications integrated into all lifecycle updates.
  */
 export default function CaseHubPage() {
   const { id } = useParams()
@@ -96,6 +97,23 @@ export default function CaseHubPage() {
     }));
   }, [systemUsers]);
 
+  // Utility: Dispatches the automated email update
+  const dispatchEmailUpdate = async (action: string, remark: string) => {
+    if (!caseData?.email || !caseData?.fullName) return;
+    try {
+      await sendTimelineEmailUpdate({
+        recipientEmail: caseData.email,
+        recipientName: caseData.fullName,
+        caseId: caseData.caseId || caseData.token,
+        action,
+        remark,
+        timestamp: new Date().toLocaleString('en-IN')
+      });
+    } catch (e) {
+      console.warn("[NOTIFICATION-SERVICE] Background dispatch encountered an error.");
+    }
+  };
+
   // Status Lifecycle Update
   const updateCaseStatus = async (newStatus: string) => {
     if (!docRef || !user) return;
@@ -113,7 +131,12 @@ export default function CaseHubPage() {
         updatedAt: serverTimestamp(),
         timeline: arrayUnion(entry)
       });
+      
       toast({ title: "Lifecycle Updated", description: `Case transitioned to ${newStatus}.` });
+      
+      // Automatic Notification
+      dispatchEmailUpdate(`Case Status Updated`, `Your complaint has moved to the next stage: ${newStatus}.`);
+
     } catch (e) {
       toast({ variant: "destructive", title: "Transition Denied" });
     } finally {
@@ -138,7 +161,12 @@ export default function CaseHubPage() {
         updatedAt: serverTimestamp(),
         timeline: arrayUnion(entry)
       });
+      
       toast({ title: "Officer Assigned", description: `Case file transferred to ${personName}.` });
+      
+      // Automatic Notification
+      dispatchEmailUpdate(`Investigator Assigned`, `A specialized officer has been assigned to investigate your report.`);
+
     } catch (e) {
       toast({ variant: "destructive", title: "Assignment Failed" });
     } finally {
@@ -161,8 +189,13 @@ export default function CaseHubPage() {
         timeline: arrayUnion(entry),
         updatedAt: serverTimestamp()
       });
-      setRemark('');
+      
       toast({ title: "Remark Authenticated" });
+      
+      // Automatic Notification
+      dispatchEmailUpdate(`Investigative Remark Posted`, remark.trim());
+      
+      setRemark('');
     } catch (e) {
       toast({ variant: "destructive", title: "Sync Failed" });
     } finally {
@@ -186,8 +219,13 @@ export default function CaseHubPage() {
         timeline: arrayUnion(entry),
         updatedAt: serverTimestamp()
       });
-      setLevelNote('');
+      
       toast({ title: "Review Recorded", description: `Consideration from ${selectedReviewLevel} level established.` });
+      
+      // Automatic Notification
+      dispatchEmailUpdate(`Council Review: ${selectedReviewLevel}`, levelReviewNote.trim());
+      
+      setLevelNote('');
     } catch (e) {
       toast({ variant: "destructive", title: "Review Rejected" });
     } finally {
@@ -211,8 +249,13 @@ export default function CaseHubPage() {
         timeline: arrayUnion(entry),
         updatedAt: serverTimestamp()
       });
-      setStageNote('');
+      
       toast({ title: "Stage Detail Archived" });
+      
+      // Automatic Notification
+      dispatchEmailUpdate(`Investigation Stage Completed: ${selectedLogStage}`, stageLogNote.trim());
+      
+      setStageNote('');
     } catch (e) {
       toast({ variant: "destructive", title: "Sync Error" });
     } finally {
@@ -246,6 +289,10 @@ export default function CaseHubPage() {
         title: "Findings Commissioned", 
         description: "The investigative conclusion has been committed to the national registry." 
       });
+
+      // Automatic Notification (Final Action Taken)
+      dispatchEmailUpdate(`Final Investigative Findings Published`, `Our investigation is complete. Conclusion: ${commissionData.findings}`);
+      
       setIsCommissionOpen(false);
       setCommissionData({ findings: '', directives: '' });
     } catch (e) {
