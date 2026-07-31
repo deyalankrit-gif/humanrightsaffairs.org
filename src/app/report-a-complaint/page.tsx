@@ -95,7 +95,7 @@ export default function ReportAComplaintPage() {
   const [incidentPhotos, setIncidentPhotos] = useState<string[]>([])
 
   const form = useForm<z.infer<typeof complaintSchema>>({
-    resolver: zodResolver(complaintSchema),
+    resolver: zodResolver(formSchema),
     defaultValues: {
       fullName: '',
       relationName: '',
@@ -412,7 +412,8 @@ export default function ReportAComplaintPage() {
                             <FormField control={form.control} name="victimPhone" render={({ field }) => (
                               <FormItem>
                                 <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-accent">Victim's Contact / ভুক্তভোগীর ফোন নম্বর</FormLabel>
-                                <FormControl><Input placeholder="Phone number (if available)" className="h-12 rounded-xl bg-white dark:bg-slate-950" {...field} /></FormItem>
+                                <FormControl><Input placeholder="Phone number (if available)" className="h-12 rounded-xl bg-white dark:bg-slate-950" {...field} /></FormControl>
+                              </FormItem>
                             )} />
                             <FormField control={form.control} name="victimAadhaar" render={({ field }) => (
                               <FormItem>
