@@ -179,13 +179,25 @@ export default function ReportAComplaintPage() {
     }
 
     try {
-      // 1. Log Complaint
+      // 1. Log Complaint to National Registry
       await addDoc(collection(db, "public_complaints"), complaintData);
       
       const complainantName = values.fullName;
       const currentToken = submissionToken;
       const now = new Date().toLocaleString('en-IN');
 
+      // 2. Dispatch Administrative Alert
+      try {
+        await sendComplaintNotification({
+          complainantName,
+          token: currentToken,
+          timestamp: now
+        });
+      } catch (notifErr) {
+        console.warn("[NOTIFICATION-FAIL] Silence fail to protect user flow:", notifErr);
+      }
+
+      // 3. UI Update and Feedback
       setToken(submissionToken)
       form.reset()
       setIncidentPhotos([])
@@ -194,15 +206,6 @@ export default function ReportAComplaintPage() {
         title: "Complaint Lodged",
         description: "Your official report has been recorded in the national registry."
       })
-
-      // 2. Dispatch Notification (Async Background)
-      sendComplaintNotification({
-        complainantName,
-        token: currentToken,
-        timestamp: now
-      }).catch(err => {
-        console.warn("[NOTIFICATION-SILENT-FAIL] Administrative alert failed:", err.message);
-      });
 
     } catch (error: any) {
       console.error("[SUBMISSION-ERROR]", error);
