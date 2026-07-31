@@ -180,21 +180,30 @@ export default function ReportAComplaintPage() {
 
     try {
       // 1. Log Complaint to National Registry
+      console.log(`[SUBMISSION] INITIALIZING DATABASE WRITE FOR TOKEN: ${submissionToken}`);
       await addDoc(collection(db, "public_complaints"), complaintData);
+      console.log(`[SUBMISSION] DATABASE WRITE SUCCESSFUL.`);
       
       const complainantName = values.fullName;
       const currentToken = submissionToken;
       const now = new Date().toLocaleString('en-IN');
 
       // 2. Dispatch Administrative Alert
+      console.log(`[SUBMISSION] TRIGGERING NOTIFICATION FOR TOKEN: ${submissionToken}`);
       try {
-        await sendComplaintNotification({
+        const notifResult = await sendComplaintNotification({
           complainantName,
           token: currentToken,
           timestamp: now
         });
+        
+        if (notifResult.success) {
+          console.log(`[SUBMISSION] NOTIFICATION SUCCESS. TRACE ID: ${notifResult.traceId}`);
+        } else {
+          console.warn(`[SUBMISSION] NOTIFICATION FAILED BUT HANDLED. TRACE ID: ${notifResult.traceId}`);
+        }
       } catch (notifErr) {
-        console.warn("[NOTIFICATION-FAIL] Silence fail to protect user flow:", notifErr);
+        console.warn("[NOTIFICATION-CRITICAL-FAIL] Silent catch to protect core submission flow:", notifErr);
       }
 
       // 3. UI Update and Feedback
@@ -204,11 +213,11 @@ export default function ReportAComplaintPage() {
       
       toast({
         title: "Complaint Lodged",
-        description: "Your official report has been recorded in the national registry."
+        description: "Your official report has been recorded and the administration has been notified."
       })
 
     } catch (error: any) {
-      console.error("[SUBMISSION-ERROR]", error);
+      console.error("[SUBMISSION-ERROR] CORE FAILURE:", error);
       const permissionError = new FirestorePermissionError({
         path: 'public_complaints',
         operation: 'create',
