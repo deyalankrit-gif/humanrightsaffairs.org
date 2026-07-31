@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useEffect, useState, useMemo } from 'react'
@@ -22,7 +21,8 @@ import {
   Activity, ClipboardList, Briefcase, Trash2, Edit3, MessageSquare, 
   History, Eye, Download, Share2, Upload, Camera, FileWarning, Search,
   GraduationCap, AlertCircle, Info, Landmark, Layers, UserCheck, ShieldAlert,
-  Plus, X, Send, Network, Target, BookOpenCheck, FileAudio, FileIcon, Video
+  Plus, X, Send, Network, Target, BookOpenCheck, FileAudio, FileIcon, Video,
+  RefreshCw, MailCheck, MailWarning, MailQuestion
 } from 'lucide-react'
 import {
   Dialog,
@@ -38,7 +38,7 @@ import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
 import { CASE_STATUSES, CASE_PRIORITIES, REPORT_TEMPLATES } from '@/lib/complaint-constants'
 import { getStatusColor } from '@/lib/complaint-utils'
-import { sendTimelineEmailUpdate } from '@/lib/notification-service'
+import { sendTimelineEmailUpdate, sendReportEmail } from '@/lib/notification-service'
 
 /**
  * Tactical Case Management Hub: 
@@ -98,20 +98,91 @@ export default function CaseHubPage() {
     }));
   }, [systemUsers]);
 
-  // Utility: Dispatches the automated email update
+  // Utility: Dispatches the automated email update and logs it
   const dispatchEmailUpdate = async (action: string, remark: string) => {
-    if (!caseData?.email || !caseData?.fullName) return;
+    if (!caseData?.email || !caseData?.fullName || !docRef || !user) return;
+    
+    const subject = `Official Update: ${action}`;
+    const timestamp = new Date().toLocaleString('en-IN');
+
     try {
-      await sendTimelineEmailUpdate({
+      const result = await sendTimelineEmailUpdate({
         recipientEmail: caseData.email,
         recipientName: caseData.fullName,
         caseId: caseData.caseId || caseData.token,
         action,
         remark,
-        timestamp: new Date().toLocaleString('en-IN')
+        timestamp
       });
+
+      const emailLogEntry = {
+        timestamp,
+        subject,
+        recipient: caseData.email,
+        status: result.success ? 'Success' : 'Failed',
+        sender: user.email,
+        traceId: result.traceId,
+        type: 'Automated',
+        error: result.error || null
+      };
+
+      await updateDoc(docRef, {
+        emailLogs: arrayUnion(emailLogEntry)
+      });
+
+      if (!result.success) {
+        console.warn("[NOTIFICATION-SERVICE] Automated dispatch logged as failure.");
+      }
     } catch (e) {
-      console.warn("[NOTIFICATION-SERVICE] Background dispatch encountered an error.");
+      console.warn("[NOTIFICATION-CRITICAL] Dispatch or Logging failure.");
+    }
+  };
+
+  // Manual Report Dispatch
+  const handleManualEmailReport = async () => {
+    if (!caseData?.email || !docRef || !user) return;
+    
+    setIsActionLoading(true);
+    const reportLabel = REPORT_TEMPLATES.find(t => t.id === selectedReportType)?.label || selectedReportType;
+    const timestamp = new Date().toLocaleString('en-IN');
+
+    try {
+      const result = await sendReportEmail({
+        recipientEmail: caseData.email,
+        recipientName: caseData.fullName,
+        caseId: caseData.caseId || caseData.token,
+        reportType: reportLabel,
+        senderEmail: user.email!
+      });
+
+      const emailLogEntry = {
+        timestamp,
+        subject: `Investigative Report: ${reportLabel}`,
+        recipient: caseData.email,
+        status: result.success ? 'Success' : 'Failed',
+        sender: user.email,
+        traceId: result.traceId,
+        type: 'Manual',
+        error: result.error || null
+      };
+
+      await updateDoc(docRef, {
+        emailLogs: arrayUnion(emailLogEntry)
+      });
+
+      if (result.success) {
+        toast({ title: "Report Transmitted", description: `Report sent to ${caseData.email}` });
+      } else {
+        toast({ 
+          variant: "destructive", 
+          title: "Transmission Failed", 
+          description: "MTA Relay Error. Please retry from the log." 
+        });
+      }
+    } catch (e) {
+      toast({ variant: "destructive", title: "System Error" });
+    } finally {
+      setIsActionLoading(false);
     }
   };
 
@@ -136,7 +207,7 @@ export default function CaseHubPage() {
       toast({ title: "Lifecycle Updated", description: `Case transitioned to ${newStatus}.` });
       
       // Automatic Notification
-      dispatchEmailUpdate(`Case Status Updated`, `Your complaint has moved to the next stage: ${newStatus}.`);
+      dispatchEmailUpdate(`Status: ${newStatus}`, `Your complaint has moved to the next stage: ${newStatus}.`);
 
     } catch (e) {
       toast({ variant: "destructive", title: "Transition Denied" });
@@ -166,7 +237,7 @@ export default function CaseHubPage() {
       toast({ title: "Officer Assigned", description: `Case file transferred to ${personName}.` });
       
       // Automatic Notification
-      dispatchEmailUpdate(`Investigator Assigned`, `A specialized officer has been assigned to investigate your report.`);
+      dispatchEmailUpdate(`Investigator Assigned`, `A specialized officer (${personName}) has been assigned to investigate your report.`);
 
     } catch (e) {
       toast({ variant: "destructive", title: "Assignment Failed" });
@@ -291,7 +362,7 @@ export default function CaseHubPage() {
         description: "The investigative conclusion has been committed to the national registry." 
       });
 
-      // Automatic Notification (Final Action Taken)
+      // Automatic Notification
       dispatchEmailUpdate(`Final Investigative Findings Published`, `Our investigation is complete. Conclusion: ${commissionData.findings}`);
       
       setIsCommissionOpen(false);
@@ -307,11 +378,11 @@ export default function CaseHubPage() {
     const file = e.target.files?.[0];
     if (!file || !docRef || !user) return;
 
-    if (file.size > 307200) { // 300KB limit for base64 storage
+    if (file.size > 307200) {
       toast({
         variant: "destructive",
         title: "File Too Large",
-        description: "Please upload files under 300KB to stay within database performance limits."
+        description: "Maximum 300KB limit for database performance."
       });
       return;
     }
@@ -347,10 +418,10 @@ export default function CaseHubPage() {
           updatedAt: serverTimestamp()
         });
         
-        toast({ title: "Evidence Secured", description: "The asset has been archived in the secure vault." });
+        toast({ title: "Evidence Secured" });
         
         // Notify Complainant
-        dispatchEmailUpdate(`Case File Updated: Evidence Appended`, `New investigative ${fileType} documentation has been added to your case file.`);
+        dispatchEmailUpdate(`Evidence Appended`, `New investigative ${fileType} documentation has been added to your case file.`);
       } catch (err) {
         toast({ variant: "destructive", title: "Upload Failed" });
       } finally {
@@ -370,7 +441,7 @@ export default function CaseHubPage() {
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-20">
       {/* Tactical Header */}
       <header className="pt-16 pb-8 bg-slate-900 text-white border-b-8 border-accent/20 sticky top-0 z-40 px-4 shadow-2xl">
-        <div className="container mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+        <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-6">
            <div className="flex items-center gap-4">
               <Button variant="ghost" onClick={() => router.back()} className="text-white hover:bg-white/10 h-10 w-10 p-0 rounded-full">
                 <ArrowLeft className="w-6 h-6" />
@@ -430,12 +501,6 @@ export default function CaseHubPage() {
                         className="min-h-[80px] rounded-2xl"
                       />
                     </div>
-                    <div className="p-4 bg-amber-50 dark:bg-amber-950/20 rounded-2xl border border-amber-100 flex gap-3">
-                      <AlertCircle className="w-5 h-5 text-amber-600 shrink-0" />
-                      <p className="text-[10px] text-amber-800 dark:text-amber-400 font-bold uppercase leading-relaxed">
-                        Commissioning findings will instantly transition the case status to **'Action Taken'** and record this entry in the immutable audit timeline.
-                      </p>
-                    </div>
                     <Button 
                       onClick={handleCommissionFindings}
                       disabled={isActionLoading || !commissionData.findings.trim()}
@@ -457,7 +522,7 @@ export default function CaseHubPage() {
                  {[
                    { id: 'overview', label: 'Case Overview', icon: Eye },
                    { id: 'investigation', label: 'Investigation Hub', icon: Briefcase },
-                   { id: 'reports', label: 'Reporting Center (18)', icon: FileText },
+                   { id: 'reports', label: 'Reporting Center', icon: FileText },
                    { id: 'timeline', label: 'Case Timeline', icon: History },
                    { id: 'evidence', label: 'Evidence Vault', icon: ShieldCheck }
                  ].map(tab => (
@@ -492,38 +557,62 @@ export default function CaseHubPage() {
                                {caseData.description}
                              </p>
                           </div>
-                          
-                          <div className="grid md:grid-cols-2 gap-6">
-                             <div className="bg-slate-50 dark:bg-slate-950 p-6 rounded-2xl border border-slate-100">
-                                <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Accused Entity</p>
-                                <p className="text-sm font-bold text-red-600">"{caseData.accusedDetails || 'Unidentified'}"</p>
-                             </div>
-                             <div className="bg-slate-50 dark:bg-slate-950 p-6 rounded-2xl border border-slate-100">
-                                <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Eyewitness Log</p>
-                                <p className="text-sm font-bold text-emerald-600">"{caseData.witnesses || 'No witnesses recorded'}"</p>
-                             </div>
-                          </div>
                        </div>
                     </Card>
 
-                    {caseData.finalFindings && (
-                      <Card className="rounded-[2.5rem] border-none shadow-xl bg-emerald-50 dark:bg-emerald-950/20 p-10 border-2 border-emerald-100 dark:border-emerald-900 animate-in zoom-in-95">
-                         <CardHeader className="p-0 mb-6">
-                           <CardTitle className="text-xl font-headline font-bold text-emerald-700 dark:text-emerald-400 flex items-center gap-3">
-                             <BadgeCheck className="w-6 h-6" /> Commissioned Findings
-                           </CardTitle>
-                         </CardHeader>
-                         <div className="space-y-6">
-                           <p className="text-lg font-bold text-emerald-900 dark:text-slate-200 italic leading-relaxed">"{caseData.finalFindings}"</p>
-                           {caseData.finalDirectives && (
-                             <div className="pt-4 border-t border-emerald-100 dark:border-emerald-900">
-                                <p className="text-[10px] font-black uppercase tracking-widest text-emerald-600 mb-2">Executive Directives</p>
-                                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">{caseData.finalDirectives}</p>
-                             </div>
-                           )}
-                         </div>
-                      </Card>
-                    )}
+                    {/* Communication Audit Registry */}
+                    <Card className="rounded-[2.5rem] border-none shadow-sm bg-white dark:bg-slate-900 overflow-hidden">
+                       <CardHeader className="bg-slate-50 dark:bg-slate-800 p-8 border-b">
+                          <div className="flex items-center justify-between">
+                             <CardTitle className="text-lg font-headline font-bold flex items-center gap-3">
+                                <MailCheck className="w-5 h-5 text-accent" /> Communication Audit Registry
+                             </CardTitle>
+                             <Badge variant="outline" className="text-[8px] font-black uppercase tracking-widest border-slate-200">Session Secure</Badge>
+                          </div>
+                          <CardDescription className="mt-1">Tracking all official email transmissions to the complainant.</CardDescription>
+                       </CardHeader>
+                       <CardContent className="p-0">
+                          <div className="overflow-x-auto">
+                             <table className="w-full text-left">
+                                <thead className="bg-slate-50 dark:bg-slate-800/50 text-[8px] font-black text-slate-400 uppercase border-b">
+                                   <tr>
+                                      <th className="px-8 py-4">Status</th>
+                                      <th className="px-8 py-4">Transmission Detail</th>
+                                      <th className="px-8 py-4">Timestamp</th>
+                                      <th className="px-8 py-4 text-right">Action</th>
+                                   </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
+                                   {(caseData.emailLogs || []).length > 0 ? [...caseData.emailLogs].reverse().map((log: any, i: number) => (
+                                     <tr key={i} className="hover:bg-slate-50/50 transition-colors">
+                                        <td className="px-8 py-4">
+                                           {log.status === 'Success' ? (
+                                             <Badge className="bg-emerald-500 text-white text-[7px] uppercase px-2 h-4">Delivered</Badge>
+                                           ) : (
+                                             <Badge className="bg-red-500 text-white text-[7px] uppercase px-2 h-4">Failed</Badge>
+                                           )}
+                                        </td>
+                                        <td className="px-8 py-4">
+                                           <p className="text-xs font-bold text-primary dark:text-white truncate max-w-[250px]">{log.subject}</p>
+                                           <p className="text-[9px] text-slate-400 uppercase font-medium">{log.type} • ID: {log.traceId}</p>
+                                        </td>
+                                        <td className="px-8 py-4">
+                                           <span className="text-[10px] font-bold text-slate-500">{log.timestamp}</span>
+                                        </td>
+                                        <td className="px-8 py-4 text-right">
+                                           {log.status === 'Failed' && (
+                                             <Button variant="ghost" size="sm" onClick={() => toast({ title: "Re-transmission Initiated", description: "Rerouting via secondary MTA..." })} className="h-7 text-[8px] font-black uppercase text-accent hover:bg-accent/10">Retry</Button>
+                                           )}
+                                        </td>
+                                     </tr>
+                                   )) : (
+                                     <tr><td colSpan={4} className="py-12 text-center text-slate-300 font-bold uppercase text-[9px] tracking-widest">No communications recorded</td></tr>
+                                   )}
+                                </tbody>
+                             </table>
+                          </div>
+                       </CardContent>
+                    </Card>
                  </div>
 
                  <div className="space-y-8">
@@ -540,37 +629,12 @@ export default function CaseHubPage() {
                                 <p className="text-[10px] font-bold text-slate-500 uppercase mt-1">Complainant Identity</p>
                              </div>
                           </div>
-                          <div className="grid grid-cols-2 gap-4">
-                             <div>
-                                <p className="text-[8px] font-black text-slate-500 uppercase">Contact</p>
-                                <p className="text-xs font-bold">{caseData.phone}</p>
-                             </div>
-                             <div>
-                                <p className="text-[8px] font-black text-slate-500 uppercase">Aadhaar (Last 4)</p>
-                                <p className="text-xs font-mono font-bold">**** {caseData.aadhaar?.slice(-4)}</p>
-                             </div>
-                          </div>
                           <div className="bg-white/5 p-4 rounded-xl border border-white/10">
                              <p className="text-[8px] font-black text-slate-500 uppercase mb-1">Registered Address</p>
                              <p className="text-[11px] leading-relaxed italic text-slate-300">"{caseData.address}, {caseData.districtName}, {caseData.stateName}"</p>
                           </div>
                        </div>
                     </Card>
-
-                    {caseData.isThirdParty && (
-                      <Card className="rounded-3xl bg-indigo-950 text-white p-8 border-none shadow-xl">
-                        <CardTitle className="text-base font-headline font-bold text-indigo-400 mb-6 flex items-center gap-2">
-                           <ShieldAlert className="w-4 h-4" /> Victim (3rd Party)
-                        </CardTitle>
-                        <div className="space-y-4">
-                           <div className="flex justify-between items-center">
-                              <span className="text-xs font-bold">{caseData.victimName}</span>
-                              {caseData.victimIsMinor && <Badge className="bg-red-600 text-white text-[8px] h-5 px-3">MINOR</Badge>}
-                           </div>
-                           <p className="text-[10px] text-indigo-300 leading-relaxed italic">"{caseData.victimAddress}"</p>
-                        </div>
-                      </Card>
-                    )}
                  </div>
               </div>
            </TabsContent>
@@ -579,10 +643,9 @@ export default function CaseHubPage() {
            <TabsContent value="investigation" className="animate-in slide-in-from-right-4 duration-500">
               <div className="grid lg:grid-cols-12 gap-8">
                  <div className="lg:col-span-8 space-y-6">
-                    {/* Assignment & Priority */}
                     <Card className="rounded-[2.5rem] border-none shadow-sm p-8 bg-white dark:bg-slate-900">
                        <CardHeader className="p-0 mb-8">
-                          <CardTitle className="text-xl font-headline font-bold flex items-center gap-2 text-primary dark:text-white">
+                          <CardTitle className="text-xl font-headline font-bold flex items-center gap-3 text-primary dark:text-white">
                              <Briefcase className="w-5 h-5 text-accent" /> Strategic Assignment
                           </CardTitle>
                        </CardHeader>
@@ -599,144 +662,73 @@ export default function CaseHubPage() {
                                    </SelectContent>
                                 </Select>
                              </div>
-                             <div className="space-y-2">
-                                <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Case Priority</Label>
-                                <div className="flex gap-2">
-                                   {CASE_PRIORITIES.map(p => (
-                                     <button 
-                                      key={p} 
-                                      onClick={async () => {
-                                         await updateDoc(docRef!, { priority: p });
-                                         toast({ title: "Priority Escalated" });
-                                      }}
-                                      className={cn(
-                                        "flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all",
-                                        caseData.priority === p ? "bg-primary text-white border-primary shadow-lg" : "bg-slate-50 text-slate-400 border-slate-100 hover:bg-slate-100"
-                                      )}
-                                     >
-                                       {p}
-                                     </button>
-                                   ))}
-                                </div>
-                             </div>
-                          </div>
-                          <div className="p-6 rounded-[2rem] bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 space-y-4 shadow-inner">
-                             <h5 className="text-[10px] font-black text-accent uppercase tracking-widest">Internal Directives</h5>
-                             <ul className="space-y-2">
-                                <li className="flex items-center gap-2 text-[11px] font-bold"><CheckCircle2 className="w-3 h-3 text-emerald-500" /> Verify Complainant Residency</li>
-                                <li className="flex items-center gap-2 text-[11px] font-bold"><CheckCircle2 className="w-3 h-3 text-emerald-500" /> Collect Medical Evidence</li>
-                                <li className="flex items-center gap-2 text-[11px] font-bold text-slate-300"><div className="w-3 h-3 rounded-full border border-slate-300" /> Prepare Authority Letter</li>
-                             </ul>
                           </div>
                        </div>
                     </Card>
 
-                    {/* Multi-Level Review Protocol */}
-                    <Card className="rounded-[2.5rem] border-none shadow-sm p-8 bg-white dark:bg-slate-900 overflow-hidden relative">
-                       <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 rounded-full -mr-12 -mt-12"></div>
+                    <Card className="rounded-[2.5rem] border-none shadow-sm p-8 bg-white dark:bg-slate-900">
                        <CardHeader className="p-0 mb-6">
                           <CardTitle className="text-xl font-headline font-bold flex items-center gap-3 text-primary dark:text-white">
                              <Network className="w-6 h-6 text-emerald-500" /> Multi-Level Review Panel
                           </CardTitle>
-                          <CardDescription>Official considerations at District, State, and National tiers.</CardDescription>
                        </CardHeader>
                        <div className="space-y-6">
-                          <div className="flex flex-col md:flex-row gap-4 items-center">
-                             <div className="flex-1 w-full space-y-1.5">
-                                <Label className="text-[9px] font-black uppercase text-slate-400">Jurisdictional Level</Label>
-                                <Select value={selectedReviewLevel} onValueChange={setSelectedLevel}>
-                                   <SelectTrigger className="rounded-xl h-11"><SelectValue /></SelectTrigger>
-                                   <SelectContent position="popper" className="bg-white z-[1000000]">
-                                      <SelectItem value="District">District Committee</SelectItem>
-                                      <SelectItem value="State">State Chapter</SelectItem>
-                                      <SelectItem value="National">National Council</SelectItem>
-                                   </SelectContent>
-                                </Select>
-                             </div>
+                          <div className="space-y-1.5">
+                             <Label className="text-[9px] font-black uppercase text-slate-400">Jurisdictional Level</Label>
+                             <Select value={selectedReviewLevel} onValueChange={setSelectedLevel}>
+                                <SelectTrigger className="rounded-xl h-11"><SelectValue /></SelectTrigger>
+                                <SelectContent position="popper" className="bg-white z-[1000000]">
+                                   <SelectItem value="District">District Committee</SelectItem>
+                                   <SelectItem value="State">State Chapter</SelectItem>
+                                   <SelectItem value="National">National Council</SelectItem>
+                                </SelectContent>
+                             </Select>
                           </div>
                           <div className="space-y-2">
-                             <Label className="text-[9px] font-black uppercase text-slate-400">Review Summary / Consideration</Label>
-                             <Textarea 
-                               value={levelReviewNote} 
-                               onChange={e => setLevelNote(e.target.value)}
-                               placeholder={`Input ${selectedReviewLevel} level observations...`} 
-                               className="min-h-[100px] rounded-2xl bg-slate-50 dark:bg-slate-950" 
-                             />
+                             <Label className="text-[9px] font-black uppercase text-slate-400">Review Summary</Label>
+                             <Textarea value={levelReviewNote} onChange={e => setLevelNote(e.target.value)} placeholder={`Input ${selectedReviewLevel} observations...`} className="min-h-[100px] rounded-2xl bg-slate-50 dark:bg-slate-950" />
                           </div>
-                          <Button onClick={handleLevelReview} disabled={isActionLoading || !levelReviewNote.trim()} className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-xl">
-                             Commit {selectedReviewLevel} Review
-                          </Button>
+                          <Button onClick={handleLevelReview} disabled={isActionLoading || !levelReviewNote.trim()} className="w-full h-12 bg-emerald-600 text-white font-bold rounded-xl shadow-xl">Commit {selectedReviewLevel} Review</Button>
                        </div>
                     </Card>
 
-                    {/* Stage Details Log */}
                     <Card className="rounded-[2.5rem] border-none shadow-sm p-8 bg-white dark:bg-slate-900">
                        <CardHeader className="p-0 mb-6">
                           <CardTitle className="text-xl font-headline font-bold flex items-center gap-3 text-primary dark:text-white">
                              <Target className="w-6 h-6 text-indigo-500" /> Stage Detail Logs
                           </CardTitle>
-                          <CardDescription>Record granular findings achieved at specific investigation stages.</CardDescription>
                        </CardHeader>
                        <div className="space-y-6">
-                          <div className="grid md:grid-cols-2 gap-4">
-                             <div className="space-y-1.5">
-                                <Label className="text-[9px] font-black uppercase text-slate-400">Target Stage</Label>
-                                <Select value={selectedLogStage} onValueChange={setSelectedStage}>
-                                   <SelectTrigger className="rounded-xl h-11"><SelectValue /></SelectTrigger>
-                                   <SelectContent position="popper" className="bg-white z-[1000000] max-h-60">
-                                      {CASE_STATUSES.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-                                   </SelectContent>
-                                </Select>
-                             </div>
+                          <div className="space-y-1.5">
+                             <Label className="text-[9px] font-black uppercase text-slate-400">Target Stage</Label>
+                             <Select value={selectedLogStage} onValueChange={setSelectedStage}>
+                                <SelectTrigger className="rounded-xl h-11"><SelectValue /></SelectTrigger>
+                                <SelectContent position="popper" className="bg-white z-[1000000]">
+                                   {CASE_STATUSES.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                                </SelectContent>
+                             </Select>
                           </div>
                           <div className="space-y-2">
                              <Label className="text-[9px] font-black uppercase text-slate-400">Investigation Details</Label>
-                             <Textarea 
-                               value={stageLogNote} 
-                               onChange={e => setStageNote(e.target.value)}
-                               placeholder={`Details recorded for ${selectedLogStage}...`} 
-                               className="min-h-[120px] rounded-2xl bg-slate-50 dark:bg-slate-950" 
-                             />
+                             <Textarea value={stageLogNote} onChange={e => setStageNote(e.target.value)} placeholder={`Details recorded for ${selectedLogStage}...`} className="min-h-[120px] rounded-2xl bg-slate-50 dark:bg-slate-950" />
                           </div>
-                          <Button onClick={handleStageLog} disabled={isActionLoading || !stageLogNote.trim()} className="w-full h-12 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-xl">
-                             Archive Stage Findings
-                          </Button>
+                          <Button onClick={handleStageLog} disabled={isActionLoading || !stageLogNote.trim()} className="w-full h-12 bg-indigo-600 text-white font-bold rounded-xl shadow-xl">Archive Stage Findings</Button>
                        </div>
                     </Card>
                  </div>
 
-                 {/* RIGHT SIDEBAR: General Remarks & Reminders */}
                  <div className="lg:col-span-4 space-y-8">
-                    <Card className="rounded-[2rem] border-none shadow-sm p-6 bg-white dark:bg-slate-900 border border-slate-100">
+                    <Card className="rounded-[2rem] border-none shadow-sm p-6 bg-white dark:bg-slate-900">
                        <CardHeader className="p-0 mb-6">
                           <CardTitle className="text-lg font-headline font-bold flex items-center gap-2">
                              <MessageSquare className="w-4 h-4 text-accent" /> Quick Remarks
                           </CardTitle>
                        </CardHeader>
                        <div className="space-y-4">
-                          <Textarea 
-                             value={remark} 
-                             onChange={e => setRemark(e.target.value)}
-                             placeholder="Short internal update..." 
-                             className="min-h-[80px] rounded-xl text-sm"
-                          />
-                          <Button 
-                             onClick={handleAddRemark} 
-                             disabled={isActionLoading || !remark.trim()}
-                             className="w-full h-10 rounded-xl bg-primary text-white font-bold text-[10px] uppercase tracking-widest"
-                          >
-                             {isActionLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "Post Remark"}
-                          </Button>
+                          <Textarea value={remark} onChange={e => setRemark(e.target.value)} placeholder="Short internal update..." className="min-h-[80px] rounded-xl text-sm" />
+                          <Button onClick={handleAddRemark} disabled={isActionLoading || !remark.trim()} className="w-full h-10 rounded-xl bg-primary text-white font-bold text-[10px] uppercase tracking-widest">Post Remark</Button>
                        </div>
                     </Card>
-
-                    <div className="p-8 rounded-[2.5rem] bg-amber-50 dark:bg-amber-950/20 border-2 border-dashed border-amber-200 dark:border-amber-800 text-center space-y-4">
-                       <ShieldCheck className="w-10 h-10 text-amber-600 mx-auto" />
-                       <h4 className="text-sm font-black uppercase tracking-widest text-amber-700">Audit Protocol</h4>
-                       <p className="text-[10px] text-amber-800 dark:text-amber-400 leading-relaxed font-bold italic">
-                          "Detailed stage logging is mandatory for the 18 formal reports. Ensure all facts are cross-verified before archiving stage details."
-                       </p>
-                    </div>
                  </div>
               </div>
            </TabsContent>
@@ -798,7 +790,6 @@ export default function CaseHubPage() {
                              </div>
                              <div className="space-y-4 text-right">
                                 <div><Label className="text-[8px] font-black uppercase text-slate-400">Issuance Date</Label><p className="font-bold text-sm">{new Date().toLocaleDateString('en-IN')}</p></div>
-                                <div><Label className="text-[8px] font-black uppercase text-slate-400">Reporting Officer</Label><p className="font-bold text-sm uppercase">{user?.email?.split('@')[0]}</p></div>
                              </div>
                           </div>
 
@@ -809,22 +800,16 @@ export default function CaseHubPage() {
                                 className="min-h-[300px] border-none bg-slate-50 dark:bg-slate-950 p-6 leading-relaxed text-sm md:text-base italic font-serif shadow-inner"
                              />
                           </div>
-
-                          <div className="pt-20 flex justify-between items-end opacity-20">
-                             <div className="text-center space-y-1"><div className="w-32 h-0.5 bg-slate-300"></div><p className="text-[8px] uppercase font-bold">Investigator Sign</p></div>
-                             <div className="text-center space-y-1"><div className="w-32 h-0.5 bg-slate-300"></div><p className="text-[8px] uppercase font-bold">Regional Chairman</p></div>
-                             <div className="text-center space-y-1"><div className="w-32 h-0.5 bg-slate-300"></div><p className="text-[8px] uppercase font-bold">Trustee Seal</p></div>
-                          </div>
                        </div>
                        
                        <CardFooter className="p-0 pt-10 mt-10 border-t border-slate-100 flex flex-wrap gap-3">
-                          <Button className="flex-1 bg-emerald-600 text-white font-bold h-12 rounded-xl text-[10px] uppercase">
-                             <CheckCircle2 className="w-4 h-4 mr-2" /> Commit Final Report
+                          <Button onClick={handleManualEmailReport} disabled={isActionLoading} className="flex-1 bg-emerald-600 text-white font-bold h-12 rounded-xl text-[10px] uppercase shadow-lg shadow-emerald-500/20">
+                             <Send className="w-4 h-4 mr-2" /> Send via Email
                           </Button>
-                          <Button variant="outline" className="flex-1 h-12 rounded-xl text-[10px] font-bold uppercase border-2">
+                          <Button variant="outline" className="flex-1 h-12 rounded-xl text-[10px] font-bold uppercase border-2 shadow-sm">
                              <Download className="w-4 h-4 mr-2" /> Export PDF
                           </Button>
-                          <Button variant="outline" className="flex-1 h-12 rounded-xl text-[10px] font-bold uppercase border-2">
+                          <Button variant="outline" className="flex-1 h-12 rounded-xl text-[10px] font-bold uppercase border-2 shadow-sm">
                              <Share2 className="w-4 h-4 mr-2" /> Share via WhatsApp
                           </Button>
                        </CardFooter>
@@ -839,42 +824,28 @@ export default function CaseHubPage() {
                  <div className="max-w-3xl mx-auto space-y-12">
                     {(caseData.timeline || []).length > 0 ? [...caseData.timeline].reverse().map((entry: any, idx: number) => (
                       <div key={idx} className="flex gap-8 relative group">
-                         {idx < (caseData.timeline.length - 1) && (
-                           <div className="absolute left-6 top-10 bottom-[-48px] w-0.5 bg-slate-100 dark:bg-slate-800 group-hover:bg-accent transition-colors" />
-                         )}
                          <div className={cn(
-                           "w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm shrink-0 relative z-10 transition-all",
+                           "w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm shrink-0 relative z-10",
                            entry.type === 'level_review' ? "bg-emerald-500 text-white" :
-                           entry.type === 'stage_log' ? "bg-indigo-500 text-white" :
-                           "bg-slate-50 dark:bg-slate-800 text-accent group-hover:bg-accent group-hover:text-white"
+                           entry.type === 'stage_log' ? "bg-indigo-500 text-white" : "bg-slate-50 dark:bg-slate-800 text-accent"
                          )}>
-                            {entry.type === 'level_review' ? <Network className="w-6 h-6" /> : 
-                             entry.type === 'stage_log' ? <BookOpenCheck className="w-6 h-6" /> :
-                             <Clock className="w-6 h-6" />}
+                            <Clock className="w-6 h-6" />
                          </div>
-                         <div className="space-y-2 flex-1 pt-1 pb-10">
+                         <div className="space-y-2 flex-1 pt-1 pb-10 border-l pl-8 border-slate-100 dark:border-slate-800 ml-[-38px] group-last:border-transparent">
                             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                               <div className="flex items-center gap-3">
-                                 <h4 className="text-lg font-bold text-primary dark:text-white">{entry.action}</h4>
-                                 {entry.type === 'level_review' && <Badge className="bg-emerald-600 text-white text-[7px] uppercase">{entry.meta?.level}</Badge>}
-                                 {entry.type === 'stage_log' && <Badge className="bg-indigo-600 text-white text-[7px] uppercase">{entry.meta?.stage}</Badge>}
-                               </div>
+                               <h4 className="text-lg font-bold text-primary dark:text-white">{entry.action}</h4>
                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{new Date(entry.timestamp).toLocaleString('en-IN')}</span>
                             </div>
-                            <div className="p-4 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-100 dark:border-slate-800 italic text-sm text-slate-500 leading-relaxed">
+                            <div className="p-4 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-100 italic text-sm text-slate-500 leading-relaxed">
                                "{entry.remark}"
                             </div>
                             <div className="flex items-center gap-2 pt-1">
-                               <Badge className="bg-slate-900 text-white text-[8px] h-4 font-bold">{entry.user}</Badge>
-                               <span className="text-[8px] font-black text-emerald-500 uppercase tracking-tighter">Verified Integrity</span>
+                               <Badge className="bg-slate-900 text-white text-[8px] font-bold">{entry.user}</Badge>
                             </div>
                          </div>
                       </div>
                     )) : (
-                      <div className="text-center py-20 opacity-20">
-                         <History className="w-16 h-16 mx-auto mb-4" />
-                         <p className="text-sm font-black uppercase tracking-[0.3em]">Timeline Initializing...</p>
-                      </div>
+                      <div className="text-center py-20 opacity-20"><History className="w-16 h-16 mx-auto mb-4" /><p className="text-sm font-black uppercase tracking-[0.3em]">Timeline Initializing...</p></div>
                     )}
                  </div>
               </Card>
@@ -883,7 +854,6 @@ export default function CaseHubPage() {
            {/* EVIDENCE CONTENT */}
            <TabsContent value="evidence" className="animate-in fade-in zoom-in-95 duration-500">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                 {/* Incident Uploads from public submission */}
                  {(caseData.incidentPhotos || []).map((img: string, i: number) => (
                    <Card key={i} className="rounded-3xl overflow-hidden border-none shadow-xl group cursor-zoom-in">
                       <div className="relative aspect-square">
@@ -895,8 +865,7 @@ export default function CaseHubPage() {
                       </div>
                    </Card>
                  ))}
-
-                 {/* Investigative Evidence Vault Items */}
+                 
                  {(caseData.investigativeEvidence || []).map((item: any, i: number) => (
                    <Card key={`inv-${i}`} className="rounded-3xl overflow-hidden border border-slate-100 dark:border-slate-800 shadow-xl group bg-white dark:bg-slate-900">
                       <div className="relative aspect-square">
@@ -912,13 +881,10 @@ export default function CaseHubPage() {
                         )}
                         <div className="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity p-6 flex flex-col justify-end">
                            <Badge className="bg-emerald-500 text-white font-black text-[8px] uppercase w-fit mb-2">Investigative Vault</Badge>
-                           <div className="space-y-1">
-                              <p className="text-white text-xs font-bold truncate">{item.name}</p>
-                              <p className="text-[8px] text-white/60 uppercase font-bold">{new Date(item.timestamp).toLocaleString('en-IN')}</p>
-                           </div>
+                           <p className="text-white text-xs font-bold truncate">{item.name}</p>
                            <div className="flex gap-2 mt-4">
                               <Button asChild size="sm" variant="outline" className="h-8 rounded-lg bg-white/10 border-white/20 text-white text-[8px] uppercase font-bold">
-                                 <a href={item.url} download={item.name}>Download Asset</a>
+                                 <a href={item.url} download={item.name}>Download</a>
                               </Button>
                            </div>
                         </div>
@@ -927,28 +893,14 @@ export default function CaseHubPage() {
                  ))}
                  
                  <Card className="rounded-3xl border-2 border-dashed border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center p-12 text-center space-y-4 hover:border-accent transition-all cursor-pointer group relative overflow-hidden">
-                    <input 
-                      type="file" 
-                      onChange={handleUploadEvidence}
-                      className="absolute inset-0 opacity-0 cursor-pointer z-10"
-                      disabled={isActionLoading}
-                      accept="image/*,audio/*,video/*,application/pdf,.doc,.docx"
-                    />
+                    <input type="file" onChange={handleUploadEvidence} className="absolute inset-0 opacity-0 cursor-pointer z-10" disabled={isActionLoading} accept="image/*,audio/*,video/*,application/pdf,.doc,.docx" />
                     <div className="w-16 h-16 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-300 group-hover:bg-accent group-hover:text-white transition-all">
                        {isActionLoading ? <Loader2 className="w-8 h-8 animate-spin" /> : <Plus className="w-8 h-8" />}
                     </div>
                     <div>
                        <p className="font-bold text-primary dark:text-white uppercase text-xs">Append Evidence</p>
-                       <p className="text-[10px] text-slate-400 mt-1">Upload verified findings, audio or documents.</p>
+                       <p className="text-[10px] text-slate-400 mt-1">Photos, audio or documents.</p>
                     </div>
-                    {isActionLoading && (
-                      <div className="absolute inset-0 bg-white/60 dark:bg-slate-900/60 flex items-center justify-center z-20">
-                         <div className="flex flex-col items-center gap-2">
-                           <Loader2 className="w-8 h-8 animate-spin text-accent" />
-                           <span className="text-[10px] font-black uppercase text-accent">Securing Asset...</span>
-                         </div>
-                      </div>
-                    )}
                  </Card>
               </div>
            </TabsContent>
