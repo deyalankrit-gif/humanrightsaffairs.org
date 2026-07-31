@@ -156,11 +156,6 @@ export default function CaseHubPage() {
     setOfficers([...officers, { name: '', phone: '', designation: '', responsibility: '' }]);
   };
 
-  const removeOfficerRow = (index: number) => {
-    const updated = officers.filter((_, i) => i !== index);
-    setOfficers(updated);
-  };
-
   const handleSelectFromRegistry = (index: number, officer: any) => {
     const updated = [...officers];
     updated[index] = {
