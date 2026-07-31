@@ -47,7 +47,7 @@ import { sendTimelineEmailUpdate, sendReportEmail } from '@/lib/notification-ser
  * Enhanced with Multi-Level Review and Stage-Specific Log protocols.
  * Automated Email Notifications integrated into all lifecycle updates.
  * Manual Timeline Transmission Node added to stages and status logs.
- * Audit Registry updated to display sender email addresses for all transmissions.
+ * Audit Registry updated to display both sender and recipient emails for full transparency.
  */
 export default function CaseHubPage() {
   const { id } = useParams()
@@ -615,10 +615,15 @@ export default function CaseHubPage() {
                                         </td>
                                         <td className="px-8 py-4">
                                            <p className="text-xs font-bold text-primary dark:text-white truncate max-w-[250px]">{log.subject}</p>
-                                           <p className="text-[9px] text-slate-400 uppercase font-medium">{log.type} • ID: {log.traceId}</p>
-                                           <p className="text-[8px] text-accent font-bold uppercase mt-1 flex items-center gap-1">
-                                             <Mail className="w-2 h-2" /> From: {log.sender || 'System'}
-                                           </p>
+                                           <div className="flex flex-col gap-0.5 mt-1.5">
+                                              <p className="text-[9px] font-bold text-slate-500 uppercase flex items-center gap-1.5">
+                                                <User className="w-3 h-3 text-slate-400" /> To: <span className="text-primary dark:text-slate-300 font-mono lowercase">{log.recipient}</span>
+                                              </p>
+                                              <p className="text-[9px] font-bold text-accent uppercase flex items-center gap-1.5">
+                                                <Mail className="w-3 h-3 text-accent" /> From: <span className="font-mono lowercase">{log.sender || 'system-mta@hrat-india.org'}</span>
+                                              </p>
+                                           </div>
+                                           <p className="text-[8px] text-slate-400 uppercase font-medium mt-1.5">{log.type} • ID: {log.traceId}</p>
                                         </td>
                                         <td className="px-8 py-4">
                                            <span className="text-[10px] font-bold text-slate-500">{log.timestamp}</span>
