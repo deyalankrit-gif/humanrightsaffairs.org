@@ -35,7 +35,8 @@ import {
   Filter,
   BarChart3,
   TrendingUp,
-  LayoutDashboard
+  LayoutDashboard,
+  Users
 } from 'lucide-react'
 import {
   AlertDialog,
@@ -98,17 +99,17 @@ export default function PublicComplaintsTerminal() {
 
   const { data: complaints, loading: dataLoading } = useCollection(complaintsQuery);
 
-  const usersQuery = useMemoFirebase(() => {
+  const officersQuery = useMemoFirebase(() => {
     if (!db) return null;
-    return query(collection(db, 'users'), where('status', '==', 'active'));
+    return query(collection(db, 'investigation_officers'), where('status', '==', 'active'));
   }, [db]);
 
-  const { data: systemUsers } = useCollection(usersQuery);
+  const { data: registryOfficers } = useCollection(officersQuery);
 
   const investigators = useMemo(() => {
-    if (!systemUsers) return [];
-    return Array.from(new Set(systemUsers.map((u: any) => u.name).filter(Boolean)));
-  }, [systemUsers]);
+    if (!registryOfficers) return [];
+    return Array.from(new Set(registryOfficers.map((o: any) => o.name).filter(Boolean)));
+  }, [registryOfficers]);
 
   // Stats Logic
   const stats = useMemo(() => {
@@ -168,7 +169,9 @@ export default function PublicComplaintsTerminal() {
     (c.subject || '').toLowerCase().includes(search.toLowerCase())
   ).filter((c: any) => {
     const matchesStatus = statusFilter === 'All' || c.status === statusFilter;
-    const matchesInvestigator = investigatorFilter === 'All' || c.assignedTo === investigatorFilter;
+    const matchesInvestigator = investigatorFilter === 'All' || 
+      (c.assignedOfficers || []).some((o: any) => o.name === investigatorFilter) ||
+      (c.assignedTo === investigatorFilter);
     return matchesStatus && matchesInvestigator;
   })
 
@@ -208,39 +211,17 @@ export default function PublicComplaintsTerminal() {
           <div className="flex flex-col lg:flex-row items-center justify-between gap-6">
             <div className="flex w-full md:w-auto overflow-x-auto no-scrollbar gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-2xl border border-slate-200">
                {['All', ...CASE_STATUSES.slice(0, 4), 'Action Taken', 'Closed'].map(st => (
-                 <button 
-                   key={st} 
-                   onClick={() => setStatusFilter(st)}
-                   className={cn(
-                     "whitespace-nowrap px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-tight transition-all", 
-                     statusFilter === st ? "bg-primary text-white shadow-lg" : "text-slate-500 hover:bg-white"
-                   )}
-                 >
-                   {st}
-                 </button>
+                 <button key={st} onClick={() => setStatusFilter(st)} className={cn("whitespace-nowrap px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-tight transition-all", statusFilter === st ? "bg-primary text-white shadow-lg" : "text-slate-50 hover:bg-white")}>{st}</button>
                ))}
             </div>
             
             <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto items-center">
               <Select value={investigatorFilter} onValueChange={setInvestigatorFilter}>
-                <SelectTrigger className="w-full sm:w-48 h-12 md:h-14 rounded-2xl border-slate-200 bg-white dark:bg-slate-950 font-bold text-[10px] uppercase tracking-widest">
-                  <SelectValue placeholder="Investigator" />
-                </SelectTrigger>
-                <SelectContent className="bg-white z-[1000000]">
-                  <SelectItem value="All">All Officers</SelectItem>
-                  {investigators.map(name => <SelectItem key={name} value={name}>{name}</SelectItem>)}
-                </SelectContent>
+                <SelectTrigger className="w-full sm:w-48 h-12 md:h-14 rounded-2xl border-slate-200 bg-white dark:bg-slate-950 font-bold text-[10px] uppercase tracking-widest"><SelectValue placeholder="Investigator" /></SelectTrigger>
+                <SelectContent className="bg-white z-[1000000]"><SelectItem value="All">All Officers</SelectItem>{investigators.map(name => <SelectItem key={name} value={name}>{name}</SelectItem>)}</SelectContent>
               </Select>
 
-              <div className="relative w-full max-md:max-w-full max-w-sm">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                <Input 
-                  placeholder="Case ID, Token, Name..." 
-                  className="pl-12 h-12 md:h-14 rounded-2xl border-slate-200 text-sm shadow-inner bg-slate-50 dark:bg-slate-950 font-medium"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                />
-              </div>
+              <div className="relative w-full max-md:max-w-full max-w-sm"><Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" /><Input placeholder="Case ID, Token, Name..." className="pl-12 h-12 md:h-14 rounded-2xl border-slate-200 text-sm shadow-inner bg-slate-50 dark:bg-slate-950 font-medium" value={search} onChange={(e) => setSearch(e.target.value)} /></div>
             </div>
           </div>
         </div>
@@ -249,10 +230,7 @@ export default function PublicComplaintsTerminal() {
       <section className="py-8 pb-32">
         <div className="container mx-auto px-4">
           {dataLoading ? (
-            <div className="text-center py-32">
-              <Loader2 className="w-12 h-12 animate-spin text-accent mx-auto mb-4" />
-              <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px]">Synchronizing Case Registry...</p>
-            </div>
+            <div className="text-center py-32"><Loader2 className="w-12 h-12 animate-spin text-accent mx-auto mb-4" /><p className="text-slate-400 font-bold uppercase tracking-widest text-[10px]">Synchronizing Case Registry...</p></div>
           ) : (
             <div className="grid gap-6 max-w-6xl mx-auto">
               {filtered.map((c: any) => (
@@ -260,74 +238,38 @@ export default function PublicComplaintsTerminal() {
                   <CardContent className="p-0">
                     <div className="flex flex-col md:flex-row items-stretch">
                       <div className="p-8 bg-slate-50 dark:bg-slate-800 md:w-56 text-center border-r border-slate-100 flex flex-col items-center justify-center shrink-0 space-y-4">
-                         <div className="space-y-1">
-                            <span className="text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">CASE ID</span>
-                            <div className="text-sm font-black text-primary dark:text-white tracking-tighter bg-white dark:bg-slate-950 px-3 py-1 rounded-lg border border-slate-100 shadow-sm">{c.caseId || 'PROVISIONING'}</div>
-                         </div>
-                         <div className="space-y-1">
-                            <span className="text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">TOKEN</span>
-                            <div className="text-[11px] font-mono font-bold text-accent">{c.token}</div>
-                         </div>
-                         <Badge className={cn("text-[9px] font-black uppercase px-4 py-1.5 rounded-full border-none shadow-md", getStatusColor(c.status))}>
-                           {c.status}
-                         </Badge>
+                         <div className="space-y-1"><span className="text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">CASE ID</span><div className="text-sm font-black text-primary dark:text-white tracking-tighter bg-white dark:bg-slate-950 px-3 py-1 rounded-lg border border-slate-100 shadow-sm">{c.caseId || 'PROVISIONING'}</div></div>
+                         <div className="space-y-1"><span className="text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">TOKEN</span><div className="text-[11px] font-mono font-bold text-accent">{c.token}</div></div>
+                         <Badge className={cn("text-[9px] font-black uppercase px-4 py-1.5 rounded-full border-none shadow-md", getStatusColor(c.status))}>{c.status}</Badge>
                       </div>
                       <div className="flex-1 p-8 grid lg:grid-cols-4 gap-8 items-center">
                         <div className="lg:col-span-3 space-y-4">
-                          <div className="space-y-1">
-                            <div className="flex items-center gap-3">
-                               <h3 className="text-2xl font-headline font-bold text-primary dark:text-white leading-tight group-hover:text-accent transition-colors">{c.subject}</h3>
-                               {c.victimIsMinor && <Badge className="bg-red-600 text-white text-[8px] font-black animate-pulse">MINOR AT RISK</Badge>}
-                               {c.priority && <Badge variant="outline" className={cn("text-[8px] font-black border-none", c.priority === 'High' ? 'bg-red-50 text-red-600' : 'bg-blue-50 text-blue-600')}>{c.priority} PRIORITY</Badge>}
-                            </div>
-                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest flex items-center gap-1.5">
-                              <MapPin className="w-3 h-3 text-accent" /> {c.incidentLocation} • {c.stateName || 'National Scope'}
-                            </p>
-                          </div>
-                          
+                          <div className="space-y-1"><div className="flex items-center gap-3"><h3 className="text-2xl font-headline font-bold text-primary dark:text-white leading-tight group-hover:text-accent transition-colors">{c.subject}</h3>{c.victimIsMinor && <Badge className="bg-red-600 text-white text-[8px] font-black animate-pulse">MINOR AT RISK</Badge>}{c.priority && <Badge variant="outline" className={cn("text-[8px] font-black border-none", c.priority === 'High' ? 'bg-red-50 text-red-600' : 'bg-blue-50 text-blue-600')}>{c.priority} PRIORITY</Badge>}</div><p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest flex items-center gap-1.5"><MapPin className="w-3 h-3 text-accent" /> {c.incidentLocation} • {c.stateName || 'National Scope'}</p></div>
                           <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 pt-4 border-t border-slate-50 dark:border-slate-800">
+                             <div className="space-y-1"><p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Complainant</p><p className="text-xs font-bold flex items-center gap-1.5"><User className="w-3 h-3 text-accent" /> {c.fullName}</p></div>
+                             <div className="space-y-1"><p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Filed On</p><p className="text-xs font-bold flex items-center gap-1.5"><Clock className="w-3 h-3 text-accent" /> {c.createdAt?.toDate ? c.createdAt.toDate().toLocaleDateString('en-IN') : 'Just now'}</p></div>
                              <div className="space-y-1">
-                                <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Complainant</p>
-                                <p className="text-xs font-bold flex items-center gap-1.5"><User className="w-3 h-3 text-accent" /> {c.fullName}</p>
-                             </div>
-                             <div className="space-y-1">
-                                <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Filed On</p>
-                                <p className="text-xs font-bold flex items-center gap-1.5"><Clock className="w-3 h-3 text-accent" /> {c.createdAt?.toDate ? c.createdAt.toDate().toLocaleDateString('en-IN') : 'Just now'}</p>
-                             </div>
-                             <div className="space-y-1">
-                                <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Assigned Investigator</p>
+                                <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Investigative Team</p>
                                 <p className="text-xs font-black text-emerald-600 uppercase flex items-center gap-1.5">
-                                   <Briefcase className="w-3 h-3" /> {c.assignedTo || 'Unassigned'}
+                                   <Users className="w-3 h-3 text-accent" /> 
+                                   {(c.assignedOfficers || []).length > 0 
+                                     ? `${(c.assignedOfficers || []).length} Officials` 
+                                     : c.assignedTo || 'Unassigned'}
                                 </p>
                              </div>
                           </div>
                         </div>
-                        <div className="flex flex-col gap-3 h-full justify-center">
-                          <Button size="lg" className="w-full bg-primary text-white font-bold h-12 rounded-xl text-[11px] uppercase tracking-widest gap-2 shadow-xl shadow-primary/20 hover:bg-secondary transition-all" onClick={() => router.push(`/internal/public-complaints/${c.id}`)}>
-                            <LayoutDashboard className="w-4 h-4" /> Manage Case
-                          </Button>
-                          <Button size="sm" variant="ghost" className="h-10 text-[10px] font-bold text-slate-400 hover:text-accent" onClick={() => router.push(`/internal/public-complaints/${c.id}#reports`)}>
-                             <FileText className="w-4 h-4 mr-2" /> 18 Templates
-                          </Button>
-                        </div>
+                        <div className="flex flex-col gap-3 h-full justify-center"><Button size="lg" className="w-full bg-primary text-white font-bold h-12 rounded-xl text-[11px] uppercase tracking-widest gap-2 shadow-xl shadow-primary/20 hover:bg-secondary transition-all" onClick={() => router.push(`/internal/public-complaints/${c.id}`)}><LayoutDashboard className="w-4 h-4" /> Manage Case</Button><Button size="sm" variant="ghost" className="h-10 text-[10px] font-bold text-slate-400 hover:text-accent" onClick={() => router.push(`/internal/public-complaints/${c.id}#reports`)}><FileText className="w-4 h-4 mr-2" /> 18 Templates</Button></div>
                       </div>
                     </div>
                   </CardContent>
                 </Card>
               ))}
-
-              {filtered.length === 0 && (
-                <div className="text-center py-40 bg-white dark:bg-slate-900 rounded-[3rem] border-4 border-dashed border-slate-100 dark:border-slate-800">
-                  <Activity className="w-20 h-20 mx-auto mb-6 text-slate-200" />
-                  <h3 className="text-2xl font-headline font-bold text-slate-400">No active cases identified</h3>
-                  <p className="text-sm text-slate-500 mt-2">Adjust your filters or examine the search parameters.</p>
-                </div>
-              )}
+              {filtered.length === 0 && (<div className="text-center py-40 bg-white dark:bg-slate-900 rounded-[3rem] border-4 border-dashed border-slate-100 dark:border-slate-800"><Activity className="w-20 h-20 mx-auto mb-6 text-slate-200" /><h3 className="text-2xl font-headline font-bold text-slate-400">No active cases identified</h3><p className="text-sm text-slate-500 mt-2">Adjust your filters or examine the search parameters.</p></div>)}
             </div>
           )}
         </div>
       </section>
-
       <Footer />
     </main>
   )
