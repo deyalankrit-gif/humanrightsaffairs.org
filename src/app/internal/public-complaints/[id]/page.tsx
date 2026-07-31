@@ -6,7 +6,7 @@ import Image from 'next/image'
 import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase'
 import { doc, updateDoc, serverTimestamp, arrayUnion, collection, addDoc, query, where, orderBy } from 'firebase/firestore'
 import { Footer } from '@/components/footer'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -20,8 +20,18 @@ import {
   Clock, FileText, Gavel, Scale, CheckCircle2, MoreVertical, 
   Activity, ClipboardList, Briefcase, Trash2, Edit3, MessageSquare, 
   History, Eye, Download, Share2, Upload, Camera, FileWarning, Search,
-  GraduationCap, AlertCircle, Info, Landmark, Layers, UserCheck, ShieldAlert
+  GraduationCap, AlertCircle, Info, Landmark, Layers, UserCheck, ShieldAlert,
+  Plus, X
 } from 'lucide-react'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogDescription,
+  DialogClose,
+} from "@/components/ui/dialog"
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
 import { CASE_STATUSES, CASE_PRIORITIES, REPORT_TEMPLATES } from '@/lib/complaint-constants'
