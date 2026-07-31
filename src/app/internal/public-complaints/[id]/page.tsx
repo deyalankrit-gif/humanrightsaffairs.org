@@ -22,7 +22,7 @@ import {
   Activity, ClipboardList, Briefcase, Trash2, Edit3, MessageSquare, 
   History, Eye, Download, Share2, Upload, Camera, FileWarning, Search,
   GraduationCap, AlertCircle, Info, Landmark, Layers, UserCheck, ShieldAlert,
-  Plus, X, Send
+  Plus, X, Send, Network, Target, BookOpenCheck
 } from 'lucide-react'
 import {
   Dialog,
@@ -42,6 +42,7 @@ import { getStatusColor } from '@/lib/complaint-utils'
 /**
  * Tactical Case Management Hub: 
  * Professional interface for investigative and reporting lifecycle.
+ * Enhanced with Multi-Level Review and Stage-Specific Log protocols.
  */
 export default function CaseHubPage() {
   const { id } = useParams()
@@ -54,6 +55,14 @@ export default function CaseHubPage() {
   const [isActionLoading, setIsActionLoading] = useState(false)
   const [remark, setRemark] = useState('')
   const [selectedReportType, setSelectedReportType] = useState<string>('preliminary_assessment')
+  
+  // Multi-Level Review State
+  const [selectedReviewLevel, setSelectedLevel] = useState('District')
+  const [levelReviewNote, setLevelNote] = useState('')
+
+  // Stage Log State
+  const [selectedLogStage, setSelectedStage] = useState('New Complaint')
+  const [stageLogNote, setStageNote] = useState('')
   
   // Commission Findings State
   const [isCommissionOpen, setIsCommissionOpen] = useState(false)
@@ -96,7 +105,8 @@ export default function CaseHubPage() {
         action: `Status Transition: ${newStatus}`,
         user: user.email,
         timestamp: new Date().toISOString(),
-        remark: `Authorized lifecycle update to ${newStatus}.`
+        remark: `Authorized lifecycle update to ${newStatus}.`,
+        type: 'status_change'
       };
       await updateDoc(docRef, { 
         status: newStatus,
@@ -119,7 +129,8 @@ export default function CaseHubPage() {
         action: "Investigator Assignment",
         user: user.email,
         timestamp: new Date().toISOString(),
-        remark: `Case assigned to ${personName} for detailed investigation.`
+        remark: `Case assigned to ${personName} for detailed investigation.`,
+        type: 'assignment'
       };
       await updateDoc(docRef, { 
         assignedTo: personName,
@@ -143,7 +154,8 @@ export default function CaseHubPage() {
         action: "Investigative Remark",
         user: user.email,
         timestamp: new Date().toISOString(),
-        remark: remark.trim()
+        remark: remark.trim(),
+        type: 'remark'
       };
       await updateDoc(docRef, { 
         timeline: arrayUnion(entry),
@@ -158,6 +170,56 @@ export default function CaseHubPage() {
     }
   };
 
+  const handleLevelReview = async () => {
+    if (!levelReviewNote.trim() || !docRef || !user) return;
+    setIsActionLoading(true);
+    try {
+      const entry = {
+        action: `${selectedReviewLevel} Council Consideration`,
+        user: user.email,
+        timestamp: new Date().toISOString(),
+        remark: levelReviewNote.trim(),
+        type: 'level_review',
+        meta: { level: selectedReviewLevel }
+      };
+      await updateDoc(docRef, { 
+        timeline: arrayUnion(entry),
+        updatedAt: serverTimestamp()
+      });
+      setLevelNote('');
+      toast({ title: "Review Recorded", description: `Consideration from ${selectedReviewLevel} level established.` });
+    } catch (e) {
+      toast({ variant: "destructive", title: "Review Rejected" });
+    } finally {
+      setIsActionLoading(false);
+    }
+  };
+
+  const handleStageLog = async () => {
+    if (!stageLogNote.trim() || !docRef || !user) return;
+    setIsActionLoading(true);
+    try {
+      const entry = {
+        action: `Stage Detail Log: ${selectedLogStage}`,
+        user: user.email,
+        timestamp: new Date().toISOString(),
+        remark: stageLogNote.trim(),
+        type: 'stage_log',
+        meta: { stage: selectedLogStage }
+      };
+      await updateDoc(docRef, { 
+        timeline: arrayUnion(entry),
+        updatedAt: serverTimestamp()
+      });
+      setStageNote('');
+      toast({ title: "Stage Detail Archived" });
+    } catch (e) {
+      toast({ variant: "destructive", title: "Sync Error" });
+    } finally {
+      setIsActionLoading(false);
+    }
+  };
+
   const handleCommissionFindings = async () => {
     if (!commissionData.findings.trim() || !docRef || !user) return;
     setIsActionLoading(true);
@@ -166,7 +228,8 @@ export default function CaseHubPage() {
         action: "Commission Findings Registered",
         user: user.email,
         timestamp: new Date().toISOString(),
-        remark: `Final Findings: ${commissionData.findings}. Directives: ${commissionData.directives}`
+        remark: `Final Findings: ${commissionData.findings}. Directives: ${commissionData.directives}`,
+        type: 'commission'
       };
       
       await updateDoc(docRef, {
@@ -397,7 +460,7 @@ export default function CaseHubPage() {
                         <div className="space-y-4">
                            <div className="flex justify-between items-center">
                               <span className="text-xs font-bold">{caseData.victimName}</span>
-                              {caseData.victimIsMinor && <Badge className="bg-red-600 text-[8px] h-5 px-3">MINOR</Badge>}
+                              {caseData.victimIsMinor && <Badge className="bg-red-600 text-white text-[8px] h-5 px-3">MINOR</Badge>}
                            </div>
                            <p className="text-[10px] text-indigo-300 leading-relaxed italic">"{caseData.victimAddress}"</p>
                         </div>
@@ -409,18 +472,19 @@ export default function CaseHubPage() {
 
            {/* INVESTIGATION CONTENT */}
            <TabsContent value="investigation" className="animate-in slide-in-from-right-4 duration-500">
-              <div className="grid lg:grid-cols-3 gap-8">
-                 <div className="lg:col-span-2 space-y-6">
+              <div className="grid lg:grid-cols-12 gap-8">
+                 <div className="lg:col-span-8 space-y-6">
+                    {/* Assignment & Priority */}
                     <Card className="rounded-[2.5rem] border-none shadow-sm p-8 bg-white dark:bg-slate-900">
                        <CardHeader className="p-0 mb-8">
-                          <CardTitle className="text-xl font-headline font-bold flex items-center gap-2">
-                             <Briefcase className="w-5 h-5 text-accent" /> Resource Management
+                          <CardTitle className="text-xl font-headline font-bold flex items-center gap-2 text-primary dark:text-white">
+                             <Briefcase className="w-5 h-5 text-accent" /> Strategic Assignment
                           </CardTitle>
                        </CardHeader>
                        <div className="grid md:grid-cols-2 gap-8">
                           <div className="space-y-4">
                              <div className="space-y-2">
-                                <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Assigned Investigator</Label>
+                                <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Assigned Official</Label>
                                 <Select value={caseData.assignedTo || 'Unassigned'} onValueChange={handleAssignment}>
                                    <SelectTrigger className="rounded-xl h-11"><SelectValue placeholder="Choose Officer" /></SelectTrigger>
                                    <SelectContent className="bg-white">
@@ -451,48 +515,121 @@ export default function CaseHubPage() {
                                 </div>
                              </div>
                           </div>
-                          
-                          <div className="p-6 rounded-[2rem] bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 space-y-4">
+                          <div className="p-6 rounded-[2rem] bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 space-y-4 shadow-inner">
                              <h5 className="text-[10px] font-black text-accent uppercase tracking-widest">Internal Directives</h5>
                              <ul className="space-y-2">
                                 <li className="flex items-center gap-2 text-[11px] font-bold"><CheckCircle2 className="w-3 h-3 text-emerald-500" /> Verify Complainant Residency</li>
-                                <li className="flex items-center gap-2 text-[11px] font-bold"><CheckCircle2 className="w-3 h-3 text-emerald-500" /> Collect Medical Certificates</li>
-                                <li className="flex items-center gap-2 text-[11px] font-bold text-slate-300"><div className="w-3 h-3 rounded-full border border-slate-300" /> Draft Formal Authority Letter</li>
+                                <li className="flex items-center gap-2 text-[11px] font-bold"><CheckCircle2 className="w-3 h-3 text-emerald-500" /> Collect Medical Evidence</li>
+                                <li className="flex items-center gap-2 text-[11px] font-bold text-slate-300"><div className="w-3 h-3 rounded-full border border-slate-300" /> Prepare Authority Letter</li>
                              </ul>
                           </div>
                        </div>
                     </Card>
 
+                    {/* Multi-Level Review Protocol */}
+                    <Card className="rounded-[2.5rem] border-none shadow-sm p-8 bg-white dark:bg-slate-900 overflow-hidden relative">
+                       <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 rounded-full -mr-12 -mt-12"></div>
+                       <CardHeader className="p-0 mb-6">
+                          <CardTitle className="text-xl font-headline font-bold flex items-center gap-3 text-primary dark:text-white">
+                             <Network className="w-6 h-6 text-emerald-500" /> Multi-Level Review Panel
+                          </CardTitle>
+                          <CardDescription>Official considerations at District, State, and National tiers.</CardDescription>
+                       </CardHeader>
+                       <div className="space-y-6">
+                          <div className="flex flex-col md:flex-row gap-4 items-center">
+                             <div className="flex-1 w-full space-y-1.5">
+                                <Label className="text-[9px] font-black uppercase text-slate-400">Jurisdictional Level</Label>
+                                <Select value={selectedReviewLevel} onValueChange={setSelectedLevel}>
+                                   <SelectTrigger className="rounded-xl h-11"><SelectValue /></SelectTrigger>
+                                   <SelectContent position="popper" className="bg-white z-[1000000]">
+                                      <SelectItem value="District">District Committee</SelectItem>
+                                      <SelectItem value="State">State Chapter</SelectItem>
+                                      <SelectItem value="National">National Council</SelectItem>
+                                   </SelectContent>
+                                </Select>
+                             </div>
+                          </div>
+                          <div className="space-y-2">
+                             <Label className="text-[9px] font-black uppercase text-slate-400">Review Summary / Consideration</Label>
+                             <Textarea 
+                               value={levelReviewNote} 
+                               onChange={e => setLevelNote(e.target.value)}
+                               placeholder={`Input ${selectedReviewLevel} level observations...`} 
+                               className="min-h-[100px] rounded-2xl bg-slate-50 dark:bg-slate-950" 
+                             />
+                          </div>
+                          <Button onClick={handleLevelReview} disabled={isActionLoading || !levelReviewNote.trim()} className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-xl">
+                             Commit {selectedReviewLevel} Review
+                          </Button>
+                       </div>
+                    </Card>
+
+                    {/* Stage Details Log */}
                     <Card className="rounded-[2.5rem] border-none shadow-sm p-8 bg-white dark:bg-slate-900">
                        <CardHeader className="p-0 mb-6">
+                          <CardTitle className="text-xl font-headline font-bold flex items-center gap-3 text-primary dark:text-white">
+                             <Target className="w-6 h-6 text-indigo-500" /> Stage Detail Logs
+                          </CardTitle>
+                          <CardDescription>Record granular findings achieved at specific investigation stages.</CardDescription>
+                       </CardHeader>
+                       <div className="space-y-6">
+                          <div className="grid md:grid-cols-2 gap-4">
+                             <div className="space-y-1.5">
+                                <Label className="text-[9px] font-black uppercase text-slate-400">Target Stage</Label>
+                                <Select value={selectedLogStage} onValueChange={setSelectedStage}>
+                                   <SelectTrigger className="rounded-xl h-11"><SelectValue /></SelectTrigger>
+                                   <SelectContent position="popper" className="bg-white z-[1000000] max-h-60">
+                                      {CASE_STATUSES.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                                   </SelectContent>
+                                </Select>
+                             </div>
+                          </div>
+                          <div className="space-y-2">
+                             <Label className="text-[9px] font-black uppercase text-slate-400">Investigation Details</Label>
+                             <Textarea 
+                               value={stageLogNote} 
+                               onChange={e => setStageNote(e.target.value)}
+                               placeholder={`Details recorded for ${selectedLogStage}...`} 
+                               className="min-h-[120px] rounded-2xl bg-slate-50 dark:bg-slate-950" 
+                             />
+                          </div>
+                          <Button onClick={handleStageLog} disabled={isActionLoading || !stageLogNote.trim()} className="w-full h-12 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-xl">
+                             Archive Stage Findings
+                          </Button>
+                       </div>
+                    </Card>
+                 </div>
+
+                 {/* RIGHT SIDEBAR: General Remarks & Reminders */}
+                 <div className="lg:col-span-4 space-y-8">
+                    <Card className="rounded-[2rem] border-none shadow-sm p-6 bg-white dark:bg-slate-900 border border-slate-100">
+                       <CardHeader className="p-0 mb-6">
                           <CardTitle className="text-lg font-headline font-bold flex items-center gap-2">
-                             <MessageSquare className="w-4 h-4 text-accent" /> Investigative Remarks
+                             <MessageSquare className="w-4 h-4 text-accent" /> Quick Remarks
                           </CardTitle>
                        </CardHeader>
                        <div className="space-y-4">
                           <Textarea 
                              value={remark} 
                              onChange={e => setRemark(e.target.value)}
-                             placeholder="Append a critical log or update to this case file..." 
-                             className="min-h-[120px] rounded-2xl bg-slate-50 dark:bg-slate-950 border-none shadow-inner"
+                             placeholder="Short internal update..." 
+                             className="min-h-[80px] rounded-xl text-sm"
                           />
                           <Button 
                              onClick={handleAddRemark} 
                              disabled={isActionLoading || !remark.trim()}
-                             className="w-full h-12 rounded-xl bg-primary text-white font-bold"
+                             className="w-full h-10 rounded-xl bg-primary text-white font-bold text-[10px] uppercase tracking-widest"
                           >
-                             {isActionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Commit Remark to Registry"}
+                             {isActionLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "Post Remark"}
                           </Button>
                        </div>
                     </Card>
-                 </div>
 
-                 <div className="space-y-6">
-                    <div className="p-8 rounded-[2.5rem] bg-emerald-50 dark:bg-emerald-950/20 border-2 border-dashed border-emerald-200 dark:border-emerald-800 text-center space-y-4">
-                       <ShieldCheck className="w-10 h-10 text-emerald-600 mx-auto" />
-                       <h4 className="text-sm font-black uppercase tracking-widest text-emerald-700">Investigation Mandate</h4>
-                       <p className="text-[10px] text-emerald-800 dark:text-emerald-400 leading-relaxed font-bold italic">
-                          "Administrators are required to update case status every 72 hours to ensure statutory compliance with the national human rights reporting standards."
+                    <div className="p-8 rounded-[2.5rem] bg-amber-50 dark:bg-amber-950/20 border-2 border-dashed border-amber-200 dark:border-amber-800 text-center space-y-4">
+                       <ShieldCheck className="w-10 h-10 text-amber-600 mx-auto" />
+                       <h4 className="text-sm font-black uppercase tracking-widest text-amber-700">Audit Protocol</h4>
+                       <p className="text-[10px] text-amber-800 dark:text-amber-400 leading-relaxed font-bold italic">
+                          "Detailed stage logging is mandatory for the 18 formal reports. Ensure all facts are cross-verified before archiving stage details."
                        </p>
                     </div>
                  </div>
@@ -600,19 +737,30 @@ export default function CaseHubPage() {
                          {idx < (caseData.timeline.length - 1) && (
                            <div className="absolute left-6 top-10 bottom-[-48px] w-0.5 bg-slate-100 dark:bg-slate-800 group-hover:bg-accent transition-colors" />
                          )}
-                         <div className="w-12 h-12 rounded-2xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-accent shadow-sm shrink-0 relative z-10 group-hover:bg-accent group-hover:text-white transition-all">
-                            <Clock className="w-6 h-6" />
+                         <div className={cn(
+                           "w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm shrink-0 relative z-10 transition-all",
+                           entry.type === 'level_review' ? "bg-emerald-500 text-white" :
+                           entry.type === 'stage_log' ? "bg-indigo-500 text-white" :
+                           "bg-slate-50 dark:bg-slate-800 text-accent group-hover:bg-accent group-hover:text-white"
+                         )}>
+                            {entry.type === 'level_review' ? <Network className="w-6 h-6" /> : 
+                             entry.type === 'stage_log' ? <BookOpenCheck className="w-6 h-6" /> :
+                             <Clock className="w-6 h-6" />}
                          </div>
                          <div className="space-y-2 flex-1 pt-1 pb-10">
                             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                               <h4 className="text-lg font-bold text-primary dark:text-white">{entry.action}</h4>
+                               <div className="flex items-center gap-3">
+                                 <h4 className="text-lg font-bold text-primary dark:text-white">{entry.action}</h4>
+                                 {entry.type === 'level_review' && <Badge className="bg-emerald-600 text-white text-[7px] uppercase">{entry.meta?.level}</Badge>}
+                                 {entry.type === 'stage_log' && <Badge className="bg-indigo-600 text-white text-[7px] uppercase">{entry.meta?.stage}</Badge>}
+                               </div>
                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{new Date(entry.timestamp).toLocaleString('en-IN')}</span>
                             </div>
-                            <div className="p-4 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-100 dark:border-slate-800 italic text-sm text-slate-500">
+                            <div className="p-4 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-100 dark:border-slate-800 italic text-sm text-slate-500 leading-relaxed">
                                "{entry.remark}"
                             </div>
                             <div className="flex items-center gap-2 pt-1">
-                               <Badge className="bg-slate-900 text-[8px] h-4 font-bold">{entry.user}</Badge>
+                               <Badge className="bg-slate-900 text-white text-[8px] h-4 font-bold">{entry.user}</Badge>
                                <span className="text-[8px] font-black text-emerald-500 uppercase tracking-tighter">Verified Integrity</span>
                             </div>
                          </div>
