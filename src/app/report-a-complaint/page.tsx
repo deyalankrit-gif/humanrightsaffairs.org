@@ -65,7 +65,7 @@ const complaintSchema = z.object({
   // Third Party Reporting
   isThirdParty: z.boolean().default(false),
   victimName: z.string().optional(),
-  victimPhone: z.string().optional(),
+  victimPhone: z.string().optional().or(z.literal('')),
   victimAddress: z.string().optional(),
   victimAadhaar: z.string().optional(),
   
@@ -178,40 +178,43 @@ export default function ReportAComplaintPage() {
       createdAt: serverTimestamp()
     }
 
-    addDoc(collection(db, "public_complaints"), complaintData)
-      .then(() => {
-        const complainantName = values.fullName;
-        const currentToken = submissionToken;
-        const now = new Date().toLocaleString('en-IN');
+    try {
+      // 1. Log Complaint
+      await addDoc(collection(db, "public_complaints"), complaintData);
+      
+      const complainantName = values.fullName;
+      const currentToken = submissionToken;
+      const now = new Date().toLocaleString('en-IN');
 
-        setToken(submissionToken)
-        form.reset()
-        setIncidentPhotos([])
-        toast({
-          title: "Complaint Lodged",
-          description: "Your official report has been recorded in the national registry."
-        })
+      setToken(submissionToken)
+      form.reset()
+      setIncidentPhotos([])
+      
+      toast({
+        title: "Complaint Lodged",
+        description: "Your official report has been recorded in the national registry."
+      })
 
-        // 🔔 Dispatch Notification to Administrative terminal
-        sendComplaintNotification({
-          complainantName,
-          token: currentToken,
-          timestamp: now
-        }).catch(err => {
-          console.warn("[NOTIFICATION-SILENT-FAIL] Administrative alert failed:", err.message);
-        });
-      })
-      .catch(async (error) => {
-        const permissionError = new FirestorePermissionError({
-          path: 'public_complaints',
-          operation: 'create',
-          requestResourceData: complaintData,
-        } satisfies SecurityRuleContext);
-        errorEmitter.emit('permission-error', permissionError);
-      })
-      .finally(() => {
-        setIsSubmitting(false)
-      })
+      // 2. Dispatch Notification (Async Background)
+      sendComplaintNotification({
+        complainantName,
+        token: currentToken,
+        timestamp: now
+      }).catch(err => {
+        console.warn("[NOTIFICATION-SILENT-FAIL] Administrative alert failed:", err.message);
+      });
+
+    } catch (error: any) {
+      console.error("[SUBMISSION-ERROR]", error);
+      const permissionError = new FirestorePermissionError({
+        path: 'public_complaints',
+        operation: 'create',
+        requestResourceData: complaintData,
+      } satisfies SecurityRuleContext);
+      errorEmitter.emit('permission-error', permissionError);
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   if (token) {
