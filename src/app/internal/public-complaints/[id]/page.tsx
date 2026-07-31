@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useEffect, useState, useMemo } from 'react'
@@ -45,6 +46,7 @@ import { sendTimelineEmailUpdate, sendReportEmail } from '@/lib/notification-ser
  * Professional interface for investigative and reporting lifecycle.
  * Enhanced with Multi-Level Review and Stage-Specific Log protocols.
  * Automated Email Notifications integrated into all lifecycle updates.
+ * Manual Timeline Transmission Node added to stages and status logs.
  */
 export default function CaseHubPage() {
   const { id } = useParams()
@@ -135,6 +137,24 @@ export default function CaseHubPage() {
       }
     } catch (e) {
       console.warn("[NOTIFICATION-CRITICAL] Dispatch or Logging failure.");
+    }
+  };
+
+  // Manual Timeline Item Dispatch
+  const handleManualTimelineEmail = async (entry: any) => {
+    if (!caseData?.email || !caseData?.fullName || !docRef || !user) return;
+    
+    setIsActionLoading(true);
+    try {
+      await dispatchEmailUpdate(entry.action, entry.remark);
+      toast({ 
+        title: "Update Transmitted", 
+        description: `Notification for "${entry.action}" dispatched to citizen.` 
+      });
+    } catch (e) {
+      toast({ variant: "destructive", title: "Transmission Failed" });
+    } finally {
+      setIsActionLoading(false);
     }
   };
 
@@ -834,7 +854,18 @@ export default function CaseHubPage() {
                          <div className="space-y-2 flex-1 pt-1 pb-10 border-l pl-8 border-slate-100 dark:border-slate-800 ml-[-38px] group-last:border-transparent">
                             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                                <h4 className="text-lg font-bold text-primary dark:text-white">{entry.action}</h4>
-                               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{new Date(entry.timestamp).toLocaleString('en-IN')}</span>
+                               <div className="flex items-center gap-4">
+                                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{new Date(entry.timestamp).toLocaleString('en-IN')}</span>
+                                  <Button 
+                                    variant="ghost" 
+                                    size="sm" 
+                                    onClick={() => handleManualTimelineEmail(entry)}
+                                    disabled={isActionLoading}
+                                    className="h-8 px-3 rounded-lg text-accent hover:bg-accent/10 font-bold text-[10px] uppercase tracking-widest gap-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                                  >
+                                    <Mail className="w-3.5 h-3.5" /> Transmit Notice
+                                  </Button>
+                               </div>
                             </div>
                             <div className="p-4 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-100 italic text-sm text-slate-500 leading-relaxed">
                                "{entry.remark}"
