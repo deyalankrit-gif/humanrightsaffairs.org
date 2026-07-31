@@ -99,6 +99,11 @@ service cloud.firestore {
       allow create: if true;
     }
 
+    match /investigation_officers/{id} {
+      allow read: if true;
+      allow write: if isRoot();
+    }
+
     // 4. SECURE USER REGISTRY
     match /users/{userEmail} {
       allow read: if isAuthenticated() && (

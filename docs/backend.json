@@ -53,6 +53,18 @@
       },
       "required": ["email", "permissions", "uid", "role"]
     },
+    "InvestigationOfficer": {
+      "title": "Investigation Officer",
+      "description": "Registry of personnel authorized to investigate public complaints.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "title": { "type": "string" },
+        "status": { "type": "string", "enum": ["active", "inactive"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name"]
+    },
     "MemberProfile": {
       "title": "Member Profile",
       "description": "Official personnel record for Trust members and volunteers.",
@@ -133,6 +145,7 @@
   },
   "firestore": {
     "/users/{userEmail}": { "schema": "UserAccount", "description": "Permissions registry." },
+    "/investigation_officers/{officerId}": { "schema": "InvestigationOfficer", "description": "Official investigator registry." },
     "/memberProfiles/{memberId}": { "schema": "MemberProfile", "description": "Personnel registry." },
     "/materials/{materialId}": { "schema": "MaterialItem", "description": "Material management inventory." },
     "/current_news/{newsId}": { "schema": "CurrentNews", "description": "Homepage news broadcast." },

@@ -5,7 +5,7 @@ import React, { useEffect, useState, useMemo } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { useUser, useFirestore, useDoc, useMemoFirebase, useCollection } from '@/firebase'
-import { doc, updateDoc, serverTimestamp, arrayUnion, collection, query, orderBy, where } from 'firebase/firestore'
+import { doc, updateDoc, serverTimestamp, arrayUnion, collection, query, orderBy, where, getDocs, addDoc, setDoc } from 'firebase/firestore'
 import { Footer } from '@/components/footer'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -23,7 +23,8 @@ import {
   History, Eye, Download, Share2, Upload, Camera, FileWarning, Search,
   GraduationCap, AlertCircle, Info, Landmark, Layers, UserCheck, ShieldAlert,
   Plus, X, Send, Network, Target, BookOpenCheck, FileAudio, FileIcon, Video,
-  RefreshCw, MailCheck, MailWarning, MailQuestion
+  RefreshCw, MailCheck, MailWarning, MailQuestion,
+  UserRoundCheck
 } from 'lucide-react'
 import {
   Dialog,
@@ -44,11 +45,7 @@ import { sendTimelineEmailUpdate, sendReportEmail } from '@/lib/notification-ser
 /**
  * Tactical Case Management Hub: 
  * Professional interface for investigative and reporting lifecycle.
- * Enhanced with Multi-Level Review and Stage-Specific Log protocols.
- * Automated Email Notifications integrated into all lifecycle updates.
- * Manual Timeline Transmission Node added to stages and status logs.
- * Audit Registry updated to display both sender and recipient emails for full transparency.
- * Timeline updated to show mail status and sender/recipient details for each action.
+ * Enhanced: Hybrid Investigator Assignment (Manual + Dropdown).
  */
 export default function CaseHubPage() {
   const { id } = useParams()
@@ -62,6 +59,9 @@ export default function CaseHubPage() {
   const [remark, setRemark] = useState('')
   const [selectedReportType, setSelectedReportType] = useState<string>('preliminary_assessment')
   
+  // Assignment State
+  const [manualOfficerName, setManualOfficerName] = useState('')
+
   // Multi-Level Review State
   const [selectedReviewLevel, setSelectedLevel] = useState('District')
   const [levelReviewNote, setLevelNote] = useState('')
@@ -85,22 +85,21 @@ export default function CaseHubPage() {
 
   const { data: caseData, loading: dataLoading } = useDoc(docRef);
 
-  // Data Fetching: Available Personnel for Assignment
-  const usersQuery = useMemoFirebase(() => {
+  // Data Fetching: Registered Investigators
+  const officersQuery = useMemoFirebase(() => {
     if (!db) return null;
-    return query(collection(db, 'users'), where('status', '==', 'active'));
+    return query(collection(db, 'investigation_officers'), where('status', '==', 'active'));
   }, [db]);
 
-  const { data: systemUsers } = useCollection(usersQuery);
+  const { data: registryOfficers } = useCollection(officersQuery);
 
-  const availablePersonnel = useMemo(() => {
-    if (!systemUsers) return [];
-    return systemUsers.map((u: any) => ({
-      email: u.email || u.id,
-      name: u.name || (u.email || u.id).split('@')[0],
-      role: u.role
-    }));
-  }, [systemUsers]);
+  const isRoot = user?.email?.toLowerCase() === 'deydhritiman@gmail.com';
+
+  useEffect(() => {
+    if (caseData?.assignedTo) {
+      setManualOfficerName(caseData.assignedTo);
+    }
+  }, [caseData?.assignedTo]);
 
   // Utility: Dispatches the automated email update and logs it
   const dispatchEmailUpdate = async (action: string, remark: string) => {
@@ -240,30 +239,30 @@ export default function CaseHubPage() {
     }
   };
 
-  const handleAssignment = async (personName: string) => {
-    if (!docRef || !user) return;
+  const handleAssignment = async () => {
+    if (!docRef || !user || !manualOfficerName.trim()) return;
     setIsActionLoading(true);
     try {
-      const mailLog = await dispatchEmailUpdate(`Investigator Assigned`, `A specialized officer (${personName}) has been assigned to investigate your report.`);
+      const mailLog = await dispatchEmailUpdate(`Investigator Assigned`, `A specialized officer (${manualOfficerName}) has been assigned to investigate your report.`);
 
       const entry = {
         action: "Investigator Assignment",
         user: user.email,
         timestamp: new Date().toISOString(),
-        remark: `Case assigned to ${personName} for detailed investigation.`,
+        remark: `Case assigned to ${manualOfficerName} for detailed investigation.`,
         type: 'assignment',
         mailStatus: mailLog?.status,
         mailFrom: mailLog?.sender,
         mailTo: mailLog?.recipient
       };
       await updateDoc(docRef, { 
-        assignedTo: personName,
+        assignedTo: manualOfficerName.trim(),
         assignedAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
         timeline: arrayUnion(entry)
       });
       
-      toast({ title: "Officer Assigned", description: `Case file transferred to ${personName}.` });
+      toast({ title: "Officer Assigned", description: `Case file transferred to ${manualOfficerName}.` });
     } catch (e) {
       toast({ variant: "destructive", title: "Assignment Failed" });
     } finally {
@@ -689,18 +688,40 @@ export default function CaseHubPage() {
                              <Briefcase className="w-5 h-5 text-accent" /> Strategic Assignment
                           </CardTitle>
                        </CardHeader>
-                       <div className="grid md:grid-cols-2 gap-8">
-                          <div className="space-y-4">
-                             <div className="space-y-2">
-                                <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Assigned Official</Label>
-                                <Select value={caseData.assignedTo || 'Unassigned'} onValueChange={handleAssignment}>
-                                   <SelectTrigger className="rounded-xl h-11"><SelectValue placeholder="Choose Officer" /></SelectTrigger>
-                                   <SelectContent className="bg-white">
-                                      {availablePersonnel.map((p, idx) => (
-                                        <SelectItem key={idx} value={p.name}>{p.name} ({p.role})</SelectItem>
-                                      ))}
-                                   </SelectContent>
-                                </Select>
+                       <div className="grid md:grid-cols-1 gap-8">
+                          <div className="space-y-6">
+                             <div className="grid md:grid-cols-2 gap-4 items-end">
+                                <div className="space-y-2">
+                                  <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Authorized Investigator Name *</Label>
+                                  <div className="flex gap-2">
+                                     <Input 
+                                        value={manualOfficerName} 
+                                        onChange={e => setManualOfficerName(e.target.value)} 
+                                        placeholder="Enter name manually..." 
+                                        className="h-11 rounded-xl bg-slate-50 dark:bg-slate-950 font-bold"
+                                     />
+                                     <Select onValueChange={setManualOfficerName}>
+                                        <SelectTrigger className="w-14 h-11 rounded-xl shrink-0"><UserRoundCheck className="w-4 h-4" /></SelectTrigger>
+                                        <SelectContent position="popper" className="z-[1000000] bg-white max-h-60">
+                                           <p className="px-3 py-2 text-[8px] font-black uppercase text-slate-400 border-b">Select from Registry</p>
+                                           {(registryOfficers || []).map((o: any) => (
+                                             <SelectItem key={o.id} value={o.name}>{o.name}</SelectItem>
+                                           ))}
+                                           {(!registryOfficers || registryOfficers.length === 0) && (
+                                              <p className="p-4 text-center text-[10px] text-slate-400 italic">No officials registered.</p>
+                                           )}
+                                        </SelectContent>
+                                     </Select>
+                                  </div>
+                                </div>
+                                <Button onClick={handleAssignment} disabled={isActionLoading || !manualOfficerName.trim()} className="h-11 rounded-xl bg-primary text-white font-bold shadow-xl">Assign Case</Button>
+                             </div>
+                             
+                             <div className="p-4 bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-dashed flex items-center gap-3">
+                                <Info className="w-4 h-4 text-blue-500" />
+                                <p className="text-[10px] text-slate-500 leading-relaxed italic">
+                                  "You can type the name manually or use the dropdown to select a verified official from the Investigator Registry."
+                                </p>
                              </div>
                           </div>
                        </div>

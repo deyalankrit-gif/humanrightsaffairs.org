@@ -67,7 +67,8 @@ import {
   ChevronDown,
   Pin,
   PinOff,
-  MessageSquareQuote
+  MessageSquareQuote,
+  UserRoundCheck
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -99,6 +100,7 @@ const topAnalyticsLinksConfig = [
 const adminLinksConfig = [
   { name: 'Applications', href: '/internal/applications', icon: FileText, permission: 'applications' },
   { name: 'Public Complaints', href: '/internal/public-complaints', icon: ShieldQuestion, permission: 'publicComplaints' },
+  { name: 'Investigator Registry', href: '/internal/investigation-officers', icon: UserRoundCheck, rootOnly: true },
   { name: 'Testimonials Mgmt', href: '/internal/feedback', icon: MessageSquareQuote, permission: 'feedback' },
   { name: 'Current News', href: '/internal/current-news', icon: Newspaper, permission: 'occasions' },
   { name: 'Kit Management', href: '/internal/kit-management', icon: Archive, permission: 'kitManagement' },
