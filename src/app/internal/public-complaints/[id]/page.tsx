@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useEffect, useState, useMemo } from 'react'
@@ -47,6 +48,7 @@ import { sendTimelineEmailUpdate, sendReportEmail } from '@/lib/notification-ser
  * Automated Email Notifications integrated into all lifecycle updates.
  * Manual Timeline Transmission Node added to stages and status logs.
  * Audit Registry updated to display both sender and recipient emails for full transparency.
+ * Timeline updated to show mail status and sender/recipient details for each action.
  */
 export default function CaseHubPage() {
   const { id } = useParams()
@@ -102,7 +104,7 @@ export default function CaseHubPage() {
 
   // Utility: Dispatches the automated email update and logs it
   const dispatchEmailUpdate = async (action: string, remark: string) => {
-    if (!caseData?.email || !caseData?.fullName || !docRef || !user) return;
+    if (!caseData?.email || !caseData?.fullName || !docRef || !user) return null;
     
     const subject = `Official Update: ${action}`;
     const timestamp = new Date().toLocaleString('en-IN');
@@ -132,11 +134,10 @@ export default function CaseHubPage() {
         emailLogs: arrayUnion(emailLogEntry)
       });
 
-      if (!result.success) {
-        console.warn("[NOTIFICATION-SERVICE] Automated dispatch logged as failure.");
-      }
+      return emailLogEntry;
     } catch (e) {
       console.warn("[NOTIFICATION-CRITICAL] Dispatch or Logging failure.");
+      return null;
     }
   };
 
@@ -211,13 +212,20 @@ export default function CaseHubPage() {
     if (!docRef || !user) return;
     setIsActionLoading(true);
     try {
+      // Dispatch notification and get log entry
+      const mailLog = await dispatchEmailUpdate(`Status: ${newStatus}`, `Your complaint has moved to the next stage: ${newStatus}.`);
+
       const entry = {
         action: `Status Transition: ${newStatus}`,
         user: user.email,
         timestamp: new Date().toISOString(),
         remark: `Authorized lifecycle update to ${newStatus}.`,
-        type: 'status_change'
+        type: 'status_change',
+        mailStatus: mailLog?.status,
+        mailFrom: mailLog?.sender,
+        mailTo: mailLog?.recipient
       };
+      
       await updateDoc(docRef, { 
         status: newStatus,
         updatedAt: serverTimestamp(),
@@ -225,10 +233,6 @@ export default function CaseHubPage() {
       });
       
       toast({ title: "Lifecycle Updated", description: `Case transitioned to ${newStatus}.` });
-      
-      // Automatic Notification
-      dispatchEmailUpdate(`Status: ${newStatus}`, `Your complaint has moved to the next stage: ${newStatus}.`);
-
     } catch (e) {
       toast({ variant: "destructive", title: "Transition Denied" });
     } finally {
@@ -240,12 +244,17 @@ export default function CaseHubPage() {
     if (!docRef || !user) return;
     setIsActionLoading(true);
     try {
+      const mailLog = await dispatchEmailUpdate(`Investigator Assigned`, `A specialized officer (${personName}) has been assigned to investigate your report.`);
+
       const entry = {
         action: "Investigator Assignment",
         user: user.email,
         timestamp: new Date().toISOString(),
         remark: `Case assigned to ${personName} for detailed investigation.`,
-        type: 'assignment'
+        type: 'assignment',
+        mailStatus: mailLog?.status,
+        mailFrom: mailLog?.sender,
+        mailTo: mailLog?.recipient
       };
       await updateDoc(docRef, { 
         assignedTo: personName,
@@ -255,10 +264,6 @@ export default function CaseHubPage() {
       });
       
       toast({ title: "Officer Assigned", description: `Case file transferred to ${personName}.` });
-      
-      // Automatic Notification
-      dispatchEmailUpdate(`Investigator Assigned`, `A specialized officer (${personName}) has been assigned to investigate your report.`);
-
     } catch (e) {
       toast({ variant: "destructive", title: "Assignment Failed" });
     } finally {
@@ -270,12 +275,17 @@ export default function CaseHubPage() {
     if (!remark.trim() || !docRef || !user) return;
     setIsActionLoading(true);
     try {
+      const mailLog = await dispatchEmailUpdate(`Investigative Remark Posted`, remark.trim());
+
       const entry = {
         action: "Investigative Remark",
         user: user.email,
         timestamp: new Date().toISOString(),
         remark: remark.trim(),
-        type: 'remark'
+        type: 'remark',
+        mailStatus: mailLog?.status,
+        mailFrom: mailLog?.sender,
+        mailTo: mailLog?.recipient
       };
       await updateDoc(docRef, { 
         timeline: arrayUnion(entry),
@@ -283,10 +293,6 @@ export default function CaseHubPage() {
       });
       
       toast({ title: "Remark Authenticated" });
-      
-      // Automatic Notification
-      dispatchEmailUpdate(`Investigative Remark Posted`, remark.trim());
-      
       setRemark('');
     } catch (e) {
       toast({ variant: "destructive", title: "Sync Failed" });
@@ -299,13 +305,18 @@ export default function CaseHubPage() {
     if (!levelReviewNote.trim() || !docRef || !user) return;
     setIsActionLoading(true);
     try {
+      const mailLog = await dispatchEmailUpdate(`Council Review: ${selectedReviewLevel}`, levelReviewNote.trim());
+
       const entry = {
         action: `${selectedReviewLevel} Council Consideration`,
         user: user.email,
         timestamp: new Date().toISOString(),
         remark: levelReviewNote.trim(),
         type: 'level_review',
-        meta: { level: selectedReviewLevel }
+        meta: { level: selectedReviewLevel },
+        mailStatus: mailLog?.status,
+        mailFrom: mailLog?.sender,
+        mailTo: mailLog?.recipient
       };
       await updateDoc(docRef, { 
         timeline: arrayUnion(entry),
@@ -313,10 +324,6 @@ export default function CaseHubPage() {
       });
       
       toast({ title: "Review Recorded", description: `Consideration from ${selectedReviewLevel} level established.` });
-      
-      // Automatic Notification
-      dispatchEmailUpdate(`Council Review: ${selectedReviewLevel}`, levelReviewNote.trim());
-      
       setLevelNote('');
     } catch (e) {
       toast({ variant: "destructive", title: "Review Rejected" });
@@ -329,13 +336,18 @@ export default function CaseHubPage() {
     if (!stageLogNote.trim() || !docRef || !user) return;
     setIsActionLoading(true);
     try {
+      const mailLog = await dispatchEmailUpdate(`Investigation Stage Completed: ${selectedLogStage}`, stageLogNote.trim());
+
       const entry = {
         action: `Stage Detail Log: ${selectedLogStage}`,
         user: user.email,
         timestamp: new Date().toISOString(),
         remark: stageLogNote.trim(),
         type: 'stage_log',
-        meta: { stage: selectedLogStage }
+        meta: { stage: selectedLogStage },
+        mailStatus: mailLog?.status,
+        mailFrom: mailLog?.sender,
+        mailTo: mailLog?.recipient
       };
       await updateDoc(docRef, { 
         timeline: arrayUnion(entry),
@@ -343,10 +355,6 @@ export default function CaseHubPage() {
       });
       
       toast({ title: "Stage Detail Archived" });
-      
-      // Automatic Notification
-      dispatchEmailUpdate(`Investigation Stage Completed: ${selectedLogStage}`, stageLogNote.trim());
-      
       setStageNote('');
     } catch (e) {
       toast({ variant: "destructive", title: "Sync Error" });
@@ -359,12 +367,17 @@ export default function CaseHubPage() {
     if (!commissionData.findings.trim() || !docRef || !user) return;
     setIsActionLoading(true);
     try {
+      const mailLog = await dispatchEmailUpdate(`Final Investigative Findings Published`, `Our investigation is complete. Conclusion: ${commissionData.findings}`);
+
       const entry = {
         action: "Commission Findings Registered",
         user: user.email,
         timestamp: new Date().toISOString(),
         remark: `Final Findings: ${commissionData.findings}. Directives: ${commissionData.directives}`,
-        type: 'commission'
+        type: 'commission',
+        mailStatus: mailLog?.status,
+        mailFrom: mailLog?.sender,
+        mailTo: mailLog?.recipient
       };
       
       await updateDoc(docRef, {
@@ -381,9 +394,6 @@ export default function CaseHubPage() {
         title: "Findings Commissioned", 
         description: "The investigative conclusion has been committed to the national registry." 
       });
-
-      // Automatic Notification
-      dispatchEmailUpdate(`Final Investigative Findings Published`, `Our investigation is complete. Conclusion: ${commissionData.findings}`);
       
       setIsCommissionOpen(false);
       setCommissionData({ findings: '', directives: '' });
@@ -423,12 +433,17 @@ export default function CaseHubPage() {
         uploadedBy: user.email
       };
 
+      const mailLog = await dispatchEmailUpdate(`Evidence Appended`, `New investigative ${fileType} documentation has been added to your case file.`);
+
       const timelineEntry = {
         action: "Evidence Appended to Vault",
         user: user.email,
         timestamp: new Date().toISOString(),
         remark: `Secured investigative ${fileType}: ${file.name}`,
-        type: 'evidence'
+        type: 'evidence',
+        mailStatus: mailLog?.status,
+        mailFrom: mailLog?.sender,
+        mailTo: mailLog?.recipient
       };
 
       try {
@@ -439,9 +454,6 @@ export default function CaseHubPage() {
         });
         
         toast({ title: "Evidence Secured" });
-        
-        // Notify Complainant
-        dispatchEmailUpdate(`Evidence Appended`, `New investigative ${fileType} documentation has been added to your case file.`);
       } catch (err) {
         toast({ variant: "destructive", title: "Upload Failed" });
       } finally {
@@ -878,6 +890,29 @@ export default function CaseHubPage() {
                             <div className="p-4 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-100 italic text-sm text-slate-500 leading-relaxed">
                                "{entry.remark}"
                             </div>
+                            
+                            {/* NEW: Explicit Communication Status Block */}
+                            {entry.mailStatus && (
+                              <div className="mt-3 p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800 flex flex-col gap-1.5 shadow-sm animate-in fade-in duration-500">
+                                 <div className="flex items-center gap-2">
+                                    {entry.mailStatus === 'Success' ? (
+                                      <Badge className="bg-emerald-500 text-white text-[7px] uppercase px-1.5 h-4">Delivered</Badge>
+                                    ) : (
+                                      <Badge className="bg-red-500 text-white text-[7px] uppercase px-1.5 h-4">Failed</Badge>
+                                    )}
+                                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-tighter">Transmission Metadata</span>
+                                 </div>
+                                 <div className="flex flex-col gap-0.5">
+                                    <p className="text-[9px] font-bold text-slate-500 uppercase flex items-center gap-1.5">
+                                      <User className="w-2.5 h-2.5 text-slate-400" /> To: <span className="text-primary dark:text-slate-300 font-mono lowercase">{entry.mailTo}</span>
+                                    </p>
+                                    <p className="text-[9px] font-bold text-accent uppercase flex items-center gap-1.5">
+                                      <Mail className="w-2.5 h-2.5 text-accent" /> From: <span className="font-mono lowercase">{entry.mailFrom}</span>
+                                    </p>
+                                 </div>
+                              </div>
+                            )}
+
                             <div className="flex items-center gap-2 pt-1">
                                <Badge className="bg-slate-900 text-white text-[8px] font-bold">{entry.user}</Badge>
                             </div>
