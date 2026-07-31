@@ -47,6 +47,7 @@ import { sendTimelineEmailUpdate, sendReportEmail } from '@/lib/notification-ser
  * Enhanced with Multi-Level Review and Stage-Specific Log protocols.
  * Automated Email Notifications integrated into all lifecycle updates.
  * Manual Timeline Transmission Node added to stages and status logs.
+ * Audit Registry updated to display sender email addresses for all transmissions.
  */
 export default function CaseHubPage() {
   const { id } = useParams()
@@ -615,6 +616,9 @@ export default function CaseHubPage() {
                                         <td className="px-8 py-4">
                                            <p className="text-xs font-bold text-primary dark:text-white truncate max-w-[250px]">{log.subject}</p>
                                            <p className="text-[9px] text-slate-400 uppercase font-medium">{log.type} • ID: {log.traceId}</p>
+                                           <p className="text-[8px] text-accent font-bold uppercase mt-1 flex items-center gap-1">
+                                             <Mail className="w-2 h-2" /> From: {log.sender || 'System'}
+                                           </p>
                                         </td>
                                         <td className="px-8 py-4">
                                            <span className="text-[10px] font-bold text-slate-500">{log.timestamp}</span>
