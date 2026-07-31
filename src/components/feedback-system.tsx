@@ -169,7 +169,7 @@ export function FeedbackSystem() {
                              ))}
                            </div>
                            {isGoogle && (
-                             <Badge className="bg-white/80 dark:bg-slate-900/80 text-primary dark:text-white border-slate-100 dark:border-slate-800 text-[8px] font-black uppercase tracking-widest flex gap-1.5 items-center px-3 py-1 mr-8 transition-all duration-300 hover:bg-slate-950 hover:text-white dark:hover:bg-white dark:hover:text-black">
+                             <Badge className="bg-white/80 dark:bg-slate-900/80 text-primary dark:text-white border-slate-100 dark:border-slate-800 text-[8px] font-black uppercase tracking-widest flex gap-1.5 items-center px-3 py-1 mr-12 transition-all duration-300 hover:bg-slate-950 hover:text-white dark:hover:bg-white dark:hover:text-black">
                                <GoogleIcon className="w-2.5 h-2.5" /> Google Review
                              </Badge>
                            )}
