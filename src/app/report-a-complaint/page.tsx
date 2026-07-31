@@ -48,6 +48,7 @@ import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import Image from 'next/image'
+import { sendComplaintNotification } from '@/lib/notification-service'
 
 const complaintSchema = z.object({
   // Complainant Info
@@ -179,6 +180,10 @@ export default function ReportAComplaintPage() {
 
     addDoc(collection(db, "public_complaints"), complaintData)
       .then(() => {
+        const complainantName = values.fullName;
+        const currentToken = submissionToken;
+        const now = new Date().toLocaleString('en-IN');
+
         setToken(submissionToken)
         form.reset()
         setIncidentPhotos([])
@@ -186,6 +191,15 @@ export default function ReportAComplaintPage() {
           title: "Complaint Lodged",
           description: "Your official report has been recorded in the national registry."
         })
+
+        // 🔔 Dispatch Notification to Administrative terminal
+        sendComplaintNotification({
+          complainantName,
+          token: currentToken,
+          timestamp: now
+        }).catch(err => {
+          console.warn("[NOTIFICATION-SILENT-FAIL] Administrative alert failed:", err.message);
+        });
       })
       .catch(async (error) => {
         const permissionError = new FirestorePermissionError({
@@ -398,8 +412,7 @@ export default function ReportAComplaintPage() {
                             <FormField control={form.control} name="victimPhone" render={({ field }) => (
                               <FormItem>
                                 <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-accent">Victim's Contact / ভুক্তভোগীর ফোন নম্বর</FormLabel>
-                                <FormControl><Input placeholder="Phone number (if available)" className="h-12 rounded-xl bg-white dark:bg-slate-950" {...field} /></FormControl>
-                              </FormItem>
+                                <FormControl><Input placeholder="Phone number (if available)" className="h-12 rounded-xl bg-white dark:bg-slate-950" {...field} /></FormItem>
                             )} />
                             <FormField control={form.control} name="victimAadhaar" render={({ field }) => (
                               <FormItem>
