@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useEffect, useState, useMemo } from 'react'
@@ -21,7 +22,7 @@ import {
   Activity, ClipboardList, Briefcase, Trash2, Edit3, MessageSquare, 
   History, Eye, Download, Share2, Upload, Camera, FileWarning, Search,
   GraduationCap, AlertCircle, Info, Landmark, Layers, UserCheck, ShieldAlert,
-  Plus, X
+  Plus, X, Send
 } from 'lucide-react'
 import {
   Dialog,
@@ -31,6 +32,7 @@ import {
   DialogTrigger,
   DialogDescription,
   DialogClose,
+  DialogFooter
 } from "@/components/ui/dialog"
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
@@ -52,6 +54,13 @@ export default function CaseHubPage() {
   const [isActionLoading, setIsActionLoading] = useState(false)
   const [remark, setRemark] = useState('')
   const [selectedReportType, setSelectedReportType] = useState<string>('preliminary_assessment')
+  
+  // Commission Findings State
+  const [isCommissionOpen, setIsCommissionOpen] = useState(false)
+  const [commissionData, setCommissionData] = useState({
+    findings: '',
+    directives: ''
+  })
 
   const docRef = useMemoFirebase(() => {
     if (!db || !id) return null;
@@ -107,6 +116,40 @@ export default function CaseHubPage() {
     }
   };
 
+  const handleCommissionFindings = async () => {
+    if (!commissionData.findings.trim() || !docRef || !user) return;
+    setIsActionLoading(true);
+    try {
+      const entry = {
+        action: "Commission Findings Registered",
+        user: user.email,
+        timestamp: new Date().toISOString(),
+        remark: `Final Findings: ${commissionData.findings}. Directives: ${commissionData.directives}`
+      };
+      
+      await updateDoc(docRef, {
+        status: "Action Taken",
+        finalFindings: commissionData.findings,
+        finalDirectives: commissionData.directives,
+        commissionedAt: serverTimestamp(),
+        commissionedBy: user.email,
+        updatedAt: serverTimestamp(),
+        timeline: arrayUnion(entry)
+      });
+
+      toast({ 
+        title: "Findings Commissioned", 
+        description: "The investigative conclusion has been committed to the national registry." 
+      });
+      setIsCommissionOpen(false);
+      setCommissionData({ findings: '', directives: '' });
+    } catch (e) {
+      toast({ variant: "destructive", title: "Commission Failed" });
+    } finally {
+      setIsActionLoading(false);
+    }
+  };
+
   if (authLoading || dataLoading) {
     return <div className="min-h-screen flex items-center justify-center bg-slate-50"><Loader2 className="w-12 h-12 animate-spin text-accent" /></div>
   }
@@ -144,9 +187,55 @@ export default function CaseHubPage() {
                     </SelectContent>
                  </Select>
               </div>
-              <Button className="bg-accent text-primary font-bold h-11 px-8 rounded-xl shadow-xl shadow-accent/20 hover:bg-secondary hover:text-white transition-all">
-                 <Edit3 className="w-4 h-4 mr-2" /> Commission Findings
-              </Button>
+              
+              <Dialog open={isCommissionOpen} onOpenChange={setIsCommissionOpen}>
+                <DialogTrigger asChild>
+                  <Button className="bg-accent text-primary font-bold h-11 px-8 rounded-xl shadow-xl shadow-accent/20 hover:bg-secondary hover:text-white transition-all">
+                    <Edit3 className="w-4 h-4 mr-2" /> Commission Findings
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-xl rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden bg-white dark:bg-slate-900">
+                  <div className="bg-slate-900 p-8 text-white relative">
+                    <div className="absolute right-6 top-6"><DialogClose asChild><Button variant="ghost" size="icon" className="rounded-full text-white/20 hover:text-white"><X className="w-5 h-5" /></Button></DialogClose></div>
+                    <Badge className="bg-accent text-primary font-black text-[8px] uppercase mb-2">Executive Action</Badge>
+                    <DialogTitle className="text-2xl font-headline font-bold">Commission Investigative Findings</DialogTitle>
+                    <DialogDescription className="text-slate-400">Formalize the conclusion of this case and issue administrative directives.</DialogDescription>
+                  </div>
+                  <div className="p-8 space-y-6">
+                    <div className="space-y-1.5">
+                      <Label className="text-[10px] font-bold uppercase text-slate-400 tracking-widest">Final Executive Findings</Label>
+                      <Textarea 
+                        value={commissionData.findings}
+                        onChange={e => setCommissionData({...commissionData, findings: e.target.value})}
+                        placeholder="Summarize the core investigative conclusions..."
+                        className="min-h-[120px] rounded-2xl"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-[10px] font-bold uppercase text-slate-400 tracking-widest">Directives to Authorities</Label>
+                      <Textarea 
+                        value={commissionData.directives}
+                        onChange={e => setCommissionData({...commissionData, directives: e.target.value})}
+                        placeholder="Specify required actions for administrative bodies..."
+                        className="min-h-[80px] rounded-2xl"
+                      />
+                    </div>
+                    <div className="p-4 bg-amber-50 dark:bg-amber-950/20 rounded-2xl border border-amber-100 flex gap-3">
+                      <AlertCircle className="w-5 h-5 text-amber-600 shrink-0" />
+                      <p className="text-[10px] text-amber-800 dark:text-amber-400 font-bold uppercase leading-relaxed">
+                        Commissioning findings will instantly transition the case status to **'Action Taken'** and record this entry in the immutable audit timeline.
+                      </p>
+                    </div>
+                    <Button 
+                      onClick={handleCommissionFindings}
+                      disabled={isActionLoading || !commissionData.findings.trim()}
+                      className="w-full h-14 rounded-2xl bg-primary text-white font-bold text-lg hover:bg-secondary transition-all"
+                    >
+                      {isActionLoading ? <Loader2 className="animate-spin" /> : <><Send className="w-5 h-5 mr-2" /> Commit & Close Investigation</>}
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
            </div>
         </div>
       </header>
@@ -206,6 +295,25 @@ export default function CaseHubPage() {
                           </div>
                        </div>
                     </Card>
+
+                    {caseData.finalFindings && (
+                      <Card className="rounded-[2.5rem] border-none shadow-xl bg-emerald-50 dark:bg-emerald-950/20 p-10 border-2 border-emerald-100 dark:border-emerald-900 animate-in zoom-in-95">
+                         <CardHeader className="p-0 mb-6">
+                           <CardTitle className="text-xl font-headline font-bold text-emerald-700 dark:text-emerald-400 flex items-center gap-3">
+                             <BadgeCheck className="w-6 h-6" /> Commissioned Findings
+                           </CardTitle>
+                         </CardHeader>
+                         <div className="space-y-6">
+                           <p className="text-lg font-bold text-emerald-900 dark:text-slate-200 italic leading-relaxed">"{caseData.finalFindings}"</p>
+                           {caseData.finalDirectives && (
+                             <div className="pt-4 border-t border-emerald-100 dark:border-emerald-900">
+                                <p className="text-[10px] font-black uppercase tracking-widest text-emerald-600 mb-2">Executive Directives</p>
+                                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">{caseData.finalDirectives}</p>
+                             </div>
+                           )}
+                         </div>
+                      </Card>
+                    )}
                  </div>
 
                  <div className="space-y-8">
