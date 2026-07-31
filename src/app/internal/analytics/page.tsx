@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo, useEffect, useState } from 'react'
@@ -8,6 +7,7 @@ import { collection, query, orderBy, deleteDoc, doc } from 'firebase/firestore'
 import { Footer } from '@/components/footer'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { ManualDonationDialog } from '@/components/manual-donation-dialog'
 import { 
   BarChart, 
@@ -182,7 +182,7 @@ export default function DonationAnalyticsPage() {
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
-                <Card className="lg:col-span-2 border-none shadow-sm rounded-[2rem] bg-card dark:bg-slate-900 overflow-hidden">
+                <Card className="lg:col-span-2 border-none shadow-sm rounded-[2.5rem] bg-card dark:bg-slate-900 overflow-hidden">
                   <CardHeader className="pb-2">
                     <CardTitle className="text-lg font-headline font-bold">Revenue Timeline</CardTitle>
                   </CardHeader>
@@ -202,7 +202,7 @@ export default function DonationAnalyticsPage() {
                   </CardContent>
                 </Card>
 
-                <Card className="border-none shadow-sm rounded-[2rem] bg-card dark:bg-slate-900 overflow-hidden">
+                <Card className="border-none shadow-sm rounded-[2.5rem] bg-card dark:bg-slate-900 overflow-hidden">
                   <CardHeader className="pb-0">
                     <CardTitle className="text-lg font-headline font-bold">Channel Mix</CardTitle>
                   </CardHeader>
@@ -237,7 +237,7 @@ export default function DonationAnalyticsPage() {
                 </Card>
               </div>
 
-              <Card className="border-none shadow-sm rounded-[2rem] bg-card dark:bg-slate-900 overflow-hidden">
+              <Card className="border-none shadow-sm rounded-[2.5rem] bg-card dark:bg-slate-900 overflow-hidden">
                 <CardHeader className="bg-muted/50 dark:bg-slate-800/50 border-b p-6">
                   <CardTitle className="text-xl font-headline font-bold flex items-center gap-3">
                     <FileText className="w-5 h-5 text-accent" /> Master Contribution Ledger
@@ -251,7 +251,6 @@ export default function DonationAnalyticsPage() {
                           <th className="px-8 py-5">Donor Name</th>
                           <th className="px-8 py-5">Amount</th>
                           <th className="px-8 py-5">Method</th>
-                          <th className="px-8 py-5">Ref / PAN</th>
                           <th className="px-8 py-5 text-right">Actions</th>
                         </tr>
                       </thead>
@@ -259,9 +258,8 @@ export default function DonationAnalyticsPage() {
                         {donations && donations.map((d: any) => (
                           <tr key={d.id} className="hover:bg-muted/20 dark:hover:bg-slate-800/30 transition-colors">
                             <td className="px-8 py-6 font-bold text-sm">{d.donorName || d.name}</td>
-                            <td className="px-8 py-6 text-emerald-600 dark:text-emerald-400 font-bold text-sm">₹{d.amount.toLocaleString()}</td>
+                            <td className="px-8 py-6 text-emerald-600 dark:text-emerald-400 font-bold text-sm">₹{d.amount.toLocaleString() || 0}</td>
                             <td className="px-8 py-6 text-[10px] font-bold text-muted-foreground uppercase">{d.paymentMethod}</td>
-                            <td className="px-8 py-6 font-mono text-[10px] text-slate-400">{d.pan || d.transactionId?.slice(-8)}</td>
                             <td className="px-8 py-6 text-right">
                               <AlertDialog>
                                 <AlertDialogTrigger asChild>
@@ -285,7 +283,7 @@ export default function DonationAnalyticsPage() {
                         ))}
                         {(!donations || donations.length === 0) && (
                           <tr>
-                            <td colSpan={5} className="py-20 text-center opacity-30">
+                            <td colSpan={4} className="py-20 text-center opacity-30">
                                <FileText className="w-12 h-12 mx-auto mb-4" />
                                <p className="text-sm font-bold uppercase tracking-widest">No transaction records found</p>
                             </td>
