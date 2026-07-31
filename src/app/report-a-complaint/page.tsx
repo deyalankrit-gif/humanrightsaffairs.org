@@ -95,7 +95,7 @@ export default function ReportAComplaintPage() {
   const [incidentPhotos, setIncidentPhotos] = useState<string[]>([])
 
   const form = useForm<z.infer<typeof complaintSchema>>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(complaintSchema),
     defaultValues: {
       fullName: '',
       relationName: '',
