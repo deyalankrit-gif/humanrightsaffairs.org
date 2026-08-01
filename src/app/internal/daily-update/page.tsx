@@ -4,7 +4,7 @@
 import React, { useState, useMemo, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useUser, useCollection, useFirestore, useMemoFirebase } from '@/firebase'
-import { collection, query, orderBy, where, addDoc, deleteDoc, doc, updateDoc, serverTimestamp, getDocs } from 'firebase/firestore'
+import { collection, query, orderBy, where, addDoc, deleteDoc, doc, updateDoc, serverTimestamp } from 'firebase/firestore'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -45,7 +45,9 @@ import {
   Cpu,
   Globe,
   Gavel,
-  Scale
+  Scale,
+  Hourglass,
+  LayoutDashboard
 } from 'lucide-react'
 import {
   Dialog,
@@ -82,7 +84,6 @@ export default function DailyUpdatePage() {
   const { toast } = useToast()
   
   const [isActionLoading, setIsActionLoading] = useState(false)
-  const [isAddingTask, setIsAddingTask] = useState(false)
   const [isAddingNote, setIsAddingNote] = useState(false)
   const [todoFilter, setTodoFilter] = useState<'All' | 'Pending' | 'Completed' | 'Overdue'>('All')
 
@@ -180,7 +181,7 @@ export default function DailyUpdatePage() {
     });
 
     const pendingReview = complaintList.filter(c => c.status === 'New Complaint' || c.status === 'Pending').length;
-    const underInvestigation = complaintList.filter(c => c.status === 'Investigation in Progress').length;
+    const underInvestigation = complaintList.filter(c => ['Under Preliminary Review', 'Assigned for Investigation', 'Investigation in Progress'].includes(c.status)).length;
     const highPriority = complaintList.filter(c => c.priority === 'High' && c.status !== 'Closed').length;
 
     // AI Suggested Actions Logic
@@ -231,7 +232,6 @@ export default function DailyUpdatePage() {
         createdBy: user?.email
       });
       setNewTask({ title: '', priority: 'Medium', dueDate: format(new Date(), 'yyyy-MM-dd') });
-      setIsAddingTask(false);
       toast({ title: "Task Logged" });
     } catch (e) {
       toast({ variant: "destructive", title: "Update Failed" });
@@ -265,7 +265,7 @@ export default function DailyUpdatePage() {
     } catch (e) {
       toast({ variant: "destructive", title: "Save Failed" });
     } finally {
-      setIsActionLoading(false);
+      setIsActionLoading(false)
     }
   };
 
@@ -288,15 +288,15 @@ export default function DailyUpdatePage() {
         <div className="container mx-auto flex flex-col md:flex-row items-center justify-between gap-6 relative z-10">
           <div className="space-y-1">
             <div className="inline-flex items-center gap-2 bg-emerald-500/20 text-emerald-400 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.2em] border border-emerald-500/30">
-               <Cpu className="w-2.5 h-2.5 animate-spin-slow" /> Terminal v2.0 Operational
+               <Cpu className="w-2.5 h-2.5" /> Command Center Operational
             </div>
-            <h1 className="text-3xl md:text-5xl font-headline font-bold">Command <span className="text-accent italic">Center</span></h1>
+            <h1 className="text-3xl md:text-5xl font-headline font-bold">Daily <span className="text-accent italic">Update</span></h1>
             <p className="text-slate-400 text-[10px] uppercase font-black tracking-widest flex items-center gap-2">
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" /> Operational Oversight: {format(new Date(), 'PPPP')}
             </p>
           </div>
           <div className="flex flex-wrap justify-center gap-3">
-             <Button onClick={() => window.print()} variant="outline" className="bg-white/5 border-white/10 text-white hover:bg-white/10 h-11 px-6 rounded-xl font-bold gap-2">
+             <Button onClick={() => window.print()} variant="outline" className="bg-white/5 border-white/20 text-white hover:bg-white/10 h-11 px-6 rounded-xl font-bold gap-2">
                 <Printer className="w-4 h-4 text-slate-400" /> Print Archive
              </Button>
              <Button onClick={handleSendDailySummary} className="bg-accent text-primary hover:bg-secondary hover:text-white h-11 px-6 rounded-xl font-bold gap-2 shadow-xl shadow-accent/20 transition-all hover:-translate-y-1">
@@ -317,7 +317,7 @@ export default function DailyUpdatePage() {
                  {[
                    { label: "Complaint Intake", val: summary.newComplaintsToday, icon: <AlertCircle className="text-red-500" />, color: "bg-red-50 dark:bg-red-950/20" },
                    { label: "Pending Vetting", val: summary.pendingReview, icon: <Clock className="text-amber-500" />, color: "bg-amber-50 dark:bg-amber-950/20" },
-                   { label: "Active Field Missions", val: summary.underInvestigation, icon: <Activity className="text-blue-500" />, color: "bg-blue-50 dark:bg-blue-950/20" },
+                   { label: "Active Investigations", val: summary.underInvestigation, icon: <Activity className="text-blue-500" />, color: "bg-blue-50 dark:bg-blue-950/20" },
                    { label: "Resolved Today", val: summary.casesClosedToday, icon: <CheckCircle2 className="text-emerald-500" />, color: "bg-emerald-50 dark:bg-emerald-950/20" },
                    { label: "New Recruits", val: summary.newAppsToday, icon: <UserPlus className="text-indigo-500" />, color: "bg-indigo-50 dark:bg-indigo-950/20" },
                    { label: "Total Applications", val: applications?.length || 0, icon: <FileText className="text-slate-400" />, color: "bg-slate-50 dark:bg-slate-900" }
@@ -333,6 +333,61 @@ export default function DailyUpdatePage() {
                    </Card>
                  ))}
               </div>
+
+              {/* Recruitment Pipeline Stream */}
+              <Card className="rounded-[3rem] border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900 border-2 border-slate-100">
+                <CardHeader className="bg-slate-50 dark:bg-slate-800/50 border-b p-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                  <div className="space-y-1">
+                    <CardTitle className="text-xl font-headline font-bold flex items-center gap-3">
+                      <UserPlus className="w-6 h-6 text-indigo-500" /> Recruitment Pipeline
+                    </CardTitle>
+                    <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">Real-time status tracking for new membership applications</p>
+                  </div>
+                  <Button variant="ghost" size="sm" onClick={() => router.push('/internal/applications')} className="rounded-full text-[10px] font-black uppercase tracking-widest text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 border-indigo-100 border px-6 h-10">
+                    Full Registry <ChevronRight className="ml-1 w-4 h-4" />
+                  </Button>
+                </CardHeader>
+                <CardContent className="p-0">
+                   <div className="divide-y divide-slate-50 dark:divide-slate-800">
+                      {applications && applications.slice(0, 5).map((app: any) => (
+                        <div key={app.id} className="p-8 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all flex items-center justify-between group">
+                           <div className="flex items-center gap-5">
+                              <div className="w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-400 group-hover:scale-110 transition-transform shadow-sm">
+                                 <User className="w-7 h-7" />
+                              </div>
+                              <div className="space-y-1">
+                                 <h4 className="text-base font-bold leading-tight">{app.name}</h4>
+                                 <div className="flex items-center gap-3">
+                                    <Badge variant="outline" className="text-[8px] font-black text-slate-400 uppercase tracking-tighter border-slate-200">{app.level} Council</Badge>
+                                    <span className="text-[10px] font-bold text-slate-500 uppercase flex items-center gap-1.5"><Globe className="w-3 h-3" /> {app.stateName || 'National'}</span>
+                                 </div>
+                              </div>
+                           </div>
+                           <div className="flex items-center gap-6">
+                              <div className="text-right hidden sm:block">
+                                 <p className="text-[8px] font-black text-slate-400 uppercase">Received</p>
+                                 <p className="text-[10px] font-bold text-slate-500">{app.createdAt?.toDate ? format(app.createdAt.toDate(), 'MMM d, p') : 'Just now'}</p>
+                              </div>
+                              <Badge className={cn(
+                                "text-[9px] font-black uppercase px-4 h-7 border-none shadow-sm",
+                                app.status === 'Approved' ? 'bg-emerald-500 text-white' : 
+                                app.status === 'Rejected' ? 'bg-red-500 text-white' : 
+                                app.status === 'Archived' ? 'bg-blue-500 text-white' : 'bg-amber-500 text-white animate-pulse'
+                              )}>
+                                 {app.status}
+                              </Badge>
+                           </div>
+                        </div>
+                      ))}
+                      {(!applications || applications.length === 0) && (
+                        <div className="py-24 text-center opacity-20">
+                           <UserPlus className="w-16 h-16 mx-auto mb-4" />
+                           <p className="text-sm font-black uppercase tracking-[0.2em]">Pipeline Idle</p>
+                        </div>
+                      )}
+                   </div>
+                </CardContent>
+              </Card>
 
               {/* Master To-Do Terminal */}
               <Card className="rounded-[3rem] border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900 border-2 border-slate-100">
@@ -366,6 +421,7 @@ export default function DailyUpdatePage() {
                                placeholder="Draft new institutional mandate..." 
                                value={newTask.title} 
                                onChange={e => setNewTask({...newTask, title: e.target.value})}
+                               onKeyDown={e => e.key === 'Enter' && handleAddTask()}
                                className="h-12 rounded-2xl border-none shadow-inner bg-white"
                              />
                           </div>
@@ -433,61 +489,6 @@ export default function DailyUpdatePage() {
                        )}
                     </div>
                  </CardContent>
-              </Card>
-
-              {/* Membership Application Stream */}
-              <Card className="rounded-[3rem] border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900 border-2 border-slate-100">
-                <CardHeader className="bg-slate-50 dark:bg-slate-800/50 border-b p-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
-                  <div className="space-y-1">
-                    <CardTitle className="text-xl font-headline font-bold flex items-center gap-3">
-                      <UserPlus className="w-6 h-6 text-indigo-500" /> Recruitment Pipeline
-                    </CardTitle>
-                    <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">Real-time status tracking for new human rights defenders</p>
-                  </div>
-                  <Button variant="ghost" size="sm" onClick={() => router.push('/internal/applications')} className="rounded-full text-[10px] font-black uppercase tracking-widest text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 border-indigo-100 border px-6 h-10">
-                    Full Registry <ChevronRight className="ml-1 w-4 h-4" />
-                  </Button>
-                </CardHeader>
-                <CardContent className="p-0">
-                   <div className="divide-y divide-slate-50 dark:divide-slate-800">
-                      {applications && applications.slice(0, 5).map((app: any) => (
-                        <div key={app.id} className="p-8 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all flex items-center justify-between group">
-                           <div className="flex items-center gap-5">
-                              <div className="w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-400 group-hover:scale-110 transition-transform shadow-sm">
-                                 <User className="w-7 h-7" />
-                              </div>
-                              <div className="space-y-1">
-                                 <h4 className="text-base font-bold leading-tight">{app.name}</h4>
-                                 <div className="flex items-center gap-3">
-                                    <Badge variant="outline" className="text-[8px] font-black text-slate-400 uppercase tracking-tighter border-slate-200">{app.level} Council</Badge>
-                                    <span className="text-[10px] font-bold text-slate-500 uppercase flex items-center gap-1.5"><Globe className="w-3 h-3" /> {app.stateName || 'National'}</span>
-                                 </div>
-                              </div>
-                           </div>
-                           <div className="flex items-center gap-6">
-                              <div className="text-right hidden sm:block">
-                                 <p className="text-[8px] font-black text-slate-400 uppercase">Received</p>
-                                 <p className="text-[10px] font-bold text-slate-500">{app.createdAt?.toDate ? format(app.createdAt.toDate(), 'MMM d, p') : 'Just now'}</p>
-                              </div>
-                              <Badge className={cn(
-                                "text-[9px] font-black uppercase px-4 h-7 border-none shadow-sm",
-                                app.status === 'Approved' ? 'bg-emerald-500 text-white' : 
-                                app.status === 'Rejected' ? 'bg-red-500 text-white' : 
-                                app.status === 'Archived' ? 'bg-blue-500 text-white' : 'bg-amber-500 text-white animate-pulse'
-                              )}>
-                                 {app.status}
-                              </Badge>
-                           </div>
-                        </div>
-                      ))}
-                      {(!applications || applications.length === 0) && (
-                        <div className="py-24 text-center opacity-20">
-                           <UserPlus className="w-16 h-16 mx-auto mb-4" />
-                           <p className="text-sm font-black uppercase tracking-[0.2em]">Pipeline Idle</p>
-                        </div>
-                      )}
-                   </div>
-                </CardContent>
               </Card>
            </div>
 

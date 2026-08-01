@@ -70,7 +70,8 @@ export default function RootLoginPage() {
         financePayroll: true,
         financeProjects: true,
         financeAssets: true,
-        financeCompliance: true
+        financeCompliance: true,
+        feedback: true
       };
 
       if (!userSnap.exists()) {
@@ -93,10 +94,11 @@ export default function RootLoginPage() {
 
       toast({
         title: "ROOT ACCESS GRANTED",
-        description: "Governance privileges unlocked. Accessing National Registry.",
+        description: "Governance privileges unlocked. Accessing Command Center.",
       })
       
-      router.push('/internal/analytics')
+      // Default landing page is now Daily Update
+      router.push('/internal/daily-update')
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -112,7 +114,7 @@ export default function RootLoginPage() {
     <main className="min-h-screen flex items-center justify-center bg-slate-950 p-4 md:p-8">
       <div className="w-full max-w-md space-y-6 md:space-y-8">
         <div className="text-center">
-          <Link href="/" className="inline-flex items-center gap-2 text-slate-400 hover:text-red-500 transition-colors text-[10px] md:text-xs font-bold uppercase tracking-widest">
+          <Link href="/" className="inline-flex items-center gap-2 text-slate-500 hover:text-red-500 transition-colors text-[10px] md:text-xs font-bold uppercase tracking-widest">
             <Home className="w-3 h-3" /> Abort Session
           </Link>
         </div>

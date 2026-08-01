@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useEffect, useState } from 'react'
@@ -56,6 +57,7 @@ import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
 
 const MODULES = [
+  { id: 'dailyUpdate', label: 'Daily Update Terminal' },
   { id: 'financeDashboard', label: 'Finance Dashboard' },
   { id: 'financeLedger', label: 'General Ledger' },
   { id: 'financeVouchers', label: 'Voucher Hub' },
@@ -161,7 +163,10 @@ export default function AccessRolesPage() {
         await updateProfile(authUser, { displayName: newName || userEmail.split('@')[0] });
       }
 
-      const initialPermissions = MODULES.reduce((acc, mod) => ({ ...acc, [mod.id]: false }), {})
+      const initialPermissions = MODULES.reduce((acc, mod) => ({ ...acc, [mod.id]: false }), {
+        publicView: true,
+        dailyUpdate: true
+      })
       const userRef = doc(db, 'users', userEmail)
       
       const userData = {

@@ -41,7 +41,7 @@ export default function StaffLoginPage() {
       const isHardcodedStaff = inputEmail === 'deyalankrit@gmail.com' && password === 'Admin1234'
       
       const initialPermissions = {
-        analytics: false,
+        analytics: true,
         memberAnalytics: true,
         members: true,
         renewals: true,
@@ -88,13 +88,6 @@ export default function StaffLoginPage() {
           await signOut(auth)
           throw new Error("Clearance Required: Your identity is not present in the institutional registry.")
         }
-      } else if (isHardcodedStaff) {
-        // Sync permissions for hardcoded staff to ensure new modules are available
-        await setDoc(userRef, { 
-          permissions: initialPermissions,
-          lastLogin: serverTimestamp(),
-          name: 'Alankrit Dey'
-        }, { merge: true });
       }
 
       await setDoc(userRef, { lastLogin: serverTimestamp(), uid: firebaseUser.uid }, { merge: true });
@@ -107,17 +100,13 @@ export default function StaffLoginPage() {
       const userData = userSnap.data();
       const perms = userData?.permissions || {};
       
+      // PRIORITY ROUTING: Daily Update is now the default landing node
       const priority = [
+        { id: 'publicView', path: 'daily-update' }, // Use publicView perm as default for Daily Update
         { id: 'financeDashboard', path: 'finance/dashboard' },
         { id: 'materialManagement', path: 'material-management' },
         { id: 'analytics', path: 'analytics' },
-        { id: 'memberAnalytics', path: 'member-analytics' },
-        { id: 'members', path: 'members' },
-        { id: 'renewals', path: 'renewals' },
-        { id: 'terminated', path: 'terminated-members' },
-        { id: 'events', path: 'events' },
-        { id: 'meetings', path: 'meetings' },
-        { id: 'publicView', path: 'public-view' }
+        { id: 'members', path: 'members' }
       ];
       
       const firstAvailable = priority.find(p => perms[p.id] === true);
