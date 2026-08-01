@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
@@ -32,7 +31,8 @@ import {
   Settings2,
   Newspaper,
   Handshake,
-  BookMarked
+  BookMarked,
+  Gavel
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -42,7 +42,7 @@ import {
   Sheet, 
   SheetContent, 
   SheetTrigger,
-  SheetHeader,
+  SheetHeader, 
   SheetTitle
 } from '@/components/ui/sheet';
 import { MANUAL_DATA, type ManualSection } from './manual-content';
