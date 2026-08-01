@@ -156,7 +156,7 @@ export function PublicFooter() {
               <li><Link href="/trust-responsibilities" className="text-[#CEFF00] hover:text-white transition-colors font-medium leading-tight">Duties & Responsibilities</Link></li>
               <li><button onClick={handleOpenGate('/legal/required-documents')} className="text-[#CEFF00] hover:text-white transition-colors font-medium leading-tight text-left">Required Documents</button></li>
               <li><Link href="/legal/annual-governance-checklist" className="text-[#CEFF00] hover:text-white transition-colors font-medium leading-tight">Annual Governance Checklist</Link></li>
-              <li><Link href="/activity-calendar" className="text-[#CEFF00] hover:text-white transition-colors font-medium leading-tight">Activity Calendar 2025-26</Link></li>
+              <li><Link href="/activity-calendar" className="text-[#CEFF00] hover:text-white transition-colors font-medium leading-tight">Activity Calendar 2026</Link></li>
               <li><Link href="/legal/quotation-format" className="text-[#CEFF00] hover:text-white transition-colors font-medium leading-tight">Supplier Quotation Format</Link></li>
               <li><Link href="/meetings" className="text-[#CEFF00] hover:text-white transition-colors font-medium leading-tight">Organizations Meeting</Link></li>
               <li><Link href="/#grievances" className="text-[#CEFF00] hover:text-white transition-colors font-medium leading-tight">Organizations Grievances</Link></li>

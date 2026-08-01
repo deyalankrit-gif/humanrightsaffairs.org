@@ -106,7 +106,7 @@ export default function ActivityCalendarPage() {
           </Button>
           <div className="bg-white/10 backdrop-blur-xl px-4 py-2 rounded-full border border-white/20 shadow-2xl flex items-center gap-3">
             <Calendar className="w-4 h-4 text-accent" />
-            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white hidden sm:inline">Activity Calendar 2025-26</span>
+            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white hidden sm:inline">Activity Calendar 2026</span>
           </div>
         </div>
 
