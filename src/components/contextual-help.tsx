@@ -1,17 +1,17 @@
-
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { 
   Info, 
-  BookOpen, 
   CheckCircle2, 
   AlertCircle, 
   ChevronDown, 
-  ShieldCheck,
+  ShieldCheck, 
   ArrowRight,
-  BookMarked
+  BookMarked,
+  ChevronRight
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -164,5 +164,3 @@ export function ContextualHelp() {
     </div>
   );
 }
-
-import { useMemo } from 'react';
