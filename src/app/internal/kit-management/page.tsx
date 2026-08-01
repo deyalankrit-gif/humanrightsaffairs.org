@@ -35,7 +35,8 @@ import {
   Info,
   Layers,
   X,
-  Check
+  Check,
+  User
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
