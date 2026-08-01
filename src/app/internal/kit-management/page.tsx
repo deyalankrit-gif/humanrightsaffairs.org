@@ -39,7 +39,8 @@ import {
   FileText,
   Car,
   User,
-  Info
+  Info,
+  Clock3
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
@@ -548,43 +549,59 @@ export default function MemberKitManagement() {
       </section>
 
       {/* Item-wise Issuance Audit Section */}
-      <section className="py-4 bg-slate-50 dark:bg-slate-900 border-b overflow-hidden">
+      <section className="py-8 bg-slate-50 dark:bg-slate-900 border-b overflow-hidden">
         <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-6">
             <div className="space-y-1">
               <h3 className="text-[10px] font-black uppercase text-accent tracking-[0.2em] flex items-center gap-2">
                 <ClipboardList className="w-3.5 h-3.5" /> Item-wise Issuance Audit
               </h3>
+              <p className="text-[8px] text-slate-400 font-bold uppercase">Real-time distribution analytics by kit component</p>
             </div>
           </div>
-          <div className="flex overflow-x-auto no-scrollbar gap-4 pb-2">
+          
+          <div className="flex overflow-x-auto no-scrollbar gap-4 pb-4 px-1">
             {kitItems.map((item: any) => {
               const stat = itemStats[item.id] || { issued: 0, total: 0 };
               const percent = stat.total > 0 ? Math.round((stat.issued / stat.total) * 100) : 0;
               
+              const progressColor = percent < 30 ? "bg-red-500" : percent < 70 ? "bg-amber-500" : "bg-emerald-500";
+              const trackColor = percent < 30 ? "bg-red-100" : percent < 70 ? "bg-amber-100" : "bg-emerald-100";
+
               return (
                 <Card 
                   key={item.id} 
-                  className="min-w-[180px] border-none shadow-sm rounded-2xl bg-white dark:bg-slate-800 p-4 flex flex-col gap-3 shrink-0"
+                  className="min-w-[220px] md:min-w-[260px] border-none shadow-md rounded-2xl bg-white dark:bg-slate-800 p-5 flex flex-col gap-4 shrink-0 transition-transform hover:scale-[1.02]"
                 >
-                  <div className="flex justify-between items-start">
-                    <span className="text-[9px] font-black uppercase text-slate-500 truncate max-w-[100px]">{item.label}</span>
+                  <div className="flex justify-between items-start gap-2">
+                    <span className="text-[10px] font-black uppercase text-slate-500 truncate">{item.label}</span>
                     <button 
                       onClick={() => {
                         const receivers = members.filter(m => kitMap[m.id]?.items?.[item.id]);
                         setViewingItemMembers({ item, members: receivers });
                       }}
-                      className="text-[8px] font-bold text-accent hover:underline flex items-center gap-1"
+                      className="text-[9px] font-black text-accent hover:underline flex items-center gap-1 shrink-0 bg-accent/5 px-2 py-0.5 rounded-lg transition-colors hover:bg-accent/10"
                     >
                       VIEW <ChevronRight className="w-2.5 h-2.5" />
                     </button>
                   </div>
-                  <div className="space-y-1.5">
+                  <div className="space-y-2">
                     <div className="flex justify-between items-baseline">
-                       <p className="text-xl font-black text-primary dark:text-white leading-none">{stat.issued}<span className="text-[10px] text-slate-400 font-bold ml-1">/ {stat.total}</span></p>
-                       <span className="text-[8px] font-black text-emerald-600 uppercase">{percent}%</span>
+                       <p className="text-2xl font-black text-primary dark:text-white leading-none">
+                         {stat.issued}
+                         <span className="text-[10px] text-slate-400 font-bold ml-1.5 uppercase tracking-tighter">/ {stat.total} Issued</span>
+                       </p>
+                       <span className={cn("text-[9px] font-black uppercase px-2 py-0.5 rounded-lg", progressColor.replace('bg-', 'text-'), trackColor)}>
+                         {percent}%
+                       </span>
                     </div>
-                    <Progress value={percent} className="h-1 bg-slate-100 dark:bg-slate-900" />
+                    {/* Custom Styled Progress Bar */}
+                    <div className={cn("h-1.5 w-full rounded-full overflow-hidden", trackColor, "dark:opacity-20")}>
+                      <div 
+                        className={cn("h-full transition-all duration-1000", progressColor)} 
+                        style={{ width: `${percent}%` }}
+                      ></div>
+                    </div>
                   </div>
                 </Card>
               )
@@ -600,7 +617,7 @@ export default function MemberKitManagement() {
                <button 
                 key={st} 
                 onClick={() => setStatusFilter(st)}
-                className={cn("whitespace-nowrap px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all", statusFilter === st ? "bg-accent text-primary shadow-md" : "text-slate-50 hover:bg-slate-200")}
+                className={cn("whitespace-nowrap px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all", statusFilter === st ? "bg-accent text-primary shadow-md" : "text-slate-50 hover:bg-white")}
                >
                  {st}
                </button>
