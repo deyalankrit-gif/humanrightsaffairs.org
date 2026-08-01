@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useMemo, useEffect } from 'react'
@@ -36,7 +35,8 @@ import {
   ChevronRight,
   MoreVertical,
   X,
-  Target
+  Target,
+  Users
 } from 'lucide-react'
 import {
   Dialog,
