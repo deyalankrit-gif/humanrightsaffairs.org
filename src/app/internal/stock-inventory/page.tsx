@@ -84,8 +84,9 @@ export default function StockInventoryHub() {
         // Match by SKU or Name (same as Kit Management logic)
         const isIssued = Object.keys(kit.items || {}).some(itemId => {
           if (!kit.items[itemId]) return false;
-          // Robust matching: trim and case-insensitive
-          return itemId === m.sku || itemId === m.name.toLowerCase().replace(/\s+/g, '');
+          // Robust matching: trim and case-insensitive with presence check
+          const normalizedName = (m.name || '').toLowerCase().replace(/\s+/g, '');
+          return itemId === m.sku || itemId === normalizedName;
         });
         if (isIssued) counts[m.id]++;
       });

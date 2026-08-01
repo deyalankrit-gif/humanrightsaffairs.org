@@ -157,7 +157,7 @@ export default function MemberKitDetailPage() {
 
         const delta = isChecked ? -1 : 1;
         const materialMatch = (materialsList || []).find((m: any) => 
-          m.name.toLowerCase().trim() === kitItem.label.toLowerCase().trim() || 
+          (m.name || '').toLowerCase().trim() === (kitItem.label || '').toLowerCase().trim() || 
           m.sku === kitItem.id
         );
 
@@ -218,7 +218,7 @@ export default function MemberKitDetailPage() {
   const category = member.designationCategory || "General Member";
   const eligibleItemIds = eligibilityRules[category] || [];
   const eligibleItems = kitItems.filter((item: any) => eligibleItemIds.includes(item.id));
-  const isCarPlateIssued = kitItems.filter((i: any) => i.label.toLowerCase().includes('car plate')).some((i: any) => kitForm.items[i.id]);
+  const isCarPlateIssued = kitItems.filter((i: any) => (i.label || '').toLowerCase().includes('car plate')).some((i: any) => kitForm.items[i.id]);
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-24">
@@ -307,7 +307,7 @@ export default function MemberKitDetailPage() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                             {eligibleItems.map((item: any) => {
                               const material = (materialsList || []).find((m: any) => 
-                                m.name.toLowerCase().trim() === item.label.toLowerCase().trim() || m.sku === item.id
+                                (m.name || '').toLowerCase().trim() === (item.label || '').toLowerCase().trim() || m.sku === item.id
                               );
                               const stock = material?.currentStock ?? 'N/A';
                               const isChecked = !!kitForm.items[item.id];

@@ -33,7 +33,9 @@ import {
   ClipboardList,
   Car,
   Info,
-  Layers
+  Layers,
+  X,
+  Check
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
@@ -47,7 +49,7 @@ import {
   DialogClose,
   DialogFooter
 } from "@/components/ui/dialog"
-import { Progress } from '@/components/ui/progress'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import { Footer } from '@/components/footer'
 import { INDIA_DATA } from '@/lib/india-data'
 
@@ -230,7 +232,7 @@ export default function MemberKitManagement() {
     kitItems.forEach((item: any) => {
       // Find matching material for stock sync
       const material = (materialsList || []).find((m: any) => 
-        m.name.toLowerCase().trim() === item.label.toLowerCase().trim() || m.sku === item.id
+        (m.name || '').toLowerCase().trim() === (item.label || '').toLowerCase().trim() || m.sku === item.id
       );
       stats[item.id] = { issued: 0, total: 0, stock: material?.currentStock ?? 0 };
     });
@@ -279,7 +281,7 @@ export default function MemberKitManagement() {
     const eligibleItemIds = eligibilityRules[category] || [];
     const eligibleItems = kitItems.filter((item: any) => eligibleItemIds.includes(item.id));
     const isOfficeBearer = category === 'Office-bearing Member';
-    const carPlateItemIds = kitItems.filter((item: any) => item.label.toLowerCase().includes('car plate')).map((item: any) => item.id);
+    const carPlateItemIds = kitItems.filter((item: any) => (item.label || '').toLowerCase().includes('car plate')).map((item: any) => item.id);
     const isCarPlateIssued = carPlateItemIds.some((id: string) => kit?.items?.[id]);
 
     return (
@@ -335,7 +337,7 @@ export default function MemberKitManagement() {
                               kit?.items?.[item.id] ? "bg-emerald-500 text-white border-emerald-600" : "bg-slate-100 text-slate-300 dark:bg-slate-900 border-slate-200"
                             )}
                           >
-                            {item.label[0]}
+                            {item.label?.[0] || 'I'}
                           </div>
                         ))}
                      </div>
@@ -492,7 +494,7 @@ export default function MemberKitManagement() {
                   className="min-w-[240px] md:min-w-[280px] border-none shadow-md rounded-2xl bg-white dark:bg-slate-800 p-5 flex flex-col gap-4 shrink-0 transition-transform hover:scale-[1.02]"
                 >
                   <div className="flex justify-between items-start gap-2">
-                    <span className="text-[10px] font-black uppercase text-slate-500 truncate">{item.label}</span>
+                    <span className="text-[10px] font-black uppercase text-slate-500 truncate">{(item.label || 'N/A')}</span>
                     <button 
                       onClick={() => {
                         const receivers = members.filter(m => kitMap[m.id]?.items?.[item.id]);
@@ -675,12 +677,4 @@ export default function MemberKitManagement() {
       <Footer />
     </main>
   )
-}
-
-function ScrollArea({ className, children }: { className?: string, children: React.ReactNode }) {
-  return (
-    <div className={cn("overflow-y-auto custom-scrollbar", className)}>
-      {children}
-    </div>
-  );
 }
