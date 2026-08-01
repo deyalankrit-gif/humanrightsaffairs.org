@@ -12,6 +12,7 @@ import { VisitorTracker } from '@/components/visitor-tracker';
 import { PublicFooter } from '@/components/public-footer';
 import { AdminFooter } from '@/components/admin-footer';
 import { FeedbackSystem } from '@/components/feedback-system';
+import { ContextualHelp } from '@/components/contextual-help';
 import { useUser } from '@/firebase';
 import { cn } from '@/lib/utils';
 
@@ -65,6 +66,8 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
               </div>
             </header>
             <main className="flex-1 overflow-x-hidden w-full">
+              {/* Contextual Help Injected into Admin Layout */}
+              <ContextualHelp />
               {children}
             </main>
             <AdminFooter />

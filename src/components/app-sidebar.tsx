@@ -68,7 +68,8 @@ import {
   Pin,
   PinOff,
   MessageSquareQuote,
-  UserRoundCheck
+  UserRoundCheck,
+  BookOpen
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -98,6 +99,7 @@ const topAnalyticsLinksConfig = [
 ]
 
 const adminLinksConfig = [
+  { name: 'Governance Manual', href: '/internal/manual', icon: BookOpen, permission: 'publicView' },
   { name: 'Applications', href: '/internal/applications', icon: FileText, permission: 'applications' },
   { name: 'Public Complaints', href: '/internal/public-complaints', icon: ShieldQuestion, permission: 'publicComplaints' },
   { name: 'Investigator Registry', href: '/internal/investigation-officers', icon: UserRoundCheck, rootOnly: true },
