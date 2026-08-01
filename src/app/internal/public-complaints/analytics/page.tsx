@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo, useEffect, useState } from 'react'
@@ -42,7 +41,8 @@ import {
   Lock,
   UserRoundX,
   Scale,
-  Navigation
+  Navigation,
+  Download
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
