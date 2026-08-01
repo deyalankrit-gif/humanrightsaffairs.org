@@ -45,6 +45,7 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogFooter,
+  DialogDescription,
 } from "@/components/ui/dialog"
 import {
   Select,
@@ -199,7 +200,7 @@ export default function DailyUpdatePage() {
 
   const handleAddNote = async () => {
     if (!db || !newNote.trim()) return;
-    setIsActionLoading(true);
+    setIsActionLoading(true)
     try {
       await addDoc(collection(db, 'daily_notes'), {
         content: newNote,
@@ -239,7 +240,7 @@ export default function DailyUpdatePage() {
             </p>
           </div>
           <div className="flex flex-wrap justify-center gap-3">
-             <Button onClick={() => window.print()} variant="outline" className="bg-white/5 border-white/20 text-white hover:bg-white/10 h-11 px-6 rounded-xl font-bold gap-2">
+             <Button onClick={() => window.print()} variant="outline" className="bg-white/5 border-white/10 text-white hover:bg-white/10 h-11 px-6 rounded-xl font-bold gap-2">
                 <Printer className="w-4 h-4 text-slate-400" /> Print Summary
              </Button>
              <Button onClick={handleSendDailySummary} className="bg-accent text-primary hover:bg-secondary hover:text-white h-11 px-6 rounded-xl font-bold gap-2 shadow-xl shadow-accent/20 transition-all">
