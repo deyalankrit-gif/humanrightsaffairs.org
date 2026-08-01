@@ -2,7 +2,25 @@
 
 import React, { useMemo, useState } from 'react';
 import Image from 'next/image';
-import { Mail, Phone, MapPin, Facebook, Twitter, Instagram, Youtube, Bell, Crown, ShieldCheck, Lock, ArrowRight, Loader2, CheckCircle2, Heart } from 'lucide-react';
+import { 
+  Mail, 
+  Phone, 
+  MapPin, 
+  Facebook, 
+  Twitter, 
+  Instagram, 
+  Youtube, 
+  Bell, 
+  Crown, 
+  ShieldCheck, 
+  Lock, 
+  ArrowRight, 
+  Loader2, 
+  CheckCircle2, 
+  Heart,
+  ArrowUpRight,
+  ChevronRight
+} from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { DonationDialog } from './donation-dialog';
@@ -28,6 +46,7 @@ import { useToast } from '@/hooks/use-toast';
  * Includes a secure email OTP gate for the Required Documents section.
  * Featuring the Bengali orange hyperlink "প্রয়োজনীয় কিছু তথ্য" leading to legal guides.
  * Repositioned donation CTA image under the Registered Office block on the right.
+ * Updated: Restored "Office Use Only" icons on the right side of administrative links.
  */
 export function PublicFooter() {
   const donationFooterImg = PlaceHolderImages.find(img => img.id === 'donation-footer-image');
@@ -151,15 +170,62 @@ export function PublicFooter() {
               <li><Link href="/donors" className="hover:text-accent transition-colors font-medium flex items-center gap-2">Wall of Donors <Heart className="w-3.5 h-3.5 text-red-500 fill-red-500/20" /></Link></li>
               <li><Link href="/trust-credentials" className="hover:text-accent transition-colors font-medium flex items-center gap-2">Trust Credentials <Crown className="w-3.5 h-3.5 text-[#D4AF37] fill-[#D4AF37]/20" /></Link></li>
               <li><Link href="/activity-hub" className="text-emerald-400 font-bold hover:text-white transition-colors flex items-center gap-2"><Bell className={cn("w-3 h-3 md:w-4 md:h-4 text-red-500", hasReminders && "animate-ring")} /><span>Activity Hub</span></Link></li>
-              <li className="pt-2"><span className="text-[#CEFF00] font-black text-sm md:text-lg uppercase tracking-tighter">Office Use Only</span></li>
-              <li><Link href="/legal/official-representation" className="text-[#CEFF00] hover:text-white transition-colors font-bold flex flex-col leading-tight"><span>Official Representation</span></Link></li>
-              <li><Link href="/trust-responsibilities" className="text-[#CEFF00] hover:text-white transition-colors font-medium leading-tight">Duties & Responsibilities</Link></li>
-              <li><button onClick={handleOpenGate('/legal/required-documents')} className="text-[#CEFF00] hover:text-white transition-colors font-medium leading-tight text-left">Required Documents</button></li>
-              <li><Link href="/legal/annual-governance-checklist" className="text-[#CEFF00] hover:text-white transition-colors font-medium leading-tight">Annual Governance Checklist</Link></li>
-              <li><Link href="/activity-calendar" className="text-[#CEFF00] hover:text-white transition-colors font-medium leading-tight">Activity Calendar 2026</Link></li>
-              <li><Link href="/legal/quotation-format" className="text-[#CEFF00] hover:text-white transition-colors font-medium leading-tight">Supplier Quotation Format</Link></li>
-              <li><Link href="/meetings" className="text-[#CEFF00] hover:text-white transition-colors font-medium leading-tight">Organizations Meeting</Link></li>
-              <li><Link href="/#grievances" className="text-[#CEFF00] hover:text-white transition-colors font-medium leading-tight">Organizations Grievances</Link></li>
+              
+              <li className="pt-6"><span className="text-[#CEFF00] font-black text-sm md:text-lg uppercase tracking-tighter">Office Use Only</span></li>
+              <li>
+                <Link href="/legal/official-representation" className="text-[#CEFF00] hover:text-white transition-colors font-bold flex items-center justify-between leading-tight group/link">
+                  <span>Official Representation</span>
+                  <ArrowUpRight className="w-3.5 h-3.5 opacity-40 group-hover/link:opacity-100 transition-opacity" />
+                </Link>
+              </li>
+              <li>
+                <Link href="/trust-responsibilities" className="text-[#CEFF00] hover:text-white transition-colors font-medium flex items-center justify-between leading-tight group/link">
+                  <span>Duties & Responsibilities</span>
+                  <ArrowUpRight className="w-3.5 h-3.5 opacity-40 group-hover/link:opacity-100 transition-opacity" />
+                </Link>
+              </li>
+              <li>
+                <button onClick={handleOpenGate('/legal/required-documents')} className="text-[#CEFF00] hover:text-white transition-colors font-medium leading-tight text-left flex items-center justify-between w-full group/link">
+                  <span>Required Documents</span>
+                  <Lock className="w-3 h-3 opacity-40 group-hover/link:opacity-100 transition-opacity" />
+                </button>
+              </li>
+              <li>
+                <Link href="/legal/annual-governance-checklist" className="text-[#CEFF00] hover:text-white transition-colors font-medium flex items-center justify-between leading-tight group/link">
+                  <span>Annual Governance Checklist</span>
+                  <ArrowUpRight className="w-3.5 h-3.5 opacity-40 group-hover/link:opacity-100 transition-opacity" />
+                </Link>
+              </li>
+              <li>
+                <Link href="/activity-calendar" className="text-[#CEFF00] hover:text-white transition-colors font-medium flex items-center justify-between leading-tight group/link">
+                  <span>Activity Calendar 2026</span>
+                  <ArrowUpRight className="w-3.5 h-3.5 opacity-40 group-hover/link:opacity-100 transition-opacity" />
+                </Link>
+              </li>
+              <li>
+                <Link href="/legal/quotation-format" className="text-[#CEFF00] hover:text-white transition-colors font-medium flex items-center justify-between leading-tight group/link">
+                  <span>Supplier Quotation Format</span>
+                  <ArrowUpRight className="w-3.5 h-3.5 opacity-40 group-hover/link:opacity-100 transition-opacity" />
+                </Link>
+              </li>
+              <li>
+                <Link href="/meetings" className="text-[#CEFF00] hover:text-white transition-colors font-medium flex items-center justify-between leading-tight group/link">
+                  <span>Organizations Meeting</span>
+                  <ArrowUpRight className="w-3.5 h-3.5 opacity-40 group-hover/link:opacity-100 transition-opacity" />
+                </Link>
+              </li>
+              <li>
+                <Link href="/#grievances" className="text-[#CEFF00] hover:text-white transition-colors font-medium flex items-center justify-between leading-tight group/link">
+                  <span>Organizations Grievances</span>
+                  <ArrowUpRight className="w-3.5 h-3.5 opacity-40 group-hover/link:opacity-100 transition-opacity" />
+                </Link>
+              </li>
+              <li className="pt-2">
+                <Link href="/internal/login" className="text-white bg-white/5 border border-white/10 px-3 py-1.5 rounded-lg hover:bg-accent hover:text-primary transition-all font-bold text-[10px] uppercase tracking-widest flex items-center justify-between group/link">
+                  <span>Personnel Portal Access</span>
+                  <Lock className="w-3 h-3 group-hover/link:scale-110 transition-transform" />
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -171,7 +237,7 @@ export function PublicFooter() {
               <li><Link href="/legal/rti-assistant" className="hover:text-accent transition-colors font-medium">RTI Assistant</Link></li>
               <li><Link href="/legal/bail-procedure" className="hover:text-accent transition-colors font-medium">Bail Procedures</Link></li>
               <li><Link href="/legal/privacy-policy" className="hover:text-accent transition-colors font-medium">Privacy Policy</Link></li>
-              <li><Link href="/complaint-form" className="text-[#FF00FF] hover:text-white transition-colors font-bold">Complaint Submission Form</Link></li>
+              <li><Link href="/complaint-form" className="text-[#FF00FF] hover:text-white transition-colors font-bold flex items-center justify-between group/link"><span>Complaint Submission Form</span> <ArrowUpRight className="w-3.5 h-3.5 opacity-40 group-hover/link:opacity-100" /></Link></li>
             </ul>
             <div className="scale-90 md:scale-100 origin-left mt-6">
               <FooterMusicPlayer />
