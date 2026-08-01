@@ -220,12 +220,6 @@ export function PublicFooter() {
                   <ArrowUpRight className="w-3.5 h-3.5 opacity-40 group-hover/link:opacity-100 transition-opacity" />
                 </Link>
               </li>
-              <li className="pt-2">
-                <Link href="/internal/login" className="text-white bg-white/5 border border-white/10 px-3 py-1.5 rounded-lg hover:bg-accent hover:text-primary transition-all font-bold text-[10px] uppercase tracking-widest flex items-center justify-between group/link">
-                  <span>Personnel Portal Access</span>
-                  <Lock className="w-3 h-3 group-hover/link:scale-110 transition-transform" />
-                </Link>
-              </li>
             </ul>
           </div>
 
