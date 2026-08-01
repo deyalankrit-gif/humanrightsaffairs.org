@@ -49,6 +49,7 @@ import { cn } from '@/lib/utils'
 /**
  * Public Complaints Analytics: High-Fidelity Multi-Indicator Dashboard.
  * Optimized for institutional oversight and regional performance auditing.
+ * Refined: Fixed text contrast in the Health Monitor section and improved chart visibility.
  */
 export default function ComplaintAnalyticsPage() {
   const { user, loading: authLoading } = useUser()
@@ -193,7 +194,10 @@ export default function ComplaintAnalyticsPage() {
 
       <section className="py-8 container mx-auto px-4">
         {dataLoading ? (
-          <div className="text-center py-20"><Loader2 className="w-10 h-10 animate-spin text-accent mx-auto mb-4" /><p className="text-slate-500 font-bold uppercase tracking-widest text-xs">Compiling Multi-Indicator Data...</p></div>
+          <div className="text-center py-20">
+            <Loader2 className="w-10 h-10 animate-spin text-accent mx-auto mb-4" />
+            <p className="text-slate-500 font-bold uppercase tracking-widest text-xs">Compiling Multi-Indicator Data...</p>
+          </div>
         ) : (
           <div className="space-y-8">
             {/* Primary KPI Row */}
@@ -350,17 +354,17 @@ export default function ComplaintAnalyticsPage() {
                         <Scale className="w-4 h-4" /> Protocol Efficiency
                      </div>
                      <h2 className="text-3xl md:text-5xl font-headline font-bold leading-tight">National Registry <br/><span className="text-accent italic">Health Monitor</span></h2>
-                     <p className="text-slate-400 text-sm md:text-lg leading-relaxed italic">
+                     <p className="text-primary-foreground/70 text-sm md:text-lg leading-relaxed italic">
                         "Real-time monitoring of rights violations and investigative progress enables the central council to identify regional spikes and deploy specialized tactical teams where they are most needed."
                      </p>
                      <div className="flex gap-4">
                         <div className="bg-white/5 p-4 rounded-2xl border border-white/10 text-center flex-1">
                            <p className="text-2xl font-black text-white">{stats.total}</p>
-                           <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Total Intake</p>
+                           <p className="text-[9px] font-bold text-primary-foreground/40 uppercase tracking-widest">Total Intake</p>
                         </div>
                         <div className="bg-white/5 p-4 rounded-2xl border border-white/10 text-center flex-1">
                            <p className="text-2xl font-black text-emerald-400">{stats.resolved}%</p>
-                           <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Global Resolution</p>
+                           <p className="text-[9px] font-bold text-primary-foreground/40 uppercase tracking-widest">Global Resolution</p>
                         </div>
                      </div>
                   </div>
@@ -374,13 +378,13 @@ export default function ComplaintAnalyticsPage() {
                               </linearGradient>
                            </defs>
                            <CartesianGrid strokeDasharray="3 3" vertical={false} strokeOpacity={0.05} />
-                           <XAxis dataKey="name" fontSize={10} axisLine={false} tickLine={false} stroke="#64748b" />
-                           <YAxis fontSize={10} axisLine={false} tickLine={false} stroke="#64748b" />
+                           <XAxis dataKey="name" fontSize={10} axisLine={false} tickLine={false} stroke="#94a3b8" />
+                           <YAxis fontSize={10} axisLine={false} tickLine={false} stroke="#94a3b8" />
                            <Tooltip contentStyle={{ backgroundColor: '#001f54', border: 'none', borderRadius: '1rem', color: '#fff' }} />
                            <Area type="monotone" dataKey="intake" stroke="#D4AF37" fillOpacity={1} fill="url(#colorIntake)" strokeWidth={3} />
                         </AreaChart>
                      </ResponsiveContainer>
-                     <p className="text-center text-[9px] font-black text-slate-500 uppercase tracking-[0.4em] mt-4">Case Intake Historical Trend</p>
+                     <p className="text-center text-[9px] font-black text-primary-foreground/30 uppercase tracking-[0.4em] mt-4">Case Intake Historical Trend</p>
                   </div>
                </div>
             </Card>
