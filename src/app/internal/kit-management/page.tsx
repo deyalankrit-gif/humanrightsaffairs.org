@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useEffect, useState, useMemo } from 'react'
@@ -560,7 +561,7 @@ export default function MemberKitManagement() {
             </div>
           </div>
           
-          <div className="flex overflow-x-auto custom-scrollbar gap-4 pb-6 px-1">
+          <div className="flex flex-nowrap overflow-x-auto custom-scrollbar gap-4 pb-6 px-1">
             {kitItems.map((item: any) => {
               const stat = itemStats[item.id] || { issued: 0, total: 0 };
               const percent = stat.total > 0 ? Math.round((stat.issued / stat.total) * 100) : 0;
@@ -619,7 +620,7 @@ export default function MemberKitManagement() {
                <button 
                 key={st} 
                 onClick={() => setStatusFilter(st)}
-                className={cn("whitespace-nowrap px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all", statusFilter === st ? "bg-accent text-primary shadow-md" : "text-slate-50 hover:bg-white")}
+                className={cn("whitespace-nowrap px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all", statusFilter === st ? "bg-accent text-primary shadow-md" : "text-slate-500 hover:bg-white")}
                >
                  {st}
                </button>
