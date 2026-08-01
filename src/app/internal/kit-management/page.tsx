@@ -560,12 +560,14 @@ export default function MemberKitManagement() {
             </div>
           </div>
           
-          <div className="flex overflow-x-auto no-scrollbar gap-4 pb-4 px-1">
+          <div className="flex overflow-x-auto custom-scrollbar gap-4 pb-6 px-1">
             {kitItems.map((item: any) => {
               const stat = itemStats[item.id] || { issued: 0, total: 0 };
               const percent = stat.total > 0 ? Math.round((stat.issued / stat.total) * 100) : 0;
               
+              // High-fidelity dynamic coloring logic
               const progressColor = percent < 30 ? "bg-red-500" : percent < 70 ? "bg-amber-500" : "bg-emerald-500";
+              const textColor = percent < 30 ? "text-red-500" : percent < 70 ? "text-amber-500" : "text-emerald-500";
               const trackColor = percent < 30 ? "bg-red-100" : percent < 70 ? "bg-amber-100" : "bg-emerald-100";
 
               return (
@@ -591,11 +593,11 @@ export default function MemberKitManagement() {
                          {stat.issued}
                          <span className="text-[10px] text-slate-400 font-bold ml-1.5 uppercase tracking-tighter">/ {stat.total} Issued</span>
                        </p>
-                       <span className={cn("text-[9px] font-black uppercase px-2 py-0.5 rounded-lg", progressColor.replace('bg-', 'text-'), trackColor)}>
+                       <span className={cn("text-[9px] font-black uppercase px-2 py-0.5 rounded-lg", textColor, trackColor)}>
                          {percent}%
                        </span>
                     </div>
-                    {/* Custom Styled Progress Bar */}
+                    {/* Custom Styled Dynamic Progress Bar */}
                     <div className={cn("h-1.5 w-full rounded-full overflow-hidden", trackColor, "dark:opacity-20")}>
                       <div 
                         className={cn("h-full transition-all duration-1000", progressColor)} 
