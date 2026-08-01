@@ -197,6 +197,24 @@ export function AppSidebar() {
     }
   };
 
+  /**
+   * Tactical isActive check.
+   * Ensures that parent routes (like /public-complaints) are NOT highlighted when a 
+   * more specific sibling/child menu item (like /public-complaints/analytics) is active.
+   */
+  const checkIsActive = (href: string) => {
+    if (!pathname) return false;
+    return pathname === href || (
+      href !== '/' && 
+      pathname.startsWith(href + '/') && 
+      !ALL_ADMIN_LINKS.some(other => 
+        other.href !== href && 
+        pathname.startsWith(other.href) && 
+        other.href.length > href.length
+      )
+    );
+  };
+
   React.useEffect(() => {
     const scrollActiveItem = () => {
       if (!activeItemRef.current) return;
@@ -274,7 +292,7 @@ export function AppSidebar() {
                   <CollapsibleContent>
                     <SidebarMenu>
                       {filteredTopAnalyticsLinks.map((link) => {
-                        const isActive = pathname === link.href
+                        const isActive = checkIsActive(link.href)
                         const isPinned = pinnedHrefs.includes(link.href)
                         return (
                           <SidebarMenuItem key={link.name} ref={isActive ? activeItemRef : null}>
@@ -313,7 +331,7 @@ export function AppSidebar() {
                 </div>
                 <SidebarMenu>
                   {pinnedItems.length > 0 ? pinnedItems.map((link) => {
-                    const isActive = pathname === link.href
+                    const isActive = checkIsActive(link.href)
                     return (
                       <SidebarMenuItem key={link.name} ref={isActive ? activeItemRef : null}>
                         <SidebarMenuButton
@@ -345,7 +363,7 @@ export function AppSidebar() {
             )}
 
             {filteredLogisticLinks.length > 0 && (
-              <Collapsible defaultOpen={filteredLogisticLinks.some(l => pathname === l.href)} className="group/collapsible">
+              <Collapsible defaultOpen={filteredLogisticLinks.some(l => checkIsActive(l.href))} className="group/collapsible">
                 <SidebarGroup>
                   <CollapsibleTrigger asChild>
                     <SidebarGroupLabel className="cursor-pointer hover:bg-blue-500/5 transition-colors group-data-[collapsible=icon]:hidden text-blue-600 font-bold uppercase tracking-widest flex items-center justify-between w-full pr-2">
@@ -356,7 +374,7 @@ export function AppSidebar() {
                   <CollapsibleContent>
                     <SidebarMenu>
                       {filteredLogisticLinks.map((link) => {
-                        const isActive = pathname === link.href
+                        const isActive = checkIsActive(link.href)
                         const isPinned = pinnedHrefs.includes(link.href)
                         return (
                           <SidebarMenuItem key={link.name} ref={isActive ? activeItemRef : null}>
@@ -381,7 +399,7 @@ export function AppSidebar() {
             )}
 
             {filteredFinanceLinks.length > 0 && (
-              <Collapsible defaultOpen={filteredFinanceLinks.some(l => pathname.startsWith(l.href))} className="group/collapsible">
+              <Collapsible defaultOpen={filteredFinanceLinks.some(l => checkIsActive(l.href))} className="group/collapsible">
                 <SidebarGroup>
                   <CollapsibleTrigger asChild>
                     <SidebarGroupLabel className="cursor-pointer hover:bg-red-500/5 transition-colors group-data-[collapsible=icon]:hidden text-red-600 font-bold flex items-center justify-between w-full pr-2">
@@ -392,7 +410,7 @@ export function AppSidebar() {
                   <CollapsibleContent>
                     <SidebarMenu>
                       {filteredFinanceLinks.map((link) => {
-                        const isActive = pathname === link.href || (link.href !== '/internal/finance/dashboard' && pathname.startsWith(link.href))
+                        const isActive = checkIsActive(link.href)
                         const isPinned = pinnedHrefs.includes(link.href)
                         return (
                           <SidebarMenuItem key={link.name} ref={isActive ? activeItemRef : null}>
@@ -428,7 +446,7 @@ export function AppSidebar() {
                   <CollapsibleContent>
                     <SidebarMenu>
                       {filteredAdminLinks.map((link) => {
-                        const isActive = pathname === link.href || (link.href !== '/' && pathname.startsWith(link.href))
+                        const isActive = checkIsActive(link.href)
                         const isPinned = pinnedHrefs.includes(link.href)
                         return (
                           <SidebarMenuItem key={link.name} ref={isActive ? activeItemRef : null}>
@@ -464,7 +482,7 @@ export function AppSidebar() {
                   <SidebarMenuItem key={link.name} ref={isActive ? activeItemRef : null}>
                     <SidebarMenuButton asChild isActive={isActive} tooltip={link.name} className={cn("h-11 rounded-xl transition-all px-4", isActive ? "bg-accent text-white font-bold" : "hover:bg-secondary/10 hover:text-secondary")}>
                       <Link href={link.href} className="flex items-center gap-3">
-                        <link.icon className={cn("w-3 h-3 md:w-3.5 md:h-3.5 transition-colors", isActive ? "text-white" : "text-muted-foreground")} />
+                        <link.icon className={cn("w-3 h-3 md:w-3.5 md:h-3.5 transition-colors", isActive ? "text-white" : "text-muted-foreground group-hover:text-white")} />
                         <span className="group-data-[collapsible=icon]:hidden">{link.name}</span>
                       </Link>
                     </SidebarMenuButton>
