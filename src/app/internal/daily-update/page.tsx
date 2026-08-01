@@ -41,7 +41,11 @@ import {
   UserPlus,
   RefreshCw,
   User,
-  Sparkles
+  Sparkles,
+  Cpu,
+  Globe,
+  Gavel,
+  Scale
 } from 'lucide-react'
 import {
   Dialog,
@@ -51,6 +55,7 @@ import {
   DialogTrigger,
   DialogFooter,
   DialogDescription,
+  DialogClose
 } from "@/components/ui/dialog"
 import {
   Select,
@@ -66,6 +71,10 @@ import { Footer } from '@/components/footer'
 import { BUILT_IN_OBSERVANCES, BUILT_IN_HOLIDAYS } from '@/lib/activity-hub-data'
 import Link from 'next/link'
 
+/**
+ * MISSION COMMAND CENTER: Daily Update Dashboard
+ * A high-fidelity, colorfully animated terminal for real-time institutional oversight.
+ */
 export default function DailyUpdatePage() {
   const { user, loading: authLoading } = useUser()
   const router = useRouter()
@@ -159,7 +168,7 @@ export default function DailyUpdatePage() {
     }).length;
 
     const casesClosedToday = complaintList.filter(c => {
-      if (c.status !== 'Closed' || !c.updatedAt) return false;
+      if (c.status !== 'Closed' && c.status !== 'Action Taken') return false;
       const updated = typeof c.updatedAt === 'string' ? parseISO(c.updatedAt) : c.updatedAt?.toDate?.();
       return updated && isToday(updated);
     }).length;
@@ -274,20 +283,24 @@ export default function DailyUpdatePage() {
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-20">
-      <header className="pt-16 pb-8 bg-slate-900 text-white border-b-8 border-accent/20 px-4">
-        <div className="container mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+      <header className="pt-16 pb-8 bg-slate-900 text-white border-b-8 border-accent/20 px-4 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-1/4 h-full bg-emerald-500/5 -skew-x-12 animate-pulse"></div>
+        <div className="container mx-auto flex flex-col md:flex-row items-center justify-between gap-6 relative z-10">
           <div className="space-y-1">
-            <h1 className="text-3xl md:text-4xl font-headline font-bold">Daily <span className="text-accent italic">Update</span></h1>
+            <div className="inline-flex items-center gap-2 bg-emerald-500/20 text-emerald-400 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.2em] border border-emerald-500/30">
+               <Cpu className="w-2.5 h-2.5 animate-spin-slow" /> Terminal v2.0 Operational
+            </div>
+            <h1 className="text-3xl md:text-5xl font-headline font-bold">Command <span className="text-accent italic">Center</span></h1>
             <p className="text-slate-400 text-[10px] uppercase font-black tracking-widest flex items-center gap-2">
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" /> Operational Oversight: {format(new Date(), 'PPPP')}
             </p>
           </div>
           <div className="flex flex-wrap justify-center gap-3">
              <Button onClick={() => window.print()} variant="outline" className="bg-white/5 border-white/10 text-white hover:bg-white/10 h-11 px-6 rounded-xl font-bold gap-2">
-                <Printer className="w-4 h-4 text-slate-400" /> Print Summary
+                <Printer className="w-4 h-4 text-slate-400" /> Print Archive
              </Button>
-             <Button onClick={handleSendDailySummary} className="bg-accent text-primary hover:bg-secondary hover:text-white h-11 px-6 rounded-xl font-bold gap-2 shadow-xl shadow-accent/20 transition-all">
-                <Mail className="w-4 h-4" /> Send Daily Summary
+             <Button onClick={handleSendDailySummary} className="bg-accent text-primary hover:bg-secondary hover:text-white h-11 px-6 rounded-xl font-bold gap-2 shadow-xl shadow-accent/20 transition-all hover:-translate-y-1">
+                <Mail className="w-4 h-4" /> Send Master Report
              </Button>
           </div>
         </div>
@@ -299,22 +312,22 @@ export default function DailyUpdatePage() {
            {/* Left Content: Overview & Tasks */}
            <div className="lg:col-span-8 space-y-8">
               
-              {/* Today's Overview Widget */}
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 animate-in fade-in duration-700">
+              {/* Today's Intelligence Grid */}
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 animate-in fade-in slide-in-from-bottom-2 duration-700">
                  {[
-                   { label: "New Complaints", val: summary.newComplaintsToday, icon: <AlertCircle className="text-red-500" /> },
-                   { label: "Pending Review", val: summary.pendingReview, icon: <Clock className="text-amber-500" /> },
-                   { label: "Investigations", val: summary.underInvestigation, icon: <Activity className="text-blue-500" /> },
-                   { label: "Cases Closed", val: summary.casesClosedToday, icon: <CheckCircle2 className="text-emerald-500" /> },
-                   { label: "New Applications", val: summary.newAppsToday, icon: <UserPlus className="text-indigo-500" /> },
-                   { label: "App Registry", val: applications?.length || 0, icon: <FileText className="text-slate-400" /> }
+                   { label: "Complaint Intake", val: summary.newComplaintsToday, icon: <AlertCircle className="text-red-500" />, color: "bg-red-50 dark:bg-red-950/20" },
+                   { label: "Pending Vetting", val: summary.pendingReview, icon: <Clock className="text-amber-500" />, color: "bg-amber-50 dark:bg-amber-950/20" },
+                   { label: "Active Field Missions", val: summary.underInvestigation, icon: <Activity className="text-blue-500" />, color: "bg-blue-50 dark:bg-blue-950/20" },
+                   { label: "Resolved Today", val: summary.casesClosedToday, icon: <CheckCircle2 className="text-emerald-500" />, color: "bg-emerald-50 dark:bg-emerald-950/20" },
+                   { label: "New Recruits", val: summary.newAppsToday, icon: <UserPlus className="text-indigo-500" />, color: "bg-indigo-50 dark:bg-indigo-950/20" },
+                   { label: "Total Applications", val: applications?.length || 0, icon: <FileText className="text-slate-400" />, color: "bg-slate-50 dark:bg-slate-900" }
                  ].map((stat, i) => (
-                   <Card key={i} className="border-none shadow-sm rounded-2xl overflow-hidden group">
-                     <CardContent className="p-5 flex items-center gap-4">
-                        <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl group-hover:bg-accent/10 transition-colors">{stat.icon}</div>
+                   <Card key={i} className={cn("border-none shadow-sm rounded-3xl overflow-hidden group transition-all hover:scale-105 hover:shadow-xl cursor-default", stat.color)}>
+                     <CardContent className="p-6 flex items-center gap-5">
+                        <div className="p-4 bg-white dark:bg-slate-800 rounded-2xl group-hover:rotate-12 transition-transform shadow-sm">{stat.icon}</div>
                         <div>
-                           <p className="text-2xl font-headline font-bold">{stat.val}</p>
-                           <p className="text-[9px] font-black uppercase text-slate-400 tracking-widest">{stat.label}</p>
+                           <p className="text-3xl font-headline font-bold leading-none">{stat.val}</p>
+                           <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest mt-1">{stat.label}</p>
                         </div>
                      </CardContent>
                    </Card>
@@ -322,22 +335,22 @@ export default function DailyUpdatePage() {
               </div>
 
               {/* Master To-Do Terminal */}
-              <Card className="rounded-[2.5rem] border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900">
+              <Card className="rounded-[3rem] border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900 border-2 border-slate-100">
                  <CardHeader className="bg-slate-50 dark:bg-slate-800/50 border-b p-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div className="space-y-1">
-                       <CardTitle className="text-xl font-headline font-bold flex items-center gap-3">
-                          <ListTodo className="w-5 h-5 text-accent" /> Institutional To-Do List
+                       <CardTitle className="text-2xl font-headline font-bold flex items-center gap-3">
+                          <ListTodo className="w-6 h-6 text-accent" /> Institutional Task Log
                        </CardTitle>
-                       <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">Administrative Task Governance</p>
+                       <p className="text-xs text-slate-400 font-bold uppercase tracking-widest italic">"Efficiency is the foundation of justice."</p>
                     </div>
-                    <div className="flex items-center gap-2 p-1 bg-white dark:bg-slate-950 rounded-xl border">
+                    <div className="flex items-center gap-2 p-1.5 bg-white dark:bg-slate-950 rounded-2xl border shadow-inner">
                        {['All', 'Pending', 'Completed', 'Overdue'].map(f => (
                          <button 
                            key={f}
                            onClick={() => setTodoFilter(f as any)}
                            className={cn(
-                             "px-3 py-1.5 rounded-lg text-[9px] font-black uppercase transition-all",
-                             todoFilter === f ? "bg-primary text-white" : "text-slate-400 hover:bg-slate-100"
+                             "px-4 py-2 rounded-xl text-[9px] font-black uppercase transition-all",
+                             todoFilter === f ? "bg-primary text-white shadow-lg" : "text-slate-400 hover:bg-slate-100"
                            )}
                          >
                            {f}
@@ -346,70 +359,76 @@ export default function DailyUpdatePage() {
                     </div>
                  </CardHeader>
                  <CardContent className="p-0">
-                    <div className="p-6 border-b bg-slate-50/30">
-                       <div className="grid md:grid-cols-12 gap-3">
+                    <div className="p-8 border-b bg-slate-50/30">
+                       <div className="grid md:grid-cols-12 gap-4">
                           <div className="md:col-span-7">
                              <Input 
-                               placeholder="Draft new institutional task..." 
+                               placeholder="Draft new institutional mandate..." 
                                value={newTask.title} 
                                onChange={e => setNewTask({...newTask, title: e.target.value})}
-                               className="h-11 rounded-xl"
+                               className="h-12 rounded-2xl border-none shadow-inner bg-white"
                              />
                           </div>
                           <div className="md:col-span-2">
                              <Select value={newTask.priority} onValueChange={(v:any) => setNewTask({...newTask, priority: v})}>
-                                <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
-                                <SelectContent className="bg-white">
-                                   <SelectItem value="High">High</SelectItem>
-                                   <SelectItem value="Medium">Medium</SelectItem>
-                                   <SelectItem value="Low">Low</SelectItem>
+                                <SelectTrigger className="h-12 rounded-2xl bg-white border-none shadow-inner font-bold"><SelectValue /></SelectTrigger>
+                                <SelectContent className="bg-white z-[1000000]">
+                                   <SelectItem value="High" className="text-red-600 font-bold">HIGH</SelectItem>
+                                   <SelectItem value="Medium" className="text-amber-600 font-bold">MEDIUM</SelectItem>
+                                   <SelectItem value="Low" className="text-blue-600 font-bold">LOW</SelectItem>
                                 </SelectContent>
                              </Select>
                           </div>
                           <div className="md:col-span-3">
-                             <Button onClick={handleAddTask} disabled={isActionLoading || !newTask.title.trim()} className="w-full h-11 bg-primary text-white font-bold rounded-xl gap-2">
-                                <Plus className="w-4 h-4" /> Add Task
+                             <Button onClick={handleAddTask} disabled={isActionLoading || !newTask.title.trim()} className="w-full h-12 bg-primary text-white font-bold rounded-2xl gap-2 shadow-lg hover:bg-secondary">
+                                <Plus className="w-5 h-5" /> Log Task
                              </Button>
                           </div>
                        </div>
                     </div>
 
-                    <div className="divide-y divide-slate-50 dark:divide-slate-800 min-h-[300px]">
+                    <div className="divide-y divide-slate-100 dark:divide-slate-800 min-h-[400px]">
                        {filteredTasks.length > 0 ? filteredTasks.map((task: any) => {
                          const isOverdue = !task.completed && task.dueDate && parseISO(task.dueDate) < startOfDay(new Date());
                          return (
-                           <div key={task.id} className={cn("p-6 flex items-center justify-between group transition-colors", task.completed ? "opacity-50 grayscale bg-slate-50/20" : "hover:bg-slate-50/50")}>
-                              <div className="flex items-center gap-5">
+                           <div key={task.id} className={cn(
+                             "p-8 flex items-center justify-between group transition-all", 
+                             task.completed ? "opacity-40 grayscale bg-slate-50/20" : "hover:bg-slate-50/50 hover:pl-10",
+                             task.priority === 'High' && !task.completed && "border-l-8 border-red-500"
+                           )}>
+                              <div className="flex items-center gap-6">
                                  <Checkbox 
                                    checked={task.completed} 
                                    onCheckedChange={() => handleToggleTask(task.id, task.completed)}
-                                   className="h-6 w-6 rounded-lg border-2"
+                                   className="h-7 w-7 rounded-xl border-2 transition-all data-[state=checked]:bg-emerald-500 data-[state=checked]:border-emerald-500"
                                  />
-                                 <div className="space-y-1">
-                                    <h4 className={cn("text-sm font-bold leading-none", task.completed && "line-through text-slate-400", isOverdue && !task.completed && "text-red-600")}>
+                                 <div className="space-y-2">
+                                    <h4 className={cn("text-lg font-bold leading-tight", task.completed && "line-through text-slate-400", isOverdue && !task.completed && "text-red-600")}>
                                        {task.title}
                                     </h4>
-                                    <div className="flex items-center gap-3">
-                                       <Badge className={cn("text-[7px] font-black uppercase px-2 h-4 border-none", task.priority === 'High' ? "bg-red-500" : task.priority === 'Medium' ? "bg-amber-500" : "bg-blue-500")}>
-                                          {task.priority}
+                                    <div className="flex items-center gap-4">
+                                       <Badge className={cn("text-[8px] font-black uppercase px-3 h-5 border-none shadow-sm", task.priority === 'High' ? "bg-red-500" : task.priority === 'Medium' ? "bg-amber-500" : "bg-blue-500")}>
+                                          {task.priority} Priority
                                        </Badge>
                                        {task.dueDate && (
-                                         <span className={cn("text-[9px] font-bold uppercase flex items-center gap-1", isOverdue && !task.completed ? "text-red-500" : "text-slate-400")}>
-                                            <Calendar className="w-2.5 h-2.5" /> Due: {task.dueDate}
+                                         <span className={cn("text-[10px] font-bold uppercase flex items-center gap-1.5", isOverdue && !task.completed ? "text-red-500 animate-pulse" : "text-slate-400")}>
+                                            <Calendar className="w-3.5 h-3.5" /> Due: {task.dueDate}
                                          </span>
                                        )}
                                     </div>
                                  </div>
                               </div>
-                              <button onClick={() => handleDeleteTask(task.id)} className="p-2 text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all">
-                                 <Trash2 className="w-4 h-4" />
+                              <button onClick={() => handleDeleteTask(task.id)} className="p-3 text-slate-200 hover:text-red-500 hover:bg-red-50 rounded-2xl transition-all opacity-0 group-hover:opacity-100">
+                                 <Trash2 className="w-5 h-5" />
                               </button>
                            </div>
                          );
                        }) : (
-                         <div className="py-24 text-center opacity-20">
-                            <ListTodo className="w-16 h-16 mx-auto mb-4" />
-                            <p className="text-sm font-black uppercase tracking-[0.2em]">Queue Clear</p>
+                         <div className="py-32 text-center">
+                            <div className="w-20 h-20 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
+                               <CheckCircle2 className="w-10 h-10 text-emerald-500 animate-bounce" />
+                            </div>
+                            <p className="text-lg font-black uppercase tracking-[0.3em] text-slate-300">All Mandates Satisfied</p>
                          </div>
                        )}
                     </div>
@@ -417,54 +436,54 @@ export default function DailyUpdatePage() {
               </Card>
 
               {/* Membership Application Stream */}
-              <Card className="rounded-[2.5rem] border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900">
+              <Card className="rounded-[3rem] border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900 border-2 border-slate-100">
                 <CardHeader className="bg-slate-50 dark:bg-slate-800/50 border-b p-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
                   <div className="space-y-1">
                     <CardTitle className="text-xl font-headline font-bold flex items-center gap-3">
-                      <UserPlus className="w-5 h-5 text-indigo-500" /> Membership Application Stream
+                      <UserPlus className="w-6 h-6 text-indigo-500" /> Recruitment Pipeline
                     </CardTitle>
-                    <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">Real-time status tracking for new recruits</p>
+                    <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">Real-time status tracking for new human rights defenders</p>
                   </div>
-                  <Button variant="ghost" size="sm" onClick={() => router.push('/internal/applications')} className="rounded-full text-xs font-bold text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50">
-                    Manage All <ChevronRight className="ml-1 w-4 h-4" />
+                  <Button variant="ghost" size="sm" onClick={() => router.push('/internal/applications')} className="rounded-full text-[10px] font-black uppercase tracking-widest text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 border-indigo-100 border px-6 h-10">
+                    Full Registry <ChevronRight className="ml-1 w-4 h-4" />
                   </Button>
                 </CardHeader>
                 <CardContent className="p-0">
                    <div className="divide-y divide-slate-50 dark:divide-slate-800">
                       {applications && applications.slice(0, 5).map((app: any) => (
-                        <div key={app.id} className="p-6 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors flex items-center justify-between">
-                           <div className="flex items-center gap-4">
-                              <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-300">
-                                 <User className="w-5 h-5" />
+                        <div key={app.id} className="p-8 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all flex items-center justify-between group">
+                           <div className="flex items-center gap-5">
+                              <div className="w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-400 group-hover:scale-110 transition-transform shadow-sm">
+                                 <User className="w-7 h-7" />
                               </div>
-                              <div className="space-y-0.5">
-                                 <h4 className="text-sm font-bold">{app.name}</h4>
-                                 <div className="flex items-center gap-2">
-                                    <span className="text-[9px] font-bold text-slate-400 uppercase">{app.level} Council</span>
-                                    <span className="text-[9px] font-bold text-slate-400 uppercase">•</span>
-                                    <span className="text-[9px] font-bold text-slate-400 uppercase">{app.stateName || 'National'}</span>
+                              <div className="space-y-1">
+                                 <h4 className="text-base font-bold leading-tight">{app.name}</h4>
+                                 <div className="flex items-center gap-3">
+                                    <Badge variant="outline" className="text-[8px] font-black text-slate-400 uppercase tracking-tighter border-slate-200">{app.level} Council</Badge>
+                                    <span className="text-[10px] font-bold text-slate-500 uppercase flex items-center gap-1.5"><Globe className="w-3 h-3" /> {app.stateName || 'National'}</span>
                                  </div>
                               </div>
                            </div>
-                           <div className="flex items-center gap-4">
+                           <div className="flex items-center gap-6">
+                              <div className="text-right hidden sm:block">
+                                 <p className="text-[8px] font-black text-slate-400 uppercase">Received</p>
+                                 <p className="text-[10px] font-bold text-slate-500">{app.createdAt?.toDate ? format(app.createdAt.toDate(), 'MMM d, p') : 'Just now'}</p>
+                              </div>
                               <Badge className={cn(
-                                "text-[8px] font-black uppercase px-2 h-5 border-none",
-                                app.status === 'Approved' ? 'bg-emerald-500' : 
-                                app.status === 'Rejected' ? 'bg-red-500' : 
-                                app.status === 'Archived' ? 'bg-blue-500' : 'bg-amber-500'
+                                "text-[9px] font-black uppercase px-4 h-7 border-none shadow-sm",
+                                app.status === 'Approved' ? 'bg-emerald-500 text-white' : 
+                                app.status === 'Rejected' ? 'bg-red-500 text-white' : 
+                                app.status === 'Archived' ? 'bg-blue-500 text-white' : 'bg-amber-500 text-white animate-pulse'
                               )}>
                                  {app.status}
                               </Badge>
-                              <p className="text-[9px] font-black text-slate-300 uppercase hidden sm:block">
-                                {app.createdAt?.toDate ? format(app.createdAt.toDate(), 'MMM d, p') : 'Just now'}
-                              </p>
                            </div>
                         </div>
                       ))}
                       {(!applications || applications.length === 0) && (
-                        <div className="py-20 text-center opacity-20">
-                           <UserPlus className="w-12 h-12 mx-auto mb-4" />
-                           <p className="text-xs font-black uppercase">Registry Empty</p>
+                        <div className="py-24 text-center opacity-20">
+                           <UserPlus className="w-16 h-16 mx-auto mb-4" />
+                           <p className="text-sm font-black uppercase tracking-[0.2em]">Pipeline Idle</p>
                         </div>
                       )}
                    </div>
@@ -475,118 +494,138 @@ export default function DailyUpdatePage() {
            {/* Right Column: Health, Suggestions, Notes */}
            <div className="lg:col-span-4 space-y-8">
               
-              {/* Seasonal Alerts (NEW: Look-ahead for special days) */}
-              <Card className="rounded-[2rem] border-none shadow-sm bg-white dark:bg-slate-900 p-8">
-                 <h3 className="text-xs font-black uppercase text-pink-500 tracking-[0.2em] mb-6 flex items-center gap-2">
-                    <Sparkles className="w-4 h-4" /> Seasonal Alerts
+              {/* Live Connection Hub */}
+              <Card className="rounded-[2.5rem] border-none shadow-2xl bg-slate-900 text-white p-8 relative overflow-hidden">
+                 <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full -mr-16 -mt-16 blur-3xl"></div>
+                 <div className="flex items-center justify-between mb-8">
+                    <div className="space-y-1">
+                       <h3 className="text-xs font-black uppercase text-emerald-400 tracking-[0.2em] flex items-center gap-2">
+                          <Wifi className="w-4 h-4 animate-pulse" /> Live System Node
+                       </h3>
+                       <p className="text-[9px] text-slate-500 font-bold uppercase">Real-time health telemetry</p>
+                    </div>
+                    <Badge className="bg-emerald-500 text-primary font-black text-[8px]">ACTIVE</Badge>
+                 </div>
+                 
+                 <div className="space-y-4">
+                    {[
+                      { label: "Registry Database", val: "Operational", color: "text-emerald-400" },
+                      { label: "Notification Relay", val: "99.9% Efficiency", color: "text-emerald-400" },
+                      { label: "Security Encryption", val: "Level 5 Active", color: "text-accent" },
+                      { label: "Crawl Integrity", val: "Optimized", color: "text-emerald-400" }
+                    ].map((n, i) => (
+                      <div key={i} className="flex items-center justify-between p-3 bg-white/5 rounded-2xl border border-white/5 group hover:bg-white/10 transition-colors">
+                         <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{n.label}</span>
+                         <span className={cn("text-[10px] font-bold uppercase", n.color)}>{n.val}</span>
+                      </div>
+                    ))}
+                 </div>
+              </Card>
+
+              {/* Seasonal Alerts (FESTIVAL RADAR) */}
+              <Card className="rounded-[2.5rem] border-none shadow-sm bg-white dark:bg-slate-900 p-8 relative overflow-hidden group">
+                 <div className="absolute top-0 right-0 w-24 h-24 bg-pink-500/10 rounded-full -mr-12 -mt-12 blur-2xl group-hover:scale-150 transition-transform duration-1000"></div>
+                 <h3 className="text-xs font-black uppercase text-pink-500 tracking-[0.2em] mb-8 flex items-center gap-2 leading-none">
+                    <Sparkles className="w-5 h-5 animate-float" /> Seasonal Awareness
                  </h3>
                  <div className="space-y-4">
                     {upcomingSpecialDays.length > 0 ? upcomingSpecialDays.map((d, i) => (
-                      <div key={i} className="p-4 bg-pink-50/50 dark:bg-pink-950/20 rounded-2xl border border-pink-100 dark:border-pink-900 flex flex-col gap-2">
+                      <div key={i} className="p-6 bg-pink-50/40 dark:bg-pink-950/20 rounded-[2rem] border border-pink-100 dark:border-pink-900/40 flex flex-col gap-3 relative group/item hover:shadow-lg transition-all active:scale-[0.98]">
                          <div className="flex justify-between items-center">
-                            <Badge className="bg-pink-500 text-white text-[7px] font-black uppercase">{d.daysAway === 0 ? 'Today' : d.daysAway === 1 ? 'Tomorrow' : `In ${d.daysAway} Days`}</Badge>
-                            <span className="text-[9px] font-bold text-slate-400 uppercase">{format(d.date, 'MMM d')}</span>
+                            <Badge className="bg-pink-500 text-white text-[8px] font-black uppercase tracking-tighter px-3 h-5">
+                              {d.daysAway === 0 ? 'Today' : d.daysAway === 1 ? 'Tomorrow' : `In ${d.daysAway} Days`}
+                            </Badge>
+                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{format(d.date, 'MMM d')}</span>
                          </div>
-                         <p className="text-xs font-bold text-primary dark:text-white leading-tight">{d.title}</p>
-                         <Link href="/internal/occasions">
-                            <Button variant="link" className="p-0 h-auto text-[9px] font-black text-pink-600 hover:text-pink-700 uppercase tracking-widest flex items-center gap-1">
-                               Create Greeting <ChevronRight className="w-2.5 h-2.5" />
+                         <h4 className="text-sm font-black text-primary dark:text-white leading-tight uppercase tracking-tight">{d.title}</h4>
+                         <Link href="/internal/occasions" className="mt-2">
+                            <Button className="w-full bg-pink-500 hover:bg-pink-600 text-white font-bold h-9 rounded-xl text-[10px] uppercase tracking-widest gap-2 shadow-lg shadow-pink-500/20">
+                               Initialize Greeting <ArrowRight className="w-3.5 h-3.5" />
                             </Button>
                          </Link>
                       </div>
                     )) : (
-                      <div className="text-center py-6">
-                         <Sparkles className="w-8 h-8 text-pink-500/20 mx-auto mb-2" />
-                         <p className="text-[10px] font-bold text-slate-400 uppercase">No special days this week</p>
+                      <div className="text-center py-12 bg-slate-50 dark:bg-slate-950 rounded-3xl border-2 border-dashed">
+                         <Sparkles className="w-10 h-10 text-pink-500/10 mx-auto mb-3" />
+                         <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest leading-relaxed">No seasonal events<br/>in current cycle</p>
                       </div>
                     )}
                  </div>
               </Card>
 
-              {/* Website Health Sentinel */}
-              <Card className="rounded-[2rem] border-none shadow-sm bg-slate-950 text-white p-8 relative overflow-hidden">
-                 <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full -mr-16 -mt-16 blur-2xl"></div>
-                 <h3 className="text-xs font-black uppercase text-emerald-400 tracking-[0.2em] mb-8 flex items-center gap-2">
-                    <Wifi className="w-4 h-4 animate-pulse" /> Website Health Node
-                 </h3>
-                 <div className="space-y-5">
-                    {[
-                      { label: "Broken Links", status: "None Detected", ok: true },
-                      { label: "Failed Submissions", status: "0 Today", ok: true },
-                      { label: "Email Delivery", status: "98% Success", ok: true },
-                      { label: "Registry Sync", status: "Operational", ok: true },
-                      { label: "System Latency", status: "24ms", ok: true }
-                    ].map((h, i) => (
-                      <div key={i} className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5">
-                         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{h.label}</span>
-                         <span className={cn("text-[9px] font-black uppercase", h.ok ? "text-emerald-400" : "text-red-500")}>{h.status}</span>
-                      </div>
-                    ))}
-                 </div>
-              </Card>
-
-              {/* Case Follow-up Focus */}
-              <Card className="rounded-[2rem] border-none shadow-sm bg-white dark:bg-slate-900 p-8">
-                 <h3 className="text-xs font-black uppercase text-accent tracking-[0.2em] mb-6 flex items-center gap-2">
-                    <Target className="w-4 h-4" /> Stale Case Radar
+              {/* Stale Case Radar */}
+              <Card className="rounded-[2.5rem] border-none shadow-sm bg-white dark:bg-slate-900 p-8">
+                 <h3 className="text-xs font-black uppercase text-red-600 tracking-[0.2em] mb-8 flex items-center gap-2">
+                    <Target className="w-5 h-5 animate-pulse" /> Inactivity Radar
                  </h3>
                  <div className="space-y-4">
                     {summary.staleCases.length > 0 ? summary.staleCases.slice(0, 3).map((c: any) => (
-                      <div key={c.id} onClick={() => router.push(`/internal/public-complaints/${c.id}`)} className="p-4 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-100 dark:border-slate-800 hover:border-accent cursor-pointer transition-all">
-                         <p className="text-[8px] font-black text-red-500 uppercase mb-1">{differenceInDays(new Date(), c.createdAt?.toDate?.() || new Date())} Days Since Update</p>
-                         <h4 className="text-xs font-bold truncate">{c.subject}</h4>
-                         <p className="text-[9px] text-slate-400 uppercase font-bold mt-1.5 flex items-center gap-1.5"><User className="w-2.5 h-2.5" /> {c.fullName}</p>
+                      <div key={c.id} onClick={() => router.push(`/internal/public-complaints/${c.id}`)} className="p-6 bg-slate-50 dark:bg-slate-950 rounded-[1.75rem] border border-slate-100 dark:border-slate-800 hover:border-red-500/50 cursor-pointer group/case transition-all shadow-sm hover:shadow-lg">
+                         <div className="flex justify-between items-start mb-2">
+                            <Badge variant="outline" className="text-[7px] font-black text-red-600 border-red-100 bg-red-50">{differenceInDays(new Date(), c.createdAt?.toDate?.() || new Date())} DAYS STALE</Badge>
+                            <ChevronRight className="w-4 h-4 text-slate-300 group-hover/case:translate-x-1 transition-transform" />
+                         </div>
+                         <h4 className="text-sm font-bold text-primary dark:text-white leading-tight truncate">{c.subject}</h4>
+                         <div className="flex items-center gap-3 mt-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+                            <div className="w-7 h-7 rounded-full bg-slate-200 flex items-center justify-center text-slate-500"><User className="w-4 h-4" /></div>
+                            <span className="text-[10px] font-black text-slate-400 uppercase truncate">{c.fullName}</span>
+                         </div>
                       </div>
                     )) : (
-                      <div className="text-center py-6">
-                         <CheckCircle2 className="w-8 h-8 text-emerald-500/20 mx-auto mb-2" />
-                         <p className="text-[10px] font-bold text-slate-400 uppercase">All active cases current</p>
+                      <div className="text-center py-10 bg-emerald-50/30 rounded-3xl border-2 border-dashed border-emerald-100">
+                         <CheckCircle2 className="w-10 h-10 text-emerald-500/20 mx-auto mb-3" />
+                         <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Case-flow Optimal</p>
                       </div>
                     )}
                  </div>
               </Card>
 
-              {/* AI Suggested Actions */}
-              <div className="space-y-4">
-                 <div className="flex items-center gap-2 px-2">
-                    <Zap className="w-4 h-4 text-accent animate-pulse" />
-                    <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-500">AI Priority Synthesis</h3>
+              {/* AI Priority Synthesis */}
+              <div className="space-y-4 animate-in fade-in duration-1000">
+                 <div className="flex items-center justify-between px-3">
+                    <div className="flex items-center gap-2">
+                       <Zap className="w-4 h-4 text-accent animate-pulse" />
+                       <h3 className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-500">AI Priority Synthesis</h3>
+                    </div>
+                    <Badge variant="outline" className="text-[8px] font-bold border-accent/20 text-accent">Real-time Analysis</Badge>
                  </div>
-                 <div className="grid gap-3">
+                 <div className="grid gap-4">
                     {summary.suggestions.map((s, i) => (
-                      <div key={i} className="p-4 bg-accent/5 border border-accent/20 rounded-2xl flex items-start gap-4">
-                         <div className="mt-1.5 h-1.5 w-1.5 rounded-full bg-accent animate-ping shrink-0"></div>
-                         <p className="text-xs font-bold text-primary dark:text-slate-300 leading-relaxed italic">"{s}"</p>
+                      <div key={i} className="p-6 bg-accent/5 border border-accent/20 rounded-[2rem] flex items-start gap-5 shadow-sm group hover:bg-accent/10 transition-colors">
+                         <div className="mt-2 h-2 w-2 rounded-full bg-accent animate-ping shrink-0"></div>
+                         <p className="text-sm font-bold text-primary dark:text-slate-200 leading-relaxed italic">"{s}"</p>
                       </div>
                     ))}
                     {summary.suggestions.length === 0 && (
-                      <div className="p-4 bg-emerald-50/50 border border-emerald-100 rounded-2xl">
-                         <p className="text-xs font-bold text-emerald-700 italic leading-relaxed">"Operational health is optimal. No critical AI flags detected."</p>
+                      <div className="p-6 bg-emerald-50/50 border border-emerald-100 rounded-[2rem] text-center">
+                         <p className="text-sm font-bold text-emerald-700 italic leading-relaxed">"Operational health is optimal. No critical anomalies identified."</p>
                       </div>
                     )}
                  </div>
               </div>
 
               {/* Daily Administrative Notes */}
-              <Card className="rounded-[2rem] border-none shadow-sm bg-white dark:bg-slate-900 overflow-hidden">
+              <Card className="rounded-[2.5rem] border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900 border-2 border-slate-100">
                  <CardHeader className="bg-slate-50 dark:bg-slate-800/50 p-6 border-b flex items-center justify-between">
-                    <CardTitle className="text-sm font-black uppercase tracking-widest flex items-center gap-2">
-                       <FileText className="w-4 h-4 text-accent" /> Administrative Notes
+                    <CardTitle className="text-sm font-black uppercase tracking-[0.2em] flex items-center gap-2 text-primary dark:text-white">
+                       <FileText className="w-5 h-5 text-accent" /> Audit Observations
                     </CardTitle>
-                    <Button variant="ghost" size="icon" onClick={() => setIsAddingNote(true)} className="h-8 w-8 rounded-full hover:bg-accent/10"><Plus className="w-4 h-4 text-accent" /></Button>
+                    <Button variant="ghost" size="icon" onClick={() => setIsAddingNote(true)} className="h-9 w-9 rounded-xl hover:bg-accent/10 text-accent shadow-sm border border-accent/10"><Plus className="w-5 h-5" /></Button>
                  </CardHeader>
-                 <CardContent className="p-6">
-                    <div className="space-y-6">
+                 <CardContent className="p-8">
+                    <div className="space-y-8">
                        {notes && notes.slice(0, 3).map((note: any) => (
-                         <div key={note.id} className="space-y-2 relative pl-4 border-l-2 border-accent/20">
-                            <p className="text-xs font-medium leading-relaxed">"{note.content}"</p>
-                            <div className="flex items-center gap-2 text-[8px] font-black text-slate-400 uppercase">
-                               <Clock className="w-2.5 h-2.5" /> {note.createdAt?.toDate?.()?.toLocaleString() || 'Just now'}
+                         <div key={note.id} className="space-y-3 relative pl-6 border-l-2 border-accent/30 animate-in slide-in-from-left-2 duration-300">
+                            <p className="text-sm font-medium leading-relaxed italic text-slate-600 dark:text-slate-400">"{note.content}"</p>
+                            <div className="flex items-center gap-3 text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                               <span className="flex items-center gap-1.5"><Clock className="w-3 h-3 text-accent" /> {note.createdAt?.toDate?.()?.toLocaleTimeString() || 'Just now'}</span>
+                               <span className="w-1.5 h-px bg-slate-200"></span>
+                               <span className="flex items-center gap-1.5"><User className="w-3 h-3" /> {note.user?.split('@')[0]}</span>
                             </div>
                          </div>
                        ))}
                        {(!notes || notes.length === 0) && (
-                         <p className="text-[10px] text-center text-slate-400 italic">No notes recorded for today.</p>
+                         <p className="text-[10px] text-center text-slate-400 italic font-bold uppercase tracking-widest py-10 border-2 border-dashed rounded-3xl">No audit notes recorded for this cycle.</p>
                        )}
                     </div>
                  </CardContent>
@@ -597,24 +636,29 @@ export default function DailyUpdatePage() {
 
       {/* Manual Note Dialog */}
       <Dialog open={isAddingNote} onOpenChange={setIsAddingNote}>
-         <DialogContent className="max-w-md rounded-[2.5rem] border-none shadow-2xl p-8">
-            <DialogHeader>
-               <DialogTitle className="text-2xl font-headline font-bold">New Audit Note</DialogTitle>
-               <DialogDescription>Internal administrative observations for the current cycle.</DialogDescription>
-            </DialogHeader>
-            <div className="py-6 space-y-4">
+         <DialogContent className="max-w-md rounded-[3rem] border-none shadow-2xl p-0 overflow-hidden bg-white dark:bg-slate-950">
+            <div className="bg-slate-900 p-8 text-white">
+               <DialogTitle className="text-2xl font-headline font-bold">New Audit Observation</DialogTitle>
+               <DialogDescription className="text-slate-400 mt-2 uppercase tracking-widest font-bold text-[10px]">Internal administrative record terminal</DialogDescription>
+            </div>
+            <div className="p-10 space-y-6">
                <Textarea 
-                 placeholder="Type your observations here..." 
+                 placeholder="Type your strategic observations here..." 
                  value={newNote} 
                  onChange={e => setNewNote(e.target.value)}
-                 className="min-h-[150px] rounded-2xl"
+                 className="min-h-[180px] rounded-3xl bg-slate-50 border-none shadow-inner p-6 text-sm font-medium"
                />
-               <Button onClick={handleAddNote} disabled={isActionLoading || !newNote.trim()} className="w-full h-12 bg-primary text-white font-bold rounded-xl shadow-xl">
-                  {isActionLoading ? <Loader2 className="animate-spin" /> : "Archive Note"}
+               <Button onClick={handleAddNote} disabled={isActionLoading || !newNote.trim()} className="w-full h-14 bg-primary text-white font-bold rounded-2xl shadow-xl text-lg hover:bg-secondary">
+                  {isActionLoading ? <Loader2 className="animate-spin" /> : "Commit Observation"}
                </Button>
             </div>
          </DialogContent>
       </Dialog>
+
+      <div className="mt-12 flex flex-col items-center gap-4 opacity-20">
+         <div className="h-px w-32 bg-slate-300 dark:bg-slate-700" />
+         <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.5em]">National Governance Node • HRAT INDIA</p>
+      </div>
 
       <Footer />
     </main>
