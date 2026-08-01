@@ -40,7 +40,8 @@ import {
   Users,
   UserPlus,
   RefreshCw,
-  User
+  User,
+  Sparkles
 } from 'lucide-react'
 import {
   Dialog,
@@ -60,8 +61,10 @@ import {
 } from "@/components/ui/select"
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
-import { format, isToday, parseISO, differenceInDays, startOfDay } from 'date-fns'
+import { format, isToday, parseISO, differenceInDays, startOfDay, isTomorrow, addDays } from 'date-fns'
 import { Footer } from '@/components/footer'
+import { BUILT_IN_OBSERVANCES, BUILT_IN_HOLIDAYS } from '@/lib/activity-hub-data'
+import Link from 'next/link'
 
 export default function DailyUpdatePage() {
   const { user, loading: authLoading } = useUser()
@@ -81,6 +84,11 @@ export default function DailyUpdatePage() {
   })
 
   const [newNote, setNewNote] = useState('')
+
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   // Data Streams
   const complaintsQuery = useMemoFirebase(() => {
@@ -106,6 +114,33 @@ export default function DailyUpdatePage() {
     return query(collection(db, 'daily_notes'), orderBy('createdAt', 'desc'));
   }, [db, user]);
   const { data: notes } = useCollection(notesQuery);
+
+  // Calendar Intelligence: Special Days within next 7 days
+  const upcomingSpecialDays = useMemo(() => {
+    if (!mounted) return [];
+    const results: any[] = [];
+    const now = new Date();
+    
+    for (let i = 0; i <= 7; i++) {
+      const checkDate = addDays(now, i);
+      const dayNum = checkDate.getDate();
+      const monthNum = checkDate.getMonth() + 1;
+      
+      const matches = [
+        ...BUILT_IN_HOLIDAYS.filter(h => h.month === monthNum && h.day === dayNum),
+        ...BUILT_IN_OBSERVANCES.filter(o => o.month === monthNum && o.day === dayNum)
+      ];
+      
+      matches.forEach(m => {
+        results.push({
+          ...m,
+          date: checkDate,
+          daysAway: i
+        });
+      });
+    }
+    return results;
+  }, [mounted]);
 
   // Derived Summary Logic
   const summary = useMemo(() => {
@@ -145,6 +180,10 @@ export default function DailyUpdatePage() {
     if (staleCases.length > 0) suggestions.push(`Review ${staleCases.length} cases with no updates in >3 days.`);
     if (newAppsToday > 0) suggestions.push(`Action Required: ${newAppsToday} new membership applications received.`);
     if (highPriority > 3) suggestions.push("High volume of critical priority cases detected.");
+    if (upcomingSpecialDays.length > 0) {
+      const nextDay = upcomingSpecialDays[0];
+      suggestions.push(`Upcoming Special Day: ${nextDay.title} (${nextDay.daysAway === 0 ? 'Today' : `in ${nextDay.daysAway} days`}). Prepare greetings.`);
+    }
 
     return {
       newComplaintsToday,
@@ -156,7 +195,7 @@ export default function DailyUpdatePage() {
       staleCases,
       suggestions
     };
-  }, [complaints, applications]);
+  }, [complaints, applications, upcomingSpecialDays]);
 
   const filteredTasks = useMemo(() => {
     const list = tasks || [];
@@ -272,9 +311,7 @@ export default function DailyUpdatePage() {
                  ].map((stat, i) => (
                    <Card key={i} className="border-none shadow-sm rounded-2xl overflow-hidden group">
                      <CardContent className="p-5 flex items-center gap-4">
-                        <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl group-hover:bg-accent/10 transition-colors">
-                           {stat.icon}
-                        </div>
+                        <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl group-hover:bg-accent/10 transition-colors">{stat.icon}</div>
                         <div>
                            <p className="text-2xl font-headline font-bold">{stat.val}</p>
                            <p className="text-[9px] font-black uppercase text-slate-400 tracking-widest">{stat.label}</p>
@@ -438,6 +475,34 @@ export default function DailyUpdatePage() {
            {/* Right Column: Health, Suggestions, Notes */}
            <div className="lg:col-span-4 space-y-8">
               
+              {/* Seasonal Alerts (NEW: Look-ahead for special days) */}
+              <Card className="rounded-[2rem] border-none shadow-sm bg-white dark:bg-slate-900 p-8">
+                 <h3 className="text-xs font-black uppercase text-pink-500 tracking-[0.2em] mb-6 flex items-center gap-2">
+                    <Sparkles className="w-4 h-4" /> Seasonal Alerts
+                 </h3>
+                 <div className="space-y-4">
+                    {upcomingSpecialDays.length > 0 ? upcomingSpecialDays.map((d, i) => (
+                      <div key={i} className="p-4 bg-pink-50/50 dark:bg-pink-950/20 rounded-2xl border border-pink-100 dark:border-pink-900 flex flex-col gap-2">
+                         <div className="flex justify-between items-center">
+                            <Badge className="bg-pink-500 text-white text-[7px] font-black uppercase">{d.daysAway === 0 ? 'Today' : d.daysAway === 1 ? 'Tomorrow' : `In ${d.daysAway} Days`}</Badge>
+                            <span className="text-[9px] font-bold text-slate-400 uppercase">{format(d.date, 'MMM d')}</span>
+                         </div>
+                         <p className="text-xs font-bold text-primary dark:text-white leading-tight">{d.title}</p>
+                         <Link href="/internal/occasions">
+                            <Button variant="link" className="p-0 h-auto text-[9px] font-black text-pink-600 hover:text-pink-700 uppercase tracking-widest flex items-center gap-1">
+                               Create Greeting <ChevronRight className="w-2.5 h-2.5" />
+                            </Button>
+                         </Link>
+                      </div>
+                    )) : (
+                      <div className="text-center py-6">
+                         <Sparkles className="w-8 h-8 text-pink-500/20 mx-auto mb-2" />
+                         <p className="text-[10px] font-bold text-slate-400 uppercase">No special days this week</p>
+                      </div>
+                    )}
+                 </div>
+              </Card>
+
               {/* Website Health Sentinel */}
               <Card className="rounded-[2rem] border-none shadow-sm bg-slate-950 text-white p-8 relative overflow-hidden">
                  <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full -mr-16 -mt-16 blur-2xl"></div>
@@ -490,7 +555,7 @@ export default function DailyUpdatePage() {
                  <div className="grid gap-3">
                     {summary.suggestions.map((s, i) => (
                       <div key={i} className="p-4 bg-accent/5 border border-accent/20 rounded-2xl flex items-start gap-4">
-                         <div className="mt-1 h-1.5 w-1.5 rounded-full bg-accent animate-ping"></div>
+                         <div className="mt-1.5 h-1.5 w-1.5 rounded-full bg-accent animate-ping shrink-0"></div>
                          <p className="text-xs font-bold text-primary dark:text-slate-300 leading-relaxed italic">"{s}"</p>
                       </div>
                     ))}
