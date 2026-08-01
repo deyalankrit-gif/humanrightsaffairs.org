@@ -38,7 +38,9 @@ import {
   Trash2,
   Clock,
   FileText,
-  Car
+  Car,
+  User,
+  Info
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
@@ -53,6 +55,8 @@ import {
   DialogClose,
   DialogFooter
 } from "@/components/ui/dialog"
+import { Progress } from '@/components/ui/progress'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import { errorEmitter } from '@/firebase/error-emitter'
 import { FirestorePermissionError, type SecurityRuleContext } from '@/firebase/errors'
 import { Footer } from '@/components/footer'
@@ -544,6 +548,52 @@ export default function MemberKitManagement() {
         </div>
       </section>
 
+      {/* Item-wise Issuance Audit Section */}
+      <section className="py-4 bg-slate-50 dark:bg-slate-900 border-b overflow-hidden">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between mb-4">
+            <div className="space-y-1">
+              <h3 className="text-[10px] font-black uppercase text-accent tracking-[0.2em] flex items-center gap-2">
+                <ClipboardList className="w-3.5 h-3.5" /> Item-wise Issuance Audit
+              </h3>
+            </div>
+          </div>
+          <div className="flex overflow-x-auto no-scrollbar gap-4 pb-2">
+            {kitItems.map((item: any) => {
+              const stat = itemStats[item.id] || { issued: 0, total: 0 };
+              const percent = stat.total > 0 ? Math.round((stat.issued / stat.total) * 100) : 0;
+              
+              return (
+                <Card 
+                  key={item.id} 
+                  className="min-w-[180px] border-none shadow-sm rounded-2xl bg-white dark:bg-slate-800 p-4 flex flex-col gap-3 shrink-0"
+                >
+                  <div className="flex justify-between items-start">
+                    <span className="text-[9px] font-black uppercase text-slate-500 truncate max-w-[100px]">{item.label}</span>
+                    <button 
+                      onClick={() => {
+                        const receivers = members.filter(m => kitMap[m.id]?.items?.[item.id]);
+                        setViewingItemMembers({ item, members: receivers });
+                      }}
+                      className="text-[8px] font-bold text-accent hover:underline flex items-center gap-1"
+                    >
+                      VIEW <ChevronRight className="w-2.5 h-2.5" />
+                    </button>
+                  </div>
+                  <div className="space-y-1.5">
+                    <div className="flex justify-between items-baseline">
+                       <p className="text-xl font-black text-primary dark:text-white leading-none">{stat.issued}<span className="text-[10px] text-slate-400 font-bold ml-1">/ {stat.total}</span></p>
+                       <span className="text-[8px] font-black text-emerald-600 uppercase">{percent}%</span>
+                    </div>
+                    <Progress value={percent} className="h-1 bg-slate-100 dark:bg-slate-900" />
+                  </div>
+                </Card>
+              )
+            })}
+          </div>
+        </div>
+      </section>
+
       <section className="py-6 border-b bg-white dark:bg-slate-900 sticky top-10 z-40 shadow-sm">
         <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex w-full overflow-x-auto no-scrollbar gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl border">
@@ -551,7 +601,7 @@ export default function MemberKitManagement() {
                <button 
                 key={st} 
                 onClick={() => setStatusFilter(st)}
-                className={cn("whitespace-nowrap px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all", statusFilter === st ? "bg-accent text-primary shadow-md" : "text-slate-500 hover:bg-slate-200")}
+                className={cn("whitespace-nowrap px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all", statusFilter === st ? "bg-accent text-primary shadow-md" : "text-slate-50 hover:bg-slate-200")}
                >
                  {st}
                </button>
@@ -579,9 +629,9 @@ export default function MemberKitManagement() {
                   </div>
                 )}
 
-                {Object.keys(groupings.stateGroups).length > 0 && (
+                {Object.keys(stateGroups).length > 0 && (
                   <div className="space-y-12">
-                    {Object.keys(groupings.stateGroups).sort().map(state => (
+                    {Object.keys(stateGroups).sort().map(state => (
                       <div key={state} className="space-y-4">
                         <div className="flex items-center gap-3 px-2">
                            <Globe className="w-6 h-6 text-emerald-600" />
@@ -596,11 +646,11 @@ export default function MemberKitManagement() {
                   </div>
                 )}
 
-                {Object.keys(groupings.districtGroups).length > 0 && (
+                {Object.keys(districtGroups).length > 0 && (
                   <div className="space-y-16">
-                    {Object.keys(groupings.districtGroups).sort().map(state => (
+                    {Object.keys(districtGroups).sort().map(state => (
                       <div key={state} className="space-y-12">
-                        {Object.keys(groupings.districtGroups[state]).sort().map(district => (
+                        {Object.keys(districtGroups[state]).sort().map(district => (
                           <div key={district} className="space-y-4">
                             <div className="flex items-center gap-3 px-2">
                                <Building2 className="w-6 h-6 text-blue-600" />
@@ -707,6 +757,57 @@ export default function MemberKitManagement() {
           </div>
         </div>
       </section>
+
+      {/* View Item Members Dialog */}
+      <Dialog open={!!viewingItemMembers} onOpenChange={(val) => !val && setViewingItemMembers(null)}>
+        <DialogContent className="max-w-md rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden bg-white dark:bg-slate-900">
+           {viewingItemMembers && (
+             <>
+               <div className="bg-slate-900 p-8 text-white relative">
+                  <div className="absolute right-6 top-6">
+                    <DialogClose asChild>
+                      <Button variant="ghost" size="icon" className="rounded-full text-white/40 hover:text-white">
+                        <X className="w-5 h-5" />
+                      </Button>
+                    </DialogClose>
+                  </div>
+                  <Badge className="bg-accent text-primary font-black text-[8px] uppercase mb-2">Inventory Audit</Badge>
+                  <DialogTitle className="text-2xl font-headline font-bold">{viewingItemMembers.item.label}</DialogTitle>
+                  <DialogDescription className="text-slate-400">List of personnel who have been issued this item.</DialogDescription>
+               </div>
+               <div className="p-8">
+                  <ScrollArea className="h-64 pr-4">
+                     <div className="space-y-2">
+                        {viewingItemMembers.members.length > 0 ? viewingItemMembers.members.map((m: any) => (
+                          <div key={m.id} className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700">
+                             <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-full bg-white dark:bg-slate-900 flex items-center justify-center text-accent">
+                                   <User className="w-4 h-4" />
+                                </div>
+                                <div className="flex flex-col">
+                                   <span className="text-xs font-bold">{m.name}</span>
+                                   <span className="text-[8px] font-black text-slate-400 uppercase">{m.memberId}</span>
+                                </div>
+                             </div>
+                             <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                          </div>
+                        )) : (
+                          <div className="text-center py-12 opacity-30">
+                             <Info className="w-10 h-10 mx-auto mb-2" />
+                             <p className="text-xs font-bold uppercase tracking-widest">No issuance recorded</p>
+                          </div>
+                        )}
+                     </div>
+                  </ScrollArea>
+                  <Button onClick={() => setViewingItemMembers(null)} className="w-full h-12 rounded-xl mt-6 bg-primary text-white font-bold">
+                    Close Audit
+                  </Button>
+               </div>
+             </>
+           )}
+        </DialogContent>
+      </Dialog>
+
       <Footer />
     </main>
   )
