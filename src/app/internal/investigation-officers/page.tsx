@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useEffect, useState } from 'react'
@@ -31,6 +30,7 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogFooter,
+  DialogDescription,
   DialogClose
 } from "@/components/ui/dialog"
 import {
@@ -38,7 +38,7 @@ import {
   AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
-  AlertDialogDescription,
+  AlertDialogDescription as AlertDialogDesc,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
@@ -211,7 +211,7 @@ export default function InvestigationOfficersRegistry() {
                              <AlertDialogContent className="rounded-3xl border-none shadow-2xl">
                                 <AlertDialogHeader>
                                    <AlertDialogTitle>Purge Record?</AlertDialogTitle>
-                                   <AlertDialogDescription>Remove {officer.name} from the investigative pool?</AlertDialogDescription>
+                                   <AlertDialogDesc>Remove {officer.name} from the investigative pool?</AlertDialogDesc>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
                                    <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
