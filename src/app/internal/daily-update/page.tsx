@@ -39,7 +39,8 @@ import {
   Target,
   Users,
   UserPlus,
-  RefreshCw
+  RefreshCw,
+  User
 } from 'lucide-react'
 import {
   Dialog,
@@ -478,7 +479,7 @@ export default function DailyUpdatePage() {
                       </div>
                     )}
                  </div>
-              </Card>
+              </div>
 
               {/* AI Suggested Actions */}
               <div className="space-y-4">
