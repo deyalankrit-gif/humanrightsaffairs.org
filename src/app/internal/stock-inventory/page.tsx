@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useMemo, useEffect } from 'react'
@@ -21,7 +22,9 @@ import {
   Minus,
   Tag,
   MapPin,
-  X
+  X,
+  UserCheck,
+  Package
 } from 'lucide-react'
 import {
   Dialog,
@@ -39,7 +42,7 @@ import { useToast } from '@/hooks/use-toast'
 /**
  * STOCK INVENTORY HUB
  * Reconciliation terminal for institutional supplies.
- * Synchronized with Material Management Registry and Kit Management Issuances.
+ * Fully synchronized with Material Registry and Kit Management Issuances.
  */
 export default function StockInventoryHub() {
   const { user, loading: authLoading } = useUser()
@@ -55,12 +58,40 @@ export default function StockInventoryHub() {
     }
   }, [user, authLoading, router])
 
+  // Real-time Material Data
   const materialsQuery = useMemoFirebase(() => {
     if (!db || !user) return null;
-    return query(collection(db, 'materials'), orderBy('currentStock', 'asc'));
+    // Order by name for UI stability during stock adjustments
+    return query(collection(db, 'materials'), orderBy('name', 'asc'));
   }, [db, user]);
 
   const { data: materials, loading: dataLoading } = useCollection(materialsQuery);
+
+  // Real-time Kit Data for "Issued" synchronization visibility
+  const kitsQuery = useMemoFirebase(() => {
+    if (!db || !user) return null;
+    return query(collection(db, 'member_kits'));
+  }, [db, user]);
+  const { data: kits } = useCollection(kitsQuery);
+
+  const issuedCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    if (!kits || !materials) return counts;
+
+    materials.forEach((m: any) => {
+      counts[m.id] = 0;
+      kits.forEach((kit: any) => {
+        // Match by SKU or Name (same as Kit Management logic)
+        const isIssued = Object.keys(kit.items || {}).some(itemId => {
+          if (!kit.items[itemId]) return false;
+          // Robust matching: trim and case-insensitive
+          return itemId === m.sku || itemId === m.name.toLowerCase().replace(/\s+/g, '');
+        });
+        if (isIssued) counts[m.id]++;
+      });
+    });
+    return counts;
+  }, [kits, materials]);
 
   const stats = useMemo(() => {
     if (!materials) return { totalItems: 0, lowStock: 0, outOfStock: 0 };
@@ -127,7 +158,7 @@ export default function StockInventoryHub() {
                   <p className="text-lg font-bold text-red-500 leading-none">{stats.outOfStock + stats.lowStock}</p>
                </div>
                <div className="bg-white/5 px-6 py-2 rounded-xl border border-white/10 text-center flex-1">
-                  <p className="text-[8px] text-slate-500 font-bold uppercase mb-0.5">Total Assets</p>
+                  <p className="text-[8px] text-slate-500 font-bold uppercase mb-0.5">Total Registry</p>
                   <p className="text-lg font-bold text-white leading-none">{stats.totalItems}</p>
                </div>
             </div>
@@ -139,7 +170,7 @@ export default function StockInventoryHub() {
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
              <h2 className="text-xl font-headline font-bold text-primary dark:text-white flex items-center gap-3 w-full md:w-auto">
-                <RefreshCw className="w-5 h-5 text-accent" /> Live Reconciliation Registry
+                <RefreshCw className="w-5 h-5 text-accent" /> Synchronized Ledger
              </h2>
              <div className="relative w-full md:max-w-md">
                 <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -160,7 +191,7 @@ export default function StockInventoryHub() {
                   <CardContent className="p-0">
                      <div className="flex flex-col md:flex-row items-stretch">
                         <div className="p-6 md:w-56 text-center border-r flex flex-col items-center justify-center shrink-0 bg-slate-50 dark:bg-slate-800/50">
-                           <p className="text-2xl font-black text-primary dark:text-white leading-none">{item.currentStock}</p>
+                           <p className="text-3xl font-black text-primary dark:text-white leading-none">{item.currentStock}</p>
                            <p className="text-[10px] font-bold text-slate-400 uppercase mt-1 tracking-widest">{item.unit}</p>
                            <Badge className={cn(
                              "mt-3 text-[9px] font-black uppercase border-none text-white px-3 h-5",
@@ -172,13 +203,14 @@ export default function StockInventoryHub() {
                         <div className="flex-1 p-6 flex flex-col lg:flex-row items-center justify-between gap-6 md:gap-8">
                            <div className="space-y-1.5 flex-1 text-center md:text-left">
                               <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 mb-1">
-                                 <Badge variant="outline" className="text-[7px] font-black border-accent/20 text-accent uppercase tracking-widest px-2">CATEGORY: {item.category}</Badge>
+                                 <Badge variant="outline" className="text-[7px] font-black border-accent/20 text-accent uppercase tracking-widest px-2">{item.category}</Badge>
                                  <span className="text-[9px] font-mono font-bold text-slate-400 tracking-tighter">SKU: {item.sku}</span>
                               </div>
                               <h3 className="text-lg md:text-xl font-bold text-primary dark:text-white leading-tight">{item.name}</h3>
-                              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2 justify-center md:justify-start">
-                                 <History className="w-3.5 h-3.5 text-accent" /> Warning Threshold: {item.lowStockThreshold}
-                              </p>
+                              <div className="flex items-center gap-4 text-[9px] font-bold text-slate-400 uppercase tracking-widest justify-center md:justify-start">
+                                 <span className="flex items-center gap-1.5"><MapPin className="w-3 h-3 text-accent" /> {item.location}</span>
+                                 <span className="flex items-center gap-1.5 text-indigo-500"><UserCheck className="w-3 h-3" /> Issued: {issuedCounts[item.id] || 0}</span>
+                              </div>
                            </div>
 
                            <div className="flex flex-col sm:flex-row items-center gap-4 w-full lg:w-auto">
@@ -192,7 +224,7 @@ export default function StockInventoryHub() {
                                  >
                                    <Minus className="w-4 h-4" />
                                  </Button>
-                                 <div className="px-4 text-center text-[10px] font-black text-slate-500 uppercase tracking-widest">Adjust</div>
+                                 <div className="px-4 text-center text-[10px] font-black text-slate-500 uppercase tracking-widest">Stock</div>
                                  <Button 
                                    onClick={() => handleAdjustStock(item.id, item.name, 1)} 
                                    disabled={isAdjusting === item.id}

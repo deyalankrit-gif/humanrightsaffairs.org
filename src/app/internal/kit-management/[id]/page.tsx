@@ -5,7 +5,7 @@ import React, { useEffect, useState, useMemo } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
 import { useUser, useFirestore, useDoc, useCollection, useMemoFirebase } from '@/firebase'
-import { doc, setDoc, updateDoc, serverTimestamp, increment, collection, query, orderBy } from 'firebase/firestore'
+import { doc, setDoc, updateDoc, serverTimestamp, increment, collection, query, orderBy, writeBatch } from 'firebase/firestore'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -31,6 +31,8 @@ import {
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
 import { Footer } from '@/components/footer'
+import { errorEmitter } from '@/firebase/error-emitter'
+import { FirestorePermissionError, type SecurityRuleContext } from '@/firebase/errors'
 
 const INITIAL_KIT_ITEMS = [
   { id: 'identityCard', label: 'Identity Card' },
@@ -127,9 +129,10 @@ export default function MemberKitDetailPage() {
   }, [kit])
 
   const handleSaveKit = async () => {
-    if (!db || !member || !kitRef) return
+    if (!db || !member || !kitRef || !user || !materialsList) return
     setIsSaving(true)
 
+    const batch = writeBatch(db);
     const oldItems = kit?.items || {}
     const newItems = kitForm.items
 
@@ -138,12 +141,14 @@ export default function MemberKitDetailPage() {
       memberId: member.memberId,
       memberName: member.name,
       updatedAt: serverTimestamp(),
-      updatedBy: user?.email
+      updatedBy: user.email
     }
 
     try {
-      await setDoc(kitRef, kitData, { merge: true })
+      // 1. Queue Kit Document Update
+      batch.set(kitRef, kitData, { merge: true })
       
+      // 2. Queue Material Stock Synchronizations
       for (const kitItem of kitItems) {
         const wasChecked = !!oldItems[kitItem.id];
         const isChecked = !!newItems[kitItem.id];
@@ -152,24 +157,43 @@ export default function MemberKitDetailPage() {
 
         const delta = isChecked ? -1 : 1;
         const materialMatch = (materialsList || []).find((m: any) => 
-          m.name.toLowerCase() === kitItem.label.toLowerCase() || 
+          m.name.toLowerCase().trim() === kitItem.label.toLowerCase().trim() || 
           m.sku === kitItem.id
         );
 
         if (materialMatch) {
           const mRef = doc(db, 'materials', materialMatch.id);
-          updateDoc(mRef, {
-            currentStock: increment(delta),
+          const newStock = Math.max(0, (materialMatch.currentStock || 0) + delta);
+          const threshold = materialMatch.lowStockThreshold || 10;
+          
+          const newStatus = newStock <= 0 ? 'Out of Stock' : 
+                            newStock <= threshold ? 'Low Stock' : 'Available';
+
+          batch.update(mRef, {
+            currentStock: newStock,
+            status: newStatus,
             updatedAt: serverTimestamp()
           });
         }
       }
 
-      toast({ title: "Registry Synchronized", description: `Logistics data for ${member.name} updated.` })
-      router.push('/internal/kit-management')
+      // 3. Commit Atomic Batch
+      batch.commit()
+        .then(() => {
+          toast({ title: "Registry Synchronized", description: `Logistics data for ${member.name} updated with inventory sync.` })
+          router.push('/internal/kit-management')
+        })
+        .catch(async (error) => {
+          const permissionError = new FirestorePermissionError({
+            path: 'atomic_kit_sync',
+            operation: 'write',
+            requestResourceData: kitData,
+          } satisfies SecurityRuleContext);
+          errorEmitter.emit('permission-error', permissionError);
+        });
+
     } catch (e: any) {
-      toast({ variant: "destructive", title: "Sync Failed", description: e.message })
-    } finally {
+      toast({ variant: "destructive", title: "Sync Protocol Failed", description: e.message })
       setIsSaving(false)
     }
   }
@@ -283,7 +307,7 @@ export default function MemberKitDetailPage() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                             {eligibleItems.map((item: any) => {
                               const material = (materialsList || []).find((m: any) => 
-                                m.name.toLowerCase() === item.label.toLowerCase() || m.sku === item.id
+                                m.name.toLowerCase().trim() === item.label.toLowerCase().trim() || m.sku === item.id
                               );
                               const stock = material?.currentStock ?? 'N/A';
                               const isChecked = !!kitForm.items[item.id];
@@ -354,7 +378,7 @@ export default function MemberKitDetailPage() {
                   <CardFooter className="p-8 md:p-12 bg-slate-50 dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800">
                      <Button 
                         onClick={handleSaveKit} 
-                        disabled={isSaving} 
+                        disabled={isSaving || !materialsList} 
                         className="w-full h-16 rounded-[1.5rem] bg-primary text-white font-bold text-xl hover:bg-secondary transition-all shadow-xl shadow-primary/20 flex gap-3"
                      >
                         {isSaving ? <Loader2 className="animate-spin w-6 h-6" /> : <><Save className="w-6 h-6" /> Commit Audit Records</>}

@@ -32,7 +32,8 @@ import {
   Trash2,
   ClipboardList,
   Car,
-  Info
+  Info,
+  Layers
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
@@ -141,6 +142,13 @@ export default function MemberKitManagement() {
     return map;
   }, [kits]);
 
+  // Sync with materials for Stock Visibility
+  const materialsQuery = useMemoFirebase(() => {
+    if (!db || !user) return null;
+    return query(collection(db, 'materials'));
+  }, [db, user]);
+  const { data: materialsList } = useCollection(materialsQuery);
+
   const saveLogisticsConfig = async (newKitItems: any[], newEligibilityRules: any) => {
     if (!db) return;
     const updateData = {
@@ -217,10 +225,16 @@ export default function MemberKitManagement() {
   }, [members, kitMap]);
 
   const itemStats = useMemo(() => {
-    const stats: Record<string, { issued: number, total: number }> = {};
+    const stats: Record<string, { issued: number, total: number, stock: number }> = {};
+    
     kitItems.forEach((item: any) => {
-      stats[item.id] = { issued: 0, total: 0 };
+      // Find matching material for stock sync
+      const material = (materialsList || []).find((m: any) => 
+        m.name.toLowerCase().trim() === item.label.toLowerCase().trim() || m.sku === item.id
+      );
+      stats[item.id] = { issued: 0, total: 0, stock: material?.currentStock ?? 0 };
     });
+
     members?.forEach(m => {
       const category = m.designationCategory || "General Member";
       const eligibleItemsList = eligibilityRules[category] || [];
@@ -233,7 +247,7 @@ export default function MemberKitManagement() {
       });
     });
     return stats;
-  }, [members, kitMap, eligibilityRules, kitItems]);
+  }, [members, kitMap, eligibilityRules, kitItems, materialsList]);
 
   const groupings = useMemo(() => {
     const central = filteredMembers.filter(m => m.level === 'National');
@@ -377,7 +391,7 @@ export default function MemberKitManagement() {
                                />
                                <Button onClick={editingItemId ? handleSaveEditItem : handleCreateKitItem} className="h-11 px-8 rounded-xl font-bold bg-accent text-primary">
                                   {editingItemId ? "Commit" : "Add Item"}
-                               </Button>
+                                </Button>
                             </div>
                           </div>
                           <div className="flex flex-wrap gap-2">
@@ -459,13 +473,13 @@ export default function MemberKitManagement() {
               <h3 className="text-[10px] font-black uppercase text-accent tracking-[0.2em] flex items-center gap-2">
                 <ClipboardList className="w-3.5 h-3.5" /> Item-wise Issuance Audit
               </h3>
-              <p className="text-[8px] text-slate-400 font-bold uppercase">Real-time distribution analytics by kit component</p>
+              <p className="text-[8px] text-slate-400 font-bold uppercase">Real-time distribution & synchronized stock visibility</p>
             </div>
           </div>
           
           <div className="flex flex-nowrap overflow-x-auto custom-scrollbar gap-4 pb-6 px-1">
             {kitItems.map((item: any) => {
-              const stat = itemStats[item.id] || { issued: 0, total: 0 };
+              const stat = itemStats[item.id] || { issued: 0, total: 0, stock: 0 };
               const percent = stat.total > 0 ? Math.round((stat.issued / stat.total) * 100) : 0;
               
               const progressColor = percent < 30 ? "bg-red-500" : percent < 70 ? "bg-amber-500" : "bg-emerald-500";
@@ -475,7 +489,7 @@ export default function MemberKitManagement() {
               return (
                 <Card 
                   key={item.id} 
-                  className="min-w-[220px] md:min-w-[260px] border-none shadow-md rounded-2xl bg-white dark:bg-slate-800 p-5 flex flex-col gap-4 shrink-0 transition-transform hover:scale-[1.02]"
+                  className="min-w-[240px] md:min-w-[280px] border-none shadow-md rounded-2xl bg-white dark:bg-slate-800 p-5 flex flex-col gap-4 shrink-0 transition-transform hover:scale-[1.02]"
                 >
                   <div className="flex justify-between items-start gap-2">
                     <span className="text-[10px] font-black uppercase text-slate-500 truncate">{item.label}</span>
@@ -489,21 +503,32 @@ export default function MemberKitManagement() {
                       VIEW <ChevronRight className="w-2.5 h-2.5" />
                     </button>
                   </div>
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-baseline">
-                       <p className="text-2xl font-black text-primary dark:text-white leading-none">
-                         {stat.issued}
-                         <span className="text-[10px] text-slate-400 font-bold ml-1.5 uppercase tracking-tighter">/ {stat.total}</span>
-                       </p>
-                       <span className={cn("text-[9px] font-black uppercase px-2 py-0.5 rounded-lg", textColor, trackColor)}>
-                         {percent}%
-                       </span>
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                       <div>
+                          <p className="text-xl font-black text-primary dark:text-white leading-none">
+                            {stat.issued}
+                            <span className="text-[10px] text-slate-400 font-bold ml-1.5 uppercase tracking-tighter">Issued / {stat.total} Req</span>
+                          </p>
+                       </div>
+                       <div className="text-right">
+                          <p className="text-xs font-black text-emerald-600 flex items-center gap-1">
+                             <Layers className="w-3 h-3" /> {stat.stock}
+                          </p>
+                          <p className="text-[7px] font-bold text-slate-400 uppercase">Available</p>
+                       </div>
                     </div>
-                    <div className={cn("h-1.5 w-full rounded-full overflow-hidden", trackColor, "dark:opacity-20")}>
-                      <div 
-                        className={cn("h-full transition-all duration-1000", progressColor)} 
-                        style={{ width: `${percent}%` }}
-                      ></div>
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-[8px] font-black uppercase">
+                        <span className="text-slate-400">Distribution %</span>
+                        <span className={textColor}>{percent}%</span>
+                      </div>
+                      <div className={cn("h-1 w-full rounded-full overflow-hidden", trackColor, "dark:opacity-20")}>
+                        <div 
+                          className={cn("h-full transition-all duration-1000", progressColor)} 
+                          style={{ width: `${percent}%` }}
+                        ></div>
+                      </div>
                     </div>
                   </div>
                 </Card>
