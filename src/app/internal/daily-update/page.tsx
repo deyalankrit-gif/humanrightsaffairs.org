@@ -47,7 +47,8 @@ import {
   Gavel,
   Scale,
   Hourglass,
-  LayoutDashboard
+  LayoutDashboard,
+  Handshake
 } from 'lucide-react'
 import {
   Dialog,
@@ -68,7 +69,7 @@ import {
 } from "@/components/ui/select"
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
-import { format, isToday, parseISO, differenceInDays, startOfDay, isTomorrow, addDays } from 'date-fns'
+import { format, isToday, parseISO, differenceInDays, startOfDay, isTomorrow, addDays, parse } from 'date-fns'
 import { Footer } from '@/components/footer'
 import { BUILT_IN_OBSERVANCES, BUILT_IN_HOLIDAYS } from '@/lib/activity-hub-data'
 import Link from 'next/link'
@@ -76,6 +77,7 @@ import Link from 'next/link'
 /**
  * MISSION COMMAND CENTER: Daily Update Dashboard
  * A high-fidelity, colorfully animated terminal for real-time institutional oversight.
+ * Updated: Included Strategic Assemblies monitor with 15-day lookahead and 3-day blinking alert.
  */
 export default function DailyUpdatePage() {
   const { user, loading: authLoading } = useUser()
@@ -125,6 +127,12 @@ export default function DailyUpdatePage() {
   }, [db, user]);
   const { data: notes } = useCollection(notesQuery);
 
+  const meetingsQuery = useMemoFirebase(() => {
+    if (!db || !user) return null;
+    return query(collection(db, 'meetings'), orderBy('createdAt', 'desc'));
+  }, [db, user]);
+  const { data: meetings } = useCollection(meetingsQuery);
+
   // Calendar Intelligence: Special Days within next 7 days
   const upcomingSpecialDays = useMemo(() => {
     if (!mounted) return [];
@@ -151,6 +159,25 @@ export default function DailyUpdatePage() {
     }
     return results;
   }, [mounted]);
+
+  // Meeting Intelligence: Lookahead for 15 days
+  const upcomingAssemblies = useMemo(() => {
+    if (!meetings || !mounted) return [];
+    const now = startOfDay(new Date());
+    
+    return (meetings as any[])
+      .map(m => {
+        try {
+          const mDate = parse(m.date, "PPP", new Date());
+          const diff = differenceInDays(startOfDay(mDate), now);
+          return { ...m, daysAway: diff };
+        } catch (e) {
+          return { ...m, daysAway: 999 };
+        }
+      })
+      .filter(m => m.daysAway >= 0 && m.daysAway <= 15)
+      .sort((a, b) => a.daysAway - b.daysAway);
+  }, [meetings, mounted]);
 
   // Derived Summary Logic
   const summary = useMemo(() => {
@@ -194,6 +221,9 @@ export default function DailyUpdatePage() {
       const nextDay = upcomingSpecialDays[0];
       suggestions.push(`Upcoming Special Day: ${nextDay.title} (${nextDay.daysAway === 0 ? 'Today' : `in ${nextDay.daysAway} days`}). Prepare greetings.`);
     }
+    if (upcomingAssemblies.length > 0 && upcomingAssemblies[0].daysAway <= 3) {
+      suggestions.push(`Urgent: ${upcomingAssemblies[0].title} is scheduled in ${upcomingAssemblies[0].daysAway} days.`);
+    }
 
     return {
       newComplaintsToday,
@@ -205,7 +235,7 @@ export default function DailyUpdatePage() {
       staleCases,
       suggestions
     };
-  }, [complaints, applications, upcomingSpecialDays]);
+  }, [complaints, applications, upcomingSpecialDays, upcomingAssemblies]);
 
   const filteredTasks = useMemo(() => {
     const list = tasks || [];
@@ -495,6 +525,46 @@ export default function DailyUpdatePage() {
            {/* Right Column: Health, Suggestions, Notes */}
            <div className="lg:col-span-4 space-y-8">
               
+              {/* Strategic Assemblies Monitor (NEW) */}
+              <Card className="rounded-[2.5rem] border-none shadow-sm bg-white dark:bg-slate-900 p-8 relative overflow-hidden group">
+                 <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/10 rounded-full -mr-12 -mt-12 blur-2xl group-hover:scale-150 transition-transform duration-1000"></div>
+                 <h3 className="text-xs font-black uppercase text-blue-600 tracking-[0.2em] mb-8 flex items-center gap-2 leading-none">
+                    <Handshake className="w-5 h-5 animate-pulse" /> Strategic Assemblies
+                 </h3>
+                 <div className="space-y-4">
+                    {upcomingAssemblies.length > 0 ? upcomingAssemblies.map((meeting, i) => {
+                      const isUrgent = meeting.daysAway <= 3;
+                      return (
+                        <div key={i} onClick={() => router.push('/internal/meetings')} className={cn(
+                          "p-6 rounded-[2rem] border flex flex-col gap-3 relative group/item hover:shadow-lg transition-all active:scale-[0.98] cursor-pointer",
+                          isUrgent 
+                            ? "bg-blue-600 text-white border-blue-400 animate-pulse shadow-xl shadow-blue-600/30" 
+                            : "bg-blue-50/40 dark:bg-blue-950/20 border-blue-100 dark:border-blue-900/40"
+                        )}>
+                           <div className="flex justify-between items-center">
+                              <Badge className={cn(
+                                "text-[8px] font-black uppercase tracking-tighter px-3 h-5",
+                                isUrgent ? "bg-white text-blue-600" : "bg-blue-600 text-white"
+                              )}>
+                                {meeting.daysAway === 0 ? 'Today' : meeting.daysAway === 1 ? 'Tomorrow' : `In ${meeting.daysAway} Days`}
+                              </Badge>
+                              <span className={cn("text-[10px] font-black uppercase tracking-widest", isUrgent ? "text-blue-100" : "text-slate-400")}>{meeting.date}</span>
+                           </div>
+                           <h4 className={cn("text-sm font-black leading-tight uppercase tracking-tight", isUrgent ? "text-white" : "text-primary dark:text-white")}>{meeting.title}</h4>
+                           <div className={cn("flex items-center gap-2 text-[9px] font-bold uppercase", isUrgent ? "text-blue-200" : "text-slate-400")}>
+                             <MapPin className="w-3 h-3" /> {meeting.location}
+                           </div>
+                        </div>
+                      )
+                    }) : (
+                      <div className="text-center py-10 bg-slate-50 dark:bg-slate-950 rounded-3xl border-2 border-dashed">
+                         <Handshake className="w-10 h-10 text-blue-500/10 mx-auto mb-3" />
+                         <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest leading-relaxed">No assemblies in<br/>15-day lookahead</p>
+                      </div>
+                    )}
+                 </div>
+              </Card>
+
               {/* Live Connection Hub */}
               <Card className="rounded-[2.5rem] border-none shadow-2xl bg-slate-900 text-white p-8 relative overflow-hidden">
                  <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full -mr-16 -mt-16 blur-3xl"></div>
