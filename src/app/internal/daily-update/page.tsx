@@ -479,7 +479,7 @@ export default function DailyUpdatePage() {
                       </div>
                     )}
                  </div>
-              </div>
+              </Card>
 
               {/* AI Suggested Actions */}
               <div className="space-y-4">
