@@ -1,10 +1,9 @@
-
 "use client"
 
 import React, { useEffect, useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { useUser, useCollection, useFirestore, useMemoFirebase, useDoc } from '@/firebase'
-import { collection, query, orderBy, doc, setDoc, updateDoc, serverTimestamp, increment, where } from 'firebase/firestore'
+import { collection, query, orderBy, doc, setDoc, updateDoc, serverTimestamp, increment, where, getDocs } from 'firebase/firestore'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -629,9 +628,9 @@ export default function MemberKitManagement() {
                   </div>
                 )}
 
-                {Object.keys(stateGroups).length > 0 && (
+                {Object.keys(groupings.stateGroups).length > 0 && (
                   <div className="space-y-12">
-                    {Object.keys(stateGroups).sort().map(state => (
+                    {Object.keys(groupings.stateGroups).sort().map(state => (
                       <div key={state} className="space-y-4">
                         <div className="flex items-center gap-3 px-2">
                            <Globe className="w-6 h-6 text-emerald-600" />
@@ -646,11 +645,11 @@ export default function MemberKitManagement() {
                   </div>
                 )}
 
-                {Object.keys(districtGroups).length > 0 && (
+                {Object.keys(groupings.districtGroups).length > 0 && (
                   <div className="space-y-16">
-                    {Object.keys(districtGroups).sort().map(state => (
+                    {Object.keys(groupings.districtGroups).sort().map(state => (
                       <div key={state} className="space-y-12">
-                        {Object.keys(districtGroups[state]).sort().map(district => (
+                        {Object.keys(groupings.districtGroups[state]).sort().map(district => (
                           <div key={district} className="space-y-4">
                             <div className="flex items-center gap-3 px-2">
                                <Building2 className="w-6 h-6 text-blue-600" />
