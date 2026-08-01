@@ -69,7 +69,8 @@ import {
   PinOff,
   MessageSquareQuote,
   UserRoundCheck,
-  BookOpen
+  BookOpen,
+  Activity
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -94,6 +95,7 @@ const publicLinks = [
 const topAnalyticsLinksConfig = [
   { name: 'Donation Analytics', href: '/internal/analytics', icon: LayoutDashboard, permission: 'analytics' },
   { name: 'Member Analytics', href: '/internal/member-analytics', icon: BarChart, permission: 'memberAnalytics' },
+  { name: 'Complaint Analytics', href: '/internal/public-complaints/analytics', icon: Activity, permission: 'publicComplaints' },
   { name: 'Website Visitors', href: '/internal/visitors', icon: BarChart3, permission: 'visitors' },
   { name: 'SEO Analytics Hub', href: '/internal/seo-dashboard', icon: Search, permission: 'seoDashboard' },
 ]

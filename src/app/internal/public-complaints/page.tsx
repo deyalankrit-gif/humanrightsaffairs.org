@@ -216,6 +216,14 @@ export default function PublicComplaintsTerminal() {
             </div>
             
             <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto items-center">
+              <Button 
+                onClick={() => router.push('/internal/public-complaints/analytics')}
+                variant="outline" 
+                className="h-12 md:h-14 rounded-2xl bg-accent/5 border-accent/20 text-accent font-black text-[10px] uppercase tracking-widest px-6"
+              >
+                <BarChart3 className="w-4 h-4 mr-2" /> Detailed Analytics
+              </Button>
+
               <Select value={investigatorFilter} onValueChange={setInvestigatorFilter}>
                 <SelectTrigger className="w-full sm:w-48 h-12 md:h-14 rounded-2xl border-slate-200 bg-white dark:bg-slate-950 font-bold text-[10px] uppercase tracking-widest"><SelectValue placeholder="Investigator" /></SelectTrigger>
                 <SelectContent className="bg-white z-[1000000]"><SelectItem value="All">All Officers</SelectItem>{investigators.map(name => <SelectItem key={name} value={name}>{name}</SelectItem>)}</SelectContent>
