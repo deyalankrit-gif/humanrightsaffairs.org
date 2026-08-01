@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useMemo, useEffect } from 'react'
@@ -36,7 +37,9 @@ import {
   MoreVertical,
   X,
   Target,
-  Users
+  Users,
+  UserPlus,
+  RefreshCw
 } from 'lucide-react'
 import {
   Dialog,
@@ -139,7 +142,7 @@ export default function DailyUpdatePage() {
     const suggestions = [];
     if (pendingReview > 5) suggestions.push("Prioritize triage for pending complaint records.");
     if (staleCases.length > 0) suggestions.push(`Review ${staleCases.length} cases with no updates in >3 days.`);
-    if (newAppsToday > 0) suggestions.push("Process new membership registrations for regional chapters.");
+    if (newAppsToday > 0) suggestions.push(`Action Required: ${newAppsToday} new membership applications received.`);
     if (highPriority > 3) suggestions.push("High volume of critical priority cases detected.");
 
     return {
@@ -263,7 +266,7 @@ export default function DailyUpdatePage() {
                    { label: "Pending Review", val: summary.pendingReview, icon: <Clock className="text-amber-500" /> },
                    { label: "Investigations", val: summary.underInvestigation, icon: <Activity className="text-blue-500" /> },
                    { label: "Cases Closed", val: summary.casesClosedToday, icon: <CheckCircle2 className="text-emerald-500" /> },
-                   { label: "New Members", val: summary.newAppsToday, icon: <Users className="text-indigo-500" /> },
+                   { label: "New Applications", val: summary.newAppsToday, icon: <UserPlus className="text-indigo-500" /> },
                    { label: "App Registry", val: applications?.length || 0, icon: <FileText className="text-slate-400" /> }
                  ].map((stat, i) => (
                    <Card key={i} className="border-none shadow-sm rounded-2xl overflow-hidden group">
@@ -373,6 +376,61 @@ export default function DailyUpdatePage() {
                        )}
                     </div>
                  </CardContent>
+              </Card>
+
+              {/* Membership Application Stream */}
+              <Card className="rounded-[2.5rem] border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900">
+                <CardHeader className="bg-slate-50 dark:bg-slate-800/50 border-b p-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                  <div className="space-y-1">
+                    <CardTitle className="text-xl font-headline font-bold flex items-center gap-3">
+                      <UserPlus className="w-5 h-5 text-indigo-500" /> Membership Application Stream
+                    </CardTitle>
+                    <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">Real-time status tracking for new recruits</p>
+                  </div>
+                  <Button variant="ghost" size="sm" onClick={() => router.push('/internal/applications')} className="rounded-full text-xs font-bold text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50">
+                    Manage All <ChevronRight className="ml-1 w-4 h-4" />
+                  </Button>
+                </CardHeader>
+                <CardContent className="p-0">
+                   <div className="divide-y divide-slate-50 dark:divide-slate-800">
+                      {applications && applications.slice(0, 5).map((app: any) => (
+                        <div key={app.id} className="p-6 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors flex items-center justify-between">
+                           <div className="flex items-center gap-4">
+                              <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-300">
+                                 <User className="w-5 h-5" />
+                              </div>
+                              <div className="space-y-0.5">
+                                 <h4 className="text-sm font-bold">{app.name}</h4>
+                                 <div className="flex items-center gap-2">
+                                    <span className="text-[9px] font-bold text-slate-400 uppercase">{app.level} Council</span>
+                                    <span className="text-[9px] font-bold text-slate-400 uppercase">•</span>
+                                    <span className="text-[9px] font-bold text-slate-400 uppercase">{app.stateName || 'National'}</span>
+                                 </div>
+                              </div>
+                           </div>
+                           <div className="flex items-center gap-4">
+                              <Badge className={cn(
+                                "text-[8px] font-black uppercase px-2 h-5 border-none",
+                                app.status === 'Approved' ? 'bg-emerald-500' : 
+                                app.status === 'Rejected' ? 'bg-red-500' : 
+                                app.status === 'Archived' ? 'bg-blue-500' : 'bg-amber-500'
+                              )}>
+                                 {app.status}
+                              </Badge>
+                              <p className="text-[9px] font-black text-slate-300 uppercase hidden sm:block">
+                                {app.createdAt?.toDate ? format(app.createdAt.toDate(), 'MMM d, p') : 'Just now'}
+                              </p>
+                           </div>
+                        </div>
+                      ))}
+                      {(!applications || applications.length === 0) && (
+                        <div className="py-20 text-center opacity-20">
+                           <UserPlus className="w-12 h-12 mx-auto mb-4" />
+                           <p className="text-xs font-black uppercase">Registry Empty</p>
+                        </div>
+                      )}
+                   </div>
+                </CardContent>
               </Card>
            </div>
 
