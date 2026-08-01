@@ -365,7 +365,7 @@ export default function UserManualPage() {
  */
 function ScrollArea({ className, children }: { className?: string, children: React.ReactNode }) {
   return (
-    <div className={cn("overflow-y-auto no-scrollbar", className)}>
+    <div className={cn("overflow-y-auto custom-scrollbar", className)}>
       {children}
     </div>
   );
