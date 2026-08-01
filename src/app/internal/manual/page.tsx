@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState } from 'react';
@@ -17,7 +16,9 @@ import {
   Info,
   Clock,
   ExternalLink,
-  Crown
+  Crown,
+  Zap,
+  ShieldAlert
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -82,7 +83,7 @@ export default function UserManualPage() {
                         onClick={() => setActiveSection(s.id)}
                         className={cn(
                           "w-full text-left px-4 py-3 rounded-xl text-xs font-bold transition-all flex items-center justify-between group",
-                          activeSection === s.id ? "bg-accent text-primary shadow-md" : "text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800"
+                          activeSection === s.id ? "bg-accent text-primary shadow-md" : "text-slate-50 hover:bg-slate-50 dark:hover:bg-slate-800"
                         )}
                       >
                          <span className="truncate">{s.title}</span>
@@ -165,7 +166,7 @@ export default function UserManualPage() {
                              {s.mandates && (
                                 <div className="space-y-6">
                                    <div className="flex items-center gap-3">
-                                      <ShieldAlert className="w-5 h-5 text-red-500" />
+                                      <ShieldAlert className="w-5 h-5 text-red-600" />
                                       <h4 className="text-xs font-black uppercase tracking-[0.2em] text-red-600">Root Mandates</h4>
                                    </div>
                                    <div className="space-y-4">
