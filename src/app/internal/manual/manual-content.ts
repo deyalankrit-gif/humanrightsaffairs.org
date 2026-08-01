@@ -14,6 +14,23 @@ export type ManualSection = {
 };
 
 export const MANUAL_DATA: Record<string, ManualSection> = {
+  "/internal/daily-update": {
+    id: "daily-update",
+    title: "Daily Update & To-Do",
+    subtitle: "Operational Oversight Terminal",
+    instructions: [
+      "Review 'Today's Overview' for rapid assessment of intake and throughput.",
+      "Manage institutional tasks via the integrated To-Do list (High/Medium/Low priority).",
+      "Monitor 'Website Health' for critical failure points like notification or sync errors.",
+      "Check 'Case Follow-up' to identify victims awaiting updates (>3 days stale).",
+      "Draft and transmit the Daily Summary report to leadership with one click."
+    ],
+    tips: [
+      "Items in red in the To-Do list indicate overdue status based on the selected date.",
+      "AI suggestions are generated dynamically based on pending workload counts.",
+      "Use 'Daily Notes' for non-structured administrative observations."
+    ]
+  },
   "/internal/analytics": {
     id: "donations-analytics",
     title: "Donation Analytics",

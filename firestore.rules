@@ -45,7 +45,6 @@ service cloud.firestore {
 
     match /current_news/{newsId} {
       allow read: if true;
-      // Allow public write to enable the "Automatic Background Sync" requirement for the prototype
       allow write: if true; 
     }
 
@@ -193,6 +192,15 @@ service cloud.firestore {
     match /activity_reminders/{reminderId} {
       allow read, write: if isAuthenticated() && (request.auth.uid == resource.data.uid || isRoot());
       allow create: if isAuthenticated() && request.auth.uid == request.resource.data.uid;
+    }
+
+    // 8. DAILY OPERATIONAL DATA
+    match /daily_tasks/{taskId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    match /daily_notes/{noteId} {
+      allow read, write: if isAuthenticated();
     }
   }
 }

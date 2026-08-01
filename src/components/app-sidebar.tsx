@@ -70,7 +70,8 @@ import {
   MessageSquareQuote,
   UserRoundCheck,
   BookOpen,
-  Activity
+  Activity,
+  ListTodo
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -101,6 +102,7 @@ const topAnalyticsLinksConfig = [
 ]
 
 const adminLinksConfig = [
+  { name: 'Daily Update', href: '/internal/daily-update', icon: ListTodo, permission: 'publicView' },
   { name: 'Governance Manual', href: '/internal/manual', icon: BookOpen, permission: 'publicView' },
   { name: 'Applications', href: '/internal/applications', icon: FileText, permission: 'applications' },
   { name: 'Public Complaints', href: '/internal/public-complaints', icon: ShieldQuestion, permission: 'publicComplaints' },
