@@ -80,10 +80,18 @@ export default function UserManualPage() {
                     {filtered.map((s) => (
                       <button 
                         key={s.id}
-                        onClick={() => setActiveSection(s.id)}
+                        onClick={() => {
+                          setActiveSection(s.id);
+                          const element = document.getElementById(s.id);
+                          if (element) {
+                            element.scrollIntoView({ behavior: 'smooth' });
+                          }
+                        }}
                         className={cn(
                           "w-full text-left px-4 py-3 rounded-xl text-xs font-bold transition-all flex items-center justify-between group",
-                          activeSection === s.id ? "bg-accent text-primary shadow-md" : "text-slate-50 hover:bg-slate-50 dark:hover:bg-slate-800"
+                          activeSection === s.id 
+                            ? "bg-accent text-primary shadow-md" 
+                            : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
                         )}
                       >
                          <span className="truncate">{s.title}</span>
@@ -173,7 +181,7 @@ export default function UserManualPage() {
                                       {s.mandates.map((m, i) => (
                                         <div key={i} className="p-5 bg-red-50/50 dark:bg-red-950/20 rounded-2xl border border-red-100 dark:border-red-900/30 flex items-start gap-4">
                                            <AlertCircle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
-                                           <p className="text-[11px] font-black text-red-900 dark:text-red-400 uppercase leading-relaxed tracking-tight">{m}</p>
+                                           <p className="text-[10px] font-black text-red-900 dark:text-red-400 uppercase leading-relaxed tracking-tight">{m}</p>
                                         </div>
                                       ))}
                                    </div>
