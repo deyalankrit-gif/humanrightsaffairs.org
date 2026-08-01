@@ -1,10 +1,12 @@
+
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   BookOpen, 
   Search, 
   ChevronRight, 
+  ChevronLeft,
   CheckCircle2, 
   ShieldCheck, 
   AlertCircle,
@@ -18,191 +20,353 @@ import {
   ExternalLink,
   Crown,
   Zap,
-  ShieldAlert
+  ShieldAlert,
+  Menu,
+  X,
+  LayoutDashboard,
+  BarChart3,
+  ShieldQuestion,
+  Archive,
+  Receipt,
+  Users,
+  Settings2,
+  Newspaper,
+  Handshake,
+  BookMarked
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MANUAL_DATA } from './manual-content';
+import { 
+  Sheet, 
+  SheetContent, 
+  SheetTrigger,
+  SheetHeader,
+  SheetTitle
+} from '@/components/ui/sheet';
+import { MANUAL_DATA, type ManualSection } from './manual-content';
 import { cn } from '@/lib/utils';
 import { Footer } from '@/components/footer';
 
 /**
- * UserManualPage: Comprehensive hand-book for HRAT administrators.
+ * UserManualPage: High-fidelity GitBook-style documentation terminal.
+ * Features a sticky inner sidebar, independent content scrolling, and sequential navigation.
  */
 export default function UserManualPage() {
   const [search, setSearch] = useState('');
-  const [activeSection, setActiveSection] = useState<string | null>(null);
+  const [activeSectionId, setActiveSectionId] = useState<string>('daily-update');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    // Persist selection on refresh
+    const saved = localStorage.getItem('hrat_manual_active_node');
+    if (saved && MANUAL_DATA[saved]) {
+      setActiveSectionId(MANUAL_DATA[saved].id);
+    }
+  }, []);
 
   const sections = Object.values(MANUAL_DATA);
-  const filtered = sections.filter(s => 
-    s.title.toLowerCase().includes(search.toLowerCase()) || 
-    s.subtitle.toLowerCase().includes(search.toLowerCase()) ||
-    s.instructions.some(i => i.toLowerCase().includes(search.toLowerCase()))
+  
+  // Logical Grouping for the Sidebar
+  const navigationGroups = useMemo(() => [
+    {
+      title: "Core Operations",
+      items: [
+        { id: "daily-update", label: "Daily Update", icon: LayoutDashboard },
+      ]
+    },
+    {
+      title: "Force Intelligence",
+      items: [
+        { id: "donations-analytics", label: "Donation Analytics", icon: BarChart3 },
+        { id: "member-analytics", label: "Member Analytics", icon: Globe },
+      ]
+    },
+    {
+      title: "Case Management",
+      items: [
+        { id: "complaints-registry", label: "Complaints Registry", icon: ShieldQuestion },
+        { id: "case-investigation", label: "Investigation Hub", icon: Gavel },
+      ]
+    },
+    {
+      title: "Logistics & Assets",
+      items: [
+        { id: "kit-logistics", label: "Kit Management", icon: Archive },
+        { id: "material-registry", label: "Material System", icon: Settings2 },
+      ]
+    },
+    {
+      title: "Legal & Finance",
+      items: [
+        { id: "vms-terminal", label: "VMS Terminal", icon: Receipt },
+        { id: "voucher-generation", label: "Generate Instrument", icon: FileText },
+      ]
+    },
+    {
+      title: "Personnel & Policy",
+      items: [
+        { id: "member-directory", label: "Secure Registry", icon: Users },
+        { id: "access-governance", label: "Access Roles", icon: ShieldAlert },
+        { id: "news-governance", label: "News Governance", icon: Newspaper },
+        { id: "meetings-registry", label: "Meeting Registry", icon: Handshake },
+      ]
+    }
+  ], []);
+
+  const filteredSections = useMemo(() => {
+    if (!search.trim()) return sections;
+    return sections.filter(s => 
+      s.title.toLowerCase().includes(search.toLowerCase()) || 
+      s.subtitle.toLowerCase().includes(search.toLowerCase()) ||
+      s.instructions.some(i => i.toLowerCase().includes(search.toLowerCase()))
+    );
+  }, [search, sections]);
+
+  const activeContent = sections.find(s => s.id === activeSectionId) || sections[0];
+  
+  const currentIndex = sections.findIndex(s => s.id === activeSectionId);
+  const prevSection = currentIndex > 0 ? sections[currentIndex - 1] : null;
+  const nextSection = currentIndex < sections.length - 1 ? sections[currentIndex + 1] : null;
+
+  const handleNavigate = (id: string, fullPath?: string) => {
+    setActiveSectionId(id);
+    if (fullPath) localStorage.setItem('hrat_manual_active_node', fullPath);
+    setIsMobileMenuOpen(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  if (!mounted) return null;
+
+  const SidebarContent = () => (
+    <div className="flex flex-col h-full">
+      <div className="p-4 space-y-4">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <Input 
+            placeholder="Search manual..." 
+            className="pl-9 h-10 rounded-xl bg-slate-50 dark:bg-slate-800 border-none shadow-inner text-xs"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+          />
+        </div>
+      </div>
+
+      <ScrollArea className="flex-1 px-2 pb-10">
+        <div className="space-y-6">
+          {navigationGroups.map((group, gIdx) => {
+            const groupItems = group.items.filter(item => 
+              filteredSections.some(fs => fs.id === item.id)
+            );
+
+            if (groupItems.length === 0) return null;
+
+            return (
+              <div key={gIdx} className="space-y-1">
+                <h4 className="px-4 text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">{group.title}</h4>
+                {groupItems.map((item) => {
+                  const isActive = activeSectionId === item.id;
+                  const fullPath = Object.keys(MANUAL_DATA).find(k => MANUAL_DATA[k].id === item.id);
+                  return (
+                    <button 
+                      key={item.id}
+                      onClick={() => handleNavigate(item.id, fullPath)}
+                      className={cn(
+                        "w-full text-left px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-3 group",
+                        isActive 
+                          ? "bg-accent text-primary shadow-sm" 
+                          : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
+                      )}
+                    >
+                      <item.icon className={cn("w-4 h-4", isActive ? "text-primary" : "text-slate-400 group-hover:text-accent")} />
+                      <span className="truncate">{item.label}</span>
+                      {isActive && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />}
+                    </button>
+                  );
+                })}
+              </div>
+            );
+          })}
+        </div>
+      </ScrollArea>
+    </div>
   );
 
   return (
-    <main className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-20">
-      <header className="pt-16 pb-8 bg-slate-900 text-white border-b-8 border-accent/20 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-1/3 h-full bg-accent/5 -skew-x-12"></div>
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="max-w-4xl">
-            <div className="inline-flex items-center gap-2 bg-accent/20 text-accent px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.2em] border border-accent/30 mb-4">
-              <BookOpen className="w-2.5 h-2.5" /> Institutional Documentation
-            </div>
-            <h1 className="text-4xl md:text-5xl font-headline font-bold">Governance <span className="text-accent italic">Manual</span></h1>
-            <p className="text-slate-400 text-sm md:text-lg mt-4 max-w-2xl leading-relaxed">
-              Operational roadmap for all authorized officials of the Human Rights Affairs Trust. Master every administrative node and registry protocol.
-            </p>
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col">
+      {/* Dynamic Header */}
+      <header className="h-16 md:h-20 bg-slate-900 text-white flex items-center px-4 md:px-8 border-b-4 border-accent/20 sticky top-12 md:top-10 z-30 shadow-xl">
+        <div className="container mx-auto flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+             <div className="lg:hidden">
+               <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
+                 <SheetTrigger asChild>
+                   <Button variant="ghost" size="icon" className="text-white hover:bg-white/10">
+                     <Menu className="w-6 h-6" />
+                   </Button>
+                 </SheetTrigger>
+                 <SheetContent side="left" className="p-0 w-72 bg-white dark:bg-slate-900 border-r">
+                    <SheetHeader className="p-6 border-b">
+                      <SheetTitle className="text-xl font-headline font-bold flex items-center gap-2">
+                        <BookMarked className="w-6 h-6 text-accent" /> Manual Index
+                      </SheetTitle>
+                    </SheetHeader>
+                    <SidebarContent />
+                 </SheetContent>
+               </Sheet>
+             </div>
+             <div className="flex flex-col">
+               <h1 className="text-xl md:text-2xl font-headline font-bold flex items-center gap-2">
+                 <ShieldCheck className="w-5 h-5 text-accent hidden sm:block" /> Governance <span className="text-accent italic">Manual</span>
+               </h1>
+               <div className="flex items-center gap-2 text-[9px] font-bold uppercase tracking-widest text-slate-400">
+                 <Navigation className="w-2.5 h-2.5 text-accent" /> National Support Node • Protocol v1.0
+               </div>
+             </div>
+          </div>
+          
+          <div className="hidden md:flex items-center gap-4">
+             <Badge variant="outline" className="text-emerald-400 border-emerald-400/30 font-black uppercase text-[8px]">Registry Verified</Badge>
+             <div className="h-8 w-px bg-white/10" />
+             <p className="text-[10px] font-bold text-slate-400">Authorized Access Only</p>
           </div>
         </div>
       </header>
 
-      <section className="py-8 container mx-auto px-4">
-        <div className="grid lg:grid-cols-12 gap-8 items-start">
-           
-           {/* Sidebar Navigation */}
-           <div className="lg:col-span-3 space-y-6">
-              <div className="relative">
-                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                 <Input 
-                   placeholder="Search manual..." 
-                   className="pl-9 h-11 rounded-xl bg-white dark:bg-slate-900 border-none shadow-sm"
-                   value={search}
-                   onChange={e => setSearch(e.target.value)}
-                 />
-              </div>
+      <div className="container mx-auto flex flex-1 w-full">
+        {/* Desktop Sticky Sidebar */}
+        <aside className="hidden lg:block w-72 border-r bg-white dark:bg-slate-900/50 sticky top-[100px] h-[calc(100vh-140px)] shrink-0">
+          <SidebarContent />
+        </aside>
 
-              <div className="bg-white dark:bg-slate-900 rounded-3xl p-2 border shadow-sm">
-                 <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest p-4 pb-2">Module Directory</p>
-                 <div className="space-y-1">
-                    {filtered.map((s) => (
-                      <button 
-                        key={s.id}
-                        onClick={() => {
-                          setActiveSection(s.id);
-                          const element = document.getElementById(s.id);
-                          if (element) {
-                            element.scrollIntoView({ behavior: 'smooth' });
-                          }
-                        }}
-                        className={cn(
-                          "w-full text-left px-4 py-3 rounded-xl text-xs font-bold transition-all flex items-center justify-between group",
-                          activeSection === s.id 
-                            ? "bg-accent text-primary shadow-md" 
-                            : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
-                        )}
-                      >
-                         <span className="truncate">{s.title}</span>
-                         <ChevronRight className={cn("w-3.5 h-3.5 transition-transform", activeSection === s.id ? "translate-x-1" : "opacity-0 group-hover:opacity-100")} />
-                      </button>
-                    ))}
-                 </div>
-              </div>
+        {/* Independent Scroll Content Area */}
+        <div className="flex-1 min-w-0 bg-white dark:bg-slate-950">
+          <div className="max-w-4xl mx-auto py-8 md:py-12 px-4 md:px-12 space-y-12 pb-32">
+            
+            {/* Breadcrumbs */}
+            <nav className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 mb-8 overflow-hidden whitespace-nowrap">
+               <span>Manual</span>
+               <ChevronRight className="w-3 h-3" />
+               <span className="text-primary dark:text-white">{activeContent.title}</span>
+            </nav>
 
-              <Card className="rounded-3xl bg-slate-900 text-white p-8 border-none shadow-xl relative overflow-hidden">
-                 <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/10 rounded-full -mr-12 -mt-12 blur-2xl"></div>
-                 <div className="relative z-10 space-y-4">
-                    <ShieldCheck className="w-8 h-8 text-emerald-500" />
-                    <h4 className="font-headline font-bold text-lg">Integrity First</h4>
-                    <p className="text-[10px] text-slate-400 leading-relaxed uppercase font-black tracking-wider">
-                      "All administrative actions are timestamped and attributed. Accuracy in documentation is the shield of the organization."
-                    </p>
-                 </div>
-              </Card>
-           </div>
-
-           {/* Manual Content Area */}
-           <div className="lg:col-span-9 space-y-12">
-              {filtered.length === 0 ? (
-                <div className="py-32 text-center opacity-30 bg-white dark:bg-slate-900 rounded-[3rem] border-4 border-dashed">
-                   <Search className="w-16 h-16 mx-auto mb-6" />
-                   <p className="text-xl font-headline font-bold">No documentation found</p>
-                </div>
-              ) : (
-                filtered.map((s) => (
-                  <div key={s.id} id={s.id} className="scroll-mt-32 animate-in fade-in slide-in-from-bottom-4 duration-700">
-                    <Card className="rounded-[3rem] border-none shadow-sm bg-white dark:bg-slate-900 overflow-hidden">
-                       <CardHeader className="p-10 md:p-16 bg-slate-50 dark:bg-slate-950 border-b relative">
-                          <div className="absolute top-10 right-10 opacity-10 pointer-events-none"><BookOpen className="w-32 h-32" /></div>
-                          <div className="space-y-4 relative z-10">
-                             <div className="flex items-center gap-3">
-                                <Badge className="bg-accent text-primary font-black uppercase text-[10px] tracking-widest px-4 h-6">Section Protocol</Badge>
-                                <span className="text-slate-400 text-[9px] font-bold uppercase tracking-[0.2em]">{s.id.replace(/-/g, ' ')}</span>
-                             </div>
-                             <h2 className="text-3xl md:text-5xl font-headline font-bold text-primary dark:text-white leading-tight">{s.title}</h2>
-                             <p className="text-lg text-slate-500 italic font-medium">"{s.subtitle}"</p>
-                          </div>
-                       </CardHeader>
-                       <CardContent className="p-10 md:p-16 space-y-16">
-                          <div className="space-y-8">
-                             <div className="flex items-center gap-4 border-b pb-4">
-                                <Navigation className="w-6 h-6 text-accent" />
-                                <h3 className="text-sm font-black uppercase tracking-[0.3em] text-primary dark:text-white">Procedural Roadmap</h3>
-                             </div>
-                             <div className="grid md:grid-cols-1 gap-6">
-                                {s.instructions.map((step, i) => (
-                                  <div key={i} className="flex gap-6 group">
-                                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-slate-50 dark:bg-slate-800 text-slate-300 font-black text-lg shadow-inner group-hover:bg-accent group-hover:text-primary transition-all">
-                                        {i + 1}
-                                     </div>
-                                     <div className="pt-2">
-                                        <p className="text-base md:text-lg text-slate-600 dark:text-slate-300 leading-relaxed font-medium">{step}</p>
-                                     </div>
-                                  </div>
-                                ))}
-                             </div>
-                          </div>
-
-                          <div className="grid md:grid-cols-2 gap-12 pt-8 border-t border-slate-100 dark:border-slate-800">
-                             <div className="space-y-6">
-                                <div className="flex items-center gap-3">
-                                   <Zap className="w-5 h-5 text-emerald-500" />
-                                   <h4 className="text-xs font-black uppercase tracking-[0.2em] text-emerald-600">Administrative Tips</h4>
-                                </div>
-                                <div className="space-y-4">
-                                   {s.tips.map((tip, i) => (
-                                     <div key={i} className="p-5 bg-emerald-50/50 dark:bg-emerald-950/20 rounded-2xl border border-emerald-100 dark:border-emerald-900/30 flex items-start gap-4">
-                                        <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-                                        <p className="text-sm font-bold text-emerald-800 dark:text-emerald-400 italic">"{tip}"</p>
-                                     </div>
-                                   ))}
-                                </div>
-                             </div>
-
-                             {s.mandates && (
-                                <div className="space-y-6">
-                                   <div className="flex items-center gap-3">
-                                      <ShieldAlert className="w-5 h-5 text-red-600" />
-                                      <h4 className="text-xs font-black uppercase tracking-[0.2em] text-red-600">Root Mandates</h4>
-                                   </div>
-                                   <div className="space-y-4">
-                                      {s.mandates.map((m, i) => (
-                                        <div key={i} className="p-5 bg-red-50/50 dark:bg-red-950/20 rounded-2xl border border-red-100 dark:border-red-900/30 flex items-start gap-4">
-                                           <AlertCircle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
-                                           <p className="text-[10px] font-black text-red-900 dark:text-red-400 uppercase leading-relaxed tracking-tight">{m}</p>
-                                        </div>
-                                      ))}
-                                   </div>
-                                </div>
-                             )}
-                          </div>
-
-                          <div className="pt-10 flex flex-col items-center gap-4 opacity-30">
-                             <div className="h-px w-32 bg-slate-300"></div>
-                             <p className="text-[8px] font-black text-slate-400 uppercase tracking-[0.5em]">Institutional Compliance Node</p>
-                          </div>
-                       </CardContent>
-                    </Card>
+            {/* Main Content Render */}
+            <article className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+               <div className="space-y-4 mb-16">
+                  <div className="flex items-center gap-3">
+                     <Badge className="bg-accent text-primary font-black uppercase text-[10px] tracking-widest px-4 h-6">Section Protocol</Badge>
+                     <span className="text-slate-400 text-[9px] font-bold uppercase tracking-[0.2em]">{activeSectionId.replace(/-/g, ' ')}</span>
                   </div>
-                ))
-              )}
-           </div>
+                  <h2 className="text-4xl md:text-6xl font-headline font-bold text-primary dark:text-white leading-tight">{activeContent.title}</h2>
+                  <p className="text-xl text-slate-500 italic font-medium">"{activeContent.subtitle}"</p>
+               </div>
+
+               <div className="space-y-16">
+                  <section className="space-y-8">
+                     <div className="flex items-center gap-4 border-b pb-4">
+                        <Navigation className="w-6 h-6 text-accent" />
+                        <h3 className="text-sm font-black uppercase tracking-[0.3em] text-primary dark:text-white">Procedural Roadmap</h3>
+                     </div>
+                     <div className="grid gap-6">
+                        {activeContent.instructions.map((step, i) => (
+                          <div key={i} className="flex gap-6 group">
+                             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-slate-50 dark:bg-slate-800 text-slate-300 font-black text-lg shadow-inner group-hover:bg-accent group-hover:text-primary transition-all">
+                                {i + 1}
+                             </div>
+                             <div className="pt-2">
+                                <p className="text-base md:text-lg text-slate-600 dark:text-slate-300 leading-relaxed font-medium">{step}</p>
+                             </div>
+                          </div>
+                        ))}
+                     </div>
+                  </section>
+
+                  <div className="grid md:grid-cols-2 gap-12 pt-8 border-t border-slate-100 dark:border-slate-800">
+                     <div className="space-y-6">
+                        <div className="flex items-center gap-3">
+                           <Zap className="w-5 h-5 text-emerald-500" />
+                           <h4 className="text-xs font-black uppercase tracking-[0.2em] text-emerald-600">Administrative Tips</h4>
+                        </div>
+                        <div className="space-y-4">
+                           {activeContent.tips.map((tip, i) => (
+                             <div key={i} className="p-5 bg-emerald-50/50 dark:bg-emerald-950/20 rounded-2xl border border-emerald-100 dark:border-emerald-900/30 flex items-start gap-4 shadow-sm">
+                                <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                                <p className="text-sm font-bold text-emerald-800 dark:text-emerald-400 italic">"{tip}"</p>
+                             </div>
+                           ))}
+                        </div>
+                     </div>
+
+                     {activeContent.mandates && (
+                        <div className="space-y-6">
+                           <div className="flex items-center gap-3">
+                              <ShieldAlert className="w-5 h-5 text-red-600" />
+                              <h4 className="text-xs font-black uppercase tracking-[0.2em] text-red-600">Governance Mandates</h4>
+                           </div>
+                           <div className="space-y-4">
+                              {activeContent.mandates.map((m, i) => (
+                                <div key={i} className="p-5 bg-red-50/50 dark:bg-red-950/20 rounded-2xl border border-red-100 dark:border-red-900/30 flex items-start gap-4">
+                                   <AlertCircle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
+                                   <p className="text-[10px] font-black text-red-900 dark:text-red-400 uppercase leading-relaxed tracking-tight">{m}</p>
+                                </div>
+                              ))}
+                           </div>
+                        </div>
+                     )}
+                  </div>
+               </div>
+            </article>
+
+            {/* Sequential Paging Navigation */}
+            <div className="grid grid-cols-2 gap-4 pt-20 border-t border-slate-100 dark:border-slate-800">
+               {prevSection ? (
+                 <button 
+                  onClick={() => handleNavigate(prevSection.id)}
+                  className="flex flex-col gap-2 p-6 rounded-3xl border border-slate-100 dark:border-slate-800 hover:border-accent transition-all text-left group"
+                 >
+                    <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                       <ChevronLeft className="w-3 h-3 group-hover:-translate-x-1 transition-transform" /> Previous
+                    </div>
+                    <span className="text-sm font-bold text-primary dark:text-white truncate">{prevSection.title}</span>
+                 </button>
+               ) : <div />}
+
+               {nextSection ? (
+                 <button 
+                  onClick={() => handleNavigate(nextSection.id)}
+                  className="flex flex-col gap-2 p-6 rounded-3xl border border-slate-100 dark:border-slate-800 hover:border-accent transition-all text-right group items-end"
+                 >
+                    <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                       Next <ChevronRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+                    </div>
+                    <span className="text-sm font-bold text-primary dark:text-white truncate">{nextSection.title}</span>
+                 </button>
+               ) : <div />}
+            </div>
+
+            <div className="pt-10 flex flex-col items-center gap-4 opacity-20">
+               <div className="h-px w-32 bg-slate-300" />
+               <p className="text-[8px] font-black text-slate-400 uppercase tracking-[0.5em]">Institutional Intelligence Node</p>
+            </div>
+          </div>
         </div>
-      </section>
+      </div>
 
       <Footer />
-    </main>
+    </div>
+  );
+}
+
+/**
+ * Custom Simple Scroll Area to keep component lightweight
+ */
+function ScrollArea({ className, children }: { className?: string, children: React.ReactNode }) {
+  return (
+    <div className={cn("overflow-y-auto no-scrollbar", className)}>
+      {children}
+    </div>
   );
 }
