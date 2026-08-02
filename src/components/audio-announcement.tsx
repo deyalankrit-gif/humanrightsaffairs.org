@@ -163,7 +163,7 @@ export function AudioAnnouncement() {
         {showAutoplayPrompt && !error && (
           <button 
             onClick={handleManualPlay}
-            className="relative w-20 h-20 md:w-24 md:h-24 rounded-full shadow-2xl border-4 border-[#2563EB] animate-bounce hover:scale-110 transition-transform overflow-hidden group bg-transparent ring-8 ring-[#2563EB]/10"
+            className="relative w-20 h-20 md:w-24 md:h-24 rounded-full shadow-2xl border-4 border-[#2563EB] animate-bounce hover:scale-110 transition-transform overflow-hidden group bg-transparent"
           >
              <Image 
                src="/handmic.jpeg" 
@@ -171,7 +171,7 @@ export function AudioAnnouncement() {
                fill 
                className="object-cover group-hover:scale-110 transition-transform duration-500"
              />
-             <div className="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-colors flex items-center justify-center">
+             <div className="absolute inset-0 bg-transparent flex items-center justify-center">
                 <Play className="w-8 h-8 text-[#2563EB] fill-[#2563EB] drop-shadow-lg" />
              </div>
              <div className="absolute -top-1 -right-1 flex h-4 w-4">
