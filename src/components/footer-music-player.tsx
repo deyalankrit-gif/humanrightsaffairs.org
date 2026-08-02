@@ -11,7 +11,8 @@ import {
   SkipForward, 
   Radio,
   ListMusic,
-  Check
+  Check,
+  AlertCircle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
@@ -26,6 +27,7 @@ import { cn } from '@/lib/utils';
 /**
  * HRAT Audio Station: Premium institutional audio component.
  * Features: Neon scrolling title, tactical playback order, session memory.
+ * Updated: Enhanced error handling to prevent "No supported sources" runtime errors.
  */
 
 const PLAYLIST = [
@@ -54,12 +56,6 @@ export function FooterMusicPlayer({ className }: { className?: string }) {
     const savedTrack = localStorage.getItem('hrat_audio_index');
     if (savedTrack) setCurrentTrackIndex(parseInt(savedTrack));
 
-    const savedTime = localStorage.getItem('hrat_audio_pos');
-    if (savedTime) {
-      audio.currentTime = parseFloat(savedTime);
-      setCurrentTime(parseFloat(savedTime));
-    }
-
     const savedVolume = localStorage.getItem('hrat_audio_vol');
     if (savedVolume) {
       const vol = parseFloat(savedVolume);
@@ -77,6 +73,13 @@ export function FooterMusicPlayer({ className }: { className?: string }) {
       setDuration(audio.duration);
       setIsLoaded(true);
       setError(false);
+      
+      // Only set current time once metadata is ready to prevent NotSupportedError
+      const savedTime = localStorage.getItem('hrat_audio_pos');
+      if (savedTime && audio.readyState >= 1) {
+        audio.currentTime = parseFloat(savedTime);
+        setCurrentTime(parseFloat(savedTime));
+      }
     };
 
     const handleTimeUpdate = () => {
@@ -92,13 +95,18 @@ export function FooterMusicPlayer({ className }: { className?: string }) {
 
     const handlePlayState = () => setIsPlaying(true);
     const handlePauseState = () => setIsPlaying(false);
+    const handleAudioError = () => {
+      setError(true);
+      setIsPlaying(false);
+      setIsLoaded(false);
+    };
 
     audio.addEventListener('play', handlePlayState);
     audio.addEventListener('pause', handlePauseState);
     audio.addEventListener('loadedmetadata', handleLoadedMetadata);
     audio.addEventListener('timeupdate', handleTimeUpdate);
     audio.addEventListener('ended', handleEnded);
-    audio.addEventListener('error', () => setError(true));
+    audio.addEventListener('error', handleAudioError);
 
     return () => {
       audio.removeEventListener('play', handlePlayState);
@@ -106,6 +114,7 @@ export function FooterMusicPlayer({ className }: { className?: string }) {
       audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
       audio.removeEventListener('timeupdate', handleTimeUpdate);
       audio.removeEventListener('ended', handleEnded);
+      audio.removeEventListener('error', handleAudioError);
     };
   }, [isLooping]);
 
@@ -113,14 +122,14 @@ export function FooterMusicPlayer({ className }: { className?: string }) {
     const audio = audioRef.current;
     if (!audio) return;
     localStorage.setItem('hrat_audio_index', currentTrackIndex.toString());
-    if (isPlaying) {
+    if (isPlaying && !error) {
       audio.load();
       audio.play().catch(() => setError(true));
     }
   }, [currentTrackIndex]);
 
   const togglePlay = () => {
-    if (!audioRef.current) return;
+    if (!audioRef.current || error) return;
     if (isPlaying) {
       audioRef.current.pause();
     } else {
@@ -133,6 +142,7 @@ export function FooterMusicPlayer({ className }: { className?: string }) {
 
   const selectTrack = (index: number) => {
     setCurrentTrackIndex(index);
+    setError(false);
     localStorage.setItem('hrat_audio_pos', '0');
     if (audioRef.current) {
       audioRef.current.currentTime = 0;
@@ -148,7 +158,7 @@ export function FooterMusicPlayer({ className }: { className?: string }) {
   };
 
   const handleSeek = (val: number[]) => {
-    if (audioRef.current) {
+    if (audioRef.current && isLoaded && !error) {
       audioRef.current.currentTime = val[0];
       setCurrentTime(val[0]);
     }
@@ -174,24 +184,37 @@ export function FooterMusicPlayer({ className }: { className?: string }) {
 
   return (
     <div className={cn("w-full max-w-[380px] group/player mt-10", className)}>
-      <audio ref={audioRef} src={PLAYLIST[currentTrackIndex].src} preload="metadata" />
+      <audio 
+        ref={audioRef} 
+        src={PLAYLIST[currentTrackIndex].src} 
+        preload="metadata" 
+      />
       
-      <div className="relative p-6 bg-black/40 backdrop-blur-3xl rounded-[2.5rem] border border-white/10 shadow-2xl space-y-5 transition-all duration-500 hover:border-orange-500/40">
+      <div className={cn(
+        "relative p-6 bg-black/40 backdrop-blur-3xl rounded-[2.5rem] border transition-all duration-500 shadow-2xl space-y-5",
+        error ? "border-red-500/40" : "border-white/10 hover:border-orange-500/40"
+      )}>
         
         {/* Track Info & Visualizer */}
         <div className="flex items-center justify-between gap-4 px-2 overflow-hidden">
           <div className="flex flex-col min-w-0 overflow-hidden flex-1">
             <div className="flex items-center gap-2 mb-1 shrink-0">
-              <Radio className={cn("w-3 h-3 text-orange-500", isPlaying && "animate-pulse")} />
-              <span className="text-[9px] font-black uppercase tracking-[0.2em] text-white/70">Mission Broadcast</span>
+              {error ? (
+                <AlertCircle className="w-3 h-3 text-red-500" />
+              ) : (
+                <Radio className={cn("w-3 h-3 text-orange-500", isPlaying && "animate-pulse")} />
+              )}
+              <span className="text-[9px] font-black uppercase tracking-[0.2em] text-white/70">
+                {error ? "System Error" : "Mission Broadcast"}
+              </span>
             </div>
             {/* Scrolling Title Container */}
             <div className="overflow-hidden w-full whitespace-nowrap">
               <h4 className={cn(
-                "text-[12px] font-black uppercase tracking-wider text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.8)] inline-block animate-marquee",
-                error && "animate-none"
+                "text-[12px] font-black uppercase tracking-wider inline-block",
+                error ? "text-red-500" : "text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.8)] animate-marquee"
               )}>
-                {error ? "Broadcast Offline" : PLAYLIST[currentTrackIndex].title}
+                {error ? "Broadcast Asset Missing" : PLAYLIST[currentTrackIndex].title}
               </h4>
             </div>
           </div>
@@ -209,19 +232,34 @@ export function FooterMusicPlayer({ className }: { className?: string }) {
 
         {/* PRIMARY CONTROLS (Above Timeline) */}
         <div className="flex items-center justify-center gap-6 py-1">
-          <Button variant="ghost" size="icon" onClick={handlePrevious} className="h-10 w-10 text-orange-500/40 hover:text-orange-500 transition-colors">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={handlePrevious} 
+            disabled={error}
+            className="h-10 w-10 text-orange-500/40 hover:text-orange-500 transition-colors disabled:opacity-20"
+          >
             <SkipBack className="w-5 h-5 fill-current" />
           </Button>
 
           <Button 
             onClick={togglePlay}
             disabled={error}
-            className="h-14 w-14 rounded-full bg-orange-500 text-primary shadow-xl shadow-orange-500/20 hover:scale-105 hover:bg-orange-400 transition-all border-none relative overflow-hidden"
+            className={cn(
+              "h-14 w-14 rounded-full shadow-xl transition-all border-none relative overflow-hidden",
+              error ? "bg-slate-800 text-slate-500" : "bg-orange-500 text-primary shadow-orange-500/20 hover:scale-105 hover:bg-orange-400"
+            )}
           >
             {isPlaying ? <Pause className="w-7 h-7 fill-current" /> : <Play className="w-7 h-7 fill-current ml-1" />}
           </Button>
 
-          <Button variant="ghost" size="icon" onClick={handleNext} className="h-10 w-10 text-orange-500/40 hover:text-orange-500 transition-colors">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={handleNext} 
+            disabled={error}
+            className="h-10 w-10 text-orange-500/40 hover:text-orange-500 transition-colors disabled:opacity-20"
+          >
             <SkipForward className="w-5 h-5 fill-current" />
           </Button>
         </div>

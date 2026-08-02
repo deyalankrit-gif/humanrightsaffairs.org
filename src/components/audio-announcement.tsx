@@ -13,7 +13,8 @@ import {
   X,
   Speaker,
   Radio,
-  ShieldCheck
+  ShieldCheck,
+  AlertCircle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { 
@@ -27,6 +28,7 @@ import { cn } from '@/lib/utils';
 /**
  * AudioAnnouncement: Global institutional broadcast player with sleek homepage controls.
  * Features: Autoplay detection, mute state persistence, and real-time registry sync.
+ * Updated: Defensive rendering and error handling for "no supported sources" browser errors.
  */
 export function AudioAnnouncement() {
   const db = useFirestore();
@@ -38,6 +40,7 @@ export function AudioAnnouncement() {
   const [showAutoplayPrompt, setShowAutoplayPrompt] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
   const [mounted, setMounted] = useState(false);
+  const [error, setError] = useState(false);
   
   const audioRef = useRef<HTMLAudioElement>(null);
 
@@ -57,7 +60,7 @@ export function AudioAnnouncement() {
 
   // Handle Audio Logic & Autoplay
   useEffect(() => {
-    if (!mounted || loading || !settings?.enabled || !settings?.audioData) return;
+    if (!mounted || loading || !settings?.enabled || !settings?.audioData || error) return;
 
     const audio = audioRef.current;
     if (!audio) return;
@@ -65,8 +68,8 @@ export function AudioAnnouncement() {
     audio.volume = settings.volume || 0.5;
     audio.muted = isMuted;
     
-    // Attempt Autoplay only if not explicitly muted by user
-    if (settings.autoplay && !isMuted && !isPlaying) {
+    // Attempt Autoplay only if not explicitly muted by user and element is ready
+    if (settings.autoplay && !isMuted && !isPlaying && audio.readyState >= 1) {
       const playPromise = audio.play();
       if (playPromise !== undefined) {
         playPromise
@@ -77,7 +80,7 @@ export function AudioAnnouncement() {
           });
       }
     }
-  }, [mounted, loading, settings, isMuted, isPlaying]);
+  }, [mounted, loading, settings, isMuted, isPlaying, error]);
 
   const toggleMute = () => {
     const nextMute = !isMuted;
@@ -87,17 +90,17 @@ export function AudioAnnouncement() {
     if (audioRef.current) {
       audioRef.current.muted = nextMute;
       // If unmuting, try to play if not already playing
-      if (!nextMute && audioRef.current.paused) {
+      if (!nextMute && audioRef.current.paused && !error) {
         audioRef.current.play().then(() => {
           setIsPlaying(true);
           setShowAutoplayPrompt(false);
-        });
+        }).catch(() => {});
       }
     }
   };
 
   const handleManualPlay = () => {
-    if (!audioRef.current) return;
+    if (!audioRef.current || error) return;
     audioRef.current.muted = false;
     setIsMuted(false);
     localStorage.setItem('hrat_audio_muted', 'false');
@@ -105,11 +108,11 @@ export function AudioAnnouncement() {
     audioRef.current.play().then(() => {
       setIsPlaying(true);
       setShowAutoplayPrompt(false);
-    });
+    }).catch(() => setError(true));
   };
 
   const handleReplay = () => {
-    if (!audioRef.current) return;
+    if (!audioRef.current || error) return;
     audioRef.current.currentTime = 0;
     audioRef.current.muted = false;
     setIsMuted(false);
@@ -118,7 +121,12 @@ export function AudioAnnouncement() {
     audioRef.current.play().then(() => {
       setIsPlaying(true);
       setShowAutoplayPrompt(false);
-    });
+    }).catch(() => setError(true));
+  };
+
+  const handleAudioError = () => {
+    setError(true);
+    setIsPlaying(false);
   };
 
   // Only render on Home and when essential data is present
@@ -130,12 +138,13 @@ export function AudioAnnouncement() {
         ref={audioRef} 
         src={settings.audioData} 
         onEnded={() => setIsPlaying(false)}
+        onError={handleAudioError}
         className="hidden"
       />
       
       <div className="flex flex-col items-end gap-3">
         {/* Autoplay/Manual Play Bubble Prompt */}
-        {showAutoplayPrompt && (
+        {showAutoplayPrompt && !error && (
           <div className="bg-primary text-white p-4 rounded-2xl shadow-2xl border border-white/10 mb-2 max-w-[220px] animate-bounce">
             <div className="flex items-center gap-2 mb-2">
                <Radio className="w-3 h-3 text-accent animate-pulse" />
@@ -152,53 +161,71 @@ export function AudioAnnouncement() {
         )}
 
         {/* Sleek Floating Control Pill */}
-        <div className="bg-slate-900/90 backdrop-blur-xl border border-white/10 p-1.5 rounded-2xl shadow-2xl flex items-center gap-1 group hover:bg-slate-900 transition-all duration-300 ring-1 ring-white/5">
+        <div className={cn(
+          "bg-slate-900/90 backdrop-blur-xl border p-1.5 rounded-2xl shadow-2xl flex items-center gap-1 group transition-all duration-300 ring-1 ring-white/5",
+          error ? "border-red-500/50" : "border-white/10 hover:bg-slate-900"
+        )}>
           
           {/* Status Context (Revealed on Hover) */}
           <div className="px-3 py-1 flex flex-col overflow-hidden max-w-0 group-hover:max-w-[180px] transition-all duration-500 ease-in-out">
              <div className="flex items-center gap-1.5">
-               <span className="text-[8px] font-black text-emerald-400 uppercase tracking-[0.2em] whitespace-nowrap">Live Broadcast</span>
-               <div className="h-1 w-1 rounded-full bg-emerald-500 animate-ping"></div>
+               <span className={cn(
+                 "text-[8px] font-black uppercase tracking-[0.2em] whitespace-nowrap",
+                 error ? "text-red-400" : "text-emerald-400"
+               )}>
+                 {error ? "Broadcast Error" : "Live Broadcast"}
+               </span>
+               {!error && <div className="h-1 w-1 rounded-full bg-emerald-500 animate-ping"></div>}
              </div>
-             <span className="text-[10px] font-bold text-white truncate max-w-[140px]">{settings.title || 'Official Announcement'}</span>
+             <span className="text-[10px] font-bold text-white truncate max-w-[140px]">
+               {error ? "No supported sources" : (settings.title || 'Official Announcement')}
+             </span>
           </div>
 
           {/* Action Buttons Tray */}
           <div className="flex items-center gap-1">
-            <TooltipProvider>
-              <Tooltip delayDuration={300}>
-                <TooltipTrigger asChild>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    onClick={handleReplay}
-                    className="h-9 w-9 rounded-xl text-white/40 hover:text-accent hover:bg-white/5 transition-colors"
-                  >
-                    <RefreshCw className="w-4 h-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent side="top" className="bg-primary text-white border-none text-[10px] font-bold uppercase">Replay</TooltipContent>
-              </Tooltip>
+            {!error && (
+              <TooltipProvider>
+                <Tooltip delayDuration={300}>
+                  <TooltipTrigger asChild>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      onClick={handleReplay}
+                      className="h-9 w-9 rounded-xl text-white/40 hover:text-accent hover:bg-white/5 transition-colors"
+                    >
+                      <RefreshCw className="w-4 h-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" className="bg-primary text-white border-none text-[10px] font-bold uppercase">Replay</TooltipContent>
+                </Tooltip>
 
-              <Tooltip delayDuration={300}>
-                <TooltipTrigger asChild>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    onClick={toggleMute}
-                    className={cn(
-                      "h-9 w-9 rounded-xl transition-all duration-300",
-                      isMuted ? "text-red-500 bg-red-500/10 shadow-inner" : "text-white/40 hover:text-emerald-400 hover:bg-white/5"
-                    )}
-                  >
-                    {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent side="top" className="bg-primary text-white border-none text-[10px] font-bold uppercase">
-                  {isMuted ? 'Unmute Audio' : 'Mute Audio'}
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+                <Tooltip delayDuration={300}>
+                  <TooltipTrigger asChild>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      onClick={toggleMute}
+                      className={cn(
+                        "h-9 w-9 rounded-xl transition-all duration-300",
+                        isMuted ? "text-red-500 bg-red-500/10 shadow-inner" : "text-white/40 hover:text-emerald-400 hover:bg-white/5"
+                      )}
+                    >
+                      {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" className="bg-primary text-white border-none text-[10px] font-bold uppercase">
+                    {isMuted ? 'Unmute Audio' : 'Mute Audio'}
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
+
+            {error && (
+              <div className="p-2 text-red-500">
+                <AlertCircle className="w-5 h-5" />
+              </div>
+            )}
 
             <div className="w-px h-5 bg-white/10 mx-1" />
 

@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -18,7 +17,8 @@ import {
   RefreshCw,
   X,
   FileAudio,
-  Volume2
+  Volume2,
+  AlertCircle
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -33,6 +33,7 @@ import { Footer } from '@/components/footer';
 /**
  * AudioAnnouncementAdmin: Terminal for managing global website audio broadcasts.
  * Features: Direct Base64 archival, real-time preview, and broadcast status monitoring.
+ * Updated: Enhanced preview resilience to prevent NotSupportedError.
  */
 export default function AudioAnnouncementAdmin() {
   const { user, loading: authLoading } = useUser();
@@ -42,6 +43,7 @@ export default function AudioAnnouncementAdmin() {
   
   const [isSaving, setIsSaving] = useState(false);
   const [isPreviewPlaying, setIsPreviewPlaying] = useState(false);
+  const [previewError, setPreviewError] = useState(false);
   const [tempFile, setTempFile] = useState<File | null>(null);
   const [tempDataUri, setTempDataUri] = useState<string | null>(null);
   
@@ -98,6 +100,7 @@ export default function AudioAnnouncementAdmin() {
       return;
     }
 
+    setPreviewError(false);
     const reader = new FileReader();
     reader.onloadend = () => {
       const dataUri = reader.result as string;
@@ -129,11 +132,11 @@ export default function AudioAnnouncementAdmin() {
   };
 
   const togglePreview = () => {
-    if (!previewRef.current) return;
+    if (!previewRef.current || previewError) return;
     if (isPreviewPlaying) {
       previewRef.current.pause();
     } else {
-      previewRef.current.play();
+      previewRef.current.play().catch(() => setPreviewError(true));
     }
     setIsPreviewPlaying(!isPreviewPlaying);
   };
@@ -142,6 +145,7 @@ export default function AudioAnnouncementAdmin() {
     setForm(prev => ({ ...prev, audioData: '', enabled: false }));
     setTempDataUri(null);
     setTempFile(null);
+    setPreviewError(false);
     toast({ title: "Asset Purged", description: "Audio buffer cleared." });
   };
 
@@ -232,25 +236,48 @@ export default function AudioAnnouncementAdmin() {
                     <div className="flex flex-col items-center gap-8">
                        {form.audioData ? (
                          <div className="w-full space-y-6 animate-in zoom-in-95 duration-500">
-                            <div className="p-8 bg-slate-900 rounded-3xl border border-white/5 flex flex-col items-center gap-6 shadow-2xl relative overflow-hidden">
+                            <div className={cn(
+                              "p-8 bg-slate-900 rounded-3xl border flex flex-col items-center gap-6 shadow-2xl relative overflow-hidden",
+                              previewError ? "border-red-500/50" : "border-white/5"
+                            )}>
                                <div className="absolute top-0 right-0 w-32 h-32 bg-accent/5 rounded-full -mr-16 -mt-16 blur-2xl"></div>
-                               <div className="relative z-10 w-20 h-20 rounded-full bg-accent/10 border-4 border-accent/20 flex items-center justify-center text-accent">
-                                  {isPreviewPlaying ? <Loader2 className="w-10 h-10 animate-spin" /> : <Speaker className="w-10 h-10" />}
+                               <div className={cn(
+                                 "relative z-10 w-20 h-20 rounded-full border-4 flex items-center justify-center",
+                                 previewError ? "bg-red-500/10 border-red-500/20 text-red-500" : "bg-accent/10 border-accent/20 text-accent"
+                               )}>
+                                  {isPreviewPlaying && !previewError ? <Loader2 className="w-10 h-10 animate-spin" /> : previewError ? <AlertCircle className="w-10 h-10" /> : <Speaker className="w-10 h-10" />}
                                </div>
                                <div className="text-center z-10">
-                                  <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-1">Active Asset Loaded</p>
-                                  <h4 className="text-lg font-bold text-white uppercase tracking-tight">{tempFile?.name || 'Committed Audio File'}</h4>
+                                  <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-1">
+                                    {previewError ? "Playback Incompatible" : "Active Asset Loaded"}
+                                  </p>
+                                  <h4 className="text-lg font-bold text-white uppercase tracking-tight">
+                                    {previewError ? "Format Not Supported" : (tempFile?.name || 'Committed Audio File')}
+                                  </h4>
                                </div>
                                
                                <div className="flex gap-3 relative z-10">
-                                  <Button onClick={togglePreview} className="bg-white text-primary hover:bg-accent hover:text-white font-bold h-12 px-10 rounded-xl transition-all">
+                                  <Button 
+                                    onClick={togglePreview} 
+                                    disabled={previewError}
+                                    className="bg-white text-primary hover:bg-accent hover:text-white font-bold h-12 px-10 rounded-xl transition-all"
+                                  >
                                      {isPreviewPlaying ? <><Pause className="w-4 h-4 mr-2" /> STOP PREVIEW</> : <><Play className="w-4 h-4 mr-2" /> START PREVIEW</>}
                                   </Button>
                                   <Button variant="ghost" onClick={purgeAudio} className="h-12 w-12 rounded-xl text-red-500 hover:bg-red-500/10">
                                      <Trash2 className="w-5 h-5" />
                                   </Button>
                                </div>
-                               <audio ref={previewRef} src={form.audioData} onEnded={() => setIsPlaying(false)} className="hidden" />
+                               <audio 
+                                 ref={previewRef} 
+                                 src={form.audioData} 
+                                 onEnded={() => setIsPreviewPlaying(false)}
+                                 onError={() => {
+                                   setPreviewError(true);
+                                   setIsPreviewPlaying(false);
+                                 }}
+                                 className="hidden" 
+                               />
                             </div>
                          </div>
                        ) : (
