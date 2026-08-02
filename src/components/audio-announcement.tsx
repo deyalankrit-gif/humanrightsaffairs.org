@@ -14,7 +14,8 @@ import {
   Speaker,
   Radio,
   ShieldCheck,
-  AlertCircle
+  AlertCircle,
+  Zap
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { 
@@ -28,7 +29,7 @@ import { cn } from '@/lib/utils';
 /**
  * AudioAnnouncement: Global institutional broadcast player with sleek homepage controls.
  * Features: Autoplay detection, mute state persistence, and real-time registry sync.
- * Updated: Repositioned to bottom-32 for enhanced visibility and UI spacing.
+ * Updated: Repositioned to bottom-40 with vibrant animations and colorful neon aesthetics.
  */
 export function AudioAnnouncement() {
   const db = useFirestore();
@@ -133,7 +134,7 @@ export function AudioAnnouncement() {
   if (!mounted || loading || !settings?.enabled || !settings?.audioData || !isVisible || !isHome) return null;
 
   return (
-    <div className="fixed bottom-32 right-6 z-[120] animate-in fade-in slide-in-from-right-4 duration-700 print:hidden">
+    <div className="fixed bottom-40 right-6 z-[120] animate-in fade-in slide-in-from-right-4 duration-700 print:hidden">
       <audio 
         ref={audioRef} 
         src={settings.audioData} 
@@ -145,7 +146,7 @@ export function AudioAnnouncement() {
       <div className="flex flex-col items-end gap-3">
         {/* Autoplay/Manual Play Bubble Prompt */}
         {showAutoplayPrompt && !error && (
-          <div className="bg-primary text-white p-4 rounded-2xl shadow-2xl border border-white/10 mb-2 max-w-[220px] animate-bounce">
+          <div className="bg-primary text-white p-4 rounded-2xl shadow-2xl border border-white/10 mb-2 max-w-[220px] animate-bounce ring-2 ring-[#CFFF04]/20">
             <div className="flex items-center gap-2 mb-2">
                <Radio className="w-3 h-3 text-accent animate-pulse" />
                <p className="text-[10px] font-black uppercase tracking-widest leading-tight">Institutional Notice</p>
@@ -160,10 +161,11 @@ export function AudioAnnouncement() {
           </div>
         )}
 
-        {/* Sleek Floating Control Pill */}
+        {/* Vibrant Animated Control Pill */}
         <div className={cn(
-          "bg-slate-900/90 backdrop-blur-xl border p-1.5 rounded-2xl shadow-2xl flex items-center gap-1 group transition-all duration-300 ring-1 ring-white/5",
-          error ? "border-red-500/50" : "border-white/10 hover:bg-slate-900"
+          "bg-slate-900/95 backdrop-blur-xl border p-1.5 rounded-2xl shadow-2xl flex items-center gap-1 group transition-all duration-300 ring-1 ring-white/10",
+          "animate-pulsate hover:shadow-[0_0_30px_rgba(207,255,4,0.3)]",
+          error ? "border-red-500/50 shadow-red-500/10" : "border-[#CFFF04]/20 hover:border-[#CFFF04]"
         )}>
           
           {/* Status Context (Revealed on Hover) */}
@@ -171,13 +173,13 @@ export function AudioAnnouncement() {
              <div className="flex items-center gap-1.5">
                <span className={cn(
                  "text-[8px] font-black uppercase tracking-[0.2em] whitespace-nowrap",
-                 error ? "text-red-400" : "text-emerald-400"
+                 error ? "text-red-400" : "bg-gradient-to-r from-[#CFFF04] via-[#FF00FF] to-[#CFFF04] bg-[length:200%_auto] bg-clip-text text-transparent animate-gradient-x"
                )}>
                  {error ? "Broadcast Error" : "Live Broadcast"}
                </span>
-               {!error && <div className="h-1 w-1 rounded-full bg-emerald-500 animate-ping"></div>}
+               {!error && <Zap className="w-2 h-2 text-[#CFFF04] animate-pulse" />}
              </div>
-             <span className="text-[10px] font-bold text-white truncate max-w-[140px]">
+             <span className="text-[10px] font-bold text-white truncate max-w-[140px] drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">
                {error ? "No supported sources" : (settings.title || 'Official Announcement')}
              </span>
           </div>
@@ -192,7 +194,7 @@ export function AudioAnnouncement() {
                       variant="ghost" 
                       size="icon" 
                       onClick={handleReplay}
-                      className="h-9 w-9 rounded-xl text-white/40 hover:text-accent hover:bg-white/5 transition-colors"
+                      className="h-9 w-9 rounded-xl text-white/40 hover:text-[#CFFF04] hover:bg-white/5 transition-colors"
                     >
                       <RefreshCw className="w-4 h-4" />
                     </Button>
@@ -247,9 +249,9 @@ export function AudioAnnouncement() {
           </div>
         </div>
         
-        {/* Subtle Branding Tag */}
-        <div className="pr-2 opacity-0 group-hover:opacity-40 transition-opacity duration-500">
-           <p className="text-[7px] font-black text-white uppercase tracking-[0.4em]">National Audio Registry</p>
+        {/* Colorful Branding Tag */}
+        <div className="pr-2 opacity-0 group-hover:opacity-60 transition-all duration-500">
+           <p className="text-[7px] font-black text-[#CFFF04] uppercase tracking-[0.4em] drop-shadow-[0_0_5px_rgba(207,255,4,0.5)]">National Audio Registry</p>
         </div>
       </div>
     </div>
