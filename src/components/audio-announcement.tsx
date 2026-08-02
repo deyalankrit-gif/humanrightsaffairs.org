@@ -28,7 +28,7 @@ import { cn } from '@/lib/utils';
 /**
  * AudioAnnouncement: Global institutional broadcast player with sleek homepage controls.
  * Features: Autoplay detection, mute state persistence, and real-time registry sync.
- * Updated: Defensive rendering and error handling for "no supported sources" browser errors.
+ * Updated: Repositioned to bottom-32 for enhanced visibility and UI spacing.
  */
 export function AudioAnnouncement() {
   const db = useFirestore();
@@ -133,7 +133,7 @@ export function AudioAnnouncement() {
   if (!mounted || loading || !settings?.enabled || !settings?.audioData || !isVisible || !isHome) return null;
 
   return (
-    <div className="fixed bottom-24 right-6 z-[120] animate-in fade-in slide-in-from-right-4 duration-700 print:hidden">
+    <div className="fixed bottom-32 right-6 z-[120] animate-in fade-in slide-in-from-right-4 duration-700 print:hidden">
       <audio 
         ref={audioRef} 
         src={settings.audioData} 
