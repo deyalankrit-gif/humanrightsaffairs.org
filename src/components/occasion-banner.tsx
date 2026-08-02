@@ -14,8 +14,7 @@ import { cn } from '@/lib/utils';
  * Features: Fully transparent background, #CFFF04 primary typography, and #FF00FF for "Welcome to HRAT".
  * Optimized for real-time synchronization with the administrative terminal.
  * Updated: Hides automatically when scrolling to prevent overlap with floating navigation.
- * Note: Positioned with a significant top margin to keep it clear of the elevated news feed.
- * Refinement: Moved significantly lower and further to the right to clear the NITI Aayog emblem.
+ * Refinement: Positioned higher and further right to clear the NITI Aayog emblem and centered hero content.
  */
 export function OccasionBanner() {
   const db = useFirestore();
@@ -77,7 +76,7 @@ export function OccasionBanner() {
   const isDefault = activeOccasion.isDefault === true;
 
   return (
-    <div className="absolute top-full right-[-50px] md:right-[-150px] mt-40 md:mt-64 z-[110] animate-in fade-in slide-in-from-top-4 duration-700 pointer-events-auto w-[320px] sm:w-[450px] lg:w-[500px]">
+    <div className="absolute top-full right-[-80px] md:right-[-200px] mt-32 md:mt-48 z-[110] animate-in fade-in slide-in-from-top-4 duration-700 pointer-events-auto w-[320px] sm:w-[450px] lg:w-[500px]">
       <div className={cn(
         "bg-transparent p-4 md:p-6 flex items-center gap-4 md:gap-7 group transition-all duration-700",
         loading && "opacity-80"
