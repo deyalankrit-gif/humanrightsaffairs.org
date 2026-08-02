@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, query, orderBy, addDoc, deleteDoc, doc, updateDoc, serverTimestamp, limit } from 'firebase/firestore';
+import { collection, query, orderBy, addDoc, deleteDoc, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { 
   Speaker, 
   ShieldCheck, 
@@ -31,7 +31,8 @@ import {
   User,
   Activity,
   XCircle,
-  Radio
+  Radio,
+  Edit
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -82,6 +83,7 @@ export default function AiAudioCenter() {
   const [isSaving, setIsSaving] = useState(false);
   const [search, setSearch] = useState('');
   const [isAddOpen, setIsAddOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   const [form, setForm] = useState({
     title: '',
@@ -158,21 +160,46 @@ export default function AiAudioCenter() {
         status,
         updatedAt: serverTimestamp(),
         updatedBy: user.email,
-        createdAt: serverTimestamp(),
-        createdBy: user.email,
         publishedTime: status === 'Published' ? serverTimestamp() : null
       };
 
-      await addDoc(collection(db, 'ai_announcements'), docData);
+      if (editingId) {
+        await updateDoc(doc(db, 'ai_announcements', editingId), docData);
+        toast({ title: "Registry Updated", description: "Record modified successfully." });
+      } else {
+        await addDoc(collection(db, 'ai_announcements'), {
+          ...docData,
+          createdAt: serverTimestamp(),
+          createdBy: user.email,
+        });
+        toast({ title: status === 'Published' ? "Broadcast Live" : "Draft Archived", description: "National registry successfully updated." });
+      }
       
-      toast({ title: status === 'Published' ? "Broadcast Live" : "Draft Archived", description: "National registry successfully updated." });
       setIsAddOpen(false);
+      setEditingId(null);
       setForm({ title: '', fullText: '', category: 'Official Notice', language: 'English', voice: 'Male', emotion: 'Official', speed: 1, pitch: 0, audioData: '', status: 'Draft' });
     } catch (e: any) {
       toast({ variant: "destructive", title: "Archive Error", description: e.message });
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const handleStartEdit = (ann: any) => {
+    setEditingId(ann.id);
+    setForm({
+      title: ann.title || '',
+      fullText: ann.fullText || '',
+      category: ann.category || 'Official Notice',
+      language: ann.language || 'English',
+      voice: ann.voice || 'Male',
+      emotion: ann.emotion || 'Official',
+      speed: ann.speed || 1,
+      pitch: ann.pitch || 0,
+      audioData: ann.audioData || '',
+      status: ann.status || 'Draft'
+    });
+    setIsAddOpen(true);
   };
 
   const handleStatusUpdate = async (id: string, newStatus: string) => {
@@ -223,7 +250,7 @@ export default function AiAudioCenter() {
              <h1 className="text-3xl md:text-4xl font-headline font-bold">Audio <span className="text-accent italic">Announcement Center</span></h1>
              <p className="text-slate-400 text-[11px] uppercase font-black">Autonomous Speech Generation Node</p>
           </div>
-          <Button onClick={() => setIsAddOpen(true)} className="bg-accent text-primary hover:bg-secondary hover:text-white h-11 px-8 rounded-xl font-bold gap-2 shadow-xl shadow-accent/20 transition-all">
+          <Button onClick={() => { setEditingId(null); setIsAddOpen(true); setForm({ title: '', fullText: '', category: 'Official Notice', language: 'English', voice: 'Male', emotion: 'Official', speed: 1, pitch: 0, audioData: '', status: 'Draft' }); }} className="bg-accent text-primary hover:bg-secondary hover:text-white h-11 px-8 rounded-xl font-bold gap-2 shadow-xl shadow-accent/20 transition-all">
              <Plus className="w-4 h-4" /> Initialize New Announcement
           </Button>
         </div>
@@ -276,7 +303,7 @@ export default function AiAudioCenter() {
         )}
 
         <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
-           <div className="relative w-full max-w-md">
+           <div className="relative w-full max-width-md">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <Input placeholder="Filter registry by title or category..." className="pl-10 h-11 rounded-xl bg-white dark:bg-slate-900 shadow-sm" value={search} onChange={e => setSearch(e.target.value)} />
            </div>
@@ -315,6 +342,7 @@ export default function AiAudioCenter() {
                             </div>
                          </div>
                          <div className="flex items-center gap-3">
+                            <Button onClick={() => handleStartEdit(ann)} variant="ghost" size="icon" className="h-10 w-10 text-slate-300 hover:text-accent rounded-xl"><Edit className="w-5 h-5" /></Button>
                             {ann.status === 'Draft' && (
                               <Button onClick={() => handleStatusUpdate(ann.id, 'Published')} variant="outline" size="sm" className="h-9 rounded-xl border-emerald-100 text-emerald-600 hover:bg-emerald-50 font-bold text-[10px] uppercase shadow-sm">
                                 <Zap className="w-3 h-3 mr-1.5" /> Go Live
@@ -355,13 +383,13 @@ export default function AiAudioCenter() {
         </div>
       </section>
 
-      {/* Initialize New Announcement Dialog */}
-      <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
+      {/* Initialize New/Edit Announcement Dialog */}
+      <Dialog open={isAddOpen} onOpenChange={(val) => { setIsAddOpen(val); if(!val) setEditingId(null); }}>
          <DialogContent className="max-w-3xl rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden bg-white dark:bg-slate-950 flex flex-col max-h-[90vh]">
             <div className="bg-slate-900 p-8 text-white relative shrink-0 border-b-4 border-accent/20">
                <div className="absolute right-6 top-6"><DialogClose asChild><Button variant="ghost" size="icon" className="rounded-full text-white/40 hover:text-white"><X className="w-5 h-5" /></Button></DialogClose></div>
                <Badge className="bg-accent text-primary font-black text-[8px] uppercase mb-2 tracking-widest">Administrative Node</Badge>
-               <DialogTitle className="text-2xl font-headline font-bold">AI Speech Synthesis Protocol</DialogTitle>
+               <DialogTitle className="text-2xl font-headline font-bold">{editingId ? "Update Announcement Protocol" : "AI Speech Synthesis Protocol"}</DialogTitle>
                <DialogDescription className="text-slate-400">Institutional Voice Generation & Publishing Terminal</DialogDescription>
             </div>
             
@@ -467,7 +495,7 @@ export default function AiAudioCenter() {
                     disabled={isGenerating}
                     className="w-full h-16 rounded-2xl bg-primary text-white font-black text-lg hover:bg-secondary transition-all shadow-xl shadow-primary/20 flex gap-3 group"
                   >
-                     {isGenerating ? <Loader2 className="w-7 h-7 animate-spin" /> : <><Mic2 className="w-6 h-6 group-hover:scale-110" /> Generate AI Voice</>}
+                     {isGenerating ? <Loader2 className="w-7 h-7 animate-spin" /> : <><Mic2 className="w-6 h-6 group-hover:scale-110" /> {form.audioData ? "Regenerate AI Voice" : "Generate AI Voice"}</>}
                   </Button>
 
                   {form.audioData && (
@@ -490,10 +518,10 @@ export default function AiAudioCenter() {
             <DialogFooter className="p-8 bg-slate-50 dark:bg-slate-900 border-t shrink-0">
                <div className="flex w-full gap-4">
                   <Button onClick={() => handleSave('Draft')} disabled={isSaving || isGenerating || !form.audioData} variant="outline" className="flex-1 h-12 rounded-xl font-bold uppercase text-[10px] tracking-widest border-2">
-                     <Archive className="w-4 h-4 mr-2" /> Save as Draft
+                     <Archive className="w-4 h-4 mr-2" /> {editingId ? "Save Changes" : "Save as Draft"}
                   </Button>
                   <Button onClick={() => handleSave('Published')} disabled={isSaving || isGenerating || !form.audioData} className="flex-1 h-12 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold uppercase text-[10px] tracking-widest shadow-xl shadow-emerald-900/20">
-                     <CheckCircle2 className="w-4 h-4 mr-2" /> Verify & Go Live
+                     <CheckCircle2 className="w-4 h-4 mr-2" /> {editingId ? "Apply & Go Live" : "Verify & Go Live"}
                   </Button>
                </div>
             </DialogFooter>
