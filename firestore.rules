@@ -37,7 +37,6 @@ service cloud.firestore {
     }
 
     // 3. PUBLIC READ REGISTRY
-    // High-priority paths readable by everyone to ensure transparency.
     match /occasions/{occasionId} {
       allow read: if true;
       allow write: if hasPermission('occasions');
@@ -46,6 +45,11 @@ service cloud.firestore {
     match /current_news/{newsId} {
       allow read: if true;
       allow write: if true; 
+    }
+
+    match /ai_announcements/{id} {
+      allow read: if true;
+      allow write: if hasPermission('occasions');
     }
 
     match /current_news_state/{docId} {
@@ -138,7 +142,7 @@ service cloud.firestore {
       allow read, write: if hasPermission('grievances');
     }
 
-    // 6. FINANCIAL GOVERNANCE (Enterprise Modules)
+    // 6. FINANCIAL GOVERNANCE
     match /finance_transactions/{txId} {
       allow read: if isRoot() || isInternalStaff() || hasPermission('financeLedger') || hasPermission('financeDashboard');
       allow create, update: if isRoot() || isInternalStaff() || hasPermission('financeVouchers');

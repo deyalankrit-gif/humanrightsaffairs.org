@@ -153,6 +153,30 @@
         "updatedAt": { "type": "string", "format": "date-time" },
         "updatedBy": { "type": "string" }
       }
+    },
+    "AiAnnouncement": {
+      "title": "AI Audio Announcement",
+      "description": "AI-generated speech announcement.",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "fullText": { "type": "string" },
+        "audioData": { "type": "string" },
+        "category": { "type": "string" },
+        "language": { "type": "string", "enum": ["English", "Bengali", "Hindi"] },
+        "voice": { "type": "string", "enum": ["Male", "Female"] },
+        "emotion": { "type": "string", "enum": ["Professional", "Calm", "Friendly", "Emergency", "Official"] },
+        "speed": { "type": "number" },
+        "pitch": { "type": "number" },
+        "status": { "type": "string", "enum": ["Draft", "Published", "Archived"] },
+        "duration": { "type": "number" },
+        "fileSize": { "type": "number" },
+        "publishedTime": { "type": "string", "format": "date-time" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" },
+        "createdBy": { "type": "string" },
+        "updatedBy": { "type": "string" }
+      }
     }
   },
   "auth": {
@@ -165,6 +189,7 @@
     "/materials/{materialId}": { "schema": "MaterialItem", "description": "Material management inventory." },
     "/current_news/{newsId}": { "schema": "CurrentNews", "description": "Homepage news broadcast." },
     "/feedback/{feedbackId}": { "schema": "Feedback", "description": "User feedback collection." },
-    "/settings/audio_announcement": { "schema": "AudioAnnouncement", "description": "Global audio broadcast configuration." }
+    "/settings/audio_announcement": { "schema": "AudioAnnouncement", "description": "Global audio broadcast configuration." },
+    "/ai_announcements/{id}": { "schema": "AiAnnouncement", "description": "Registry of AI-generated audio announcements." }
   }
 }

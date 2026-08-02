@@ -1,14 +1,15 @@
+
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
-import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
+import { collection, query, orderBy, addDoc, deleteDoc, doc, updateDoc, serverTimestamp, setDoc } from 'firebase/firestore';
 import { 
   Speaker, 
   ShieldCheck, 
   Loader2, 
-  UploadCloud, 
+  Plus, 
   Play, 
   Pause, 
   Trash2, 
@@ -18,138 +19,165 @@ import {
   X,
   FileAudio,
   Volume2,
-  AlertCircle
+  AlertCircle,
+  BrainCircuit,
+  Languages,
+  Mic2,
+  Clock,
+  CheckCircle2,
+  Search,
+  History,
+  Archive,
+  ArrowRight,
+  User
 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { Footer } from '@/components/footer';
+import { generateAiSpeech } from '@/ai/flows/tts-flow';
 
 /**
- * AudioAnnouncementAdmin: Terminal for managing global website audio broadcasts.
- * Features: Direct Base64 archival, real-time preview, and broadcast status monitoring.
- * Updated: Enhanced preview resilience to prevent NotSupportedError.
+ * AI Audio Announcement Center: Full Enterprise Terminal.
+ * Managed registry for AI-generated human voice broadcasts.
  */
-export default function AudioAnnouncementAdmin() {
+export default function AiAudioCenter() {
   const { user, loading: authLoading } = useUser();
   const router = useRouter();
   const db = useFirestore();
   const { toast } = useToast();
   
+  const [isGenerating, setIsGenerating] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [isPreviewPlaying, setIsPreviewPlaying] = useState(false);
-  const [previewError, setPreviewError] = useState(false);
-  const [tempFile, setTempFile] = useState<File | null>(null);
-  const [tempDataUri, setTempDataUri] = useState<string | null>(null);
-  
-  const previewRef = React.useRef<HTMLAudioElement>(null);
-
-  const announcementRef = useMemoFirebase(() => {
-    if (!db) return null;
-    return doc(db, 'settings', 'audio_announcement');
-  }, [db]);
-
-  const { data: settings, loading: settingsLoading } = useDoc(announcementRef);
+  const [search, setSearch] = useState('');
+  const [isAddOpen, setIsAddOpen] = useState(false);
 
   const [form, setForm] = useState({
-    enabled: false,
-    title: 'HRAT Official Announcement',
-    description: '',
-    autoplay: true,
-    volume: 0.5,
-    audioData: ''
+    title: '',
+    fullText: '',
+    category: 'Official Notice',
+    language: 'English' as 'English' | 'Bengali' | 'Hindi',
+    voice: 'Male' as 'Male' | 'Female',
+    emotion: 'Official' as any,
+    speed: 1,
+    pitch: 0,
+    audioData: '',
+    status: 'Draft' as any
   });
 
   useEffect(() => {
     if (!authLoading && !user) router.push('/internal/login');
   }, [user, authLoading, router]);
 
-  useEffect(() => {
-    if (settings) {
-      setForm({
-        enabled: settings.enabled ?? false,
-        title: settings.title || 'HRAT Official Announcement',
-        description: settings.description || '',
-        autoplay: settings.autoplay ?? true,
-        volume: settings.volume ?? 0.5,
-        audioData: settings.audioData || ''
-      });
+  const announcementsQuery = useMemoFirebase(() => {
+    if (!db || !user) return null;
+    return query(collection(db, 'ai_announcements'), orderBy('createdAt', 'desc'));
+  }, [db, user]);
+
+  const { data: announcements, loading: dataLoading } = useCollection(announcementsQuery);
+
+  const handleGenerate = async () => {
+    if (!form.fullText.trim()) {
+      toast({ variant: "destructive", title: "Content Missing", description: "Please provide the text for AI conversion." });
+      return;
     }
-  }, [settings]);
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    // File validation: MPEG, MP3, WAV, OGG under 1MB
-    const validTypes = ['audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/mp3'];
-    const isMpegExtension = file.name.toLowerCase().endsWith('.mpeg') || file.name.toLowerCase().endsWith('.mpg');
     
-    if (!validTypes.includes(file.type) && !isMpegExtension) {
-      toast({ variant: "destructive", title: "Invalid Format", description: "Please upload MPEG, MP3, WAV, or OGG." });
-      return;
-    }
+    setIsGenerating(true);
+    toast({ title: "Initializing AI Synthesis", description: "Mapping text to high-fidelity human voice nodes..." });
 
-    if (file.size > 1024 * 1024) { // 1MB Firestore Doc Limit safety
-      toast({ variant: "destructive", title: "File Too Large", description: "Direct archival limit is 1MB. Use a shorter clip." });
-      return;
-    }
+    try {
+      const result = await generateAiSpeech({
+        text: form.fullText,
+        language: form.language,
+        voice: form.voice,
+        emotion: form.emotion,
+        speed: form.speed,
+        pitch: form.pitch
+      });
 
-    setPreviewError(false);
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const dataUri = reader.result as string;
-      setTempDataUri(dataUri);
-      setTempFile(file);
-      setForm(prev => ({ ...prev, audioData: dataUri }));
-      toast({ title: "Audio Buffered", description: "The asset is ready for verification." });
-    };
-    reader.readAsDataURL(file);
+      if (result.success && result.audioData) {
+        setForm(prev => ({ ...prev, audioData: result.audioData! }));
+        toast({ title: "Synthesis Complete", description: "The AI voice has been successfully generated." });
+      } else {
+        throw new Error(result.error);
+      }
+    } catch (e: any) {
+      toast({ variant: "destructive", title: "Synthesis Failed", description: e.message });
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
-  const handleSave = async () => {
-    if (!announcementRef || !user) return;
+  const handleSave = async (status: 'Draft' | 'Published') => {
+    if (!db || !user) return;
+    if (!form.title || !form.audioData) {
+      toast({ variant: "destructive", title: "Incomplete Protocol", description: "Title and Generated Audio are mandatory." });
+      return;
+    }
+
     setIsSaving(true);
     try {
-      await setDoc(announcementRef, {
+      const docData = {
         ...form,
+        status,
         updatedAt: serverTimestamp(),
-        updatedBy: user.email
-      }, { merge: true });
+        updatedBy: user.email,
+        createdAt: serverTimestamp(),
+        createdBy: user.email,
+        publishedTime: status === 'Published' ? serverTimestamp() : null
+      };
+
+      await addDoc(collection(db, 'ai_announcements'), docData);
       
-      toast({ title: "Broadcast Synchronized", description: "The institutional announcement registry has been updated." });
+      toast({ title: status === 'Published' ? "Broadcast Live" : "Draft Archived", description: "National registry successfully updated." });
+      setIsAddOpen(false);
+      setForm({ title: '', fullText: '', category: 'Official Notice', language: 'English', voice: 'Male', emotion: 'Official', speed: 1, pitch: 0, audioData: '', status: 'Draft' });
     } catch (e: any) {
-      toast({ variant: "destructive", title: "Sync Failed", description: e.message });
+      toast({ variant: "destructive", title: "Archive Error", description: e.message });
     } finally {
-      setIsSaving(true);
-      setTimeout(() => setIsSaving(false), 500);
+      setIsSaving(false);
     }
   };
 
-  const togglePreview = () => {
-    if (!previewRef.current || previewError) return;
-    if (isPreviewPlaying) {
-      previewRef.current.pause();
-    } else {
-      previewRef.current.play().catch(() => setPreviewError(true));
+  const handleStatusUpdate = async (id: string, newStatus: string) => {
+    if (!db) return;
+    const ref = doc(db, 'ai_announcements', id);
+    try {
+      await updateDoc(ref, { 
+        status: newStatus, 
+        updatedAt: serverTimestamp(),
+        publishedTime: newStatus === 'Published' ? serverTimestamp() : null
+      });
+      toast({ title: `Status: ${newStatus}` });
+    } catch (e) {
+      toast({ variant: "destructive", title: "Update Failed" });
     }
-    setIsPreviewPlaying(!isPreviewPlaying);
   };
 
-  const purgeAudio = () => {
-    setForm(prev => ({ ...prev, audioData: '', enabled: false }));
-    setTempDataUri(null);
-    setTempFile(null);
-    setPreviewError(false);
-    toast({ title: "Asset Purged", description: "Audio buffer cleared." });
+  const handleDelete = async (id: string) => {
+    if (!db) return;
+    try {
+      await deleteDoc(doc(db, 'ai_announcements', id));
+      toast({ title: "Record Purged" });
+    } catch (e) {
+      toast({ variant: "destructive", title: "Delete Failed" });
+    }
   };
 
-  if (authLoading || settingsLoading) {
+  const filtered = (announcements || []).filter(a => 
+    a.title.toLowerCase().includes(search.toLowerCase()) || 
+    a.category.toLowerCase().includes(search.toLowerCase())
+  );
+
+  if (authLoading || dataLoading) {
     return <div className="min-h-screen flex items-center justify-center bg-slate-950"><Loader2 className="animate-spin text-accent" /></div>;
   }
 
@@ -159,171 +187,239 @@ export default function AudioAnnouncementAdmin() {
         <div className="container mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="space-y-1">
              <div className="inline-flex items-center gap-2 bg-accent/20 text-accent px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border border-accent/30">
-               <Speaker className="w-2.5 h-2.5 animate-pulse" /> Audio Broadcast Node
+               <BrainCircuit className="w-2.5 h-2.5 animate-pulse" /> AI Voice Terminal
              </div>
-             <h1 className="text-3xl md:text-4xl font-headline font-bold">Audio <span className="text-accent italic">Announcement</span></h1>
-             <p className="text-slate-400 text-[11px] uppercase font-black">Institutional Communication Registry</p>
+             <h1 className="text-3xl md:text-4xl font-headline font-bold">Audio <span className="text-accent italic">Announcement Center</span></h1>
+             <p className="text-slate-400 text-[11px] uppercase font-black">Autonomous Speech Generation Node</p>
           </div>
-          <Button onClick={handleSave} disabled={isSaving} className="bg-accent text-primary hover:bg-secondary hover:text-white h-11 px-8 rounded-xl font-bold gap-2 shadow-xl shadow-accent/20 transition-all">
-             {isSaving ? <Loader2 className="animate-spin w-4 h-4" /> : <Save className="w-4 h-4" />} Commit Changes
+          <Button onClick={() => setIsAddOpen(true)} className="bg-accent text-primary hover:bg-secondary hover:text-white h-11 px-8 rounded-xl font-bold gap-2 shadow-xl shadow-accent/20 transition-all">
+             <Plus className="w-4 h-4" /> Initialize New Announcement
           </Button>
         </div>
       </header>
 
-      <section className="py-8 container mx-auto px-4 max-w-5xl">
-        <div className="grid lg:grid-cols-12 gap-8">
-           
-           <div className="lg:col-span-8 space-y-6">
-              <Card className="rounded-[2.5rem] border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900">
-                 <CardHeader className="p-8 border-b bg-slate-50 dark:bg-slate-800/50">
-                    <CardTitle className="text-xl font-headline font-bold">Broadcast Configuration</CardTitle>
-                    <CardDescription>Define the metadata and behavioral logic for the website audio.</CardDescription>
-                 </CardHeader>
-                 <CardContent className="p-8 space-y-8">
-                    <div className="grid md:grid-cols-2 gap-8">
-                       <div className="space-y-2">
-                          <Label className="text-[10px] font-black uppercase text-slate-400">Announcement Title</Label>
-                          <Input value={form.title} onChange={e => setForm({...form, title: e.target.value})} placeholder="e.g. Welcome to HRAT India" className="h-11 rounded-xl" />
-                       </div>
-                       <div className="space-y-2">
-                          <Label className="text-[10px] font-black uppercase text-slate-400">Default Volume</Label>
-                          <div className="flex items-center gap-4 pt-2">
-                             <Volume2 className="w-4 h-4 text-slate-400" />
-                             <Slider 
-                               value={[form.volume]} 
-                               max={1} 
-                               step={0.1} 
-                               onValueChange={v => setForm({...form, volume: v[0]})}
-                               className="flex-1"
-                             />
-                             <span className="text-xs font-bold w-8">{Math.round(form.volume * 100)}%</span>
-                          </div>
-                       </div>
-                    </div>
+      <section className="py-8 container mx-auto px-4">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
+           <div className="relative w-full max-w-md">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <Input placeholder="Filter registry by title or category..." className="pl-10 h-11 rounded-xl bg-white dark:bg-slate-900 shadow-sm" value={search} onChange={e => setSearch(e.target.value)} />
+           </div>
+           <div className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 p-1.5 rounded-xl border">
+              <Badge variant="outline" className="text-[10px] uppercase font-bold border-slate-200">History: {announcements?.length || 0}</Badge>
+           </div>
+        </div>
 
-                    <div className="space-y-2">
-                       <Label className="text-[10px] font-black uppercase text-slate-400">Tactical Description (Optional)</Label>
-                       <Input value={form.description} onChange={e => setForm({...form, description: e.target.value})} placeholder="Brief context for administrative logs..." className="h-11 rounded-xl" />
-                    </div>
-
-                    <div className="grid md:grid-cols-2 gap-4">
-                       <div className="flex items-center justify-between p-5 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-100">
-                          <div className="space-y-0.5">
-                             <Label className="font-bold text-sm">Status: {form.enabled ? 'Live' : 'Inactive'}</Label>
-                             <p className="text-[9px] text-slate-400 uppercase font-bold">Enable global broadcast</p>
-                          </div>
-                          <Switch checked={form.enabled} onCheckedChange={v => setForm({...form, enabled: v})} className="data-[state=checked]:bg-emerald-500" />
-                       </div>
-                       <div className="flex items-center justify-between p-5 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-100">
-                          <div className="space-y-0.5">
-                             <Label className="font-bold text-sm">Autoplay Logic</Label>
-                             <p className="text-[9px] text-slate-400 uppercase font-bold">Trigger on landing</p>
-                          </div>
-                          <Switch checked={form.autoplay} onCheckedChange={v => setForm({...form, autoplay: v})} className="data-[state=checked]:bg-accent" />
-                       </div>
-                    </div>
-                 </CardContent>
-              </Card>
-
-              {/* Audio Asset Terminal */}
-              <Card className="rounded-[2.5rem] border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900">
-                 <CardHeader className="p-8 border-b">
-                    <CardTitle className="text-xl font-headline font-bold flex items-center gap-3">
-                       <FileAudio className="w-5 h-5 text-accent" /> Institutional Audio Registry
-                    </CardTitle>
-                 </CardHeader>
-                 <CardContent className="p-8">
-                    <div className="flex flex-col items-center gap-8">
-                       {form.audioData ? (
-                         <div className="w-full space-y-6 animate-in zoom-in-95 duration-500">
-                            <div className={cn(
-                              "p-8 bg-slate-900 rounded-3xl border flex flex-col items-center gap-6 shadow-2xl relative overflow-hidden",
-                              previewError ? "border-red-500/50" : "border-white/5"
-                            )}>
-                               <div className="absolute top-0 right-0 w-32 h-32 bg-accent/5 rounded-full -mr-16 -mt-16 blur-2xl"></div>
-                               <div className={cn(
-                                 "relative z-10 w-20 h-20 rounded-full border-4 flex items-center justify-center",
-                                 previewError ? "bg-red-500/10 border-red-500/20 text-red-500" : "bg-accent/10 border-accent/20 text-accent"
-                               )}>
-                                  {isPreviewPlaying && !previewError ? <Loader2 className="w-10 h-10 animate-spin" /> : previewError ? <AlertCircle className="w-10 h-10" /> : <Speaker className="w-10 h-10" />}
-                               </div>
-                               <div className="text-center z-10">
-                                  <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-1">
-                                    {previewError ? "Playback Incompatible" : "Active Asset Loaded"}
-                                  </p>
-                                  <h4 className="text-lg font-bold text-white uppercase tracking-tight">
-                                    {previewError ? "Format Not Supported" : (tempFile?.name || 'Committed Audio File')}
-                                  </h4>
-                               </div>
-                               
-                               <div className="flex gap-3 relative z-10">
-                                  <Button 
-                                    onClick={togglePreview} 
-                                    disabled={previewError}
-                                    className="bg-white text-primary hover:bg-accent hover:text-white font-bold h-12 px-10 rounded-xl transition-all"
-                                  >
-                                     {isPreviewPlaying ? <><Pause className="w-4 h-4 mr-2" /> STOP PREVIEW</> : <><Play className="w-4 h-4 mr-2" /> START PREVIEW</>}
-                                  </Button>
-                                  <Button variant="ghost" onClick={purgeAudio} className="h-12 w-12 rounded-xl text-red-500 hover:bg-red-500/10">
-                                     <Trash2 className="w-5 h-5" />
-                                  </Button>
-                               </div>
-                               <audio 
-                                 ref={previewRef} 
-                                 src={form.audioData} 
-                                 onEnded={() => setIsPreviewPlaying(false)}
-                                 onError={() => {
-                                   setPreviewError(true);
-                                   setIsPreviewPlaying(false);
-                                 }}
-                                 className="hidden" 
-                               />
+        <div className="grid gap-6">
+           {filtered.map((ann: any) => (
+             <Card key={ann.id} className="border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900 rounded-3xl group transition-all hover:shadow-lg">
+                <CardContent className="p-0">
+                   <div className="flex flex-col md:flex-row items-stretch">
+                      <div className="p-6 md:w-56 text-center border-r bg-slate-50 dark:bg-slate-800/50 flex flex-col items-center justify-center shrink-0">
+                         <div className="w-12 h-12 rounded-2xl bg-white dark:bg-slate-900 flex items-center justify-center text-accent mb-3 shadow-sm group-hover:scale-110 transition-transform">
+                            <Speaker className="w-6 h-6" />
+                         </div>
+                         <Badge className={cn(
+                           "text-[9px] font-black uppercase px-3 py-0.5 rounded-full border-none shadow-sm",
+                           ann.status === 'Published' ? "bg-emerald-500" : ann.status === 'Draft' ? "bg-slate-400" : "bg-amber-600"
+                         )}>
+                           {ann.status}
+                         </Badge>
+                         <p className="text-[8px] font-bold text-slate-400 uppercase mt-3 tracking-widest">{ann.language} • {ann.voice}</p>
+                      </div>
+                      <div className="flex-1 p-6 flex flex-col md:flex-row items-center justify-between gap-6">
+                         <div className="space-y-1.5 text-center md:text-left flex-1">
+                            <div className="flex items-center justify-center md:justify-start gap-2">
+                               <h3 className="text-xl font-bold text-primary dark:text-white leading-tight">{ann.title}</h3>
+                               <Badge variant="outline" className="text-[7px] font-black uppercase border-accent text-accent">{ann.category}</Badge>
+                            </div>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 italic">"{ann.fullText}"</p>
+                            <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-2">
+                               <span className="flex items-center gap-1.5"><Clock className="w-3 h-3 text-accent" /> {ann.createdAt?.toDate?.()?.toLocaleDateString() || 'Just now'}</span>
+                               <span className="flex items-center gap-1.5"><User className="w-3 h-3 text-accent" /> By: {ann.createdBy?.split('@')[0]}</span>
                             </div>
                          </div>
-                       ) : (
-                         <div className="w-full flex flex-col items-center p-12 border-4 border-dashed border-slate-100 rounded-[3rem] group hover:border-accent transition-colors relative cursor-pointer">
-                            <UploadCloud className="w-16 h-16 text-slate-200 group-hover:text-accent transition-colors duration-500" />
-                            <div className="text-center mt-6">
-                               <p className="text-lg font-bold text-primary dark:text-white uppercase tracking-tight">Archival Upload Node</p>
-                               <p className="text-xs text-slate-400 mt-1 uppercase font-bold">MPEG, MP3, WAV or OGG (Max 1MB)</p>
-                            </div>
-                            <input type="file" accept="audio/*" onChange={handleFileChange} className="absolute inset-0 opacity-0 cursor-pointer" />
+                         <div className="flex items-center gap-3">
+                            {ann.status === 'Draft' && (
+                              <Button onClick={() => handleStatusUpdate(ann.id, 'Published')} variant="outline" size="sm" className="h-9 rounded-xl border-emerald-100 text-emerald-600 hover:bg-emerald-50 font-bold text-[10px] uppercase">Publish</Button>
+                            )}
+                            {ann.status === 'Published' && (
+                              <Button onClick={() => handleStatusUpdate(ann.id, 'Archived')} variant="outline" size="sm" className="h-9 rounded-xl border-slate-200 text-slate-500 font-bold text-[10px] uppercase">Archive</Button>
+                            )}
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button variant="ghost" size="icon" className="h-10 w-10 text-slate-300 hover:text-red-500 transition-all rounded-xl"><Trash2 className="w-5 h-5" /></Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent className="rounded-[2.5rem]">
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Purge announcement record?</AlertDialogTitle>
+                                  <AlertDialogDescription>This will permanently remove "{ann.title}" from the registry. It will vanished from the public portal instantly.</AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+                                  <AlertDialogAction onClick={() => handleDelete(ann.id)} className="bg-red-600 hover:bg-red-700 rounded-xl">Confirm Purge</AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
                          </div>
-                       )}
-                    </div>
-                 </CardContent>
-              </Card>
-           </div>
-
-           <div className="lg:col-span-4 space-y-6">
-              <Card className="rounded-[2.5rem] border-none shadow-sm bg-slate-900 text-white p-8 relative overflow-hidden">
-                 <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full -mr-16 -mt-16 blur-2xl"></div>
-                 <h3 className="text-xs font-black uppercase text-emerald-400 tracking-[0.2em] mb-8 flex items-center gap-2">
-                    <ShieldCheck className="w-4 h-4" /> Integrity Protocol
-                 </h3>
-                 <div className="space-y-4 text-[11px] text-slate-400 font-medium leading-relaxed italic">
-                    <p>"The audio announcement is a primary institutional tool. Ensure all uploaded assets reflect the formal tone and mandate of the Human Rights Affairs Trust."</p>
-                    <p>"Files are archived directly in the National Registry database. Maintaining a strict 1MB limit ensures high-fidelity performance for mobile and low-bandwidth users."</p>
-                 </div>
-              </Card>
-
-              <div className="p-8 rounded-[2.5rem] bg-indigo-50 dark:bg-indigo-950/20 border-2 border-dashed border-indigo-200 dark:border-indigo-900/30 text-center space-y-4">
-                 <RefreshCw className="w-10 h-10 text-indigo-500 mx-auto" />
-                 <h4 className="text-sm font-black uppercase tracking-widest text-indigo-500">Live Status</h4>
-                 <div className="flex flex-col items-center gap-1">
-                    <div className="flex items-center gap-2">
-                       <div className={cn("w-2 h-2 rounded-full", form.enabled ? "bg-emerald-500 animate-pulse" : "bg-red-500")}></div>
-                       <span className={cn("text-[10px] font-black uppercase", form.enabled ? "text-emerald-600" : "text-red-500")}>
-                          {form.enabled ? 'ACTIVE BROADCAST' : 'SYSTEM OFFLINE'}
-                       </span>
-                    </div>
-                    <p className="text-[8px] text-slate-400 font-bold uppercase mt-2">Latest Sync: {settings?.updatedAt?.toDate?.()?.toLocaleString() || 'N/A'}</p>
-                 </div>
-              </div>
-           </div>
-
+                      </div>
+                   </div>
+                </CardContent>
+             </Card>
+           ))}
+           {filtered.length === 0 && (
+             <div className="text-center py-32 opacity-30">
+                <speaker className="w-20 h-20 text-slate-300 mx-auto mb-4" />
+                <p className="text-xl font-headline font-bold">No announcements found in history</p>
+             </div>
+           )}
         </div>
       </section>
+
+      {/* Initialize New Announcement Dialog */}
+      <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
+         <DialogContent className="max-w-3xl rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden bg-white dark:bg-slate-950 flex flex-col max-h-[90vh]">
+            <div className="bg-slate-900 p-8 text-white relative shrink-0 border-b-4 border-accent/20">
+               <div className="absolute right-6 top-6"><DialogClose asChild><Button variant="ghost" size="icon" className="rounded-full text-white/40 hover:text-white"><X className="w-5 h-5" /></Button></DialogClose></div>
+               <Badge className="bg-accent text-primary font-black text-[8px] uppercase mb-2 tracking-widest">Administrative Node</Badge>
+               <DialogTitle className="text-2xl font-headline font-bold">AI Speech Synthesis Protocol</DialogTitle>
+               <DialogDescription className="text-slate-400">Institutional Voice Generation & Publishing Terminal</DialogDescription>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto p-8 space-y-8 custom-scrollbar">
+               <div className="grid md:grid-cols-2 gap-6">
+                  <div className="space-y-1.5">
+                     <Label className="text-[10px] font-bold uppercase text-slate-400">Announcement Title *</Label>
+                     <Input value={form.title} onChange={e => setForm({...form, title: e.target.value})} placeholder="e.g. Constitutional Awareness Update" className="h-11 rounded-xl" />
+                  </div>
+                  <div className="space-y-1.5">
+                     <Label className="text-[10px] font-bold uppercase text-slate-400">Categorization</Label>
+                     <Select value={form.category} onValueChange={v => setForm({...form, category: v})}>
+                        <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
+                        <SelectContent className="bg-white">
+                           {['Official Notice', 'Legal Update', 'Mission Alert', 'Event Greeting', 'Emergency Broadcast'].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                        </SelectContent>
+                     </Select>
+                  </div>
+               </div>
+
+               <div className="space-y-1.5">
+                  <Label className="text-[10px] font-bold uppercase text-slate-400">Broadcast Narrative (Full Text) *</Label>
+                  <Textarea 
+                    value={form.fullText} 
+                    onChange={e => setForm({...form, fullText: e.target.value})} 
+                    placeholder="Type the message to be converted to human speech..." 
+                    className="min-h-[150px] rounded-2xl p-4 leading-relaxed" 
+                  />
+               </div>
+
+               <div className="grid md:grid-cols-3 gap-6">
+                  <div className="space-y-1.5">
+                     <Label className="text-[10px] font-bold uppercase text-slate-400">Language</Label>
+                     <Select value={form.language} onValueChange={(v: any) => setForm({...form, language: v})}>
+                        <SelectTrigger className="h-11 rounded-xl font-bold"><SelectValue /></SelectTrigger>
+                        <SelectContent className="bg-white">
+                           <SelectItem value="English">English (Global)</SelectItem>
+                           <SelectItem value="Bengali">Bengali (State)</SelectItem>
+                           <SelectItem value="Hindi">Hindi (National)</SelectItem>
+                        </SelectContent>
+                     </Select>
+                  </div>
+                  <div className="space-y-1.5">
+                     <Label className="text-[10px] font-bold uppercase text-slate-400">Vocal Profile</Label>
+                     <Select value={form.voice} onValueChange={(v: any) => setForm({...form, voice: v})}>
+                        <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
+                        <SelectContent className="bg-white">
+                           <SelectItem value="Male">Male (Lead)</SelectItem>
+                           <SelectItem value="Female">Female (Support)</SelectItem>
+                        </SelectContent>
+                     </Select>
+                  </div>
+                  <div className="space-y-1.5">
+                     <Label className="text-[10px] font-bold uppercase text-slate-400">Tonality / Emotion</Label>
+                     <Select value={form.emotion} onValueChange={(v: any) => setForm({...form, emotion: v})}>
+                        <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
+                        <SelectContent className="bg-white">
+                           {['Official', 'Professional', 'Calm', 'Friendly', 'Emergency'].map(e => <SelectItem key={e} value={e}>{e}</SelectItem>)}
+                        </SelectContent>
+                     </Select>
+                  </div>
+               </div>
+
+               <div className="grid md:grid-cols-2 gap-8 p-6 bg-slate-50 dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-inner">
+                  <div className="space-y-4">
+                     <Label className="text-[10px] font-black uppercase text-accent flex items-center gap-2">
+                        <RefreshCw className={cn("w-3 h-3", isGenerating && "animate-spin")} /> Speech Velocity
+                     </Label>
+                     <div className="flex items-center gap-4">
+                        <Slider 
+                          value={[form.speed]} 
+                          min={0.5} 
+                          max={2} 
+                          step={0.1} 
+                          onValueChange={v => setForm({...form, speed: v[0]})}
+                          className="flex-1"
+                        />
+                        <span className="text-xs font-bold w-12 text-center bg-white px-2 py-1 rounded-lg border">{form.speed}x</span>
+                     </div>
+                  </div>
+                  <div className="space-y-4">
+                     <Label className="text-[10px] font-black uppercase text-accent flex items-center gap-2">
+                        <Activity className="w-3 h-3" /> Vocal Pitch
+                     </Label>
+                     <div className="flex items-center gap-4">
+                        <Slider 
+                          value={[form.pitch]} 
+                          min={-20} 
+                          max={20} 
+                          step={1} 
+                          onValueChange={v => setForm({...form, pitch: v[0]})}
+                          className="flex-1"
+                        />
+                        <span className="text-xs font-bold w-12 text-center bg-white px-2 py-1 rounded-lg border">{form.pitch}</span>
+                     </div>
+                  </div>
+               </div>
+
+               <div className="pt-6 flex flex-col items-center gap-6">
+                  <Button 
+                    type="button"
+                    onClick={handleGenerate}
+                    disabled={isGenerating}
+                    className="w-full h-16 rounded-2xl bg-primary text-white font-black text-lg hover:bg-secondary transition-all shadow-xl shadow-primary/20 flex gap-3 group"
+                  >
+                     {isGenerating ? <Loader2 className="w-7 h-7 animate-spin" /> : <><Mic2 className="w-6 h-6 group-hover:scale-110" /> Generate AI Voice</>}
+                  </Button>
+
+                  {form.audioData && (
+                    <div className="w-full p-8 bg-slate-900 rounded-[2rem] flex flex-col items-center gap-6 animate-in zoom-in-95 duration-500 border border-white/10 shadow-2xl">
+                       <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 rounded-2xl bg-accent/20 flex items-center justify-center text-accent animate-pulse">
+                             <Volume2 className="w-6 h-6" />
+                          </div>
+                          <div className="text-center md:text-left">
+                             <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest leading-none mb-1">Generated Sample</p>
+                             <h4 className="text-white font-bold uppercase tracking-tight">Vocal Signature: {form.voice} ({form.language})</h4>
+                          </div>
+                       </div>
+                       <audio src={form.audioData} controls className="w-full rounded-full bg-white/5" />
+                    </div>
+                  )}
+               </div>
+            </div>
+
+            <DialogFooter className="p-8 bg-slate-50 dark:bg-slate-900 border-t shrink-0">
+               <div className="flex w-full gap-4">
+                  <Button onClick={() => handleSave('Draft')} disabled={isSaving || isGenerating || !form.audioData} variant="outline" className="flex-1 h-12 rounded-xl font-bold uppercase text-[10px] tracking-widest border-2">
+                     <Archive className="w-4 h-4 mr-2" /> Save as Draft
+                  </Button>
+                  <Button onClick={() => handleSave('Published')} disabled={isSaving || isGenerating || !form.audioData} className="flex-1 h-12 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold uppercase text-[10px] tracking-widest shadow-xl shadow-emerald-900/20">
+                     <CheckCircle2 className="w-4 h-4 mr-2" /> Verify & Go Live
+                  </Button>
+               </div>
+            </DialogFooter>
+         </DialogContent>
+      </Dialog>
+
       <Footer />
     </main>
   );
