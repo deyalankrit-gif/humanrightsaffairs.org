@@ -134,13 +134,13 @@ export default function RootLoginPage() {
             </div>
           </CardHeader>
           <CardContent className="p-6 md:p-8">
-            <form onSubmit={handleLogin} className="space-y-5 md:space-y-6">
+            <form onSubmit={handleLogin} className="space-y-5 md:space-y-6" autoComplete="off">
               <div className="space-y-2">
                 <Label className="text-slate-500 text-[9px] md:text-[10px] font-bold uppercase tracking-[0.2em]">Root Identity</Label>
                 <div className="relative">
                   <Input 
                     type="email" 
-                    placeholder="deydhritiman@gmail.com" 
+                    placeholder="root@hrat.org" 
                     className="bg-black/50 border-red-900/30 text-red-500 h-11 md:h-12 rounded-xl pl-10 font-mono text-sm focus:ring-red-600"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -158,9 +158,10 @@ export default function RootLoginPage() {
                     className="bg-black/50 border-red-900/30 text-red-500 h-11 md:h-12 rounded-xl pl-10 pr-10 font-mono text-sm focus:ring-red-600"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    autoComplete="current-password"
                     required
                   />
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-red-900" />
+                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-red-900" />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}

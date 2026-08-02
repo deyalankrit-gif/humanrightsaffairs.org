@@ -150,7 +150,7 @@ export default function MemberSignupPage() {
             </div>
           </CardHeader>
           <CardContent className="p-8">
-            <form onSubmit={handleSignup} className="space-y-5">
+            <form onSubmit={handleSignup} className="space-y-5" autoComplete="off">
               <div className="space-y-2">
                 <Label className="text-slate-400 text-[10px] font-bold uppercase tracking-wider ml-1">Full Name</Label>
                 <div className="relative">
@@ -170,10 +170,11 @@ export default function MemberSignupPage() {
                 <div className="relative">
                   <Input 
                     type="email" 
-                    placeholder="your@email.com" 
+                    placeholder="abcd@gmail.com" 
                     className="bg-slate-50 border-slate-200 h-12 rounded-xl pl-10 text-sm"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    autoComplete="email"
                     required
                   />
                   <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -194,6 +195,7 @@ export default function MemberSignupPage() {
                     className="bg-slate-50 border-slate-200 h-12 rounded-xl pl-10 pr-10 text-sm"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    autoComplete="new-password"
                     required
                   />
                   <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -216,6 +218,7 @@ export default function MemberSignupPage() {
                     className="bg-slate-50 border-slate-200 h-12 rounded-xl pl-10 text-sm"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
+                    autoComplete="new-password"
                     required
                   />
                   <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
