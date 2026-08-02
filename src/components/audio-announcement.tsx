@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
 import { useFirestore, useDoc, useMemoFirebase } from '@/firebase';
 import { doc } from 'firebase/firestore';
+import Image from 'next/image';
 import { 
   Volume2, 
   VolumeX, 
@@ -13,7 +14,8 @@ import {
   X,
   Speaker,
   ShieldCheck,
-  AlertCircle
+  AlertCircle,
+  Radio
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { 
@@ -28,6 +30,7 @@ import { cn } from '@/lib/utils';
  * AudioAnnouncement: Refined institutional broadcast player.
  * Optimized for automatic playback on refresh while respecting browser policies.
  * Automatically initializes and plays when the site is refreshed if enabled and not muted.
+ * Autoplay fallback (Mission Notice) now features the handmic.jpeg thematic asset.
  */
 export function AudioAnnouncement() {
   const db = useFirestore();
@@ -74,7 +77,7 @@ export function AudioAnnouncement() {
           setError(false);
         })
         .catch((err) => {
-          // Autoplay often blocked on first load, but usually works on refresh if user interacted previously
+          // Autoplay often blocked on first load
           console.warn("[AUDIO-AUTOPLAY] Playback blocked or interrupted:", err.name);
           setShowAutoplayPrompt(true);
           setIsPlaying(false);
@@ -94,7 +97,6 @@ export function AudioAnnouncement() {
 
     // If autoplay is enabled and we are not muted, try to play
     if (settings.autoplay && !isMuted) {
-      // If audio is already loaded enough, try playing immediately
       if (audio.readyState >= 2) {
         attemptPlay();
       }
@@ -146,7 +148,6 @@ export function AudioAnnouncement() {
   };
 
   const handleAudioError = () => {
-    // Only set error if we actually have a source but it fails
     if (settings?.audioData) {
       setError(true);
       setIsPlaying(false);
@@ -168,18 +169,40 @@ export function AudioAnnouncement() {
       
       <div className="flex flex-col items-end gap-4">
         {showAutoplayPrompt && !error && (
-          <div className="bg-white dark:bg-slate-900 text-primary dark:text-white p-5 rounded-[2rem] shadow-2xl border border-slate-100 dark:border-white/5 mb-2 max-w-[240px] animate-bounce ring-4 ring-accent/10">
-            <div className="flex items-center gap-2 mb-3">
-               <div className="w-2 h-2 rounded-full bg-accent animate-pulse" />
-               <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Mission Notice</p>
+          <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl border border-slate-100 dark:border-white/10 mb-2 w-[280px] overflow-hidden animate-bounce ring-8 ring-accent/5">
+            <div className="relative h-32 w-full bg-slate-900 overflow-hidden">
+               <Image 
+                 src="/handmic.jpeg" 
+                 alt="Mission Announcement" 
+                 fill 
+                 className="object-cover opacity-80"
+               />
+               <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent"></div>
+               <div className="absolute top-4 left-4 flex items-center gap-2">
+                 <div className="w-2 h-2 rounded-full bg-accent animate-pulse" />
+                 <span className="text-[10px] font-black text-white uppercase tracking-[0.2em] drop-shadow-md">Mission Notice</span>
+               </div>
             </div>
-            <Button 
-              onClick={handleManualPlay}
-              size="sm"
-              className="w-full bg-primary text-white font-bold text-[10px] h-10 rounded-xl shadow-lg hover:bg-secondary transition-all"
+            
+            <div className="p-6 pt-2 space-y-4">
+               <div className="space-y-1">
+                 <h4 className="text-xs font-black text-primary dark:text-white uppercase tracking-tight">Official Audio Update</h4>
+                 <p className="text-[10px] text-slate-500 font-bold uppercase leading-tight">Hear the latest institutional mandate from HRAT India.</p>
+               </div>
+               
+               <Button 
+                onClick={handleManualPlay}
+                className="w-full bg-primary text-white font-bold text-[10px] h-11 rounded-xl shadow-xl hover:bg-secondary transition-all flex gap-2"
+               >
+                 <Radio className="w-4 h-4 animate-pulse text-accent" /> START BROADCAST
+               </Button>
+            </div>
+            <button 
+              onClick={() => setShowAutoplayPrompt(false)}
+              className="absolute top-3 right-3 p-1 rounded-full bg-black/20 hover:bg-black/40 text-white transition-colors"
             >
-              <Play className="w-3.5 h-3.5 mr-2 fill-current" /> START ANNOUNCEMENT
-            </Button>
+              <X className="w-3.5 h-3.5" />
+            </button>
           </div>
         )}
 
