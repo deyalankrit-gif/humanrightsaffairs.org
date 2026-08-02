@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState } from 'react'
@@ -16,6 +17,10 @@ import Link from 'next/link'
 import { Captcha } from '@/components/captcha'
 import { cn } from '@/lib/utils'
 
+/**
+ * Staff Login Page: Terminal for authorized officials to access the administrative hub.
+ * Updated: Ensures no pre-filled fields and descriptive placeholders.
+ */
 export default function StaffLoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -167,11 +172,11 @@ export default function StaffLoginPage() {
                 <div className="relative">
                   <Input 
                     type="email" 
-                    placeholder="name@hrat.org" 
+                    placeholder="e.g. name@hrat-india.org" 
                     className="bg-slate-50 border-slate-200 h-11 md:h-12 rounded-xl pl-10 text-sm"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    autoComplete="email"
+                    autoComplete="off"
                     required
                   />
                   <UserCircle className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -182,11 +187,11 @@ export default function StaffLoginPage() {
                 <div className="relative">
                   <Input 
                     type={showPassword ? "text" : "password"} 
-                    placeholder="••••••••" 
+                    placeholder="Enter security key" 
                     className="bg-slate-50 border-slate-200 h-11 md:h-12 rounded-xl pl-10 pr-10 text-sm"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    autoComplete="current-password"
+                    autoComplete="off"
                     required
                   />
                   <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />

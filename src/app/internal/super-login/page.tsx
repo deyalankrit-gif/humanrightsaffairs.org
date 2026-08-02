@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState } from 'react'
@@ -16,6 +17,10 @@ import Link from 'next/link'
 import { Captcha } from '@/components/captcha'
 import { cn } from '@/lib/utils'
 
+/**
+ * Root Login Page: High-security terminal for root administrator access.
+ * Updated: Ensures no pre-filled fields and descriptive placeholders.
+ */
 export default function RootLoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -151,10 +156,11 @@ export default function RootLoginPage() {
                 <div className="relative">
                   <Input 
                     type="email" 
-                    placeholder="root@hrat.org" 
+                    placeholder="e.g. root@hrat-india.org" 
                     className="bg-black/50 border-red-900/30 text-red-500 h-11 md:h-12 rounded-xl pl-10 font-mono text-sm focus:ring-red-600"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    autoComplete="off"
                     required
                   />
                   <Terminal className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-red-900" />
@@ -165,11 +171,11 @@ export default function RootLoginPage() {
                 <div className="relative">
                   <Input 
                     type={showPassword ? "text" : "password"} 
-                    placeholder="••••••••" 
+                    placeholder="Enter root key" 
                     className="bg-black/50 border-red-900/30 text-red-500 h-11 md:h-12 rounded-xl pl-10 pr-10 font-mono text-sm focus:ring-red-600"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    autoComplete="current-password"
+                    autoComplete="off"
                     required
                   />
                   <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-red-900" />

@@ -41,6 +41,7 @@ import { cn } from '@/lib/utils'
 /**
  * Member Login Page: High-fidelity terminal for Trust members to access their private dashboards.
  * Features: Email/Password, Google Sign-In, and Phone Auth with OTP.
+ * Updated: Ensures no pre-filled fields and descriptive placeholders.
  */
 export default function MemberLoginPage() {
   const [email, setEmail] = useState('')
@@ -140,7 +141,6 @@ export default function MemberLoginPage() {
         router.push('/account')
       }
     } catch (error: any) {
-      // Suppress toast if user is actually signed in
       if (auth.currentUser) {
         router.push('/account')
         return
@@ -266,10 +266,11 @@ export default function MemberLoginPage() {
                       <Label className="text-slate-400 text-[10px] font-bold uppercase tracking-wider ml-1">Mobile Number</Label>
                       <div className="relative">
                         <Input 
-                          placeholder="+91 00000 00000" 
+                          placeholder="e.g. +91 00000 00000" 
                           className="h-12 rounded-xl pl-10 text-sm font-bold"
                           value={phoneNumber}
                           onChange={(e) => setPhoneNumber(e.target.value)}
+                          autoComplete="off"
                         />
                         <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                       </div>
@@ -284,11 +285,12 @@ export default function MemberLoginPage() {
                       <Label className="text-slate-400 text-[10px] font-bold uppercase tracking-wider ml-1">Verification OTP</Label>
                       <div className="relative">
                         <Input 
-                          placeholder="6-digit code" 
+                          placeholder="e.g. 123456" 
                           maxLength={6}
                           className="h-12 rounded-xl pl-10 text-center text-lg font-black tracking-[0.5em]"
                           value={verificationCode}
                           onChange={(e) => setVerificationCode(e.target.value)}
+                          autoComplete="off"
                         />
                         <MessageSquare className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                       </div>
@@ -307,11 +309,11 @@ export default function MemberLoginPage() {
                   <div className="relative">
                     <Input 
                       type="email" 
-                      placeholder="abcd@gmail.com" 
+                      placeholder="e.g. abcd@gmail.com" 
                       className="bg-slate-50 border-slate-200 h-12 rounded-xl pl-10 text-sm"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      autoComplete="email"
+                      autoComplete="off"
                       required
                     />
                     <UserCircle className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -325,11 +327,11 @@ export default function MemberLoginPage() {
                   <div className="relative">
                     <Input 
                       type={showPassword ? "text" : "password"} 
-                      placeholder="••••••••" 
+                      placeholder="Enter security key" 
                       className="bg-slate-50 border-slate-200 h-12 rounded-xl pl-10 pr-10 text-sm"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      autoComplete="current-password"
+                      autoComplete="off"
                       required
                     />
                     <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
