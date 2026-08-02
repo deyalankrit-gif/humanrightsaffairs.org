@@ -62,9 +62,8 @@ function DigitalClock() {
 }
 
 /**
- * AiAudioPlayer: High-fidelity public broadcast terminal.
- * Features advanced seek control, volume management, and real-time registry sync.
- * Resilient query: Fetches recent items and filters 'Published' status in memory to avoid index requirements.
+ * AiAudioPlayer: Optimized compact broadcast terminal.
+ * Features advanced seek control, volume management, and real-time registry sync in a slim footprint.
  */
 export function AiAudioPlayer({ className }: { className?: string }) {
   const db = useFirestore();
@@ -84,7 +83,6 @@ export function AiAudioPlayer({ className }: { className?: string }) {
 
   const announcementsQuery = useMemoFirebase(() => {
     if (!db) return null;
-    // Resilient query: Fetch most recent first, then filter status in memory to bypass index requirements
     return query(
       collection(db, 'ai_announcements'), 
       orderBy('createdAt', 'desc'),
@@ -94,7 +92,6 @@ export function AiAudioPlayer({ className }: { className?: string }) {
 
   const { data: list, loading } = useCollection(announcementsQuery);
   
-  // Pick the most recent published announcement in memory
   const activeAnn = useMemo(() => {
     if (!list || list.length === 0) return null;
     return list.find((a: any) => a.status === 'Published');
@@ -166,85 +163,84 @@ export function AiAudioPlayer({ className }: { className?: string }) {
   if (!mounted || loading || !activeAnn) return null;
 
   return (
-    <div className={cn("w-full py-12 bg-white dark:bg-slate-950 border-y border-slate-100 dark:border-slate-800", className)}>
+    <div className={cn("w-full py-6 md:py-8 bg-white dark:bg-slate-950 border-y border-slate-100 dark:border-slate-800", className)}>
       <div className="container mx-auto px-4">
         <audio ref={audioRef} src={activeAnn.audioData} />
         
-        <div className="max-w-5xl mx-auto flex flex-col lg:flex-row items-center gap-8 md:gap-16">
+        <div className="max-w-4xl mx-auto flex flex-col lg:flex-row items-center gap-6 md:gap-10">
           
-          {/* Metadata Sidebar */}
-          <div className="w-full lg:w-72 shrink-0 space-y-4 text-center lg:text-left">
-             <div className="inline-flex items-center gap-2 bg-accent/20 text-accent px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border border-accent/20">
-                <Mic2 className="w-3.5 h-3.5 animate-pulse" /> Official Announcement
+          {/* Compact Metadata */}
+          <div className="w-full lg:w-64 shrink-0 space-y-2 text-center lg:text-left">
+             <div className="inline-flex items-center gap-2 bg-accent/20 text-accent px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest border border-accent/20">
+                <Mic2 className="w-3 h-3 animate-pulse" /> Official Notice
              </div>
-             <h2 className="text-2xl md:text-4xl font-headline font-bold text-primary dark:text-white leading-tight">
+             <h2 className="text-lg md:text-xl font-headline font-bold text-primary dark:text-white leading-tight truncate">
                {activeAnn.title}
              </h2>
-             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                <span className="flex items-center gap-1.5"><Badge variant="outline" className="h-5 px-2 border-slate-200">{activeAnn.category}</Badge></span>
-                <span className="flex items-center gap-1.5"><Clock className="w-3 h-3 text-accent" /> {activeAnn.publishedTime?.toDate?.()?.toLocaleDateString() || 'Today'}</span>
-                <span className="flex items-center gap-1.5"><Activity className="w-3 h-3 text-accent" /> {formatTime(duration)}</span>
+             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 text-[8px] font-bold text-slate-400 uppercase tracking-widest">
+                <span className="flex items-center gap-1"><Badge variant="outline" className="h-4 px-1.5 border-slate-200 text-[7px]">{activeAnn.category}</Badge></span>
+                <span className="flex items-center gap-1"><Activity className="w-2.5 h-2.5 text-accent" /> {formatTime(duration)}</span>
              </div>
           </div>
 
-          {/* Player Terminal */}
-          <Card className="flex-1 w-full rounded-[2.5rem] md:rounded-[3.5rem] border-none shadow-2xl bg-primary dark:bg-slate-900 p-6 md:p-10 relative overflow-hidden group">
-             <div className="absolute top-0 right-0 w-64 h-64 bg-accent/5 rounded-full -mr-32 -mt-32 blur-3xl group-hover:scale-110 transition-transform duration-1000"></div>
+          {/* Slim Player Terminal */}
+          <Card className="flex-1 w-full rounded-[1.75rem] border-none shadow-xl bg-primary dark:bg-slate-900 p-4 md:p-6 relative overflow-hidden group">
+             <div className="absolute top-0 right-0 w-48 h-48 bg-accent/5 rounded-full -mr-24 -mt-24 blur-3xl"></div>
              
-             <div className="relative z-10 space-y-6 md:space-y-8">
-                <div className="flex flex-col md:flex-row items-center gap-6 md:gap-10">
+             <div className="relative z-10 space-y-4">
+                <div className="flex flex-col md:flex-row items-center gap-4 md:gap-6">
                    <Button 
                     onClick={togglePlay}
-                    className="h-16 w-16 md:h-20 md:w-20 rounded-full bg-accent hover:bg-secondary text-primary hover:text-white shadow-2xl transition-all hover:scale-105 active:scale-95 border-none p-0 flex items-center justify-center shrink-0"
+                    className="h-12 w-12 md:h-14 md:w-14 rounded-full bg-accent hover:bg-secondary text-primary hover:text-white shadow-lg transition-all hover:scale-105 active:scale-95 border-none p-0 flex items-center justify-center shrink-0"
                    >
-                     {isPlaying ? <Pause className="w-8 h-8 fill-current" /> : <Play className="w-8 h-8 fill-current ml-1" />}
+                     {isPlaying ? <Pause className="w-6 h-6 fill-current" /> : <Play className="w-6 h-6 fill-current ml-0.5" />}
                    </Button>
 
-                   <div className="flex-1 w-full space-y-4">
-                      <div className="flex justify-between items-center text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
-                         <span>Time Elapsed: {formatTime(currentTime)}</span>
-                         <span>Remaining: {formatTime(duration - currentTime)}</span>
+                   <div className="flex-1 w-full space-y-2">
+                      <div className="flex justify-between items-center text-[8px] font-black text-slate-400 uppercase tracking-widest">
+                         <span>{formatTime(currentTime)}</span>
+                         <span>- {formatTime(duration - currentTime)}</span>
                       </div>
                       <Slider 
                         value={[currentTime]} 
                         max={duration || 100} 
                         step={0.1} 
                         onValueChange={handleSeek}
-                        className="h-2 cursor-pointer"
+                        className="h-1.5 cursor-pointer"
                       />
                    </div>
                 </div>
 
-                <div className="flex flex-wrap items-center justify-between gap-6 pt-4 border-t border-white/5">
-                   <div className="flex items-center gap-3">
-                      <Button variant="ghost" size="icon" onClick={handleStop} className="h-10 w-10 rounded-full text-white/40 hover:text-red-500 hover:bg-red-500/10"><Square className="w-5 h-5 fill-current" /></Button>
-                      <Button variant="ghost" size="icon" onClick={() => { if(audioRef.current) audioRef.current.currentTime = 0 }} className="h-10 w-10 rounded-full text-white/40 hover:text-accent hover:bg-white/5"><RefreshCw className="w-5 h-5" /></Button>
-                      <div className="w-px h-6 bg-white/10 mx-2"></div>
+                <div className="flex flex-wrap items-center justify-between gap-4 pt-3 border-t border-white/5">
+                   <div className="flex items-center gap-2">
+                      <Button variant="ghost" size="icon" onClick={handleStop} className="h-8 w-8 rounded-lg text-white/40 hover:text-red-500 hover:bg-red-500/10"><Square className="w-4 h-4 fill-current" /></Button>
+                      <Button variant="ghost" size="icon" onClick={() => { if(audioRef.current) audioRef.current.currentTime = 0 }} className="h-8 w-8 rounded-lg text-white/40 hover:text-accent hover:bg-white/5"><RefreshCw className="w-4 h-4" /></Button>
+                      <div className="w-px h-4 bg-white/10 mx-1"></div>
                       <Select value={playbackSpeed.toString()} onValueChange={v => { setPlaybackSpeed(parseFloat(v)); if(audioRef.current) audioRef.current.playbackRate = parseFloat(v); }}>
-                         <SelectTrigger className="h-8 w-24 rounded-full bg-white/5 border-white/10 text-white font-bold text-[10px] uppercase"><SelectValue /></SelectTrigger>
-                         <SelectContent className="bg-slate-900 border-white/10 text-white min-w-[100px] z-[1000]">
-                            {[0.5, 0.75, 1, 1.25, 1.5, 2].map(s => <SelectItem key={s} value={s.toString()}>{s}x Speed</SelectItem>)}
+                         <SelectTrigger className="h-7 w-20 rounded-lg bg-white/5 border-white/10 text-white font-bold text-[8px] uppercase"><SelectValue /></SelectTrigger>
+                         <SelectContent className="bg-slate-900 border-white/10 text-white min-w-[80px] z-[1000]">
+                            {[0.5, 0.75, 1, 1.25, 1.5, 2].map(s => <SelectItem key={s} value={s.toString()}>{s}x</SelectItem>)}
                          </SelectContent>
                       </Select>
                    </div>
 
-                   <div className="flex flex-1 md:flex-none items-center gap-4 bg-white/5 p-2 rounded-full border border-white/10 min-w-[180px]">
-                      <Button variant="ghost" size="icon" onClick={toggleMute} className="h-8 w-8 rounded-full text-white/60 hover:text-accent">
-                         {isMuted || volume === 0 ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                   <div className="flex flex-1 md:flex-none items-center gap-3 bg-white/5 p-1.5 rounded-lg border border-white/10 min-w-[140px]">
+                      <Button variant="ghost" size="icon" onClick={toggleMute} className="h-6 w-6 rounded-md text-white/60 hover:text-accent p-0">
+                         {isMuted || volume === 0 ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
                       </Button>
                       <Slider 
                         value={[isMuted ? 0 : volume]} 
                         max={1} 
                         step={0.01} 
                         onValueChange={handleVolumeChange}
-                        className="w-24 md:w-32"
+                        className="w-20 md:w-24"
                       />
-                      <span className="text-[8px] font-black text-white/80 w-6 text-center tabular-nums">{Math.round((isMuted ? 0 : volume) * 100)}%</span>
+                      <span className="text-[7px] font-black text-white/80 w-5 text-center tabular-nums">{Math.round((isMuted ? 0 : volume) * 100)}%</span>
                    </div>
 
-                   <div className="flex items-center gap-2">
-                      <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full text-white/40 hover:text-white hover:bg-white/10"><Download className="w-5 h-5" /></Button>
-                      <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full text-white/40 hover:text-white hover:bg-white/10"><Share2 className="w-5 h-5" /></Button>
+                   <div className="flex items-center gap-1.5">
+                      <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-white/40 hover:text-white hover:bg-white/10"><Download className="w-4 h-4" /></Button>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-white/40 hover:text-white hover:bg-white/10"><Share2 className="w-4 h-4" /></Button>
                    </div>
                 </div>
              </div>
