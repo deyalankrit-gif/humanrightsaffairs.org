@@ -38,7 +38,8 @@ import {
   X,
   UserCheck,
   Info,
-  Filter
+  Filter,
+  Settings2
 } from 'lucide-react'
 import {
   AlertDialog,
@@ -294,9 +295,13 @@ export default function AccessRolesPage() {
   }
 
   const filteredUsers = (users || []).filter((u: any) => {
-    const matchesSearch = (u.email || u.id).toLowerCase().includes(search.toLowerCase()) || 
-                          (u.name || '').toLowerCase().includes(search.toLowerCase());
-    const matchesRole = roleTab === 'All' || u.role?.toLowerCase() === roleTab.toLowerCase();
+    const emailStr = (u.email || u.id || '').toLowerCase();
+    const nameStr = (u.name || '').toLowerCase();
+    const matchesSearch = emailStr.includes(search.toLowerCase()) || nameStr.includes(search.toLowerCase());
+    
+    const userRole = (u.role || '').toLowerCase();
+    const matchesRole = roleTab === 'All' || userRole === roleTab.toLowerCase();
+    
     return matchesSearch && matchesRole;
   })
 
@@ -306,7 +311,7 @@ export default function AccessRolesPage() {
         <div className="absolute top-0 right-0 w-1/3 h-full bg-red-600/5 -skew-x-12"></div>
         <div className="container mx-auto px-4 relative z-10">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="space-y-1">
+            <div className="space-y-1 text-center md:text-left">
               <div className="inline-flex items-center gap-2 bg-red-600/20 text-red-500 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.2em] border border-accent/30">
                 <ShieldAlert className="w-2.5 h-2.5" /> Secure Governance
               </div>
@@ -408,110 +413,123 @@ export default function AccessRolesPage() {
                 <div className="text-center py-20"><Loader2 className="w-10 h-10 animate-spin text-red-600 mx-auto" /></div>
               ) : (
                 <div className="grid gap-6">
-                  {filteredUsers.map((u: any) => (
-                    <Card key={u.id} className="bg-slate-900 border-white/5 rounded-[2rem] overflow-hidden group hover:border-red-900/30 transition-all">
-                      <CardHeader className="p-6 pb-2 flex flex-col sm:flex-row items-center justify-between gap-4">
-                         <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10 group-hover:border-red-600 transition-colors"><User className="w-6 h-6 text-slate-400" /></div>
-                            <div>
-                               <CardTitle className="text-xl font-headline font-bold text-white flex items-center gap-3">
-                                 {u.name || (u.email || u.id).split('@')[0]}
-                                 <Badge className={cn("text-[8px] font-black px-3 h-5 rounded-full uppercase border-none", u.role === 'admin' ? "bg-red-600 text-white" : u.role === 'member' ? "bg-secondary text-white" : "bg-slate-800 text-white")}>
-                                   {u.role?.toUpperCase()}
-                                 </Badge>
-                               </CardTitle>
-                               <div className="flex items-center gap-3">
-                                  <Mail className="w-3 h-3 text-red-500" />
-                                  <span className="text-[10px] font-mono text-slate-500">{u.email || u.id}</span>
-                                  <div className="flex items-center gap-1.5 bg-black/40 px-2 py-0.5 rounded-md border border-white/5">
-                                    <div className={cn("w-1.5 h-1.5 rounded-full", u.status === 'active' ? "bg-emerald-500 animate-pulse" : "bg-red-500")} />
-                                    <span className={cn("text-[8px] font-black uppercase", u.status === 'active' ? "text-emerald-500" : "text-red-500")}>{u.status || 'Active'}</span>
-                                  </div>
-                               </div>
-                            </div>
-                         </div>
-                         <div className="flex items-center gap-3">
-                            {u.role !== 'admin' && (
-                              <div className="flex items-center gap-2">
-                                <Button 
-                                  variant="ghost" 
-                                  size="sm" 
-                                  onClick={() => handleToggleStatus(u.id, u.status || 'active')}
-                                  className={cn("h-9 rounded-xl text-[9px] font-black uppercase tracking-widest gap-2", u.status === 'active' ? "text-red-500 hover:bg-red-500/10" : "text-emerald-500 hover:bg-emerald-500/10")}
-                                >
-                                  {u.status === 'active' ? <XCircle className="w-3.5 h-3.5" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
-                                  {u.status === 'active' ? 'Suspend' : 'Approve'}
-                                </Button>
-                                <Button variant="ghost" size="icon" onClick={() => { setEditingUser({ ...u, email: u.email || u.id }); setIsAddingEditDialogOpen(true); }} className="h-9 w-9 text-slate-600 hover:text-accent rounded-xl transition-colors"><Edit className="w-4 h-4" /></Button>
-                                <AlertDialog>
-                                  <AlertDialogTrigger asChild><Button variant="ghost" size="icon" className="h-9 w-9 text-slate-600 hover:text-red-500 rounded-xl transition-colors"><Trash2 className="w-4 h-4" /></Button></AlertDialogTrigger>
-                                  <AlertDialogContent className="bg-slate-900 border-white/10 text-white rounded-[2rem]">
-                                    <AlertDialogHeader><AlertDialogTitle className="flex items-center gap-2 text-red-500"><AlertTriangle className="w-6 h-6" /> Revoke Clearance?</AlertDialogTitle><AlertDialogDescription className="text-slate-400 uppercase tracking-widest text-[10px]">Permanently purge the record for <strong className="text-white">{u.email || u.id}</strong>? Access will be terminated immediately.</AlertDialogDescription></AlertDialogHeader>
-                                    <AlertDialogFooter><AlertDialogCancel className="bg-white/5 border-white/10 text-white rounded-xl">Cancel</AlertDialogCancel><AlertDialogAction onClick={() => handleDeleteUser(u.id)} className="bg-red-600 hover:bg-red-700 rounded-xl font-bold">{isDeleting === u.id ? <Loader2 className="animate-spin" /> : "Revoke Clearance"}</AlertDialogAction></AlertDialogFooter>
-                                  </AlertDialogContent>
-                                </AlertDialog>
-                              </div>
-                            )}
-                         </div>
-                      </CardHeader>
-                      <CardContent className="p-6">
-                         {u.role === 'member' ? (
-                           <div className="space-y-4">
-                              <div className="flex items-center gap-2 mb-2">
-                                <UserCheck className="w-3.5 h-3.5 text-secondary" />
-                                <span className="text-[10px] font-black uppercase text-slate-500 tracking-widest">Member Specific Permissions</span>
-                              </div>
-                              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                                {MEMBER_MODULES.map((mod) => {
-                                  const hasAccess = u.permissions?.[mod.id] === true;
-                                  const loadingId = `${u.id}-${mod.id}`;
-                                  return (
-                                    <div key={mod.id} className={cn("flex items-center justify-between p-3 rounded-2xl border transition-all duration-300", hasAccess ? "bg-emerald-500/5 border-emerald-900/30 text-emerald-400" : "bg-black/20 border-white/5 text-slate-500")}>
-                                      <span className="text-[10px] font-bold uppercase tracking-tighter">{mod.label}</span>
-                                      <Switch 
-                                        checked={hasAccess} 
-                                        disabled={isSaving === loadingId} 
-                                        onCheckedChange={() => handleTogglePermission(u.id, mod.id, hasAccess)} 
-                                        className="data-[state=checked]:bg-emerald-500" 
-                                      />
+                  {filteredUsers.map((u: any) => {
+                    const isMember = (u.role || '').toLowerCase() === 'member';
+                    
+                    return (
+                      <Card key={u.id} className="bg-slate-900 border-white/5 rounded-[2rem] overflow-hidden group hover:border-red-900/30 transition-all">
+                        <CardHeader className="p-6 pb-2 flex flex-col sm:flex-row items-center justify-between gap-4">
+                           <div className="flex items-center gap-4">
+                              <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10 group-hover:border-red-600 transition-colors"><User className="w-6 h-6 text-slate-400" /></div>
+                              <div>
+                                 <CardTitle className="text-xl font-headline font-bold text-white flex items-center gap-3">
+                                   {u.name || (u.email || u.id).split('@')[0]}
+                                   <Badge className={cn(
+                                     "text-[8px] font-black px-3 h-5 rounded-full uppercase border-none", 
+                                     u.role === 'admin' ? "bg-red-600 text-white" : isMember ? "bg-secondary text-white" : "bg-slate-800 text-white"
+                                   )}>
+                                     {u.role?.toUpperCase()}
+                                   </Badge>
+                                 </CardTitle>
+                                 <div className="flex items-center gap-3">
+                                    <Mail className="w-3 h-3 text-red-500" />
+                                    <span className="text-[10px] font-mono text-slate-500">{u.email || u.id}</span>
+                                    <div className="flex items-center gap-1.5 bg-black/40 px-2 py-0.5 rounded-md border border-white/5">
+                                      <div className={cn("w-1.5 h-1.5 rounded-full", u.status === 'active' ? "bg-emerald-500 animate-pulse" : "bg-red-500")} />
+                                      <span className={cn("text-[8px] font-black uppercase", u.status === 'active' ? "text-emerald-500" : "text-red-500")}>{u.status || 'Active'}</span>
                                     </div>
-                                  )
-                                })}
-                              </div>
-                              <div className="pt-4 border-t border-white/5">
-                                <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest flex items-center gap-2">
-                                  <Info className="w-3 h-3 text-accent" /> Standard Member Access Baseline (Profile & Donations) is enabled by default.
-                                </p>
+                                 </div>
                               </div>
                            </div>
-                         ) : (
-                           <div className="space-y-4">
-                              <div className="flex items-center gap-2 mb-2">
-                                <ShieldCheck className="w-3.5 h-3.5 text-red-500" />
-                                <span className="text-[10px] font-black uppercase text-slate-500 tracking-widest">Full Administrative Suite</span>
-                              </div>
-                              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                                {MODULES.map((mod) => {
-                                  const hasAccess = u.permissions?.[mod.id] === true;
-                                  const loadingId = `${u.id}-${mod.id}`;
-                                  return (
-                                    <div key={mod.id} className={cn("flex items-center justify-between p-3 rounded-2xl border transition-all duration-300", hasAccess ? "bg-red-500/5 border-red-900/30 text-red-400" : "bg-black/20 border-white/5 text-slate-500")}>
-                                      <span className="text-[10px] font-bold uppercase tracking-tighter">{mod.label}</span>
-                                      <Switch 
-                                        checked={hasAccess} 
-                                        disabled={isSaving === loadingId || u.role === 'admin'} 
-                                        onCheckedChange={() => handleTogglePermission(u.id, mod.id, hasAccess)} 
-                                        className="data-[state=checked]:bg-red-600" 
-                                      />
-                                    </div>
-                                  )
-                                })}
-                              </div>
+                           <div className="flex items-center gap-3">
+                              {u.role !== 'admin' && (
+                                <div className="flex items-center gap-2">
+                                  <Button 
+                                    variant="ghost" 
+                                    size="sm" 
+                                    onClick={() => handleToggleStatus(u.id, u.status || 'active')}
+                                    className={cn("h-9 rounded-xl text-[9px] font-black uppercase tracking-widest gap-2", u.status === 'active' ? "text-red-500 hover:bg-red-500/10" : "text-emerald-500 hover:bg-emerald-500/10")}
+                                  >
+                                    {u.status === 'active' ? <XCircle className="w-3.5 h-3.5" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
+                                    {u.status === 'active' ? 'Suspend' : 'Approve'}
+                                  </Button>
+                                  <Button variant="ghost" size="icon" onClick={() => { setEditingUser({ ...u, email: u.email || u.id }); setIsAddingEditDialogOpen(true); }} className="h-9 w-9 text-slate-600 hover:text-accent rounded-xl transition-colors"><Edit className="w-4 h-4" /></Button>
+                                  <AlertDialog>
+                                    <AlertDialogTrigger asChild><Button variant="ghost" size="icon" className="h-9 w-9 text-slate-600 hover:text-red-500 rounded-xl transition-colors"><Trash2 className="w-4 h-4" /></Button></AlertDialogTrigger>
+                                    <AlertDialogContent className="bg-slate-900 border-white/10 text-white rounded-[2rem]">
+                                      <AlertDialogHeader><AlertDialogTitle className="flex items-center gap-2 text-red-500"><AlertTriangle className="w-6 h-6" /> Revoke Clearance?</AlertDialogTitle><AlertDialogDescription className="text-slate-400 uppercase tracking-widest text-[10px]">Permanently purge the record for <strong className="text-white">{u.email || u.id}</strong>? Access will be terminated immediately.</AlertDialogDescription></AlertDialogHeader>
+                                      <AlertDialogFooter><AlertDialogCancel className="bg-white/5 border-white/10 text-white rounded-xl">Cancel</AlertDialogCancel><AlertDialogAction onClick={() => handleDeleteUser(u.id)} className="bg-red-600 hover:bg-red-700 rounded-xl font-bold">{isDeleting === u.id ? <Loader2 className="animate-spin" /> : "Revoke Clearance"}</AlertDialogAction></AlertDialogFooter>
+                                    </AlertDialogContent>
+                                  </AlertDialog>
+                                </div>
+                              )}
                            </div>
-                         )}
-                      </CardContent>
-                    </Card>
-                  ))}
+                        </CardHeader>
+                        <CardContent className="p-6">
+                           {isMember ? (
+                             <div className="space-y-4 animate-in fade-in duration-500">
+                                <div className="flex items-center gap-2 mb-2 border-b border-white/5 pb-2">
+                                  <UserCheck className="w-4 h-4 text-emerald-500" />
+                                  <span className="text-[10px] font-black uppercase text-emerald-500 tracking-[0.2em]">Member Specific Governance</span>
+                                </div>
+                                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                                  {MEMBER_MODULES.map((mod) => {
+                                    const hasAccess = u.permissions?.[mod.id] === true;
+                                    const loadingId = `${u.id}-${mod.id}`;
+                                    return (
+                                      <div key={mod.id} className={cn("flex items-center justify-between p-3 rounded-2xl border transition-all duration-300", hasAccess ? "bg-emerald-500/5 border-emerald-900/30 text-emerald-400 shadow-lg shadow-emerald-500/5" : "bg-black/20 border-white/5 text-slate-500")}>
+                                        <span className="text-[10px] font-bold uppercase tracking-tighter">{mod.label}</span>
+                                        <Switch 
+                                          checked={hasAccess} 
+                                          disabled={isSaving === loadingId} 
+                                          onCheckedChange={() => handleTogglePermission(u.id, mod.id, hasAccess)} 
+                                          className="data-[state=checked]:bg-emerald-500" 
+                                        />
+                                      </div>
+                                    )
+                                  })}
+                                </div>
+                                <div className="pt-4 p-4 bg-black/40 rounded-2xl border border-white/5">
+                                  <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest flex items-start gap-3 leading-relaxed">
+                                    <Info className="w-4 h-4 text-accent shrink-0" /> Standard members can only see this restricted set of institutional intelligence nodes.
+                                  </p>
+                                </div>
+                             </div>
+                           ) : (
+                             <div className="space-y-4 animate-in fade-in duration-500">
+                                <div className="flex items-center gap-2 mb-2 border-b border-white/5 pb-2">
+                                  <ShieldCheck className="w-4 h-4 text-red-500" />
+                                  <span className="text-[10px] font-black uppercase text-red-500 tracking-[0.2em]">Full Administrative Suite</span>
+                                </div>
+                                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                                  {MODULES.map((mod) => {
+                                    const hasAccess = u.permissions?.[mod.id] === true;
+                                    const loadingId = `${u.id}-${mod.id}`;
+                                    return (
+                                      <div key={mod.id} className={cn("flex items-center justify-between p-3 rounded-2xl border transition-all duration-300", hasAccess ? "bg-red-500/5 border-red-900/30 text-red-400" : "bg-black/20 border-white/5 text-slate-500")}>
+                                        <span className="text-[10px] font-bold uppercase tracking-tighter">{mod.label}</span>
+                                        <Switch 
+                                          checked={hasAccess} 
+                                          disabled={isSaving === loadingId || u.role === 'admin'} 
+                                          onCheckedChange={() => handleTogglePermission(u.id, mod.id, hasAccess)} 
+                                          className="data-[state=checked]:bg-red-600" 
+                                        />
+                                      </div>
+                                    )
+                                  })}
+                                </div>
+                             </div>
+                           )}
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                  {filteredUsers.length === 0 && (
+                    <div className="text-center py-40 bg-white/5 rounded-[3rem] border-2 border-dashed border-white/5">
+                       <UserCheck className="w-16 h-16 text-white/5 mx-auto mb-6" />
+                       <p className="text-lg font-headline font-bold text-slate-500 uppercase tracking-widest">No matching records identified</p>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
