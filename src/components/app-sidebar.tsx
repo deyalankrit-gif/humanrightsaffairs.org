@@ -106,7 +106,6 @@ const topAnalyticsLinksConfig = [
 
 const adminLinksConfig = [
   { name: 'Governance Manual', href: '/internal/manual', icon: BookOpen, permission: 'publicView' },
-  { name: 'Audio Announcement', href: '/internal/audio-announcement', icon: Speaker, permission: 'occasions' },
   { name: 'Applications', href: '/internal/applications', icon: FileText, permission: 'applications' },
   { name: 'Public Complaints', href: '/internal/public-complaints', icon: ShieldQuestion, permission: 'publicComplaints' },
   { name: 'Investigator Pool', href: '/internal/investigation-officers', icon: UserRoundCheck, rootOnly: true },
@@ -126,6 +125,7 @@ const adminLinksConfig = [
   { name: 'Activity Hub', href: '/internal/activity-hub', icon: LayoutDashboard, permission: 'activityHub' },
   { name: 'Access Roles', href: '/internal/roles', icon: Settings, rootOnly: true },
   { name: 'Public Site View', href: '/internal/public-view', icon: Monitor, permission: 'publicView' },
+  { name: 'Audio Announcement', href: '/internal/audio-announcement', icon: Speaker, permission: 'occasions' },
 ]
 
 const logisticLinksConfig = [
@@ -450,12 +450,18 @@ export function AppSidebar() {
                       {filteredAdminLinks.map((link) => {
                         const isActive = checkIsActive(link.href)
                         const isPinned = pinnedHrefs.includes(link.href)
+                        const isAudioAnnouncement = link.name === 'Audio Announcement'
                         return (
                           <SidebarMenuItem key={link.name} ref={isActive ? activeItemRef : null}>
                             <SidebarMenuButton asChild isActive={isActive} tooltip={link.name} className={cn("h-11 rounded-xl transition-all px-4", isActive ? "bg-accent text-white font-bold" : "hover:bg-secondary/10 hover:text-secondary")}>
                               <Link href={link.href} className="flex items-center gap-3">
-                                <link.icon className={cn("w-5 h-5", isActive ? "text-white" : "text-muted-foreground")} />
-                                <span className="group-data-[collapsible=icon]:hidden">{link.name}</span>
+                                <link.icon className={cn("w-5 h-5", isActive ? "text-white" : isAudioAnnouncement ? "text-[#CEFF00]" : "text-muted-foreground")} />
+                                <span className={cn(
+                                  "group-data-[collapsible=icon]:hidden",
+                                  isAudioAnnouncement && !isActive && "text-[#CEFF00] font-black drop-shadow-[0_0_2px_rgba(206,255,0,0.5)]"
+                                )}>
+                                  {link.name}
+                                </span>
                               </Link>
                             </SidebarMenuButton>
                             {isRoot && (
