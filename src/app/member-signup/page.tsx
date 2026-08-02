@@ -10,19 +10,21 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
-import { UserPlus, Mail, Lock, User, ArrowRight, Loader2, Home, Eye, EyeOff, ShieldCheck, CheckCircle2 } from 'lucide-react'
+import { UserPlus, Mail, Lock, User, ArrowRight, Loader2, Home, Eye, EyeOff, ShieldCheck, CheckCircle2, AlertCircle } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import Image from 'next/image'
 import Link from 'next/link'
 
 /**
  * Member Sign-Up Page: Allows prospective members to register their digital identity.
- * Accounts are created as 'inactive' and require administrative approval in the Access Roles terminal.
+ * Features: Double-line password verification and strict alphanumeric validation.
+ * Accounts are created as 'inactive' and require administrative approval.
  */
 export default function MemberSignupPage() {
   const [email, setEmail] = useState('')
   const [name, setName] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
@@ -34,8 +36,29 @@ export default function MemberSignupPage() {
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsLoading(true)
 
+    // 1. Validation Logic
+    if (password !== confirmPassword) {
+      toast({
+        variant: "destructive",
+        title: "Passphrase Mismatch",
+        description: "The confirmation passphrase does not match the original entry.",
+      })
+      return
+    }
+
+    // Alphanumeric, min 8 chars, at least one capital letter
+    const passwordRegex = /^(?=.*[A-Z])(?=.*[0-9])[a-zA-Z0-9]{8,}$/;
+    if (!passwordRegex.test(password)) {
+      toast({
+        variant: "destructive",
+        title: "Security Requirement Not Met",
+        description: "Passphrase must be at least 8 alphanumeric characters with at least one capital letter.",
+      })
+      return
+    }
+
+    setIsLoading(true)
     const inputEmail = email.toLowerCase().trim()
     
     try {
@@ -115,7 +138,7 @@ export default function MemberSignupPage() {
         <Card className="bg-white border-slate-200 shadow-2xl rounded-[2.5rem] overflow-hidden border-t-8 border-t-accent">
           <CardHeader className="text-center space-y-4 pb-2 pt-10">
             <div className="flex justify-center">
-              <div className="relative w-16 h-16 rounded-2xl overflow-hidden shadow-lg border border-slate-100 p-2">
+              <div className="relative w-16 h-16 md:w-20 md:h-20 rounded-2xl overflow-hidden shadow-lg border border-slate-100 p-2">
                 <Image src="/HRAT%20Logo.jpeg" alt="HRAT Logo" fill className="object-contain" />
               </div>
             </div>
@@ -158,7 +181,12 @@ export default function MemberSignupPage() {
               </div>
 
               <div className="space-y-2">
-                <Label className="text-slate-400 text-[10px] font-bold uppercase tracking-wider ml-1">Passphrase</Label>
+                <div className="flex justify-between items-center ml-1">
+                  <Label className="text-slate-400 text-[10px] font-bold uppercase tracking-wider">Passphrase</Label>
+                  <div className="flex items-center gap-1.5 text-[8px] font-black uppercase text-accent">
+                    <AlertCircle className="w-3 h-3" /> 8+ Alphanumeric with 1 Capital
+                  </div>
+                </div>
                 <div className="relative">
                   <Input 
                     type={showPassword ? "text" : "password"} 
@@ -167,7 +195,6 @@ export default function MemberSignupPage() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    minLength={8}
                   />
                   <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <button
@@ -177,6 +204,21 @@ export default function MemberSignupPage() {
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-slate-400 text-[10px] font-bold uppercase tracking-wider ml-1">Confirm Passphrase</Label>
+                <div className="relative">
+                  <Input 
+                    type={showPassword ? "text" : "password"} 
+                    placeholder="Re-enter secure key" 
+                    className="bg-slate-50 border-slate-200 h-12 rounded-xl pl-10 text-sm"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    required
+                  />
+                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 </div>
               </div>
 
