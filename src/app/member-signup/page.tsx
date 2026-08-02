@@ -14,6 +14,7 @@ import { useToast } from '@/hooks/use-toast'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Captcha } from '@/components/captcha'
+import { cn } from '@/lib/utils'
 
 /**
  * Member Sign-Up Page: Allows prospective members to register their digital identity.
