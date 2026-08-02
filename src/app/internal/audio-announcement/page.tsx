@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, query, orderBy, addDoc, deleteDoc, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, query, orderBy, addDoc, deleteDoc, doc, updateDoc, serverTimestamp, limit } from 'firebase/firestore';
 import { 
   Speaker, 
   ShieldCheck, 
@@ -30,7 +30,9 @@ import {
   ArrowRight,
   User,
   Activity,
-  XCircle
+  XCircle,
+  Radio,
+  Broadcast
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -106,6 +108,11 @@ export default function AiAudioCenter() {
 
   const { data: announcements, loading: dataLoading } = useCollection(announcementsQuery);
 
+  const activeBroadcast = useMemo(() => {
+    if (!announcements) return null;
+    return announcements.find((a: any) => a.status === 'Published');
+  }, [announcements]);
+
   const handleGenerate = async () => {
     if (!form.fullText.trim()) {
       toast({ variant: "destructive", title: "Content Missing", description: "Please provide the text for AI conversion." });
@@ -178,7 +185,10 @@ export default function AiAudioCenter() {
         updatedAt: serverTimestamp(),
         publishedTime: newStatus === 'Published' ? serverTimestamp() : null
       });
-      toast({ title: `Status: ${newStatus}` });
+      toast({ 
+        title: newStatus === 'Published' ? "Broadcast Live" : "Broadcast Stopped",
+        description: newStatus === 'Published' ? "Audio is now active on the public page." : "Audio removed from live stream."
+      });
     } catch (e) {
       toast({ variant: "destructive", title: "Update Failed" });
     }
@@ -221,6 +231,51 @@ export default function AiAudioCenter() {
       </header>
 
       <section className="py-8 container mx-auto px-4">
+        
+        {/* Live Broadcast Monitor Section */}
+        {activeBroadcast ? (
+          <div className="mb-10 animate-in fade-in slide-in-from-top-4 duration-700">
+            <Card className="border-none shadow-2xl rounded-[2.5rem] bg-slate-950 text-white overflow-hidden relative border-l-8 border-emerald-500">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full -mr-16 -mt-16 blur-2xl"></div>
+              <CardContent className="p-8 md:p-10 flex flex-col md:flex-row items-center justify-between gap-8">
+                 <div className="flex items-center gap-6">
+                    <div className="w-20 h-20 rounded-[2rem] bg-emerald-500/20 flex items-center justify-center text-emerald-500 relative shrink-0">
+                       <Radio className="w-10 h-10 animate-pulse" />
+                       <div className="absolute -top-1 -right-1 flex h-4 w-4">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-4 w-4 bg-emerald-500"></span>
+                       </div>
+                    </div>
+                    <div className="space-y-1">
+                       <div className="flex items-center gap-2">
+                          <Badge className="bg-emerald-600 text-white font-black text-[8px] uppercase tracking-widest px-3 h-5">Live Now</Badge>
+                          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Public Channel Active</span>
+                       </div>
+                       <h2 className="text-2xl md:text-3xl font-headline font-bold text-white">{activeBroadcast.title}</h2>
+                       <p className="text-slate-400 text-sm italic line-clamp-1">"{activeBroadcast.fullText}"</p>
+                    </div>
+                 </div>
+                 <div className="flex items-center gap-4 w-full md:w-auto">
+                    <Button 
+                      onClick={() => handleStatusUpdate(activeBroadcast.id, 'Archived')} 
+                      className="flex-1 md:flex-none h-14 px-10 rounded-2xl bg-red-600 hover:bg-red-700 text-white font-black uppercase text-xs tracking-widest gap-2 shadow-xl shadow-red-900/40"
+                    >
+                      <XCircle className="w-5 h-5" /> Stop Live Broadcast
+                    </Button>
+                 </div>
+              </CardContent>
+            </Card>
+          </div>
+        ) : (
+          <div className="mb-10 animate-in fade-in duration-700">
+             <div className="p-8 rounded-[2.5rem] bg-slate-100 dark:bg-slate-900 border-2 border-dashed border-slate-200 dark:border-slate-800 text-center flex flex-col items-center gap-3">
+                <Broadcast className="w-10 h-10 text-slate-300" />
+                <h3 className="text-lg font-bold text-slate-400">No Active Broadcast</h3>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Select a draft to go live on the homepage player</p>
+             </div>
+          </div>
+        )}
+
         <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
            <div className="relative w-full max-w-md">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -244,7 +299,7 @@ export default function AiAudioCenter() {
                            "text-[9px] font-black uppercase px-3 py-0.5 rounded-full border-none shadow-sm",
                            ann.status === 'Published' ? "bg-emerald-500" : ann.status === 'Draft' ? "bg-slate-400" : "bg-amber-600"
                          )}>
-                           {ann.status}
+                           {ann.status === 'Published' ? 'LIVE' : ann.status}
                          </Badge>
                          <p className="text-[8px] font-bold text-slate-400 uppercase mt-3 tracking-widest">{ann.language} • {ann.voice}</p>
                       </div>
@@ -262,10 +317,14 @@ export default function AiAudioCenter() {
                          </div>
                          <div className="flex items-center gap-3">
                             {ann.status === 'Draft' && (
-                              <Button onClick={() => handleStatusUpdate(ann.id, 'Published')} variant="outline" size="sm" className="h-9 rounded-xl border-emerald-100 text-emerald-600 hover:bg-emerald-50 font-bold text-[10px] uppercase">Publish</Button>
+                              <Button onClick={() => handleStatusUpdate(ann.id, 'Published')} variant="outline" size="sm" className="h-9 rounded-xl border-emerald-100 text-emerald-600 hover:bg-emerald-50 font-bold text-[10px] uppercase shadow-sm">
+                                <Zap className="w-3 h-3 mr-1.5" /> Go Live
+                              </Button>
                             )}
                             {ann.status === 'Published' && (
-                              <Button onClick={() => handleStatusUpdate(ann.id, 'Archived')} variant="outline" size="sm" className="h-9 rounded-xl border-slate-200 text-slate-500 font-bold text-[10px] uppercase">Archive</Button>
+                              <Button onClick={() => handleStatusUpdate(ann.id, 'Archived')} variant="outline" size="sm" className="h-9 rounded-xl border-red-100 text-red-600 hover:bg-red-50 font-bold text-[10px] uppercase shadow-sm">
+                                <XCircle className="w-3 h-3 mr-1.5" /> Stop Live
+                              </Button>
                             )}
                             <AlertDialog>
                               <AlertDialogTrigger asChild>
