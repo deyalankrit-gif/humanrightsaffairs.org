@@ -297,7 +297,7 @@ export default function AiAudioCenter() {
              <div className="p-8 rounded-[2.5rem] bg-slate-100 dark:bg-slate-900 border-2 border-dashed border-slate-200 dark:border-slate-800 text-center flex flex-col items-center gap-3">
                 <Radio className="w-10 h-10 text-slate-300" />
                 <h3 className="text-lg font-bold text-slate-400">No Active Broadcast</h3>
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Select a draft to go live on the homepage player</p>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Select a draft or archive to go live on the homepage player</p>
              </div>
           </div>
         )}
@@ -323,7 +323,7 @@ export default function AiAudioCenter() {
                          </div>
                          <Badge className={cn(
                            "text-[9px] font-black uppercase px-3 py-0.5 rounded-full border-none shadow-sm",
-                           ann.status === 'Published' ? "bg-emerald-500" : ann.status === 'Draft' ? "bg-slate-400" : "bg-amber-600"
+                           ann.status === 'Published' ? "bg-emerald-500" : ann.status === 'Draft' ? "bg-slate-400" : "bg-blue-600"
                          )}>
                            {ann.status === 'Published' ? 'LIVE' : ann.status}
                          </Badge>
@@ -343,7 +343,7 @@ export default function AiAudioCenter() {
                          </div>
                          <div className="flex items-center gap-3">
                             <Button onClick={() => handleStartEdit(ann)} variant="ghost" size="icon" className="h-10 w-10 text-slate-300 hover:text-accent rounded-xl"><Edit className="w-5 h-5" /></Button>
-                            {ann.status === 'Draft' && (
+                            {(ann.status === 'Draft' || ann.status === 'Archived') && (
                               <Button onClick={() => handleStatusUpdate(ann.id, 'Published')} variant="outline" size="sm" className="h-9 rounded-xl border-emerald-100 text-emerald-600 hover:bg-emerald-50 font-bold text-[10px] uppercase shadow-sm">
                                 <Zap className="w-3 h-3 mr-1.5" /> Go Live
                               </Button>
