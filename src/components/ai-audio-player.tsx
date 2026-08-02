@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, query, where, orderBy, limit } from 'firebase/firestore';
+import { collection, query, orderBy, limit } from 'firebase/firestore';
 import { 
   Play, 
   Pause, 
@@ -27,8 +27,38 @@ import { cn } from '@/lib/utils';
 import { Card, CardContent } from '@/components/ui/card';
 
 /**
+ * DigitalClock: Isolated timer node to prevent news card re-renders.
+ */
+function DigitalClock() {
+  const [time, setTime] = useState<Date | null>(null);
+
+  useEffect(() => {
+    setTime(new Date());
+    const timer = setInterval(() => {
+      setTime(new Date());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  if (!time) return null;
+
+  return (
+    <div className="flex items-center gap-2 bg-black/30 px-3 py-1 rounded-full border border-white/10 shadow-lg animate-in fade-in duration-1000">
+      <div className="relative flex h-1.5 w-1.5">
+        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
+        <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-accent"></span>
+      </div>
+      <span className="text-[10px] font-black font-mono bg-gradient-to-r from-accent via-emerald-400 to-sky-400 bg-[length:200%_auto] animate-gradient-x bg-clip-text text-transparent drop-shadow-[0_0_8px_rgba(212,175,55,0.3)] tabular-nums">
+        {time.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })}
+      </span>
+    </div>
+  );
+}
+
+/**
  * AiAudioPlayer: High-fidelity public broadcast terminal.
  * Features advanced seek control, volume management, and real-time registry sync.
+ * Resilient query: Fetches recent items and filters 'Published' status in memory to avoid index requirements.
  */
 export function AiAudioPlayer({ className }: { className?: string }) {
   const db = useFirestore();
@@ -48,16 +78,21 @@ export function AiAudioPlayer({ className }: { className?: string }) {
 
   const announcementsQuery = useMemoFirebase(() => {
     if (!db) return null;
+    // Resilient query: Fetch most recent first, then filter status in memory to bypass index requirements
     return query(
       collection(db, 'ai_announcements'), 
-      where('status', '==', 'Published'),
-      orderBy('publishedTime', 'desc'),
-      limit(1)
+      orderBy('createdAt', 'desc'),
+      limit(5)
     );
   }, [db]);
 
-  const { data: latest, loading } = useCollection(announcementsQuery);
-  const activeAnn = latest?.[0];
+  const { data: list, loading } = useCollection(announcementsQuery);
+  
+  // Pick the most recent published announcement in memory
+  const activeAnn = useMemo(() => {
+    if (!list || list.length === 0) return null;
+    return list.find((a: any) => a.status === 'Published');
+  }, [list]);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -132,14 +167,14 @@ export function AiAudioPlayer({ className }: { className?: string }) {
         <div className="max-w-5xl mx-auto flex flex-col lg:flex-row items-center gap-8 md:gap-16">
           
           {/* Metadata Sidebar */}
-          <div className="w-full lg:w-72 shrink-0 space-y-4">
+          <div className="w-full lg:w-72 shrink-0 space-y-4 text-center lg:text-left">
              <div className="inline-flex items-center gap-2 bg-accent/20 text-accent px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border border-accent/20">
                 <Mic2 className="w-3.5 h-3.5 animate-pulse" /> Official Announcement
              </div>
              <h2 className="text-2xl md:text-4xl font-headline font-bold text-primary dark:text-white leading-tight">
                {activeAnn.title}
              </h2>
-             <div className="flex flex-wrap items-center gap-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                 <span className="flex items-center gap-1.5"><Badge variant="outline" className="h-5 px-2 border-slate-200">{activeAnn.category}</Badge></span>
                 <span className="flex items-center gap-1.5"><Clock className="w-3 h-3 text-accent" /> {activeAnn.publishedTime?.toDate?.()?.toLocaleDateString() || 'Today'}</span>
                 <span className="flex items-center gap-1.5"><Activity className="w-3 h-3 text-accent" /> {formatTime(duration)}</span>
@@ -198,7 +233,7 @@ export function AiAudioPlayer({ className }: { className?: string }) {
                         onValueChange={handleVolumeChange}
                         className="w-24 md:w-32"
                       />
-                      <span className="text-[8px] font-black text-white/40 uppercase w-8">{Math.round((isMuted ? 0 : volume) * 100)}%</span>
+                      <span className="text-[8px] font-black text-white/80 w-6 text-center tabular-nums">{Math.round((isMuted ? 0 : volume) * 100)}%</span>
                    </div>
 
                    <div className="flex items-center gap-2">
@@ -213,3 +248,4 @@ export function AiAudioPlayer({ className }: { className?: string }) {
     </div>
   );
 }
+
