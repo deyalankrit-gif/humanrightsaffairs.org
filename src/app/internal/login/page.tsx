@@ -19,10 +19,10 @@ import { cn } from '@/lib/utils'
 
 /**
  * Staff Login Page: Terminal for authorized officials to access the administrative hub.
- * Updated: Ensures no pre-filled fields and descriptive placeholders.
+ * Updated: Pre-fills the email field with the default institutional ID.
  */
 export default function StaffLoginPage() {
-  const [email, setEmail] = useState('')
+  const [email, setEmail] = useState('deydhritiman@gmail.com')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)

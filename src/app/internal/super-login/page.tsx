@@ -19,10 +19,10 @@ import { cn } from '@/lib/utils'
 
 /**
  * Root Login Page: High-security terminal for root administrator access.
- * Updated: Ensures no pre-filled fields and descriptive placeholders.
+ * Updated: Pre-fills the email field with the root institutional ID.
  */
 export default function RootLoginPage() {
-  const [email, setEmail] = useState('')
+  const [email, setEmail] = useState('deydhritiman@gmail.com')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)

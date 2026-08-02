@@ -40,11 +40,10 @@ import { cn } from '@/lib/utils'
 
 /**
  * Member Login Page: High-fidelity terminal for Trust members to access their private dashboards.
- * Features: Email/Password, Google Sign-In, and Phone Auth with OTP.
- * Updated: Ensures no pre-filled fields and descriptive placeholders.
+ * Updated: Pre-fills the email field with the default ID.
  */
 export default function MemberLoginPage() {
-  const [email, setEmail] = useState('')
+  const [email, setEmail] = useState('deydhritiman@gmail.com')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
