@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
@@ -84,10 +84,12 @@ export default function AudioAnnouncementAdmin() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // File validation: MP3, WAV, OGG under 1MB
-    const validTypes = ['audio/mpeg', 'audio/wav', 'audio/ogg'];
-    if (!validTypes.includes(file.type)) {
-      toast({ variant: "destructive", title: "Invalid Format", description: "Please upload MP3, WAV, or OGG." });
+    // File validation: MPEG, MP3, WAV, OGG under 1MB
+    const validTypes = ['audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/mp3'];
+    const isMpegExtension = file.name.toLowerCase().endsWith('.mpeg') || file.name.toLowerCase().endsWith('.mpg');
+    
+    if (!validTypes.includes(file.type) && !isMpegExtension) {
+      toast({ variant: "destructive", title: "Invalid Format", description: "Please upload MPEG, MP3, WAV, or OGG." });
       return;
     }
 
@@ -248,7 +250,7 @@ export default function AudioAnnouncementAdmin() {
                                      <Trash2 className="w-5 h-5" />
                                   </Button>
                                </div>
-                               <audio ref={previewRef} src={form.audioData} onEnded={() => setIsPreviewPlaying(false)} className="hidden" />
+                               <audio ref={previewRef} src={form.audioData} onEnded={() => setIsPlaying(false)} className="hidden" />
                             </div>
                          </div>
                        ) : (
@@ -256,7 +258,7 @@ export default function AudioAnnouncementAdmin() {
                             <UploadCloud className="w-16 h-16 text-slate-200 group-hover:text-accent transition-colors duration-500" />
                             <div className="text-center mt-6">
                                <p className="text-lg font-bold text-primary dark:text-white uppercase tracking-tight">Archival Upload Node</p>
-                               <p className="text-xs text-slate-400 mt-1 uppercase font-bold">MP3, WAV or OGG (Max 1MB)</p>
+                               <p className="text-xs text-slate-400 mt-1 uppercase font-bold">MPEG, MP3, WAV or OGG (Max 1MB)</p>
                             </div>
                             <input type="file" accept="audio/*" onChange={handleFileChange} className="absolute inset-0 opacity-0 cursor-pointer" />
                          </div>

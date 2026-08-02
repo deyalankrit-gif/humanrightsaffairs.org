@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState } from 'react';
@@ -17,6 +18,7 @@ import { useToast } from '@/hooks/use-toast';
 /**
  * Technical Broadcast Manager: Root-exclusive file management system.
  * Enhanced visibility for empty state and high-fidelity archival.
+ * Updated: Support for .mpeg audio files.
  */
 export function SidebarAudioStation() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -25,14 +27,17 @@ export function SidebarAudioStation() {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file && (file.type === 'audio/mpeg' || file.name.endsWith('.mp3'))) {
-      setSelectedFile(file);
-    } else {
-      toast({
-        variant: "destructive",
-        title: "Invalid Format",
-        description: "Please select a valid MP3 file from the local terminal."
-      });
+    if (file) {
+      const isMpeg = file.type === 'audio/mpeg' || file.name.toLowerCase().endsWith('.mp3') || file.name.toLowerCase().endsWith('.mpeg');
+      if (isMpeg) {
+        setSelectedFile(file);
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Invalid Format",
+          description: "Please select a valid MPEG or MP3 file from the local terminal."
+        });
+      }
     }
   };
 
@@ -48,7 +53,7 @@ export function SidebarAudioStation() {
       setSelectedFile(null);
       toast({
         title: "File Inserted",
-        description: "The MP3 has been added to the technical broadcast queue."
+        description: "The audio asset has been added to the technical broadcast queue."
       });
     }
   };
@@ -88,11 +93,11 @@ export function SidebarAudioStation() {
                 "text-[10px] font-black text-center uppercase tracking-widest leading-tight transition-colors",
                 selectedFile ? "text-white" : "text-white/40"
               )}>
-                {selectedFile ? selectedFile.name : "Select MP3 File"}
+                {selectedFile ? selectedFile.name : "Select Audio File"}
               </p>
               <Input 
                 type="file" 
-                accept=".mp3,audio/mpeg" 
+                accept=".mp3,audio/mpeg,.mpeg" 
                 onChange={handleFileChange}
                 className="absolute inset-0 opacity-0 cursor-pointer z-10 w-full h-full"
               />
