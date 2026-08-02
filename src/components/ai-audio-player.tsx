@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
@@ -27,6 +28,7 @@ import { JsonLd } from './json-ld';
 /**
  * AiAudioPlayer: High-efficiency Micro-Node design.
  * Optimized for minimal vertical footprint while preserving full tactical control.
+ * Integrated with automatic playback logic for first-time page load.
  */
 export function AiAudioPlayer({ className }: { className?: string }) {
   const db = useFirestore();
@@ -39,6 +41,8 @@ export function AiAudioPlayer({ className }: { className?: string }) {
   const [mounted, setMounted] = useState(false);
   
   const audioRef = useRef<HTMLAudioElement>(null);
+  // Ref to track the attempt during the component's lifecycle
+  const autoPlayAttempted = useRef(false);
 
   useEffect(() => {
     setMounted(true);
@@ -63,6 +67,39 @@ export function AiAudioPlayer({ className }: { className?: string }) {
     if (!list || list.length === 0) return null;
     return list.find((a: any) => a.status === 'Published');
   }, [list]);
+
+  // Autoplay Logic: Triggers automatically when the announcement and component are ready
+  useEffect(() => {
+    if (!mounted || loading || !activeAnn || autoPlayAttempted.current) return;
+
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const triggerAutoPlay = () => {
+      if (autoPlayAttempted.current) return;
+      autoPlayAttempted.current = true;
+      
+      const playPromise = audio.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            setIsPlaying(true);
+          })
+          .catch((err) => {
+            // Browsers block autoplay with sound if no user interaction has occurred on the domain yet.
+            // This is a standard security restriction.
+            console.warn("[AUDIO-AUTOPLAY] Policy Restriction:", err.name);
+          });
+      }
+    };
+
+    // Attempt playback if audio state is ready, otherwise wait for canplay event
+    if (audio.readyState >= 2) {
+      triggerAutoPlay();
+    } else {
+      audio.addEventListener('canplay', triggerAutoPlay, { once: true });
+    }
+  }, [mounted, loading, activeAnn]);
 
   useEffect(() => {
     const audio = audioRef.current;
