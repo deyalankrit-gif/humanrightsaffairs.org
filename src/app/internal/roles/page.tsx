@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useEffect, useState } from 'react'
@@ -36,7 +35,8 @@ import {
   CheckCircle2,
   XCircle,
   X,
-  UserCheck
+  UserCheck,
+  Info
 } from 'lucide-react'
 import {
   AlertDialog,
@@ -290,7 +290,7 @@ export default function AccessRolesPage() {
     return <div className="min-h-screen flex items-center justify-center bg-slate-950"><Loader2 className="w-10 h-10 animate-spin text-red-600" /></div>
   }
 
-  const filteredUsers = (users || []).filter(u => 
+  const filteredUsers = (users || []).filter((u: any) => 
     (u.email || u.id).toLowerCase().includes(search.toLowerCase()) || 
     (u.name || '').toLowerCase().includes(search.toLowerCase())
   )
@@ -302,7 +302,7 @@ export default function AccessRolesPage() {
         <div className="container mx-auto px-4 relative z-10">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="space-y-1">
-              <div className="inline-flex items-center gap-2 bg-red-600/20 text-red-500 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.2em] border border-red-600/30">
+              <div className="inline-flex items-center gap-2 bg-red-600/20 text-red-500 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.2em] border border-accent/30">
                 <ShieldAlert className="w-2.5 h-2.5" /> Secure Governance
               </div>
               <h1 className="text-3xl md:text-4xl font-headline font-bold text-white">Access <span className="text-red-600 italic">Roles</span></h1>
@@ -327,26 +327,26 @@ export default function AccessRolesPage() {
                  <CardContent className="p-6">
                    <form onSubmit={handleAddStaff} className="space-y-4">
                       <div className="space-y-2">
-                        <Label className="text-[10px] font-bold uppercase text-slate-500">Full Legal Name</Label>
+                        <Label className="text-[10px] font-bold uppercase text-slate-300">Full Legal Name</Label>
                         <Input value={newName} onChange={e => setNewName(e.target.value)} className="bg-black/50 border-white/5 text-white rounded-xl h-11" placeholder="Official Name" />
                       </div>
                       <div className="space-y-2">
-                        <Label className="text-[10px] font-bold uppercase text-slate-500">Official Identity (Email)</Label>
+                        <Label className="text-[10px] font-bold uppercase text-slate-300">Official Identity (Email)</Label>
                         <Input value={newEmail} onChange={e => setNewEmail(e.target.value)} className="bg-black/50 border-white/5 text-white rounded-xl h-11" placeholder="name@hrat-india.org" required />
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <Label className="text-[10px] font-bold uppercase text-slate-500">Institutional Role</Label>
+                          <Label className="text-[10px] font-bold uppercase text-slate-300">Institutional Role</Label>
                           <Select value={newRole} onValueChange={setNewRole}>
-                             <SelectTrigger className="bg-black/50 border-white/5 h-11 rounded-xl"><SelectValue /></SelectTrigger>
-                             <SelectContent className="bg-slate-900 border-white/10 text-white">
+                             <SelectTrigger className="bg-black/50 border-white/10 h-11 rounded-xl text-white"><SelectValue placeholder="Select Role" /></SelectTrigger>
+                             <SelectContent className="bg-slate-900 border-white/10 text-white z-[1000001]">
                                 <SelectItem value="staff">Staff Personnel</SelectItem>
                                 <SelectItem value="member">General Member</SelectItem>
                              </SelectContent>
                           </Select>
                         </div>
                         <div className="space-y-2">
-                          <Label className="text-[10px] font-bold uppercase text-slate-500">Authentication Secret</Label>
+                          <Label className="text-[10px] font-bold uppercase text-slate-300">Auth Secret</Label>
                           <div className="relative">
                             <Input type={showNewPassword ? "text" : "password"} value={newPassword} onChange={e => setNewPassword(e.target.value)} className="bg-black/50 border-white/5 text-white rounded-xl h-11 pl-10 pr-10" placeholder="••••••••" required />
                             <Key className="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-600" />
@@ -492,20 +492,20 @@ export default function AccessRolesPage() {
       </section>
 
       <Dialog open={isEditDialogOpen} onOpenChange={setIsAddingEditDialogOpen}>
-        <DialogContent className="bg-slate-900 border-white/5 text-white rounded-[2.5rem] shadow-2xl">
+        <DialogContent className="bg-slate-900 border-white/5 text-white rounded-[2.5rem] shadow-2xl z-[1000001]">
           <DialogHeader>
             <DialogTitle className="text-2xl font-headline font-bold flex items-center gap-2"><Edit className="w-6 h-6 text-accent" /> Update Account Metadata</DialogTitle>
             <DialogDescription className="text-slate-400 uppercase tracking-widest text-[10px]">Modify registry profile for authorized official or member.</DialogDescription>
           </DialogHeader>
           {editingUser && (
             <form onSubmit={handleUpdateStaff} className="space-y-6 py-4">
-               <div className="space-y-2"><Label className="text-[10px] font-bold uppercase text-slate-500">Identity (Registry ID)</Label><Input value={editingUser.email} disabled className="bg-black/30 border-white/5 text-slate-500 rounded-xl h-11" /></div>
-               <div className="space-y-2"><Label className="text-[10px] font-bold uppercase text-slate-500">Legal Name</Label><Input value={editingUser.name} onChange={e => setEditingUser({ ...editingUser, name: e.target.value })} className="bg-black/50 border-white/5 text-white rounded-xl h-11" /></div>
+               <div className="space-y-2"><Label className="text-[10px] font-bold uppercase text-slate-300">Identity (Registry ID)</Label><Input value={editingUser.email} disabled className="bg-black/30 border-white/5 text-slate-500 rounded-xl h-11" /></div>
+               <div className="space-y-2"><Label className="text-[10px] font-bold uppercase text-slate-300">Legal Name</Label><Input value={editingUser.name} onChange={e => setEditingUser({ ...editingUser, name: e.target.value })} className="bg-black/50 border-white/5 text-white rounded-xl h-11" /></div>
                <div className="space-y-2">
-                  <Label className="text-[10px] font-bold uppercase text-slate-500">Role Elevation/Demotion</Label>
+                  <Label className="text-[10px] font-bold uppercase text-slate-300">Role Elevation/Demotion</Label>
                   <Select value={editingUser.role} onValueChange={v => setEditingUser({...editingUser, role: v})}>
-                    <SelectTrigger className="bg-black/50 border-white/5 h-11 rounded-xl"><SelectValue /></SelectTrigger>
-                    <SelectContent className="bg-slate-900 border-white/10 text-white">
+                    <SelectTrigger className="bg-black/50 border-white/10 h-11 rounded-xl text-white"><SelectValue placeholder="Select Role" /></SelectTrigger>
+                    <SelectContent className="bg-slate-900 border-white/10 text-white z-[1000001]">
                       <SelectItem value="staff">Staff Personnel</SelectItem>
                       <SelectItem value="member">General Member</SelectItem>
                     </SelectContent>
