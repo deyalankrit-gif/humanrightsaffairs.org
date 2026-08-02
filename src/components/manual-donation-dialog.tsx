@@ -37,7 +37,6 @@ import { Loader2, Plus, IndianRupee, User, Mail, Phone, MapPin, Hash, CreditCard
 import { doc, setDoc, serverTimestamp, increment, addDoc, collection } from 'firebase/firestore'
 import { useFirestore } from '@/firebase'
 import { useToast } from '@/hooks/use-toast'
-import { format } from 'date-fns'
 
 const formSchema = z.object({
   donorName: z.string().min(2, "Name is required"),
@@ -81,8 +80,12 @@ export function ManualDonationDialog({ children }: { children: React.ReactNode }
     setLoading(true)
 
     const transactionId = `MANUAL-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
+    const donorEmailLower = values.donorEmail.toLowerCase().trim()
+    
     const donationData = {
       ...values,
+      donorEmail: donorEmailLower,
+      email: donorEmailLower, // Sync with both field names for rule consistency
       transactionId,
       createdAt: serverTimestamp(),
       isManual: true,

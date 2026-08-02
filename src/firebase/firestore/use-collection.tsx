@@ -65,8 +65,8 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
         const auth = getAuth();
         const lowerPath = pathString.toLowerCase();
         
-        // Exemption list for public-facing data streams
-        const publicPaths = [
+        // Exemption list for public-facing data streams or member-specific filtered queries
+        const silentPaths = [
           'occasions', 
           'events', 
           'current_news',
@@ -76,13 +76,14 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
           'public_complaints', 
           'terminatedmembers',
           'activity_events',
-          'donor_tiers'
+          'donor_tiers',
+          'donations'
         ];
 
-        const isPublicPath = publicPaths.some(p => lowerPath.includes(p));
+        const isSilentPath = silentPaths.some(p => lowerPath.includes(p));
 
         // Administrative policy: Only emit to global listener for authenticated staff on restricted data
-        if (auth.currentUser && !isPublicPath) {
+        if (auth.currentUser && !isSilentPath) {
           errorEmitter.emit('permission-error', permissionError);
         }
         

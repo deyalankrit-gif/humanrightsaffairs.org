@@ -51,7 +51,6 @@ import { errorEmitter } from '@/firebase/error-emitter'
 import { FirestorePermissionError, type SecurityRuleContext } from '@/firebase/errors'
 import { PlaceHolderImages } from '@/lib/placeholder-images'
 import { useToast } from '@/hooks/use-toast'
-import { format } from 'path'
 
 const formSchema = z.object({
   name: z.string().min(2, "Name is required"),
@@ -108,6 +107,7 @@ export function DonationDialog({ children, defaultAmount, initialStep = 'details
     
     const data = {
       ...values,
+      email: values.email.toLowerCase().trim(),
       photo,
       transactionId,
       timestamp: new Date().toLocaleString()
@@ -131,10 +131,10 @@ export function DonationDialog({ children, defaultAmount, initialStep = 'details
     
     const finalData = {
       name: data?.name || form.getValues('name') || donationData?.name || 'Valued Donor',
-      email: data?.email || form.getValues('email') || donationData?.email || '',
+      email: (data?.email || form.getValues('email') || donationData?.email || '').toLowerCase().trim(),
       phone: data?.phone || form.getValues('phone') || donationData?.phone || '',
       address: data?.address || form.getValues('address') || donationData?.address || '',
-      pan: data?.pan || form.getValues('pan') || donationData?.pan || '',
+      pan: (data?.pan || form.getValues('pan') || donationData?.pan || '').toUpperCase(),
       aadhaar: data?.aadhaar || form.getValues('aadhaar') || donationData?.aadhaar || '',
       amount: amountNum,
       paymentMethod: data?.paymentMethod || form.getValues('paymentMethod') || donationData?.paymentMethod || 'UPI QR Code',
@@ -174,7 +174,12 @@ export function DonationDialog({ children, defaultAmount, initialStep = 'details
       setDonationData(finalData)
       setStep('success')
     } catch (error: any) {
-      toast({ variant: "destructive", title: "Synchronization Error", description: "Could not commit records to National Registry." })
+      const permissionError = new FirestorePermissionError({
+        path: `donations/${safeTransactionId}`,
+        operation: 'create',
+        requestResourceData: finalData,
+      } satisfies SecurityRuleContext);
+      errorEmitter.emit('permission-error', permissionError);
     } finally {
       setLoading(false)
     }
@@ -412,7 +417,7 @@ export function DonationDialog({ children, defaultAmount, initialStep = 'details
                 <Button 
                   onClick={() => handleFinalSubmission(donationData)}
                   disabled={loading}
-                  className="w-full bg-primary text-white font-bold py-7 text-xl rounded-2xl hover:bg-secondary hover:text-white shadow-xl shadow-primary/20"
+                  className="w-full bg-primary text-white font-bold py-7 text-xl rounded-2xl hover:bg-secondary hover:text-white shadow-xl shadow-accent/20"
                 >
                   {loading ? <Loader2 className="animate-spin mr-2" /> : "Verify & Generate Receipt"}
                 </Button>
