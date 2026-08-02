@@ -12,10 +12,8 @@ import {
   Pause, 
   RefreshCw, 
   X,
-  Speaker,
   ShieldCheck,
-  AlertCircle,
-  Radio
+  AlertCircle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { 
@@ -29,7 +27,8 @@ import { cn } from '@/lib/utils';
 /**
  * AudioAnnouncement: Refined institutional broadcast player.
  * Optimized for automatic playback on refresh while respecting browser policies.
- * Background set to fully transparent as requested.
+ * Background set to fully transparent.
+ * Icons updated to specific blue color #2563EB as per user request.
  */
 export function AudioAnnouncement() {
   const db = useFirestore();
@@ -164,7 +163,7 @@ export function AudioAnnouncement() {
         {showAutoplayPrompt && !error && (
           <button 
             onClick={handleManualPlay}
-            className="relative w-20 h-20 md:w-24 md:h-24 rounded-full shadow-2xl border-4 border-accent animate-bounce hover:scale-110 transition-transform overflow-hidden group bg-transparent ring-8 ring-accent/10"
+            className="relative w-20 h-20 md:w-24 md:h-24 rounded-full shadow-2xl border-4 border-[#2563EB] animate-bounce hover:scale-110 transition-transform overflow-hidden group bg-transparent ring-8 ring-[#2563EB]/10"
           >
              <Image 
                src="/handmic.jpeg" 
@@ -173,18 +172,18 @@ export function AudioAnnouncement() {
                className="object-cover group-hover:scale-110 transition-transform duration-500"
              />
              <div className="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-colors flex items-center justify-center">
-                <Play className="w-8 h-8 text-white fill-white drop-shadow-lg" />
+                <Play className="w-8 h-8 text-[#2563EB] fill-[#2563EB] drop-shadow-lg" />
              </div>
              <div className="absolute -top-1 -right-1 flex h-4 w-4">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-4 w-4 bg-accent"></span>
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#2563EB] opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-4 w-4 bg-[#2563EB]"></span>
              </div>
           </button>
         )}
 
         <div className={cn(
           "bg-transparent p-2 rounded-[1.75rem] flex items-center gap-1.5 group transition-all duration-500",
-          "hover:ring-1 hover:ring-accent/20",
+          "hover:ring-1 hover:ring-[#2563EB]/20",
           error ? "border-red-500/30" : "border-white/10"
         )}>
           
@@ -216,7 +215,7 @@ export function AudioAnnouncement() {
                         variant="ghost" 
                         size="icon" 
                         onClick={handleReplay}
-                        className="h-9 w-9 rounded-full text-white/40 hover:text-accent hover:bg-white/5 transition-all"
+                        className="h-9 w-9 rounded-full text-[#2563EB] hover:text-[#2563EB] hover:bg-white/5 transition-all"
                       >
                         <RefreshCw className="w-4 h-4" />
                       </Button>
@@ -232,7 +231,7 @@ export function AudioAnnouncement() {
                         onClick={toggleMute}
                         className={cn(
                           "h-10 w-10 rounded-full transition-all duration-500",
-                          isMuted ? "text-red-500 bg-red-500/10" : "text-white/60 hover:text-emerald-400 hover:bg-emerald-500/10"
+                          isMuted ? "text-red-500 bg-red-500/10" : "text-[#2563EB] hover:text-[#2563EB] hover:bg-emerald-500/10"
                         )}
                       >
                         {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
@@ -261,7 +260,7 @@ export function AudioAnnouncement() {
                     variant="ghost" 
                     size="icon" 
                     onClick={() => setIsVisible(false)}
-                    className="h-9 w-9 rounded-full text-white/20 hover:text-white hover:bg-red-500/20 transition-all"
+                    className="h-9 w-9 rounded-full text-[#2563EB]/40 hover:text-[#2563EB] hover:bg-red-500/20 transition-all"
                   >
                     <X className="w-4 h-4" />
                   </Button>
