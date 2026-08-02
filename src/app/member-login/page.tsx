@@ -62,14 +62,24 @@ export default function MemberLoginPage() {
 
   // Initialize reCAPTCHA for Phone Auth
   const setupRecaptcha = () => {
-    if (!(window as any).recaptchaVerifier) {
-      (window as any).recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-        size: 'invisible',
-        callback: () => {
-          console.log('reCAPTCHA solved');
-        }
-      });
+    const container = document.getElementById('recaptcha-container');
+    if (!container) return;
+
+    // Clean up existing instances to prevent "element removed" errors
+    if ((window as any).recaptchaVerifier) {
+      try {
+        (window as any).recaptchaVerifier.clear();
+      } catch (e) {}
+      (window as any).recaptchaVerifier = null;
     }
+    
+    container.innerHTML = '<div id="recaptcha-target"></div>';
+    (window as any).recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-target', {
+      size: 'invisible',
+      callback: () => {
+        console.log('reCAPTCHA solved');
+      }
+    });
   }
 
   const handleSyncUser = async (firebaseUser: any) => {
@@ -124,11 +134,20 @@ export default function MemberLoginPage() {
     const provider = new GoogleAuthProvider()
     try {
       const result = await signInWithPopup(auth, provider)
-      await handleSyncUser(result.user)
-      toast({ title: "Authorized via Google", description: "Identity verified successfully." })
-      router.push('/account')
+      if (result.user) {
+        await handleSyncUser(result.user)
+        toast({ title: "Authorized via Google", description: "Identity verified successfully." })
+        router.push('/account')
+      }
     } catch (error: any) {
-      toast({ variant: "destructive", title: "Social Login Failed", description: error.message })
+      // Suppress toast if user is actually signed in
+      if (auth.currentUser) {
+        router.push('/account')
+        return
+      }
+      if (error.code !== 'auth/popup-closed-by-user') {
+        toast({ variant: "destructive", title: "Social Login Failed", description: error.message })
+      }
     } finally {
       setIsLoading(false)
     }
@@ -158,11 +177,17 @@ export default function MemberLoginPage() {
     setIsLoading(true)
     try {
       const result = await confirmationResult.confirm(verificationCode)
-      await handleSyncUser(result.user)
-      toast({ title: "Phone Verified", description: "Welcome to the National Registry." })
-      router.push('/account')
+      if (result.user) {
+        await handleSyncUser(result.user)
+        toast({ title: "Phone Verified", description: "Welcome to the National Registry." })
+        router.push('/account')
+      }
     } catch (error: any) {
-      toast({ variant: "destructive", title: "Verification Failed", description: "The OTP entered is incorrect." })
+      if (auth.currentUser) {
+        router.push('/account')
+      } else {
+        toast({ variant: "destructive", title: "Verification Failed", description: "The OTP entered is incorrect." })
+      }
     } finally {
       setIsLoading(false)
     }
@@ -200,9 +225,9 @@ export default function MemberLoginPage() {
                 variant="outline" 
                 onClick={handleGoogleLogin} 
                 disabled={isLoading}
-                className="h-12 rounded-xl border-slate-200 gap-3 font-bold text-xs uppercase tracking-wider hover:bg-slate-50"
+                className="h-12 rounded-xl border-slate-200 font-bold text-xs uppercase tracking-wider hover:bg-slate-50"
               >
-                <img src="https://www.gstatic.com/firebase/anonymous/google.svg" className="w-5 h-5" alt="Google" />
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18" height="18" className="mr-2" alt="Google" />
                 Continue with Google
               </Button>
               
