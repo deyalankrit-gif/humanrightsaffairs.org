@@ -44,7 +44,8 @@ import {
   Globe,
   Building2,
   Users,
-  Star
+  Star,
+  ShieldAlert
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -53,26 +54,38 @@ import { Progress } from '@/components/ui/progress'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
-import { useUser, useCollection, useFirestore, useDoc, useMemoFirebase } from '@/firebase'
-import { collection, query, where, orderBy } from 'firebase/firestore'
+import { useUser, useCollection, useFirestore, useDoc, useMemoFirebase, useAuth } from '@/firebase'
+import { collection, query, where, orderBy, doc } from 'firebase/firestore'
+import { signOut } from 'firebase/auth'
 import { Footer } from '@/components/footer'
 import { cn } from '@/lib/utils'
 import { format, parseISO, differenceInDays } from 'date-fns'
 import { PlaceHolderImages } from '@/lib/placeholder-images'
+import { useRouter } from 'next/navigation'
 
 /**
- * Account Dashboard: Premium user interface for Human Rights Affairs Trust members.
+ * Account Dashboard: Premium user interface for Human Rights Affairs Trust members and personnel.
  * Unified hub for profile management, membership tracking, and contribution history.
+ * Restricted view implemented for standard 'member' role.
  */
 export default function UserAccountDashboard() {
   const { user, loading: authLoading } = useUser()
   const db = useFirestore()
+  const auth = useAuth()
+  const router = useRouter()
   const [activeTab, setActiveTab] = useState('overview')
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
     setMounted(true)
   }, [])
+
+  // User Account Metadata from Registry
+  const userRegistryRef = useMemoFirebase(() => {
+    if (!db || !user?.email) return null;
+    return doc(db, 'users', user.email.toLowerCase());
+  }, [db, user?.email]);
+  const { data: userAccount, loading: registryLoading } = useDoc(userRegistryRef);
 
   // Data Fetching: Find member profile linked to current user email
   const memberQuery = useMemoFirebase(() => {
@@ -90,6 +103,11 @@ export default function UserAccountDashboard() {
   }, [db, user?.email]);
 
   const { data: donations, loading: donationLoading } = useCollection(donationQuery);
+
+  const handleSignOut = async () => {
+    await signOut(auth);
+    router.push('/');
+  }
 
   // Stats Calculations
   const stats = useMemo(() => {
@@ -112,7 +130,9 @@ export default function UserAccountDashboard() {
     return { completion: Math.round(completion), daysActive, totalDonated };
   }, [profile, donations, mounted]);
 
-  if (!mounted || authLoading || profileLoading) {
+  const isMemberRole = userAccount?.role === 'member';
+
+  if (!mounted || authLoading || profileLoading || registryLoading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-950">
         <Loader2 className="w-12 h-12 animate-spin text-accent mb-4" />
@@ -130,9 +150,14 @@ export default function UserAccountDashboard() {
            </div>
            <h2 className="text-2xl font-headline font-bold text-primary mb-2">Secure Access Required</h2>
            <p className="text-slate-500 mb-8 leading-relaxed">Please authenticate through the mission portal to access your private dashboard.</p>
-           <Button asChild className="w-full h-12 rounded-xl bg-primary text-white font-bold hover:bg-secondary transition-all">
-             <Link href="/internal/login">Authorized Login</Link>
-           </Button>
+           <div className="grid gap-3">
+             <Button asChild className="w-full h-12 rounded-xl bg-primary text-white font-bold hover:bg-secondary transition-all">
+               <Link href="/member-login">Member Login</Link>
+             </Button>
+             <Button asChild variant="outline" className="w-full h-12 rounded-xl border-slate-200 text-slate-500 font-bold hover:bg-slate-50 transition-all">
+               <Link href="/internal/login">Authorized Staff Entry</Link>
+             </Button>
+           </div>
         </Card>
       </main>
     )
@@ -160,14 +185,16 @@ export default function UserAccountDashboard() {
               <div className="p-2 bg-primary rounded-xl">
                  <ShieldCheck className="w-5 h-5 text-accent" />
               </div>
-              <h1 className="text-sm md:text-lg font-headline font-bold text-primary dark:text-white uppercase tracking-tight">Personnel <span className="text-accent italic">Dashboard</span></h1>
+              <h1 className="text-sm md:text-lg font-headline font-bold text-primary dark:text-white uppercase tracking-tight">
+                {isMemberRole ? 'Member' : 'Personnel'} <span className="text-accent italic">Dashboard</span>
+              </h1>
            </div>
            <div className="flex items-center gap-4">
               <Badge className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-100 font-bold text-[9px] uppercase tracking-widest hidden sm:flex">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-2 animate-pulse" /> Live Session
               </Badge>
               <div className="w-px h-6 bg-slate-200 hidden sm:block"></div>
-              <Button variant="ghost" size="icon" className="rounded-full text-slate-400 hover:text-red-500">
+              <Button variant="ghost" size="icon" onClick={handleSignOut} className="rounded-full text-slate-400 hover:text-red-500">
                  <LogOut className="w-5 h-5" />
               </Button>
            </div>
@@ -181,7 +208,7 @@ export default function UserAccountDashboard() {
             {/* Sidebar Column: Profile Overview */}
             <div className="lg:col-span-4 space-y-8">
                <Card className="border-none shadow-xl rounded-[2.5rem] overflow-hidden bg-white dark:bg-slate-900 relative group">
-                  <div className="absolute top-0 left-0 w-full h-32 bg-primary">
+                  <div className={cn("absolute top-0 left-0 w-full h-32", isMemberRole ? "bg-secondary" : "bg-primary")}>
                      <div className="absolute inset-0 bg-accent/5 opacity-50 skew-y-6 transform origin-top-left" />
                   </div>
                   <CardContent className="pt-16 pb-10 text-center relative z-10 px-8">
@@ -243,42 +270,46 @@ export default function UserAccountDashboard() {
                         </div>
                      </div>
 
-                     <Button className="w-full mt-6 h-12 rounded-xl bg-accent text-primary font-bold hover:bg-secondary hover:text-white transition-all shadow-lg shadow-accent/20 group">
-                        <Edit3 className="w-4 h-4 mr-2" /> Modify Profile Data
-                     </Button>
+                     {!isMemberRole && (
+                       <Button className="w-full mt-6 h-12 rounded-xl bg-accent text-primary font-bold hover:bg-secondary hover:text-white transition-all shadow-lg shadow-accent/20 group">
+                          <Edit3 className="w-4 h-4 mr-2" /> Modify Profile Data
+                       </Button>
+                     )}
                   </CardContent>
                </Card>
 
-               <Card className="border-none shadow-lg rounded-3xl bg-slate-900 text-white p-8 relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-24 h-24 bg-accent/10 rounded-full -mr-12 -mt-12 blur-3xl"></div>
-                  <div className="relative z-10 space-y-6">
-                    <div className="flex justify-between items-center">
-                       <h3 className="text-xs font-black uppercase tracking-widest text-accent">Profile Completion</h3>
-                       <span className="text-lg font-headline font-bold">{stats.completion}%</span>
+               {!isMemberRole && (
+                 <Card className="border-none shadow-lg rounded-3xl bg-slate-900 text-white p-8 relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-accent/10 rounded-full -mr-12 -mt-12 blur-3xl"></div>
+                    <div className="relative z-10 space-y-6">
+                      <div className="flex justify-between items-center">
+                         <h3 className="text-xs font-black uppercase tracking-widest text-accent">Profile Completion</h3>
+                         <span className="text-lg font-headline font-bold">{stats.completion}%</span>
+                      </div>
+                      <Progress value={stats.completion} className="h-1.5 bg-white/10" />
+                      
+                      <div className="space-y-3">
+                         <p className="text-[9px] font-black uppercase text-slate-500 tracking-[0.2em]">Mandatory Actions</p>
+                         <ul className="space-y-3">
+                            {!profile?.imageId && <li className="flex items-center gap-3 text-[11px] font-medium text-slate-400 group cursor-pointer hover:text-accent"><Circle className="w-2 h-2 text-accent" /> Upload verified photo</li>}
+                            {!profile?.phone && <li className="flex items-center gap-3 text-[11px] font-medium text-slate-400 group cursor-pointer hover:text-accent"><Circle className="w-2 h-2 text-accent" /> Authenticate mobile number</li>}
+                            {!profile?.address && <li className="flex items-center gap-3 text-[11px] font-medium text-slate-400 group cursor-pointer hover:text-accent"><Circle className="w-2 h-2 text-accent" /> Provide residential proof</li>}
+                            <li className="flex items-center gap-3 text-[11px] font-medium text-emerald-500"><CheckCircle2 className="w-3.5 h-3.5" /> Email identity verified</li>
+                         </ul>
+                      </div>
                     </div>
-                    <Progress value={stats.completion} className="h-1.5 bg-white/10" />
-                    
-                    <div className="space-y-3">
-                       <p className="text-[9px] font-black uppercase text-slate-500 tracking-[0.2em]">Mandatory Actions</p>
-                       <ul className="space-y-3">
-                          {!profile?.imageId && <li className="flex items-center gap-3 text-[11px] font-medium text-slate-400 group cursor-pointer hover:text-accent"><Circle className="w-2 h-2 text-accent" /> Upload verified photo</li>}
-                          {!profile?.phone && <li className="flex items-center gap-3 text-[11px] font-medium text-slate-400 group cursor-pointer hover:text-accent"><Circle className="w-2 h-2 text-accent" /> Authenticate mobile number</li>}
-                          {!profile?.address && <li className="flex items-center gap-3 text-[11px] font-medium text-slate-400 group cursor-pointer hover:text-accent"><Circle className="w-2 h-2 text-accent" /> Provide residential proof</li>}
-                          <li className="flex items-center gap-3 text-[11px] font-medium text-emerald-500"><CheckCircle2 className="w-3.5 h-3.5" /> Email identity verified</li>
-                       </ul>
-                    </div>
-                  </div>
-               </Card>
+                 </Card>
+               )}
 
                <div className="space-y-4">
-                  <h4 className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-500 px-4">Quick Governance Actions</h4>
+                  <h4 className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-500 px-4">Governance Actions</h4>
                   <div className="grid grid-cols-2 gap-3">
                      {[
-                       { label: 'Renew Term', icon: RefreshCw, color: 'text-blue-500' },
+                       { label: 'Renew Term', icon: RefreshCw, color: 'text-blue-500', hide: isMemberRole },
                        { label: 'Download ID', icon: FileText, color: 'text-emerald-500' },
                        { label: 'Request Aid', icon: HelpCircle, color: 'text-accent' },
                        { label: 'Share ID', icon: Share2, color: 'text-indigo-500' }
-                     ].map((act, i) => (
+                     ].filter(a => !a.hide).map((act, i) => (
                        <Button key={i} variant="outline" className="h-20 rounded-2xl bg-white dark:bg-slate-900 border-none shadow-sm flex flex-col items-center justify-center gap-2 hover:bg-slate-50 transition-all">
                           <act.icon className={cn("w-5 h-5", act.color)} />
                           <span className="text-[9px] font-black uppercase tracking-tight">{act.label}</span>
@@ -296,7 +327,7 @@ export default function UserAccountDashboard() {
                   {[
                     { label: 'Days Active', value: stats.daysActive, icon: Clock, color: 'bg-blue-50 text-blue-600' },
                     { label: 'Contributions', value: `₹${stats.totalDonated}`, icon: Heart, color: 'bg-red-50 text-red-600' },
-                    { label: 'Certificates', value: profile?.id ? 2 : 0, icon: Award, color: 'bg-emerald-50 text-emerald-600' },
+                    { label: 'Certificates', value: profile?.id ? 1 : 0, icon: Award, color: 'bg-emerald-50 text-emerald-600' },
                     { label: 'Requests', value: 0, icon: Zap, color: 'bg-amber-50 text-amber-600' }
                   ].map((stat, i) => (
                     <Card key={i} className="border-none shadow-sm rounded-[2rem] overflow-hidden group hover:shadow-lg transition-all">
@@ -311,16 +342,16 @@ export default function UserAccountDashboard() {
                   ))}
                </div>
 
-               <Tabs defaultValue="overview" className="w-full" onValueChange={setActiveTab}>
+               <Tabs defaultValue={isMemberRole ? "personal" : "overview"} className="w-full" onValueChange={setActiveTab}>
                   <div className="bg-white dark:bg-slate-900 p-1.5 rounded-[1.75rem] shadow-sm mb-8 inline-flex w-full md:w-auto overflow-x-auto no-scrollbar">
                     <TabsList className="bg-transparent border-none p-0 flex">
                       {[
-                        { id: 'overview', label: 'Overview', icon: Globe },
+                        { id: 'overview', label: 'Overview', icon: Globe, hide: isMemberRole },
                         { id: 'personal', label: 'Personal', icon: User },
                         { id: 'membership', label: 'Membership', icon: Award },
                         { id: 'donations', label: 'History', icon: CreditCard },
-                        { id: 'security', label: 'Security', icon: Lock }
-                      ].map(tab => (
+                        { id: 'security', label: 'Security', icon: Lock, hide: isMemberRole }
+                      ].filter(t => !t.hide).map(tab => (
                         <TabsTrigger 
                           key={tab.id} 
                           value={tab.id} 
@@ -333,84 +364,86 @@ export default function UserAccountDashboard() {
                     </TabsList>
                   </div>
 
-                  <TabsContent value="overview" className="space-y-8 animate-in fade-in duration-500">
-                     <div className="grid md:grid-cols-2 gap-8">
-                        <Card className="rounded-[2.5rem] border-none shadow-sm bg-white dark:bg-slate-900 overflow-hidden">
-                           <CardHeader className="p-8 pb-0">
-                              <CardTitle className="text-lg font-headline font-bold flex items-center gap-2">
-                                 <History className="w-5 h-5 text-accent" /> Activity Stream
-                              </CardTitle>
-                           </CardHeader>
-                           <CardContent className="p-8">
-                              <div className="space-y-8 relative">
-                                 <div className="absolute top-0 left-[15px] bottom-0 w-0.5 bg-slate-50 dark:bg-slate-800" />
-                                 {[
-                                   { title: 'Profile Synchronized', time: '2h ago', icon: RefreshCw, color: 'bg-blue-500' },
-                                   { title: 'Identity Authenticated', time: 'Yesterday', icon: Fingerprint, color: 'bg-emerald-500' },
-                                   { title: 'Commissioned in National Registry', time: '3 days ago', icon: Award, color: 'bg-accent' }
-                                 ].map((act, i) => (
-                                   <div key={i} className="flex gap-6 relative z-10">
-                                      <div className={cn("w-8 h-8 rounded-full flex items-center justify-center text-white shadow-lg shrink-0", act.color)}>
-                                         <act.icon className="w-4 h-4" />
-                                      </div>
-                                      <div className="flex-1">
-                                         <p className="text-sm font-bold text-slate-700 dark:text-slate-200">{act.title}</p>
-                                         <p className="text-[10px] text-slate-400 uppercase font-black tracking-tighter">{act.time}</p>
-                                      </div>
-                                   </div>
-                                 ))}
-                              </div>
-                           </CardContent>
-                        </Card>
+                  {!isMemberRole && (
+                    <TabsContent value="overview" className="space-y-8 animate-in fade-in duration-500">
+                      <div className="grid md:grid-cols-2 gap-8">
+                          <Card className="rounded-[2.5rem] border-none shadow-sm bg-white dark:bg-slate-900 overflow-hidden">
+                            <CardHeader className="p-8 pb-0">
+                                <CardTitle className="text-lg font-headline font-bold flex items-center gap-2">
+                                  <History className="w-5 h-5 text-accent" /> Activity Stream
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="p-8">
+                                <div className="space-y-8 relative">
+                                  <div className="absolute top-0 left-[15px] bottom-0 w-0.5 bg-slate-50 dark:bg-slate-800" />
+                                  {[
+                                    { title: 'Profile Synchronized', time: '2h ago', icon: RefreshCw, color: 'bg-blue-500' },
+                                    { title: 'Identity Authenticated', time: 'Yesterday', icon: Fingerprint, color: 'bg-emerald-500' },
+                                    { title: 'Commissioned in National Registry', time: '3 days ago', icon: Award, color: 'bg-accent' }
+                                  ].map((act, i) => (
+                                    <div key={i} className="flex gap-6 relative z-10">
+                                        <div className={cn("w-8 h-8 rounded-full flex items-center justify-center text-white shadow-lg shrink-0", act.color)}>
+                                          <act.icon className="w-4 h-4" />
+                                        </div>
+                                        <div className="flex-1">
+                                          <p className="text-sm font-bold text-slate-700 dark:text-slate-200">{act.title}</p>
+                                          <p className="text-[10px] text-slate-400 uppercase font-black tracking-tighter">{act.time}</p>
+                                        </div>
+                                    </div>
+                                  ))}
+                                </div>
+                            </CardContent>
+                          </Card>
 
-                        <Card className="rounded-[2.5rem] border-none shadow-sm bg-white dark:bg-slate-900 overflow-hidden">
-                           <CardHeader className="p-8 pb-0">
-                              <CardTitle className="text-lg font-headline font-bold flex items-center gap-2">
-                                 <Bell className="w-5 h-5 text-accent" /> Notifications
-                              </CardTitle>
-                           </CardHeader>
-                           <CardContent className="p-8">
-                              <div className="space-y-4">
-                                 <div className="p-4 bg-accent/5 rounded-2xl border border-accent/20 flex gap-4">
-                                    <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center shrink-0">
-                                       <Sparkles className="w-5 h-5 text-accent" />
-                                    </div>
-                                    <div className="space-y-1">
-                                       <p className="text-[11px] font-bold text-primary dark:text-white leading-tight">Welcome to JusticeShield</p>
-                                       <p className="text-[10px] text-slate-500">Your personnel credentials are now live in the National Registry.</p>
-                                    </div>
-                                 </div>
-                                 <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl flex gap-4 opacity-60">
-                                    <div className="w-10 h-10 rounded-xl bg-slate-200 dark:bg-slate-700 flex items-center justify-center shrink-0">
-                                       <ShieldCheck className="w-5 h-5 text-slate-400" />
-                                    </div>
-                                    <div className="space-y-1">
-                                       <p className="text-[11px] font-bold text-slate-500 leading-tight">Registry System Update</p>
-                                       <p className="text-[10px] text-slate-500">Scheduled maintenance completed successfully.</p>
-                                    </div>
-                                 </div>
-                              </div>
-                           </CardContent>
-                        </Card>
-                     </div>
+                          <Card className="rounded-[2.5rem] border-none shadow-sm bg-white dark:bg-slate-900 overflow-hidden">
+                            <CardHeader className="p-8 pb-0">
+                                <CardTitle className="text-lg font-headline font-bold flex items-center gap-2">
+                                  <Bell className="w-5 h-5 text-accent" /> Notifications
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="p-8">
+                                <div className="space-y-4">
+                                  <div className="p-4 bg-accent/5 rounded-2xl border border-accent/20 flex gap-4">
+                                      <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center shrink-0">
+                                        <Sparkles className="w-5 h-5 text-accent" />
+                                      </div>
+                                      <div className="space-y-1">
+                                        <p className="text-[11px] font-bold text-primary dark:text-white leading-tight">Welcome to JusticeShield</p>
+                                        <p className="text-[10px] text-slate-500">Your personnel credentials are now live in the National Registry.</p>
+                                      </div>
+                                  </div>
+                                  <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl flex gap-4 opacity-60">
+                                      <div className="w-10 h-10 rounded-xl bg-slate-200 dark:bg-slate-700 flex items-center justify-center shrink-0">
+                                        <ShieldCheck className="w-5 h-5 text-slate-400" />
+                                      </div>
+                                      <div className="space-y-1">
+                                        <p className="text-[11px] font-bold text-slate-500 leading-tight">Registry System Update</p>
+                                        <p className="text-[10px] text-slate-500">Scheduled maintenance completed successfully.</p>
+                                      </div>
+                                  </div>
+                                </div>
+                            </CardContent>
+                          </Card>
+                      </div>
 
-                     <Card className="rounded-[2.5rem] border-none shadow-sm bg-slate-900 text-white overflow-hidden p-10 relative">
-                        <div className="absolute top-0 right-0 w-64 h-64 bg-accent/10 rounded-full -mr-32 -mt-32 blur-3xl"></div>
-                        <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
-                           <div className="space-y-4 text-center md:text-left">
-                              <h3 className="text-3xl font-headline font-bold leading-tight">Mission <span className="text-accent italic">Support Center</span></h3>
-                              <p className="text-slate-400 text-sm max-w-md">Need administrative assistance or legal guidance regarding your profile? Our support cell is standing by.</p>
-                              <div className="flex flex-wrap justify-center md:justify-start gap-4">
-                                 <Button className="rounded-xl bg-accent text-primary font-bold px-8 h-12 shadow-xl shadow-accent/20 hover:bg-secondary hover:text-white transition-all">Contact Support</Button>
-                                 <Button variant="outline" className="rounded-xl border-white/20 text-white hover:bg-white/10 h-12 px-8">Frequently Asked Questions</Button>
-                              </div>
-                           </div>
-                           <div className="w-32 h-32 md:w-48 md:h-48 relative animate-float">
-                              <Image src="/HRAT%20Logo.jpeg" alt="HRAT Seal" fill className="object-contain opacity-20" />
-                           </div>
-                        </div>
-                     </Card>
-                  </TabsContent>
+                      <Card className="rounded-[2.5rem] border-none shadow-sm bg-slate-900 text-white overflow-hidden p-10 relative">
+                          <div className="absolute top-0 right-0 w-64 h-64 bg-accent/10 rounded-full -mr-32 -mt-32 blur-3xl"></div>
+                          <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
+                            <div className="space-y-4 text-center md:text-left">
+                                <h3 className="text-3xl font-headline font-bold leading-tight">Mission <span className="text-accent italic">Support Center</span></h3>
+                                <p className="text-slate-400 text-sm max-w-md">Need administrative assistance or legal guidance regarding your profile? Our support cell is standing by.</p>
+                                <div className="flex flex-wrap justify-center md:justify-start gap-4">
+                                  <Button className="rounded-xl bg-accent text-primary font-bold px-8 h-12 shadow-xl shadow-accent/20 hover:bg-secondary hover:text-white transition-all">Contact Support</Button>
+                                  <Button variant="outline" className="rounded-xl border-white/20 text-white hover:bg-white/10 h-12 px-8">Frequently Asked Questions</Button>
+                                </div>
+                            </div>
+                            <div className="w-32 h-32 md:w-48 md:h-48 relative animate-float">
+                                <Image src="/HRAT%20Logo.jpeg" alt="HRAT Seal" fill className="object-contain opacity-20" />
+                            </div>
+                          </div>
+                      </Card>
+                    </TabsContent>
+                  )}
 
                   <TabsContent value="personal" className="animate-in slide-in-from-right-4 duration-500">
                      <Card className="rounded-[2.5rem] border-none shadow-sm bg-white dark:bg-slate-900 overflow-hidden">
@@ -567,7 +600,7 @@ export default function UserAccountDashboard() {
                         <CardContent className="p-0">
                            <div className="overflow-x-auto">
                               <table className="w-full text-left">
-                                 <thead className="bg-slate-50 dark:bg-slate-800/50 text-[9px] font-black text-slate-400 uppercase tracking-widest border-b">
+                                 <thead className="bg-slate-50 dark:bg-slate-800/50 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b">
                                     <tr>
                                        <th className="px-10 py-6">Date</th>
                                        <th className="px-10 py-6">Amount</th>
@@ -607,76 +640,78 @@ export default function UserAccountDashboard() {
                      </Card>
                   </TabsContent>
 
-                  <TabsContent value="security" className="animate-in slide-in-from-right-4 duration-500">
-                     <div className="grid md:grid-cols-2 gap-8">
-                        <Card className="rounded-[2.5rem] border-none shadow-sm bg-white dark:bg-slate-900 p-8 md:p-12 space-y-10">
-                           <div className="space-y-1">
-                              <h3 className="text-xl font-headline font-bold flex items-center gap-2">
-                                 <Lock className="w-5 h-5 text-accent" /> Passphrase Governance
-                              </h3>
-                              <p className="text-sm text-slate-400">Regularly updating your security key ensures registry sovereignty.</p>
-                           </div>
-                           
-                           <div className="space-y-6">
-                              <div className="space-y-2">
-                                 <Label className="text-[10px] font-bold uppercase text-slate-400">Current Security Key</Label>
-                                 <Input type="password" value="••••••••••••" disabled className="bg-slate-50 dark:bg-slate-950 border-none rounded-xl h-11" />
-                              </div>
-                              <Button className="w-full h-12 rounded-xl bg-primary text-white font-bold hover:bg-secondary">Initialize Update Protocol</Button>
-                           </div>
+                  {!isMemberRole && (
+                    <TabsContent value="security" className="animate-in slide-in-from-right-4 duration-500">
+                      <div className="grid md:grid-cols-2 gap-8">
+                          <Card className="rounded-[2.5rem] border-none shadow-sm bg-white dark:bg-slate-900 p-8 md:p-12 space-y-10">
+                            <div className="space-y-1">
+                                <h3 className="text-xl font-headline font-bold flex items-center gap-2">
+                                  <Lock className="w-5 h-5 text-accent" /> Passphrase Governance
+                                </h3>
+                                <p className="text-sm text-slate-400">Regularly updating your security key ensures registry sovereignty.</p>
+                            </div>
+                            
+                            <div className="space-y-6">
+                                <div className="space-y-2">
+                                  <Label className="text-[10px] font-bold uppercase text-slate-400">Current Security Key</Label>
+                                  <Input type="password" value="••••••••••••" disabled className="bg-slate-50 dark:bg-slate-950 border-none rounded-xl h-11" />
+                                </div>
+                                <Button className="w-full h-12 rounded-xl bg-primary text-white font-bold hover:bg-secondary">Initialize Update Protocol</Button>
+                            </div>
 
-                           <div className="pt-8 border-t space-y-4">
-                              <div className="flex items-center justify-between">
-                                 <div className="space-y-0.5">
-                                    <p className="text-xs font-bold">Two-Factor Authentication</p>
-                                    <p className="text-[10px] text-slate-400">Add an extra layer of protection to your account.</p>
-                                 </div>
-                                 <Badge className="bg-slate-100 text-slate-400 uppercase text-[8px] font-black h-5 px-3">COMING SOON</Badge>
-                              </div>
-                           </div>
-                        </Card>
+                            <div className="pt-8 border-t space-y-4">
+                                <div className="flex items-center justify-between">
+                                  <div className="space-y-0.5">
+                                      <p className="text-xs font-bold">Two-Factor Authentication</p>
+                                      <p className="text-[10px] text-slate-400">Add an extra layer of protection to your account.</p>
+                                  </div>
+                                  <Badge className="bg-slate-100 text-slate-400 uppercase text-[8px] font-black h-5 px-3">COMING SOON</Badge>
+                                </div>
+                            </div>
+                          </Card>
 
-                        <div className="space-y-8">
-                           <Card className="rounded-[2.5rem] border-none shadow-sm bg-white dark:bg-slate-900 p-8">
-                              <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-6">Credential Status</h4>
-                              <div className="space-y-4">
-                                 <div className="flex items-center justify-between p-4 bg-emerald-50 dark:bg-emerald-950/20 rounded-2xl border border-emerald-100 dark:border-emerald-900">
-                                    <div className="flex items-center gap-3">
-                                       <Mail className="w-4 h-4 text-emerald-600" />
-                                       <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400">Email Identity Verified</span>
-                                    </div>
-                                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                                 </div>
-                                 <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-800 opacity-60">
-                                    <div className="flex items-center gap-3">
-                                       <Phone className="w-4 h-4 text-slate-400" />
-                                       <span className="text-xs font-bold text-slate-50">Mobile Verification Pending</span>
-                                    </div>
-                                    <Button variant="ghost" size="sm" className="h-6 text-[8px] font-black uppercase text-accent hover:bg-accent/10">Start</Button>
-                                 </div>
-                              </div>
-                           </Card>
-
-                           <Card className="rounded-[2.5rem] border-none shadow-sm bg-white dark:bg-slate-900 p-8">
-                              <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-6">Recent Login Activity</h4>
-                              <div className="space-y-4">
-                                 {[
-                                   { location: 'Kolkata, WB (Current)', device: 'Chrome / MacOS', time: 'Just now', ok: true },
-                                   { location: 'Delhi, IN', device: 'Safari / iOS', time: '3 days ago', ok: true }
-                                 ].map((log, i) => (
-                                   <div key={i} className="flex items-start gap-4">
-                                      <div className={cn("w-2 h-2 rounded-full mt-1.5", log.ok ? 'bg-emerald-500' : 'bg-red-500')}></div>
-                                      <div className="space-y-0.5">
-                                         <p className="text-[11px] font-bold text-primary dark:text-white leading-none">{log.location}</p>
-                                         <p className="text-[9px] text-slate-500 uppercase tracking-tighter">{log.device} • {log.time}</p>
+                          <div className="space-y-8">
+                            <Card className="rounded-[2.5rem] border-none shadow-sm bg-white dark:bg-slate-900 p-8">
+                                <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-6">Credential Status</h4>
+                                <div className="space-y-4">
+                                  <div className="flex items-center justify-between p-4 bg-emerald-50 dark:bg-emerald-950/20 rounded-2xl border border-emerald-100 dark:border-emerald-900">
+                                      <div className="flex items-center gap-3">
+                                        <Mail className="w-4 h-4 text-emerald-600" />
+                                        <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400">Email Identity Verified</span>
                                       </div>
-                                   </div>
-                                 ))}
-                              </div>
-                           </Card>
-                        </div>
-                     </div>
-                  </TabsContent>
+                                      <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                                  </div>
+                                  <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-800 opacity-60">
+                                      <div className="flex items-center gap-3">
+                                        <Phone className="w-4 h-4 text-slate-400" />
+                                        <span className="text-xs font-bold text-slate-50">Mobile Verification Pending</span>
+                                      </div>
+                                      <Button variant="ghost" size="sm" className="h-6 text-[8px] font-black uppercase text-accent hover:bg-accent/10">Start</Button>
+                                  </div>
+                                </div>
+                            </Card>
+
+                            <Card className="rounded-[2.5rem] border-none shadow-sm bg-white dark:bg-slate-900 p-8">
+                                <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-6">Recent Login Activity</h4>
+                                <div className="space-y-4">
+                                  {[
+                                    { location: 'Kolkata, WB (Current)', device: 'Chrome / MacOS', time: 'Just now', ok: true },
+                                    { location: 'Delhi, IN', device: 'Safari / iOS', time: '3 days ago', ok: true }
+                                  ].map((log, i) => (
+                                    <div key={i} className="flex items-start gap-4">
+                                        <div className={cn("w-2 h-2 rounded-full mt-1.5", log.ok ? 'bg-emerald-500' : 'bg-red-500')}></div>
+                                        <div className="space-y-0.5">
+                                          <p className="text-[11px] font-bold text-primary dark:text-white leading-none">{log.location}</p>
+                                          <p className="text-[9px] text-slate-500 uppercase tracking-tighter">{log.device} • {log.time}</p>
+                                        </div>
+                                    </div>
+                                  ))}
+                                </div>
+                            </Card>
+                          </div>
+                      </div>
+                    </TabsContent>
+                  )}
                </Tabs>
             </div>
           </div>

@@ -14,11 +14,24 @@ import {
   Scale, 
   Phone,
   Image as ImageIcon,
-  ShieldAlert
+  ShieldAlert,
+  User as UserIcon,
+  LogOut,
+  ChevronDown
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { HeaderActions } from './header-actions'
 import { OccasionBanner } from './occasion-banner'
+import { useUser, useAuth } from '@/firebase'
+import { Button } from './ui/button'
+import { signOut } from 'firebase/auth'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator
+} from "@/components/ui/dropdown-menu"
 
 const publicLinks = [
   { name: 'Home', href: '/', icon: Home },
@@ -34,6 +47,8 @@ const publicLinks = [
 
 export function Navbar() {
   const pathname = usePathname()
+  const auth = useAuth()
+  const { user } = useUser()
   const [activeHash, setActiveHash] = useState('')
   const [scrolled, setScrolled] = useState(false)
   const activeLinkRef = useRef<HTMLDivElement>(null)
@@ -67,6 +82,10 @@ export function Navbar() {
       });
     }
   }, [pathname, activeHash]);
+
+  const handleSignOut = async () => {
+    await signOut(auth);
+  }
 
   return (
     <header className={cn(
@@ -130,6 +149,44 @@ export function Navbar() {
 
       {/* Header Actions (Right) */}
       <div className="ml-2 md:ml-8 flex items-center gap-1 md:gap-2 shrink-0 h-full pl-2 md:pl-6 border-l border-slate-100 dark:border-slate-800">
+        {user ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="flex items-center gap-2 p-1.5 rounded-full hover:bg-slate-50 transition-all border border-transparent hover:border-slate-100">
+                <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center text-primary font-bold text-xs shadow-sm">
+                  {user.displayName?.[0] || user.email?.[0]?.toUpperCase() || 'U'}
+                </div>
+                <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56 rounded-2xl bg-white border-slate-100 shadow-2xl p-2 z-[1000]">
+               <div className="px-3 py-2">
+                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Signed in as</p>
+                 <p className="text-xs font-bold text-primary truncate">{user.email}</p>
+               </div>
+               <DropdownMenuSeparator className="bg-slate-50" />
+               <DropdownMenuItem asChild className="rounded-xl focus:bg-slate-50 cursor-pointer">
+                  <Link href="/account" className="flex items-center gap-2 p-2">
+                    <UserIcon className="w-4 h-4 text-accent" />
+                    <span className="text-xs font-bold uppercase tracking-tight">Dashboard</span>
+                  </Link>
+               </DropdownMenuItem>
+               <DropdownMenuItem onClick={handleSignOut} className="rounded-xl focus:bg-red-50 focus:text-red-600 text-red-500 cursor-pointer">
+                  <div className="flex items-center gap-2 p-2 w-full">
+                    <LogOut className="w-4 h-4" />
+                    <span className="text-xs font-bold uppercase tracking-tight">Sign Out</span>
+                  </div>
+               </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : (
+          <Link href="/member-login">
+            <Button size="sm" variant="outline" className="h-9 rounded-xl border-accent text-accent hover:bg-accent hover:text-primary font-bold text-[10px] md:text-xs uppercase tracking-widest px-4 md:px-6">
+               Member Login
+            </Button>
+          </Link>
+        )}
+        <div className="w-px h-6 bg-slate-100 mx-1 hidden sm:block"></div>
         <HeaderActions />
       </div>
     </header>

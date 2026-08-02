@@ -129,7 +129,7 @@ service cloud.firestore {
     
     match /donations/{donationId} {
       allow create: if true;
-      allow read: if isRoot() || isInternalStaff() || hasPermission('analytics') || hasPermission('financeLedger');
+      allow read: if isRoot() || isInternalStaff() || hasPermission('analytics') || hasPermission('financeLedger') || (isAuthenticated() && resource.data.email == getAuthEmail());
       allow delete: if isRoot();
     }
 

@@ -3,13 +3,13 @@
   "entities": {
     "UserAccount": {
       "title": "User Account",
-      "description": "Administrative account with specific permission toggles and linked Auth UID.",
+      "description": "Administrative or Member account with specific permission toggles and linked Auth UID.",
       "type": "object",
       "properties": {
         "uid": { "type": "string", "description": "Linked Firebase Authentication UID." },
         "email": { "type": "string", "format": "email" },
         "name": { "type": "string" },
-        "role": { "type": "string", "enum": ["admin", "staff", "national_finance", "state_finance", "auditor"] },
+        "role": { "type": "string", "enum": ["admin", "staff", "national_finance", "state_finance", "auditor", "member"] },
         "status": { "type": "string", "enum": ["active", "inactive"] },
         "permissions": {
           "type": "object",
