@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState } from 'react'
@@ -14,12 +13,16 @@ import { ShieldAlert, Lock, ArrowRight, Loader2, Home, Eye, EyeOff, Terminal } f
 import { useToast } from '@/hooks/use-toast'
 import Image from 'next/image'
 import Link from 'next/link'
+import { Captcha } from '@/components/captcha'
+import { cn } from '@/lib/utils'
 
 export default function RootLoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [isCaptchaValid, setIsCaptchaValid] = useState(false)
+  
   const auth = useAuth()
   const db = useFirestore()
   const router = useRouter()
@@ -27,8 +30,17 @@ export default function RootLoginPage() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsLoading(true)
 
+    if (!isCaptchaValid) {
+      toast({
+        variant: "destructive",
+        title: "Security Block",
+        description: "Please complete the alphanumeric verification.",
+      })
+      return
+    }
+
+    setIsLoading(true)
     const inputEmail = email.toLowerCase().trim()
     const isRootEmail = inputEmail === 'deydhritiman@gmail.com';
 
@@ -97,7 +109,6 @@ export default function RootLoginPage() {
         description: "Governance privileges unlocked. Accessing Command Center.",
       })
       
-      // Default landing page is now Daily Update
       router.push('/internal/daily-update')
     } catch (error: any) {
       toast({
@@ -171,10 +182,19 @@ export default function RootLoginPage() {
                   </button>
                 </div>
               </div>
+
+              <div className="py-2 border-t border-red-900/30">
+                <Label className="text-[10px] font-black uppercase text-slate-500 tracking-widest ml-1 mb-2 block text-center">Security Verification</Label>
+                <Captcha onVerify={setIsCaptchaValid} />
+              </div>
+
               <Button 
                 type="submit" 
-                className="w-full bg-red-600 text-white font-bold h-12 md:h-14 text-sm md:text-lg rounded-xl hover:bg-red-700 transition-all shadow-[0_10px_40px_rgba(220,38,38,0.3)]" 
-                disabled={isLoading}
+                className={cn(
+                  "w-full font-bold h-12 md:h-14 text-sm md:text-lg rounded-xl transition-all shadow-[0_10px_40px_rgba(220,38,38,0.3)]",
+                  isCaptchaValid ? "bg-red-600 text-white hover:bg-red-700" : "bg-slate-800 text-slate-500 cursor-not-allowed shadow-none"
+                )} 
+                disabled={isLoading || !isCaptchaValid}
               >
                 {isLoading ? (
                   <Loader2 className="w-5 h-5 animate-spin" />

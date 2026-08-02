@@ -1,9 +1,8 @@
-
 "use client"
 
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { signInWithEmailAndPassword } from 'firebase/auth'
+import { signInWithEmailAndPassword, signOut } from 'firebase/auth'
 import { useAuth, useFirestore, useUser } from '@/firebase'
 import { doc, getDoc, serverTimestamp, setDoc, updateDoc } from 'firebase/firestore'
 import { Button } from '@/components/ui/button'
@@ -14,16 +13,20 @@ import { BadgeCheck, Lock, ArrowRight, Loader2, Home, Eye, EyeOff, UserCircle, S
 import { useToast } from '@/hooks/use-toast'
 import Image from 'next/image'
 import Link from 'next/link'
+import { Captcha } from '@/components/captcha'
+import { cn } from '@/lib/utils'
 
 /**
  * Member Login Page: High-fidelity terminal for Trust members to access their private dashboards.
- * Features: Automatic role verification, status approval checks, and password recovery redirection.
+ * Features: Automatic role verification, status approval checks, and alphanumeric captcha.
  */
 export default function MemberLoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [isCaptchaValid, setIsCaptchaValid] = useState(false)
+  
   const auth = useAuth()
   const db = useFirestore()
   const router = useRouter()
@@ -31,8 +34,17 @@ export default function MemberLoginPage() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsLoading(true)
 
+    if (!isCaptchaValid) {
+      toast({
+        variant: "destructive",
+        title: "Verification Required",
+        description: "Please complete the security captcha.",
+      })
+      return
+    }
+
+    setIsLoading(true)
     const inputEmail = email.toLowerCase().trim()
     
     try {
@@ -43,7 +55,6 @@ export default function MemberLoginPage() {
       const userSnap = await getDoc(userRef)
 
       if (!userSnap.exists()) {
-        // Fallback for members who have profiles but no 'user' account yet (auto-provision as 'member')
         await setDoc(userRef, {
           uid: firebaseUser.uid,
           email: inputEmail,
@@ -144,10 +155,19 @@ export default function MemberLoginPage() {
                   </button>
                 </div>
               </div>
+
+              <div className="py-2 border-t border-slate-100">
+                <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1 mb-2 block text-center">Security Verification</Label>
+                <Captcha onVerify={setIsCaptchaValid} />
+              </div>
+
               <Button 
                 type="submit" 
-                className="w-full bg-primary text-white font-bold h-14 text-lg rounded-xl hover:bg-secondary transition-all shadow-xl shadow-primary/20 group" 
-                disabled={isLoading}
+                className={cn(
+                  "w-full font-bold h-14 text-lg rounded-xl transition-all shadow-xl group",
+                  isCaptchaValid ? "bg-primary text-white hover:bg-secondary shadow-primary/20" : "bg-slate-200 text-slate-400 cursor-not-allowed shadow-none"
+                )} 
+                disabled={isLoading || !isCaptchaValid}
               >
                 {isLoading ? (
                   <Loader2 className="w-5 h-5 animate-spin" />

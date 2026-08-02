@@ -13,11 +13,12 @@ import { UserPlus, Mail, Lock, User, ArrowRight, Loader2, Home, Eye, EyeOff, Shi
 import { useToast } from '@/hooks/use-toast'
 import Image from 'next/image'
 import Link from 'next/link'
+import { Captcha } from '@/components/captcha'
 
 /**
  * Member Sign-Up Page: Allows prospective members to register their digital identity.
  * Features: Double-line password verification and strict alphanumeric validation.
- * Accounts are created as 'inactive' and require administrative approval.
+ * Includes alphanumeric captcha security protocol.
  */
 export default function MemberSignupPage() {
   const [email, setEmail] = useState('')
@@ -25,8 +26,10 @@ export default function MemberSignupPage() {
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
+  const [isCaptchaValid, setIsCaptchaValid] = useState(false)
   
   const auth = useAuth()
   const db = useFirestore()
@@ -36,7 +39,15 @@ export default function MemberSignupPage() {
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    // 1. Validation Logic
+    if (!isCaptchaValid) {
+      toast({
+        variant: "destructive",
+        title: "Verification Required",
+        description: "Please enter the correct captcha code to proceed.",
+      })
+      return
+    }
+
     if (password !== confirmPassword) {
       toast({
         variant: "destructive",
@@ -61,21 +72,18 @@ export default function MemberSignupPage() {
     const inputEmail = email.toLowerCase().trim()
     
     try {
-      // 1. Create Firebase Auth Account
       const userCredential = await createUserWithEmailAndPassword(auth, inputEmail, password)
       const firebaseUser = userCredential.user
 
-      // 2. Update Auth Profile
       await updateProfile(firebaseUser, { displayName: name })
 
-      // 3. Establish Inactive Registry Entry in Firestore
       const userRef = doc(db, 'users', inputEmail)
       await setDoc(userRef, {
         uid: firebaseUser.uid,
         email: inputEmail,
         name: name,
         role: 'member',
-        status: 'inactive', // Default to inactive for administrative vetting
+        status: 'inactive',
         permissions: { publicView: true },
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
@@ -212,7 +220,7 @@ export default function MemberSignupPage() {
                 <Label className="text-slate-400 text-[10px] font-bold uppercase tracking-wider ml-1">Confirm Passphrase</Label>
                 <div className="relative">
                   <Input 
-                    type={showPassword ? "text" : "password"} 
+                    type={showConfirmPassword ? "text" : "password"} 
                     placeholder="Re-enter secure key" 
                     className="bg-slate-50 border-slate-200 h-12 rounded-xl pl-10 pr-10 text-sm"
                     value={confirmPassword}
@@ -223,12 +231,17 @@ export default function MemberSignupPage() {
                   <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <button
                     type="button"
-                    onClick={() => setShowPassword(!showPassword)}
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-primary transition-colors"
                   >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
+              </div>
+
+              <div className="py-4 border-t border-slate-100">
+                <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1 mb-2 block text-center">Security Verification</Label>
+                <Captcha onVerify={setIsCaptchaValid} />
               </div>
 
               <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 mb-2">
@@ -239,8 +252,11 @@ export default function MemberSignupPage() {
 
               <Button 
                 type="submit" 
-                className="w-full bg-primary text-white font-bold h-14 text-lg rounded-xl hover:bg-secondary transition-all shadow-xl shadow-primary/20 group" 
-                disabled={isLoading}
+                className={cn(
+                  "w-full font-bold h-14 text-lg rounded-xl transition-all shadow-xl group",
+                  isCaptchaValid ? "bg-primary text-white hover:bg-secondary shadow-primary/20" : "bg-slate-200 text-slate-400 cursor-not-allowed shadow-none"
+                )} 
+                disabled={isLoading || !isCaptchaValid}
               >
                 {isLoading ? (
                   <Loader2 className="w-5 h-5 animate-spin" />
