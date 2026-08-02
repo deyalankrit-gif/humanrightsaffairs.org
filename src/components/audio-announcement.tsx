@@ -29,8 +29,7 @@ import { cn } from '@/lib/utils';
 /**
  * AudioAnnouncement: Refined institutional broadcast player.
  * Optimized for automatic playback on refresh while respecting browser policies.
- * Automatically initializes and plays when the site is refreshed if enabled and not muted.
- * Autoplay fallback (Mission Notice) now features the handmic.jpeg thematic asset.
+ * Prompt refined to be minimalist: Image-only trigger with no text.
  */
 export function AudioAnnouncement() {
   const db = useFirestore();
@@ -169,41 +168,24 @@ export function AudioAnnouncement() {
       
       <div className="flex flex-col items-end gap-4">
         {showAutoplayPrompt && !error && (
-          <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl border border-slate-100 dark:border-white/10 mb-2 w-[280px] overflow-hidden animate-bounce ring-8 ring-accent/5">
-            <div className="relative h-32 w-full bg-slate-900 overflow-hidden">
-               <Image 
-                 src="/handmic.jpeg" 
-                 alt="Mission Announcement" 
-                 fill 
-                 className="object-cover opacity-80"
-               />
-               <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent"></div>
-               <div className="absolute top-4 left-4 flex items-center gap-2">
-                 <div className="w-2 h-2 rounded-full bg-accent animate-pulse" />
-                 <span className="text-[10px] font-black text-white uppercase tracking-[0.2em] drop-shadow-md">Mission Notice</span>
-               </div>
-            </div>
-            
-            <div className="p-6 pt-2 space-y-4">
-               <div className="space-y-1">
-                 <h4 className="text-xs font-black text-primary dark:text-white uppercase tracking-tight">Official Audio Update</h4>
-                 <p className="text-[10px] text-slate-500 font-bold uppercase leading-tight">Hear the latest institutional mandate from HRAT India.</p>
-               </div>
-               
-               <Button 
-                onClick={handleManualPlay}
-                className="w-full bg-primary text-white font-bold text-[10px] h-11 rounded-xl shadow-xl hover:bg-secondary transition-all flex gap-2"
-               >
-                 <Radio className="w-4 h-4 animate-pulse text-accent" /> START BROADCAST
-               </Button>
-            </div>
-            <button 
-              onClick={() => setShowAutoplayPrompt(false)}
-              className="absolute top-3 right-3 p-1 rounded-full bg-black/20 hover:bg-black/40 text-white transition-colors"
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
-          </div>
+          <button 
+            onClick={handleManualPlay}
+            className="relative w-20 h-20 md:w-24 md:h-24 rounded-full shadow-2xl border-4 border-accent animate-bounce hover:scale-110 transition-transform overflow-hidden group bg-slate-900 ring-8 ring-accent/10"
+          >
+             <Image 
+               src="/handmic.jpeg" 
+               alt="Play" 
+               fill 
+               className="object-cover group-hover:scale-110 transition-transform duration-500"
+             />
+             <div className="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-colors flex items-center justify-center">
+                <Play className="w-8 h-8 text-white fill-white drop-shadow-lg" />
+             </div>
+             <div className="absolute -top-1 -right-1 flex h-4 w-4">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-4 w-4 bg-accent"></span>
+             </div>
+          </button>
         )}
 
         <div className={cn(
