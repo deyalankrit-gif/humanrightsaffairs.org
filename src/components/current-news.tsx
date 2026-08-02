@@ -15,7 +15,7 @@ import { getNewsSchema } from '@/lib/seo-utils';
 /**
  * CurrentNews: Real-time institutional news broadcast node.
  * Features: 2-hour autonomous sync, persistent AI translation, and fixed layout.
- * Updated: Integrated NewsArticle JSON-LD for AI Search optimization.
+ * Updated: Integrated a colorful animated digital clock in the header.
  */
 export function CurrentNews({ className }: { className?: string }) {
   const db = useFirestore();
@@ -23,6 +23,16 @@ export function CurrentNews({ className }: { className?: string }) {
   const [isSyncing, setIsSyncing] = useState(false);
   const [isTranslating, setIsTranslating] = useState(false);
   const [isBangla, setIsBangla] = useState(false);
+  const [currentTime, setCurrentTime] = useState<Date | null>(null);
+
+  // Initialize clock and update every second
+  useEffect(() => {
+    setCurrentTime(new Date());
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   // Registry metadata for sync monitoring
   const metaRef = useMemoFirebase(() => {
@@ -172,6 +182,19 @@ export function CurrentNews({ className }: { className?: string }) {
               {activeNews.scope || 'India'}
             </span>
           </div>
+
+          {/* DIGITAL COLORFUL ANIMATED CLOCK */}
+          {currentTime && (
+            <div className="flex items-center gap-2 bg-black/30 px-3 py-1 rounded-full border border-white/10 shadow-lg animate-in fade-in duration-1000">
+              <div className="relative flex h-1.5 w-1.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-accent"></span>
+              </div>
+              <span className="text-[10px] font-black font-mono bg-gradient-to-r from-accent via-emerald-400 to-sky-400 bg-[length:200%_auto] animate-gradient-x bg-clip-text text-transparent drop-shadow-[0_0_8px_rgba(212,175,55,0.3)] tabular-nums">
+                {currentTime.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })}
+              </span>
+            </div>
+          )}
         </div>
 
         <div className="space-y-4">
