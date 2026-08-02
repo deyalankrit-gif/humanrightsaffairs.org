@@ -138,6 +138,21 @@
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["name", "address", "comment"]
+    },
+    "AudioAnnouncement": {
+      "title": "Audio Announcement",
+      "description": "Institutional audio broadcast settings and asset.",
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "audioData": { "type": "string", "description": "Base64 encoded audio string." },
+        "autoplay": { "type": "boolean" },
+        "volume": { "type": "number" },
+        "updatedAt": { "type": "string", "format": "date-time" },
+        "updatedBy": { "type": "string" }
+      }
     }
   },
   "auth": {
@@ -149,6 +164,7 @@
     "/memberProfiles/{memberId}": { "schema": "MemberProfile", "description": "Personnel registry." },
     "/materials/{materialId}": { "schema": "MaterialItem", "description": "Material management inventory." },
     "/current_news/{newsId}": { "schema": "CurrentNews", "description": "Homepage news broadcast." },
-    "/feedback/{feedbackId}": { "schema": "Feedback", "description": "User feedback collection." }
+    "/feedback/{feedbackId}": { "schema": "Feedback", "description": "User feedback collection." },
+    "/settings/audio_announcement": { "schema": "AudioAnnouncement", "description": "Global audio broadcast configuration." }
   }
 }

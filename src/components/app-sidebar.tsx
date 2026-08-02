@@ -72,7 +72,8 @@ import {
   BookOpen,
   Activity,
   ListTodo,
-  Globe
+  Globe,
+  Speaker
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -105,6 +106,7 @@ const topAnalyticsLinksConfig = [
 
 const adminLinksConfig = [
   { name: 'Governance Manual', href: '/internal/manual', icon: BookOpen, permission: 'publicView' },
+  { name: 'Audio Announcement', href: '/internal/audio-announcement', icon: Speaker, permission: 'occasions' },
   { name: 'Applications', href: '/internal/applications', icon: FileText, permission: 'applications' },
   { name: 'Public Complaints', href: '/internal/public-complaints', icon: ShieldQuestion, permission: 'publicComplaints' },
   { name: 'Investigator Pool', href: '/internal/investigation-officers', icon: UserRoundCheck, rootOnly: true },

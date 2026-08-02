@@ -103,6 +103,11 @@ service cloud.firestore {
       allow write: if isRoot();
     }
 
+    match /settings/audio_announcement {
+      allow read: if true;
+      allow write: if hasPermission('occasions');
+    }
+
     // 4. SECURE USER REGISTRY
     match /users/{userEmail} {
       allow read: if isAuthenticated() && (

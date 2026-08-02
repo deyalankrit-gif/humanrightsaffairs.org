@@ -13,6 +13,7 @@ import { PublicFooter } from '@/components/public-footer';
 import { AdminFooter } from '@/components/admin-footer';
 import { FeedbackSystem } from '@/components/feedback-system';
 import { ContextualHelp } from '@/components/contextual-help';
+import { AudioAnnouncement } from '@/components/audio-announcement';
 import { useUser } from '@/firebase';
 import { cn } from '@/lib/utils';
 
@@ -81,6 +82,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex flex-col min-h-screen relative bg-background w-full overflow-x-hidden">
       <VisitorTracker />
+      <AudioAnnouncement />
       {!isAdmin && <Navbar />}
       <div className="flex-1 w-full">
         {children}
