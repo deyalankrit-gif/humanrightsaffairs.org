@@ -31,8 +31,7 @@ import {
   User,
   Activity,
   XCircle,
-  Radio,
-  Broadcast
+  Radio
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -269,7 +268,7 @@ export default function AiAudioCenter() {
         ) : (
           <div className="mb-10 animate-in fade-in duration-700">
              <div className="p-8 rounded-[2.5rem] bg-slate-100 dark:bg-slate-900 border-2 border-dashed border-slate-200 dark:border-slate-800 text-center flex flex-col items-center gap-3">
-                <Broadcast className="w-10 h-10 text-slate-300" />
+                <Radio className="w-10 h-10 text-slate-300" />
                 <h3 className="text-lg font-bold text-slate-400">No Active Broadcast</h3>
                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Select a draft to go live on the homepage player</p>
              </div>
