@@ -27,6 +27,7 @@ import { cn } from '@/lib/utils';
 /**
  * AudioAnnouncement: Refined institutional broadcast player.
  * Optimized for automatic playback on refresh while respecting browser policies.
+ * Automatically initializes and plays when the site is refreshed if enabled and not muted.
  */
 export function AudioAnnouncement() {
   const db = useFirestore();
@@ -58,9 +59,11 @@ export function AudioAnnouncement() {
   // Playback trigger logic
   const attemptPlay = React.useCallback(() => {
     const audio = audioRef.current;
-    if (!audio || !settings?.enabled || isMuted || isPlaying || error) return;
+    if (!audio || !settings?.enabled || isMuted || error) return;
 
-    audio.volume = settings.volume || 0.5;
+    // Ensure settings are applied before play
+    audio.volume = settings.volume ?? 0.5;
+    audio.muted = isMuted;
     
     const playPromise = audio.play();
     if (playPromise !== undefined) {
@@ -68,25 +71,30 @@ export function AudioAnnouncement() {
         .then(() => {
           setIsPlaying(true);
           setShowAutoplayPrompt(false);
+          setError(false);
         })
-        .catch(() => {
-          // Autoplay blocked by browser
+        .catch((err) => {
+          // Autoplay often blocked on first load, but usually works on refresh if user interacted previously
+          console.warn("[AUDIO-AUTOPLAY] Playback blocked or interrupted:", err.name);
           setShowAutoplayPrompt(true);
           setIsPlaying(false);
         });
     }
-  }, [settings, isMuted, isPlaying, error]);
+  }, [settings, isMuted, error]);
 
-  // Effect to handle metadata/settings changes
+  // Handle source changes and initial load
   useEffect(() => {
     if (!mounted || loading || !settings?.enabled || !settings?.audioData || error) return;
 
     const audio = audioRef.current;
     if (!audio) return;
 
+    // Set mute state early
     audio.muted = isMuted;
 
+    // If autoplay is enabled and we are not muted, try to play
     if (settings.autoplay && !isMuted) {
+      // If audio is already loaded enough, try playing immediately
       if (audio.readyState >= 2) {
         attemptPlay();
       }
@@ -138,8 +146,11 @@ export function AudioAnnouncement() {
   };
 
   const handleAudioError = () => {
-    setError(true);
-    setIsPlaying(false);
+    // Only set error if we actually have a source but it fails
+    if (settings?.audioData) {
+      setError(true);
+      setIsPlaying(false);
+    }
   };
 
   if (!mounted || loading || !settings?.enabled || !settings?.audioData || !isVisible || !isHome) return null;
@@ -152,7 +163,7 @@ export function AudioAnnouncement() {
         onCanPlay={attemptPlay}
         onEnded={() => setIsPlaying(false)}
         onError={handleAudioError}
-        className="hidden"
+        preload="auto"
       />
       
       <div className="flex flex-col items-end gap-4">
