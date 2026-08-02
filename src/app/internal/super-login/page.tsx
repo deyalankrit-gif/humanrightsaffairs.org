@@ -19,7 +19,7 @@ import { cn } from '@/lib/utils'
 
 /**
  * Root Login Page: High-security terminal for root administrator access.
- * Refined: Removed pre-filled state. Displays deydhritiman@gmail.com as a placeholder only.
+ * Refined: Removed pre-filled state. Displays generic placeholders.
  */
 export default function RootLoginPage() {
   const [email, setEmail] = useState('')
@@ -156,7 +156,7 @@ export default function RootLoginPage() {
                 <div className="relative">
                   <Input 
                     type="email" 
-                    placeholder="deydhritiman@gmail.com" 
+                    placeholder="your@email.com" 
                     className="bg-black/50 border-red-900/30 text-red-500 h-11 md:h-12 rounded-xl pl-10 font-mono text-sm focus:ring-red-600"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -171,11 +171,11 @@ export default function RootLoginPage() {
                 <div className="relative">
                   <Input 
                     type={showPassword ? "text" : "password"} 
-                    placeholder="••••••••" 
+                    placeholder="Password123" 
                     className="bg-black/50 border-red-900/30 text-red-500 h-11 md:h-12 rounded-xl pl-10 pr-10 font-mono text-sm focus:ring-red-600"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    autoComplete="off"
+                    autoComplete="new-password"
                     required
                   />
                   <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-red-900" />
