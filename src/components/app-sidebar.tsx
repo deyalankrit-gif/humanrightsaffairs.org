@@ -455,10 +455,10 @@ export function AppSidebar() {
                           <SidebarMenuItem key={link.name} ref={isActive ? activeItemRef : null}>
                             <SidebarMenuButton asChild isActive={isActive} tooltip={link.name} className={cn("h-11 rounded-xl transition-all px-4", isActive ? "bg-accent text-white font-bold" : "hover:bg-secondary/10 hover:text-secondary")}>
                               <Link href={link.href} className="flex items-center gap-3">
-                                <link.icon className={cn("w-5 h-5", isActive ? "text-white" : isAudioAnnouncement ? "text-[#CEFF00]" : "text-muted-foreground")} />
+                                <link.icon className={cn("w-5 h-5", isActive ? "text-white" : isAudioAnnouncement ? "text-[#FF00FF]" : "text-muted-foreground")} />
                                 <span className={cn(
                                   "group-data-[collapsible=icon]:hidden",
-                                  isAudioAnnouncement && !isActive && "text-[#CEFF00] font-black drop-shadow-[0_0_2px_rgba(206,255,0,0.5)]"
+                                  isAudioAnnouncement && !isActive && "text-[#FF00FF] font-black drop-shadow-[0_0_2px_rgba(255,0,255,0.5)]"
                                 )}>
                                   {link.name}
                                 </span>
