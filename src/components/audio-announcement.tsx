@@ -12,11 +12,8 @@ import {
   RefreshCw, 
   X,
   Speaker,
-  Radio,
   ShieldCheck,
-  AlertCircle,
-  Zap,
-  Activity
+  AlertCircle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { 
@@ -29,7 +26,7 @@ import { cn } from '@/lib/utils';
 
 /**
  * AudioAnnouncement: Refined institutional broadcast player.
- * Features: Professional glass-dark aesthetic, subtle animations, and thematic consistency.
+ * Optimized for automatic playback on refresh while respecting browser policies.
  */
 export function AudioAnnouncement() {
   const db = useFirestore();
@@ -58,26 +55,43 @@ export function AudioAnnouncement() {
     if (savedMute === 'true') setIsMuted(true);
   }, []);
 
+  // Playback trigger logic
+  const attemptPlay = React.useCallback(() => {
+    const audio = audioRef.current;
+    if (!audio || !settings?.enabled || isMuted || isPlaying || error) return;
+
+    audio.volume = settings.volume || 0.5;
+    
+    const playPromise = audio.play();
+    if (playPromise !== undefined) {
+      playPromise
+        .then(() => {
+          setIsPlaying(true);
+          setShowAutoplayPrompt(false);
+        })
+        .catch(() => {
+          // Autoplay blocked by browser
+          setShowAutoplayPrompt(true);
+          setIsPlaying(false);
+        });
+    }
+  }, [settings, isMuted, isPlaying, error]);
+
+  // Effect to handle metadata/settings changes
   useEffect(() => {
     if (!mounted || loading || !settings?.enabled || !settings?.audioData || error) return;
 
     const audio = audioRef.current;
     if (!audio) return;
 
-    audio.volume = settings.volume || 0.5;
     audio.muted = isMuted;
-    
-    if (settings.autoplay && !isMuted && !isPlaying && audio.readyState >= 1) {
-      const playPromise = audio.play();
-      if (playPromise !== undefined) {
-        playPromise
-          .then(() => setIsPlaying(true))
-          .catch(() => {
-            setShowAutoplayPrompt(true);
-          });
+
+    if (settings.autoplay && !isMuted) {
+      if (audio.readyState >= 2) {
+        attemptPlay();
       }
     }
-  }, [mounted, loading, settings, isMuted, isPlaying, error]);
+  }, [mounted, loading, settings, isMuted, error, attemptPlay]);
 
   const toggleMute = () => {
     const nextMute = !isMuted;
@@ -91,6 +105,9 @@ export function AudioAnnouncement() {
           setIsPlaying(true);
           setShowAutoplayPrompt(false);
         }).catch(() => {});
+      } else if (nextMute) {
+        setIsPlaying(false);
+        audioRef.current.pause();
       }
     }
   };
@@ -132,6 +149,7 @@ export function AudioAnnouncement() {
       <audio 
         ref={audioRef} 
         src={settings.audioData} 
+        onCanPlay={attemptPlay}
         onEnded={() => setIsPlaying(false)}
         onError={handleAudioError}
         className="hidden"
