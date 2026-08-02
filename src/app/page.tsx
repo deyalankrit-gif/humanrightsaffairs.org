@@ -17,7 +17,6 @@ import { Typewriter } from '@/components/typewriter'
 import { PlaceHolderImages } from '@/lib/placeholder-images'
 import { RazorpayDonation } from '@/components/razorpay-donation'
 import { CurrentNews } from '@/components/current-news'
-import { AiAudioPlayer } from '@/components/ai-audio-player'
 
 function BackgroundDecor() {
   return (
@@ -180,9 +179,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      {/* AI Audio Announcement Player */}
-      <AiAudioPlayer />
 
       <section id="search" className="py-16 md:py-32 bg-white/50 backdrop-blur-sm dark:bg-slate-900/50 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-80 h-80 bg-accent/5 rounded-full blur-[120px]"></div>

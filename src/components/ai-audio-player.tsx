@@ -11,7 +11,8 @@ import {
   VolumeX, 
   Download,
   Mic2,
-  ChevronRight
+  AlertCircle,
+  X
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
@@ -23,12 +24,11 @@ import {
   SelectValue 
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
-import { JsonLd } from './json-ld';
 
 /**
  * AiAudioPlayer: High-efficiency Micro-Node design.
- * Optimized for minimal vertical footprint while preserving full tactical control.
- * Integrated with automatic playback logic for first-time page load.
+ * Optimized for global layout placement with automatic playback logic.
+ * Handles browser autoplay restrictions gracefully with a non-intrusive prompt.
  */
 export function AiAudioPlayer({ className }: { className?: string }) {
   const db = useFirestore();
@@ -39,19 +39,15 @@ export function AiAudioPlayer({ className }: { className?: string }) {
   const [isMuted, setIsMuted] = useState(false);
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const [mounted, setMounted] = useState(false);
+  const [autoplayBlocked, setAutoplayBlocked] = useState(false);
   
   const audioRef = useRef<HTMLAudioElement>(null);
-  // Ref to track the attempt during the component's lifecycle
   const autoPlayAttempted = useRef(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  /**
-   * Tactical query sort: Use updatedAt to ensure modified or re-published 
-   * announcements move to the top of the processing queue.
-   */
   const announcementsQuery = useMemoFirebase(() => {
     if (!db) return null;
     return query(
@@ -68,7 +64,7 @@ export function AiAudioPlayer({ className }: { className?: string }) {
     return list.find((a: any) => a.status === 'Published');
   }, [list]);
 
-  // Autoplay Logic: Triggers automatically when the announcement and component are ready
+  // Autoplay Engine: Triggers once per mount when data and media are ready
   useEffect(() => {
     if (!mounted || loading || !activeAnn || autoPlayAttempted.current) return;
 
@@ -84,16 +80,15 @@ export function AiAudioPlayer({ className }: { className?: string }) {
         playPromise
           .then(() => {
             setIsPlaying(true);
+            setAutoplayBlocked(false);
           })
-          .catch((err) => {
-            // Browsers block autoplay with sound if no user interaction has occurred on the domain yet.
-            // This is a standard security restriction.
-            console.warn("[AUDIO-AUTOPLAY] Policy Restriction:", err.name);
+          .catch(() => {
+            // Autoplay blocked by browser policy (common on first load)
+            setAutoplayBlocked(true);
           });
       }
     };
 
-    // Attempt playback if audio state is ready, otherwise wait for canplay event
     if (audio.readyState >= 2) {
       triggerAutoPlay();
     } else {
@@ -126,6 +121,7 @@ export function AiAudioPlayer({ className }: { className?: string }) {
       audioRef.current.pause();
     } else {
       audioRef.current.play();
+      setAutoplayBlocked(false); // Clear the prompt once the user interacts
     }
     setIsPlaying(!isPlaying);
   };
@@ -155,25 +151,34 @@ export function AiAudioPlayer({ className }: { className?: string }) {
   if (!mounted || loading || !activeAnn) return null;
 
   return (
-    <div className={cn("w-full py-2.5 bg-white/90 dark:bg-slate-950/90 backdrop-blur-md border-y border-slate-100 dark:border-slate-800 transition-all duration-500", className)}>
-      <div className="container mx-auto px-4 max-w-6xl">
+    <div className={cn("w-full py-2 bg-white/90 dark:bg-slate-950/90 backdrop-blur-md border-b border-slate-100 dark:border-slate-800 transition-all duration-500", className)}>
+      <div className="container mx-auto px-4 max-w-7xl">
         <audio ref={audioRef} src={activeAnn.audioData} />
         
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3 md:gap-4">
           {/* Micro Play Trigger */}
-          <Button 
-            onClick={togglePlay}
-            size="icon"
-            className="h-9 w-9 rounded-full bg-accent hover:bg-secondary text-primary hover:text-white shadow-sm shrink-0 border-none transition-all active:scale-90"
-          >
-            {isPlaying ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current ml-0.5" />}
-          </Button>
+          <div className="flex items-center gap-3 shrink-0">
+            <Button 
+              onClick={togglePlay}
+              size="icon"
+              className="h-9 w-9 rounded-full bg-accent hover:bg-secondary text-primary hover:text-white shadow-sm shrink-0 border-none transition-all active:scale-90"
+            >
+              {isPlaying ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current ml-0.5" />}
+            </Button>
+
+            {autoplayBlocked && !isPlaying && (
+              <div className="flex items-center gap-2 px-3 py-1 bg-accent/20 rounded-full border border-accent/30 animate-pulse shrink-0">
+                <AlertCircle className="w-3 h-3 text-accent" />
+                <span className="text-[9px] font-black text-accent uppercase tracking-tighter">Tap Play to hear announcement</span>
+              </div>
+            )}
+          </div>
 
           {/* Unified Stream: Title + Progress */}
-          <div className="flex-1 min-w-0 flex flex-col md:flex-row md:items-center gap-2 md:gap-6">
+          <div className="flex-1 min-w-0 flex flex-col md:flex-row md:items-center gap-1 md:gap-6">
             <div className="flex items-center gap-2 min-w-0 shrink-0">
                <Mic2 className="w-3.5 h-3.5 text-accent animate-pulse shrink-0" />
-               <h2 className="text-[10px] md:text-xs font-black text-primary dark:text-white uppercase tracking-tight truncate max-w-[150px] md:max-w-xs">
+               <h2 className="text-[10px] md:text-xs font-black text-primary dark:text-white uppercase tracking-tight truncate max-w-[120px] md:max-w-xs">
                  {activeAnn.title}
                </h2>
             </div>
