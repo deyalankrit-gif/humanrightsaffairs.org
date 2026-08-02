@@ -9,7 +9,6 @@ import {
   Pause, 
   Volume2, 
   VolumeX, 
-  Download,
   Mic2,
   AlertCircle,
   X
@@ -55,7 +54,7 @@ export function AiAudioPlayer({ className }: { className?: string }) {
     return query(
       collection(db, 'ai_announcements'), 
       orderBy('updatedAt', 'desc'),
-      limit(10)
+      limit(20) // Increased limit to ensure latest published item is captured
     );
   }, [db]);
 
@@ -70,8 +69,7 @@ export function AiAudioPlayer({ className }: { className?: string }) {
    * Autoplay Strategy:
    * 1. Only run once per full page load (tracked via autoPlayAttempted ref).
    * 2. Wait for component mount and Firestore data resolution.
-   * 3. Use 'oncanplaythrough' to ensure media buffer is ready.
-   * 4. Catch and handle browser policy blocks silently.
+   * 3. Detect browser engagement restrictions and surface a subtle guide if blocked.
    */
   useEffect(() => {
     if (!mounted || loading || !activeAnn || autoPlayAttempted.current || !audioRef.current) return;
@@ -82,7 +80,7 @@ export function AiAudioPlayer({ className }: { className?: string }) {
       if (autoPlayAttempted.current) return;
       autoPlayAttempted.current = true;
       
-      // Slight delay ensures DOM is settled and browser media engine is ready
+      // Slight tactical delay ensures DOM is settled and browser media engine is ready
       setTimeout(() => {
         const playPromise = audio.play();
         if (playPromise !== undefined) {
@@ -97,18 +95,19 @@ export function AiAudioPlayer({ className }: { className?: string }) {
               setIsPlaying(false);
             });
         }
-      }, 150);
+      }, 300);
     };
 
     // If audio is already sufficiently buffered, attempt play immediately
-    if (audio.readyState >= 3) {
+    if (audio.readyState >= 2) {
       triggerPlayback();
     } else {
-      audio.oncanplaythrough = () => {
+      const handleCanPlay = () => {
         triggerPlayback();
-        // Clean up listener to prevent duplicate triggers
-        audio.oncanplaythrough = null;
+        audio.removeEventListener('canplay', handleCanPlay);
       };
+      audio.addEventListener('canplay', handleCanPlay);
+      return () => audio.removeEventListener('canplay', handleCanPlay);
     }
   }, [mounted, loading, activeAnn]);
 
@@ -187,7 +186,7 @@ export function AiAudioPlayer({ className }: { className?: string }) {
             {autoplayBlocked && !isPlaying && (
               <div className="flex items-center gap-2 px-3 py-1 bg-accent/10 rounded-full border border-accent/20 animate-in zoom-in-95 duration-500 shrink-0">
                 <AlertCircle className="w-3 h-3 text-accent animate-pulse" />
-                <span className="text-[9px] font-black text-accent uppercase tracking-tighter">Tap Play to hear announcement</span>
+                <span className="text-[9px] font-black text-accent uppercase tracking-tighter">Tap to Play Announcement</span>
               </div>
             )}
           </div>
