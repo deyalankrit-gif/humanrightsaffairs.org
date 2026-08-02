@@ -44,11 +44,15 @@ export function AiAudioPlayer({ className }: { className?: string }) {
     setMounted(true);
   }, []);
 
+  /**
+   * Tactical query sort: Use updatedAt to ensure modified or re-published 
+   * announcements move to the top of the processing queue.
+   */
   const announcementsQuery = useMemoFirebase(() => {
     if (!db) return null;
     return query(
       collection(db, 'ai_announcements'), 
-      orderBy('createdAt', 'desc'),
+      orderBy('updatedAt', 'desc'),
       limit(5)
     );
   }, [db]);

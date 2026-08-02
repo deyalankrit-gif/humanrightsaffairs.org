@@ -98,6 +98,23 @@ export default function AiAudioCenter() {
     status: 'Draft' as any
   });
 
+  /**
+   * updateForm: Tactical state helper that clears audioData on critical parameter changes.
+   * This ensures the saved audio always matches the current text/voice configuration.
+   */
+  const updateForm = (updates: Partial<typeof form>) => {
+    setForm(prev => {
+      const criticalFields = ['fullText', 'language', 'voice', 'emotion', 'speed', 'pitch'];
+      const hasCriticalChange = Object.keys(updates).some(k => criticalFields.includes(k));
+      
+      return {
+        ...prev,
+        ...updates,
+        audioData: hasCriticalChange ? '' : prev.audioData
+      };
+    });
+  };
+
   useEffect(() => {
     if (!authLoading && !user) router.push('/internal/login');
   }, [user, authLoading, router]);
@@ -397,11 +414,11 @@ export default function AiAudioCenter() {
                <div className="grid md:grid-cols-2 gap-6">
                   <div className="space-y-1.5">
                      <Label className="text-[10px] font-bold uppercase text-slate-400">Announcement Title *</Label>
-                     <Input value={form.title} onChange={e => setForm({...form, title: e.target.value})} placeholder="e.g. Constitutional Awareness Update" className="h-11 rounded-xl" />
+                     <Input value={form.title} onChange={e => updateForm({title: e.target.value})} placeholder="e.g. Constitutional Awareness Update" className="h-11 rounded-xl" />
                   </div>
                   <div className="space-y-1.5">
                      <Label className="text-[10px] font-bold uppercase text-slate-400">Categorization</Label>
-                     <Select value={form.category} onValueChange={v => setForm({...form, category: v})}>
+                     <Select value={form.category} onValueChange={v => updateForm({category: v})}>
                         <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
                         <SelectContent className="bg-white">
                            {['Official Notice', 'Legal Update', 'Mission Alert', 'Event Greeting', 'Emergency Broadcast'].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
@@ -414,7 +431,7 @@ export default function AiAudioCenter() {
                   <Label className="text-[10px] font-bold uppercase text-slate-400">Broadcast Narrative (Full Text) *</Label>
                   <Textarea 
                     value={form.fullText} 
-                    onChange={e => setForm({...form, fullText: e.target.value})} 
+                    onChange={e => updateForm({fullText: e.target.value})} 
                     placeholder="Type the message to be converted to human speech..." 
                     className="min-h-[150px] rounded-2xl p-4 leading-relaxed" 
                   />
@@ -423,7 +440,7 @@ export default function AiAudioCenter() {
                <div className="grid md:grid-cols-3 gap-6">
                   <div className="space-y-1.5">
                      <Label className="text-[10px] font-bold uppercase text-slate-400">Language</Label>
-                     <Select value={form.language} onValueChange={(v: any) => setForm({...form, language: v})}>
+                     <Select value={form.language} onValueChange={(v: any) => updateForm({language: v})}>
                         <SelectTrigger className="h-11 rounded-xl font-bold"><SelectValue /></SelectTrigger>
                         <SelectContent className="bg-white">
                            <SelectItem value="English">English (Global)</SelectItem>
@@ -434,7 +451,7 @@ export default function AiAudioCenter() {
                   </div>
                   <div className="space-y-1.5">
                      <Label className="text-[10px] font-bold uppercase text-slate-400">Vocal Profile</Label>
-                     <Select value={form.voice} onValueChange={(v: any) => setForm({...form, voice: v})}>
+                     <Select value={form.voice} onValueChange={(v: any) => updateForm({voice: v})}>
                         <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
                         <SelectContent className="bg-white">
                            <SelectItem value="Male">Male (Lead)</SelectItem>
@@ -444,7 +461,7 @@ export default function AiAudioCenter() {
                   </div>
                   <div className="space-y-1.5">
                      <Label className="text-[10px] font-bold uppercase text-slate-400">Tonality / Emotion</Label>
-                     <Select value={form.emotion} onValueChange={(v: any) => setForm({...form, emotion: v})}>
+                     <Select value={form.emotion} onValueChange={(v: any) => updateForm({emotion: v})}>
                         <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
                         <SelectContent className="bg-white">
                            {['Official', 'Professional', 'Calm', 'Friendly', 'Emergency'].map(e => <SelectItem key={e} value={e}>{e}</SelectItem>)}
@@ -464,7 +481,7 @@ export default function AiAudioCenter() {
                           min={0.5} 
                           max={2} 
                           step={0.1} 
-                          onValueChange={v => setForm({...form, speed: v[0]})}
+                          onValueChange={v => updateForm({speed: v[0]})}
                           className="flex-1"
                         />
                         <span className="text-xs font-bold w-12 text-center bg-white px-2 py-1 rounded-lg border">{form.speed}x</span>
@@ -480,7 +497,7 @@ export default function AiAudioCenter() {
                           min={-20} 
                           max={20} 
                           step={1} 
-                          onValueChange={v => setForm({...form, pitch: v[0]})}
+                          onValueChange={v => updateForm({pitch: v[0]})}
                           className="flex-1"
                         />
                         <span className="text-xs font-bold w-12 text-center bg-white px-2 py-1 rounded-lg border">{form.pitch}</span>
