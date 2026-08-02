@@ -13,9 +13,38 @@ import { JsonLd } from './json-ld';
 import { getNewsSchema } from '@/lib/seo-utils';
 
 /**
+ * DigitalClock: Isolated timer node to prevent news card re-renders.
+ */
+function DigitalClock() {
+  const [time, setTime] = useState<Date | null>(null);
+
+  useEffect(() => {
+    setTime(new Date());
+    const timer = setInterval(() => {
+      setTime(new Date());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  if (!time) return null;
+
+  return (
+    <div className="flex items-center gap-2 bg-black/30 px-3 py-1 rounded-full border border-white/10 shadow-lg animate-in fade-in duration-1000">
+      <div className="relative flex h-1.5 w-1.5">
+        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
+        <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-accent"></span>
+      </div>
+      <span className="text-[10px] font-black font-mono bg-gradient-to-r from-accent via-emerald-400 to-sky-400 bg-[length:200%_auto] animate-gradient-x bg-clip-text text-transparent drop-shadow-[0_0_8px_rgba(212,175,55,0.3)] tabular-nums">
+        {time.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })}
+      </span>
+    </div>
+  );
+}
+
+/**
  * CurrentNews: Real-time institutional news broadcast node.
  * Features: 2-hour autonomous sync, persistent AI translation, and fixed layout.
- * Updated: Integrated a colorful animated digital clock in the header.
+ * Updated: Isolated digital clock to prevent frequent reconciliation errors.
  */
 export function CurrentNews({ className }: { className?: string }) {
   const db = useFirestore();
@@ -23,16 +52,6 @@ export function CurrentNews({ className }: { className?: string }) {
   const [isSyncing, setIsSyncing] = useState(false);
   const [isTranslating, setIsTranslating] = useState(false);
   const [isBangla, setIsBangla] = useState(false);
-  const [currentTime, setCurrentTime] = useState<Date | null>(null);
-
-  // Initialize clock and update every second
-  useEffect(() => {
-    setCurrentTime(new Date());
-    const timer = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
 
   // Registry metadata for sync monitoring
   const metaRef = useMemoFirebase(() => {
@@ -157,6 +176,19 @@ export function CurrentNews({ className }: { className?: string }) {
     }
   };
 
+  const displayData = useMemo(() => {
+    if (!activeNews) return null;
+    const hasTranslation = !!(activeNews.bengaliTranslation?.title || activeNews.translatedTitle);
+    
+    if (isBangla && hasTranslation) {
+      return activeNews.bengaliTranslation || { 
+        title: activeNews.translatedTitle, 
+        content: activeNews.translatedContent 
+      };
+    }
+    return activeNews.originalEnglish || activeNews;
+  }, [activeNews, isBangla]);
+
   if (loading && !isSyncing) return (
     <div className={cn("flex flex-col gap-2 p-6 animate-pulse", className)}>
       <Loader2 className="w-5 h-5 animate-spin text-[#CEFF00]" />
@@ -164,12 +196,7 @@ export function CurrentNews({ className }: { className?: string }) {
     </div>
   );
 
-  if (!activeNews) return null;
-
-  const hasTranslation = !!(activeNews.bengaliTranslation?.title || activeNews.translatedTitle);
-  const displayData = isBangla && hasTranslation 
-    ? (activeNews.bengaliTranslation || { title: activeNews.translatedTitle, content: activeNews.translatedContent }) 
-    : (activeNews.originalEnglish || activeNews);
+  if (!activeNews || !displayData) return null;
 
   return (
     <>
@@ -183,18 +210,7 @@ export function CurrentNews({ className }: { className?: string }) {
             </span>
           </div>
 
-          {/* DIGITAL COLORFUL ANIMATED CLOCK */}
-          {currentTime && (
-            <div className="flex items-center gap-2 bg-black/30 px-3 py-1 rounded-full border border-white/10 shadow-lg animate-in fade-in duration-1000">
-              <div className="relative flex h-1.5 w-1.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-accent"></span>
-              </div>
-              <span className="text-[10px] font-black font-mono bg-gradient-to-r from-accent via-emerald-400 to-sky-400 bg-[length:200%_auto] animate-gradient-x bg-clip-text text-transparent drop-shadow-[0_0_8px_rgba(212,175,55,0.3)] tabular-nums">
-                {currentTime.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })}
-              </span>
-            </div>
-          )}
+          <DigitalClock />
         </div>
 
         <div className="space-y-4">
@@ -207,7 +223,7 @@ export function CurrentNews({ className }: { className?: string }) {
           
           <div className="flex items-center gap-2.5 pt-2">
             <Button asChild variant="outline" className="h-8 w-fit rounded-xl border-[#CEFF00]/40 bg-[#CEFF00]/5 text-[#CEFF00] hover:bg-[#CEFF00] hover:text-primary text-[10px] font-black uppercase transition-all">
-              <a href={activeNews.url} target="_blank">Examine Story <ExternalLink className="w-3 h-3 ml-1.5" /></a>
+              <a href={activeNews.url} target="_blank" rel="noopener noreferrer">Examine Story <ExternalLink className="w-3 h-3 ml-1.5" /></a>
             </Button>
             
             <button 
