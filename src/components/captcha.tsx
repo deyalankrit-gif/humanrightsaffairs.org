@@ -11,11 +11,14 @@ type CaptchaChar = {
   rotation: number;
   offsetY: number;
   scale: number;
+  blur: number;
+  skewX: number;
+  opacity: number;
 };
 
 /**
  * Captcha Component: Generates a distorted alphanumeric code for human verification.
- * Features individualized character transformations for organic "curved" distortion.
+ * Features individualized character transformations for crookedness and blurriness.
  */
 export function Captcha({ onVerify }: { onVerify: (isValid: boolean) => void }) {
   const [code, setCode] = useState<CaptchaChar[]>([]);
@@ -34,12 +37,18 @@ export function Captcha({ onVerify }: { onVerify: (isValid: boolean) => void }) 
       raw += char;
       result.push({
         char,
-        // Apply random rotation between -15 and 15 degrees
-        rotation: Math.floor(Math.random() * 30) - 15,
-        // Apply vertical offset between -5 and 5 pixels for curvature
-        offsetY: Math.floor(Math.random() * 10) - 5,
-        // Slight scale variation
-        scale: 0.9 + Math.random() * 0.2
+        // Crookedness: Random rotation between -20 and 20 degrees
+        rotation: Math.floor(Math.random() * 40) - 20,
+        // Organic Curvature: Random vertical offset
+        offsetY: Math.floor(Math.random() * 12) - 6,
+        // Scale variation
+        scale: 0.85 + Math.random() * 0.3,
+        // Blurriness: Slight randomized blur filter
+        blur: 0.4 + Math.random() * 0.5,
+        // Skew distortion
+        skewX: Math.floor(Math.random() * 15) - 7.5,
+        // Opacity variation
+        opacity: 0.7 + Math.random() * 0.3
       });
     }
     
@@ -64,7 +73,7 @@ export function Captcha({ onVerify }: { onVerify: (isValid: boolean) => void }) 
   return (
     <div className="space-y-3 animate-in fade-in duration-500">
       <div className="flex items-center justify-between gap-3">
-        <div className="flex-1 bg-slate-100 dark:bg-slate-800 rounded-xl p-3 flex items-center justify-center select-none border-2 border-dashed border-slate-200 dark:border-slate-700 relative overflow-hidden h-16">
+        <div className="flex-1 bg-slate-100 dark:bg-slate-800 rounded-xl p-3 flex items-center justify-center select-none border-2 border-dashed border-slate-200 dark:border-slate-700 relative overflow-hidden h-20">
           {/* Visual Noise Pattern */}
           <div className="absolute inset-0 opacity-10 pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
           
@@ -72,10 +81,12 @@ export function Captcha({ onVerify }: { onVerify: (isValid: boolean) => void }) 
             {code.map((c, i) => (
               <span 
                 key={i} 
-                className="text-2xl md:text-3xl font-black italic text-primary dark:text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)] inline-block"
+                className="text-2xl md:text-4xl font-black italic text-primary dark:text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.4)] inline-block"
                 style={{
-                  transform: `rotate(${c.rotation}deg) translateY(${c.offsetY}px) scale(${c.scale})`,
-                  letterSpacing: '0.1em'
+                  transform: `rotate(${c.rotation}deg) translateY(${c.offsetY}px) scale(${c.scale}) skewX(${c.skewX}deg)`,
+                  filter: `blur(${c.blur}px)`,
+                  opacity: c.opacity,
+                  letterSpacing: '0.05em'
                 }}
               >
                 {c.char}
@@ -88,7 +99,7 @@ export function Captcha({ onVerify }: { onVerify: (isValid: boolean) => void }) 
           variant="ghost" 
           size="icon" 
           onClick={generateCode}
-          className="h-16 w-12 rounded-xl text-slate-400 hover:text-accent hover:bg-accent/10 shrink-0"
+          className="h-20 w-12 rounded-xl text-slate-400 hover:text-accent hover:bg-accent/10 shrink-0"
           title="Refresh Code"
         >
           <RefreshCw className="w-5 h-5" />
