@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useEffect, useState } from 'react'
@@ -36,7 +37,8 @@ import {
   XCircle,
   X,
   UserCheck,
-  Info
+  Info,
+  Filter
 } from 'lucide-react'
 import {
   AlertDialog,
@@ -123,6 +125,7 @@ export default function AccessRolesPage() {
   const { toast } = useToast()
   
   const [search, setSearch] = useState('')
+  const [roleTab, setRoleTab] = useState<'All' | 'Admin' | 'Staff' | 'Member'>('All')
   const [isSaving, setIsSaving] = useState<string | null>(null)
   const [isAdding, setIsAdding] = useState(false)
   const [isUpdating, setIsUpdating] = useState(false)
@@ -290,10 +293,12 @@ export default function AccessRolesPage() {
     return <div className="min-h-screen flex items-center justify-center bg-slate-950"><Loader2 className="w-10 h-10 animate-spin text-red-600" /></div>
   }
 
-  const filteredUsers = (users || []).filter((u: any) => 
-    (u.email || u.id).toLowerCase().includes(search.toLowerCase()) || 
-    (u.name || '').toLowerCase().includes(search.toLowerCase())
-  )
+  const filteredUsers = (users || []).filter((u: any) => {
+    const matchesSearch = (u.email || u.id).toLowerCase().includes(search.toLowerCase()) || 
+                          (u.name || '').toLowerCase().includes(search.toLowerCase());
+    const matchesRole = roleTab === 'All' || u.role?.toLowerCase() === roleTab.toLowerCase();
+    return matchesSearch && matchesRole;
+  })
 
   return (
     <main className="min-h-screen bg-slate-950 text-slate-200 pb-20">
@@ -371,9 +376,32 @@ export default function AccessRolesPage() {
             </div>
 
             <div className="lg:col-span-2 space-y-6">
-              <div className="relative max-w-md ml-auto">
-                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-600" />
-                 <Input placeholder="Filter registry by name, email or role..." className="pl-9 bg-slate-900 border-white/5 text-white h-11 rounded-2xl text-xs" value={search} onChange={e => setSearch(e.target.value)} />
+              <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-2">
+                 <div className="flex w-full md:w-auto overflow-x-auto no-scrollbar gap-1.5 p-1 bg-white/5 rounded-2xl border border-white/10 shadow-inner">
+                    {['All', 'Admin', 'Staff', 'Member'].map((role) => (
+                      <button
+                        key={role}
+                        onClick={() => setRoleTab(role as any)}
+                        className={cn(
+                          "whitespace-nowrap rounded-xl px-5 font-black h-9 text-[10px] uppercase transition-all tracking-widest",
+                          roleTab === role 
+                            ? "bg-red-600 text-white shadow-[0_4px_15px_rgba(220,38,38,0.3)]" 
+                            : "text-slate-500 hover:text-slate-300 hover:bg-white/5"
+                        )}
+                      >
+                        {role}
+                      </button>
+                    ))}
+                 </div>
+                 <div className="relative w-full max-md:max-w-full max-w-sm">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-600" />
+                    <Input 
+                       placeholder="Search registry by name or email..." 
+                       className="pl-9 bg-slate-900 border-white/5 text-white h-11 rounded-2xl text-xs shadow-inner focus:ring-red-600/20" 
+                       value={search} 
+                       onChange={e => setSearch(e.target.value)} 
+                    />
+                 </div>
               </div>
 
               {dataLoading ? (
