@@ -45,7 +45,8 @@ import {
   Building2,
   Users,
   Star,
-  ShieldAlert
+  ShieldAlert,
+  Circle
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -66,7 +67,7 @@ import { useRouter } from 'next/navigation'
 /**
  * Account Dashboard: Premium user interface for Human Rights Affairs Trust members and personnel.
  * Unified hub for profile management, membership tracking, and contribution history.
- * Restricted view implemented for standard 'member' role.
+ * Restricted view implemented for standard 'member' role unless specific permissions granted.
  */
 export default function UserAccountDashboard() {
   const { user, loading: authLoading } = useUser()
@@ -131,6 +132,8 @@ export default function UserAccountDashboard() {
   }, [profile, donations, mounted]);
 
   const isMemberRole = userAccount?.role === 'member';
+  const hasIntelligenceAccess = userAccount?.permissions?.memberAnalytics || userAccount?.permissions?.analytics;
+  const hasActivityAccess = userAccount?.permissions?.activityHub;
 
   if (!mounted || authLoading || profileLoading || registryLoading) {
     return (
@@ -342,11 +345,11 @@ export default function UserAccountDashboard() {
                   ))}
                </div>
 
-               <Tabs defaultValue={isMemberRole ? "personal" : "overview"} className="w-full" onValueChange={setActiveTab}>
+               <Tabs defaultValue={isMemberRole && !hasIntelligenceAccess ? "personal" : "overview"} className="w-full" onValueChange={setActiveTab}>
                   <div className="bg-white dark:bg-slate-900 p-1.5 rounded-[1.75rem] shadow-sm mb-8 inline-flex w-full md:w-auto overflow-x-auto no-scrollbar">
                     <TabsList className="bg-transparent border-none p-0 flex">
                       {[
-                        { id: 'overview', label: 'Overview', icon: Globe, hide: isMemberRole },
+                        { id: 'overview', label: 'Overview', icon: Globe, hide: isMemberRole && !hasIntelligenceAccess },
                         { id: 'personal', label: 'Personal', icon: User },
                         { id: 'membership', label: 'Membership', icon: Award },
                         { id: 'donations', label: 'History', icon: CreditCard },
@@ -364,7 +367,7 @@ export default function UserAccountDashboard() {
                     </TabsList>
                   </div>
 
-                  {!isMemberRole && (
+                  {(!isMemberRole || hasIntelligenceAccess) && (
                     <TabsContent value="overview" className="space-y-8 animate-in fade-in duration-500">
                       <div className="grid md:grid-cols-2 gap-8">
                           <Card className="rounded-[2.5rem] border-none shadow-sm bg-white dark:bg-slate-900 overflow-hidden">
@@ -594,7 +597,7 @@ export default function UserAccountDashboard() {
                            </div>
                            <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl border text-center md:text-right shrink-0">
                               <p className="text-[9px] font-black uppercase text-slate-400 tracking-widest">Lifetime Total</p>
-                              <p className="text-3xl font-headline font-bold text-emerald-600">₹{stats.totalDonated.toLocaleString()}</p>
+                              <p className="text-3xl font-headline font-bold text-emerald-600">₹{(donations || []).reduce((acc, curr: any) => acc + Number(curr.amount || 0), 0).toLocaleString()}</p>
                            </div>
                         </CardHeader>
                         <CardContent className="p-0">
@@ -720,25 +723,5 @@ export default function UserAccountDashboard() {
 
       <Footer />
     </main>
-  )
-}
-
-function Circle({ className, ...props }: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-      {...props}
-    >
-      <circle cx="12" cy="12" r="10" />
-    </svg>
   )
 }

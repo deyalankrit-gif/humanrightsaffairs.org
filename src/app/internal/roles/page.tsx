@@ -35,7 +35,8 @@ import {
   Users,
   CheckCircle2,
   XCircle,
-  X
+  X,
+  UserCheck
 } from 'lucide-react'
 import {
   AlertDialog,
@@ -68,6 +69,9 @@ import {
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
 
+/**
+ * MODULES: The full suite of permissions available for Staff and Admins.
+ */
 const MODULES = [
   { id: 'dailyUpdate', label: 'Daily Update Terminal' },
   { id: 'financeDashboard', label: 'Finance Dashboard' },
@@ -100,6 +104,16 @@ const MODULES = [
   { id: 'activityHub', label: 'Activity Hub' },
   { id: 'publicView', label: 'Public Site View' },
   { id: 'terminated', label: 'Terminated Registry' },
+]
+
+/**
+ * MEMBER_MODULES: A specific subset of permissions that can be granted to standard members.
+ */
+const MEMBER_MODULES = [
+  { id: 'publicView', label: 'Internal Mirror Access' },
+  { id: 'activityHub', label: 'Activity Hub Access' },
+  { id: 'memberAnalytics', label: 'Demographic Intelligence' },
+  { id: 'feedback', label: 'Community Voice Hub' },
 ]
 
 export default function AccessRolesPage() {
@@ -413,29 +427,58 @@ export default function AccessRolesPage() {
                          </div>
                       </CardHeader>
                       <CardContent className="p-6">
-                         {u.role !== 'member' ? (
-                           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                              {MODULES.map((mod) => {
-                                const hasAccess = u.permissions?.[mod.id] === true;
-                                const loadingId = `${u.id}-${mod.id}`;
-                                return (
-                                  <div key={mod.id} className={cn("flex items-center justify-between p-3 rounded-2xl border transition-all duration-300", hasAccess ? "bg-emerald-500/5 border-emerald-900/30 text-emerald-400" : "bg-black/20 border-white/5 text-slate-500")}>
-                                    <span className="text-[10px] font-bold uppercase tracking-tighter">{mod.label}</span>
-                                    <Switch 
-                                      checked={hasAccess} 
-                                      disabled={isSaving === loadingId || u.role === 'admin'} 
-                                      onCheckedChange={() => handleTogglePermission(u.id, mod.id, hasAccess)} 
-                                      className="data-[state=checked]:bg-emerald-500" 
-                                    />
-                                  </div>
-                                )
-                              })}
+                         {u.role === 'member' ? (
+                           <div className="space-y-4">
+                              <div className="flex items-center gap-2 mb-2">
+                                <UserCheck className="w-3.5 h-3.5 text-secondary" />
+                                <span className="text-[10px] font-black uppercase text-slate-500 tracking-widest">Member Specific Permissions</span>
+                              </div>
+                              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                                {MEMBER_MODULES.map((mod) => {
+                                  const hasAccess = u.permissions?.[mod.id] === true;
+                                  const loadingId = `${u.id}-${mod.id}`;
+                                  return (
+                                    <div key={mod.id} className={cn("flex items-center justify-between p-3 rounded-2xl border transition-all duration-300", hasAccess ? "bg-emerald-500/5 border-emerald-900/30 text-emerald-400" : "bg-black/20 border-white/5 text-slate-500")}>
+                                      <span className="text-[10px] font-bold uppercase tracking-tighter">{mod.label}</span>
+                                      <Switch 
+                                        checked={hasAccess} 
+                                        disabled={isSaving === loadingId} 
+                                        onCheckedChange={() => handleTogglePermission(u.id, mod.id, hasAccess)} 
+                                        className="data-[state=checked]:bg-emerald-500" 
+                                      />
+                                    </div>
+                                  )
+                                })}
+                              </div>
+                              <div className="pt-4 border-t border-white/5">
+                                <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest flex items-center gap-2">
+                                  <Info className="w-3 h-3 text-accent" /> Standard Member Access Baseline (Profile & Donations) is enabled by default.
+                                </p>
+                              </div>
                            </div>
                          ) : (
-                           <div className="p-6 rounded-2xl bg-white/5 border border-white/5 text-center">
-                              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest flex items-center justify-center gap-2">
-                                <Info className="w-4 h-4 text-accent" /> Standard Member Access Baseline (Personal Profile & Donation History)
-                              </p>
+                           <div className="space-y-4">
+                              <div className="flex items-center gap-2 mb-2">
+                                <ShieldCheck className="w-3.5 h-3.5 text-red-500" />
+                                <span className="text-[10px] font-black uppercase text-slate-500 tracking-widest">Full Administrative Suite</span>
+                              </div>
+                              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                                {MODULES.map((mod) => {
+                                  const hasAccess = u.permissions?.[mod.id] === true;
+                                  const loadingId = `${u.id}-${mod.id}`;
+                                  return (
+                                    <div key={mod.id} className={cn("flex items-center justify-between p-3 rounded-2xl border transition-all duration-300", hasAccess ? "bg-red-500/5 border-red-900/30 text-red-400" : "bg-black/20 border-white/5 text-slate-500")}>
+                                      <span className="text-[10px] font-bold uppercase tracking-tighter">{mod.label}</span>
+                                      <Switch 
+                                        checked={hasAccess} 
+                                        disabled={isSaving === loadingId || u.role === 'admin'} 
+                                        onCheckedChange={() => handleTogglePermission(u.id, mod.id, hasAccess)} 
+                                        className="data-[state=checked]:bg-red-600" 
+                                      />
+                                    </div>
+                                  )
+                                })}
+                              </div>
                            </div>
                          )}
                       </CardContent>
