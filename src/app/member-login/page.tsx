@@ -40,10 +40,10 @@ import { cn } from '@/lib/utils'
 
 /**
  * Member Login Page: High-fidelity terminal for Trust members to access their private dashboards.
- * Updated: Pre-fills the email field with the default ID.
+ * Refined: Removed pre-filled state. Displays deydhritiman@gmail.com as a placeholder only.
  */
 export default function MemberLoginPage() {
-  const [email, setEmail] = useState('deydhritiman@gmail.com')
+  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -308,7 +308,7 @@ export default function MemberLoginPage() {
                   <div className="relative">
                     <Input 
                       type="email" 
-                      placeholder="e.g. abcd@gmail.com" 
+                      placeholder="deydhritiman@gmail.com" 
                       className="bg-slate-50 border-slate-200 h-12 rounded-xl pl-10 text-sm"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
@@ -326,7 +326,7 @@ export default function MemberLoginPage() {
                   <div className="relative">
                     <Input 
                       type={showPassword ? "text" : "password"} 
-                      placeholder="Enter security key" 
+                      placeholder="••••••••" 
                       className="bg-slate-50 border-slate-200 h-12 rounded-xl pl-10 pr-10 text-sm"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}

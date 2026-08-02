@@ -42,8 +42,7 @@ import { cn } from '@/lib/utils'
 
 /**
  * Member Sign-Up Page: Allows prospective members to register their digital identity.
- * Features: Email/Pass, Google Popup, and Phone Auth.
- * Updated: Ensures no pre-filled fields and descriptive placeholders.
+ * Refined: Removed pre-filled state. Displays deydhritiman@gmail.com as a placeholder only.
  */
 export default function MemberSignupPage() {
   const [email, setEmail] = useState('')
@@ -327,7 +326,7 @@ export default function MemberSignupPage() {
                 <div className="space-y-2">
                   <Label className="text-slate-400 text-[10px] font-bold uppercase tracking-wider ml-1">Email Address</Label>
                   <div className="relative">
-                    <Input type="email" placeholder="e.g. abcd@gmail.com" className="h-12 rounded-xl pl-10 text-sm" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="off" required />
+                    <Input type="email" placeholder="deydhritiman@gmail.com" className="h-12 rounded-xl pl-10 text-sm" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="off" required />
                     <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   </div>
                 </div>
@@ -336,7 +335,7 @@ export default function MemberSignupPage() {
                   <div className="relative">
                     <Input 
                       type={showPassword ? "text" : "password"} 
-                      placeholder="8+ chars, 1 Capital"
+                      placeholder="••••••••"
                       className="h-12 rounded-xl pl-10 pr-10 text-sm"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
@@ -352,7 +351,7 @@ export default function MemberSignupPage() {
                   <div className="relative">
                     <Input 
                       type={showConfirmPassword ? "text" : "password"} 
-                      placeholder="Re-enter security key"
+                      placeholder="••••••••"
                       className="h-12 rounded-xl pl-10 pr-10 text-sm"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}

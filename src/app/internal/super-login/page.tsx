@@ -19,10 +19,10 @@ import { cn } from '@/lib/utils'
 
 /**
  * Root Login Page: High-security terminal for root administrator access.
- * Updated: Pre-fills the email field with the root institutional ID.
+ * Refined: Removed pre-filled state. Displays deydhritiman@gmail.com as a placeholder only.
  */
 export default function RootLoginPage() {
-  const [email, setEmail] = useState('deydhritiman@gmail.com')
+  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -156,7 +156,7 @@ export default function RootLoginPage() {
                 <div className="relative">
                   <Input 
                     type="email" 
-                    placeholder="e.g. root@hrat-india.org" 
+                    placeholder="deydhritiman@gmail.com" 
                     className="bg-black/50 border-red-900/30 text-red-500 h-11 md:h-12 rounded-xl pl-10 font-mono text-sm focus:ring-red-600"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -171,7 +171,7 @@ export default function RootLoginPage() {
                 <div className="relative">
                   <Input 
                     type={showPassword ? "text" : "password"} 
-                    placeholder="Enter root key" 
+                    placeholder="••••••••" 
                     className="bg-black/50 border-red-900/30 text-red-500 h-11 md:h-12 rounded-xl pl-10 pr-10 font-mono text-sm focus:ring-red-600"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
