@@ -5,7 +5,7 @@ import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { signInWithEmailAndPassword } from 'firebase/auth'
 import { useAuth, useFirestore, useUser } from '@/firebase'
-import { doc, getDoc, serverTimestamp, setDoc } from 'firebase/firestore'
+import { doc, getDoc, serverTimestamp, setDoc, updateDoc } from 'firebase/firestore'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
@@ -153,6 +153,13 @@ export default function MemberLoginPage() {
                   <>Authorize & Enter <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" /></>
                 )}
               </Button>
+
+              <div className="text-center pt-2">
+                <p className="text-xs text-slate-500">
+                  New member?{' '}
+                  <Link href="/member-signup" className="text-secondary font-black uppercase tracking-widest text-[10px] hover:underline">Sign Up Now</Link>
+                </p>
+              </div>
             </form>
           </CardContent>
         </Card>
