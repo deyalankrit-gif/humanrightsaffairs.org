@@ -77,7 +77,8 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
           'terminatedmembers',
           'activity_events',
           'donor_tiers',
-          'donations'
+          'donations',
+          'ai_announcements'
         ];
 
         const isSilentPath = silentPaths.some(p => lowerPath.includes(p));
