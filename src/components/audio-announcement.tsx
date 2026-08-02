@@ -29,7 +29,7 @@ import { cn } from '@/lib/utils';
 /**
  * AudioAnnouncement: Refined institutional broadcast player.
  * Optimized for automatic playback on refresh while respecting browser policies.
- * Prompt refined to be minimalist: Image-only trigger with no text.
+ * Background set to fully transparent as requested.
  */
 export function AudioAnnouncement() {
   const db = useFirestore();
@@ -58,12 +58,10 @@ export function AudioAnnouncement() {
     if (savedMute === 'true') setIsMuted(true);
   }, []);
 
-  // Playback trigger logic
   const attemptPlay = React.useCallback(() => {
     const audio = audioRef.current;
     if (!audio || !settings?.enabled || isMuted || error) return;
 
-    // Ensure settings are applied before play
     audio.volume = settings.volume ?? 0.5;
     audio.muted = isMuted;
     
@@ -76,25 +74,21 @@ export function AudioAnnouncement() {
           setError(false);
         })
         .catch((err) => {
-          // Autoplay often blocked on first load
-          console.warn("[AUDIO-AUTOPLAY] Playback blocked or interrupted:", err.name);
+          console.warn("[AUDIO-AUTOPLAY] Playback blocked:", err.name);
           setShowAutoplayPrompt(true);
           setIsPlaying(false);
         });
     }
   }, [settings, isMuted, error]);
 
-  // Handle source changes and initial load
   useEffect(() => {
     if (!mounted || loading || !settings?.enabled || !settings?.audioData || error) return;
 
     const audio = audioRef.current;
     if (!audio) return;
 
-    // Set mute state early
     audio.muted = isMuted;
 
-    // If autoplay is enabled and we are not muted, try to play
     if (settings.autoplay && !isMuted) {
       if (audio.readyState >= 2) {
         attemptPlay();
@@ -170,7 +164,7 @@ export function AudioAnnouncement() {
         {showAutoplayPrompt && !error && (
           <button 
             onClick={handleManualPlay}
-            className="relative w-20 h-20 md:w-24 md:h-24 rounded-full shadow-2xl border-4 border-accent animate-bounce hover:scale-110 transition-transform overflow-hidden group bg-slate-900 ring-8 ring-accent/10"
+            className="relative w-20 h-20 md:w-24 md:h-24 rounded-full shadow-2xl border-4 border-accent animate-bounce hover:scale-110 transition-transform overflow-hidden group bg-transparent ring-8 ring-accent/10"
           >
              <Image 
                src="/handmic.jpeg" 
@@ -189,8 +183,8 @@ export function AudioAnnouncement() {
         )}
 
         <div className={cn(
-          "glass-dark p-2 rounded-[1.75rem] shadow-2xl flex items-center gap-1.5 group transition-all duration-500",
-          "hover:shadow-accent/10 hover:ring-1 hover:ring-accent/20",
+          "bg-transparent p-2 rounded-[1.75rem] flex items-center gap-1.5 group transition-all duration-500",
+          "hover:ring-1 hover:ring-accent/20",
           error ? "border-red-500/30" : "border-white/10"
         )}>
           
@@ -199,13 +193,13 @@ export function AudioAnnouncement() {
                 <div className="flex items-center gap-2 mb-0.5">
                    <div className={cn("w-1.5 h-1.5 rounded-full", error ? "bg-red-500" : "bg-emerald-500 animate-pulse")} />
                    <span className={cn(
-                     "text-[9px] font-black uppercase tracking-[0.2em] whitespace-nowrap",
+                     "text-[9px] font-black uppercase tracking-[0.2em] whitespace-nowrap drop-shadow-sm",
                      error ? "text-red-400" : "text-emerald-400"
                    )}>
                      {error ? "SYSTEM ERROR" : "LIVE BROADCAST"}
                    </span>
                 </div>
-                <span className="text-[11px] font-bold text-white truncate max-w-[160px] opacity-90">
+                <span className="text-[11px] font-bold text-white truncate max-w-[160px] opacity-90 drop-shadow-md">
                   {error ? "Asset unavailable" : (settings.title || 'Official Update')}
                 </span>
              </div>
@@ -279,7 +273,7 @@ export function AudioAnnouncement() {
         </div>
         
         <div className="pr-3 opacity-0 group-hover:opacity-40 transition-all duration-700 delay-100">
-           <p className="text-[8px] font-black text-white uppercase tracking-[0.4em]">National Registry Audio Station</p>
+           <p className="text-[8px] font-black text-white uppercase tracking-[0.4em] drop-shadow-sm">National Registry Audio Station</p>
         </div>
       </div>
     </div>
