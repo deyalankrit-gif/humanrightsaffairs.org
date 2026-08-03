@@ -1,10 +1,13 @@
+
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { RefreshCw, ShieldCheck } from 'lucide-react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { RefreshCw, ShieldCheck, Volume2, VolumeX, Square, Loader2, AlertCircle } from 'lucide-react';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
+import { generateAiSpeech } from '@/ai/flows/tts-flow';
+import { useToast } from '@/hooks/use-toast';
 
 type CaptchaChar = {
   char: string;
@@ -19,12 +22,22 @@ type CaptchaChar = {
 /**
  * Captcha Component: Generates a distorted alphanumeric code for human verification.
  * Features individualized character transformations for crookedness and blurriness.
+ * Now includes an accessible Audio CAPTCHA system using high-fidelity TTS.
  */
 export function Captcha({ onVerify }: { onVerify: (isValid: boolean) => void }) {
   const [code, setCode] = useState<CaptchaChar[]>([]);
   const [rawCode, setRawCode] = useState('');
   const [input, setInput] = useState('');
   const [mounted, setMounted] = useState(false);
+  
+  // Audio States
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [isGeneratingAudio, setIsGeneratingAudio] = useState(false);
+  const [isAudioPlaying, setIsAudioPlaying] = useState(false);
+  const [audioError, setAudioError] = useState(false);
+  
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const { toast } = useToast();
 
   const generateCode = useCallback(() => {
     // Unambiguous character set
@@ -37,17 +50,11 @@ export function Captcha({ onVerify }: { onVerify: (isValid: boolean) => void }) 
       raw += char;
       result.push({
         char,
-        // Crookedness: Random rotation between -20 and 20 degrees
         rotation: Math.floor(Math.random() * 40) - 20,
-        // Organic Curvature: Random vertical offset
         offsetY: Math.floor(Math.random() * 12) - 6,
-        // Scale variation
         scale: 0.85 + Math.random() * 0.3,
-        // Blurriness: Slight randomized blur filter
         blur: 0.4 + Math.random() * 0.5,
-        // Skew distortion
         skewX: Math.floor(Math.random() * 15) - 7.5,
-        // Opacity variation
         opacity: 0.7 + Math.random() * 0.3
       });
     }
@@ -56,25 +63,108 @@ export function Captcha({ onVerify }: { onVerify: (isValid: boolean) => void }) 
     setRawCode(raw);
     setInput('');
     onVerify(false);
-  }, [onVerify]);
+    
+    // Reset Audio State
+    setAudioUrl(null);
+    setAudioError(false);
+    if (isAudioPlaying && audioRef.current) {
+      audioRef.current.pause();
+      setIsAudioPlaying(false);
+    }
+  }, [onVerify, isAudioPlaying]);
 
   useEffect(() => {
     setMounted(true);
     generateCode();
   }, [generateCode]);
 
-  // Handle verification on every input change
   useEffect(() => {
     onVerify(input === rawCode && rawCode !== '');
   }, [input, rawCode, onVerify]);
+
+  /**
+   * handlePlayAudio: Manages the generation and playback of the audio CAPTCHA.
+   * Pronounces characters individually with randomized speed/pitch for security.
+   */
+  const handlePlayAudio = async () => {
+    if (isAudioPlaying) {
+      audioRef.current?.pause();
+      setIsAudioPlaying(false);
+      return;
+    }
+
+    if (audioUrl) {
+      playExistingAudio();
+      return;
+    }
+
+    setIsGeneratingAudio(true);
+    setAudioError(false);
+
+    try {
+      // Format text with commas to force clear pauses between characters
+      const speechText = rawCode.split('').join(', ');
+      
+      // Randomize parameters slightly to improve security against audio analysis bots
+      const randomizedSpeed = 0.85 + (Math.random() * 0.25); // 0.85 to 1.1
+      const randomizedPitch = Math.floor(Math.random() * 10) - 5; // -5 to 5
+
+      const result = await generateAiSpeech({
+        text: speechText,
+        language: 'English',
+        voice: 'Male',
+        emotion: 'Professional',
+        speed: randomizedSpeed,
+        pitch: randomizedPitch
+      });
+
+      if (result.success && result.audioData) {
+        setAudioUrl(result.audioData);
+        playAudio(result.audioData);
+      } else {
+        throw new Error(result.error || "Generation error");
+      }
+    } catch (e: any) {
+      setAudioError(true);
+      toast({
+        variant: "destructive",
+        title: "Audio Unavailable",
+        description: "Institutional voice node unreachable. Please use visual verification."
+      });
+    } finally {
+      setIsGeneratingAudio(false);
+    }
+  };
+
+  const playAudio = (url: string) => {
+    if (!audioRef.current) {
+      audioRef.current = new Audio(url);
+      audioRef.current.addEventListener('ended', () => setIsAudioPlaying(false));
+    } else {
+      audioRef.current.src = url;
+    }
+    
+    audioRef.current.play()
+      .then(() => setIsAudioPlaying(true))
+      .catch(() => setAudioError(true));
+  };
+
+  const playExistingAudio = () => {
+    if (audioRef.current && audioUrl) {
+      audioRef.current.currentTime = 0;
+      audioRef.current.play()
+        .then(() => setIsAudioPlaying(true))
+        .catch(() => setAudioError(true));
+    }
+  };
 
   if (!mounted) return null;
 
   return (
     <div className="space-y-3 animate-in fade-in duration-500">
       <div className="flex items-center justify-between gap-3">
+        {/* Visual CAPTCHA Display */}
         <div className="flex-1 bg-slate-100 dark:bg-slate-800 rounded-xl p-3 flex items-center justify-center select-none border-2 border-dashed border-slate-200 dark:border-slate-700 relative overflow-hidden h-20">
-          {/* Visual Noise Pattern */}
           <div className="absolute inset-0 opacity-10 pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
           
           <div className="flex items-center justify-center gap-1.5 md:gap-3 relative z-10">
@@ -94,20 +184,50 @@ export function Captcha({ onVerify }: { onVerify: (isValid: boolean) => void }) 
             ))}
           </div>
         </div>
-        <Button 
-          type="button" 
-          variant="ghost" 
-          size="icon" 
-          onClick={generateCode}
-          className="h-20 w-12 rounded-xl text-slate-400 hover:text-accent hover:bg-accent/10 shrink-0"
-          title="Refresh Code"
-        >
-          <RefreshCw className="w-5 h-5" />
-        </Button>
+
+        {/* Action Controls */}
+        <div className="flex flex-col gap-2 shrink-0">
+          <Button 
+            type="button" 
+            variant="ghost" 
+            size="icon" 
+            onClick={generateCode}
+            className="h-9 w-10 rounded-lg text-slate-400 hover:text-accent hover:bg-accent/10"
+            title="Refresh Visual CAPTCHA"
+            aria-label="Refresh Visual CAPTCHA"
+          >
+            <RefreshCw className="w-4 h-4" />
+          </Button>
+
+          <Button 
+            type="button" 
+            variant="ghost" 
+            size="icon" 
+            onClick={handlePlayAudio}
+            disabled={isGeneratingAudio}
+            className={cn(
+              "h-9 w-10 rounded-lg transition-all",
+              isAudioPlaying ? "bg-accent/20 text-accent" : "text-slate-400 hover:text-accent hover:bg-accent/10"
+            )}
+            title={isAudioPlaying ? "Stop Audio" : audioUrl ? "Replay Audio" : "Play Audio CAPTCHA"}
+            aria-label={isAudioPlaying ? "Stop Audio" : audioUrl ? "Replay Audio" : "Play Audio CAPTCHA"}
+          >
+            {isGeneratingAudio ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : isAudioPlaying ? (
+              <Square className="w-4 h-4 fill-current" />
+            ) : audioError ? (
+              <AlertCircle className="w-4 h-4 text-red-500" />
+            ) : (
+              <Volume2 className="w-4 h-4" />
+            )}
+          </Button>
+        </div>
       </div>
+
       <div className="relative">
         <Input 
-          placeholder="Enter Captcha Code" 
+          placeholder="Enter Verification Code" 
           value={input}
           onChange={(e) => setInput(e.target.value)}
           maxLength={6}
@@ -121,6 +241,13 @@ export function Captcha({ onVerify }: { onVerify: (isValid: boolean) => void }) 
             <ShieldCheck className="w-5 h-5 text-slate-200 dark:text-slate-800" />
           )}
         </div>
+      </div>
+
+      {/* Screen Reader Announcements */}
+      <div className="sr-only" aria-live="polite">
+        {isGeneratingAudio && "Generating audio version of the security code."}
+        {isAudioPlaying && "Playing security code audio."}
+        {audioError && "Audio generation failed. Please use visual code or refresh."}
       </div>
     </div>
   );
