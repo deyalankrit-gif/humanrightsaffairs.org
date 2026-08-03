@@ -50,7 +50,8 @@ import {
   Cpu,
   TrendingUp,
   UserCheck,
-  Users
+  Users,
+  Star
 } from 'lucide-react'
 import {
   Dialog,
@@ -393,7 +394,7 @@ export default function InvestigationOfficersRegistry() {
                             <SelectContent className="bg-white z-[1000000]">{OFFICER_DESIGNATIONS.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
                          </Select>
                       </div>
-                      <div className="space-y-1.5"><Label className="text-[10px] font-black uppercase text-slate-500">Phone</Label><Input value={formData.phone} onChange={e => setPhone(e.target.value)} className="rounded-xl h-11" /></div>
+                      <div className="space-y-1.5"><Label className="text-[10px] font-black uppercase text-slate-500">Phone</Label><Input value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} className="rounded-xl h-11" /></div>
                     </div>
                     <Button type="submit" disabled={isActionLoading} className="w-full h-14 bg-primary text-white font-bold rounded-2xl shadow-xl hover:bg-secondary transition-all">Provision Account</Button>
                  </form>
