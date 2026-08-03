@@ -6,7 +6,7 @@ import { initializeApp, deleteApp } from 'firebase/app'
 import { getAuth, createUserWithEmailAndPassword, updateProfile, deleteUser } from 'firebase/auth'
 import { firebaseConfig } from '@/firebase/config'
 import { useUser, useCollection, useFirestore, useMemoFirebase } from '@/firebase'
-import { collection, query, orderBy, addDoc, deleteDoc, doc, updateDoc, serverTimestamp, setDoc, getDoc, writeBatch } from 'firebase/firestore'
+import { collection, query, orderBy, addDoc, deleteDoc, doc, updateDoc, serverTimestamp, setDoc, getDoc, writeBatch, where } from 'firebase/firestore'
 import { Footer } from '@/components/footer'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -38,7 +38,8 @@ import {
   FileText,
   Clock,
   ExternalLink,
-  ChevronRight
+  ChevronRight,
+  Navigation
 } from 'lucide-react'
 import {
   Dialog,
@@ -56,7 +57,6 @@ import {
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription as AlertDialogDesc,
-  AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
