@@ -174,10 +174,10 @@ export function PublicFooter() {
               
               <li className="pt-6"><span className="text-[#CEFF00] font-black text-sm md:text-lg uppercase tracking-tighter">Office Use Only</span></li>
               <li>
-                <Link href="/investigator/login" className="text-primary-foreground/80 hover:text-accent transition-colors font-medium flex items-center justify-between leading-tight group/link">
+                <Link href="/investigator/login" className="text-[#2323FF] hover:text-accent transition-colors font-medium flex items-center justify-between leading-tight group/link">
                   <div className="flex items-center gap-2">
                     <Search className="w-3.5 h-3.5" />
-                    <span>Investigator Login</span>
+                    <span>Investigator Log In</span>
                   </div>
                   <ArrowUpRight className="w-3.5 h-3.5 opacity-40 group-hover/link:opacity-100 transition-opacity" />
                 </Link>
