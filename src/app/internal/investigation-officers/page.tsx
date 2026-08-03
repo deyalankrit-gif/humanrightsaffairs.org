@@ -34,7 +34,11 @@ import {
   Eye,
   EyeOff,
   AlertTriangle,
-  CheckCircle2
+  CheckCircle2,
+  FileText,
+  Clock,
+  ExternalLink,
+  ChevronRight
 } from 'lucide-react'
 import {
   Dialog,
@@ -85,6 +89,7 @@ export default function InvestigationOfficersRegistry() {
   const [isActionLoading, setIsActionLoading] = useState(false)
   const [isAddOpen, setIsAddOpen] = useState(false)
   const [editOfficer, setEditOfficer] = useState<any>(null)
+  const [selectedOfficerForDetails, setSelectedOfficerForDetails] = useState<any>(null)
   const [showPassword, setShowPassword] = useState(false)
 
   const [formData, setFormData] = useState({
@@ -401,7 +406,17 @@ export default function InvestigationOfficersRegistry() {
                        <div className="flex-1 p-8 flex flex-col md:flex-row items-center justify-between gap-8">
                           <div className="space-y-4 text-center md:text-left flex-1">
                              <div className="space-y-1">
-                                <h3 className="text-2xl font-headline font-bold text-primary dark:text-white leading-tight">{officer.name}</h3>
+                                <div className="flex flex-col md:flex-row md:items-center gap-3">
+                                  <h3 className="text-2xl font-headline font-bold text-primary dark:text-white leading-tight">{officer.name}</h3>
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    onClick={() => setSelectedOfficerForDetails(officer)}
+                                    className="h-7 px-3 rounded-full text-[8px] font-black uppercase tracking-widest border-slate-200 hover:bg-accent hover:text-primary transition-all w-fit"
+                                  >
+                                    <Eye className="w-3 h-3 mr-1.5" /> View Details
+                                  </Button>
+                                </div>
                                 <p className="text-[10px] font-black text-accent uppercase tracking-widest flex items-center gap-2 justify-center md:justify-start">
                                    <Briefcase className="w-3.5 h-3.5" /> {officer.designation}
                                 </p>
@@ -449,6 +464,95 @@ export default function InvestigationOfficersRegistry() {
            </div>
          )}
       </section>
+
+      {/* View Details Dialog - Read Only */}
+      <Dialog open={!!selectedOfficerForDetails} onOpenChange={(val) => !val && setSelectedOfficerForDetails(null)}>
+        <DialogContent className="max-w-xl rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden bg-white dark:bg-slate-950 flex flex-col max-h-[90vh]">
+          {selectedOfficerForDetails && (
+            <>
+               <div className="bg-slate-900 p-8 text-white relative shrink-0 border-b-8 border-accent/20">
+                  <div className="absolute right-6 top-6"><DialogClose asChild><Button variant="ghost" size="icon" className="rounded-full text-white/40 h-10 w-10 hover:bg-white/10"><X className="w-6 h-6" /></Button></DialogClose></div>
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-accent/5 rounded-full -mr-16 -mt-16 blur-2xl"></div>
+                  <Badge className="bg-accent text-primary font-black text-[8px] uppercase mb-2 tracking-[0.2em]">Force Profile View</Badge>
+                  <DialogTitle className="text-3xl font-headline font-bold leading-tight">{selectedOfficerForDetails.name}</DialogTitle>
+                  <DialogDescription className="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-1 flex items-center gap-2">
+                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" /> Verified Registry Entry
+                  </DialogDescription>
+               </div>
+
+               <div className="flex-1 overflow-y-auto p-8 space-y-10 custom-scrollbar">
+                  {/* Identity Key Segment */}
+                  <div className="grid grid-cols-2 gap-4">
+                     <div className="p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800">
+                        <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Employee ID</p>
+                        <p className="text-sm font-mono font-bold text-primary dark:text-white uppercase">{selectedOfficerForDetails.employeeId || 'IO-PENDING'}</p>
+                     </div>
+                     <div className="p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800">
+                        <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Official Rank</p>
+                        <p className="text-sm font-bold text-primary dark:text-white truncate">{selectedOfficerForDetails.designation}</p>
+                     </div>
+                  </div>
+
+                  {/* Contact Node Segment */}
+                  <div className="space-y-4">
+                     <h4 className="text-[10px] font-black uppercase text-accent tracking-[0.25em] flex items-center gap-2">
+                        <Navigation className="w-3 h-3" /> Communication Protocols
+                     </h4>
+                     <div className="space-y-2">
+                        <div className="flex items-center gap-4 p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 group transition-all">
+                           <div className="w-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-400 group-hover:text-accent"><Mail className="w-5 h-5" /></div>
+                           <div className="flex flex-col">
+                              <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Registered Email</span>
+                              <span className="text-sm font-bold text-primary dark:text-white">{selectedOfficerForDetails.email}</span>
+                           </div>
+                        </div>
+                        <div className="flex items-center gap-4 p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 group transition-all">
+                           <div className="w-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-400 group-hover:text-accent"><Phone className="w-5 h-5" /></div>
+                           <div className="flex flex-col">
+                              <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Contact Phone</span>
+                              <span className="text-sm font-bold text-primary dark:text-white">{selectedOfficerForDetails.phone || 'N/A'}</span>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+
+                  {/* Governance Meta Segment */}
+                  <div className="grid md:grid-cols-2 gap-4">
+                     <div className="p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800">
+                        <div className="flex items-center justify-between mb-2">
+                           <p className="text-[8px] font-black text-slate-400 uppercase">Operational Status</p>
+                           <div className={cn("w-2 h-2 rounded-full", selectedOfficerForDetails.status === 'active' ? "bg-emerald-500" : "bg-red-500")} />
+                        </div>
+                        <Badge className={cn("text-[9px] font-black uppercase h-5", selectedOfficerForDetails.status === 'active' ? "bg-emerald-600" : "bg-red-600")}>
+                           {selectedOfficerForDetails.status === 'active' ? 'Full Clearance' : 'Suspended'}
+                        </Badge>
+                     </div>
+                     <div className="p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800">
+                        <p className="text-[8px] font-black text-slate-400 uppercase mb-2">Commissioned On</p>
+                        <div className="flex items-center gap-2">
+                           <Clock className="w-3.5 h-3.5 text-accent" />
+                           <span className="text-xs font-bold">{selectedOfficerForDetails.createdAt?.toDate?.()?.toLocaleDateString() || 'Historical Entry'}</span>
+                        </div>
+                     </div>
+                  </div>
+
+                  <div className="p-6 rounded-3xl bg-indigo-50/50 dark:bg-indigo-900/10 border-2 border-dashed border-indigo-100 dark:border-indigo-900 text-center space-y-3">
+                     <UserRoundCheck className="w-10 h-10 text-indigo-400 mx-auto" />
+                     <p className="text-[10px] text-slate-500 leading-relaxed font-bold uppercase tracking-widest">
+                        Access to this record is audited. No modifications are permitted within this view terminal.
+                     </p>
+                  </div>
+               </div>
+
+               <DialogFooter className="p-8 bg-slate-50 dark:bg-slate-900 border-t shrink-0">
+                  <Button onClick={() => setSelectedOfficerForDetails(null)} className="w-full h-12 bg-primary text-white font-bold rounded-xl shadow-xl">
+                    Terminate Review
+                  </Button>
+               </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Edit Dialog */}
       <Dialog open={!!editOfficer} onOpenChange={(val) => !val && setEditOfficer(null)}>
