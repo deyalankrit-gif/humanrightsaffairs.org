@@ -19,8 +19,10 @@ import { cn } from '@/lib/utils'
 /**
  * Investigator Login Page: High-security terminal for investigative personnel.
  * Features real-time synchronization with the national investigator registry.
+ * Session Isolated: Operates within the 'InvestigatorTerminal' context.
  */
 export default function InvestigatorLoginPage() {
+  // 🛡️ SECURITY: States initialized to empty strings to prevent identity leakage
   const [identifier, setIdentifier] = useState('')
   const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)

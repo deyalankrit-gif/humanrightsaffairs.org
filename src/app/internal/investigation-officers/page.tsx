@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useEffect, useState, useMemo } from 'react'
@@ -82,6 +83,10 @@ const OFFICER_DESIGNATIONS = [
   "Field Investigator"
 ]
 
+/**
+ * InvestigatorPool: Vibrant command center for managing national investigative personnel.
+ * Features: Multi-app isolation, tactical statistics, and high-fidelity profile auditing.
+ */
 export default function InvestigationOfficersRegistry() {
   const { user, loading: authLoading } = useUser()
   const router = useRouter()
@@ -103,6 +108,7 @@ export default function InvestigationOfficersRegistry() {
   const [isDeleting, setIsDeleting] = useState(false)
   const [activeAssignments, setActiveAssignments] = useState<any[]>([])
 
+  // 🛡️ SECURITY: States initialized to empty to prevent data leakage
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -631,7 +637,7 @@ export default function InvestigationOfficersRegistry() {
             <div className="p-10 space-y-8 animate-in slide-in-from-right-4 duration-500">
               <div className="absolute right-6 top-6">
                 <DialogClose asChild>
-                  <Button variant="ghost" size="icon" className="rounded-full text-slate-400 hover:text-red-500 h-10 w-10"><X className="w-5 h-5" /></Button>
+                  <Button variant="ghost" size="icon" className="rounded-full text-slate-400 hover:text-red-500 h-10 w-10"><X className="w-6 h-6" /></Button>
                 </DialogClose>
               </div>
               <div className="flex flex-col items-center text-center space-y-6">
