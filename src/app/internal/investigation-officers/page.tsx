@@ -72,6 +72,7 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
+import Link from 'next/link'
 
 const OFFICER_DESIGNATIONS = [
   "Senior Investigation Officer",
@@ -100,6 +101,7 @@ export default function InvestigationOfficersRegistry() {
   const [deleteInputText, setDeleteInputText] = useState('')
   const [isDeleting, setIsDeleting] = useState(false)
   const [activeAssignments, setActiveAssignments] = useState<any[]>([])
+  const [blockReasons, setBlockReasons] = useState<string[]>([])
 
   const [formData, setFormData] = useState({
     name: '',
@@ -145,7 +147,7 @@ export default function InvestigationOfficersRegistry() {
   };
 
   const handleStartDelete = async (officer: any) => {
-    if (!db) return;
+    if (!db || !user) return;
     setOfficerToDelete(officer);
     setIsActionLoading(true);
 
@@ -167,6 +169,31 @@ export default function InvestigationOfficersRegistry() {
       
       if (conflictCases.length > 0) {
         setActiveAssignments(conflictCases);
+        
+        // Derive specific reasons
+        const reasons = new Set<string>();
+        conflictCases.forEach(c => {
+          if (c.status === 'New Complaint') reasons.add("Active complaint assignments exist.");
+          if (c.status === 'Investigation in Progress') reasons.add("Ongoing investigations assigned.");
+          if (c.status === 'Awaiting Documents') reasons.add("Pending reports or evidence verification.");
+          if (c.priority === 'High') reasons.add("Critical high-priority cases remain open.");
+        });
+        
+        if (reasons.size === 0) reasons.add("The investigator is responsible for ongoing cases.");
+        setBlockReasons(Array.from(reasons));
+
+        // Audit Log for the blocked attempt
+        const blockedLogRef = doc(collection(db, 'deletion_audit_logs'));
+        await setDoc(blockedLogRef, {
+          adminId: user.uid,
+          adminEmail: user.email,
+          targetId: officer.employeeId,
+          targetName: officer.name,
+          timestamp: new Date().toISOString(),
+          status: "Blocked by Governance",
+          reasons: Array.from(reasons)
+        });
+
         setDeleteDialogStep('blocked');
         return;
       }
@@ -604,50 +631,85 @@ export default function InvestigationOfficersRegistry() {
 
       {/* Multi-Stage Deletion Dialog (Super Admin Only) */}
       <Dialog open={!!deleteDialogStep} onOpenChange={(open) => { if(!open) { setDeleteDialogStep(null); setOfficerToDelete(null); setDeleteInputText(''); setActiveAssignments([]); } }}>
-        <DialogContent className="max-w-xl rounded-[2rem] border-none shadow-2xl p-0 overflow-hidden bg-white dark:bg-slate-900">
+        <DialogContent className="max-w-2xl rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden bg-white dark:bg-slate-900">
           
           {deleteDialogStep === 'blocked' && (
-            <div className="p-8 space-y-6">
-              <div className="flex flex-col items-center text-center space-y-4">
-                <div className="w-20 h-20 bg-amber-50 dark:bg-amber-950/30 text-amber-500 rounded-full flex items-center justify-center">
-                  <ShieldAlert className="w-10 h-10" />
+            <div className="flex flex-col animate-in fade-in duration-500">
+              <div className="bg-red-600 p-8 text-white relative shrink-0">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl"></div>
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-md border border-white/30">
+                    <ShieldAlert className="w-8 h-8 text-white" />
+                  </div>
+                  <div>
+                    <Badge variant="outline" className="bg-white/10 text-white border-white/20 font-black text-[8px] uppercase mb-1">Administrative Blockade</Badge>
+                    <DialogTitle className="text-2xl font-headline font-bold">Unable to Delete Officer</DialogTitle>
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <DialogTitle className="text-2xl font-headline font-bold text-primary dark:text-white">Governance Block</DialogTitle>
-                  <DialogDescription className="text-sm text-slate-500 leading-relaxed font-medium">
-                    This official is currently responsible for <strong>{activeAssignments.length} active assignments</strong>. Deletion is restricted until every assignment is reassigned, cancelled, or completed.
-                  </DialogDescription>
-                </div>
+                <p className="text-red-100 text-sm font-medium leading-relaxed">
+                  This investigator cannot be purged because one or more active dependencies still exist in the national registry.
+                </p>
               </div>
 
-              <ScrollArea className="h-[250px] rounded-2xl border border-slate-100 dark:border-slate-800 p-4">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="text-[10px] font-black uppercase tracking-widest">ID/Token</TableHead>
-                      <TableHead className="text-[10px] font-black uppercase tracking-widest">Subject</TableHead>
-                      <TableHead className="text-[10px] font-black uppercase tracking-widest">Status</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {activeAssignments.map((c) => (
-                      <TableRow key={c.id}>
-                        <TableCell className="text-[10px] font-mono font-bold text-accent">{c.caseId || c.token}</TableCell>
-                        <TableCell className="text-[10px] font-bold truncate max-w-[150px]">{c.subject}</TableCell>
-                        <TableCell><Badge className="text-[8px] h-4 uppercase">{c.status}</Badge></TableCell>
-                      </TableRow>
+              <div className="p-8 space-y-8">
+                <div className="space-y-4">
+                  <h4 className="text-[10px] font-black uppercase text-red-600 tracking-[0.2em] flex items-center gap-2">
+                    <AlertTriangle className="w-4 h-4" /> Conflict Identified:
+                  </h4>
+                  <div className="grid gap-2">
+                    {blockReasons.map((reason, idx) => (
+                      <div key={idx} className="flex items-center gap-3 p-3 bg-red-50 dark:bg-red-950/20 rounded-xl border border-red-100 dark:border-red-900/40">
+                         <div className="w-1.5 h-1.5 rounded-full bg-red-600" />
+                         <span className="text-xs font-bold text-red-900 dark:text-red-400">{reason}</span>
+                      </div>
                     ))}
-                  </TableBody>
-                </Table>
-              </ScrollArea>
+                  </div>
+                </div>
 
-              <div className="flex gap-3">
-                 <Button asChild variant="outline" className="flex-1 h-12 rounded-xl font-bold gap-2">
-                   <Link href="/internal/public-complaints">
-                      <ClipboardList className="w-4 h-4" /> View Assignments
-                   </Link>
-                 </Button>
-                 <Button onClick={() => setDeleteDialogStep(null)} className="flex-1 h-12 rounded-xl bg-primary text-white font-bold">Acknowledge</Button>
+                <div className="space-y-4">
+                  <h4 className="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em] flex items-center justify-between px-1">
+                    <span>Dependency Summary ({activeAssignments.length})</span>
+                    <Badge variant="outline" className="text-[8px] font-bold border-slate-100">Live Audit</Badge>
+                  </h4>
+                  <div className="rounded-2xl border border-slate-100 dark:border-slate-800 overflow-hidden">
+                    <ScrollArea className="h-[200px]">
+                      <Table>
+                        <TableHeader className="bg-slate-50 dark:bg-slate-900/50">
+                          <TableRow>
+                            <TableHead className="text-[9px] font-black uppercase h-10">Case ID</TableHead>
+                            <TableHead className="text-[9px] font-black uppercase h-10">Subject</TableHead>
+                            <TableHead className="text-[9px] font-black uppercase h-10 text-right">Status</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {activeAssignments.map((c) => (
+                            <TableRow key={c.id} className="hover:bg-slate-50/50 transition-colors">
+                              <TableCell className="text-[10px] font-mono font-bold text-accent py-3">{c.caseId || c.token}</TableCell>
+                              <TableCell className="text-[10px] font-bold py-3 truncate max-w-[150px]">{c.subject}</TableCell>
+                              <TableCell className="text-right py-3"><Badge className="text-[7px] h-4 uppercase bg-slate-800">{c.status}</Badge></TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </ScrollArea>
+                  </div>
+                </div>
+
+                <div className="p-6 bg-slate-50 dark:bg-slate-950 rounded-3xl border-2 border-dashed border-slate-100 dark:border-slate-800 flex items-start gap-4">
+                   <Info className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
+                   <p className="text-[11px] text-slate-500 leading-relaxed font-bold uppercase">
+                     Required Action: Reassign these cases to another official or mark them as completed before proceeding with the identity purge.
+                   </p>
+                </div>
+
+                <div className="flex gap-3">
+                   <Button asChild variant="outline" className="flex-1 h-12 rounded-xl font-bold gap-2 border-slate-200">
+                     <Link href="/internal/public-complaints">
+                        <ClipboardList className="w-4 h-4" /> View Assignments
+                     </Link>
+                   </Button>
+                   <Button onClick={() => setDeleteDialogStep(null)} className="flex-1 h-12 rounded-xl bg-primary text-white font-bold">Acknowledge</Button>
+                </div>
               </div>
             </div>
           )}
