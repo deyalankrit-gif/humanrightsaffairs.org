@@ -27,7 +27,10 @@ import {
   Phone,
   Fingerprint,
   Briefcase,
-  Sparkles
+  Sparkles,
+  Lock,
+  Eye,
+  EyeOff
 } from 'lucide-react'
 import {
   Dialog,
@@ -78,12 +81,14 @@ export default function InvestigationOfficersRegistry() {
   const [isActionLoading, setIsActionLoading] = useState(false)
   const [isAddOpen, setIsAddOpen] = useState(false)
   const [editOfficer, setEditOfficer] = useState<any>(null)
+  const [showPassword, setShowPassword] = useState(false)
 
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
     employeeId: '',
+    password: '',
     designation: 'Investigation Officer',
     status: 'active' as const
   })
@@ -103,14 +108,17 @@ export default function InvestigationOfficersRegistry() {
 
   const { data: officers, loading: dataLoading } = useCollection(officersQuery);
 
-  const generateOfficerId = () => {
-    const numbers = '0123456789';
-    let result = 'HRAT-IO-';
-    for (let i = 0; i < 4; i++) {
-      result += numbers.charAt(Math.floor(Math.random() * numbers.length));
+  const generateAlphanumeric = (length: number) => {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let result = '';
+    for (let i = 0; i < length; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
     }
     return result;
   }
+
+  const generateOfficerId = () => `HRAT-IO-${generateAlphanumeric(4)}`;
+  const generatePassword = () => generateAlphanumeric(12);
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -128,6 +136,7 @@ export default function InvestigationOfficersRegistry() {
         email: '', 
         phone: '', 
         employeeId: '', 
+        password: '',
         designation: 'Investigation Officer', 
         status: 'active' 
       })
@@ -192,7 +201,7 @@ export default function InvestigationOfficersRegistry() {
                 <Plus className="w-4 h-4" /> Add Investigation Officer
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-xl rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden">
+            <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="max-w-xl rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden">
                <div className="bg-slate-900 p-8 text-white relative">
                   <div className="absolute right-6 top-6"><DialogClose asChild><Button variant="ghost" size="icon" className="rounded-full text-white/40 h-8 w-8"><X className="w-4 h-4" /></Button></DialogClose></div>
                   <Badge className="bg-accent text-primary font-black text-[8px] uppercase mb-2">Personnel Node</Badge>
@@ -219,7 +228,7 @@ export default function InvestigationOfficersRegistry() {
                             type="button" 
                             variant="outline" 
                             size="icon" 
-                            title="Generate Automatically"
+                            title="Generate ID"
                             className="h-11 w-11 shrink-0 rounded-xl border-dashed hover:bg-accent/10"
                             onClick={() => setFormData({...formData, employeeId: generateOfficerId()})}
                           >
@@ -235,21 +244,55 @@ export default function InvestigationOfficersRegistry() {
                        <Input type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} placeholder="officer@hrat-india.org" className="h-11 rounded-xl" required />
                     </div>
                     <div className="space-y-1.5">
-                       <Label className="text-[10px] font-bold uppercase text-slate-400">Contact Number</Label>
-                       <Input value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} placeholder="+91" className="h-11 rounded-xl" />
+                       <Label className="text-[10px] font-bold uppercase text-slate-400">Login Password *</Label>
+                       <div className="flex gap-2">
+                          <div className="relative flex-1">
+                            <Input 
+                              type={showPassword ? "text" : "password"}
+                              value={formData.password} 
+                              onChange={e => setFormData({...formData, password: e.target.value})} 
+                              placeholder="Min 8 chars" 
+                              className="h-11 rounded-xl pr-10" 
+                              required 
+                            />
+                            <button 
+                              type="button" 
+                              onClick={() => setShowPassword(!showPassword)}
+                              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-accent"
+                            >
+                              {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                            </button>
+                          </div>
+                          <Button 
+                            type="button" 
+                            variant="outline" 
+                            size="icon" 
+                            title="Generate Password"
+                            className="h-11 w-11 shrink-0 rounded-xl border-dashed hover:bg-accent/10"
+                            onClick={() => setFormData({...formData, password: generatePassword()})}
+                          >
+                            <Lock className="w-4 h-4 text-accent" />
+                          </Button>
+                       </div>
                     </div>
                   </div>
 
-                  <div className="space-y-1.5">
-                     <Label className="text-[10px] font-bold uppercase text-slate-400">Designation / Rank *</Label>
-                     <Select value={formData.designation} onValueChange={(val) => setFormData({...formData, designation: val})}>
-                        <SelectTrigger className="h-11 rounded-xl">
-                           <SelectValue placeholder="Select Rank" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-white z-[1000000]">
-                           {OFFICER_DESIGNATIONS.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}
-                        </SelectContent>
-                     </Select>
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div className="space-y-1.5 flex-1">
+                       <Label className="text-[10px] font-bold uppercase text-slate-400">Designation / Rank *</Label>
+                       <Select value={formData.designation} onValueChange={(val) => setFormData({...formData, designation: val})}>
+                          <SelectTrigger className="h-11 rounded-xl">
+                             <SelectValue placeholder="Select Rank" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-white z-[1000000]">
+                             {OFFICER_DESIGNATIONS.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}
+                          </SelectContent>
+                       </Select>
+                    </div>
+                    <div className="space-y-1.5">
+                       <Label className="text-[10px] font-bold uppercase text-slate-400">Contact Number</Label>
+                       <Input value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} placeholder="+91" className="h-11 rounded-xl" />
+                    </div>
                   </div>
 
                   <Button type="submit" disabled={isActionLoading} className="w-full h-12 bg-primary text-white font-bold rounded-xl hover:bg-secondary shadow-xl transition-all">
@@ -304,6 +347,9 @@ export default function InvestigationOfficersRegistry() {
                              <div className="flex flex-wrap items-center justify-center md:justify-start gap-6 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
                                 <span className="flex items-center gap-2"><Mail className="w-3.5 h-3.5 text-accent" /> {officer.email}</span>
                                 <span className="flex items-center gap-2"><Phone className="w-3.5 h-3.5 text-accent" /> {officer.phone || 'N/A'}</span>
+                                {officer.password && (
+                                  <span className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md"><Lock className="w-3 h-3 text-slate-400" /> Credential Set</span>
+                                )}
                              </div>
                           </div>
 
@@ -368,7 +414,7 @@ export default function InvestigationOfficersRegistry() {
                             type="button" 
                             variant="outline" 
                             size="icon" 
-                            title="Regenerate"
+                            title="Regenerate ID"
                             className="h-11 w-11 shrink-0 rounded-xl border-dashed"
                             onClick={() => setEditOfficer({...editOfficer, employeeId: generateOfficerId()})}
                           >
@@ -379,16 +425,46 @@ export default function InvestigationOfficersRegistry() {
                   </div>
                   <div className="grid md:grid-cols-2 gap-6">
                     <div className="space-y-1.5"><Label className="text-[10px] font-bold uppercase text-slate-400">Official Email</Label><Input value={editOfficer.email} onChange={e => setEditOfficer({...editOfficer, email: e.target.value})} className="h-11 rounded-xl" /></div>
-                    <div className="space-y-1.5"><Label className="text-[10px] font-bold uppercase text-slate-400">Phone</Label><Input value={editOfficer.phone} onChange={e => setEditOfficer({...editOfficer, phone: e.target.value})} className="h-11 rounded-xl" /></div>
+                    <div className="space-y-1.5">
+                       <Label className="text-[10px] font-bold uppercase text-slate-400">Login Password</Label>
+                       <div className="flex gap-2">
+                          <div className="relative flex-1">
+                            <Input 
+                              type={showPassword ? "text" : "password"}
+                              value={editOfficer.password || ''} 
+                              onChange={e => setEditOfficer({...editOfficer, password: e.target.value})} 
+                              className="h-11 rounded-xl pr-10" 
+                            />
+                            <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-accent">
+                               {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                            </button>
+                          </div>
+                          <Button 
+                            type="button" 
+                            variant="outline" 
+                            size="icon" 
+                            title="Regenerate Password"
+                            className="h-11 w-11 shrink-0 rounded-xl border-dashed"
+                            onClick={() => setEditOfficer({...editOfficer, password: generatePassword()})}
+                          >
+                            <Lock className="w-4 h-4 text-accent" />
+                          </Button>
+                       </div>
+                    </div>
                   </div>
-                  <div className="space-y-1.5">
-                     <Label className="text-[10px] font-bold uppercase text-slate-400">Assigned Rank</Label>
-                     <Select value={editOfficer.designation} onValueChange={(val) => setEditOfficer({...editOfficer, designation: val})}>
-                        <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
-                        <SelectContent className="bg-white z-[1000001]">
-                           {OFFICER_DESIGNATIONS.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}
-                        </SelectContent>
-                     </Select>
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div className="space-y-1.5 flex-1">
+                       <Label className="text-[10px] font-bold uppercase text-slate-400">Assigned Rank</Label>
+                       <Select value={editOfficer.designation} onValueChange={(val) => setEditOfficer({...editOfficer, designation: val})}>
+                          <SelectTrigger className="h-11 rounded-xl">
+                             <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent className="bg-white z-[1000001]">
+                             {OFFICER_DESIGNATIONS.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}
+                          </SelectContent>
+                       </Select>
+                    </div>
+                    <div className="space-y-1.5"><Label className="text-[10px] font-bold uppercase text-slate-400">Phone</Label><Input value={editOfficer.phone} onChange={e => setEditOfficer({...editOfficer, phone: e.target.value})} className="h-11 rounded-xl" /></div>
                   </div>
                   <Button onClick={handleUpdate} disabled={isActionLoading} className="w-full h-14 bg-primary text-white font-bold rounded-2xl shadow-xl transition-all">
                      {isActionLoading ? <Loader2 className="animate-spin w-5 h-5" /> : "Commit Profile Refresh"}

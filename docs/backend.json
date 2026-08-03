@@ -23,6 +23,7 @@
         "phone": { "type": "string" },
         "name": { "type": "string" },
         "employeeId": { "type": "string" },
+        "password": { "type": "string", "description": "Login credential for the investigator portal." },
         "designation": { "type": "string" },
         "region": { "type": "string" },
         "assignedCount": { "type": "number" }
@@ -31,6 +32,7 @@
   },
   "firestore": {
     "/users/{email}": { "schema": "UserAccount" },
-    "/public_complaints/{id}": { "description": "Primary complaint registry linked to investigators via assignment fields." }
+    "/public_complaints/{id}": { "description": "Primary complaint registry linked to investigators via assignment fields." },
+    "/investigation_officers/{id}": { "schema": "Investigator" }
   }
 }
