@@ -44,6 +44,7 @@ import { CASE_STATUSES, CASE_PRIORITIES, REPORT_TEMPLATES } from '@/lib/complain
 import { getStatusColor } from '@/lib/complaint-utils'
 import { sendTimelineEmailUpdate, sendReportEmail } from '@/lib/notification-service'
 import { InvestigationJourney } from '@/components/investigation-journey'
+import Link from 'next/link'
 
 export default function CaseHubPage() {
   const { id } = useParams()
@@ -490,8 +491,17 @@ export default function CaseHubPage() {
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-20">
       <header className="pt-16 pb-8 bg-slate-900 text-white border-b-8 border-accent/20 sticky top-0 z-40 px-4 shadow-2xl">
         <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-6">
-           <div className="flex items-center gap-4">
-              <Button variant="ghost" onClick={() => router.back()} className="text-white hover:bg-white/10 h-10 w-10 p-0 rounded-full"><ArrowLeft className="w-6 h-6" /></Button>
+           <div className="flex items-center gap-6">
+              {/* Refined Back Link Node */}
+              <Link href="/internal/public-complaints" className="flex flex-col items-center group shrink-0 transition-all active:scale-95">
+                <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-accent group-hover:text-primary transition-all border border-white/10 shadow-sm">
+                  <ArrowLeft className="w-6 h-6" />
+                </div>
+                <span className="text-[7px] font-black uppercase tracking-tighter text-slate-500 group-hover:text-accent mt-1 text-center leading-tight">
+                  Back to Case<br/>Management Page
+                </span>
+              </Link>
+
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
                    <h1 className="text-xl md:text-3xl font-headline font-bold">{caseData.caseId || 'PROVISIONING...'}</h1>
@@ -556,7 +566,7 @@ export default function CaseHubPage() {
                     </Card>
                     <Card className="rounded-[2.5rem] border-none shadow-sm bg-white dark:bg-slate-900 overflow-hidden">
                        <CardHeader className="bg-slate-50 dark:bg-slate-800 p-8 border-b"><div className="flex items-center justify-between"><CardTitle className="text-lg font-headline font-bold flex items-center gap-3"><MailCheck className="w-5 h-5 text-accent" /> Communication Registry</CardTitle><Badge variant="outline" className="text-[8px] font-black uppercase border-slate-200">Session Secure</Badge></div></CardHeader>
-                       <CardContent className="p-0"><div className="overflow-x-auto"><table className="w-full text-left"><thead className="bg-slate-50 dark:bg-slate-800/50 text-[8px] font-black text-slate-400 uppercase border-b"><tr><th className="px-8 py-4">Status</th><th className="px-8 py-4">Transmission</th><th className="px-8 py-4">Timestamp</th><th className="px-8 py-4 text-right">Action</th></tr></thead><tbody className="divide-y divide-slate-50">{(caseData.emailLogs || []).length > 0 ? [...caseData.emailLogs].reverse().map((log: any, i: number) => (<tr key={i} className="hover:bg-slate-50/50">
+                       <CardContent className="p-0"><div className="overflow-x-auto"><table className="w-full text-left"><thead className="bg-slate-50 dark:bg-slate-800/50 text-[8px] font-black text-slate-400 uppercase border-b"><tr><th className="px-8 py-4">Status</th><th className="px-8 py-4">Transmission</th><th className="px-8 py-4 text-right">Action</th></tr></thead><tbody className="divide-y divide-slate-50">{(caseData.emailLogs || []).length > 0 ? [...caseData.emailLogs].reverse().map((log: any, i: number) => (<tr key={i} className="hover:bg-slate-50/50">
                                <td className="px-8 py-4"><Badge className={cn("text-[7px] uppercase", log.status === 'Success' ? 'bg-emerald-500' : 'bg-red-500')}>{log.status}</Badge></td>
                                <td className="px-8 py-4"><p className="text-xs font-bold truncate max-w-[200px]">{log.subject}</p><p className="text-[8px] text-slate-400 mt-1 uppercase">To: {log.recipient} | From: {log.sender}</p></td>
                                <td className="px-8 py-4"><span className="text-[10px] font-bold text-slate-500">{log.timestamp}</span></td>
