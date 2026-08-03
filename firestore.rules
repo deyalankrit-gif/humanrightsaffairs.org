@@ -1,4 +1,3 @@
-
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -12,6 +11,10 @@ service cloud.firestore {
       return request.auth.token.get('email', '').lower();
     }
 
+    function getUserRole() {
+      return get(/databases/$(database)/documents/users/$(getAuthEmail())).data.role;
+    }
+
     // High-Priority Administrative Roles
     function isRoot() {
       return isAuthenticated() && getAuthEmail() == 'deydhritiman@gmail.com';
@@ -19,6 +22,10 @@ service cloud.firestore {
 
     function isInternalStaff() {
       return isAuthenticated() && getAuthEmail() == 'deyalankrit@gmail.com';
+    }
+
+    function isInvestigator() {
+      return isAuthenticated() && getUserRole() == 'investigator';
     }
 
     // Permission-based authorization
@@ -31,7 +38,6 @@ service cloud.firestore {
     }
 
     // 2. GLOBAL OVERRIDE
-    // Root official has full access to the entire database for emergency governance.
     match /{document=**} {
       allow read, write: if isRoot();
     }
@@ -123,7 +129,12 @@ service cloud.firestore {
     // 5. PUBLIC SUBMISSIONS (Atomic Write)
     match /public_complaints/{complaintId} {
       allow create: if true;
-      allow read, write: if hasPermission('publicComplaints');
+      allow read: if hasPermission('publicComplaints') || 
+        (isInvestigator() && (
+          resource.data.assignedTo == get(/databases/$(database)/documents/users/$(getAuthEmail())).data.name ||
+          resource.data.email == getAuthEmail()
+        ));
+      allow update: if hasPermission('publicComplaints') || isInvestigator();
     }
 
     match /memberApplications/{appId} {

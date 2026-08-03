@@ -19,7 +19,8 @@ import {
   CheckCircle2, 
   Heart,
   ArrowUpRight,
-  ChevronRight
+  ChevronRight,
+  Search
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -46,7 +47,7 @@ import { useToast } from '@/hooks/use-toast';
  * Includes a secure email OTP gate for the Required Documents section.
  * Featuring the Bengali orange hyperlink "প্রয়োজনীয় কিছু তথ্য" leading to legal guides.
  * Repositioned donation CTA image under the Registered Office block on the right.
- * Updated: Restored "Office Use Only" icons on the right side of administrative links.
+ * Updated: Included Investigator Portal entry point.
  */
 export function PublicFooter() {
   const donationFooterImg = PlaceHolderImages.find(img => img.id === 'donation-footer-image');
@@ -171,6 +172,13 @@ export function PublicFooter() {
               <li><Link href="/trust-credentials" className="hover:text-accent transition-colors font-medium flex items-center gap-2">Trust Credentials <Crown className="w-3.5 h-3.5 text-[#D4AF37] fill-[#D4AF37]/20" /></Link></li>
               <li><Link href="/activity-hub" className="text-emerald-400 font-bold hover:text-white transition-colors flex items-center gap-2"><Bell className={cn("w-3 h-3 md:w-4 md:h-4 text-red-500", hasReminders && "animate-ring")} /><span>Activity Hub</span></Link></li>
               
+              <li className="pt-4">
+                <Link href="/investigator/login" className="text-indigo-400 font-bold hover:text-white transition-colors flex items-center gap-2 group/inv">
+                  <Search className="w-4 h-4 transition-transform group-hover/inv:scale-110" />
+                  <span>Investigator Login</span>
+                </Link>
+              </li>
+
               <li className="pt-6"><span className="text-[#CEFF00] font-black text-sm md:text-lg uppercase tracking-tighter">Office Use Only</span></li>
               <li>
                 <Link href="/legal/official-representation" className="text-[#CEFF00] hover:text-white transition-colors font-bold flex items-center justify-between leading-tight group/link">

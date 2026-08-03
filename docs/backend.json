@@ -1,195 +1,34 @@
-
 {
   "entities": {
     "UserAccount": {
       "title": "User Account",
-      "description": "Administrative or Member account with specific permission toggles and linked Auth UID.",
+      "description": "Administrative, Member, or Investigator account with specific permission toggles and linked Auth UID.",
       "type": "object",
       "properties": {
         "uid": { "type": "string", "description": "Linked Firebase Authentication UID." },
         "email": { "type": "string", "format": "email" },
         "name": { "type": "string" },
-        "role": { "type": "string", "enum": ["admin", "staff", "national_finance", "state_finance", "auditor", "member"] },
+        "role": { "type": "string", "enum": ["admin", "staff", "investigator", "member"] },
         "status": { "type": "string", "enum": ["active", "inactive"] },
-        "permissions": {
-          "type": "object",
-          "properties": {
-            "analytics": { "type": "boolean" },
-            "memberAnalytics": { "type": "boolean" },
-            "members": { "type": "boolean" },
-            "visitors": { "type": "boolean" },
-            "accounts": { "type": "boolean" },
-            "expenses": { "type": "boolean" },
-            "applications": { "type": "boolean" },
-            "inventory": { "type": "boolean" },
-            "materialManagement": { "type": "boolean", "description": "Access to the high-fidelity Material Management System." },
-            "vendors": { "type": "boolean" },
-            "grievances": { "type": "boolean" },
-            "meetings": { "type": "boolean" },
-            "events": { "type": "boolean" },
-            "gallery": { "type": "boolean" },
-            "publicView": { "type": "boolean" },
-            "terminated": { "type": "boolean" },
-            "renewals": { "type": "boolean" },
-            "activityHub": { "type": "boolean" },
-            "occasions": { "type": "boolean" },
-            "donorWall": { "type": "boolean" },
-            "publicComplaints": { "type": "boolean" },
-            "kitManagement": { "type": "boolean" },
-            "financeDashboard": { "type": "boolean" },
-            "financeLedger": { "type": "boolean" },
-            "financeVouchers": { "type": "boolean" },
-            "financePayroll": { "type": "boolean" },
-            "financeProjects": { "type": "boolean" },
-            "financeAssets": { "type": "boolean" },
-            "financeCompliance": { "type": "boolean" },
-            "feedback": { "type": "boolean", "description": "Permission to manage community testimonials." }
-          }
-        },
-        "lastLogin": { "type": "string", "format": "date-time" },
-        "createdAt": { "type": "string", "format": "date-time" },
-        "updatedAt": { "type": "string", "format": "date-time" },
-        "createdBy": { "type": "string" }
-      },
-      "required": ["email", "permissions", "uid", "role"]
+        "permissions": { "type": "object" }
+      }
     },
-    "InvestigationOfficer": {
-      "title": "Investigation Officer",
-      "description": "Registry of personnel authorized to investigate public complaints.",
+    "Investigator": {
+      "title": "Investigator Profile",
+      "description": "Specialized personnel authorized for field investigations.",
       "type": "object",
       "properties": {
+        "email": { "type": "string" },
         "name": { "type": "string" },
-        "title": { "type": "string" },
-        "status": { "type": "string", "enum": ["active", "inactive"] },
-        "createdAt": { "type": "string", "format": "date-time" }
-      },
-      "required": ["name"]
-    },
-    "MemberProfile": {
-      "title": "Member Profile",
-      "description": "Official personnel record for Trust members and volunteers.",
-      "type": "object",
-      "properties": {
-        "memberId": { "type": "string" },
-        "name": { "type": "string" },
+        "employeeId": { "type": "string" },
         "designation": { "type": "string" },
-        "designationCategory": { "type": "string" },
-        "level": { "type": "string", "enum": ["National", "State", "District"] },
-        "stateName": { "type": "string" },
-        "districtName": { "type": "string" },
-        "gender": { "type": "string" },
-        "isDemi": { "type": "boolean", "description": "Flag for simulated personnel records." },
-        "createdAt": { "type": "string", "format": "date-time" }
-      }
-    },
-    "MaterialItem": {
-      "title": "Material Item",
-      "description": "Logistical asset or supply in the material management system.",
-      "type": "object",
-      "properties": {
-        "name": { "type": "string" },
-        "category": { "type": "string" },
-        "sku": { "type": "string" },
-        "unit": { "type": "string" },
-        "currentStock": { "type": "number" },
-        "lowStockThreshold": { "type": "number" },
-        "status": { "type": "string", "enum": ["Available", "Low Stock", "Out of Stock"] },
-        "location": { "type": "string" },
-        "lastProcured": { "type": "string", "format": "date" },
-        "notes": { "type": "string" },
-        "createdAt": { "type": "string", "format": "date-time" },
-        "updatedAt": { "type": "string", "format": "date-time" }
-      }
-    },
-    "CurrentNews": {
-      "title": "Current News",
-      "description": "Daily news broadcast for the homepage display area.",
-      "type": "object",
-      "properties": {
-        "originalEnglish": {
-          "type": "object",
-          "properties": {
-            "title": { "type": "string" },
-            "content": { "type": "string" },
-            "category": { "type": "string" }
-          }
-        },
-        "bengaliTranslation": {
-          "type": "object",
-          "properties": {
-            "title": { "type": "string" },
-            "content": { "type": "string" },
-            "category": { "type": "string" }
-          }
-        },
-        "isActive": { "type": "boolean" },
-        "createdAt": { "type": "string", "format": "date-time" }
-      }
-    },
-    "Feedback": {
-      "title": "Public Feedback",
-      "description": "Feedback submitted by users on the website.",
-      "type": "object",
-      "properties": {
-        "name": { "type": "string" },
-        "address": { "type": "string" },
-        "comment": { "type": "string" },
-        "rating": { "type": "number" },
-        "createdAt": { "type": "string", "format": "date-time" }
-      },
-      "required": ["name", "address", "comment"]
-    },
-    "AudioAnnouncement": {
-      "title": "Audio Announcement",
-      "description": "Institutional audio broadcast settings and asset.",
-      "type": "object",
-      "properties": {
-        "enabled": { "type": "boolean" },
-        "title": { "type": "string" },
-        "description": { "type": "string" },
-        "audioData": { "type": "string", "description": "Base64 encoded audio string." },
-        "autoplay": { "type": "boolean" },
-        "volume": { "type": "number" },
-        "updatedAt": { "type": "string", "format": "date-time" },
-        "updatedBy": { "type": "string" }
-      }
-    },
-    "AiAnnouncement": {
-      "title": "AI Audio Announcement",
-      "description": "AI-generated speech announcement.",
-      "type": "object",
-      "properties": {
-        "title": { "type": "string" },
-        "fullText": { "type": "string" },
-        "audioData": { "type": "string" },
-        "category": { "type": "string" },
-        "language": { "type": "string", "enum": ["English", "Bengali", "Hindi"] },
-        "voice": { "type": "string", "enum": ["Male", "Female"] },
-        "emotion": { "type": "string", "enum": ["Professional", "Calm", "Friendly", "Emergency", "Official"] },
-        "speed": { "type": "number" },
-        "pitch": { "type": "number" },
-        "status": { "type": "string", "enum": ["Draft", "Published", "Archived"] },
-        "duration": { "type": "number" },
-        "fileSize": { "type": "number" },
-        "publishedTime": { "type": "string", "format": "date-time" },
-        "createdAt": { "type": "string", "format": "date-time" },
-        "updatedAt": { "type": "string", "format": "date-time" },
-        "createdBy": { "type": "string" },
-        "updatedBy": { "type": "string" }
+        "region": { "type": "string" },
+        "assignedCount": { "type": "number" }
       }
     }
   },
-  "auth": {
-    "providers": ["google", "password"]
-  },
   "firestore": {
-    "/users/{userEmail}": { "schema": "UserAccount", "description": "Permissions registry." },
-    "/investigation_officers/{officerId}": { "schema": "InvestigationOfficer", "description": "Official investigator registry." },
-    "/memberProfiles/{memberId}": { "schema": "MemberProfile", "description": "Personnel registry." },
-    "/materials/{materialId}": { "schema": "MaterialItem", "description": "Material management inventory." },
-    "/current_news/{newsId}": { "schema": "CurrentNews", "description": "Homepage news broadcast." },
-    "/feedback/{feedbackId}": { "schema": "Feedback", "description": "User feedback collection." },
-    "/settings/audio_announcement": { "schema": "AudioAnnouncement", "description": "Global audio broadcast configuration." },
-    "/ai_announcements/{id}": { "schema": "AiAnnouncement", "description": "Registry of AI-generated audio announcements." }
+    "/users/{email}": { "schema": "UserAccount" },
+    "/public_complaints/{id}": { "description": "Primary complaint registry linked to investigators via assignment fields." }
   }
 }
