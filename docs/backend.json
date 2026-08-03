@@ -28,11 +28,26 @@
         "region": { "type": "string" },
         "assignedCount": { "type": "number" }
       }
+    },
+    "DeletionAuditLog": {
+      "title": "Deletion Audit Log",
+      "description": "Immutable record of personnel records purged by Super Admin.",
+      "type": "object",
+      "properties": {
+        "adminId": { "type": "string" },
+        "adminName": { "type": "string" },
+        "targetId": { "type": "string" },
+        "targetName": { "type": "string" },
+        "targetEmail": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "status": { "type": "string" }
+      }
     }
   },
   "firestore": {
     "/users/{email}": { "schema": "UserAccount" },
     "/public_complaints/{id}": { "description": "Primary complaint registry linked to investigators via assignment fields." },
-    "/investigation_officers/{id}": { "schema": "Investigator" }
+    "/investigation_officers/{id}": { "schema": "Investigator" },
+    "/deletion_audit_logs/{id}": { "schema": "DeletionAuditLog" }
   }
 }

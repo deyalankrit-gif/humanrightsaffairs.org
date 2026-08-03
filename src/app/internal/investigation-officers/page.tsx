@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useEffect, useState } from 'react'
@@ -40,7 +41,8 @@ import {
   ExternalLink,
   ChevronRight,
   Navigation,
-  ShieldAlert
+  ShieldAlert,
+  ClipboardList
 } from 'lucide-react'
 import {
   Dialog,
@@ -59,6 +61,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import { ScrollArea } from '@/components/ui/scroll-area'
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
 
@@ -88,7 +99,7 @@ export default function InvestigationOfficersRegistry() {
   const [officerToDelete, setOfficerToDelete] = useState<any>(null)
   const [deleteInputText, setDeleteInputText] = useState('')
   const [isDeleting, setIsDeleting] = useState(false)
-  const [blockReason, setBlockReason] = useState('')
+  const [activeAssignments, setActiveAssignments] = useState<any[]>([])
 
   const [formData, setFormData] = useState({
     name: '',
@@ -139,21 +150,30 @@ export default function InvestigationOfficersRegistry() {
     setIsActionLoading(true);
 
     try {
-      // Governance Check: Search for active assignments in the public_complaints registry
       const complaintsRef = collection(db, 'public_complaints');
-      // Match by assignedTo name OR presence in assignedOfficers array
-      const q1 = query(complaintsRef, where('assignedTo', '==', officer.name), where('status', 'not-in', ['Closed', 'Action Taken']));
-      const snap1 = await getDocs(q1);
+      // Governance Check: Find ALL active cases where the officer is assigned
+      const q = query(
+        complaintsRef, 
+        where('status', 'not-in', ['Closed', 'Action Taken'])
+      );
       
-      if (!snap1.empty) {
-        setBlockReason(`Active Case Assignment Identified. This official is currently linked to ${snap1.size} active investigation(s). Assignments must be transferred or closed before registry purging is permitted.`);
+      const snap = await getDocs(q);
+      const conflictCases = snap.docs
+        .map(d => ({ id: d.id, ...d.data() }))
+        .filter((c: any) => 
+          c.assignedTo === officer.name || 
+          (c.assignedOfficers || []).some((o: any) => o.name === officer.name)
+        );
+      
+      if (conflictCases.length > 0) {
+        setActiveAssignments(conflictCases);
         setDeleteDialogStep('blocked');
         return;
       }
 
       setDeleteDialogStep('warning');
     } catch (e) {
-      toast({ variant: "destructive", title: "Audit Error", description: "Could not verify officer's current assignment status." });
+      toast({ variant: "destructive", title: "Audit Error", description: "Verification protocol failed." });
     } finally {
       setIsActionLoading(false);
     }
@@ -243,8 +263,24 @@ export default function InvestigationOfficersRegistry() {
     setIsDeleting(true)
     try {
       const batch = writeBatch(db)
+      
+      // 1. Delete Officer Registry
       batch.delete(doc(db, 'investigation_officers', officerToDelete.id))
+      
+      // 2. Delete User Governance Record
       batch.delete(doc(db, 'users', officerToDelete.email.toLowerCase().trim()))
+      
+      // 3. Create Permanent Deletion Audit Log
+      const auditRef = doc(collection(db, 'deletion_audit_logs'))
+      batch.set(auditRef, {
+        adminId: user?.uid,
+        adminName: 'Root Administrator',
+        targetId: officerToDelete.employeeId,
+        targetName: officerToDelete.name,
+        targetEmail: officerToDelete.email,
+        timestamp: new Date().toISOString(),
+        status: "Permanently Purged"
+      })
       
       await batch.commit()
       toast({ title: "Clearance Revoked", description: "Identity purged from national registry." })
@@ -489,7 +525,6 @@ export default function InvestigationOfficersRegistry() {
                </div>
 
                <div className="flex-1 overflow-y-auto p-8 space-y-10 custom-scrollbar">
-                  {/* Identity Key Segment */}
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                      <div className="p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800">
                         <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Employee ID</p>
@@ -508,7 +543,6 @@ export default function InvestigationOfficersRegistry() {
                      </div>
                   </div>
 
-                  {/* Contact Node Segment */}
                   <div className="space-y-4">
                      <h4 className="text-[10px] font-black uppercase text-accent tracking-[0.25em] flex items-center gap-2">
                         <Navigation className="w-3 h-3" /> Communication Protocols
@@ -531,7 +565,6 @@ export default function InvestigationOfficersRegistry() {
                      </div>
                   </div>
 
-                  {/* Governance Meta Segment */}
                   <div className="grid md:grid-cols-2 gap-4">
                      <div className="p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800">
                         <div className="flex items-center justify-between mb-2">
@@ -569,9 +602,9 @@ export default function InvestigationOfficersRegistry() {
         </DialogContent>
       </Dialog>
 
-      {/* Multi-Stage Deletion Dialog */}
-      <Dialog open={!!deleteDialogStep} onOpenChange={(open) => { if(!open) { setDeleteDialogStep(null); setOfficerToDelete(null); setDeleteInputText(''); setBlockReason(''); } }}>
-        <DialogContent className="max-w-md rounded-[2rem] border-none shadow-2xl p-0 overflow-hidden bg-white dark:bg-slate-900">
+      {/* Multi-Stage Deletion Dialog (Super Admin Only) */}
+      <Dialog open={!!deleteDialogStep} onOpenChange={(open) => { if(!open) { setDeleteDialogStep(null); setOfficerToDelete(null); setDeleteInputText(''); setActiveAssignments([]); } }}>
+        <DialogContent className="max-w-xl rounded-[2rem] border-none shadow-2xl p-0 overflow-hidden bg-white dark:bg-slate-900">
           
           {deleteDialogStep === 'blocked' && (
             <div className="p-8 space-y-6">
@@ -582,11 +615,40 @@ export default function InvestigationOfficersRegistry() {
                 <div className="space-y-2">
                   <DialogTitle className="text-2xl font-headline font-bold text-primary dark:text-white">Governance Block</DialogTitle>
                   <DialogDescription className="text-sm text-slate-500 leading-relaxed font-medium">
-                    {blockReason}
+                    This official is currently responsible for <strong>{activeAssignments.length} active assignments</strong>. Deletion is restricted until every assignment is reassigned, cancelled, or completed.
                   </DialogDescription>
                 </div>
               </div>
-              <Button onClick={() => setDeleteDialogStep(null)} className="w-full h-12 rounded-xl bg-primary text-white font-bold">Acknowledge</Button>
+
+              <ScrollArea className="h-[250px] rounded-2xl border border-slate-100 dark:border-slate-800 p-4">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="text-[10px] font-black uppercase tracking-widest">ID/Token</TableHead>
+                      <TableHead className="text-[10px] font-black uppercase tracking-widest">Subject</TableHead>
+                      <TableHead className="text-[10px] font-black uppercase tracking-widest">Status</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {activeAssignments.map((c) => (
+                      <TableRow key={c.id}>
+                        <TableCell className="text-[10px] font-mono font-bold text-accent">{c.caseId || c.token}</TableCell>
+                        <TableCell className="text-[10px] font-bold truncate max-w-[150px]">{c.subject}</TableCell>
+                        <TableCell><Badge className="text-[8px] h-4 uppercase">{c.status}</Badge></TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </ScrollArea>
+
+              <div className="flex gap-3">
+                 <Button asChild variant="outline" className="flex-1 h-12 rounded-xl font-bold gap-2">
+                   <Link href="/internal/public-complaints">
+                      <ClipboardList className="w-4 h-4" /> View Assignments
+                   </Link>
+                 </Button>
+                 <Button onClick={() => setDeleteDialogStep(null)} className="flex-1 h-12 rounded-xl bg-primary text-white font-bold">Acknowledge</Button>
+              </div>
             </div>
           )}
 
@@ -599,7 +661,7 @@ export default function InvestigationOfficersRegistry() {
                 <div className="space-y-2">
                   <DialogTitle className="text-2xl font-headline font-bold text-primary dark:text-white">Security Warning</DialogTitle>
                   <DialogDescription className="text-sm text-slate-500 leading-relaxed font-medium">
-                    You are attempting to permanently purge the record for <strong className="text-primary dark:text-white">{officerToDelete?.name}</strong>. This action will revoke their investigative clearance and delete their authentication credentials from the national registry.
+                    You are attempting to permanently purge the record for <strong className="text-primary dark:text-white">{officerToDelete?.name}</strong>. This action will revoke their investigative clearance and delete their authentication credentials. This is irreversible.
                   </DialogDescription>
                 </div>
               </div>
@@ -617,8 +679,8 @@ export default function InvestigationOfficersRegistry() {
                   <AlertTriangle className="w-3 h-3" /> Verification Protocol
                 </div>
                 <div className="space-y-1">
-                  <DialogTitle className="text-xl font-headline font-bold">Confirm Deletion</DialogTitle>
-                  <p className="text-xs text-slate-500">To prevent accidental data loss, please type the word <strong className="text-red-600 uppercase">delete</strong> below to authorize this purge.</p>
+                  <DialogTitle className="text-xl font-headline font-bold">Confirm Permanent Deletion</DialogTitle>
+                  <p className="text-xs text-slate-500">To authorize this purge, please type the word <strong className="text-red-600 uppercase">delete</strong> below.</p>
                 </div>
               </div>
               
@@ -639,7 +701,7 @@ export default function InvestigationOfficersRegistry() {
                   onClick={handleDelete}
                   className="flex-1 h-12 rounded-xl font-bold bg-red-600 hover:bg-red-700 shadow-xl shadow-red-600/20"
                 >
-                  {isDeleting ? <Loader2 className="animate-spin" /> : "Revoke & Purge"}
+                  {isDeleting ? <Loader2 className="animate-spin" /> : "Verify & Purge Record"}
                 </Button>
               </div>
             </div>
