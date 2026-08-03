@@ -397,8 +397,8 @@ export default function InvestigationOfficersRegistry() {
                   <Plus className="w-5 h-5 mr-2" /> Add Investigator
                 </Button>
               </DialogTrigger>
-              <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="max-w-xl rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden bg-white dark:bg-slate-900 [&>button]:hidden">
-                 <div className="bg-slate-900 p-8 text-white relative border-b-4 border-accent/20">
+              <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="max-w-xl rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden bg-white dark:bg-slate-900 [&>button]:hidden max-h-[90vh] flex flex-col">
+                 <div className="bg-slate-900 p-8 text-white relative border-b-4 border-accent/20 shrink-0">
                     <div className="absolute right-6 top-6">
                       <DialogClose asChild>
                         <Button variant="ghost" size="icon" className="rounded-full text-white hover:text-white hover:bg-white/10 h-10 w-10 transition-all">
@@ -409,7 +409,7 @@ export default function InvestigationOfficersRegistry() {
                     <DialogTitle className="text-3xl font-headline font-bold">Provision Officer</DialogTitle>
                     <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">Establishing Digital Investigative Identity</p>
                  </div>
-                 <form onSubmit={handleAdd} className="p-8 space-y-6">
+                 <form onSubmit={handleAdd} className="flex-1 overflow-y-auto p-8 space-y-6 custom-scrollbar">
                     <div className="grid md:grid-cols-2 gap-6">
                       <div className="space-y-1.5"><Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Name *</Label><Input value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="rounded-xl h-11 bg-slate-50 border-none shadow-inner font-bold" required /></div>
                       <div className="space-y-1.5">
@@ -664,7 +664,7 @@ export default function InvestigationOfficersRegistry() {
             <div className="p-10 space-y-8 animate-in zoom-in-95 duration-500">
               <div className="absolute right-6 top-6">
                 <DialogClose asChild>
-                  <Button variant="ghost" size="icon" className="rounded-full text-slate-400 hover:text-red-500 h-10 w-10"><X className="w-5 h-5" /></Button>
+                  <Button variant="ghost" size="icon" className="rounded-full text-slate-400 hover:text-red-500 h-10 w-10"><X className="w-6 h-6" /></Button>
                 </DialogClose>
               </div>
               <div className="space-y-4 text-center">
@@ -702,7 +702,7 @@ export default function InvestigationOfficersRegistry() {
 
       {/* Multi-Functional Edit Dialog */}
       <Dialog open={!!editOfficer} onOpenChange={(val) => !val && setEditOfficer(null)}>
-        <DialogContent className="max-w-xl rounded-[3rem] border-none shadow-2xl p-0 overflow-hidden bg-white dark:bg-slate-900 [&>button]:hidden">
+        <DialogContent className="max-w-xl rounded-[3rem] border-none shadow-2xl p-0 overflow-hidden bg-white dark:bg-slate-900 [&>button]:hidden max-h-[90vh] flex flex-col">
           {editOfficer && (
             <>
                <div className="bg-slate-900 p-10 text-white shrink-0 border-b-4 border-accent/20 relative">
@@ -716,7 +716,7 @@ export default function InvestigationOfficersRegistry() {
                   <Badge className="bg-accent text-primary font-black uppercase text-[9px] mb-2 tracking-widest">Metadata Editor</Badge>
                   <DialogTitle className="text-3xl font-headline font-bold">Update Profile Meta</DialogTitle>
                </div>
-               <div className="p-10 space-y-8">
+               <div className="flex-1 overflow-y-auto p-10 space-y-8 custom-scrollbar">
                   <div className="grid md:grid-cols-2 gap-6">
                     <div className="space-y-1.5"><Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Legal Name</Label><Input value={editOfficer.name || ''} onChange={e => setEditOfficer({...editOfficer, name: e.target.value})} className="h-12 rounded-2xl shadow-inner border-none bg-slate-50 dark:bg-slate-950 font-bold" /></div>
                     <div className="space-y-1.5"><Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Employee ID</Label><Input value={(editOfficer.employeeId || '')} disabled className="h-12 rounded-2xl bg-slate-100/50 dark:bg-slate-800/50 border-none font-mono font-bold text-slate-400" /></div>
@@ -748,10 +748,10 @@ export default function InvestigationOfficersRegistry() {
 
       {/* Personnel Detailed Account View (Examine) */}
       <Dialog open={!!selectedOfficerForDetails} onOpenChange={(val) => !val && setSelectedOfficerForDetails(null)}>
-        <DialogContent className="max-w-xl rounded-[3rem] border-none shadow-2xl p-0 overflow-hidden bg-white dark:bg-slate-900 [&>button]:hidden">
+        <DialogContent className="max-w-xl rounded-[3rem] border-none shadow-2xl p-0 overflow-hidden bg-white dark:bg-slate-900 [&>button]:hidden max-h-[90vh] flex flex-col">
           {selectedOfficerForDetails && (
             <>
-              <div className="bg-slate-900 p-10 text-white relative border-b-8 border-accent/20">
+              <div className="bg-slate-900 p-10 text-white relative border-b-8 border-accent/20 shrink-0">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-accent/5 rounded-full -mr-16 -mt-16 blur-2xl"></div>
                 <div className="absolute right-6 top-6">
                   <DialogClose asChild>
@@ -769,8 +769,8 @@ export default function InvestigationOfficersRegistry() {
                    </div>
                 </div>
               </div>
-              <div className="p-10 space-y-10">
-                <div className="grid grid-cols-2 gap-6">
+              <div className="flex-1 overflow-y-auto p-10 space-y-10 custom-scrollbar">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div className="p-6 bg-slate-50 dark:bg-slate-800 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-inner group hover:bg-white dark:hover:bg-slate-950 transition-all">
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2">
                        <Star className="w-3 h-3 text-accent" /> Institutional Rank
