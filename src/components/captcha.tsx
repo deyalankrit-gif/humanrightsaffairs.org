@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
@@ -22,7 +21,7 @@ type CaptchaChar = {
 /**
  * Captcha Component: Generates a distorted alphanumeric code for human verification.
  * Features individualized character transformations for crookedness and blurriness.
- * Now includes an accessible Audio CAPTCHA system using high-fidelity TTS.
+ * Includes an accessible Audio CAPTCHA system that identifies letter casing.
  */
 export function Captcha({ onVerify }: { onVerify: (isValid: boolean) => void }) {
   const [code, setCode] = useState<CaptchaChar[]>([]);
@@ -87,7 +86,7 @@ export function Captcha({ onVerify }: { onVerify: (isValid: boolean) => void }) 
 
   /**
    * handlePlayAudio: Manages the generation and playback of the audio CAPTCHA.
-   * Pronounces characters individually with randomized speed/pitch for security.
+   * Pronounces characters individually and explicitly identifies Uppercase/Lowercase letters.
    */
   const handlePlayAudio = async () => {
     if (!audioRef.current) return;
@@ -109,9 +108,17 @@ export function Captcha({ onVerify }: { onVerify: (isValid: boolean) => void }) 
     setAudioError(false);
 
     try {
-      // Format text with commas to force clear pauses between characters
-      // We add a preamble and repetition for better accessibility
-      const speechText = `The security code is: ${rawCode.split('').join(', ')}. I repeat, ${rawCode.split('').join(', ')}.`;
+      // Map characters to descriptive labels for casing
+      const descriptiveParts = rawCode.split('').map(char => {
+        if (/[a-z]/.test(char)) return `lowercase ${char}`;
+        if (/[A-Z]/.test(char)) return `Uppercase ${char}`;
+        return char; // Numbers
+      });
+
+      const descriptiveCode = descriptiveParts.join(', ');
+      
+      // Construct prompt with descriptive casing and repetition
+      const speechText = `The security code is: ${descriptiveCode}. I repeat, ${descriptiveCode}.`;
       
       const randomizedSpeed = 0.9 + (Math.random() * 0.2); // 0.9 to 1.1
       const randomizedPitch = Math.floor(Math.random() * 6) - 3; // -3 to 3
@@ -130,9 +137,8 @@ export function Captcha({ onVerify }: { onVerify: (isValid: boolean) => void }) 
         
         const audio = audioRef.current;
         audio.src = result.audioData;
-        audio.load(); // Force browser to prepare the new source
+        audio.load(); 
         
-        // Play the audio after ensuring it's loaded
         const playPromise = audio.play();
         if (playPromise !== undefined) {
           playPromise
