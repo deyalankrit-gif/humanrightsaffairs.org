@@ -2,16 +2,36 @@
 
 import React, { useEffect, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
-import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase'
+import { 
+  useUser, 
+  useFirestore, 
+  useDoc, 
+  useMemoFirebase, 
+  useAuth 
+} from '@/firebase'
 import { doc } from 'firebase/firestore'
-import { Loader2, Search, LayoutDashboard, History, Bell, LogOut, ShieldCheck } from 'lucide-react'
+import { Loader2, Search, LayoutDashboard, Bell, LogOut } from 'lucide-react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { signOut } from 'firebase/auth'
-import { useAuth } from '@/firebase'
 
+/**
+ * InvestigatorLayout: Secure isolated terminal for investigative personnel.
+ * Session isolation is now handled globally by FirebaseClientProvider via path-detection.
+ */
 export default function InvestigatorLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <InvestigatorTerminalContent>
+      {children}
+    </InvestigatorTerminalContent>
+  )
+}
+
+/**
+ * InvestigatorTerminalContent: Internal layout consumer that uses the isolated auth context.
+ */
+function InvestigatorTerminalContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const router = useRouter()
   const { user, loading: authLoading } = useUser()
@@ -42,7 +62,11 @@ export default function InvestigatorLayout({ children }: { children: React.React
   }
 
   if (!mounted || authLoading || (user && userLoading)) {
-    return <div className="min-h-screen flex items-center justify-center bg-slate-50"><Loader2 className="w-10 h-10 animate-spin text-indigo-600" /></div>
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <Loader2 className="w-10 h-10 animate-spin text-indigo-600" />
+      </div>
+    )
   }
 
   if (pathname === '/investigator/login') return <>{children}</>;

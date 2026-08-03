@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -8,7 +7,7 @@ import {
   DocumentData, 
   QuerySnapshot 
 } from 'firebase/firestore';
-import { getAuth } from 'firebase/auth';
+import { useAuth } from '../provider';
 import { errorEmitter } from '../error-emitter';
 import { FirestorePermissionError } from '../errors';
 
@@ -20,6 +19,7 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
   const [data, setData] = useState<T[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const auth = useAuth();
 
   useEffect(() => {
     // Reset state when query changes or becomes null to ensure real-time responsiveness
@@ -62,7 +62,6 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
           operation: 'list',
         });
         
-        const auth = getAuth();
         const lowerPath = pathString.toLowerCase();
         
         // Exemption list for public-facing data streams or member-specific filtered queries
@@ -96,7 +95,7 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
     );
 
     return () => unsubscribe();
-  }, [query]);
+  }, [query, auth]);
 
   return { data, loading, error };
 }
