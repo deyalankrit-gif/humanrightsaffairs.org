@@ -155,22 +155,46 @@ export default function InvestigationOfficersRegistry() {
 
   /**
    * validateOfficerMetadata: Strict governance check for required record info.
-   * Attempts to recover missing email from ID if appropriate, or logs specific failure reason.
+   * Attempts to recover missing identifiers from alternative fields if possible.
    */
   const validateOfficerMetadata = (officer: any) => {
     if (!officer || typeof officer !== 'object') {
-      return { isValid: false, reason: "Record object is invalid or null.", missingField: "Root Object" };
+      return { 
+        isValid: false, 
+        reason: "Registry record is null or malformed.", 
+        missingField: "Root Object"
+      };
     }
 
-    const id = officer.id;
-    const email = (officer.email || '').toLowerCase().trim();
-    const name = (officer.name || '').trim();
+    // Capture primary identifiers with safe fallbacks
+    let id = officer.id;
+    let email = (officer.email || '').toLowerCase().trim();
+    let name = (officer.name || '').trim();
+    let uid = officer.uid;
 
-    if (!id) return { isValid: false, reason: "Document ID is missing from registry state.", missingField: "id" };
-    if (!email) return { isValid: false, reason: "Official email identity is missing.", missingField: "email" };
-    if (!name) return { isValid: false, reason: "Legal name metadata is missing.", missingField: "name" };
+    // RECOVERY LOGIC: If email is missing but ID looks like an email, remap it.
+    if (!email && id && id.includes('@')) {
+      email = id.toLowerCase().trim();
+      console.log(`[GOVERNANCE-RECOVERY] Reconstructing email from ID for: ${id}`);
+    }
 
-    return { isValid: true, id, email, name };
+    if (!id) return { isValid: false, reason: "Internal document ID missing.", missingField: "id" };
+    if (!email) return { isValid: false, reason: "The official email identity is missing or unreadable.", missingField: "email" };
+    if (!name) return { isValid: false, reason: "The officer's legal name is missing.", missingField: "name" };
+
+    return { 
+      isValid: true, 
+      id, 
+      email, 
+      name, 
+      uid, 
+      employeeId: officer.employeeId,
+      metadata: {
+        collection: 'investigation_officers',
+        type: 'investigator',
+        entity: 'UserAccount'
+      }
+    };
   };
 
   const handleStartDelete = async (officer: any) => {
@@ -182,7 +206,7 @@ export default function InvestigationOfficersRegistry() {
       toast({ 
         variant: "destructive", 
         title: "Incomplete Record", 
-        description: "This investigator record cannot be deleted because the required record information is incomplete." 
+        description: "This record cannot be deleted because required information is missing. Refresh the page and try again." 
       });
       return;
     }
@@ -266,7 +290,10 @@ export default function InvestigationOfficersRegistry() {
         const validation = validateOfficerMetadata(officer);
         
         if (!validation.isValid) {
-          console.error(`[PURGE-AUDIT] Skipping incomplete record:`, validation);
+          console.error(`[PURGE-AUDIT] Skipping corrupted record: ${validation.reason}`, {
+            recordId: officer.id,
+            missing: validation.missingField
+          });
           failureCount++;
           continue;
         }
@@ -281,7 +308,7 @@ export default function InvestigationOfficersRegistry() {
         toast({ 
           title: "Registry Purged", 
           description: failureCount > 0 
-            ? `${count} records removed. ${failureCount} records were skipped due to incomplete information.` 
+            ? `${count} records removed. ${failureCount} records were skipped due to incomplete metadata.` 
             : `${count} personnel records removed successfully.` 
         });
         setIsPurgeOpen(false);
@@ -289,7 +316,7 @@ export default function InvestigationOfficersRegistry() {
         toast({ 
           variant: "destructive", 
           title: "Audit Required", 
-          description: "This investigator record cannot be deleted because the required record information is incomplete." 
+          description: "One or more records could not be purged because required information is missing." 
         });
       } else {
         toast({ title: "Audit Complete", description: "No conflicting records found." });
@@ -408,7 +435,7 @@ export default function InvestigationOfficersRegistry() {
        toast({ 
          variant: "destructive", 
          title: "Purge Cancelled", 
-         description: "This investigator record cannot be deleted because the required record information is incomplete." 
+         description: "This record cannot be deleted because required information is missing." 
        });
        return;
     }
@@ -420,7 +447,7 @@ export default function InvestigationOfficersRegistry() {
       batch.delete(doc(db, 'investigation_officers', validation.id))
       batch.delete(doc(db, 'users', validation.email))
       
-      const auditRef = doc(collection(db, 'deletion_audit_logs'))
+      const auditRef = doc(collection(db, 'deletion_audit_logs'));
       batch.set(auditRef, {
         adminId: user.uid,
         adminName: user.displayName || 'Root Administrator',
