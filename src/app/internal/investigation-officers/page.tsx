@@ -44,7 +44,9 @@ import {
   ShieldAlert,
   ClipboardList,
   Wrench,
-  Info
+  Info,
+  MapPin,
+  Hash
 } from 'lucide-react'
 import {
   Dialog,
@@ -508,6 +510,14 @@ export default function InvestigationOfficersRegistry() {
                              </div>
                           </div>
                           <div className="flex items-center gap-3">
+                             <Button 
+                              onClick={() => setSelectedOfficerForDetails(officer)} 
+                              variant="outline" 
+                              size="sm" 
+                              className="h-10 px-5 rounded-xl text-[10px] font-bold uppercase tracking-widest border-indigo-100 text-indigo-600 hover:bg-indigo-50"
+                             >
+                               Details
+                             </Button>
                              <Button onClick={() => setEditOfficer(officer)} variant="outline" size="sm" className="h-10 px-5 rounded-xl text-[10px] font-bold uppercase tracking-widest">Modify</Button>
                              <button onClick={() => handleStartDelete(officer)} disabled={isActionLoading} className="h-10 w-10 text-slate-300 hover:text-red-500 rounded-xl flex items-center justify-center">{isActionLoading ? <Loader2 className="animate-spin" /> : <Trash2 className="w-5 h-5" />}</button>
                           </div>
@@ -528,7 +538,7 @@ export default function InvestigationOfficersRegistry() {
               <div className="flex flex-col items-center text-center space-y-4">
                 <div className="w-20 h-20 bg-red-50 dark:bg-red-950/30 text-red-500 rounded-full flex items-center justify-center animate-pulse"><ShieldAlert className="w-10 h-10" /></div>
                 <div className="space-y-2">
-                  <DialogTitle className="text-2xl font-headline font-bold">Confirm Identity Purge</DialogTitle>
+                  <DialogTitle className="text-2xl font-headline font-bold text-primary dark:text-white">Confirm Identity Purge</DialogTitle>
                   <DialogDescription className="text-sm font-medium">You are about to permanently delete this record. This action cannot be undone.</DialogDescription>
                 </div>
               </div>
@@ -633,6 +643,92 @@ export default function InvestigationOfficersRegistry() {
                   </div>
                   <Button onClick={handleUpdate} disabled={isActionLoading} className="w-full h-14 bg-primary text-white font-bold rounded-2xl">Commit Refresh</Button>
                </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* View Details Dialog */}
+      <Dialog open={!!selectedOfficerForDetails} onOpenChange={(val) => !val && setSelectedOfficerForDetails(null)}>
+        <DialogContent className="max-w-xl rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden bg-white dark:bg-slate-900">
+          {selectedOfficerForDetails && (
+            <>
+              <div className="bg-slate-900 p-8 text-white relative">
+                <div className="absolute right-6 top-6">
+                  <DialogClose asChild>
+                    <Button variant="ghost" size="icon" className="rounded-full text-white/40 hover:text-white">
+                      <X className="w-5 h-5" />
+                    </Button>
+                  </DialogClose>
+                </div>
+                <Badge className="bg-accent text-primary font-black text-[8px] uppercase mb-2">Personnel Profile</Badge>
+                <DialogTitle className="text-2xl font-headline font-bold">{selectedOfficerForDetails.name}</DialogTitle>
+                <p className="text-slate-400 text-xs mt-1 uppercase tracking-widest font-bold flex items-center gap-1.5">
+                  <Hash className="w-3.5 h-3.5 text-accent" /> {selectedOfficerForDetails.employeeId || 'IO-PENDING'}
+                </p>
+              </div>
+              <div className="p-8 space-y-6">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-inner">
+                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Official Rank</p>
+                    <p className="text-sm font-bold text-primary dark:text-white leading-tight">{selectedOfficerForDetails.designation}</p>
+                  </div>
+                  <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-inner">
+                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Status</p>
+                    <Badge className={cn(
+                      "text-[9px] font-black uppercase h-5 px-3 border-none",
+                      selectedOfficerForDetails.status === 'active' ? "bg-emerald-500 text-white" : "bg-red-500 text-white"
+                    )}>
+                      {selectedOfficerForDetails.status || 'active'}
+                    </Badge>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 pb-2">
+                    <User className="w-4 h-4 text-accent" />
+                    <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-500">Contact Protocols</h4>
+                  </div>
+                  <div className="grid gap-3">
+                    <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700">
+                      <Mail className="w-4 h-4 text-slate-400" />
+                      <span className="text-sm font-bold text-primary dark:text-white truncate">{selectedOfficerForDetails.email}</span>
+                    </div>
+                    <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700">
+                      <Phone className="w-4 h-4 text-slate-400" />
+                      <span className="text-sm font-bold text-primary dark:text-white">{selectedOfficerForDetails.phone || 'NO SECURE PHONE RECORDED'}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 pb-2">
+                    <MapPin className="w-4 h-4 text-accent" />
+                    <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-500">Jurisdictional Node</h4>
+                  </div>
+                  <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700">
+                    <Navigation className="w-4 h-4 text-slate-400" />
+                    <span className="text-sm font-bold text-primary dark:text-white uppercase tracking-tight">{selectedOfficerForDetails.region || 'National Investigative Hub'}</span>
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-3.5 h-3.5 text-slate-300" />
+                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                      Registered: {selectedOfficerForDetails.createdAt?.toDate ? selectedOfficerForDetails.createdAt.toDate().toLocaleDateString('en-IN') : 'Archive Entry'}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Briefcase className="w-3.5 h-3.5 text-slate-300" />
+                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Active Docket: {selectedOfficerForDetails.assignedCount || 0}</span>
+                  </div>
+                </div>
+
+                <Button onClick={() => setSelectedOfficerForDetails(null)} className="w-full h-12 rounded-xl bg-slate-900 text-white font-bold hover:bg-slate-800 transition-all shadow-xl shadow-slate-900/20">
+                  Close Profile
+                </Button>
+              </div>
             </>
           )}
         </DialogContent>
