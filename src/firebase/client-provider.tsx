@@ -7,10 +7,11 @@ import { FirebaseProvider } from './provider';
 
 /**
  * FirebaseClientProvider: High-fidelity multi-app session provider.
- * Intelligently switches the Firebase context based on the active route to ensure
- * total session isolation between Administrative, Investigative, and Public portals.
+ * Intelligently switches the Firebase context based on the active route.
  * 
- * This prevents cross-terminal session conflicts (Root vs Investigator).
+ * [RESTORED]: Path-aware session inheritance for mirrors.
+ * If the page is running in an iframe inside the Admin Portal, it inherits the AdminTerminal session
+ * to enable administrative controls (Edit/Delete) in the Public Site View.
  */
 export function FirebaseClientProvider({
   children,
@@ -21,8 +22,24 @@ export function FirebaseClientProvider({
 
   // Determine the isolated session name based on the portal context
   const sessionName = useMemo(() => {
-    if (pathname?.startsWith('/internal')) return 'AdminTerminal';
-    if (pathname?.startsWith('/investigator')) return 'InvestigatorTerminal';
+    if (typeof window !== 'undefined') {
+      // Direct access via /internal
+      if (pathname?.startsWith('/internal')) return 'AdminTerminal';
+      
+      // Direct access via /investigator
+      if (pathname?.startsWith('/investigator')) return 'InvestigatorTerminal';
+
+      // [SESSION INHERITANCE]: Check if this is a mirror inside the Admin Terminal
+      // This allows Root Admin to see Edit/Delete buttons in the iframe view
+      try {
+        if (window.self !== window.top && window.top.location.pathname.startsWith('/internal')) {
+          return 'AdminTerminal';
+        }
+      } catch (e) {
+        // Safe fallback for cross-origin or restricted environments
+      }
+    }
+    
     return undefined; // [DEFAULT] session for public/members
   }, [pathname]);
 
