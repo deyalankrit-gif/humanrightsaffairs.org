@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useEffect, useState, useMemo } from 'react'
@@ -252,7 +251,7 @@ export default function CaseHubPage() {
 
   const handleAddRemark = async () => {
     if (!remark.trim() || !docRef || !user) return;
-    setIsActionLoading(true);
+    setIsActionLoading(true)
     try {
       const mailLog = await dispatchEmailUpdate(`Investigative Remark Posted`, remark.trim());
 
@@ -576,7 +575,7 @@ export default function CaseHubPage() {
                   </div>
                   <div className="p-8 space-y-6">
                     <div className="space-y-1.5"><Label className="text-[10px] font-bold uppercase text-slate-400">Final Executive Findings</Label><Textarea value={commissionData.findings} onChange={e => setCommissionData({...commissionData, findings: e.target.value})} placeholder="Summarize findings..." className="min-h-[120px] rounded-2xl" /></div>
-                    <div className="space-y-1.5"><Label className="text-[10px] font-bold uppercase text-slate-400">Directives to Authorities</Label><Textarea value={commissionedData.directives} onChange={e => setCommissionData({...commissionData, directives: e.target.value})} placeholder="Specify required actions..." className="min-h-[80px] rounded-2xl" /></div>
+                    <div className="space-y-1.5"><Label className="text-[10px] font-bold uppercase text-slate-400">Directives to Authorities</Label><Textarea value={commissionData.directives} onChange={e => setCommissionData({...commissionData, directives: e.target.value})} placeholder="Specify required actions..." className="min-h-[80px] rounded-2xl" /></div>
                     <Button onClick={handleCommissionFindings} disabled={isActionLoading || !commissionData.findings.trim()} className="w-full h-14 rounded-2xl bg-primary text-white font-bold text-lg hover:bg-secondary transition-all">{isActionLoading ? <Loader2 className="animate-spin" /> : <><Send className="w-5 h-5 mr-2" /> Commit & Close</>}</Button>
                   </div>
                 </DialogContent>
