@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useEffect, useState, useMemo } from 'react'
@@ -42,6 +43,7 @@ import { cn } from '@/lib/utils'
 import { CASE_STATUSES, CASE_PRIORITIES, REPORT_TEMPLATES } from '@/lib/complaint-constants'
 import { getStatusColor } from '@/lib/complaint-utils'
 import { sendTimelineEmailUpdate, sendReportEmail } from '@/lib/notification-service'
+import { InvestigationJourney } from '@/components/investigation-journey'
 
 export default function CaseHubPage() {
   const { id } = useParams()
@@ -154,6 +156,10 @@ export default function CaseHubPage() {
       return;
     }
     setOfficers([...officers, { name: '', phone: '', designation: '', responsibility: '' }]);
+  };
+
+  const removeOfficerRow = (index: number) => {
+    setOfficers(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleSelectFromRegistry = (index: number, officer: any) => {
@@ -606,7 +612,7 @@ export default function CaseHubPage() {
                        </div>
                     </Card>
                     <Card className="rounded-[2.5rem] border-none shadow-sm p-8 bg-white dark:bg-slate-900">
-                       <CardHeader className="p-0 mb-6"><CardTitle className="text-xl font-headline font-bold flex items-center gap-3"><Network className="w-6 h-6 text-emerald-500" /> Council Review Panel</CardTitle></CardHeader>
+                       <CardHeader className="p-0 mb-8"><CardTitle className="text-xl font-headline font-bold flex items-center gap-3"><Network className="w-6 h-6 text-emerald-500" /> Council Review Panel</CardTitle></CardHeader>
                        <div className="space-y-6">
                           <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase text-slate-400">Jurisdiction</Label><Select value={selectedReviewLevel} onValueChange={setSelectedLevel}><SelectTrigger className="rounded-xl h-11"><SelectValue /></SelectTrigger><SelectContent position="popper" className="bg-white z-[1000000]"><SelectItem value="District">District Committee</SelectItem><SelectItem value="State">State Chapter</SelectItem><SelectItem value="National">National Council</SelectItem></SelectContent></Select></div>
                           <div className="space-y-2"><Label className="text-[9px] font-black uppercase text-slate-400">Review Summary</Label><Textarea value={levelReviewNote} onChange={e => setLevelNote(e.target.value)} placeholder={`Input ${selectedReviewLevel} observations...`} className="min-h-[100px] rounded-2xl bg-slate-50 dark:bg-slate-950" /></div>
@@ -659,6 +665,11 @@ export default function CaseHubPage() {
                  <Card className="rounded-3xl border-2 border-dashed border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center p-12 text-center space-y-4 hover:border-accent transition-all cursor-pointer group relative overflow-hidden"><input type="file" onChange={handleUploadEvidence} className="absolute inset-0 opacity-0 cursor-pointer z-10" disabled={isActionLoading} accept="image/*,audio/*,video/*,application/pdf,.doc,.docx" /><div className="w-16 h-16 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-300 group-hover:bg-accent group-hover:text-white transition-all">{isActionLoading ? <Loader2 className="w-8 h-8 animate-spin" /> : <Plus className="w-8 h-8" />}</div><div><p className="font-bold text-primary dark:text-white uppercase text-xs">Append Evidence</p><p className="text-[10px] text-slate-400 mt-1">Photos, audio or documents.</p></div></Card></div>
            </TabsContent>
         </Tabs>
+
+        {/* PROMINENT INVESTIGATION JOURNEY INJECTION */}
+        <div className="mt-20 pt-20 border-t border-slate-200 dark:border-slate-800">
+           <InvestigationJourney complaint={caseData} />
+        </div>
       </section>
       <Footer />
     </main>
