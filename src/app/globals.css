@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -166,33 +165,36 @@
   }
 }
 
-/* 📱 MOBILE SIDEBAR OVERRIDES */
+/* 📱 MOBILE SIDEBAR OVERRIDES (ADMIN PANEL) */
 [data-mobile="true"] [data-sidebar="sidebar"] {
   border-right: 1px solid hsl(var(--border) / 0.5) !important;
+  background-color: hsl(var(--primary)) !important; /* Deep Navy Background */
 }
 
 [data-mobile="true"] [data-sidebar="header"] {
   padding: 1.5rem !important;
   height: auto !important;
-  border-bottom: 1px solid hsl(var(--border) / 0.8);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   margin-bottom: 1rem;
 }
 
 [data-mobile="true"] [data-sidebar="content"] {
-  padding: 0.75rem !important;
+  padding: 1rem !important;
 }
 
 [data-mobile="true"] [data-sidebar="menu-button"] {
-  height: 3.5rem !important; /* 56px touch target */
+  height: 3.75rem !important; /* 60px touch target */
   font-size: 16px !important;
   font-weight: 500 !important;
-  padding-left: 1.25rem !important;
+  padding-left: 1.5rem !important;
   padding-right: 1rem !important;
-  border-radius: 0.75rem !important;
-  margin-bottom: 0.5rem !important;
+  border-radius: 1rem !important;
+  margin-bottom: 0.75rem !important;
   display: flex !important;
   align-items: center !important;
-  gap: 1.25rem !important;
+  gap: 1.5rem !important;
+  color: hsl(var(--accent)) !important; /* Orange text by default on mobile */
+  transition: all 0.3s ease !important;
 }
 
 [data-mobile="true"] [data-sidebar="menu-button"] span {
@@ -203,41 +205,55 @@
 }
 
 [data-mobile="true"] [data-sidebar="menu-button"] svg {
-  width: 1.25rem !important;
-  height: 1.25rem !important;
+  width: 1.5rem !important;
+  height: 1.5rem !important;
+  color: hsl(var(--accent)) !important; /* Orange icons by default on mobile */
 }
 
+/* Active State on Mobile: Green background, Orange text */
 [data-mobile="true"] [data-sidebar="menu-button"][data-active="true"] {
-  background-color: hsl(var(--accent) / 0.15) !important;
-  color: hsl(var(--accent)) !important;
+  background-color: hsl(var(--secondary)) !important; /* Green Background */
+  color: hsl(var(--accent)) !important; /* Keep Orange Text */
   position: relative !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4) !important;
 }
 
+/* Left Indicator on Mobile Active Item */
 [data-mobile="true"] [data-sidebar="menu-button"][data-active="true"]::after {
   content: "";
   position: absolute;
   left: 0;
   top: 0.75rem;
   bottom: 0.75rem;
-  width: 4px;
-  background-color: hsl(var(--accent));
+  width: 5px;
+  background-color: hsl(var(--accent)); /* Orange Indicator */
   border-radius: 0 4px 4px 0;
-  box-shadow: 0 0 12px hsl(var(--accent) / 0.4);
+  box-shadow: 0 0 12px hsl(var(--accent) / 0.6);
 }
 
 [data-mobile="true"] [data-sidebar="group-label"] {
-  font-size: 11px !important;
+  font-size: 12px !important;
   font-weight: 800 !important;
-  color: hsl(var(--primary)) !important;
-  letter-spacing: 0.15em !important;
-  margin-top: 1.5rem !important;
-  margin-bottom: 0.75rem !important;
-  padding-left: 1.25rem !important;
+  color: white !important;
+  opacity: 0.4;
+  letter-spacing: 0.2em !important;
+  margin-top: 2rem !important;
+  margin-bottom: 1rem !important;
+  padding-left: 1.5rem !important;
   text-transform: uppercase;
 }
 
 [data-mobile="true"] [data-sidebar="footer"] {
   padding: 1.5rem !important;
-  background-color: hsl(var(--muted) / 0.3);
-  border-top: 1px solid hsl(var(--border) / 0.5);
+  background-color: rgba(0, 0, 0, 0.2);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Ensure the Sheet Close button is highly visible on the dark mobile background */
+[data-mobile="true"] button[data-sidebar="trigger"],
+[data-mobile="true"] button.absolute.right-4.top-4 {
+  color: white !important;
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  border-radius: 50% !important;
+  padding: 8px !important;
 }
