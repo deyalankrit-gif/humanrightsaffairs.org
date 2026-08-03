@@ -22,7 +22,8 @@ import {
   MessageCircle,
   Globe,
   Landmark,
-  Building2
+  Building2,
+  Info
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
