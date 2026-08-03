@@ -26,9 +26,9 @@ import {
 import { cn } from '@/lib/utils';
 
 /**
- * AiAudioPlayer: High-efficiency Tactical Micro-Node.
- * Optimized for global layout placement with robust automatic playback logic.
- * Features an intelligent "Interaction Priming" system to bypass autoplay blocks.
+ * AiAudioPlayer: Robust Institutional Audio Node.
+ * Implements "Interaction Priming" to bypass autoplay restrictions.
+ * Optimized for singleton execution across public pages via LayoutWrapper.
  */
 export function AiAudioPlayer({ className }: { className?: string }) {
   const db = useFirestore();
@@ -71,7 +71,7 @@ export function AiAudioPlayer({ className }: { className?: string }) {
 
   /**
    * triggerPlayback: Core execution node for starting audio.
-   * Handles promise resolution to prevent console errors.
+   * Wraps the play promise in a silent catch to prevent unhandled rejections.
    */
   const triggerPlayback = useCallback(() => {
     const audio = audioRef.current;
@@ -79,7 +79,7 @@ export function AiAudioPlayer({ className }: { className?: string }) {
 
     autoPlayAttempted.current = true;
     
-    // Explicitly set volume/mute before play attempt
+    // Synchronize current UI settings to hardware node
     audio.volume = volume;
     audio.muted = isMuted;
 
@@ -90,9 +90,11 @@ export function AiAudioPlayer({ className }: { className?: string }) {
           setIsPlaying(true);
           setAutoplayBlocked(false);
         })
-        .catch(() => {
-          // If blocked, flag for interaction-based recovery
-          setAutoplayBlocked(true);
+        .catch((err) => {
+          // If blocked by browser policy, flag for interaction recovery
+          if (err.name === 'NotAllowedError' || err.name === 'NotSupportedError') {
+            setAutoplayBlocked(true);
+          }
           setIsPlaying(false);
         });
     }
@@ -100,8 +102,8 @@ export function AiAudioPlayer({ className }: { className?: string }) {
 
   /**
    * Autoplay Strategy:
-   * 1. Attempt play immediately when metadata is ready.
-   * 2. Listen for 'canplaythrough' to ensure sufficient buffer.
+   * 1. Attempt play as soon as enough data is buffered (canplaythrough).
+   * 2. Uses readyState check for cached assets.
    */
   useEffect(() => {
     if (!mounted || loading || !activeAnn || autoPlayAttempted.current || !audioRef.current) return;
@@ -123,14 +125,14 @@ export function AiAudioPlayer({ className }: { className?: string }) {
   }, [mounted, loading, activeAnn, triggerPlayback]);
 
   /**
-   * Interaction-Based Recovery:
-   * If autoplay was blocked, wait for the first natural user interaction 
-   * (click, touch, or key) to start the audio automatically.
+   * Interaction-Based Recovery (Interaction Priming):
+   * If autoplay was blocked, we attach temporary global listeners.
+   * The first natural user interaction anywhere on the page will start the audio.
    */
   useEffect(() => {
     if (!autoplayBlocked || isPlaying || loadError || !audioRef.current) return;
 
-    const handleInteraction = () => {
+    const handleFirstInteraction = () => {
       if (!audioRef.current || isPlaying) return;
       
       audioRef.current.play()
@@ -140,24 +142,24 @@ export function AiAudioPlayer({ className }: { className?: string }) {
           cleanup();
         })
         .catch(() => {
-          // Still restricted, keep listeners for next interaction
+          // Still restricted or not ready
         });
     };
 
     const cleanup = () => {
-      window.removeEventListener('mousedown', handleInteraction);
-      window.removeEventListener('keydown', handleInteraction);
-      window.removeEventListener('touchstart', handleInteraction);
+      window.removeEventListener('mousedown', handleFirstInteraction);
+      window.removeEventListener('keydown', handleFirstInteraction);
+      window.removeEventListener('touchstart', handleFirstInteraction);
     };
 
-    window.addEventListener('mousedown', handleInteraction);
-    window.addEventListener('keydown', handleInteraction);
-    window.addEventListener('touchstart', handleInteraction);
+    window.addEventListener('mousedown', handleFirstInteraction);
+    window.addEventListener('keydown', handleFirstInteraction);
+    window.addEventListener('touchstart', handleFirstInteraction);
 
     return cleanup;
   }, [autoplayBlocked, isPlaying, loadError]);
 
-  // Unified State Management for the Audio Element
+  // Unified Hardware Event Management
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -235,10 +237,15 @@ export function AiAudioPlayer({ className }: { className?: string }) {
   return (
     <div className={cn("w-full py-2 bg-white/95 dark:bg-slate-950/95 backdrop-blur-md border-b border-slate-100 dark:border-slate-800 transition-all duration-500", className)}>
       <div className="container mx-auto px-4 max-w-7xl">
-        <audio ref={audioRef} src={activeAnn.audioData} playsInline preload="auto" />
+        <audio 
+          ref={audioRef} 
+          src={activeAnn.audioData} 
+          playsInline 
+          preload="auto" 
+        />
         
         <div className="flex items-center gap-3 md:gap-4">
-          {/* Play/Pause Trigger Node */}
+          {/* Action Hub */}
           <div className="flex items-center gap-3 shrink-0">
             <Button 
               onClick={togglePlay}
@@ -252,7 +259,7 @@ export function AiAudioPlayer({ className }: { className?: string }) {
             {autoplayBlocked && !isPlaying && !loadError && (
               <div className="flex items-center gap-2 px-3 py-1 bg-accent/10 rounded-full border border-accent/20 animate-in zoom-in-95 duration-500 shrink-0">
                 <AlertCircle className="w-3 h-3 text-accent animate-pulse" />
-                <span className="text-[9px] font-black text-accent uppercase tracking-tighter">Tap to Play Announcement</span>
+                <span className="text-[9px] font-black text-accent uppercase tracking-tighter">Interact to Play Announcement</span>
               </div>
             )}
 
@@ -267,7 +274,7 @@ export function AiAudioPlayer({ className }: { className?: string }) {
             )}
           </div>
 
-          {/* Unified Progress Stream */}
+          {/* Unified Stream */}
           <div className="flex-1 min-w-0 flex flex-col md:flex-row md:items-center gap-1 md:gap-6">
             <div className="flex items-center gap-2 min-w-0 shrink-0">
                <Mic2 className="w-3.5 h-3.5 text-accent animate-pulse shrink-0" />
@@ -285,7 +292,7 @@ export function AiAudioPlayer({ className }: { className?: string }) {
                 max={duration || 100} 
                 step={0.1} 
                 onValueChange={handleSeek}
-                disabled={loadError}
+                disabled={loadError || !duration}
                 className="h-1 w-full"
               />
               <span className="text-[9px] font-mono text-slate-500 tabular-nums shrink-0 font-bold">
@@ -294,7 +301,7 @@ export function AiAudioPlayer({ className }: { className?: string }) {
             </div>
           </div>
 
-          {/* Utility Stack */}
+          {/* Utility Cluster */}
           <div className="flex items-center gap-2 shrink-0">
             <div className="hidden sm:flex items-center border-x border-slate-100 dark:border-slate-800 px-3 h-7">
               <Select value={playbackSpeed.toString()} onValueChange={v => { setPlaybackSpeed(parseFloat(v)); if(audioRef.current) audioRef.current.playbackRate = parseFloat(v); }}>
