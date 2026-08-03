@@ -21,7 +21,8 @@ import {
   Mail,
   MessageCircle,
   Globe,
-  Landmark
+  Landmark,
+  Building2
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -304,11 +305,11 @@ export function InvestigationJourney({ complaint }: { complaint: any }) {
                <div className="grid grid-cols-2 gap-4">
                   <div className="p-5 bg-slate-50 dark:bg-slate-800 rounded-3xl">
                      <p className="text-[8px] font-black text-slate-400 uppercase mb-2">Responsible Cell</p>
-                     <p className="text-[10px] font-bold text-primary dark:text-white uppercase leading-tight">Human Rights Oversight Cell</p>
+                     <p className="text-10 font-bold text-primary dark:text-white uppercase leading-tight">Human Rights Oversight Cell</p>
                   </div>
                   <div className="p-5 bg-slate-50 dark:bg-slate-800 rounded-3xl">
                      <p className="text-[8px] font-black text-slate-400 uppercase mb-2">Primary Unit</p>
-                     <p className="text-[10px] font-bold text-primary dark:text-white uppercase leading-tight">{complaint.districtName || 'National'} District Hub</p>
+                     <p className="text-10 font-bold text-primary dark:text-white uppercase leading-tight">{complaint.districtName || 'National'} District Hub</p>
                   </div>
                </div>
             </div>
