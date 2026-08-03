@@ -86,7 +86,7 @@ function LeaderCard({ leader, variant = "default", isAdmin, onEdit, onDelete }: 
       <div className={`relative ${sizeClasses[variant]} rounded-2xl overflow-hidden shadow-xl border-2 md:border-4 border-white group-hover:border-secondary transition-all duration-500 bg-slate-100 dark:bg-slate-800`}>
         <Image src={img!} alt={leader.name} fill className="object-cover group-hover:scale-110 transition-transform duration-700" />
         
-        {/* Administrative Overlay - Repositioned lower */}
+        {/* Administrative Overlay - Positioned low */}
         <div className="absolute inset-0 bg-gradient-to-t from-primary/90 via-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-end justify-center pb-8 z-10">
           {isAdmin && (
             <div className="flex gap-3 animate-in fade-in slide-in-from-bottom-2 duration-300">
@@ -141,7 +141,6 @@ export default function LeadershipPage() {
   const { data: firestoreLeaders, loading: dataLoading } = useCollection(leadersQuery);
   const { data: membersList } = useCollection(membersQuery);
 
-  // Registry logic: Now purely dynamic to allow full administrative control
   const leaders = React.useMemo(() => {
     return (firestoreLeaders || []) as Leader[];
   }, [firestoreLeaders]);
@@ -204,7 +203,6 @@ export default function LeadershipPage() {
     const missingFields: string[] = [];
     if (!newLeader.name.trim()) missingFields.push("Official Name");
     if (!newLeader.title.trim()) missingFields.push("Official Designation");
-    if (!newLeader.imageId) missingFields.push("Profile Photo");
     if (newLeader.level === 'State' || newLeader.level === 'District') {
       if (!newLeader.parentRegion) missingFields.push("State / UT");
     }
@@ -222,12 +220,20 @@ export default function LeadershipPage() {
     }
 
     setIsActionLoading(true)
+    
+    // Automatic Photo Fallback Logic
+    let finalImage = newLeader.imageId;
+    if (!finalImage) {
+      finalImage = newLeader.gender === 'female' ? '/dummy w.png' : '/dummy m.png';
+    }
+
     try {
       await addDoc(collection(db, 'leadership'), { 
         ...newLeader, 
+        imageId: finalImage,
         createdAt: serverTimestamp() 
       })
-      toast({ title: "Leader Commissioned" })
+      toast({ title: "Leader Commissioned", description: !newLeader.imageId ? "Commissioned with demi photo fallback." : undefined })
       setNewLeader({ name: '', title: '', gender: 'male', level: 'Central', parentRegion: '', districtName: '', imageId: '' })
       setIsAddDialogOpen(false)
     } catch (e: any) {
@@ -249,9 +255,16 @@ export default function LeadershipPage() {
   const handleUpdate = async () => {
     if (!editLeader) return
     setIsActionLoading(true)
+    
+    // Ensure update also respects fallback if manually cleared
+    let finalImage = editLeader.imageId;
+    if (!finalImage) {
+      finalImage = editLeader.gender === 'female' ? '/dummy w.png' : '/dummy m.png';
+    }
+
     try {
       const { id, ...data } = editLeader
-      await updateDoc(doc(db, 'leadership', id), data)
+      await updateDoc(doc(db, 'leadership', id), { ...data, imageId: finalImage })
       toast({ title: "Leader Profile Updated" })
       setEditLeader(null)
     } catch (e: any) {
