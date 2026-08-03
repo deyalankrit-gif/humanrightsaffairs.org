@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState } from 'react'
@@ -146,7 +145,7 @@ export default function StaffLoginPage() {
     <main className="min-h-screen flex items-center justify-center bg-slate-50 p-4 md:p-8">
       <div className="w-full max-w-md space-y-6 md:space-y-8">
         <div className="text-center">
-          <Link href="/" className="inline-flex items-center gap-2 text-[#ccff00] hover:text-[#ccff00]/80 transition-colors text-[10px] md:text-xs font-bold uppercase tracking-widest drop-shadow-[0_0_8px_rgba(204,255,0,0.3)]">
+          <Link href="/" className="inline-flex items-center gap-2 text-[#006a4e] hover:text-[#006a4e]/80 transition-colors text-[10px] md:text-xs font-bold uppercase tracking-widest">
             <Home className="w-3 h-3 md:w-3.5 md:h-3.5" /> Public Portal
           </Link>
         </div>
