@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useEffect, useState, useMemo } from 'react'
@@ -775,14 +776,11 @@ export default function InvestigationOfficersRegistry() {
                     </p>
                     <p className="text-sm md:text-base font-bold text-primary dark:text-white leading-tight">{selectedOfficerForDetails.designation}</p>
                   </div>
-                  <div className="p-6 bg-slate-50 dark:bg-slate-800 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-inner flex flex-col items-center justify-center text-center">
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Registry Health</p>
-                    <Badge className={cn(
-                      "text-[10px] font-black uppercase h-7 px-5 border-none shadow-md",
-                      selectedOfficerForDetails.status === 'active' ? "bg-emerald-500 text-white" : "bg-red-500 text-white"
-                    )}>
-                      {selectedOfficerForDetails.status || 'active'}
-                    </Badge>
+                  <div className="p-6 bg-slate-50 dark:bg-slate-800 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-inner group hover:bg-white transition-all">
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2">
+                       <Lock className="w-3 h-3 text-accent" /> Secure Passphrase
+                    </p>
+                    <p className="text-sm md:text-base font-bold text-primary dark:text-white leading-tight font-mono">{selectedOfficerForDetails.password || 'N/A'}</p>
                   </div>
                 </div>
 
