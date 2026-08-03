@@ -1,10 +1,11 @@
+
 "use client"
 
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { signInWithEmailAndPassword } from 'firebase/auth'
 import { useAuth, useFirestore } from '@/firebase'
-import { doc, getDoc } from 'firebase/firestore'
+import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
@@ -15,8 +16,12 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 
+/**
+ * Investigator Login Page: High-security terminal for investigative personnel.
+ * Supports authentication via Official Email or Employee ID.
+ */
 export default function InvestigatorLoginPage() {
-  const [email, setEmail] = useState('')
+  const [identifier, setIdentifier] = useState('')
   const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   
@@ -30,7 +35,23 @@ export default function InvestigatorLoginPage() {
     setIsLoading(true)
 
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email.toLowerCase().trim(), password)
+      let loginEmail = identifier.toLowerCase().trim();
+
+      // If the identifier is not an email, attempt to resolve it from the Employee ID registry
+      if (!loginEmail.includes('@')) {
+        const officersRef = collection(db, 'investigation_officers');
+        const q = query(officersRef, where('employeeId', '==', identifier.toUpperCase().trim()));
+        const snap = await getDocs(q);
+
+        if (snap.empty) {
+          throw new Error("Unauthorized ID: Employee record not identified in the registry.");
+        }
+
+        const officerData = snap.docs[0].data();
+        loginEmail = officerData.email;
+      }
+
+      const userCredential = await signInWithEmailAndPassword(auth, loginEmail, password)
       const firebaseUser = userCredential.user;
 
       const userRef = doc(db, 'users', firebaseUser.email!.toLowerCase())
@@ -86,14 +107,14 @@ export default function InvestigatorLoginPage() {
           <CardContent className="p-8">
             <form onSubmit={handleLogin} className="space-y-6">
               <div className="space-y-2">
-                <Label className="text-slate-400 text-[10px] font-bold uppercase tracking-wider ml-1">Official ID (Email)</Label>
+                <Label className="text-slate-400 text-[10px] font-bold uppercase tracking-wider ml-1">Official ID or Email</Label>
                 <div className="relative">
                   <Input 
-                    type="email" 
-                    placeholder="name@hrat-india.org" 
+                    type="text" 
+                    placeholder="e.g. HRAT-IO-001 or name@hrat.org" 
                     className="bg-slate-50 border-slate-200 h-12 rounded-xl pl-10 text-sm"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    value={identifier}
+                    onChange={(e) => setIdentifier(e.target.value)}
                     required
                   />
                   <UserCircle className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
