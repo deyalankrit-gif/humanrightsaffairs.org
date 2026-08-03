@@ -36,7 +36,8 @@ import {
   BarChart3,
   TrendingUp,
   LayoutDashboard,
-  Users
+  Users,
+  Edit3
 } from 'lucide-react'
 import {
   AlertDialog,
@@ -60,6 +61,7 @@ import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
 import { generateCaseId, getStatusColor } from '@/lib/complaint-utils'
 import { CASE_STATUSES } from '@/lib/complaint-constants'
+import Link from 'next/link'
 
 export default function PublicComplaintsTerminal() {
   const { user, loading: authLoading } = useUser()
@@ -258,12 +260,17 @@ export default function PublicComplaintsTerminal() {
                              <div className="space-y-1"><p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Filed On</p><p className="text-xs font-bold flex items-center gap-1.5"><Clock className="w-3 h-3 text-accent" /> {c.createdAt?.toDate ? c.createdAt.toDate().toLocaleDateString('en-IN') : 'Just now'}</p></div>
                              <div className="space-y-1">
                                 <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Investigative Team</p>
-                                <p className="text-xs font-black text-emerald-600 uppercase flex items-center gap-1.5">
-                                   <Users className="w-3 h-3 text-accent" /> 
-                                   {(c.assignedOfficers || []).length > 0 
-                                     ? `${(c.assignedOfficers || []).length} Officials` 
-                                     : c.assignedTo || 'Unassigned'}
-                                </p>
+                                <div className="flex items-center gap-2">
+                                  <p className="text-xs font-black text-emerald-600 uppercase flex items-center gap-1.5">
+                                     <Users className="w-3 h-3 text-accent" /> 
+                                     {(c.assignedOfficers || []).length > 0 
+                                       ? `${(c.assignedOfficers || []).length} Officials` 
+                                       : c.assignedTo || 'Unassigned'}
+                                  </p>
+                                  <Link href={`/internal/public-complaints/${c.id}`} title="Update investigation status and team">
+                                    <Edit3 className="w-3.5 h-3.5 text-slate-300 hover:text-accent cursor-pointer transition-colors" />
+                                  </Link>
+                                </div>
                              </div>
                           </div>
                         </div>
