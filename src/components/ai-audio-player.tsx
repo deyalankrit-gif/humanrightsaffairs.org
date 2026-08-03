@@ -1,7 +1,6 @@
-
 'use client';
 
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, query, orderBy, limit } from 'firebase/firestore';
 import { 
@@ -11,7 +10,9 @@ import {
   VolumeX, 
   Mic2,
   AlertCircle,
-  X
+  X,
+  RefreshCw,
+  Loader2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
@@ -27,8 +28,7 @@ import { cn } from '@/lib/utils';
 /**
  * AiAudioPlayer: High-efficiency Tactical Micro-Node.
  * Optimized for global layout placement with robust automatic playback logic.
- * Handles browser autoplay restrictions gracefully with a non-intrusive prompt.
- * Ensures the announcement plays only once per page load/refresh.
+ * Features an intelligent "Interaction Priming" system to bypass autoplay blocks.
  */
 export function AiAudioPlayer({ className }: { className?: string }) {
   const db = useFirestore();
@@ -40,6 +40,7 @@ export function AiAudioPlayer({ className }: { className?: string }) {
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const [mounted, setMounted] = useState(false);
   const [autoplayBlocked, setAutoplayBlocked] = useState(false);
+  const [loadError, setLoadError] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
   
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -47,6 +48,9 @@ export function AiAudioPlayer({ className }: { className?: string }) {
 
   useEffect(() => {
     setMounted(true);
+    // Restore user preferences
+    const savedVol = localStorage.getItem('hrat_audio_vol');
+    if (savedVol) setVolume(parseFloat(savedVol));
   }, []);
 
   const announcementsQuery = useMemoFirebase(() => {
@@ -54,7 +58,7 @@ export function AiAudioPlayer({ className }: { className?: string }) {
     return query(
       collection(db, 'ai_announcements'), 
       orderBy('updatedAt', 'desc'),
-      limit(20) // Increased limit to ensure latest published item is captured
+      limit(20)
     );
   }, [db]);
 
@@ -66,68 +70,118 @@ export function AiAudioPlayer({ className }: { className?: string }) {
   }, [list]);
 
   /**
+   * triggerPlayback: Core execution node for starting audio.
+   * Handles promise resolution to prevent console errors.
+   */
+  const triggerPlayback = useCallback(() => {
+    const audio = audioRef.current;
+    if (!audio || autoPlayAttempted.current || loadError) return;
+
+    autoPlayAttempted.current = true;
+    
+    // Explicitly set volume/mute before play attempt
+    audio.volume = volume;
+    audio.muted = isMuted;
+
+    const playPromise = audio.play();
+    if (playPromise !== undefined) {
+      playPromise
+        .then(() => {
+          setIsPlaying(true);
+          setAutoplayBlocked(false);
+        })
+        .catch(() => {
+          // If blocked, flag for interaction-based recovery
+          setAutoplayBlocked(true);
+          setIsPlaying(false);
+        });
+    }
+  }, [volume, isMuted, loadError]);
+
+  /**
    * Autoplay Strategy:
-   * 1. Only run once per full page load (tracked via autoPlayAttempted ref).
-   * 2. Wait for component mount and Firestore data resolution.
-   * 3. Detect browser engagement restrictions and surface a subtle guide if blocked.
+   * 1. Attempt play immediately when metadata is ready.
+   * 2. Listen for 'canplaythrough' to ensure sufficient buffer.
    */
   useEffect(() => {
     if (!mounted || loading || !activeAnn || autoPlayAttempted.current || !audioRef.current) return;
 
     const audio = audioRef.current;
     
-    const triggerPlayback = () => {
-      if (autoPlayAttempted.current) return;
-      autoPlayAttempted.current = true;
-      
-      // Slight tactical delay ensures DOM is settled and browser media engine is ready
-      setTimeout(() => {
-        const playPromise = audio.play();
-        if (playPromise !== undefined) {
-          playPromise
-            .then(() => {
-              setIsPlaying(true);
-              setAutoplayBlocked(false);
-            })
-            .catch(() => {
-              // Gracefully handle browser autoplay block
-              setAutoplayBlocked(true);
-              setIsPlaying(false);
-            });
-        }
-      }, 300);
+    const handleCanPlay = () => {
+      triggerPlayback();
+      audio.removeEventListener('canplaythrough', handleCanPlay);
     };
 
-    // If audio is already sufficiently buffered, attempt play immediately
-    if (audio.readyState >= 2) {
+    if (audio.readyState >= 3) {
       triggerPlayback();
     } else {
-      const handleCanPlay = () => {
-        triggerPlayback();
-        audio.removeEventListener('canplay', handleCanPlay);
-      };
-      audio.addEventListener('canplay', handleCanPlay);
-      return () => audio.removeEventListener('canplay', handleCanPlay);
+      audio.addEventListener('canplaythrough', handleCanPlay);
     }
-  }, [mounted, loading, activeAnn]);
+
+    return () => audio.removeEventListener('canplaythrough', handleCanPlay);
+  }, [mounted, loading, activeAnn, triggerPlayback]);
+
+  /**
+   * Interaction-Based Recovery:
+   * If autoplay was blocked, wait for the first natural user interaction 
+   * (click, touch, or key) to start the audio automatically.
+   */
+  useEffect(() => {
+    if (!autoplayBlocked || isPlaying || loadError || !audioRef.current) return;
+
+    const handleInteraction = () => {
+      if (!audioRef.current || isPlaying) return;
+      
+      audioRef.current.play()
+        .then(() => {
+          setIsPlaying(true);
+          setAutoplayBlocked(false);
+          cleanup();
+        })
+        .catch(() => {
+          // Still restricted, keep listeners for next interaction
+        });
+    };
+
+    const cleanup = () => {
+      window.removeEventListener('mousedown', handleInteraction);
+      window.removeEventListener('keydown', handleInteraction);
+      window.removeEventListener('touchstart', handleInteraction);
+    };
+
+    window.addEventListener('mousedown', handleInteraction);
+    window.addEventListener('keydown', handleInteraction);
+    window.addEventListener('touchstart', handleInteraction);
+
+    return cleanup;
+  }, [autoplayBlocked, isPlaying, loadError]);
 
   // Unified State Management for the Audio Element
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
 
-    const handleLoadedMetadata = () => setDuration(audio.duration);
+    const handleLoadedMetadata = () => {
+      setDuration(audio.duration);
+      setLoadError(false);
+    };
     const handleTimeUpdate = () => setCurrentTime(audio.currentTime);
     const handleEnded = () => setIsPlaying(false);
+    const handleAudioError = () => {
+      if (activeAnn?.audioData) setLoadError(true);
+    };
 
     audio.addEventListener('loadedmetadata', handleLoadedMetadata);
     audio.addEventListener('timeupdate', handleTimeUpdate);
     audio.addEventListener('ended', handleEnded);
+    audio.addEventListener('error', handleAudioError);
 
     return () => {
       audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
       audio.removeEventListener('timeupdate', handleTimeUpdate);
       audio.removeEventListener('ended', handleEnded);
+      audio.removeEventListener('error', handleAudioError);
     };
   }, [activeAnn]);
 
@@ -138,6 +192,7 @@ export function AiAudioPlayer({ className }: { className?: string }) {
     } else {
       audioRef.current.play().then(() => {
         setAutoplayBlocked(false);
+        setLoadError(false);
       }).catch(() => {});
     }
     setIsPlaying(!isPlaying);
@@ -150,12 +205,22 @@ export function AiAudioPlayer({ className }: { className?: string }) {
   };
 
   const handleVolumeChange = (val: number[]) => {
-    setVolume(val[0]);
+    const v = val[0];
+    setVolume(v);
     if (audioRef.current) {
-      audioRef.current.volume = val[0];
-      audioRef.current.muted = val[0] === 0;
+      audioRef.current.volume = v;
+      audioRef.current.muted = v === 0;
     }
-    setIsMuted(val[0] === 0);
+    setIsMuted(v === 0);
+    localStorage.setItem('hrat_audio_vol', v.toString());
+  };
+
+  const handleRetry = () => {
+    setLoadError(false);
+    autoPlayAttempted.current = false;
+    if (audioRef.current) {
+      audioRef.current.load();
+    }
   };
 
   const formatTime = (time: number) => {
@@ -177,16 +242,27 @@ export function AiAudioPlayer({ className }: { className?: string }) {
           <div className="flex items-center gap-3 shrink-0">
             <Button 
               onClick={togglePlay}
+              disabled={loadError}
               size="icon"
               className="h-9 w-9 rounded-full bg-accent hover:bg-secondary text-primary hover:text-white shadow-sm shrink-0 border-none transition-all active:scale-90"
             >
               {isPlaying ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current ml-0.5" />}
             </Button>
 
-            {autoplayBlocked && !isPlaying && (
+            {autoplayBlocked && !isPlaying && !loadError && (
               <div className="flex items-center gap-2 px-3 py-1 bg-accent/10 rounded-full border border-accent/20 animate-in zoom-in-95 duration-500 shrink-0">
                 <AlertCircle className="w-3 h-3 text-accent animate-pulse" />
                 <span className="text-[9px] font-black text-accent uppercase tracking-tighter">Tap to Play Announcement</span>
+              </div>
+            )}
+
+            {loadError && (
+              <div className="flex items-center gap-2 px-3 py-1 bg-red-500/10 rounded-full border border-red-500/20 animate-in zoom-in-95 duration-500 shrink-0">
+                <AlertCircle className="w-3 h-3 text-red-500" />
+                <span className="text-[9px] font-black text-red-500 uppercase tracking-tighter">Load Failed</span>
+                <Button variant="ghost" size="sm" onClick={handleRetry} className="h-6 px-2 text-[8px] font-bold text-red-600 hover:bg-red-500/10 rounded-lg ml-1">
+                   <RefreshCw className="w-2.5 h-2.5 mr-1" /> Retry
+                </Button>
               </div>
             )}
           </div>
@@ -209,6 +285,7 @@ export function AiAudioPlayer({ className }: { className?: string }) {
                 max={duration || 100} 
                 step={0.1} 
                 onValueChange={handleSeek}
+                disabled={loadError}
                 className="h-1 w-full"
               />
               <span className="text-[9px] font-mono text-slate-500 tabular-nums shrink-0 font-bold">
@@ -229,8 +306,8 @@ export function AiAudioPlayer({ className }: { className?: string }) {
             </div>
 
             <div className="flex items-center gap-2">
-              <div className="hidden lg:flex items-center gap-2 bg-slate-50 dark:bg-slate-900 p-1.5 rounded-xl border border-slate-100 dark:border-slate-800">
-                {isMuted || volume === 0 ? <VolumeX className="w-3 h-3 text-slate-400" /> : <Volume2 className="w-3 h-3 text-accent" />}
+              <div className="hidden lg:flex items-center gap-2 bg-slate-50 dark:bg-slate-950 p-1.5 rounded-xl border border-slate-100 dark:border-slate-800">
+                {isMuted || volume === 0 ? <VolumeX className="w-3.5 h-3.5 text-slate-400" /> : <Volume2 className="w-3.5 h-3.5 text-accent" />}
                 <Slider value={[isMuted ? 0 : volume]} max={1} step={0.01} onValueChange={handleVolumeChange} className="w-14" />
               </div>
               
