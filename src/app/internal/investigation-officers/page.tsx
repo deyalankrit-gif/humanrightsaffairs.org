@@ -40,7 +40,8 @@ import {
   Clock,
   ExternalLink,
   ChevronRight,
-  Navigation
+  Navigation,
+  ShieldAlert
 } from 'lucide-react'
 import {
   Dialog,
@@ -52,17 +53,6 @@ import {
   DialogDescription,
   DialogClose
 } from "@/components/ui/dialog"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription as AlertDialogDesc,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
 import {
   Select,
   SelectContent,
@@ -93,6 +83,12 @@ export default function InvestigationOfficersRegistry() {
   const [editOfficer, setEditOfficer] = useState<any>(null)
   const [selectedOfficerForDetails, setSelectedOfficerForDetails] = useState<any>(null)
   const [showPassword, setShowPassword] = useState(false)
+
+  // Deletion States
+  const [deleteDialogStep, setDeleteDialogStep] = useState<'warning' | 'verify' | null>(null)
+  const [officerToDelete, setOfficerToDelete] = useState<any>(null)
+  const [deleteInputText, setDeleteInputText] = useState('')
+  const [isDeleting, setIsDeleting] = useState(false)
 
   const [formData, setFormData] = useState({
     name: '',
@@ -216,20 +212,24 @@ export default function InvestigationOfficersRegistry() {
     }
   }
 
-  const handleDelete = async (officer: any) => {
-    if (!db || !isRoot) return
-    setIsActionLoading(true)
+  const handleDelete = async () => {
+    if (!db || !officerToDelete || !isRoot) return
+    setIsDeleting(true)
     try {
       const batch = writeBatch(db)
-      batch.delete(doc(db, 'investigation_officers', officer.id))
-      batch.delete(doc(db, 'users', officer.email.toLowerCase().trim()))
+      batch.delete(doc(db, 'investigation_officers', officerToDelete.id))
+      batch.delete(doc(db, 'users', officerToDelete.email.toLowerCase().trim()))
       
       await batch.commit()
       toast({ title: "Clearance Revoked", description: "Identity purged from national registry." })
+      
+      setDeleteDialogStep(null)
+      setOfficerToDelete(null)
+      setDeleteInputText('')
     } catch (e) {
       toast({ variant: "destructive", title: "Purge Denied" })
     } finally {
-      setIsActionLoading(false)
+      setIsDeleting(false)
     }
   }
 
@@ -384,7 +384,7 @@ export default function InvestigationOfficersRegistry() {
                   <CardContent className="p-0">
                     <div className="flex flex-col md:flex-row items-stretch">
                        <div className="p-8 md:w-56 text-center border-r bg-slate-50 dark:bg-slate-800/50 flex flex-col items-center justify-center shrink-0">
-                          <Badge variant="outline" className="text-[9px] font-mono font-bold border-accent text-accent mb-4 tracking-tighter">
+                          <Badge variant="outline" className="text-[8px] font-mono font-bold border-accent text-accent mb-4 tracking-tighter">
                              {officer.employeeId || 'IO-TEMP'}
                           </Badge>
                           <div className="w-16 h-16 rounded-[2rem] bg-white dark:bg-slate-900 shadow-sm flex items-center justify-center text-accent group-hover:bg-accent group-hover:text-white transition-all duration-500">
@@ -423,23 +423,12 @@ export default function InvestigationOfficersRegistry() {
 
                           <div className="flex items-center gap-3">
                              <Button onClick={() => setEditOfficer(officer)} variant="outline" size="sm" className="h-10 px-5 rounded-xl text-[10px] font-bold uppercase tracking-widest border-2 hover:bg-primary hover:text-white transition-all">Modify</Button>
-                             <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                   <button className="h-10 w-10 text-slate-300 hover:text-red-500 transition-all rounded-xl flex items-center justify-center"><Trash2 className="w-5 h-5" /></button>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent className="rounded-[2.5rem] border-none shadow-2xl bg-white dark:bg-slate-900">
-                                   <AlertDialogHeader>
-                                      <AlertDialogTitle className="text-2xl font-headline font-bold text-red-600">Revoke Identity & Purge?</AlertDialogTitle>
-                                      <AlertDialogDesc className="text-sm font-medium leading-relaxed">
-                                        This will permanently remove <strong>{officer.name}</strong> from the national registry and terminate their authentication clearance. This action cannot be reversed.
-                                      </AlertDialogDesc>
-                                   </AlertDialogHeader>
-                                   <AlertDialogFooter className="mt-6">
-                                      <AlertDialogCancel className="rounded-xl h-11 font-bold">Cancel</AlertDialogCancel>
-                                      <AlertDialogAction onClick={() => handleDelete(officer)} className="bg-red-600 hover:bg-red-700 rounded-xl h-11 font-bold text-white transition-all">Revoke Clearance</AlertDialogAction>
-                                   </AlertDialogFooter>
-                                </AlertDialogContent>
-                             </AlertDialog>
+                             <button 
+                               onClick={() => { setOfficerToDelete(officer); setDeleteDialogStep('warning'); }}
+                               className="h-10 w-10 text-slate-300 hover:text-red-500 transition-all rounded-xl flex items-center justify-center"
+                             >
+                               <Trash2 className="w-5 h-5" />
+                             </button>
                           </div>
                        </div>
                     </div>
@@ -549,6 +538,66 @@ export default function InvestigationOfficersRegistry() {
                   </Button>
                </DialogFooter>
             </>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Two-Stage Deletion Dialog */}
+      <Dialog open={!!deleteDialogStep} onOpenChange={(open) => { if(!open) { setDeleteDialogStep(null); setOfficerToDelete(null); setDeleteInputText(''); } }}>
+        <DialogContent className="max-w-md rounded-[2rem] border-none shadow-2xl p-0 overflow-hidden bg-white dark:bg-slate-900">
+          {deleteDialogStep === 'warning' && (
+            <div className="p-8 space-y-6">
+              <div className="flex flex-col items-center text-center space-y-4">
+                <div className="w-20 h-20 bg-red-50 dark:bg-red-950/30 text-red-500 rounded-full flex items-center justify-center animate-pulse">
+                  <ShieldAlert className="w-10 h-10" />
+                </div>
+                <div className="space-y-2">
+                  <DialogTitle className="text-2xl font-headline font-bold text-primary dark:text-white">Security Warning</DialogTitle>
+                  <DialogDescription className="text-sm text-slate-500 leading-relaxed font-medium">
+                    You are attempting to permanently purge the record for <strong className="text-primary dark:text-white">{officerToDelete?.name}</strong>. This action will revoke their investigative clearance and delete their authentication credentials from the national registry.
+                  </DialogDescription>
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <Button variant="outline" onClick={() => { setDeleteDialogStep(null); setOfficerToDelete(null); }} className="flex-1 h-12 rounded-xl font-bold">Cancel</Button>
+                <Button variant="destructive" onClick={() => setDeleteDialogStep('verify')} className="flex-1 h-12 rounded-xl font-bold bg-red-600 hover:bg-red-700">Proceed</Button>
+              </div>
+            </div>
+          )}
+
+          {deleteDialogStep === 'verify' && (
+            <div className="p-8 space-y-6">
+              <div className="space-y-4 text-center">
+                <div className="inline-flex items-center gap-2 bg-amber-50 dark:bg-amber-950/30 text-amber-600 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border border-amber-100">
+                  <AlertTriangle className="w-3 h-3" /> Verification Protocol
+                </div>
+                <div className="space-y-1">
+                  <DialogTitle className="text-xl font-headline font-bold">Confirm Deletion</DialogTitle>
+                  <p className="text-xs text-slate-500">To prevent accidental data loss, please type the word <strong className="text-red-600 uppercase">delete</strong> below to authorize this purge.</p>
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Input 
+                  placeholder="Type 'delete' here..." 
+                  value={deleteInputText} 
+                  onChange={(e) => setDeleteInputText(e.target.value)} 
+                  className="h-12 rounded-xl border-2 focus:ring-red-500 font-bold text-center"
+                />
+              </div>
+
+              <div className="flex gap-3">
+                <Button variant="ghost" onClick={() => { setDeleteDialogStep(null); setOfficerToDelete(null); setDeleteInputText(''); }} className="flex-1 h-12 rounded-xl text-slate-400 font-bold">Abort</Button>
+                <Button 
+                  variant="destructive" 
+                  disabled={deleteInputText.toLowerCase() !== 'delete' || isDeleting} 
+                  onClick={handleDelete}
+                  className="flex-1 h-12 rounded-xl font-bold bg-red-600 hover:bg-red-700 shadow-xl shadow-red-600/20"
+                >
+                  {isDeleting ? <Loader2 className="animate-spin" /> : "Revoke & Purge"}
+                </Button>
+              </div>
+            </div>
           )}
         </DialogContent>
       </Dialog>
