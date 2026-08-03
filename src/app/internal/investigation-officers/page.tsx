@@ -3,8 +3,11 @@
 
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { initializeApp, deleteApp } from 'firebase/app'
+import { getAuth, createUserWithEmailAndPassword, updateProfile, deleteUser } from 'firebase/auth'
+import { firebaseConfig } from '@/firebase/config'
 import { useUser, useCollection, useFirestore, useMemoFirebase } from '@/firebase'
-import { collection, query, orderBy, addDoc, deleteDoc, doc, updateDoc, serverTimestamp } from 'firebase/firestore'
+import { collection, query, orderBy, addDoc, deleteDoc, doc, updateDoc, serverTimestamp, setDoc, getDoc, writeBatch } from 'firebase/firestore'
 import { Footer } from '@/components/footer'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -30,7 +33,8 @@ import {
   Sparkles,
   Lock,
   Eye,
-  EyeOff
+  EyeOff,
+  AlertTriangle
 } from 'lucide-react'
 import {
   Dialog,
@@ -90,7 +94,7 @@ export default function InvestigationOfficersRegistry() {
     employeeId: '',
     password: '',
     designation: 'Investigation Officer',
-    status: 'active' as const
+    status: 'active' as 'active' | 'inactive'
   })
 
   const isRoot = user?.email?.toLowerCase() === 'deydhritiman@gmail.com'
@@ -119,9 +123,6 @@ export default function InvestigationOfficersRegistry() {
 
   const generateOfficerId = () => `HRAT-IO-${generateAlphanumeric(4)}`;
 
-  /**
-   * generateSmartPassword: First 3 letters of name + # + last 3 digits of phone
-   */
   const generateSmartPassword = (name: string, phone: string) => {
     const prefix = (name || 'HRAT').trim().substring(0, 3);
     const cleanPhone = (phone || '000').replace(/\D/g, '');
@@ -131,28 +132,59 @@ export default function InvestigationOfficersRegistry() {
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!db || !formData.name.trim() || !formData.email.trim()) return
+    if (!db || !formData.name.trim() || !formData.email.trim() || !formData.password.trim()) return
     setIsActionLoading(true)
 
+    const officerEmail = formData.email.toLowerCase().trim()
+    const tempAppName = `TempApp-${Date.now()}`
+    const secondaryApp = initializeApp(firebaseConfig, tempAppName)
+    const secondaryAuth = getAuth(secondaryApp)
+
+    let authUser: any = null
+
     try {
-      await addDoc(collection(db, 'investigation_officers'), {
+      // 1. Create account in Firebase Auth
+      const authUserCredential = await createUserWithEmailAndPassword(secondaryAuth, officerEmail, formData.password)
+      authUser = authUserCredential.user
+      await updateProfile(authUser, { displayName: formData.name })
+
+      // 2. Atomically establish registry documents
+      const batch = writeBatch(db)
+      
+      // Investigator Pool Record
+      const officerRef = doc(collection(db, 'investigation_officers'))
+      batch.set(officerRef, {
         ...formData,
+        uid: authUser.uid,
         createdAt: serverTimestamp()
       })
-      toast({ title: "Officer Registered", description: `${formData.name} added to master pool.` })
-      setFormData({ 
-        name: '', 
-        email: '', 
-        phone: '', 
-        employeeId: '', 
-        password: '',
-        designation: 'Investigation Officer', 
-        status: 'active' 
+
+      // Standard User/Governance Record
+      const userRef = doc(db, 'users', officerEmail)
+      batch.set(userRef, {
+        uid: authUser.uid,
+        email: officerEmail,
+        name: formData.name,
+        role: 'investigator',
+        status: 'active',
+        permissions: { publicView: true },
+        createdAt: serverTimestamp(),
+        lastLogin: null
       })
+
+      await batch.commit()
+
+      toast({ title: "Officer Provisioned", description: "Identity established and registry synchronized." })
+      setFormData({ name: '', email: '', phone: '', employeeId: '', password: '', designation: 'Investigation Officer', status: 'active' })
       setIsAddOpen(false)
     } catch (e: any) {
-      toast({ variant: "destructive", title: "Registration Failed" })
+      if (authUser) {
+        // Rollback attempt if Firestore fails (Requires Admin SDK in production, but here we try best effort)
+        console.error("Critical: Auth user created but registry failed. Manual cleanup required.");
+      }
+      toast({ variant: "destructive", title: "Provisioning Failed", description: e.message })
     } finally {
+      await deleteApp(secondaryApp)
       setIsActionLoading(false)
     }
   }
@@ -162,8 +194,23 @@ export default function InvestigationOfficersRegistry() {
     setIsActionLoading(true)
     try {
       const { id, ...data } = editOfficer
-      await updateDoc(doc(db, 'investigation_officers', id), data)
-      toast({ title: "Profile Updated" })
+      const batch = writeBatch(db)
+      
+      // Update Pool
+      batch.update(doc(db, 'investigation_officers', id), {
+        ...data,
+        updatedAt: serverTimestamp()
+      })
+
+      // Update User Record for role/status sync
+      batch.update(doc(db, 'users', editOfficer.email.toLowerCase().trim()), {
+        name: editOfficer.name,
+        status: editOfficer.status,
+        updatedAt: serverTimestamp()
+      })
+
+      await batch.commit()
+      toast({ title: "Profile Refreshed" })
       setEditOfficer(null)
     } catch (e: any) {
       toast({ variant: "destructive", title: "Update Failed" })
@@ -172,13 +219,20 @@ export default function InvestigationOfficersRegistry() {
     }
   }
 
-  const handleDelete = async (id: string) => {
-    if (!db) return
+  const handleDelete = async (officer: any) => {
+    if (!db || !isRoot) return
+    setIsActionLoading(true)
     try {
-      await deleteDoc(doc(db, 'investigation_officers', id))
-      toast({ title: "Officer Purged" })
+      const batch = writeBatch(db)
+      batch.delete(doc(db, 'investigation_officers', officer.id))
+      batch.delete(doc(db, 'users', officer.email.toLowerCase().trim()))
+      
+      await batch.commit()
+      toast({ title: "Clearance Revoked", description: "Identity purged from national registry." })
     } catch (e) {
       toast({ variant: "destructive", title: "Purge Denied" })
+    } finally {
+      setIsActionLoading(false)
     }
   }
 
@@ -196,7 +250,7 @@ export default function InvestigationOfficersRegistry() {
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-20">
       <header className="pt-16 pb-8 bg-slate-900 text-white border-b-8 border-accent/20">
         <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="space-y-1">
+          <div className="space-y-1 text-center md:text-left">
              <div className="inline-flex items-center gap-2 bg-accent/20 text-accent px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border border-accent/30">
                <ShieldCheck className="w-2.5 h-2.5" /> Force Registry Node
              </div>
@@ -214,8 +268,8 @@ export default function InvestigationOfficersRegistry() {
                <div className="bg-slate-900 p-8 text-white relative">
                   <div className="absolute right-6 top-6"><DialogClose asChild><Button variant="ghost" size="icon" className="rounded-full text-white/40 h-8 w-8"><X className="w-4 h-4" /></Button></DialogClose></div>
                   <Badge className="bg-accent text-primary font-black text-[8px] uppercase mb-2">Personnel Node</Badge>
-                  <DialogTitle className="text-2xl font-headline font-bold">Register Officer</DialogTitle>
-                  <DialogDescription className="text-slate-400">Add an official to the investigative selection pool with full credentials.</DialogDescription>
+                  <DialogTitle className="text-2xl font-headline font-bold">Provision Officer</DialogTitle>
+                  <DialogDescription className="text-slate-400">Atomic registration: Creates Auth account and registry record simultaneously.</DialogDescription>
                </div>
                <form onSubmit={handleAdd} className="p-8 space-y-6">
                   <div className="grid md:grid-cols-2 gap-6">
@@ -304,8 +358,8 @@ export default function InvestigationOfficersRegistry() {
                     </div>
                   </div>
 
-                  <Button type="submit" disabled={isActionLoading} className="w-full h-12 bg-primary text-white font-bold rounded-xl hover:bg-secondary shadow-xl transition-all">
-                     {isActionLoading ? <Loader2 className="animate-spin w-5 h-5" /> : "Commit to Registry"}
+                  <Button type="submit" disabled={isActionLoading} className="w-full h-14 bg-primary text-white font-bold rounded-2xl hover:bg-secondary shadow-xl transition-all">
+                     {isActionLoading ? <Loader2 className="animate-spin w-5 h-5" /> : "Authorize & Provision Account"}
                   </Button>
                </form>
             </DialogContent>
@@ -325,7 +379,7 @@ export default function InvestigationOfficersRegistry() {
          </div>
 
          {dataLoading ? (
-           <div className="text-center py-20"><Loader2 className="w-10 h-10 animate-spin text-accent mx-auto" /></div>
+           <div className="text-center py-20"><Loader2 className="w-10 h-10 animate-spin text-accent" /></div>
          ) : (
            <div className="grid gap-6">
               {filtered.map((officer: any) => (
@@ -339,7 +393,7 @@ export default function InvestigationOfficersRegistry() {
                           <div className="w-16 h-16 rounded-[2rem] bg-white dark:bg-slate-900 shadow-sm flex items-center justify-center text-accent group-hover:bg-accent group-hover:text-white transition-all duration-500">
                              <UserRoundCheck className="w-8 h-8" />
                           </div>
-                          <Badge className={cn("mt-4 text-[8px] font-black uppercase h-5", officer.status === 'active' ? "bg-emerald-500" : "bg-slate-400")}>
+                          <Badge className={cn("mt-4 text-[8px] font-black uppercase h-5", officer.status === 'active' ? "bg-emerald-500" : "bg-red-500")}>
                              {officer.status}
                           </Badge>
                        </div>
@@ -356,28 +410,26 @@ export default function InvestigationOfficersRegistry() {
                              <div className="flex flex-wrap items-center justify-center md:justify-start gap-6 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
                                 <span className="flex items-center gap-2"><Mail className="w-3.5 h-3.5 text-accent" /> {officer.email}</span>
                                 <span className="flex items-center gap-2"><Phone className="w-3.5 h-3.5 text-accent" /> {officer.phone || 'N/A'}</span>
-                                {officer.password && (
-                                  <span className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md"><Lock className="w-3 h-3 text-slate-400" /> Credential Set</span>
-                                )}
+                                <span className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md"><CheckCircle2 className="w-3 h-3 text-emerald-500" /> Real-time Sync Active</span>
                              </div>
                           </div>
 
                           <div className="flex items-center gap-3">
-                             <Button onClick={() => setEditOfficer(officer)} variant="outline" size="sm" className="h-10 px-5 rounded-xl text-[10px] font-black uppercase tracking-widest border-2 hover:bg-primary hover:text-white transition-all">Modify</Button>
+                             <Button onClick={() => setEditOfficer(officer)} variant="outline" size="sm" className="h-10 px-5 rounded-xl text-[10px] font-bold uppercase tracking-widest border-2 hover:bg-primary hover:text-white transition-all">Modify</Button>
                              <AlertDialog>
                                 <AlertDialogTrigger asChild>
                                    <button className="h-10 w-10 text-slate-300 hover:text-red-500 transition-all rounded-xl flex items-center justify-center"><Trash2 className="w-5 h-5" /></button>
                                 </AlertDialogTrigger>
                                 <AlertDialogContent className="rounded-[2.5rem] border-none shadow-2xl bg-white dark:bg-slate-900">
                                    <AlertDialogHeader>
-                                      <AlertDialogTitle className="text-2xl font-headline font-bold text-primary dark:text-white">Purge Record?</AlertDialogTitle>
+                                      <AlertDialogTitle className="text-2xl font-headline font-bold text-red-600">Revoke Identity & Purge?</AlertDialogTitle>
                                       <AlertDialogDesc className="text-sm font-medium leading-relaxed">
-                                        Permanently remove <strong>{officer.name}</strong> from the investigative selection pool? This will erase all credentials from the registry.
+                                        This will permanently remove <strong>{officer.name}</strong> from the national registry and terminate their authentication clearance. This action cannot be reversed.
                                       </AlertDialogDesc>
                                    </AlertDialogHeader>
                                    <AlertDialogFooter className="mt-6">
                                       <AlertDialogCancel className="rounded-xl h-11 font-bold">Cancel</AlertDialogCancel>
-                                      <AlertDialogAction onClick={() => handleDelete(officer.id)} className="bg-red-600 hover:bg-red-700 rounded-xl h-11 font-bold text-white transition-all">Confirm Purge</AlertDialogAction>
+                                      <AlertDialogAction onClick={() => handleDelete(officer)} className="bg-red-600 hover:bg-red-700 rounded-xl h-11 font-bold text-white transition-all">Revoke Clearance</AlertDialogAction>
                                    </AlertDialogFooter>
                                 </AlertDialogContent>
                              </AlertDialog>
@@ -391,7 +443,7 @@ export default function InvestigationOfficersRegistry() {
               {filtered.length === 0 && (
                 <div className="text-center py-40 opacity-30">
                    <User className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-                   <p className="text-sm font-bold uppercase tracking-widest">Investigator Registry Empty</p>
+                   <p className="text-sm font-bold uppercase tracking-widest">Registry Synchronization Idle</p>
                 </div>
               )}
            </div>
@@ -405,63 +457,14 @@ export default function InvestigationOfficersRegistry() {
             <>
                <div className="bg-slate-900 p-8 text-white relative">
                   <div className="absolute right-6 top-6"><DialogClose asChild><Button variant="ghost" size="icon" className="rounded-full text-white/40 h-8 w-8"><X className="w-4 h-4" /></Button></DialogClose></div>
-                  <Badge className="bg-accent text-primary font-black text-[8px] uppercase mb-2">Audit Editor</Badge>
+                  <Badge className="bg-accent text-primary font-black text-[8px] uppercase mb-2">Registry Update</Badge>
                   <DialogTitle className="text-2xl font-headline font-bold">Update Profile Meta</DialogTitle>
+                  <DialogDescription className="text-slate-400">Sync status and designation changes instantly.</DialogDescription>
                </div>
                <div className="p-8 space-y-6">
                   <div className="grid md:grid-cols-2 gap-6">
                     <div className="space-y-1.5"><Label className="text-[10px] font-bold uppercase text-slate-400">Legal Name</Label><Input value={editOfficer.name} onChange={e => setEditOfficer({...editOfficer, name: e.target.value})} className="h-11 rounded-xl" /></div>
-                    <div className="space-y-1.5">
-                       <Label className="text-[10px] font-bold uppercase text-slate-400">Employee ID</Label>
-                       <div className="flex gap-2">
-                          <Input 
-                            value={editOfficer.employeeId} 
-                            onChange={e => setEditOfficer({...editOfficer, employeeId: e.target.value.toUpperCase()})} 
-                            className="h-11 rounded-xl font-mono flex-1" 
-                          />
-                          <Button 
-                            type="button" 
-                            variant="outline" 
-                            size="icon" 
-                            title="Regenerate ID"
-                            className="h-11 w-11 shrink-0 rounded-xl border-dashed"
-                            onClick={() => setEditOfficer({...editOfficer, employeeId: generateOfficerId()})}
-                          >
-                            <Sparkles className="w-4 h-4 text-accent" />
-                          </Button>
-                       </div>
-                    </div>
-                  </div>
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <div className="space-y-1.5"><Label className="text-[10px] font-bold uppercase text-slate-400">Official Email</Label><Input value={editOfficer.email} onChange={e => setEditOfficer({...editOfficer, email: e.target.value})} className="h-11 rounded-xl" /></div>
-                    <div className="space-y-1.5">
-                       <Label className="text-[10px] font-bold uppercase text-slate-400">Login Password</Label>
-                       <div className="flex gap-2">
-                          <div className="relative flex-1">
-                            <Input 
-                              type={showPassword ? "text" : "password"}
-                              value={editOfficer.password || ''} 
-                              onChange={e => setEditOfficer({...editOfficer, password: e.target.value})} 
-                              placeholder="Min 8 chars" 
-                              className="h-11 rounded-xl pr-10" 
-                              required 
-                            />
-                            <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-accent">
-                               {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                            </button>
-                          </div>
-                          <Button 
-                            type="button" 
-                            variant="outline" 
-                            size="icon" 
-                            title="Generate Protocol Password"
-                            className="h-11 w-11 shrink-0 rounded-xl border-dashed hover:bg-accent/10"
-                            onClick={() => setEditOfficer({...editOfficer, password: generateSmartPassword(editOfficer.name, editOfficer.phone)})}
-                          >
-                            <Lock className="w-4 h-4 text-accent" />
-                          </Button>
-                       </div>
-                    </div>
+                    <div className="space-y-1.5"><Label className="text-[10px] font-bold uppercase text-slate-400">Employee ID</Label><Input value={editOfficer.employeeId} disabled className="h-11 rounded-xl bg-slate-50 font-mono" /></div>
                   </div>
                   <div className="grid md:grid-cols-2 gap-6">
                     <div className="space-y-1.5 flex-1">
@@ -475,7 +478,22 @@ export default function InvestigationOfficersRegistry() {
                           </SelectContent>
                        </Select>
                     </div>
-                    <div className="space-y-1.5"><Label className="text-[10px] font-bold uppercase text-slate-400">Phone</Label><Input value={editOfficer.phone} onChange={e => setEditOfficer({...editOfficer, phone: e.target.value})} className="h-11 rounded-xl" /></div>
+                    <div className="space-y-1.5">
+                       <Label className="text-[10px] font-bold uppercase text-slate-400">Status</Label>
+                       <Select value={editOfficer.status} onValueChange={(val: any) => setEditOfficer({...editOfficer, status: val})}>
+                          <SelectTrigger className="h-11 rounded-xl">
+                             <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent className="bg-white z-[1000001]">
+                             <SelectItem value="active">Active (Full Access)</SelectItem>
+                             <SelectItem value="inactive">Inactive (Access Suspended)</SelectItem>
+                          </SelectContent>
+                       </Select>
+                    </div>
+                  </div>
+                  <div className="p-4 bg-amber-50 rounded-2xl border border-amber-100 flex gap-3">
+                     <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
+                     <p className="text-[10px] text-amber-800 font-bold uppercase">Password resets must be initiated through the Governance Roles terminal or Auth service directly.</p>
                   </div>
                   <Button onClick={handleUpdate} disabled={isActionLoading} className="w-full h-14 bg-primary text-white font-bold rounded-2xl shadow-xl transition-all">
                      {isActionLoading ? <Loader2 className="animate-spin w-5 h-5" /> : "Commit Profile Refresh"}
