@@ -165,3 +165,79 @@
     animation-play-state: paused;
   }
 }
+
+/* 📱 MOBILE SIDEBAR OVERRIDES */
+[data-mobile="true"] [data-sidebar="sidebar"] {
+  border-right: 1px solid hsl(var(--border) / 0.5) !important;
+}
+
+[data-mobile="true"] [data-sidebar="header"] {
+  padding: 1.5rem !important;
+  height: auto !important;
+  border-bottom: 1px solid hsl(var(--border) / 0.8);
+  margin-bottom: 1rem;
+}
+
+[data-mobile="true"] [data-sidebar="content"] {
+  padding: 0.75rem !important;
+}
+
+[data-mobile="true"] [data-sidebar="menu-button"] {
+  height: 3.5rem !important; /* 56px touch target */
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  padding-left: 1.25rem !important;
+  padding-right: 1rem !important;
+  border-radius: 0.75rem !important;
+  margin-bottom: 0.5rem !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 1.25rem !important;
+}
+
+[data-mobile="true"] [data-sidebar="menu-button"] span {
+  white-space: nowrap !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  line-height: 1.2;
+}
+
+[data-mobile="true"] [data-sidebar="menu-button"] svg {
+  width: 1.25rem !important;
+  height: 1.25rem !important;
+}
+
+[data-mobile="true"] [data-sidebar="menu-button"][data-active="true"] {
+  background-color: hsl(var(--accent) / 0.15) !important;
+  color: hsl(var(--accent)) !important;
+  position: relative !important;
+}
+
+[data-mobile="true"] [data-sidebar="menu-button"][data-active="true"]::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.75rem;
+  bottom: 0.75rem;
+  width: 4px;
+  background-color: hsl(var(--accent));
+  border-radius: 0 4px 4px 0;
+  box-shadow: 0 0 12px hsl(var(--accent) / 0.4);
+}
+
+[data-mobile="true"] [data-sidebar="group-label"] {
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  color: hsl(var(--primary)) !important;
+  letter-spacing: 0.15em !important;
+  margin-top: 1.5rem !important;
+  margin-bottom: 0.75rem !important;
+  padding-left: 1.25rem !important;
+  text-transform: uppercase;
+}
+
+[data-mobile="true"] [data-sidebar="footer"] {
+  padding: 1.5rem !important;
+  background-color: hsl(var(--muted) / 0.3);
+  border-top: 1px solid hsl(var(--border) / 0.5);
+}
