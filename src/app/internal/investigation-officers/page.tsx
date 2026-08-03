@@ -128,7 +128,12 @@ export default function InvestigationOfficersRegistry() {
     return query(collection(db, 'investigation_officers'), orderBy('name', 'asc'));
   }, [db, isRoot]);
 
-  const { data: officers, loading: dataLoading } = useCollection(officersQuery);
+  const { data: rawOfficers, loading: dataLoading } = useCollection(officersQuery);
+
+  // Sanitized list for safe rendering and processing
+  const officers = React.useMemo(() => {
+    return (rawOfficers || []).filter(o => o && typeof o === 'object' && o.id);
+  }, [rawOfficers]);
 
   const generateAlphanumeric = (length: number) => {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -149,8 +154,8 @@ export default function InvestigationOfficersRegistry() {
   };
 
   const handleStartDelete = async (officer: any) => {
-    if (!db || !user || !officer) {
-      toast({ variant: "destructive", title: "Operation Blocked", description: "Officer record data is unavailable." });
+    if (!db || !user || !officer || !officer.id) {
+      toast({ variant: "destructive", title: "Operation Blocked", description: "Investigator record is incomplete or invalid." });
       return;
     }
     setOfficerToDelete(officer);
@@ -158,8 +163,8 @@ export default function InvestigationOfficersRegistry() {
   };
 
   const executeGovernanceAudit = async () => {
-    if (!db || !user || !officerToDelete) {
-       toast({ variant: "destructive", title: "Audit Cancelled", description: "Target information is incomplete." });
+    if (!db || !user || !officerToDelete || !officerToDelete.id) {
+       toast({ variant: "destructive", title: "Audit Cancelled", description: "Required investigator information is missing." });
        return;
     }
     
@@ -213,7 +218,7 @@ export default function InvestigationOfficersRegistry() {
         setDeleteDialogStep('warning');
       }
     } catch (e: any) {
-      toast({ variant: "destructive", title: "Audit Error", description: "Verification protocol failed. Please refresh." });
+      toast({ variant: "destructive", title: "Audit Error", description: "Verification protocol failed. Please refresh the page." });
     } finally {
       setIsActionLoading(false);
     }
@@ -229,12 +234,14 @@ export default function InvestigationOfficersRegistry() {
       let failureCount = 0;
       
       for (const officer of officers) {
+        // Safe access to properties
         const officerName = (officer.name || '').trim();
         const officerEmail = (officer.email || '').toLowerCase().trim();
 
         if (officerName !== 'Raisa Das') {
+          // Strict validation of required fields for deletion
           if (!officer.id || !officerEmail) {
-            console.error(`[PURGE-VALIDATION] Skipping incomplete record:`, officer);
+            console.warn(`[PURGE-VALIDATION] Skipping incomplete record at ID: ${officer.id || 'Unknown'}`);
             failureCount++;
             continue;
           }
@@ -255,13 +262,13 @@ export default function InvestigationOfficersRegistry() {
         });
         setIsPurgeOpen(false);
       } else if (failureCount > 0) {
-        toast({ variant: "destructive", title: "Audit Incomplete", description: "Records were identified but contained invalid metadata (missing email/ID)." });
+        toast({ variant: "destructive", title: "Registry Error", description: "Invalid metadata identified in potential purge targets. Please contact support." });
       } else {
         toast({ title: "Audit Complete", description: "No conflicting records found." });
         setIsPurgeOpen(false);
       }
     } catch (e: any) {
-      toast({ variant: "destructive", title: "Purge Failed", description: "A system error occurred during bulk purge." });
+      toast({ variant: "destructive", title: "Purge Protocol Failure", description: "System error during bulk purge. Database integrity preserved." });
     } finally {
       setIsActionLoading(false);
     }
@@ -408,11 +415,8 @@ export default function InvestigationOfficersRegistry() {
     }
   }
 
-  if (authLoading || !isRoot) {
-    return <div className="min-h-screen flex items-center justify-center bg-slate-950"><Loader2 className="w-10 h-10 animate-spin text-accent" /></div>
-  }
-
   const filtered = (officers || []).filter((o: any) => {
+    if (!o || typeof o !== 'object') return false;
     const name = (o.name || '').toLowerCase();
     const designation = (o.designation || '').toLowerCase();
     const empId = (o.employeeId || '').toLowerCase();
@@ -420,6 +424,10 @@ export default function InvestigationOfficersRegistry() {
 
     return name.includes(s) || designation.includes(s) || empId.includes(s);
   });
+
+  if (authLoading || !isRoot) {
+    return <div className="min-h-screen flex items-center justify-center bg-slate-950"><Loader2 className="w-10 h-10 animate-spin text-accent" /></div>
+  }
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-20">
@@ -461,7 +469,7 @@ export default function InvestigationOfficersRegistry() {
                      <Button 
                        onClick={handlePurgeAllExceptRaisa} 
                        disabled={isActionLoading}
-                       className="w-full h-14 bg-red-600 hover:bg-red-700 text-white font-black uppercase text-xs tracking-widest shadow-xl shadow-red-900/20"
+                       className="w-full h-14 bg-red-600 hover:bg-red-700 text-white font-black uppercase text-xs tracking-widest shadow-xl shadow-red-900/40"
                      >
                         {isActionLoading ? <Loader2 className="animate-spin w-5 h-5" /> : "Authorize Registry Reset"}
                      </Button>
@@ -493,7 +501,7 @@ export default function InvestigationOfficersRegistry() {
                          <div className="flex gap-2">
                             <Input 
                               value={formData.employeeId} 
-                              onChange={e => setFormData({...formData, employeeId: e.target.value.toUpperCase()})} 
+                              onChange={e => setFormData({...formData, employeeId: (e.target.value || '').toUpperCase()})} 
                               placeholder="HRAT-IO-001" 
                               className="h-11 rounded-xl font-mono flex-1" 
                               required 
@@ -600,7 +608,7 @@ export default function InvestigationOfficersRegistry() {
                     <div className="flex flex-col md:flex-row items-stretch">
                        <div className="p-8 md:w-56 text-center border-r bg-slate-50 dark:bg-slate-800/50 flex flex-col items-center justify-center shrink-0">
                           <Badge variant="outline" className="text-[8px] font-mono font-bold border-accent text-accent mb-4 tracking-tighter">
-                             {officer.employeeId || 'IO-TEMP'}
+                             {(officer.employeeId || 'IO-TEMP')}
                           </Badge>
                           <div className="w-16 h-16 rounded-[2rem] bg-white dark:bg-slate-900 shadow-sm flex items-center justify-center text-accent group-hover:bg-accent group-hover:text-white transition-all duration-500">
                              <UserRoundCheck className="w-8 h-8" />
@@ -681,7 +689,7 @@ export default function InvestigationOfficersRegistry() {
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                      <div className="p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800">
                         <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Employee ID</p>
-                        <p className="text-sm font-mono font-bold text-primary dark:text-white uppercase">{selectedOfficerForDetails.employeeId || 'IO-PENDING'}</p>
+                        <p className="text-sm font-mono font-bold text-primary dark:text-white uppercase">{(selectedOfficerForDetails.employeeId || 'IO-PENDING')}</p>
                      </div>
                      <div className="p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800">
                         <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Official Rank</p>
@@ -830,7 +838,7 @@ export default function InvestigationOfficersRegistry() {
                         <TableBody>
                           {activeAssignments.map((c) => (
                             <TableRow key={c.id} className="hover:bg-slate-50/50 transition-colors">
-                              <TableCell className="text-[10px] font-mono font-bold text-accent py-3">{c.caseId || c.token}</TableCell>
+                              <TableCell className="text-[10px] font-mono font-bold text-accent py-3">{(c.caseId || c.token)}</TableCell>
                               <TableCell className="text-[10px] font-bold py-3 truncate max-w-[150px]">{c.subject}</TableCell>
                               <TableCell className="text-right py-3"><Badge className="text-[7px] h-4 uppercase bg-slate-800">{c.status}</Badge></TableCell>
                             </TableRow>
@@ -905,7 +913,7 @@ export default function InvestigationOfficersRegistry() {
                 <Button variant="ghost" onClick={() => { setDeleteDialogStep(null); setOfficerToDelete(null); setDeleteInputText(''); }} className="flex-1 h-12 rounded-xl text-slate-400 font-bold">Abort</Button>
                 <Button 
                   variant="destructive" 
-                  disabled={deleteInputText.toLowerCase() !== 'delete' || isDeleting} 
+                  disabled={(deleteInputText || '').toLowerCase() !== 'delete' || isDeleting} 
                   onClick={handleDelete}
                   className="flex-1 h-12 rounded-xl font-bold bg-red-600 hover:bg-red-700 shadow-xl shadow-red-600/20"
                 >
@@ -931,7 +939,7 @@ export default function InvestigationOfficersRegistry() {
                <div className="p-8 space-y-6">
                   <div className="grid md:grid-cols-2 gap-6">
                     <div className="space-y-1.5"><Label className="text-[10px] font-bold uppercase text-slate-400">Legal Name</Label><Input value={editOfficer.name || ''} onChange={e => setEditOfficer({...editOfficer, name: e.target.value})} className="h-11 rounded-xl" /></div>
-                    <div className="space-y-1.5"><Label className="text-[10px] font-bold uppercase text-slate-400">Employee ID</Label><Input value={editOfficer.employeeId || ''} disabled className="h-11 rounded-xl bg-slate-50 font-mono" /></div>
+                    <div className="space-y-1.5"><Label className="text-[10px] font-bold uppercase text-slate-400">Employee ID</Label><Input value={(editOfficer.employeeId || '')} disabled className="h-11 rounded-xl bg-slate-50 font-mono" /></div>
                   </div>
                   <div className="grid md:grid-cols-2 gap-6">
                     <div className="space-y-1.5 flex-1">
