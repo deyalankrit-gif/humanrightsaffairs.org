@@ -49,7 +49,8 @@ import {
   Activity,
   Cpu,
   TrendingUp,
-  UserCheck
+  UserCheck,
+  Users
 } from 'lucide-react'
 import {
   Dialog,
@@ -333,7 +334,7 @@ export default function InvestigationOfficersRegistry() {
                <ShieldCheck className="w-3.5 h-3.5" /> Registry Protocol Active
              </div>
              <h1 className="text-4xl md:text-5xl font-headline font-bold">Investigator <span className="text-accent italic">Pool</span></h1>
-             <p className="text-slate-400 text-xs md:text-sm font-bold uppercase tracking-widest flex items-center justify-center md:justify-start gap-2">
+             <p className="text-slate-400 text-xs md:text-sm font-bold uppercase tracking-widest flex items-center gap-2">
                <Cpu className="w-4 h-4 text-emerald-500" /> National Investigative Node Control
              </p>
           </div>
@@ -392,7 +393,7 @@ export default function InvestigationOfficersRegistry() {
                             <SelectContent className="bg-white z-[1000000]">{OFFICER_DESIGNATIONS.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
                          </Select>
                       </div>
-                      <div className="space-y-1.5"><Label className="text-[10px] font-black uppercase text-slate-500">Phone</Label><Input value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} className="rounded-xl h-11" /></div>
+                      <div className="space-y-1.5"><Label className="text-[10px] font-black uppercase text-slate-500">Phone</Label><Input value={formData.phone} onChange={e => setPhone(e.target.value)} className="rounded-xl h-11" /></div>
                     </div>
                     <Button type="submit" disabled={isActionLoading} className="w-full h-14 bg-primary text-white font-bold rounded-2xl shadow-xl hover:bg-secondary transition-all">Provision Account</Button>
                  </form>
@@ -512,7 +513,7 @@ export default function InvestigationOfficersRegistry() {
                   <ShieldAlert className="w-12 h-12" />
                 </div>
                 <div className="space-y-3">
-                  <DialogTitle className="text-3xl font-headline font-bold text-primary dark:text-white">Initialize Identity Purge</DialogTitle>
+                  <DialogTitle className="text-3xl font-headline font-bold text-primary dark:text-white">Initialize Identity PurGE</DialogTitle>
                   <DialogDescription className="text-base font-medium leading-relaxed">
                     You are attempting to permanently remove <strong>{officerToDelete?.name}</strong> from the national investigative pool. This action requires administrative clearance and a dependency audit.
                   </DialogDescription>
@@ -614,7 +615,7 @@ export default function InvestigationOfficersRegistry() {
                       onClick={handleDelete}
                       className="flex-1 h-14 rounded-2xl font-bold bg-red-600 hover:bg-red-700 shadow-2xl shadow-red-600/30"
                     >
-                      {isDeleting ? <Loader2 className="animate-spin" /> : "Verify & Force Purge"}
+                      {isDeleting ? <Loader2 className="animate-spin w-5 h-5" /> : "Verify & Force Purge"}
                     </Button>
                  </div>
               </div>
@@ -746,7 +747,7 @@ export default function InvestigationOfficersRegistry() {
                   </div>
                 </div>
 
-                <Button onClick={() => setSelectedOfficerForDetails(null)} className="w-full h-14 rounded-2xl bg-slate-900 text-white font-bold hover:bg-slate-800 transition-all shadow-xl shadow-slate-900/20 text-base">
+                <Button onClick={() => setSelectedOfficerForDetails(null)} className="w-full h-14 rounded-2xl bg-slate-900 text-white font-bold hover:bg-slate-800 transition-all shadow-xl shadow-slate-900/10 text-base">
                   Dismiss Account Node
                 </Button>
               </div>
