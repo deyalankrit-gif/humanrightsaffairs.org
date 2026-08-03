@@ -438,16 +438,19 @@ export default function LeadershipPage() {
               <div className="flex flex-col items-center mb-32">
                 <SectionHeading title="Central Committee" icon={ShieldCheck} color="text-red-600 border-red-100" subtitle={`${centralTeam.length} Officials`} />
                 <div className="flex flex-wrap justify-center gap-12">
-                  {centralTeam.map((leader, i) => (
-                    <LeaderCard 
-                      key={leader.id} 
-                      leader={leader} 
-                      variant={i === 0 ? "xl" : "default"} 
-                      isAdmin={isAdmin} 
-                      onEdit={setEditLeader} 
-                      onDelete={handleDelete} 
-                    />
-                  ))}
+                  {centralTeam.map((leader) => {
+                    const isPrimary = leader.title.toLowerCase().includes("chairman") || leader.title.toLowerCase().includes("founder");
+                    return (
+                      <LeaderCard 
+                        key={leader.id} 
+                        leader={leader} 
+                        variant={isPrimary ? "xl" : "large"} 
+                        isAdmin={isAdmin} 
+                        onEdit={setEditLeader} 
+                        onDelete={handleDelete} 
+                      />
+                    )
+                  })}
                 </div>
               </div>
 
@@ -488,16 +491,19 @@ export default function LeadershipPage() {
                         
                         {activeStateLeaders.length > 0 ? (
                           <div className="flex flex-wrap justify-center gap-10">
-                            {activeStateLeaders.map(leader => (
-                              <LeaderCard 
-                                key={leader.id} 
-                                leader={leader} 
-                                variant="large"
-                                isAdmin={isAdmin} 
-                                onEdit={setEditLeader} 
-                                onDelete={handleDelete} 
-                              />
-                            ))}
+                            {activeStateLeaders.map(leader => {
+                              const isPrimary = leader.title.toLowerCase().includes("chairman");
+                              return (
+                                <LeaderCard 
+                                  key={leader.id} 
+                                  leader={leader} 
+                                  variant={isPrimary ? "large" : "default"}
+                                  isAdmin={isAdmin} 
+                                  onEdit={setEditLeader} 
+                                  onDelete={handleDelete} 
+                                />
+                              )
+                            })}
                           </div>
                         ) : (
                           <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] animate-pulse">No commissioned chapter leaders recorded for this region.</p>
@@ -530,16 +536,19 @@ export default function LeadershipPage() {
                               </div>
                               {activeDistrictLeaders.length > 0 ? (
                                 <div className="flex flex-wrap justify-center gap-8">
-                                   {activeDistrictLeaders.map(dl => (
-                                     <LeaderCard 
-                                       key={dl.id} 
-                                       leader={dl} 
-                                       variant="small" 
-                                       isAdmin={isAdmin} 
-                                       onEdit={setEditLeader} 
-                                       onDelete={handleDelete} 
-                                     />
-                                   ))}
+                                   {activeDistrictLeaders.map(dl => {
+                                     const isPrimary = dl.title.toLowerCase().includes("chairman") || dl.title.toLowerCase().includes("president");
+                                     return (
+                                       <LeaderCard 
+                                         key={dl.id} 
+                                         leader={dl} 
+                                         variant={isPrimary ? "default" : "small"} 
+                                         isAdmin={isAdmin} 
+                                         onEdit={setEditLeader} 
+                                         onDelete={handleDelete} 
+                                       />
+                                     )
+                                   })}
                                 </div>
                               ) : (
                                 <p className="text-slate-400 font-bold uppercase tracking-widest text-[9px] animate-pulse">No commissioned district officials recorded for {activeDistrict}.</p>
@@ -612,9 +621,9 @@ export default function LeadershipPage() {
               </div>
 
               {(editLeader.level === 'State' || editLeader.level === 'District') && (
-                <div className="grid md:grid-cols-2 gap-6 p-6 rounded-3xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
+                <div className="grid md:grid-cols-2 gap-6 p-6 rounded-3xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 animate-in fade-in slide-in-from-top-2 duration-300">
                   <div className="space-y-1.5">
-                    <Label className="text-[10px] font-black uppercase text-accent flex items-center gap-2"><Globe className="w-3.5 h-3.5" /> State / UT</Label>
+                    <Label className="text-[10px] font-black uppercase text-accent flex items-center gap-2"><Globe className="w-3.5 h-3.5" /> State / UT *</Label>
                     <Select value={editLeader.parentRegion} onValueChange={(val) => setEditLeader({...editLeader, parentRegion: val, districtName: ''})}>
                       <SelectTrigger className="h-11 rounded-xl bg-white dark:bg-slate-800 border-accent/20 font-bold"><SelectValue placeholder="Choose State" /></SelectTrigger>
                       <SelectContent className="bg-white z-[1000000] max-h-60">{allStates.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
@@ -622,7 +631,7 @@ export default function LeadershipPage() {
                   </div>
                   {editLeader.level === 'District' && (
                     <div className="space-y-1.5">
-                      <Label className="text-[10px] font-black uppercase text-accent flex items-center gap-2"><MapPin className="w-3.5 h-3.5" /> District</Label>
+                      <Label className="text-[10px] font-black uppercase text-accent flex items-center gap-2"><MapPin className="w-3.5 h-3.5" /> District *</Label>
                       <Select value={editLeader.districtName} onValueChange={(val) => setEditLeader({...editLeader, districtName: val})}>
                         <SelectTrigger className="h-11 rounded-xl bg-white dark:bg-slate-800 border-accent/20 font-bold"><SelectValue placeholder="Choose District" /></SelectTrigger>
                         <SelectContent className="bg-white z-[1000000] max-h-60">{editLeader.parentRegion && (INDIA_DATA[editLeader.parentRegion] || []).map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
