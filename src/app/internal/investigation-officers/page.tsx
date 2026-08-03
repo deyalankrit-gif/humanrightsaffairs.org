@@ -149,7 +149,7 @@ export default function InvestigationOfficersRegistry() {
   const handleStartDelete = async (officer: any) => {
     if (!db || !user) return;
     setOfficerToDelete(officer);
-    setDeleteDialogStep('confirm'); // Initialize with universal confirmation
+    setDeleteDialogStep('confirm');
   };
 
   const executeGovernanceAudit = async () => {
@@ -158,6 +158,7 @@ export default function InvestigationOfficersRegistry() {
 
     try {
       const complaintsRef = collection(db, 'public_complaints');
+      // Logic: Search for any case that is NOT CLOSED where this officer is involved
       const q = query(
         complaintsRef, 
         where('status', 'not-in', ['Closed', 'Action Taken'])
@@ -171,36 +172,39 @@ export default function InvestigationOfficersRegistry() {
           (c.assignedOfficers || []).some((o: any) => o.name === officerToDelete.name)
         );
       
-      if (conflictCases.length > 0) {
+      if (conflictCases.length > 0 || (officerToDelete.assignedCount || 0) > 0) {
         setActiveAssignments(conflictCases);
         const reasons = new Set<string>();
-        conflictCases.forEach(c => {
-          if (c.status === 'New Complaint') reasons.add("Active complaint assignments exist.");
-          if (c.status === 'Investigation in Progress') reasons.add("Ongoing investigations assigned.");
-          if (c.status === 'Awaiting Documents') reasons.add("Pending reports or evidence verification.");
-          if (c.priority === 'High') reasons.add("Critical high-priority cases remain open.");
-        });
         
-        if (reasons.size === 0) reasons.add("The investigator is responsible for ongoing cases.");
+        if (conflictCases.length > 0) {
+          reasons.add("Active investigative assignments exist in the registry.");
+        }
+        
+        if ((officerToDelete.assignedCount || 0) > 0) {
+          reasons.add("Statistical record indicates pending responsibilities.");
+        }
+        
         setBlockReasons(Array.from(reasons));
 
+        // Log the blocked attempt for governance review
         const blockedLogRef = doc(collection(db, 'deletion_audit_logs'));
         await setDoc(blockedLogRef, {
           adminId: user.uid,
           adminEmail: user.email,
+          adminName: user.displayName || 'Root Administrator',
           targetId: officerToDelete.employeeId,
           targetName: officerToDelete.name,
           timestamp: new Date().toISOString(),
-          status: "Blocked by Governance",
-          reasons: Array.from(reasons)
+          status: "Blocked by Governance Validation",
+          failureReason: Array.from(reasons).join(' | ')
         });
 
         setDeleteDialogStep('blocked');
       } else {
         setDeleteDialogStep('warning');
       }
-    } catch (e) {
-      toast({ variant: "destructive", title: "Audit Error", description: "Verification protocol failed." });
+    } catch (e: any) {
+      toast({ variant: "destructive", title: "Audit Error", description: "Verification protocol failed: " + e.message });
     } finally {
       setIsActionLoading(false);
     }
@@ -229,6 +233,7 @@ export default function InvestigationOfficersRegistry() {
       batch.set(officerRef, {
         ...formData,
         uid: authUser.uid,
+        assignedCount: 0,
         createdAt: serverTimestamp()
       })
 
@@ -286,7 +291,7 @@ export default function InvestigationOfficersRegistry() {
   }
 
   const handleDelete = async () => {
-    if (!db || !officerToDelete || !isRoot) return
+    if (!db || !officerToDelete || !isRoot || !user) return
     setIsDeleting(true)
     try {
       const batch = writeBatch(db)
@@ -296,23 +301,23 @@ export default function InvestigationOfficersRegistry() {
       
       const auditRef = doc(collection(db, 'deletion_audit_logs'))
       batch.set(auditRef, {
-        adminId: user?.uid,
-        adminName: 'Root Administrator',
+        adminId: user.uid,
+        adminName: user.displayName || 'Root Administrator',
         targetId: officerToDelete.employeeId,
         targetName: officerToDelete.name,
         targetEmail: officerToDelete.email,
         timestamp: new Date().toISOString(),
-        status: "Permanently Purged"
+        status: "Permanently Purged - Successful"
       })
       
       await batch.commit()
-      toast({ title: "Clearance Revoked", description: "Identity purged from national registry." })
+      toast({ title: "Clearance Revoked", description: "Identity purged and access revoked instantly." })
       
       setDeleteDialogStep(null)
       setOfficerToDelete(null)
       setDeleteInputText('')
     } catch (e) {
-      toast({ variant: "destructive", title: "Purge Denied" })
+      toast({ variant: "destructive", title: "Purge Protocol Error" })
     } finally {
       setIsDeleting(false)
     }
@@ -663,7 +668,7 @@ export default function InvestigationOfficersRegistry() {
                   </div>
                 </div>
                 <p className="text-red-100 text-sm font-medium leading-relaxed">
-                  This investigator cannot be purged because one or more active dependencies still exist in the national registry.
+                  This Investigation Officer cannot be deleted because they currently have active assignments. Please cancel, complete, or reassign all active assignments before deleting this officer.
                 </p>
               </div>
 
