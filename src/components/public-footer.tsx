@@ -174,7 +174,7 @@ export function PublicFooter() {
               
               <li className="pt-6"><span className="text-[#CEFF00] font-black text-sm md:text-lg uppercase tracking-tighter">Office Use Only</span></li>
               <li>
-                <Link href="/investigator/login" className="text-[#2323FF] hover:text-accent transition-colors font-medium flex items-center justify-between leading-tight group/link">
+                <Link href="/investigator/login" className="text-[#4666FF] hover:text-accent transition-colors font-medium flex items-center justify-between leading-tight group/link">
                   <div className="flex items-center gap-2">
                     <Search className="w-3.5 h-3.5" />
                     <span>Investigator Log In</span>
