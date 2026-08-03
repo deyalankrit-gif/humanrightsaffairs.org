@@ -1,13 +1,13 @@
-import { initializeApp, getApp, getApps, FirebaseApp } from 'firebase/app';
-import { getAuth, Auth } from 'firebase/auth';
-import { getFirestore, Firestore } from 'firebase/firestore';
+import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
+import { getAuth } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
 import { firebaseConfig } from './config';
 
 /**
  * initializeFirebase: Core institutional utility for establishing Firebase connections.
- * Supports named application instances to enable independent authenticated sessions (Role Isolation).
+ * Supports named application instances to enable independent authenticated sessions (Auth Isolation).
  * 
- * @param name - Optional unique identifier for the application node (e.g. 'InvestigatorTerminal')
+ * @param name - Optional unique identifier for the application node (e.g. 'AdminTerminal')
  */
 export function initializeFirebase(name?: string) {
   let app: FirebaseApp;
@@ -17,8 +17,7 @@ export function initializeFirebase(name?: string) {
   if (existingApp) {
     app = existingApp;
   } else {
-    // FIX: Explicitly handle the initialization of named vs default apps
-    // This ensures that different portals on the same domain use separate storage keys
+    // Isolate sessions by using named apps which creates distinct storage keys
     app = name ? initializeApp(firebaseConfig, name) : initializeApp(firebaseConfig);
   }
 

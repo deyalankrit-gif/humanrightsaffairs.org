@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useEffect, useState, useMemo } from 'react'
@@ -7,8 +6,8 @@ import { initializeApp, deleteApp } from 'firebase/app'
 import { getAuth, createUserWithEmailAndPassword, updateProfile, deleteUser } from 'firebase/auth'
 import { firebaseConfig } from '@/firebase/config'
 import { useUser, useCollection, useFirestore, useMemoFirebase } from '@/firebase'
-import { collection, query, orderBy, addDoc, deleteDoc, doc, updateDoc, serverTimestamp, setDoc, getDoc, writeBatch, where, getDocs } from 'firebase/firestore'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { collection, query, orderBy, addDoc, deleteDoc, doc, updateDoc, serverTimestamp, setDoc, getDocs, writeBatch, where } from 'firebase/firestore'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
@@ -21,9 +20,7 @@ import {
   Loader2, 
   ShieldCheck, 
   UserRoundCheck,
-  Building2,
   X,
-  Check,
   User,
   Mail,
   Phone,
@@ -35,16 +32,10 @@ import {
   EyeOff,
   AlertTriangle,
   CheckCircle2,
-  FileText,
   Clock,
-  ExternalLink,
-  ChevronRight,
-  Navigation,
+  ArrowRight,
   ShieldAlert,
-  ClipboardList,
   Wrench,
-  Info,
-  MapPin,
   Hash,
   Activity,
   Cpu,
@@ -52,8 +43,7 @@ import {
   UserCheck,
   Users,
   Star,
-  RefreshCw,
-  LayoutDashboard
+  RefreshCw
 } from 'lucide-react'
 import {
   Dialog,
@@ -72,15 +62,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { ScrollArea } from '@/components/ui/scroll-area'
 import {
   Table,
   TableBody,
   TableCell,
-  TableHead,
-  TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
@@ -114,7 +102,6 @@ export default function InvestigationOfficersRegistry() {
   const [deleteInputText, setDeleteInputText] = useState('')
   const [isDeleting, setIsDeleting] = useState(false)
   const [activeAssignments, setActiveAssignments] = useState<any[]>([])
-  const [blockReasons, setBlockReasons] = useState<string[]>([])
 
   const [formData, setFormData] = useState({
     name: '',
@@ -180,15 +167,14 @@ export default function InvestigationOfficersRegistry() {
     let email = (officer.email || '').toLowerCase().trim();
     const name = (officer.name || 'Unknown Officer').trim();
     if (!email && id && id.includes('@')) email = id.toLowerCase().trim();
-    if (!id) return { isValid: false, reason: "Internal ID missing." };
-    return { isValid: true, id, email: email || null, name };
+    return { isValid: !!id, id, email: email || null, name };
   };
 
   const handleStartDelete = async (officer: any) => {
     if (!db || !user) return;
     const validation = validateOfficerMetadata(officer);
     if (!validation.isValid) {
-      toast({ variant: "destructive", title: "Registry Inconsistency", description: "Incomplete record." });
+      toast({ variant: "destructive", title: "Registry Inconsistency" });
       return;
     }
     setOfficerToDelete(officer);
@@ -211,7 +197,6 @@ export default function InvestigationOfficersRegistry() {
         );
       if (conflictCases.length > 0) {
         setActiveAssignments(conflictCases);
-        setBlockReasons(["Active investigative assignments exist."]);
         setDeleteDialogStep('blocked');
       } else {
         setDeleteDialogStep('warning');
@@ -289,7 +274,8 @@ export default function InvestigationOfficersRegistry() {
     }
   }
 
-  const handleUpdate = async () => {
+  const handleUpdate = async (e: React.FormEvent) => {
+    e.preventDefault()
     if (!db || !editOfficer) return;
     setIsActionLoading(true)
     try {
@@ -297,7 +283,6 @@ export default function InvestigationOfficersRegistry() {
       const email = (editOfficer.email || '').toLowerCase().trim();
       batch.update(doc(db, 'investigation_officers', editOfficer.id), { ...editOfficer, updatedAt: serverTimestamp() })
       if (email) {
-        // This ensures the user profile stays in sync with basic display info
         batch.set(doc(db, 'users', email), { 
           name: editOfficer.name, 
           status: editOfficer.status,
@@ -308,7 +293,6 @@ export default function InvestigationOfficersRegistry() {
       await batch.commit()
       toast({ title: "Profile Refreshed" })
       setEditOfficer(null)
-      setIsAddingEditDialogOpen(false)
     } catch (e: any) {
       toast({ variant: "destructive", title: "Update Error" });
     } finally {
@@ -321,17 +305,16 @@ export default function InvestigationOfficersRegistry() {
     setIsDeleting(true)
     try {
       const batch = writeBatch(db)
-      const id = officerToDelete.id;
-      let email = (officerToDelete.email || '').toLowerCase().trim();
-      batch.delete(doc(db, 'investigation_officers', id))
-      if (!email && id.includes('@')) email = id;
-      if (email) batch.delete(doc(db, 'users', email.toLowerCase().trim()))
-      const auditRef = doc(collection(db, 'deletion_audit_logs'));
-      batch.set(auditRef, {
+      const validation = validateOfficerMetadata(officerToDelete);
+      if (validation.id) batch.delete(doc(db, 'investigation_officers', validation.id))
+      if (validation.email) batch.delete(doc(db, 'users', validation.email))
+      
+      batch.set(doc(collection(db, 'deletion_audit_logs')), {
         adminId: user.uid, adminName: user.displayName || 'Root', targetId: officerToDelete.employeeId || 'N/A',
-        targetName: officerToDelete.name || 'Incomplete Record', targetEmail: email || 'N/A', timestamp: new Date().toISOString(),
+        targetName: validation.name, targetEmail: validation.email || 'N/A', timestamp: new Date().toISOString(),
         status: "Permanently Purged"
       })
+      
       await batch.commit()
       toast({ title: "Clearance Revoked" })
       setDeleteDialogStep(null)
@@ -359,6 +342,8 @@ export default function InvestigationOfficersRegistry() {
     if (rank.includes('Junior')) return 'bg-blue-400';
     return 'bg-primary';
   }
+
+  if (authLoading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="animate-spin text-red-600" /></div>
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-20">
@@ -608,7 +593,7 @@ export default function InvestigationOfficersRegistry() {
                   <DialogTitle className="text-3xl font-headline font-bold">Operation Blocked</DialogTitle>
                 </div>
                 <p className="text-red-100 text-sm leading-relaxed font-medium">
-                  Active investigative assignments identified. The officer must resolve, complete, or reassign all pending mandates before the profile can be purged.
+                  Active investigative assignments identified. The officer must resolve, complete, or reassign all pending dockets.
                 </p>
               </div>
               <div className="p-10 space-y-8">
@@ -656,7 +641,7 @@ export default function InvestigationOfficersRegistry() {
                 <div className="space-y-3">
                   <DialogTitle className="text-3xl font-headline font-bold text-primary dark:text-white uppercase">Security Escalation</DialogTitle>
                   <DialogDescription className="text-base font-medium leading-relaxed max-w-md mx-auto">
-                    Audit confirmed: No active assignments. This will permanently revoke all credentials for <strong>{officerToDelete?.name}</strong> regardless of registry data integrity.
+                    Audit confirmed: No active assignments. This will permanently revoke all credentials for <strong>{officerToDelete?.name}</strong>.
                   </DialogDescription>
                 </div>
               </div>
@@ -720,20 +705,32 @@ export default function InvestigationOfficersRegistry() {
                       </Button>
                     </DialogClose>
                   </div>
-                  <Badge className="bg-accent text-primary font-black uppercase text-[9px] mb-2 tracking-widest">Metadata Editor</Badge>
+                  <Badge className="bg-accent text-primary font-black uppercase text-[9px] mb-2 tracking-widest">Registry Editor</Badge>
                   <DialogTitle className="text-3xl font-headline font-bold">Update Profile Meta</DialogTitle>
                </div>
-               <div className="flex-1 overflow-y-auto p-10 space-y-8 custom-scrollbar">
+               <form onSubmit={handleUpdate} className="flex-1 overflow-y-auto p-10 space-y-8 custom-scrollbar">
                   <div className="grid md:grid-cols-2 gap-6">
-                    <div className="space-y-1.5"><Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Legal Name</Label><Input value={editOfficer.name || ''} onChange={e => setEditOfficer({...editOfficer, name: e.target.value})} className="h-12 rounded-2xl shadow-inner border-none bg-slate-50 dark:bg-slate-950 font-bold" /></div>
-                    <div className="space-y-1.5"><Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Employee ID</Label><Input value={(editOfficer.employeeId || '')} disabled className="h-12 rounded-2xl bg-slate-100/50 dark:bg-slate-800/50 border-none font-mono font-bold text-slate-400" /></div>
+                    <div className="space-y-1.5">
+                      <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Legal Name</Label>
+                      <Input value={editOfficer.name || ''} onChange={e => setEditOfficer({...editOfficer, name: e.target.value})} className="h-12 rounded-2xl shadow-inner border-none bg-slate-50 dark:bg-slate-950 font-bold" />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Employee ID</Label>
+                      <Input value={editOfficer.employeeId || ''} disabled className="h-12 rounded-2xl bg-slate-100/50 dark:bg-slate-800/50 border-none font-mono font-bold text-slate-400" />
+                    </div>
                   </div>
                   <div className="grid md:grid-cols-2 gap-6">
-                    <div className="space-y-1.5"><Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Official Email</Label><Input value={editOfficer.email || ''} onChange={e => setEditOfficer({...editOfficer, email: e.target.value.toLowerCase()})} className="h-12 rounded-2xl shadow-inner border-none bg-slate-50 dark:bg-slate-950" /></div>
-                    <div className="space-y-1.5"><Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Secure Phone Number</Label><Input value={editOfficer.phone || ''} onChange={e => setEditOfficer({...editOfficer, phone: e.target.value})} className="h-12 rounded-2xl shadow-inner border-none bg-slate-50 dark:bg-slate-950" /></div>
+                    <div className="space-y-1.5">
+                      <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Official Email</Label>
+                      <Input value={editOfficer.email || ''} onChange={e => setEditOfficer({...editOfficer, email: e.target.value.toLowerCase().trim()})} className="h-12 rounded-2xl shadow-inner border-none bg-slate-50 dark:bg-slate-950" />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Secure Phone Number</Label>
+                      <Input value={editOfficer.phone || ''} onChange={e => setEditOfficer({...editOfficer, phone: e.target.value})} className="h-12 rounded-2xl shadow-inner border-none bg-slate-50 dark:bg-slate-950" />
+                    </div>
                   </div>
                   <div className="grid md:grid-cols-2 gap-6">
-                    <div className="space-y-1.5 flex-1">
+                    <div className="space-y-1.5">
                        <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Official Rank</Label>
                        <Select value={editOfficer.designation || 'Investigation Officer'} onValueChange={(val) => setEditOfficer({...editOfficer, designation: val})}>
                           <SelectTrigger className="h-12 rounded-xl bg-slate-50 dark:bg-slate-950 border-none shadow-inner font-bold"><SelectValue /></SelectTrigger>
@@ -748,10 +745,10 @@ export default function InvestigationOfficersRegistry() {
                        </Select>
                     </div>
                   </div>
-                  <Button onClick={handleUpdate} disabled={isActionLoading} className="w-full h-16 rounded-2xl bg-primary text-white font-bold shadow-xl hover:bg-secondary transition-all flex gap-2">
+                  <Button type="submit" disabled={isActionLoading} className="w-full h-16 rounded-2xl bg-primary text-white font-bold shadow-xl hover:bg-secondary transition-all flex gap-2">
                      {isActionLoading ? <Loader2 className="animate-spin w-5 h-5" /> : <><RefreshCw className="w-5 h-5" /> Commit Registry Refresh</>}
                   </Button>
-               </div>
+               </form>
             </>
           )}
         </DialogContent>
@@ -817,7 +814,7 @@ export default function InvestigationOfficersRegistry() {
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-slate-50 dark:bg-slate-800 rounded-lg"><Clock className="w-4 h-4 text-slate-400" /></div>
                     <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                      Registered: {selectedOfficerForDetails.createdAt?.toDate ? selectedOfficerForDetails.createdAt.toDate().toLocaleDateString('en-IN') : 'N/A'}
+                      Commissioned: {selectedOfficerForDetails.createdAt?.toDate ? selectedOfficerForDetails.createdAt.toDate().toLocaleDateString('en-IN') : 'N/A'}
                     </span>
                   </div>
                   <div className="flex items-center gap-3">

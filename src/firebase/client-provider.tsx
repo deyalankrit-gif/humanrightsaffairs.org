@@ -9,6 +9,8 @@ import { FirebaseProvider } from './provider';
  * FirebaseClientProvider: High-fidelity multi-app session provider.
  * Intelligently switches the Firebase context based on the active route to ensure
  * total session isolation between Administrative, Investigative, and Public portals.
+ * 
+ * This prevents cross-terminal session conflicts (Root vs Investigator).
  */
 export function FirebaseClientProvider({
   children,
@@ -18,7 +20,6 @@ export function FirebaseClientProvider({
   const pathname = usePathname();
 
   // Determine the isolated session name based on the portal context
-  // This prevents the "Root Terminal" and "Investigator Terminal" from logging each other out.
   const sessionName = useMemo(() => {
     if (pathname?.startsWith('/internal')) return 'AdminTerminal';
     if (pathname?.startsWith('/investigator')) return 'InvestigatorTerminal';
