@@ -26,7 +26,8 @@ import {
   Mail,
   Phone,
   Fingerprint,
-  Briefcase
+  Briefcase,
+  Sparkles
 } from 'lucide-react'
 import {
   Dialog,
@@ -101,6 +102,15 @@ export default function InvestigationOfficersRegistry() {
   }, [db, isRoot]);
 
   const { data: officers, loading: dataLoading } = useCollection(officersQuery);
+
+  const generateOfficerId = () => {
+    const numbers = '0123456789';
+    let result = 'HRAT-IO-';
+    for (let i = 0; i < 4; i++) {
+      result += numbers.charAt(Math.floor(Math.random() * numbers.length));
+    }
+    return result;
+  }
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -197,7 +207,25 @@ export default function InvestigationOfficersRegistry() {
                     </div>
                     <div className="space-y-1.5">
                        <Label className="text-[10px] font-bold uppercase text-slate-400">Employee ID *</Label>
-                       <Input value={formData.employeeId} onChange={e => setFormData({...formData, employeeId: e.target.value.toUpperCase()})} placeholder="HRAT-IO-001" className="h-11 rounded-xl font-mono" required />
+                       <div className="flex gap-2">
+                          <Input 
+                            value={formData.employeeId} 
+                            onChange={e => setFormData({...formData, employeeId: e.target.value.toUpperCase()})} 
+                            placeholder="HRAT-IO-001" 
+                            className="h-11 rounded-xl font-mono flex-1" 
+                            required 
+                          />
+                          <Button 
+                            type="button" 
+                            variant="outline" 
+                            size="icon" 
+                            title="Generate Automatically"
+                            className="h-11 w-11 shrink-0 rounded-xl border-dashed hover:bg-accent/10"
+                            onClick={() => setFormData({...formData, employeeId: generateOfficerId()})}
+                          >
+                            <Sparkles className="w-4 h-4 text-accent" />
+                          </Button>
+                       </div>
                     </div>
                   </div>
 
@@ -328,7 +356,26 @@ export default function InvestigationOfficersRegistry() {
                <div className="p-8 space-y-6">
                   <div className="grid md:grid-cols-2 gap-6">
                     <div className="space-y-1.5"><Label className="text-[10px] font-bold uppercase text-slate-400">Legal Name</Label><Input value={editOfficer.name} onChange={e => setEditOfficer({...editOfficer, name: e.target.value})} className="h-11 rounded-xl" /></div>
-                    <div className="space-y-1.5"><Label className="text-[10px] font-bold uppercase text-slate-400">Employee ID</Label><Input value={editOfficer.employeeId} onChange={e => setEditOfficer({...editOfficer, employeeId: e.target.value.toUpperCase()})} className="h-11 rounded-xl font-mono" /></div>
+                    <div className="space-y-1.5">
+                       <Label className="text-[10px] font-bold uppercase text-slate-400">Employee ID</Label>
+                       <div className="flex gap-2">
+                          <Input 
+                            value={editOfficer.employeeId} 
+                            onChange={e => setEditOfficer({...editOfficer, employeeId: e.target.value.toUpperCase()})} 
+                            className="h-11 rounded-xl font-mono flex-1" 
+                          />
+                          <Button 
+                            type="button" 
+                            variant="outline" 
+                            size="icon" 
+                            title="Regenerate"
+                            className="h-11 w-11 shrink-0 rounded-xl border-dashed"
+                            onClick={() => setEditOfficer({...editOfficer, employeeId: generateOfficerId()})}
+                          >
+                            <Sparkles className="w-4 h-4 text-accent" />
+                          </Button>
+                       </div>
+                    </div>
                   </div>
                   <div className="grid md:grid-cols-2 gap-6">
                     <div className="space-y-1.5"><Label className="text-[10px] font-bold uppercase text-slate-400">Official Email</Label><Input value={editOfficer.email} onChange={e => setEditOfficer({...editOfficer, email: e.target.value})} className="h-11 rounded-xl" /></div>
