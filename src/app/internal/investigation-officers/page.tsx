@@ -162,12 +162,23 @@ export default function InvestigationOfficersRegistry() {
   }
 
   const generatePassword = () => {
-    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$";
-    let password = "";
-    for (let i = 0; i < 10; i++) {
-      password += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return password;
+    // Institutional Password Logic: 
+    // First 3 of Name (1st Cap) + # + Last 3 of Phone + Counter
+    const name = (formData.name || 'OFF').trim();
+    const phone = (formData.phone || '000').replace(/\D/g, '');
+    
+    // 1. First three characters of name, first letter capital
+    let namePart = name.substring(0, 3);
+    if (namePart.length < 3) namePart = namePart.padEnd(3, 'X');
+    namePart = namePart.charAt(0).toUpperCase() + namePart.slice(1).toLowerCase();
+    
+    // 2. Last three digits of phone
+    const phonePart = (phone || '000').slice(-3).padStart(3, '0');
+    
+    // 3. Counter based on total registry yield
+    const counter = (officers?.length || 0) + 1;
+    
+    return `${namePart}#${phonePart}${counter}`;
   }
 
   const validateOfficerMetadata = (officer: any) => {
@@ -347,7 +358,7 @@ export default function InvestigationOfficersRegistry() {
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-20">
       <header className="pt-16 pb-12 bg-slate-900 text-white border-b-8 border-accent/20 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-1/3 h-full bg-accent/5 -skew-x-12 animate-pulse"></div>
+        <div className="absolute top-0 right-0 w-1/4 h-full bg-accent/5 -skew-x-12 animate-pulse"></div>
         <div className="container mx-auto px-4 relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
           <div className="space-y-2 text-center md:text-left">
              <div className="inline-flex items-center gap-2 bg-accent/20 text-accent px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] border border-accent/30 animate-in slide-in-from-left-4 duration-700">
@@ -368,7 +379,7 @@ export default function InvestigationOfficersRegistry() {
                </DialogTrigger>
                <DialogContent className="max-w-md rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden [&>button]:hidden">
                   <div className="bg-red-600 p-8 text-white relative">
-                     <div className="absolute right-6 top-6"><DialogClose asChild><Button variant="ghost" size="icon" className="rounded-full text-white/40 hover:text-white hover:bg-white/10"><X className="w-4 h-4" /></Button></DialogClose></div>
+                     <div className="absolute right-6 top-6"><DialogClose asChild><Button variant="ghost" size="icon" className="rounded-full text-white hover:bg-white/10"><X className="w-4 h-4" /></Button></DialogClose></div>
                      <DialogTitle className="text-2xl font-headline font-bold">Registry Reset</DialogTitle>
                   </div>
                   <div className="p-8 space-y-6">
@@ -392,7 +403,7 @@ export default function InvestigationOfficersRegistry() {
                  <div className="bg-slate-900 p-8 text-white relative">
                     <div className="absolute right-6 top-6">
                       <DialogClose asChild>
-                        <Button variant="ghost" size="icon" className="rounded-full text-white/40 hover:text-white hover:bg-white/10 transition-all">
+                        <Button variant="ghost" size="icon" className="rounded-full text-white hover:bg-white/10 transition-all">
                           <X className="w-5 h-5" />
                         </Button>
                       </DialogClose>
@@ -579,7 +590,7 @@ export default function InvestigationOfficersRegistry() {
               <div className="bg-red-600 p-10 text-white shrink-0 relative overflow-hidden">
                 <div className="absolute right-6 top-6">
                   <DialogClose asChild>
-                    <Button variant="ghost" size="icon" className="rounded-full text-white/40"><X className="w-5 h-5" /></Button>
+                    <Button variant="ghost" size="icon" className="rounded-full text-white"><X className="w-5 h-5" /></Button>
                   </DialogClose>
                 </div>
                 <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16 blur-2xl"></div>
@@ -626,7 +637,7 @@ export default function InvestigationOfficersRegistry() {
             <div className="p-10 space-y-8 animate-in slide-in-from-right-4 duration-500">
               <div className="absolute right-6 top-6">
                 <DialogClose asChild>
-                  <Button variant="ghost" size="icon" className="rounded-full text-slate-400"><X className="w-5 h-5" /></Button>
+                  <Button variant="ghost" size="icon" className="rounded-full text-slate-400 hover:text-red-500"><X className="w-5 h-5" /></Button>
                 </DialogClose>
               </div>
               <div className="flex flex-col items-center text-center space-y-6">
@@ -651,7 +662,7 @@ export default function InvestigationOfficersRegistry() {
             <div className="p-10 space-y-8 animate-in zoom-in-95 duration-500">
               <div className="absolute right-6 top-6">
                 <DialogClose asChild>
-                  <Button variant="ghost" size="icon" className="rounded-full text-slate-400"><X className="w-5 h-5" /></Button>
+                  <Button variant="ghost" size="icon" className="rounded-full text-slate-400 hover:text-red-500"><X className="w-5 h-5" /></Button>
                 </DialogClose>
               </div>
               <div className="space-y-4 text-center">
@@ -695,7 +706,7 @@ export default function InvestigationOfficersRegistry() {
                <div className="bg-slate-900 p-10 text-white shrink-0 border-b-4 border-accent/20 relative">
                   <div className="absolute right-6 top-6">
                     <DialogClose asChild>
-                      <Button variant="ghost" size="icon" className="rounded-full text-white/40 hover:text-white transition-all">
+                      <Button variant="ghost" size="icon" className="rounded-full text-white hover:bg-white/10 transition-all">
                         <X className="w-5 h-5" />
                       </Button>
                     </DialogClose>
@@ -724,7 +735,7 @@ export default function InvestigationOfficersRegistry() {
                        </Select>
                     </div>
                   </div>
-                  <Button onClick={handleUpdate} disabled={isActionLoading} className="w-full h-16 bg-primary text-white font-bold rounded-2xl shadow-xl hover:bg-secondary transition-all flex gap-2">
+                  <Button onClick={handleUpdate} disabled={isActionLoading} className="w-full h-16 rounded-2xl bg-primary text-white font-bold shadow-xl hover:bg-secondary transition-all flex gap-2">
                      {isActionLoading ? <Loader2 className="animate-spin w-5 h-5" /> : <><RefreshCw className="w-5 h-5" /> Commit Registry Refresh</>}
                   </Button>
                </div>
@@ -742,7 +753,7 @@ export default function InvestigationOfficersRegistry() {
                 <div className="absolute top-0 right-0 w-32 h-32 bg-accent/5 rounded-full -mr-16 -mt-16 blur-2xl"></div>
                 <div className="absolute right-6 top-6">
                   <DialogClose asChild>
-                    <Button variant="ghost" size="icon" className="rounded-full text-white/40 hover:text-white hover:bg-white/10 transition-all">
+                    <Button variant="ghost" size="icon" className="rounded-full text-white hover:bg-white/10 transition-all">
                       <X className="w-5 h-5" />
                     </Button>
                   </DialogClose>
