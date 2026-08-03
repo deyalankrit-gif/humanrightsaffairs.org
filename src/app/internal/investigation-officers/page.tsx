@@ -1,7 +1,6 @@
-
 "use client"
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { initializeApp, deleteApp } from 'firebase/app'
 import { getAuth, createUserWithEmailAndPassword, updateProfile, deleteUser } from 'firebase/auth'
@@ -137,7 +136,7 @@ export default function InvestigationOfficersRegistry() {
 
   const { data: rawOfficers, loading: dataLoading } = useCollection(officersQuery);
 
-  const officers = React.useMemo(() => {
+  const officers = useMemo(() => {
     return (rawOfficers || []).filter(o => o && typeof o === 'object' && o.id);
   }, [rawOfficers]);
 
@@ -655,7 +654,7 @@ export default function InvestigationOfficersRegistry() {
                     </div>
                   </div>
                   <Button onClick={handleUpdate} disabled={isActionLoading} className="w-full h-16 bg-primary text-white font-bold rounded-2xl shadow-xl hover:bg-secondary transition-all flex gap-2">
-                     {isActionLoading ? <Loader2 className="animate-spin" /> : <><RefreshCw className="w-5 h-5" /> Commit Registry Refresh</>}
+                     {isActionLoading ? <Loader2 className="animate-spin w-5 h-5" /> : <><RefreshCw className="w-5 h-5" /> Commit Registry Refresh</>}
                   </Button>
                </div>
             </>
