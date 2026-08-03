@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useEffect, useState } from 'react'
@@ -7,7 +6,7 @@ import { initializeApp, deleteApp } from 'firebase/app'
 import { getAuth, createUserWithEmailAndPassword, updateProfile, deleteUser } from 'firebase/auth'
 import { firebaseConfig } from '@/firebase/config'
 import { useUser, useCollection, useFirestore, useMemoFirebase } from '@/firebase'
-import { collection, query, orderBy, addDoc, deleteDoc, doc, updateDoc, serverTimestamp, setDoc, getDoc, writeBatch, where } from 'firebase/firestore'
+import { collection, query, orderBy, addDoc, deleteDoc, doc, updateDoc, serverTimestamp, setDoc, getDoc, writeBatch, where, getDocs } from 'firebase/firestore'
 import { Footer } from '@/components/footer'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -85,10 +84,11 @@ export default function InvestigationOfficersRegistry() {
   const [showPassword, setShowPassword] = useState(false)
 
   // Deletion States
-  const [deleteDialogStep, setDeleteDialogStep] = useState<'warning' | 'verify' | null>(null)
+  const [deleteDialogStep, setDeleteDialogStep] = useState<'warning' | 'verify' | 'blocked' | null>(null)
   const [officerToDelete, setOfficerToDelete] = useState<any>(null)
   const [deleteInputText, setDeleteInputText] = useState('')
   const [isDeleting, setIsDeleting] = useState(false)
+  const [blockReason, setBlockReason] = useState('')
 
   const [formData, setFormData] = useState({
     name: '',
@@ -131,6 +131,32 @@ export default function InvestigationOfficersRegistry() {
     const cleanPhone = (phone || '000').replace(/\D/g, '');
     const suffix = cleanPhone.length >= 3 ? cleanPhone.slice(-3) : '000';
     return `${prefix}#${suffix}`;
+  };
+
+  const handleStartDelete = async (officer: any) => {
+    if (!db) return;
+    setOfficerToDelete(officer);
+    setIsActionLoading(true);
+
+    try {
+      // Governance Check: Search for active assignments in the public_complaints registry
+      const complaintsRef = collection(db, 'public_complaints');
+      // Match by assignedTo name OR presence in assignedOfficers array
+      const q1 = query(complaintsRef, where('assignedTo', '==', officer.name), where('status', 'not-in', ['Closed', 'Action Taken']));
+      const snap1 = await getDocs(q1);
+      
+      if (!snap1.empty) {
+        setBlockReason(`Active Case Assignment Identified. This official is currently linked to ${snap1.size} active investigation(s). Assignments must be transferred or closed before registry purging is permitted.`);
+        setDeleteDialogStep('blocked');
+        return;
+      }
+
+      setDeleteDialogStep('warning');
+    } catch (e) {
+      toast({ variant: "destructive", title: "Audit Error", description: "Could not verify officer's current assignment status." });
+    } finally {
+      setIsActionLoading(false);
+    }
   };
 
   const handleAdd = async (e: React.FormEvent) => {
@@ -424,10 +450,11 @@ export default function InvestigationOfficersRegistry() {
                           <div className="flex items-center gap-3">
                              <Button onClick={() => setEditOfficer(officer)} variant="outline" size="sm" className="h-10 px-5 rounded-xl text-[10px] font-bold uppercase tracking-widest border-2 hover:bg-primary hover:text-white transition-all">Modify</Button>
                              <button 
-                               onClick={() => { setOfficerToDelete(officer); setDeleteDialogStep('warning'); }}
+                               onClick={() => handleStartDelete(officer)}
+                               disabled={isActionLoading}
                                className="h-10 w-10 text-slate-300 hover:text-red-500 transition-all rounded-xl flex items-center justify-center"
                              >
-                               <Trash2 className="w-5 h-5" />
+                               {isActionLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Trash2 className="w-5 h-5" />}
                              </button>
                           </div>
                        </div>
@@ -542,9 +569,27 @@ export default function InvestigationOfficersRegistry() {
         </DialogContent>
       </Dialog>
 
-      {/* Two-Stage Deletion Dialog */}
-      <Dialog open={!!deleteDialogStep} onOpenChange={(open) => { if(!open) { setDeleteDialogStep(null); setOfficerToDelete(null); setDeleteInputText(''); } }}>
+      {/* Multi-Stage Deletion Dialog */}
+      <Dialog open={!!deleteDialogStep} onOpenChange={(open) => { if(!open) { setDeleteDialogStep(null); setOfficerToDelete(null); setDeleteInputText(''); setBlockReason(''); } }}>
         <DialogContent className="max-w-md rounded-[2rem] border-none shadow-2xl p-0 overflow-hidden bg-white dark:bg-slate-900">
+          
+          {deleteDialogStep === 'blocked' && (
+            <div className="p-8 space-y-6">
+              <div className="flex flex-col items-center text-center space-y-4">
+                <div className="w-20 h-20 bg-amber-50 dark:bg-amber-950/30 text-amber-500 rounded-full flex items-center justify-center">
+                  <ShieldAlert className="w-10 h-10" />
+                </div>
+                <div className="space-y-2">
+                  <DialogTitle className="text-2xl font-headline font-bold text-primary dark:text-white">Governance Block</DialogTitle>
+                  <DialogDescription className="text-sm text-slate-500 leading-relaxed font-medium">
+                    {blockReason}
+                  </DialogDescription>
+                </div>
+              </div>
+              <Button onClick={() => setDeleteDialogStep(null)} className="w-full h-12 rounded-xl bg-primary text-white font-bold">Acknowledge</Button>
+            </div>
+          )}
+
           {deleteDialogStep === 'warning' && (
             <div className="p-8 space-y-6">
               <div className="flex flex-col items-center text-center space-y-4">
