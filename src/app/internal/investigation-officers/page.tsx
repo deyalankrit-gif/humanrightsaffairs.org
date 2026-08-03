@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useEffect, useState } from 'react'
@@ -149,15 +150,12 @@ export default function InvestigationOfficersRegistry() {
     let authUser: any = null
 
     try {
-      // 1. Create account in Firebase Auth
       const authUserCredential = await createUserWithEmailAndPassword(secondaryAuth, officerEmail, formData.password)
       authUser = authUserCredential.user
       await updateProfile(authUser, { displayName: formData.name })
 
-      // 2. Atomically establish registry documents
       const batch = writeBatch(db)
       
-      // Investigator Pool Record
       const officerRef = doc(collection(db, 'investigation_officers'))
       batch.set(officerRef, {
         ...formData,
@@ -165,7 +163,6 @@ export default function InvestigationOfficersRegistry() {
         createdAt: serverTimestamp()
       })
 
-      // Standard User/Governance Record
       const userRef = doc(db, 'users', officerEmail)
       batch.set(userRef, {
         uid: authUser.uid,
@@ -184,10 +181,6 @@ export default function InvestigationOfficersRegistry() {
       setFormData({ name: '', email: '', phone: '', employeeId: '', password: '', designation: 'Investigation Officer', status: 'active' })
       setIsAddOpen(false)
     } catch (e: any) {
-      if (authUser) {
-        // Rollback attempt if Firestore fails (Requires Admin SDK in production, but here we try best effort)
-        console.error("Critical: Auth user created but registry failed. Manual cleanup required.");
-      }
       toast({ variant: "destructive", title: "Provisioning Failed", description: e.message })
     } finally {
       await deleteApp(secondaryApp)
@@ -202,13 +195,11 @@ export default function InvestigationOfficersRegistry() {
       const { id, ...data } = editOfficer
       const batch = writeBatch(db)
       
-      // Update Pool
       batch.update(doc(db, 'investigation_officers', id), {
         ...data,
         updatedAt: serverTimestamp()
       })
 
-      // Update User Record for role/status sync
       batch.update(doc(db, 'users', editOfficer.email.toLowerCase().trim()), {
         name: editOfficer.name,
         status: editOfficer.status,
@@ -468,7 +459,7 @@ export default function InvestigationOfficersRegistry() {
 
       {/* View Details Dialog - Read Only */}
       <Dialog open={!!selectedOfficerForDetails} onOpenChange={(val) => !val && setSelectedOfficerForDetails(null)}>
-        <DialogContent className="max-w-xl rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden bg-white dark:bg-slate-950 flex flex-col max-h-[90vh]">
+        <DialogContent className="max-w-2xl rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden bg-white dark:bg-slate-950 flex flex-col max-h-[90vh]">
           {selectedOfficerForDetails && (
             <>
                <div className="bg-slate-900 p-8 text-white relative shrink-0 border-b-8 border-accent/20">
@@ -483,7 +474,7 @@ export default function InvestigationOfficersRegistry() {
 
                <div className="flex-1 overflow-y-auto p-8 space-y-10 custom-scrollbar">
                   {/* Identity Key Segment */}
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                      <div className="p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800">
                         <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Employee ID</p>
                         <p className="text-sm font-mono font-bold text-primary dark:text-white uppercase">{selectedOfficerForDetails.employeeId || 'IO-PENDING'}</p>
@@ -491,6 +482,13 @@ export default function InvestigationOfficersRegistry() {
                      <div className="p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800">
                         <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Official Rank</p>
                         <p className="text-sm font-bold text-primary dark:text-white truncate">{selectedOfficerForDetails.designation}</p>
+                     </div>
+                     <div className="p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800">
+                        <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Registry Passphrase</p>
+                        <div className="flex items-center gap-2">
+                           <Lock className="w-3.5 h-3.5 text-accent" />
+                           <p className="text-sm font-bold text-primary dark:text-white">{selectedOfficerForDetails.password || 'N/A'}</p>
+                        </div>
                      </div>
                   </div>
 
