@@ -42,7 +42,8 @@ import {
   ChevronRight,
   Navigation,
   ShieldAlert,
-  ClipboardList
+  ClipboardList,
+  Wrench
 } from 'lucide-react'
 import {
   Dialog,
@@ -91,6 +92,7 @@ export default function InvestigationOfficersRegistry() {
   const [search, setSearch] = useState('')
   const [isActionLoading, setIsActionLoading] = useState(false)
   const [isAddOpen, setIsAddOpen] = useState(false)
+  const [isPurgeOpen, setIsPurgeOpen] = useState(false)
   const [editOfficer, setEditOfficer] = useState<any>(null)
   const [selectedOfficerForDetails, setSelectedOfficerForDetails] = useState<any>(null)
   const [showPassword, setShowPassword] = useState(false)
@@ -158,7 +160,6 @@ export default function InvestigationOfficersRegistry() {
 
     try {
       const complaintsRef = collection(db, 'public_complaints');
-      // Logic: Search for any case that is NOT CLOSED where this officer is involved
       const q = query(
         complaintsRef, 
         where('status', 'not-in', ['Closed', 'Action Taken'])
@@ -186,7 +187,6 @@ export default function InvestigationOfficersRegistry() {
         
         setBlockReasons(Array.from(reasons));
 
-        // Log the blocked attempt for governance review
         const blockedLogRef = doc(collection(db, 'deletion_audit_logs'));
         await setDoc(blockedLogRef, {
           adminId: user.uid,
@@ -205,6 +205,37 @@ export default function InvestigationOfficersRegistry() {
       }
     } catch (e: any) {
       toast({ variant: "destructive", title: "Audit Error", description: "Verification protocol failed: " + e.message });
+    } finally {
+      setIsActionLoading(false);
+    }
+  };
+
+  const handlePurgeAllExceptRaisa = async () => {
+    if (!db || !isRoot || !officers) return;
+    setIsActionLoading(true);
+    
+    try {
+      const batch = writeBatch(db);
+      let count = 0;
+      
+      for (const officer of officers) {
+        if (officer.name !== 'Raisa Das') {
+          batch.delete(doc(db, 'investigation_officers', officer.id));
+          batch.delete(doc(db, 'users', officer.email.toLowerCase().trim()));
+          count++;
+        }
+      }
+      
+      if (count > 0) {
+        await batch.commit();
+        toast({ title: "Registry Purged", description: `${count} personnel records removed. Raisa Das preserved.` });
+        setIsPurgeOpen(false);
+      } else {
+        toast({ title: "Audit Complete", description: "No conflicting records found. Raisa Das is the sole investigator." });
+        setIsPurgeOpen(false);
+      }
+    } catch (e: any) {
+      toast({ variant: "destructive", title: "Purge Failed", description: e.message });
     } finally {
       setIsActionLoading(false);
     }
@@ -345,112 +376,149 @@ export default function InvestigationOfficersRegistry() {
              <p className="text-slate-400 text-[11px] uppercase font-black">Official Registry of Investigative Personnel</p>
           </div>
           
-          <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
-            <DialogTrigger asChild>
-              <Button className="bg-accent text-primary font-bold rounded-xl h-11 px-8 flex gap-2 shadow-xl shadow-accent/20 hover:bg-secondary hover:text-white transition-all transform hover:scale-105 active:scale-95">
-                <Plus className="w-4 h-4" /> Add Investigation Officer
-              </Button>
-            </DialogTrigger>
-            <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="max-w-xl rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden">
-               <div className="bg-slate-900 p-8 text-white relative">
-                  <div className="absolute right-6 top-6"><DialogClose asChild><Button variant="ghost" size="icon" className="rounded-full text-white/40 h-8 w-8"><X className="w-4 h-4" /></Button></DialogClose></div>
-                  <Badge className="bg-accent text-primary font-black text-[8px] uppercase mb-2">Personnel Node</Badge>
-                  <DialogTitle className="text-2xl font-headline font-bold">Provision Officer</DialogTitle>
-                  <DialogDescription className="text-slate-400">Atomic registration: Creates Auth account and registry record simultaneously.</DialogDescription>
-               </div>
-               <form onSubmit={handleAdd} className="p-8 space-y-6">
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <div className="space-y-1.5">
-                       <Label className="text-[10px] font-bold uppercase text-slate-400">Officer Name *</Label>
-                       <Input value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} placeholder="e.g. Adv. Sourav Chatterjee" className="h-11 rounded-xl" required />
-                    </div>
-                    <div className="space-y-1.5">
-                       <Label className="text-[10px] font-bold uppercase text-slate-400">Employee ID *</Label>
-                       <div className="flex gap-2">
-                          <Input 
-                            value={formData.employeeId} 
-                            onChange={e => setFormData({...formData, employeeId: e.target.value.toUpperCase()})} 
-                            placeholder="HRAT-IO-001" 
-                            className="h-11 rounded-xl font-mono flex-1" 
-                            required 
-                          />
-                          <Button 
-                            type="button" 
-                            variant="outline" 
-                            size="icon" 
-                            title="Generate ID"
-                            className="h-11 w-11 shrink-0 rounded-xl border-dashed hover:bg-accent/10"
-                            onClick={() => setFormData({...formData, employeeId: generateOfficerId()})}
-                          >
-                            <Sparkles className="w-4 h-4 text-accent" />
-                          </Button>
-                       </div>
-                    </div>
+          <div className="flex flex-wrap justify-center gap-3">
+            <Dialog open={isPurgeOpen} onOpenChange={setIsPurgeOpen}>
+               <DialogTrigger asChild>
+                 <Button variant="outline" className="bg-white/5 border-red-500/30 text-red-500 h-11 px-6 rounded-xl font-bold gap-2 hover:bg-red-500/10 transition-all">
+                    <Wrench className="w-4 h-4" /> Registry Maintenance
+                 </Button>
+               </DialogTrigger>
+               <DialogContent className="max-w-md rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden">
+                  <div className="bg-red-600 p-8 text-white relative">
+                     <div className="absolute right-6 top-6"><DialogClose asChild><Button variant="ghost" size="icon" className="rounded-full text-white/40 hover:text-white"><X className="w-4 h-4" /></Button></DialogClose></div>
+                     <Badge className="bg-white/20 text-white font-black text-[8px] uppercase mb-2 border-white/30">Governance Protocol</Badge>
+                     <DialogTitle className="text-2xl font-headline font-bold">Registry Cleanup</DialogTitle>
                   </div>
+                  <div className="p-8 space-y-6">
+                     <div className="space-y-4">
+                        <div className="flex items-start gap-4 p-4 bg-red-50 rounded-2xl border border-red-100">
+                           <ShieldAlert className="w-6 h-6 text-red-600 shrink-0 mt-0.5" />
+                           <p className="text-sm font-bold text-red-900 leading-relaxed">
+                              This protocol will permanently purge ALL investigation officers and their access credentials from the registry, EXCEPT for **Raisa Das**.
+                           </p>
+                        </div>
+                        <p className="text-xs text-slate-500 leading-relaxed italic">
+                           "All assignments, dockets, and authentication keys for other officials will be destroyed. Ensure all active cases have been transferred before execution."
+                        </p>
+                     </div>
+                     <Button 
+                       onClick={handlePurgeAllExceptRaisa} 
+                       disabled={isActionLoading}
+                       className="w-full h-14 bg-red-600 hover:bg-red-700 text-white font-black uppercase text-xs tracking-widest shadow-xl shadow-red-900/20"
+                     >
+                        {isActionLoading ? <Loader2 className="animate-spin w-5 h-5" /> : "Authorize Registry Reset"}
+                     </Button>
+                  </div>
+               </DialogContent>
+            </Dialog>
 
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <div className="space-y-1.5">
-                       <Label className="text-[10px] font-bold uppercase text-slate-400">Official Email *</Label>
-                       <Input type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} placeholder="officer@hrat-india.org" className="h-11 rounded-xl" required />
-                    </div>
-                    <div className="space-y-1.5">
-                       <Label className="text-[10px] font-bold uppercase text-slate-400">Login Password *</Label>
-                       <div className="flex gap-2">
-                          <div className="relative flex-1">
+            <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
+              <DialogTrigger asChild>
+                <Button className="bg-accent text-primary font-bold rounded-xl h-11 px-8 flex gap-2 shadow-xl shadow-accent/20 hover:bg-secondary hover:text-white transition-all transform hover:scale-105 active:scale-95">
+                  <Plus className="w-4 h-4" /> Add Investigation Officer
+                </Button>
+              </DialogTrigger>
+              <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="max-w-xl rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden">
+                 <div className="bg-slate-900 p-8 text-white relative">
+                    <div className="absolute right-6 top-6"><DialogClose asChild><Button variant="ghost" size="icon" className="rounded-full text-white/40 h-8 w-8"><X className="w-4 h-4" /></Button></DialogClose></div>
+                    <Badge className="bg-accent text-primary font-black text-[8px] uppercase mb-2">Personnel Node</Badge>
+                    <DialogTitle className="text-2xl font-headline font-bold">Provision Officer</DialogTitle>
+                    <DialogDescription className="text-slate-400">Atomic registration: Creates Auth account and registry record simultaneously.</DialogDescription>
+                 </div>
+                 <form onSubmit={handleAdd} className="p-8 space-y-6">
+                    <div className="grid md:grid-cols-2 gap-6">
+                      <div className="space-y-1.5">
+                         <Label className="text-[10px] font-bold uppercase text-slate-400">Officer Name *</Label>
+                         <Input value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} placeholder="e.g. Adv. Sourav Chatterjee" className="h-11 rounded-xl" required />
+                      </div>
+                      <div className="space-y-1.5">
+                         <Label className="text-[10px] font-bold uppercase text-slate-400">Employee ID *</Label>
+                         <div className="flex gap-2">
                             <Input 
-                              type={showPassword ? "text" : "password"}
-                              value={formData.password} 
-                              onChange={e => setFormData({...formData, password: e.target.value})} 
-                              placeholder="Min 8 chars" 
-                              className="h-11 rounded-xl pr-10" 
+                              value={formData.employeeId} 
+                              onChange={e => setFormData({...formData, employeeId: e.target.value.toUpperCase()})} 
+                              placeholder="HRAT-IO-001" 
+                              className="h-11 rounded-xl font-mono flex-1" 
                               required 
                             />
-                            <button 
+                            <Button 
                               type="button" 
-                              onClick={() => setShowPassword(!showPassword)}
-                              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-accent"
+                              variant="outline" 
+                              size="icon" 
+                              title="Generate ID"
+                              className="h-11 w-11 shrink-0 rounded-xl border-dashed hover:bg-accent/10"
+                              onClick={() => setFormData({...formData, employeeId: generateOfficerId()})}
                             >
-                              {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                            </button>
-                          </div>
-                          <Button 
-                            type="button" 
-                            variant="outline" 
-                            size="icon" 
-                            title="Generate Protocol Password"
-                            className="h-11 w-11 shrink-0 rounded-xl border-dashed hover:bg-accent/10"
-                            onClick={() => setFormData({...formData, password: generateSmartPassword(formData.name, formData.phone)})}
-                          >
-                            <Lock className="w-4 h-4 text-accent" />
-                          </Button>
-                       </div>
+                              <Sparkles className="w-4 h-4 text-accent" />
+                            </Button>
+                         </div>
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <div className="space-y-1.5 flex-1">
-                       <Label className="text-[10px] font-bold uppercase text-slate-400">Designation / Rank *</Label>
-                       <Select value={formData.designation} onValueChange={(val) => setFormData({...formData, designation: val})}>
-                          <SelectTrigger className="h-11 rounded-xl">
-                             <SelectValue placeholder="Select Rank" />
-                          </SelectTrigger>
-                          <SelectContent className="bg-white z-[1000000]">
-                             {OFFICER_DESIGNATIONS.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}
-                          </SelectContent>
-                       </Select>
+                    <div className="grid md:grid-cols-2 gap-6">
+                      <div className="space-y-1.5">
+                         <Label className="text-[10px] font-bold uppercase text-slate-400">Official Email *</Label>
+                         <Input type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} placeholder="officer@hrat-india.org" className="h-11 rounded-xl" required />
+                      </div>
+                      <div className="space-y-1.5">
+                         <Label className="text-[10px] font-bold uppercase text-slate-400">Login Password *</Label>
+                         <div className="flex gap-2">
+                            <div className="relative flex-1">
+                              <Input 
+                                type={showPassword ? "text" : "password"}
+                                value={formData.password} 
+                                onChange={e => setFormData({...formData, password: e.target.value})} 
+                                placeholder="Min 8 chars" 
+                                className="h-11 rounded-xl pr-10" 
+                                required 
+                              />
+                              <button 
+                                type="button" 
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-accent"
+                              >
+                                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                              </button>
+                            </div>
+                            <Button 
+                              type="button" 
+                              variant="outline" 
+                              size="icon" 
+                              title="Generate Protocol Password"
+                              className="h-11 w-11 shrink-0 rounded-xl border-dashed hover:bg-accent/10"
+                              onClick={() => setFormData({...formData, password: generateSmartPassword(formData.name, formData.phone)})}
+                            >
+                              <Lock className="w-4 h-4 text-accent" />
+                            </Button>
+                         </div>
+                      </div>
                     </div>
-                    <div className="space-y-1.5">
-                       <Label className="text-[10px] font-bold uppercase text-slate-400">Contact Number</Label>
-                       <Input value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} placeholder="+91" className="h-11 rounded-xl" />
-                    </div>
-                  </div>
 
-                  <Button type="submit" disabled={isActionLoading} className="w-full h-14 bg-primary text-white font-bold rounded-2xl hover:bg-secondary shadow-xl transition-all">
-                     {isActionLoading ? <Loader2 className="animate-spin w-5 h-5" /> : "Authorize & Provision Account"}
-                  </Button>
-               </form>
-            </DialogContent>
-          </Dialog>
+                    <div className="grid md:grid-cols-2 gap-6">
+                      <div className="space-y-1.5 flex-1">
+                         <Label className="text-[10px] font-bold uppercase text-slate-400">Designation / Rank *</Label>
+                         <Select value={formData.designation} onValueChange={(val) => setFormData({...formData, designation: val})}>
+                            <SelectTrigger className="h-11 rounded-xl">
+                               <SelectValue placeholder="Select Rank" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-white z-[1000000]">
+                               {OFFICER_DESIGNATIONS.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}
+                            </SelectContent>
+                         </Select>
+                      </div>
+                      <div className="space-y-1.5">
+                         <Label className="text-[10px] font-bold uppercase text-slate-400">Contact Number</Label>
+                         <Input value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} placeholder="+91" className="h-11 rounded-xl" />
+                      </div>
+                    </div>
+
+                    <Button type="submit" disabled={isActionLoading} className="w-full h-14 bg-primary text-white font-bold rounded-2xl hover:bg-secondary shadow-xl transition-all">
+                       {isActionLoading ? <Loader2 className="animate-spin w-5 h-5" /> : "Authorize & Provision Account"}
+                    </Button>
+                 </form>
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
       </header>
 
