@@ -64,14 +64,17 @@ export function Captcha({ onVerify }: { onVerify: (isValid: boolean) => void }) 
     setInput('');
     onVerify(false);
     
-    // Reset Audio State
+    // Reset Audio State for the new code
     setAudioUrl(null);
     setAudioError(false);
-    if (isAudioPlaying && audioRef.current) {
+    
+    // Stop and clear current audio source
+    if (audioRef.current) {
       audioRef.current.pause();
-      setIsAudioPlaying(false);
+      audioRef.current.src = "";
     }
-  }, [onVerify, isAudioPlaying]);
+    setIsAudioPlaying(false);
+  }, [onVerify]);
 
   useEffect(() => {
     setMounted(true);
@@ -87,12 +90,16 @@ export function Captcha({ onVerify }: { onVerify: (isValid: boolean) => void }) 
    * Pronounces characters individually with randomized speed/pitch for security.
    */
   const handlePlayAudio = async () => {
+    if (!audioRef.current) return;
+
+    // If currently playing, stop it
     if (isAudioPlaying) {
-      audioRef.current?.pause();
+      audioRef.current.pause();
       setIsAudioPlaying(false);
       return;
     }
 
+    // If we already have the generated audio for THIS code, just play it
     if (audioUrl) {
       playExistingAudio();
       return;
@@ -103,11 +110,11 @@ export function Captcha({ onVerify }: { onVerify: (isValid: boolean) => void }) 
 
     try {
       // Format text with commas to force clear pauses between characters
-      const speechText = rawCode.split('').join(', ');
+      // We add a preamble and repetition for better accessibility
+      const speechText = `The security code is: ${rawCode.split('').join(', ')}. I repeat, ${rawCode.split('').join(', ')}.`;
       
-      // Randomize parameters slightly to improve security against audio analysis bots
-      const randomizedSpeed = 0.85 + (Math.random() * 0.25); // 0.85 to 1.1
-      const randomizedPitch = Math.floor(Math.random() * 10) - 5; // -5 to 5
+      const randomizedSpeed = 0.9 + (Math.random() * 0.2); // 0.9 to 1.1
+      const randomizedPitch = Math.floor(Math.random() * 6) - 3; // -3 to 3
 
       const result = await generateAiSpeech({
         text: speechText,
@@ -120,7 +127,22 @@ export function Captcha({ onVerify }: { onVerify: (isValid: boolean) => void }) 
 
       if (result.success && result.audioData) {
         setAudioUrl(result.audioData);
-        playAudio(result.audioData);
+        
+        const audio = audioRef.current;
+        audio.src = result.audioData;
+        audio.load(); // Force browser to prepare the new source
+        
+        // Play the audio after ensuring it's loaded
+        const playPromise = audio.play();
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => setIsAudioPlaying(true))
+            .catch((err) => {
+              console.warn("[CAPTCHA-AUDIO] Playback blocked:", err);
+              setAudioError(true);
+              setIsAudioPlaying(false);
+            });
+        }
       } else {
         throw new Error(result.error || "Generation error");
       }
@@ -128,31 +150,19 @@ export function Captcha({ onVerify }: { onVerify: (isValid: boolean) => void }) 
       setAudioError(true);
       toast({
         variant: "destructive",
-        title: "Audio Unavailable",
-        description: "Institutional voice node unreachable. Please use visual verification."
+        title: "Audio Service Busy",
+        description: "Failed to generate vocal code. Please use visual verification or try again."
       });
     } finally {
       setIsGeneratingAudio(false);
     }
   };
 
-  const playAudio = (url: string) => {
-    if (!audioRef.current) {
-      audioRef.current = new Audio(url);
-      audioRef.current.addEventListener('ended', () => setIsAudioPlaying(false));
-    } else {
-      audioRef.current.src = url;
-    }
-    
-    audioRef.current.play()
-      .then(() => setIsAudioPlaying(true))
-      .catch(() => setAudioError(true));
-  };
-
   const playExistingAudio = () => {
     if (audioRef.current && audioUrl) {
-      audioRef.current.currentTime = 0;
-      audioRef.current.play()
+      const audio = audioRef.current;
+      audio.currentTime = 0;
+      audio.play()
         .then(() => setIsAudioPlaying(true))
         .catch(() => setAudioError(true));
     }
@@ -162,6 +172,16 @@ export function Captcha({ onVerify }: { onVerify: (isValid: boolean) => void }) 
 
   return (
     <div className="space-y-3 animate-in fade-in duration-500">
+      {/* Hidden Audio Element used for all CAPTCHA playback */}
+      <audio 
+        ref={audioRef} 
+        onEnded={() => setIsAudioPlaying(false)}
+        onPause={() => setIsAudioPlaying(false)}
+        onPlay={() => setIsAudioPlaying(true)}
+        onError={() => setAudioError(true)}
+        className="hidden"
+      />
+
       <div className="flex items-center justify-between gap-3">
         {/* Visual CAPTCHA Display */}
         <div className="flex-1 bg-slate-100 dark:bg-slate-800 rounded-xl p-3 flex items-center justify-center select-none border-2 border-dashed border-slate-200 dark:border-slate-700 relative overflow-hidden h-20">
