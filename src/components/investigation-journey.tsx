@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo } from 'react';
@@ -21,7 +20,8 @@ import {
   HelpCircle,
   Mail,
   MessageCircle,
-  Globe
+  Globe,
+  Landmark
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -60,7 +60,7 @@ export function InvestigationJourney({ complaint }: { complaint: any }) {
   }, [complaint]);
 
   return (
-    <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-1000">
+    <div className="space-y-12 animate-in fade-in duration-1000">
       
       {/* SECTION HEADER */}
       <div className="text-center space-y-4">
