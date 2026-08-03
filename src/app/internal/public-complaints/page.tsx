@@ -211,9 +211,18 @@ export default function PublicComplaintsTerminal() {
       <section className="py-8 border-b bg-white dark:bg-slate-900 sticky top-10 z-30 shadow-sm transition-colors">
         <div className="container mx-auto px-4">
           <div className="flex flex-col lg:flex-row items-center justify-between gap-6">
-            <div className="flex w-full md:w-auto overflow-x-auto no-scrollbar gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-2xl border border-slate-200">
+            <div className="flex flex-wrap w-full md:w-auto gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-2xl border border-slate-200">
                {['All', ...CASE_STATUSES.slice(0, 4), 'Action Taken', 'Closed'].map(st => (
-                 <button key={st} onClick={() => setStatusFilter(st)} className={cn("whitespace-nowrap px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-tight transition-all", statusFilter === st ? "bg-primary text-white shadow-lg" : "text-slate-500 hover:bg-white")}>{st}</button>
+                 <button 
+                  key={st} 
+                  onClick={() => setStatusFilter(st)} 
+                  className={cn(
+                    "whitespace-normal text-center leading-tight px-5 py-2 rounded-xl text-[9px] md:text-[10px] font-black uppercase tracking-tight transition-all min-w-[90px] flex items-center justify-center", 
+                    statusFilter === st ? "bg-primary text-white shadow-lg" : "text-slate-500 hover:bg-white"
+                  )}
+                 >
+                   {st}
+                 </button>
                ))}
             </div>
             
