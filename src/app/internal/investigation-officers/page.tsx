@@ -43,7 +43,8 @@ import {
   Navigation,
   ShieldAlert,
   ClipboardList,
-  Wrench
+  Wrench,
+  Info
 } from 'lucide-react'
 import {
   Dialog,
@@ -130,7 +131,6 @@ export default function InvestigationOfficersRegistry() {
 
   const { data: rawOfficers, loading: dataLoading } = useCollection(officersQuery);
 
-  // Sanitized list for safe rendering and processing
   const officers = React.useMemo(() => {
     return (rawOfficers || []).filter(o => o && typeof o === 'object' && o.id);
   }, [rawOfficers]);
@@ -153,20 +153,46 @@ export default function InvestigationOfficersRegistry() {
     return `${prefix}#${suffix}`;
   };
 
+  /**
+   * validateOfficerMetadata: Strict governance check for required record info.
+   * Attempts to recover missing email from ID if appropriate, or logs specific failure reason.
+   */
+  const validateOfficerMetadata = (officer: any) => {
+    if (!officer || typeof officer !== 'object') {
+      return { isValid: false, reason: "Record object is invalid or null.", missingField: "Root Object" };
+    }
+
+    const id = officer.id;
+    const email = (officer.email || '').toLowerCase().trim();
+    const name = (officer.name || '').trim();
+
+    if (!id) return { isValid: false, reason: "Document ID is missing from registry state.", missingField: "id" };
+    if (!email) return { isValid: false, reason: "Official email identity is missing.", missingField: "email" };
+    if (!name) return { isValid: false, reason: "Legal name metadata is missing.", missingField: "name" };
+
+    return { isValid: true, id, email, name };
+  };
+
   const handleStartDelete = async (officer: any) => {
-    if (!db || !user || !officer || !officer.id) {
-      toast({ variant: "destructive", title: "Operation Blocked", description: "Investigator record is incomplete or invalid." });
+    if (!db || !user) return;
+    
+    const validation = validateOfficerMetadata(officer);
+    if (!validation.isValid) {
+      console.error(`[GOVERNANCE-AUDIT] Blocked deletion attempt:`, validation);
+      toast({ 
+        variant: "destructive", 
+        title: "Incomplete Record", 
+        description: "This investigator record cannot be deleted because the required record information is incomplete." 
+      });
       return;
     }
+
     setOfficerToDelete(officer);
     setDeleteDialogStep('confirm');
   };
 
   const executeGovernanceAudit = async () => {
-    if (!db || !user || !officerToDelete || !officerToDelete.id) {
-       toast({ variant: "destructive", title: "Audit Cancelled", description: "Required investigator information is missing." });
-       return;
-    }
+    if (!db || !user || !officerToDelete) return;
     
     setIsActionLoading(true);
 
@@ -234,22 +260,20 @@ export default function InvestigationOfficersRegistry() {
       let failureCount = 0;
       
       for (const officer of officers) {
-        // Safe access to properties
         const officerName = (officer.name || '').trim();
-        const officerEmail = (officer.email || '').toLowerCase().trim();
+        if (officerName === 'Raisa Das') continue;
 
-        if (officerName !== 'Raisa Das') {
-          // Strict validation of required fields for deletion
-          if (!officer.id || !officerEmail) {
-            console.warn(`[PURGE-VALIDATION] Skipping incomplete record at ID: ${officer.id || 'Unknown'}`);
-            failureCount++;
-            continue;
-          }
-
-          batch.delete(doc(db, 'investigation_officers', officer.id));
-          batch.delete(doc(db, 'users', officerEmail));
-          count++;
+        const validation = validateOfficerMetadata(officer);
+        
+        if (!validation.isValid) {
+          console.error(`[PURGE-AUDIT] Skipping incomplete record:`, validation);
+          failureCount++;
+          continue;
         }
+
+        batch.delete(doc(db, 'investigation_officers', validation.id));
+        batch.delete(doc(db, 'users', validation.email));
+        count++;
       }
       
       if (count > 0) {
@@ -257,18 +281,22 @@ export default function InvestigationOfficersRegistry() {
         toast({ 
           title: "Registry Purged", 
           description: failureCount > 0 
-            ? `${count} records removed. ${failureCount} invalid records skipped.` 
-            : `${count} personnel records removed. Raisa Das preserved.` 
+            ? `${count} records removed. ${failureCount} records were skipped due to incomplete information.` 
+            : `${count} personnel records removed successfully.` 
         });
         setIsPurgeOpen(false);
       } else if (failureCount > 0) {
-        toast({ variant: "destructive", title: "Registry Error", description: "Invalid metadata identified in potential purge targets. Please contact support." });
+        toast({ 
+          variant: "destructive", 
+          title: "Audit Required", 
+          description: "This investigator record cannot be deleted because the required record information is incomplete." 
+        });
       } else {
         toast({ title: "Audit Complete", description: "No conflicting records found." });
         setIsPurgeOpen(false);
       }
     } catch (e: any) {
-      toast({ variant: "destructive", title: "Purge Protocol Failure", description: "System error during bulk purge. Database integrity preserved." });
+      toast({ variant: "destructive", title: "System Error", description: "The purge protocol encountered a communication error with the registry." });
     } finally {
       setIsActionLoading(false);
     }
@@ -335,28 +363,28 @@ export default function InvestigationOfficersRegistry() {
   }
 
   const handleUpdate = async () => {
-    if (!db || !editOfficer || !editOfficer.id) {
-       toast({ variant: "destructive", title: "Refused", description: "Required investigator information is missing." });
-       return;
-    }
+    if (!db || !editOfficer) return;
     
-    const officerEmail = (editOfficer.email || '').toLowerCase().trim();
-    if (!officerEmail) {
-       toast({ variant: "destructive", title: "Refused", description: "Officer email is missing in registry." });
+    const validation = validateOfficerMetadata(editOfficer);
+    if (!validation.isValid) {
+       toast({ 
+         variant: "destructive", 
+         title: "Update Denied", 
+         description: "Please resolve the missing record information before attempting update." 
+       });
        return;
     }
 
     setIsActionLoading(true)
     try {
-      const { id, ...data } = editOfficer
       const batch = writeBatch(db)
       
-      batch.update(doc(db, 'investigation_officers', id), {
-        ...data,
+      batch.update(doc(db, 'investigation_officers', validation.id), {
+        ...editOfficer,
         updatedAt: serverTimestamp()
       })
 
-      batch.update(doc(db, 'users', officerEmail), {
+      batch.update(doc(db, 'users', validation.email), {
         name: editOfficer.name,
         status: editOfficer.status,
         updatedAt: serverTimestamp()
@@ -373,14 +401,15 @@ export default function InvestigationOfficersRegistry() {
   }
 
   const handleDelete = async () => {
-    if (!db || !officerToDelete || !officerToDelete.id || !isRoot || !user) {
-       toast({ variant: "destructive", title: "Purge Cancelled", description: "Record ID or administrator context is missing." });
-       return;
-    }
+    if (!db || !officerToDelete || !isRoot || !user) return;
 
-    const officerEmail = (officerToDelete.email || '').toLowerCase().trim();
-    if (!officerEmail) {
-       toast({ variant: "destructive", title: "Purge Cancelled", description: "Email required for identity revocation." });
+    const validation = validateOfficerMetadata(officerToDelete);
+    if (!validation.isValid) {
+       toast({ 
+         variant: "destructive", 
+         title: "Purge Cancelled", 
+         description: "This investigator record cannot be deleted because the required record information is incomplete." 
+       });
        return;
     }
 
@@ -388,8 +417,8 @@ export default function InvestigationOfficersRegistry() {
     try {
       const batch = writeBatch(db)
       
-      batch.delete(doc(db, 'investigation_officers', officerToDelete.id))
-      batch.delete(doc(db, 'users', officerEmail))
+      batch.delete(doc(db, 'investigation_officers', validation.id))
+      batch.delete(doc(db, 'users', validation.email))
       
       const auditRef = doc(collection(db, 'deletion_audit_logs'))
       batch.set(auditRef, {
@@ -397,7 +426,7 @@ export default function InvestigationOfficersRegistry() {
         adminName: user.displayName || 'Root Administrator',
         targetId: officerToDelete.employeeId || 'N/A',
         targetName: officerToDelete.name || 'Unknown',
-        targetEmail: officerEmail,
+        targetEmail: validation.email,
         timestamp: new Date().toISOString(),
         status: "Permanently Purged - Successful"
       })
