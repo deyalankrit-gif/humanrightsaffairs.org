@@ -178,6 +178,16 @@ export default function InternalMembersDirectory() {
       return;
     }
 
+    const idPattern = /^[A-Z]{6}[0-9]{4}$/;
+    if (!idPattern.test(newMember.memberId)) {
+      toast({ 
+        variant: "destructive", 
+        title: "Invalid Member ID", 
+        description: "ID must be 10 characters: 6 uppercase letters followed by 4 digits (e.g. ABCDEF1234)." 
+      })
+      return
+    }
+
     setIsAdding(true)
     try {
       const { honorific, ...data } = newMember;
@@ -314,7 +324,7 @@ export default function InternalMembersDirectory() {
               <div className="inline-flex items-center gap-2 bg-red-500/20 text-red-400 px-3 py-1 rounded-full text-[9px] font-bold border border-red-500/30 uppercase tracking-[0.2em]">
                 <Lock className="w-2.5 h-2.5" /> Members Directory
               </div>
-              <h1 className="text-3xl md:text-4xl font-headline font-bold">Secure <span className="text-accent italic">Registry</span></h1>
+              <h1 className="text-3xl md:text-4xl font-headline font-bold text-white">Secure <span className="text-accent italic">Registry</span></h1>
               <p className="text-slate-400 text-[11px] max-w-xl font-bold uppercase tracking-widest">Internal dashboard for managing operational force contact protocols.</p>
             </div>
             

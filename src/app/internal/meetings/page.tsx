@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useEffect, useState } from 'react'
@@ -476,7 +477,7 @@ export default function InternalMeetingsManagement() {
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
                                   <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
-                                  <AlertDialogAction onClick={() => handleDeleteMeeting(meeting.id)} className="bg-red-500 hover:bg-red-600 rounded-xl border-none text-white font-bold transition-colors">Confirm Delete</AlertDialogAction>
+                                  <AlertDialogAction onClick={() => handleDeleteMeeting(meeting.id)} className="bg-red-600 hover:bg-red-700 rounded-xl border-none text-white font-bold transition-colors">Confirm Delete</AlertDialogAction>
                                 </AlertDialogFooter>
                               </AlertDialogContent>
                            </AlertDialog>
@@ -542,7 +543,7 @@ export default function InternalMeetingsManagement() {
                   <div className="space-y-1">
                     <Label className="text-[10px] font-bold uppercase text-slate-400">State</Label>
                     <Select value={editMeeting.stateName} onValueChange={(val) => setEditMeeting({...editMeeting, stateName: val, districtName: ''})}>
-                      <SelectTrigger><SelectValue placeholder="Choose State" /></SelectTrigger>
+                      <SelectTrigger placeholder="Choose State"><SelectValue placeholder="Choose State" /></SelectTrigger>
                       <SelectContent position="popper" className="z-[1000000] max-h-60">{states.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
                     </Select>
                   </div>
@@ -550,7 +551,7 @@ export default function InternalMeetingsManagement() {
                     <div className="space-y-1 animate-in fade-in slide-in-from-top-1">
                       <Label className="text-[10px] font-bold uppercase text-slate-400">District</Label>
                       <Select value={editMeeting.districtName} onValueChange={(val) => setEditMeeting({...editMeeting, districtName: val})}>
-                        <SelectTrigger><SelectValue placeholder="Choose District" /></SelectTrigger>
+                        <SelectTrigger placeholder="Choose District"><SelectValue placeholder="Choose District" /></SelectTrigger>
                         <SelectContent position="popper" className="z-[1000000] max-h-60">{(INDIA_DATA[editMeeting.stateName] || []).map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
                       </Select>
                     </div>
@@ -602,7 +603,7 @@ export default function InternalMeetingsManagement() {
             </div>
           )}
           <DialogFooter>
-            <Button onClick={handleUpdateMeeting} disabled={isActionLoading} className="w-full h-11 rounded-xl bg-primary text-white font-bold hover:bg-secondary hover:text-white transition-all">
+            <Button onClick={handleUpdateMeeting} disabled={isActionLoading} className="w-full h-11 rounded-xl bg-primary text-primary-foreground font-bold hover:bg-secondary hover:text-white transition-all">
               {isActionLoading ? <Loader2 className="animate-spin mr-2" /> : "Commit Changes"}
             </Button>
           </DialogFooter>

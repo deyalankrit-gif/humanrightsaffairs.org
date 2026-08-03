@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useEffect, useState } from 'react'
@@ -346,7 +347,7 @@ export default function InternalApplicationsPage() {
                    onClick={() => setActiveFilter(st)}
                    className={cn(
                      "whitespace-nowrap rounded-lg px-4 font-bold h-8 text-[10px] uppercase transition-all",
-                     activeFilter === st ? "bg-accent text-primary shadow-sm" : "text-slate-50 hover:bg-slate-200"
+                     activeFilter === st ? "bg-accent text-primary shadow-sm" : "text-slate-500 hover:bg-slate-200"
                    )}
                  >
                    {st}
