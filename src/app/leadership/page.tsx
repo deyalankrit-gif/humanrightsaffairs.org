@@ -86,7 +86,7 @@ function LeaderCard({ leader, variant = "default", isAdmin, onEdit, onDelete }: 
       <div className={`relative ${sizeClasses[variant]} rounded-2xl overflow-hidden shadow-xl border-2 md:border-4 border-white group-hover:border-secondary transition-all duration-500 bg-slate-100 dark:bg-slate-800`}>
         <Image src={img!} alt={leader.name} fill className="object-cover group-hover:scale-110 transition-transform duration-700" />
         
-        {/* Administrative Overlay */}
+        {/* Administrative Overlay - Repositioned lower */}
         <div className="absolute inset-0 bg-gradient-to-t from-primary/90 via-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-end justify-center pb-8 z-10">
           {isAdmin && (
             <div className="flex gap-3 animate-in fade-in slide-in-from-bottom-2 duration-300">
@@ -141,44 +141,9 @@ export default function LeadershipPage() {
   const { data: firestoreLeaders, loading: dataLoading } = useCollection(leadersQuery);
   const { data: membersList } = useCollection(membersQuery);
 
+  // Registry logic: Now purely dynamic to allow full administrative control
   const leaders = React.useMemo(() => {
-    const base = (firestoreLeaders || []) as Leader[];
-    
-    // Inject institutional officials if not present in Firestore
-    const staticOfficials: Leader[] = [
-      {
-        id: 'sec-wb',
-        name: 'Aniket Chattopadhyay',
-        title: 'Secretary (West Bengal State Committee)',
-        gender: 'male',
-        level: 'State',
-        parentRegion: 'West Bengal'
-      },
-      {
-        id: 'treasurer-central',
-        name: 'Rahul Sharma',
-        title: 'Treasurer (Central Council)',
-        gender: 'male',
-        level: 'Central'
-      },
-      {
-        id: 'treasurer-wb',
-        name: 'Priyanka Das',
-        title: 'Treasurer (West Bengal State Committee)',
-        gender: 'female',
-        level: 'State',
-        parentRegion: 'West Bengal'
-      }
-    ];
-
-    const result = [...base];
-    staticOfficials.forEach(official => {
-      if (!result.some(l => l.id === official.id)) {
-        result.push(official);
-      }
-    });
-    
-    return result;
+    return (firestoreLeaders || []) as Leader[];
   }, [firestoreLeaders]);
 
   const filteredMembers = React.useMemo(() => {
@@ -296,6 +261,21 @@ export default function LeadershipPage() {
     }
   }
 
+  const SectionHeading = ({ title, icon: Icon, color, subtitle }: { title: string, icon: any, color: string, subtitle?: string }) => (
+    <div className="flex items-center gap-5 mb-10 pb-5 border-b border-slate-100 dark:border-slate-800">
+      <div className={cn("p-4 rounded-[1.5rem] bg-white dark:bg-slate-900 shadow-sm border", color)}>
+        <Icon className="w-8 h-8" />
+      </div>
+      <div>
+        <h2 className={cn(
+          "font-headline font-bold leading-tight",
+          title === "Central Council" ? "text-5xl md:text-7xl bg-gradient-to-r from-red-600 via-orange-500 to-red-600 bg-clip-text text-transparent animate-gradient-x py-2" : "text-3xl md:text-5xl text-primary dark:text-white"
+        )}>{title}</h2>
+        <p className="text-[10px] font-black uppercase text-slate-400 tracking-[0.25em] mt-1">{subtitle || "Authorized Governance Tier"}</p>
+      </div>
+    </div>
+  )
+
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
       <section className="pt-32 md:pt-40 pb-16 md:pb-20 bg-primary text-primary-foreground relative overflow-hidden">
@@ -313,8 +293,9 @@ export default function LeadershipPage() {
                   <Plus className="w-6 h-6" /> Commission Leadership Member
                 </Button>
               </DialogTrigger>
-              <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="bg-white dark:bg-slate-900 rounded-[2.5rem] border-none shadow-2xl max-h-[90vh] overflow-y-auto flex flex-col p-0">
-                <div className="bg-slate-900 p-8 text-white relative border-b-4 border-accent/20 shrink-0">
+              <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="max-w-2xl bg-white dark:bg-slate-900 rounded-[2.5rem] border-none shadow-2xl max-h-[90vh] overflow-y-auto flex flex-col p-0">
+                {/* Header with increased padding */}
+                <div className="bg-slate-900 pt-14 pb-10 px-8 text-white relative border-b-4 border-accent/20 shrink-0">
                    <div className="absolute right-6 top-6"><DialogClose asChild><Button variant="ghost" size="icon" className="rounded-full text-white hover:bg-white/10 h-10 w-10"><X className="w-6 h-6" /></Button></DialogClose></div>
                    <DialogTitle className="text-2xl font-headline font-bold">Commission Official</DialogTitle>
                    <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">Establishing Leadership Identity</p>
@@ -382,7 +363,7 @@ export default function LeadershipPage() {
 
                     <div className="grid grid-cols-2 gap-6">
                       <div className="space-y-1.5">
-                        <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Chapter Level</Label>
+                        <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Chapter Level *</Label>
                         <Select value={newLeader.level} onValueChange={(val: any) => setNewLeader({...newLeader, level: val, parentRegion: '', districtName: ''})}>
                           <SelectTrigger className="h-11 rounded-xl bg-slate-50 border-none shadow-inner font-bold"><SelectValue placeholder="Level" /></SelectTrigger>
                           <SelectContent className="bg-white z-[1000000]">
@@ -393,7 +374,7 @@ export default function LeadershipPage() {
                         </Select>
                       </div>
                       <div className="space-y-1.5">
-                        <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Gender</Label>
+                        <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Gender *</Label>
                         <Select value={newLeader.gender} onValueChange={(val: any) => setNewLeader({...newLeader, gender: val})}>
                           <SelectTrigger className="h-11 rounded-xl bg-slate-50 border-none shadow-inner font-bold"><SelectValue placeholder="Gender" /></SelectTrigger>
                           <SelectContent className="bg-white z-[1000000]"><SelectItem value="male">Male</SelectItem><SelectItem value="female">Female</SelectItem></SelectContent>
@@ -404,7 +385,7 @@ export default function LeadershipPage() {
                     {(newLeader.level === 'State' || newLeader.level === 'District') && (
                       <div className="grid md:grid-cols-2 gap-6 p-6 rounded-3xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 animate-in fade-in slide-in-from-top-2 duration-300">
                         <div className="space-y-1.5">
-                          <Label className="text-[10px] font-black uppercase text-accent flex items-center gap-2"><Globe className="w-3.5 h-3.5" /> State / UT</Label>
+                          <Label className="text-[10px] font-black uppercase text-accent flex items-center gap-2"><Globe className="w-3.5 h-3.5" /> State / UT *</Label>
                           <Select value={newLeader.parentRegion} onValueChange={(val) => setNewLeader({...newLeader, parentRegion: val, districtName: ''})}>
                             <SelectTrigger className="h-11 rounded-xl bg-white dark:bg-slate-800 border-accent/20 font-bold"><SelectValue placeholder="Choose State" /></SelectTrigger>
                             <SelectContent className="bg-white z-[1000000] max-h-60">{allStates.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
@@ -412,7 +393,7 @@ export default function LeadershipPage() {
                         </div>
                         {newLeader.level === 'District' && (
                           <div className="space-y-1.5">
-                            <Label className="text-[10px] font-black uppercase text-accent flex items-center gap-2"><MapPin className="w-3.5 h-3.5" /> District</Label>
+                            <Label className="text-[10px] font-black uppercase text-accent flex items-center gap-2"><MapPin className="w-3.5 h-3.5" /> District *</Label>
                             <Select value={newLeader.districtName} onValueChange={(val) => setNewLeader({...newLeader, districtName: val})}>
                               <SelectTrigger className="h-11 rounded-xl bg-white dark:bg-slate-800 border-accent/20 font-bold"><SelectValue placeholder="Choose District" /></SelectTrigger>
                               <SelectContent className="bg-white z-[1000000] max-h-60">{newLeader.parentRegion && (INDIA_DATA[newLeader.parentRegion] || []).map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
@@ -424,7 +405,8 @@ export default function LeadershipPage() {
                   </div>
                 </div>
 
-                <div className="p-8 bg-slate-50 dark:bg-slate-900 border-t shrink-0">
+                {/* Footer with increased padding */}
+                <div className="pb-16 pt-10 px-8 bg-slate-50 dark:bg-slate-900 border-t shrink-0">
                   <Button onClick={handleAdd} disabled={isActionLoading} className="w-full h-14 bg-primary text-white font-bold rounded-2xl shadow-xl hover:bg-secondary transition-all text-base md:text-lg">Commission to Leadership</Button>
                 </div>
               </DialogContent>
@@ -441,10 +423,7 @@ export default function LeadershipPage() {
             <>
               {/* Central Council Section */}
               <div className="flex flex-col items-center mb-32">
-                <div className="flex items-center gap-3 text-primary dark:text-white font-black uppercase tracking-[0.25em] mb-12 text-center">
-                  <Award className="w-8 h-8 text-accent md:w-10 md:h-10" />
-                  <span className="text-xl md:text-3xl lg:text-4xl">Central Council</span>
-                </div>
+                <SectionHeading title="Central Committee" icon={ShieldCheck} color="text-red-600 border-red-100" subtitle={`${centralTeam.length} Officials`} />
                 <div className="flex flex-wrap justify-center gap-12">
                   {centralTeam.map((leader, i) => (
                     <LeaderCard 
@@ -496,23 +475,16 @@ export default function LeadershipPage() {
                         
                         {activeStateLeaders.length > 0 ? (
                           <div className="flex flex-wrap justify-center gap-10">
-                            {activeStateLeaders.map(leader => {
-                              const isLarge = leader.name.includes("Moumita Saha") || 
-                                              leader.name.includes("Indraneel Adak") || 
-                                              leader.name.includes("Indranil Adak");
-                              const variant = isLarge ? "large" : "default";
-                              
-                              return (
-                                <LeaderCard 
-                                  key={leader.id} 
-                                  leader={leader} 
-                                  variant={variant}
-                                  isAdmin={isAdmin} 
-                                  onEdit={setEditLeader} 
-                                  onDelete={handleDelete} 
-                                />
-                              );
-                            })}
+                            {activeStateLeaders.map(leader => (
+                              <LeaderCard 
+                                key={leader.id} 
+                                leader={leader} 
+                                variant="large"
+                                isAdmin={isAdmin} 
+                                onEdit={setEditLeader} 
+                                onDelete={handleDelete} 
+                              />
+                            ))}
                           </div>
                         ) : (
                           <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] animate-pulse">No commissioned chapter leaders recorded for this region.</p>
@@ -545,21 +517,16 @@ export default function LeadershipPage() {
                               </div>
                               {activeDistrictLeaders.length > 0 ? (
                                 <div className="flex flex-wrap justify-center gap-8">
-                                   {activeDistrictLeaders.map(dl => {
-                                     // Refined hierarchy for specific district officials
-                                     const isPriority = dl.name.includes("Indraneel Adak") || dl.name.includes("Indranil Adak");
-                                     const variant = isPriority ? "default" : "small";
-                                     return (
-                                       <LeaderCard 
-                                         key={dl.id} 
-                                         leader={dl} 
-                                         variant={variant} 
-                                         isAdmin={isAdmin} 
-                                         onEdit={setEditLeader} 
-                                         onDelete={handleDelete} 
-                                       />
-                                     );
-                                   })}
+                                   {activeDistrictLeaders.map(dl => (
+                                     <LeaderCard 
+                                       key={dl.id} 
+                                       leader={dl} 
+                                       variant="small" 
+                                       isAdmin={isAdmin} 
+                                       onEdit={setEditLeader} 
+                                       onDelete={handleDelete} 
+                                     />
+                                   ))}
                                 </div>
                               ) : (
                                 <p className="text-slate-400 font-bold uppercase tracking-widest text-[9px] animate-pulse">No commissioned district officials recorded for {activeDistrict}.</p>
@@ -583,7 +550,7 @@ export default function LeadershipPage() {
       {/* Edit Dialog */}
       <Dialog open={!!editLeader} onOpenChange={(open) => !open && setEditLeader(null)}>
         <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="bg-white dark:bg-slate-900 rounded-[2.5rem] border-none shadow-2xl max-h-[90vh] overflow-y-auto flex flex-col p-0">
-          <div className="bg-slate-900 p-8 text-white relative border-b-4 border-accent/20 shrink-0">
+          <div className="bg-slate-900 pt-14 pb-10 px-8 text-white relative border-b-4 border-accent/20 shrink-0">
              <div className="absolute right-6 top-6"><DialogClose asChild><Button variant="ghost" size="icon" className="rounded-full text-white hover:bg-white/10 h-10 w-10"><X className="w-6 h-6" /></Button></DialogClose></div>
              <DialogTitle className="text-2xl font-headline font-bold">Refine Leader Profile</DialogTitle>
              <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">Registry Update Protocol</p>
