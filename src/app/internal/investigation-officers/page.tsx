@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useEffect, useState, useMemo } from 'react'
@@ -51,7 +52,8 @@ import {
   TrendingUp,
   UserCheck,
   Users,
-  Star
+  Star,
+  RefreshCw
 } from 'lucide-react'
 import {
   Dialog,
@@ -150,6 +152,24 @@ export default function InvestigationOfficersRegistry() {
     const load = officers.reduce((acc, curr: any) => acc + (curr.assignedCount || 0), 0);
     return { total, active, load };
   }, [officers]);
+
+  const generateEmployeeId = () => {
+    const numbers = '0123456789';
+    let result = 'HRAT-IO-';
+    for (let i = 0; i < 4; i++) {
+      result += numbers.charAt(Math.floor(Math.random() * numbers.length));
+    }
+    return result;
+  }
+
+  const generatePassword = () => {
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$";
+    let password = "";
+    for (let i = 0; i < 10; i++) {
+      password += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return password;
+  }
 
   const validateOfficerMetadata = (officer: any) => {
     if (!officer || typeof officer !== 'object') {
@@ -347,9 +367,9 @@ export default function InvestigationOfficersRegistry() {
                     <Wrench className="w-4 h-4 group-hover:rotate-90 transition-transform duration-500" /> Maintenance
                  </Button>
                </DialogTrigger>
-               <DialogContent className="max-w-md rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden">
+               <DialogContent className="max-w-md rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden [&>button]:hidden">
                   <div className="bg-red-600 p-8 text-white relative">
-                     <div className="absolute right-6 top-6"><DialogClose asChild><Button variant="ghost" size="icon" className="rounded-full text-white/40"><X className="w-4 h-4" /></Button></DialogClose></div>
+                     <div className="absolute right-6 top-6"><DialogClose asChild><Button variant="ghost" size="icon" className="rounded-full text-white/40 hover:text-white hover:bg-white/10"><X className="w-4 h-4" /></Button></DialogClose></div>
                      <DialogTitle className="text-2xl font-headline font-bold">Registry Reset</DialogTitle>
                   </div>
                   <div className="p-8 space-y-6">
@@ -369,20 +389,43 @@ export default function InvestigationOfficersRegistry() {
                   <Plus className="w-5 h-5 mr-2" /> Add Investigator
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-xl rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden bg-white dark:bg-slate-900">
-                 <div className="bg-slate-900 p-8 text-white"><DialogTitle className="text-3xl font-headline font-bold">Provision Officer</DialogTitle><p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">Establishing Digital Investigative Identity</p></div>
+              <DialogContent className="max-w-xl rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden bg-white dark:bg-slate-900 [&>button]:hidden">
+                 <div className="bg-slate-900 p-8 text-white relative">
+                    <div className="absolute right-6 top-6">
+                      <DialogClose asChild>
+                        <Button variant="ghost" size="icon" className="rounded-full text-white/40 hover:text-white hover:bg-white/10 transition-all">
+                          <X className="w-5 h-5" />
+                        </Button>
+                      </DialogClose>
+                    </div>
+                    <DialogTitle className="text-3xl font-headline font-bold">Provision Officer</DialogTitle>
+                    <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">Establishing Digital Investigative Identity</p>
+                 </div>
                  <form onSubmit={handleAdd} className="p-8 space-y-6">
                     <div className="grid md:grid-cols-2 gap-6">
                       <div className="space-y-1.5"><Label className="text-[10px] font-black uppercase text-slate-500">Name *</Label><Input value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="rounded-xl h-11" required /></div>
-                      <div className="space-y-1.5"><Label className="text-[10px] font-black uppercase text-slate-500">Employee ID *</Label><Input value={formData.employeeId} onChange={e => setFormData({...formData, employeeId: e.target.value.toUpperCase()})} className="rounded-xl h-11 font-mono font-bold" required /></div>
+                      <div className="space-y-1.5">
+                        <Label className="text-[10px] font-black uppercase text-slate-500">Employee ID *</Label>
+                        <div className="flex gap-2">
+                          <Input value={formData.employeeId} onChange={e => setFormData({...formData, employeeId: e.target.value.toUpperCase()})} className="rounded-xl h-11 font-mono font-bold flex-1" required />
+                          <Button type="button" variant="outline" size="icon" onClick={() => setFormData({...formData, employeeId: generateEmployeeId()})} className="h-11 w-11 rounded-xl border-dashed">
+                            <Sparkles className="w-4 h-4 text-accent" />
+                          </Button>
+                        </div>
+                      </div>
                     </div>
                     <div className="grid md:grid-cols-2 gap-6">
                       <div className="space-y-1.5"><Label className="text-[10px] font-black uppercase text-slate-500">Official Email *</Label><Input type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} className="rounded-xl h-11" required /></div>
                       <div className="space-y-1.5">
                          <Label className="text-[10px] font-black uppercase text-slate-500">Passphrase *</Label>
-                         <div className="relative">
-                            <Input type={showPassword ? "text" : "password"} value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} className="rounded-xl h-11" required />
-                            <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400">{showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}</button>
+                         <div className="flex gap-2">
+                            <div className="relative flex-1">
+                               <Input type={showPassword ? "text" : "password"} value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} className="rounded-xl h-11 pr-10" required />
+                               <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400">{showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}</button>
+                            </div>
+                            <Button type="button" variant="outline" size="icon" onClick={() => setFormData({...formData, password: generatePassword()})} className="h-11 w-11 rounded-xl border-dashed">
+                              <RefreshCw className="w-4 h-4 text-accent" />
+                            </Button>
                          </div>
                       </div>
                     </div>
@@ -506,9 +549,14 @@ export default function InvestigationOfficersRegistry() {
 
       {/* RE-ENGINEERED FAULT-TOLERANT DELETION WORKFLOW */}
       <Dialog open={!!deleteDialogStep} onOpenChange={(open) => { if(!open) { setDeleteDialogStep(null); setOfficerToDelete(null); setDeleteInputText(''); } }}>
-        <DialogContent className="max-w-2xl rounded-[3rem] border-none shadow-2xl p-0 overflow-hidden bg-white dark:bg-slate-900">
+        <DialogContent className="max-w-2xl rounded-[3rem] border-none shadow-2xl p-0 overflow-hidden bg-white dark:bg-slate-900 [&>button]:hidden">
           {deleteDialogStep === 'confirm' && (
             <div className="p-10 space-y-8 animate-in fade-in zoom-in-95 duration-500">
+              <div className="absolute right-6 top-6">
+                <DialogClose asChild>
+                  <Button variant="ghost" size="icon" className="rounded-full text-slate-400 hover:text-red-500"><X className="w-5 h-5" /></Button>
+                </DialogClose>
+              </div>
               <div className="flex flex-col items-center text-center space-y-6">
                 <div className="w-24 h-24 bg-red-50 dark:bg-red-950/30 text-red-500 rounded-[2.5rem] flex items-center justify-center animate-pulsate shadow-xl shadow-red-500/10">
                   <ShieldAlert className="w-12 h-12" />
@@ -530,6 +578,11 @@ export default function InvestigationOfficersRegistry() {
           {deleteDialogStep === 'blocked' && (
             <div className="flex flex-col animate-in fade-in duration-500">
               <div className="bg-red-600 p-10 text-white shrink-0 relative overflow-hidden">
+                <div className="absolute right-6 top-6">
+                  <DialogClose asChild>
+                    <Button variant="ghost" size="icon" className="rounded-full text-white/40"><X className="w-5 h-5" /></Button>
+                  </DialogClose>
+                </div>
                 <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16 blur-2xl"></div>
                 <div className="flex items-center gap-4 mb-4">
                   <ShieldAlert className="w-10 h-10" />
@@ -572,6 +625,11 @@ export default function InvestigationOfficersRegistry() {
 
           {deleteDialogStep === 'warning' && (
             <div className="p-10 space-y-8 animate-in slide-in-from-right-4 duration-500">
+              <div className="absolute right-6 top-6">
+                <DialogClose asChild>
+                  <Button variant="ghost" size="icon" className="rounded-full text-slate-400"><X className="w-5 h-5" /></Button>
+                </DialogClose>
+              </div>
               <div className="flex flex-col items-center text-center space-y-6">
                 <div className="w-24 h-24 bg-amber-50 text-amber-600 rounded-[2.5rem] flex items-center justify-center shadow-xl shadow-amber-500/10">
                   <AlertTriangle className="w-12 h-12" />
@@ -592,6 +650,11 @@ export default function InvestigationOfficersRegistry() {
 
           {deleteDialogStep === 'verify' && (
             <div className="p-10 space-y-8 animate-in zoom-in-95 duration-500">
+              <div className="absolute right-6 top-6">
+                <DialogClose asChild>
+                  <Button variant="ghost" size="icon" className="rounded-full text-slate-400"><X className="w-5 h-5" /></Button>
+                </DialogClose>
+              </div>
               <div className="space-y-4 text-center">
                 <div className="inline-flex items-center gap-2 bg-slate-100 dark:bg-slate-800 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border">
                    <Lock className="w-3.5 h-3.5" /> Verification Protocol
@@ -627,10 +690,17 @@ export default function InvestigationOfficersRegistry() {
 
       {/* Multi-Functional Edit Dialog */}
       <Dialog open={!!editOfficer} onOpenChange={(val) => !val && setEditOfficer(null)}>
-        <DialogContent className="max-w-xl rounded-[3rem] border-none shadow-2xl p-0 overflow-hidden bg-white dark:bg-slate-900">
+        <DialogContent className="max-w-xl rounded-[3rem] border-none shadow-2xl p-0 overflow-hidden bg-white dark:bg-slate-900 [&>button]:hidden">
           {editOfficer && (
             <>
-               <div className="bg-slate-900 p-10 text-white shrink-0 border-b-4 border-accent/20">
+               <div className="bg-slate-900 p-10 text-white shrink-0 border-b-4 border-accent/20 relative">
+                  <div className="absolute right-6 top-6">
+                    <DialogClose asChild>
+                      <Button variant="ghost" size="icon" className="rounded-full text-white/40 hover:text-white transition-all">
+                        <X className="w-5 h-5" />
+                      </Button>
+                    </DialogClose>
+                  </div>
                   <Badge className="bg-accent text-primary font-black uppercase text-[9px] mb-2 tracking-widest">Metadata Editor</Badge>
                   <DialogTitle className="text-3xl font-headline font-bold">Update Profile Meta</DialogTitle>
                </div>
@@ -666,7 +736,7 @@ export default function InvestigationOfficersRegistry() {
 
       {/* Personnel Detailed Account View */}
       <Dialog open={!!selectedOfficerForDetails} onOpenChange={(val) => !val && setSelectedOfficerForDetails(null)}>
-        <DialogContent className="max-w-xl rounded-[3rem] border-none shadow-2xl p-0 overflow-hidden bg-white dark:bg-slate-900">
+        <DialogContent className="max-w-xl rounded-[3rem] border-none shadow-2xl p-0 overflow-hidden bg-white dark:bg-slate-900 [&>button]:hidden">
           {selectedOfficerForDetails && (
             <>
               <div className="bg-slate-900 p-10 text-white relative border-b-8 border-accent/20">
