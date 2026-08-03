@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useEffect } from 'react'
@@ -29,7 +30,9 @@ import {
   Save,
   Lock,
   User,
-  MessageSquare
+  MessageSquare,
+  ClipboardCheck,
+  Target
 } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useToast } from '@/hooks/use-toast'
@@ -53,8 +56,10 @@ export default function InvestigationCaseHub() {
   const router = useRouter()
   const { toast } = useToast()
   
+  const [activeTab, setActiveTab] = useState('overview')
   const [isActionLoading, setIsActionLoading] = useState(false)
   const [remark, setRemark] = useState('')
+  const [fulfillmentReport, setFulfillmentReport] = useState('')
   const [activeStatus, setActiveStatus] = useState('')
 
   const docRef = useMemoFirebase(() => {
@@ -122,6 +127,38 @@ export default function InvestigationCaseHub() {
     }
   };
 
+  const handlePostFulfillmentReport = async () => {
+    if (!fulfillmentReport.trim() || !docRef || !user) return;
+    setIsActionLoading(true);
+    try {
+      const entry = {
+        action: "Detailed Task Fulfillment Account",
+        user: user.email,
+        timestamp: new Date().toISOString(),
+        remark: fulfillmentReport.trim(),
+        type: 'fulfillment_report',
+        visibility: 'public'
+      };
+      
+      await updateDoc(docRef, { 
+        timeline: arrayUnion(entry),
+        lastFulfillmentAccount: fulfillmentReport.trim(),
+        updatedAt: serverTimestamp()
+      });
+      
+      toast({ 
+        title: "Account Submitted", 
+        description: "Your detailed task fulfillment record has been committed to the case file." 
+      });
+      setFulfillmentReport('');
+      setActiveTab('timeline');
+    } catch (e) {
+      toast({ variant: "destructive", title: "Submission Failed" });
+    } finally {
+      setIsActionLoading(false);
+    }
+  };
+
   if (loading) return <div className="py-20 text-center"><Loader2 className="animate-spin text-indigo-600 mx-auto" /></div>
   if (!c) return <div className="p-20 text-center font-bold text-slate-400">FILE NOT FOUND</div>
 
@@ -164,9 +201,10 @@ export default function InvestigationCaseHub() {
          </Card>
       </header>
 
-      <Tabs defaultValue="overview" className="space-y-8">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
          <TabsList className="bg-white p-1 rounded-2xl border shadow-sm w-full md:w-auto overflow-x-auto no-scrollbar">
             <TabsTrigger value="overview" className="rounded-xl px-8 font-bold text-[10px] uppercase tracking-widest data-[state=active]:bg-indigo-600 data-[state=active]:text-white">Overview</TabsTrigger>
+            <TabsTrigger value="report" className="rounded-xl px-8 font-bold text-[10px] uppercase tracking-widest data-[state=active]:bg-accent data-[state=active]:text-primary border border-transparent data-[state=active]:border-accent">Mission Report</TabsTrigger>
             <TabsTrigger value="evidence" className="rounded-xl px-8 font-bold text-[10px] uppercase tracking-widest data-[state=active]:bg-indigo-600 data-[state=active]:text-white">Evidence Vault</TabsTrigger>
             <TabsTrigger value="notes" className="rounded-xl px-8 font-bold text-[10px] uppercase tracking-widest data-[state=active]:bg-indigo-600 data-[state=active]:text-white">Field Notes</TabsTrigger>
             <TabsTrigger value="timeline" className="rounded-xl px-8 font-bold text-[10px] uppercase tracking-widest data-[state=active]:bg-indigo-600 data-[state=active]:text-white">Timeline</TabsTrigger>
@@ -187,6 +225,55 @@ export default function InvestigationCaseHub() {
                   <p className="text-slate-600 leading-relaxed">{c.accusedDetails || "No specific names provided in original filing."}</p>
                </Card>
             </div>
+         </TabsContent>
+
+         <TabsContent value="report" className="space-y-8 animate-in slide-in-from-right-4 duration-500">
+            <Card className="rounded-[2.5rem] border-none shadow-sm p-10 bg-white relative overflow-hidden">
+               <div className="absolute top-0 right-0 w-32 h-32 bg-accent/5 rounded-full -mr-16 -mt-16 blur-2xl"></div>
+               <CardHeader className="p-0 mb-10">
+                  <div className="flex items-center gap-4 mb-4">
+                     <div className="w-14 h-14 rounded-2xl bg-accent/10 flex items-center justify-center text-accent shadow-sm">
+                        <ClipboardCheck className="w-7 h-7" />
+                     </div>
+                     <div>
+                        <CardTitle className="text-2xl font-headline font-bold">Task Fulfillment Account</CardTitle>
+                        <CardDescription className="text-xs font-bold uppercase tracking-widest text-slate-400">Formal Investigative Reporting Node</CardDescription>
+                     </div>
+                  </div>
+                  <p className="text-sm text-slate-500 leading-relaxed max-w-2xl">
+                     Provide a detailed account of your investigative activities. Describe how and to what extent the assigned tasks have been fulfilled. This report will be reviewed by the National Governance Cell.
+                  </p>
+               </CardHeader>
+               
+               <CardContent className="p-0 space-y-8">
+                  <div className="space-y-2">
+                     <Label className="text-[10px] font-black uppercase text-accent tracking-[0.2em] ml-2">Fulfillment Narrative *</Label>
+                     <Textarea 
+                       value={fulfillmentReport}
+                       onChange={e => setFulfillmentReport(e.target.value)}
+                       placeholder="Detail your findings, site visits, witness interactions, and overall progress towards the assigned mandate..."
+                       className="min-h-[300px] rounded-[2rem] p-8 bg-slate-50 border-none shadow-inner text-base leading-relaxed italic font-medium"
+                     />
+                  </div>
+
+                  <div className="p-6 rounded-2xl bg-amber-50 border border-amber-100 flex items-start gap-4">
+                     <ShieldCheck className="w-6 h-6 text-amber-600 shrink-0 mt-0.5" />
+                     <p className="text-xs text-amber-800 font-medium leading-relaxed">
+                        By submitting this account, you verify that the information provided is an accurate representation of your field work. This record is immutable once committed to the case timeline.
+                     </p>
+                  </div>
+               </CardContent>
+
+               <CardFooter className="p-0 mt-10 pt-8 border-t">
+                  <Button 
+                    onClick={handlePostFulfillmentReport} 
+                    disabled={isActionLoading || !fulfillmentReport.trim()} 
+                    className="w-full h-16 rounded-2xl bg-accent text-primary font-black uppercase text-xs tracking-[0.2em] shadow-xl shadow-accent/20 hover:bg-secondary hover:text-white transition-all flex gap-3"
+                  >
+                     {isActionLoading ? <Loader2 className="w-6 h-6 animate-spin" /> : <><CheckCircle2 className="w-5 h-5" /> Commit Detailed Account</>}
+                  </Button>
+               </CardFooter>
+            </Card>
          </TabsContent>
 
          <TabsContent value="evidence" className="space-y-8 animate-in fade-in duration-500">
@@ -235,12 +322,15 @@ export default function InvestigationCaseHub() {
                <div className="space-y-8">
                   {(c.timeline || []).slice().reverse().map((entry: any, i: number) => (
                     <div key={i} className="flex gap-6 relative group">
-                       <div className="w-12 h-12 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-600 shrink-0 relative z-10">
-                          <History className="w-5 h-5" />
+                       <div className={cn(
+                          "w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 relative z-10 shadow-sm",
+                          entry.type === 'fulfillment_report' ? "bg-accent text-primary" : "bg-indigo-50 text-indigo-600"
+                       )}>
+                          {entry.type === 'fulfillment_report' ? <ClipboardCheck className="w-6 h-6" /> : <History className="w-5 h-5" />}
                        </div>
                        <div className="flex-1 pt-1 pb-8 border-l-2 border-slate-100 pl-8 ml-[-40px] group-last:border-transparent">
                           <div className="flex justify-between items-center mb-2">
-                             <h4 className="font-bold text-primary">{entry.action}</h4>
+                             <h4 className={cn("font-bold", entry.type === 'fulfillment_report' ? "text-accent" : "text-primary")}>{entry.action}</h4>
                              <span className="text-[10px] font-black text-slate-400 uppercase">{new Date(entry.timestamp).toLocaleString()}</span>
                           </div>
                           <p className="text-sm text-slate-500 italic">"{entry.remark}"</p>
@@ -254,4 +344,8 @@ export default function InvestigationCaseHub() {
       </Tabs>
     </div>
   )
+}
+
+function Loader2({ className }: { className?: string }) {
+  return <Clock className={cn("animate-spin", className)} />
 }
