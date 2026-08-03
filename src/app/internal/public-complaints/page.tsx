@@ -148,11 +148,14 @@ export default function PublicComplaintsTerminal() {
 
   const handleDelete = async (id: string) => {
     if (!db || !isRoot) return
+    setIsActionLoading(true)
     try {
       await deleteDoc(doc(db, 'public_complaints', id))
-      toast({ title: "Record Purged" })
+      toast({ title: "Record Purged", description: "Case has been removed from all institutional indices." })
     } catch (e) {
       toast({ variant: "destructive", title: "Purge Denied" })
+    } finally {
+      setIsActionLoading(false)
     }
   }
 
@@ -283,7 +286,33 @@ export default function PublicComplaintsTerminal() {
                              </div>
                           </div>
                         </div>
-                        <div className="flex flex-col gap-3 h-full justify-center"><Button size="lg" className="w-full bg-primary text-white font-bold h-12 rounded-xl text-[11px] uppercase tracking-widest gap-2 shadow-xl shadow-primary/20 hover:bg-secondary transition-all" onClick={() => router.push(`/internal/public-complaints/${c.id}`)}><LayoutDashboard className="w-4 h-4" /> Manage Case</Button><Button size="sm" variant="ghost" className="h-10 text-[10px] font-bold text-slate-400 hover:text-accent" onClick={() => router.push(`/internal/public-complaints/${c.id}#reports`)}><FileText className="w-4 h-4 mr-2" /> 18 Templates</Button></div>
+                        <div className="flex flex-col gap-3 h-full justify-center">
+                          <Button size="lg" className="w-full bg-primary text-white font-bold h-12 rounded-xl text-[11px] uppercase tracking-widest gap-2 shadow-xl shadow-primary/20 hover:bg-secondary transition-all" onClick={() => router.push(`/internal/public-complaints/${c.id}`)}>
+                            <LayoutDashboard className="w-4 h-4" /> Manage Case
+                          </Button>
+                          
+                          {isRoot && (
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button variant="ghost" size="sm" className="h-10 text-slate-300 hover:text-red-500 transition-colors uppercase font-bold text-[10px]">
+                                  <Trash2 className="w-4 h-4 mr-2" /> Purge Case
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent className="rounded-[2.5rem]">
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Permanent Deletion</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    You are about to permanently purge the complaint record for "{c.subject}". This will remove all timeline history, evidence, and audit logs.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+                                  <AlertDialogAction onClick={() => handleDelete(c.id)} className="bg-red-600 hover:bg-red-700 rounded-xl">Authorize Deletion</AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </CardContent>

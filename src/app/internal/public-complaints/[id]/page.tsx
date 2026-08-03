@@ -5,7 +5,7 @@ import React, { useEffect, useState, useMemo } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { useUser, useFirestore, useDoc, useMemoFirebase, useCollection } from '@/firebase'
-import { doc, updateDoc, serverTimestamp, arrayUnion, collection, query, orderBy, where, getDocs, addDoc, setDoc } from 'firebase/firestore'
+import { doc, updateDoc, serverTimestamp, arrayUnion, collection, query, orderBy, where, getDocs, addDoc, setDoc, deleteDoc } from 'firebase/firestore'
 import { Footer } from '@/components/footer'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -38,6 +38,17 @@ import {
   DialogClose,
   DialogFooter as UiDialogFooter
 } from "@/components/ui/dialog"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
 import { CASE_STATUSES, CASE_PRIORITIES, REPORT_TEMPLATES } from '@/lib/complaint-constants'
@@ -484,6 +495,20 @@ export default function CaseHubPage() {
     }
   };
 
+  const handlePurgeCase = async () => {
+    if (!db || !isRoot || !id) return;
+    setIsActionLoading(true);
+    try {
+      await deleteDoc(doc(db, 'public_complaints', id as string));
+      toast({ title: "Case Purged", description: "Record has been removed from the registry." });
+      router.push('/internal/public-complaints');
+    } catch (e) {
+      toast({ variant: "destructive", title: "Purge Failed" });
+    } finally {
+      setIsActionLoading(false);
+    }
+  };
+
   if (authLoading || dataLoading) return <div className="min-h-screen flex items-center justify-center bg-slate-50"><Loader2 className="w-12 h-12 animate-spin text-accent" /></div>
   if (!caseData) return <div className="p-20 text-center text-slate-400 font-bold uppercase">Record not identified in National Registry.</div>
 
@@ -492,7 +517,6 @@ export default function CaseHubPage() {
       <header className="pt-16 pb-8 bg-slate-900 text-white border-b-8 border-accent/20 sticky top-0 z-40 px-4 shadow-2xl">
         <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-6">
            <div className="flex items-center gap-6">
-              {/* Refined Back Link Node */}
               <Link href="/internal/public-complaints" className="flex flex-col items-center group shrink-0 transition-all active:scale-95">
                 <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-accent group-hover:text-primary transition-all border border-white/10 shadow-sm">
                   <ArrowLeft className="w-6 h-6" />
@@ -513,6 +537,28 @@ export default function CaseHubPage() {
               </div>
            </div>
            <div className="flex items-center gap-3 w-full md:w-auto">
+              {isRoot && (
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="ghost" className="text-red-500 hover:text-red-600 hover:bg-red-500/10 font-bold uppercase text-[10px] tracking-widest h-11 px-6 rounded-xl">
+                      <Trash2 className="w-4 h-4 mr-2" /> Purge Case
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent className="rounded-[2.5rem]">
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Permanent Deletion</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        You are about to permanently purge the complaint record for "{caseData.subject}". This will remove all timeline history, evidence, and audit logs.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={handlePurgeCase} className="bg-red-600 hover:bg-red-700 rounded-xl">Authorize Deletion</AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              )}
+              
               <div className="flex-1 md:flex-none">
                  <Select onValueChange={updateCaseStatus} defaultValue={caseData.status}>
                     <SelectTrigger className="w-full md:w-56 h-11 bg-white/5 border-white/10 text-white font-bold text-[10px] uppercase tracking-widest"><SelectValue placeholder="Transition Status" /></SelectTrigger>
@@ -523,7 +569,7 @@ export default function CaseHubPage() {
                 <DialogTrigger asChild><Button className="bg-accent text-primary font-bold h-11 px-8 rounded-xl shadow-xl hover:bg-secondary hover:text-white transition-all"><Edit3 className="w-4 h-4 mr-2" /> Commission Findings</Button></DialogTrigger>
                 <DialogContent className="max-w-xl rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden bg-white dark:bg-slate-900">
                   <div className="bg-slate-900 p-8 text-white relative">
-                    <div className="absolute right-6 top-6"><DialogClose asChild><Button variant="ghost" size="icon" className="rounded-full text-white/20 hover:text-white"><X className="w-5 h-5" /></Button></DialogClose></div>
+                    <div className="absolute right-6 top-6"><DialogClose asChild><Button variant="ghost" size="icon" className="rounded-full text-white/40 hover:text-white"><X className="w-5 h-5" /></Button></DialogClose></div>
                     <Badge className="bg-accent text-primary font-black text-[8px] uppercase mb-2">Executive Action</Badge>
                     <DialogTitle className="text-2xl font-headline font-bold">Commission Investigative Findings</DialogTitle>
                     <DialogDescription className="text-slate-400">Formalize the conclusion of this case and issue administrative directives.</DialogDescription>
@@ -672,7 +718,7 @@ export default function CaseHubPage() {
            <TabsContent value="evidence" className="animate-in fade-in zoom-in-95 duration-500">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">{(caseData.incidentPhotos || []).map((img: string, i: number) => (<Card key={i} className="rounded-3xl overflow-hidden border-none shadow-xl group cursor-zoom-in"><div className="relative aspect-square"><Image src={img} alt="Evidence" fill className="object-cover group-hover:scale-110 transition-transform duration-700" /><div className="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity p-6 flex flex-col justify-end"><Badge className="bg-accent text-primary font-black text-[8px] uppercase w-fit mb-2">Citizen Submission</Badge><p className="text-white text-xs font-bold">Attached Document #{i + 1}</p></div></div></Card>))}
                  {(caseData.investigativeEvidence || []).map((item: any, i: number) => (<Card key={`inv-${i}`} className="rounded-3xl overflow-hidden border border-slate-100 dark:border-slate-800 shadow-xl group bg-white dark:bg-slate-900"><div className="relative aspect-square">{item.type === 'image' ? (<Image src={item.url} alt={item.name} fill className="object-cover group-hover:scale-110 transition-transform duration-700" />) : (<div className="w-full h-full flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-950 gap-4">{item.type === 'audio' ? <FileAudio className="w-16 h-16 text-indigo-500" /> : item.type === 'video' ? <Video className="w-16 h-16 text-rose-500" /> : <FileIcon className="w-16 h-16 text-emerald-500" />}<p className="text-[10px] font-black uppercase text-slate-400 tracking-widest px-4 text-center truncate w-full">{item.name}</p></div>)}<div className="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity p-6 flex flex-col justify-end"><Badge className="bg-emerald-500 text-white font-black text-[8px] uppercase w-fit mb-2">Investigative Vault</Badge><p className="text-white text-xs font-bold truncate">{item.name}</p><div className="flex gap-2 mt-4"><Button asChild size="sm" variant="outline" className="h-8 rounded-lg bg-white/10 border-white/20 text-white text-[8px] uppercase font-bold"><a href={item.url} download={item.name}>Download</a></Button></div></div></div></Card>))}
-                 <Card className="rounded-3xl border-2 border-dashed border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center p-12 text-center space-y-4 hover:border-accent transition-all cursor-pointer group relative overflow-hidden"><input type="file" onChange={handleUploadEvidence} className="absolute inset-0 opacity-0 cursor-pointer z-10" disabled={isActionLoading} accept="image/*,audio/*,video/*,application/pdf,.doc,.docx" /><div className="w-16 h-16 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-300 group-hover:bg-accent group-hover:text-white transition-all">{isActionLoading ? <Loader2 className="w-8 h-8 animate-spin" /> : <Plus className="w-8 h-8" />}</div><div><p className="font-bold text-primary dark:text-white uppercase text-xs">Append Evidence</p><p className="text-[10px] text-slate-400 mt-1">Photos, audio or documents.</p></div></Card></div>
+                 <Card className="rounded-3xl border-2 border-dashed border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center p-12 text-center space-y-4 hover:border-accent transition-all cursor-pointer group relative overflow-hidden"><input type="file" onChange={handleUploadEvidence} className="absolute inset-0 opacity-0 cursor-pointer z-10" disabled={isActionLoading} accept="image/*,audio/*,video/*,application/pdf,.doc,.docx" /><div className="w-16 h-16 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-300 group-hover:bg-accent group-hover:text-white transition-all">{isActionLoading ? <Loader2 className="animate-spin" /> : <Plus className="w-8 h-8" />}</div><div><p className="font-bold text-primary dark:text-white uppercase text-xs">Append Evidence</p><p className="text-[10px] text-slate-400 mt-1">Photos, audio or documents.</p></div></Card></div>
            </TabsContent>
         </Tabs>
 
