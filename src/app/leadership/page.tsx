@@ -58,14 +58,15 @@ function LeaderCard({ leader, variant = "default", isAdmin, onEdit, onDelete }: 
     <div className="flex flex-col items-center group relative">
       <div className={`relative ${sizeClasses[variant]} rounded-2xl overflow-hidden shadow-xl border-2 md:border-4 border-white group-hover:border-secondary transition-all duration-500 bg-slate-100 dark:bg-slate-800`}>
         <Image src={img!} alt={leader.name} fill className="object-cover group-hover:scale-110 transition-transform duration-700" />
-        <div className="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-10">
+        {/* Administrative Overlay - Positioned further down the image */}
+        <div className="absolute inset-0 bg-gradient-to-t from-primary/90 via-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-end justify-center pb-10 z-10">
           {isAdmin && (
-            <div className="flex gap-2">
-              <Button onClick={() => onEdit?.(leader)} size="icon" className="bg-white dark:bg-slate-800 text-primary dark:text-white rounded-full hover:bg-secondary hover:text-white transition-colors border border-white/20 shadow-xl">
-                <Edit className="w-4 h-4" />
+            <div className="flex gap-3 animate-in fade-in slide-in-from-bottom-2 duration-300">
+              <Button onClick={() => onEdit?.(leader)} size="icon" className="bg-white dark:bg-slate-800 text-primary dark:text-white rounded-full hover:bg-secondary hover:text-white transition-colors border border-white/20 shadow-2xl h-11 w-11">
+                <Edit className="w-5 h-5" />
               </Button>
-              <Button onClick={() => onDelete?.(leader.id)} size="icon" className="bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors border border-white/20 shadow-xl">
-                <Trash2 className="w-4 h-4" />
+              <Button onClick={() => onDelete?.(leader.id)} size="icon" className="bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors border border-white/20 shadow-2xl h-11 w-11">
+                <Trash2 className="w-5 h-5" />
               </Button>
             </div>
           )}
