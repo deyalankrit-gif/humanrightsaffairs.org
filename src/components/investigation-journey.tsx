@@ -23,7 +23,8 @@ import {
   Globe,
   Landmark,
   Building2,
-  Info
+  Info,
+  User
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
