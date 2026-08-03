@@ -26,7 +26,8 @@ import {
   Star,
   ShieldCheck,
   Building2,
-  Info
+  Info,
+  BadgeCheck as BadgeCheckIcon
 } from 'lucide-react'
 import { useCollection, useFirestore, useMemoFirebase, useUser } from '@/firebase'
 import { collection, query, orderBy, addDoc, deleteDoc, doc, updateDoc, serverTimestamp, where } from 'firebase/firestore'
@@ -85,7 +86,7 @@ function LeaderCard({ leader, variant = "default", isAdmin, onEdit, onDelete }: 
       <div className={`relative ${sizeClasses[variant]} rounded-2xl overflow-hidden shadow-xl border-2 md:border-4 border-white group-hover:border-secondary transition-all duration-500 bg-slate-100 dark:bg-slate-800`}>
         <Image src={img!} alt={leader.name} fill className="object-cover group-hover:scale-110 transition-transform duration-700" />
         
-        {/* Administrative Overlay - Positioned further down the image to clear face */}
+        {/* Administrative Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-primary/90 via-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-end justify-center pb-8 z-10">
           {isAdmin && (
             <div className="flex gap-3 animate-in fade-in slide-in-from-bottom-2 duration-300">
@@ -111,6 +112,7 @@ function LeaderCard({ leader, variant = "default", isAdmin, onEdit, onDelete }: 
 export default function LeadershipPage() {
   const [isActionLoading, setIsActionLoading] = useState(false)
   const [isMirror, setIsMirror] = useState(false)
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const { user } = useUser()
   const db = useFirestore()
   const { toast } = useToast()
@@ -188,15 +190,11 @@ export default function LeadershipPage() {
   }, [membersList, memberSearch]);
   
   const allStates = Object.keys(INDIA_DATA).sort()
-  const districtsInState = allStates.reduce((acc, state) => {
-    acc[state] = INDIA_DATA[state] || [];
-    return acc;
-  }, {} as Record<string, string[]>);
 
   const [activeState, setActiveState] = useState<string | null>("West Bengal")
   const [activeDistrict, setActiveDistrict] = useState<string | null>("Howrah")
   const [editLeader, setEditLeader] = useState<any>(null)
-  const [newLeader, setNewMember] = useState({
+  const [newLeader, setNewLeader] = useState({
     name: '',
     title: '',
     gender: 'male' as const,
@@ -217,14 +215,14 @@ export default function LeadershipPage() {
       reader.onloadend = () => {
         const dataUri = reader.result as string
         if (isEdit) setEditLeader({ ...editLeader, imageId: dataUri })
-        else setNewMember({ ...newLeader, imageId: dataUri })
+        else setNewLeader({ ...newLeader, imageId: dataUri })
       }
       reader.readAsDataURL(file)
     }
   }
 
   const handleFetchFromMember = (member: any) => {
-    setNewMember({
+    setNewLeader({
       name: member.name || '',
       title: member.designation || '',
       gender: (member.gender?.toLowerCase() === 'female' ? 'female' : 'male'),
@@ -241,9 +239,13 @@ export default function LeadershipPage() {
     if (!newLeader.name || !newLeader.title) return
     setIsActionLoading(true)
     try {
-      await addDoc(collection(db, 'leadership'), { ...newLeader, createdAt: serverTimestamp() })
+      await addDoc(collection(db, 'leadership'), { 
+        ...newLeader, 
+        createdAt: serverTimestamp() 
+      })
       toast({ title: "Leader Commissioned" })
-      setNewMember({ name: '', title: '', gender: 'male', level: 'Central', parentRegion: '', districtName: '', imageId: '' })
+      setNewLeader({ name: '', title: '', gender: 'male', level: 'Central', parentRegion: '', districtName: '', imageId: '' })
+      setIsAddDialogOpen(false)
     } catch (e: any) {
       toast({ variant: "destructive", title: "Error", description: e.message })
     } finally {
@@ -286,7 +288,7 @@ export default function LeadershipPage() {
           <h1 className="text-4xl md:text-7xl font-headline font-bold mb-6">Our <span className="text-accent italic">Leadership</span> Tree</h1>
           
           {isAdmin && (
-            <Dialog>
+            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
               <DialogTrigger asChild>
                 <Button className="bg-accent text-primary font-bold rounded-2xl h-14 px-10 flex gap-2 hover:bg-secondary hover:text-white shadow-xl shadow-accent/20 mx-auto transform hover:scale-105 transition-all">
                   <Plus className="w-5 h-5" /> Commission Leadership Member
@@ -320,7 +322,7 @@ export default function LeadershipPage() {
                            {filteredMembers.map((m: any) => (
                               <button 
                                 key={m.id}
-                                onClick={() => handleFetchFromMember(m)}
+                                onClick={() => handleSelectFromRegistry && handleFetchFromMember(m)}
                                 className="flex items-center justify-between p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800 hover:border-accent transition-all group"
                               >
                                  <div className="flex items-center gap-3">
@@ -351,18 +353,18 @@ export default function LeadershipPage() {
                     <div className="grid md:grid-cols-2 gap-6">
                       <div className="space-y-1.5">
                         <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Official Name *</Label>
-                        <Input value={newLeader.name} onChange={e => setNewMember({...newLeader, name: e.target.value})} placeholder="Full Legal Identity" className="h-11 rounded-xl bg-slate-50 border-none shadow-inner font-bold" required />
+                        <Input value={newLeader.name} onChange={e => setNewLeader({...newLeader, name: e.target.value})} placeholder="Full Legal Identity" className="h-11 rounded-xl bg-slate-50 border-none shadow-inner font-bold" required />
                       </div>
                       <div className="space-y-1.5">
                         <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Official Designation *</Label>
-                        <Input value={newLeader.title} onChange={e => setNewMember({...newLeader, title: e.target.value})} placeholder="e.g. State Chairman" className="h-11 rounded-xl bg-slate-50 border-none shadow-inner font-bold" required />
+                        <Input value={newLeader.title} onChange={e => setNewLeader({...newLeader, title: e.target.value})} placeholder="e.g. State Chairman" className="h-11 rounded-xl bg-slate-50 border-none shadow-inner font-bold" required />
                       </div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-6">
                       <div className="space-y-1.5">
                         <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Chapter Level</Label>
-                        <Select value={newLeader.level} onValueChange={(val: any) => setNewMember({...newLeader, level: val, parentRegion: '', districtName: ''})}>
+                        <Select value={newLeader.level} onValueChange={(val: any) => setNewLeader({...newLeader, level: val, parentRegion: '', districtName: ''})}>
                           <SelectTrigger className="h-11 rounded-xl bg-slate-50 border-none shadow-inner font-bold"><SelectValue placeholder="Level" /></SelectTrigger>
                           <SelectContent className="bg-white z-[1000000]">
                             <SelectItem value="Central">Central Council</SelectItem>
@@ -373,7 +375,7 @@ export default function LeadershipPage() {
                       </div>
                       <div className="space-y-1.5">
                         <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Gender</Label>
-                        <Select value={newLeader.gender} onValueChange={(val: any) => setNewMember({...newLeader, gender: val})}>
+                        <Select value={newLeader.gender} onValueChange={(val: any) => setNewLeader({...newLeader, gender: val})}>
                           <SelectTrigger className="h-11 rounded-xl bg-slate-50 border-none shadow-inner font-bold"><SelectValue placeholder="Gender" /></SelectTrigger>
                           <SelectContent className="bg-white z-[1000000]"><SelectItem value="male">Male</SelectItem><SelectItem value="female">Female</SelectItem></SelectContent>
                         </Select>
@@ -384,7 +386,7 @@ export default function LeadershipPage() {
                       <div className="grid md:grid-cols-2 gap-6 p-6 rounded-3xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 animate-in fade-in slide-in-from-top-2 duration-300">
                         <div className="space-y-1.5">
                           <Label className="text-[10px] font-black uppercase text-accent flex items-center gap-2"><Globe className="w-3.5 h-3.5" /> State / UT</Label>
-                          <Select value={newLeader.parentRegion} onValueChange={(val) => setNewMember({...newLeader, parentRegion: val, districtName: ''})}>
+                          <Select value={newLeader.parentRegion} onValueChange={(val) => setNewLeader({...newLeader, parentRegion: val, districtName: ''})}>
                             <SelectTrigger className="h-11 rounded-xl bg-white dark:bg-slate-800 border-accent/20 font-bold"><SelectValue placeholder="Choose State" /></SelectTrigger>
                             <SelectContent className="bg-white z-[1000000] max-h-60">{allStates.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
                           </Select>
@@ -392,7 +394,7 @@ export default function LeadershipPage() {
                         {newLeader.level === 'District' && (
                           <div className="space-y-1.5">
                             <Label className="text-[10px] font-black uppercase text-accent flex items-center gap-2"><MapPin className="w-3.5 h-3.5" /> District</Label>
-                            <Select value={newLeader.districtName} onValueChange={(val) => setNewMember({...newLeader, districtName: val})}>
+                            <Select value={newLeader.districtName} onValueChange={(val) => setNewLeader({...newLeader, districtName: val})}>
                               <SelectTrigger className="h-11 rounded-xl bg-white dark:bg-slate-800 border-accent/20 font-bold"><SelectValue placeholder="Choose District" /></SelectTrigger>
                               <SelectContent className="bg-white z-[1000000] max-h-60">{newLeader.parentRegion && (INDIA_DATA[newLeader.parentRegion] || []).map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
                             </Select>
@@ -403,9 +405,9 @@ export default function LeadershipPage() {
                   </div>
                 </div>
 
-                <DialogFooter className="p-8 bg-slate-50 dark:bg-slate-900 border-t shrink-0">
+                <div className="p-8 bg-slate-50 dark:bg-slate-900 border-t shrink-0">
                   <Button onClick={handleAdd} disabled={isActionLoading} className="w-full h-14 bg-primary text-white font-bold rounded-2xl shadow-xl hover:bg-secondary transition-all text-base md:text-lg">Commission to Leadership</Button>
-                </DialogFooter>
+                </div>
               </DialogContent>
             </Dialog>
           )}
@@ -510,7 +512,7 @@ export default function LeadershipPage() {
                                   <SelectValue placeholder="Select District" />
                                 </SelectTrigger>
                                 <SelectContent className="max-h-80 bg-white">
-                                  {districtsInState[activeState]?.map(d => <SelectItem key={d} value={d} className="text-[10px] font-bold">{d}</SelectItem>)}
+                                  {activeState && (INDIA_DATA[activeState] || []).map(d => <SelectItem key={d} value={d} className="text-[10px] font-bold">{d}</SelectItem>)}
                                 </SelectContent>
                               </Select>
                             </div>
