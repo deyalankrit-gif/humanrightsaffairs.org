@@ -46,7 +46,11 @@ import {
   Wrench,
   Info,
   MapPin,
-  Hash
+  Hash,
+  Activity,
+  Cpu,
+  TrendingUp,
+  UserCheck
 } from 'lucide-react'
 import {
   Dialog,
@@ -137,92 +141,61 @@ export default function InvestigationOfficersRegistry() {
     return (rawOfficers || []).filter(o => o && typeof o === 'object' && o.id);
   }, [rawOfficers]);
 
-  const generateOfficerId = () => `HRAT-IO-${Math.random().toString(36).substr(2, 4).toUpperCase()}`;
+  // Strategic Stats
+  const stats = useMemo(() => {
+    if (!officers) return { total: 0, active: 0, load: 0 };
+    const total = officers.length;
+    const active = officers.filter((o: any) => o.status === 'active').length;
+    const load = officers.reduce((acc, curr: any) => acc + (curr.assignedCount || 0), 0);
+    return { total, active, load };
+  }, [officers]);
 
-  const generateSmartPassword = (name: string, phone: string) => {
-    const prefix = (name || 'HRAT').trim().substring(0, 3);
-    const cleanPhone = (phone || '000').replace(/\D/g, '');
-    const suffix = cleanPhone.length >= 3 ? cleanPhone.slice(-3) : '000';
-    return `${prefix}#${suffix}`;
-  };
-
-  /**
-   * validateOfficerMetadata: Governance check for required record info.
-   * PERMISSIVE MODE: Now attempts recovery or allows partial return to ensure force delete.
-   */
   const validateOfficerMetadata = (officer: any) => {
     if (!officer || typeof officer !== 'object') {
       return { isValid: false, reason: "Record unavailable." };
     }
-
     const id = officer.id;
     let email = (officer.email || '').toLowerCase().trim();
     const name = (officer.name || 'Unknown Officer').trim();
-
-    // Recovery: If email is missing but ID contains an @, treat ID as email (legacy support)
-    if (!email && id && id.includes('@')) {
-      email = id.toLowerCase().trim();
-    }
-
-    // A Document ID is the absolute minimum requirement to attempt ANY deletion.
+    if (!email && id && id.includes('@')) email = id.toLowerCase().trim();
     if (!id) return { isValid: false, reason: "Internal ID missing." };
-
-    return { 
-      isValid: true, 
-      id, 
-      email: email || null, // Allow null email for fault-tolerant skip
-      name 
-    };
+    return { isValid: true, id, email: email || null, name };
   };
 
   const handleStartDelete = async (officer: any) => {
     if (!db || !user) return;
-    
     const validation = validateOfficerMetadata(officer);
     if (!validation.isValid) {
-      toast({ 
-        variant: "destructive", 
-        title: "Registry Inconsistency", 
-        description: "This record is too corrupted to delete via normal protocol. Contact support." 
-      });
+      toast({ variant: "destructive", title: "Registry Inconsistency", description: "Incomplete record. Contact support." });
       return;
     }
-
     setOfficerToDelete(officer);
     setDeleteDialogStep('confirm');
   };
 
   const executeGovernanceAudit = async () => {
     if (!db || !user || !officerToDelete) return;
-    
     setIsActionLoading(true);
-
     try {
       const complaintsRef = collection(db, 'public_complaints');
-      const q = query(
-        complaintsRef, 
-        where('status', 'not-in', ['Closed', 'Action Taken'])
-      );
-      
+      const q = query(complaintsRef, where('status', 'not-in', ['Closed', 'Action Taken']));
       const snap = await getDocs(q);
       const officerName = (officerToDelete.name || '').trim();
-      
       const conflictCases = snap.docs
         .map(d => ({ id: d.id, ...d.data() }))
         .filter((c: any) => 
           (c.assignedTo && c.assignedTo.trim() === officerName) || 
           (c.assignedOfficers || []).some((o: any) => (o.name || '').trim() === officerName)
         );
-      
       if (conflictCases.length > 0) {
         setActiveAssignments(conflictCases);
-        setBlockReasons(["Active investigative assignments exist in the national registry."]);
+        setBlockReasons(["Active investigative assignments exist."]);
         setDeleteDialogStep('blocked');
       } else {
         setDeleteDialogStep('warning');
       }
     } catch (e: any) {
-      toast({ variant: "destructive", title: "Audit Error", description: "Verification protocol failed. Please refresh." });
+      toast({ variant: "destructive", title: "Audit Error" });
     } finally {
       setIsActionLoading(false);
     }
@@ -231,34 +204,23 @@ export default function InvestigationOfficersRegistry() {
   const handlePurgeAllExceptRaisa = async () => {
     if (!db || !isRoot || !officers) return;
     setIsActionLoading(true);
-    
     try {
       const batch = writeBatch(db);
       let count = 0;
-      
       for (const officer of officers) {
         const officerName = (officer.name || '').trim();
         if (officerName === 'Raisa Das') continue;
-
         const validation = validateOfficerMetadata(officer);
-        if (!validation.id) continue; // Unrecoverable
-
-        // Purge Registry Profile (Primary)
+        if (!validation.id) continue;
         batch.delete(doc(db, 'investigation_officers', validation.id));
-        
-        // Purge Auth Link (Secondary - Skip if email missing/invalid)
-        if (validation.email) {
-          batch.delete(doc(db, 'users', validation.email));
-        }
-        
+        if (validation.email) batch.delete(doc(db, 'users', validation.email));
         count++;
       }
-      
       await batch.commit();
-      toast({ title: "Registry Purged", description: `${count} personnel records removed.` });
+      toast({ title: "Registry Purged", description: `${count} records removed.` });
       setIsPurgeOpen(false);
     } catch (e: any) {
-      toast({ variant: "destructive", title: "Partial Purge", description: "Some records could not be removed. Check audit log." });
+      toast({ variant: "destructive", title: "Partial Purge Failed" });
     } finally {
       setIsActionLoading(false);
     }
@@ -269,11 +231,7 @@ export default function InvestigationOfficersRegistry() {
     const emailVal = (formData.email || '').toLowerCase().trim();
     const nameVal = (formData.name || '').trim();
     const passVal = formData.password;
-
-    if (!db || !isRoot || !nameVal || !emailVal || !passVal) {
-       toast({ variant: "destructive", title: "Incomplete Form" });
-       return;
-    }
+    if (!db || !isRoot || !nameVal || !emailVal || !passVal) return;
 
     setIsActionLoading(true)
     const tempAppName = `TempApp-${Date.now()}`
@@ -284,9 +242,7 @@ export default function InvestigationOfficersRegistry() {
       const authUserCredential = await createUserWithEmailAndPassword(secondaryAuth, emailVal, passVal)
       const authUser = authUserCredential.user
       await updateProfile(authUser, { displayName: nameVal })
-
       const batch = writeBatch(db)
-      
       batch.set(doc(collection(db, 'investigation_officers')), {
         ...formData,
         name: nameVal,
@@ -295,17 +251,10 @@ export default function InvestigationOfficersRegistry() {
         assignedCount: 0,
         createdAt: serverTimestamp()
       })
-
       batch.set(doc(db, 'users', emailVal), {
-        uid: authUser.uid,
-        email: emailVal,
-        name: nameVal,
-        role: 'investigator',
-        status: 'active',
-        permissions: { publicView: true },
-        createdAt: serverTimestamp()
+        uid: authUser.uid, email: emailVal, name: nameVal, role: 'investigator', status: 'active',
+        permissions: { publicView: true }, createdAt: serverTimestamp()
       })
-
       await batch.commit()
       toast({ title: "Officer Provisioned" })
       setFormData({ name: '', email: '', phone: '', employeeId: '', password: '', designation: 'Investigation Officer', status: 'active' })
@@ -324,20 +273,10 @@ export default function InvestigationOfficersRegistry() {
     try {
       const batch = writeBatch(db)
       const email = (editOfficer.email || '').toLowerCase().trim();
-      
-      batch.update(doc(db, 'investigation_officers', editOfficer.id), {
-        ...editOfficer,
-        updatedAt: serverTimestamp()
-      })
-
+      batch.update(doc(db, 'investigation_officers', editOfficer.id), { ...editOfficer, updatedAt: serverTimestamp() })
       if (email) {
-        batch.update(doc(db, 'users', email), {
-          name: editOfficer.name,
-          status: editOfficer.status,
-          updatedAt: serverTimestamp()
-        })
+        batch.update(doc(db, 'users', email), { name: editOfficer.name, status: editOfficer.status, updatedAt: serverTimestamp() })
       }
-
       await batch.commit()
       toast({ title: "Profile Refreshed" })
       setEditOfficer(null)
@@ -350,41 +289,27 @@ export default function InvestigationOfficersRegistry() {
 
   const handleDelete = async () => {
     if (!db || !officerToDelete || !isRoot || !user) return;
-
     setIsDeleting(true)
     try {
       const batch = writeBatch(db)
       const id = officerToDelete.id;
       let email = (officerToDelete.email || '').toLowerCase().trim();
-
-      // Graceful Primary Deletion
       batch.delete(doc(db, 'investigation_officers', id))
-
-      // Fault-Tolerant Secondary Deletion
-      if (!email && id.includes('@')) email = id; // Recovery
-      if (email) {
-        batch.delete(doc(db, 'users', email.toLowerCase().trim()))
-      }
-      
-      // Audit Logging (Captures available data)
+      if (!email && id.includes('@')) email = id;
+      if (email) batch.delete(doc(db, 'users', email.toLowerCase().trim()))
       const auditRef = doc(collection(db, 'deletion_audit_logs'));
       batch.set(auditRef, {
-        adminId: user.uid,
-        adminName: user.displayName || 'Root',
-        targetId: officerToDelete.employeeId || 'N/A',
-        targetName: officerToDelete.name || 'Incomplete Record',
-        targetEmail: email || 'N/A',
-        timestamp: new Date().toISOString(),
-        status: "Permanently Purged - Successful"
+        adminId: user.uid, adminName: user.displayName || 'Root', targetId: officerToDelete.employeeId || 'N/A',
+        targetName: officerToDelete.name || 'Incomplete Record', targetEmail: email || 'N/A', timestamp: new Date().toISOString(),
+        status: "Permanently Purged"
       })
-      
       await batch.commit()
-      toast({ title: "Clearance Revoked", description: "Identity purged from national registry." })
+      toast({ title: "Clearance Revoked" })
       setDeleteDialogStep(null)
       setOfficerToDelete(null)
       setDeleteInputText('')
     } catch (e) {
-      toast({ variant: "destructive", title: "Purge Incomplete", description: "Partial registry sync failure. Please refresh." });
+      toast({ variant: "destructive", title: "Purge Incomplete" });
     } finally {
       setIsDeleting(false)
     }
@@ -399,27 +324,26 @@ export default function InvestigationOfficersRegistry() {
     return name.includes(s) || designation.includes(s) || empId.includes(s);
   });
 
-  if (authLoading || !isRoot) {
-    return <div className="min-h-screen flex items-center justify-center bg-slate-950"><Loader2 className="animate-spin text-accent" /></div>
-  }
-
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-20">
-      <header className="pt-16 pb-8 bg-slate-900 text-white border-b-8 border-accent/20">
-        <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="space-y-1 text-center md:text-left">
-             <div className="inline-flex items-center gap-2 bg-accent/20 text-accent px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border border-accent/30">
-               <ShieldCheck className="w-2.5 h-2.5" /> Registry Protocol Active
+      <header className="pt-16 pb-12 bg-slate-900 text-white border-b-8 border-accent/20 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-1/3 h-full bg-accent/5 -skew-x-12 animate-pulse"></div>
+        <div className="container mx-auto px-4 relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
+          <div className="space-y-2 text-center md:text-left">
+             <div className="inline-flex items-center gap-2 bg-accent/20 text-accent px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] border border-accent/30 animate-in slide-in-from-left-4 duration-700">
+               <ShieldCheck className="w-3.5 h-3.5" /> Registry Protocol Active
              </div>
-             <h1 className="text-3xl md:text-4xl font-headline font-bold">Investigator <span className="text-accent italic">Pool</span></h1>
-             <p className="text-slate-400 text-[11px] uppercase font-black">Official Registry of Investigative Personnel</p>
+             <h1 className="text-4xl md:text-5xl font-headline font-bold">Investigator <span className="text-accent italic">Pool</span></h1>
+             <p className="text-slate-400 text-xs md:text-sm font-bold uppercase tracking-widest flex items-center justify-center md:justify-start gap-2">
+               <Cpu className="w-4 h-4 text-emerald-500" /> National Investigative Node Control
+             </p>
           </div>
           
-          <div className="flex flex-wrap justify-center gap-3">
+          <div className="flex flex-wrap justify-center gap-4">
             <Dialog open={isPurgeOpen} onOpenChange={setIsPurgeOpen}>
                <DialogTrigger asChild>
-                 <Button variant="outline" className="bg-white/5 border-red-500/30 text-red-500 h-11 px-6 rounded-xl font-bold gap-2">
-                    <Wrench className="w-4 h-4" /> Maintenance
+                 <Button variant="outline" className="bg-white/5 border-red-500/30 text-red-500 h-12 px-6 rounded-2xl font-bold gap-2 transition-all hover:bg-red-500 hover:text-white group">
+                    <Wrench className="w-4 h-4 group-hover:rotate-90 transition-transform duration-500" /> Maintenance
                  </Button>
                </DialogTrigger>
                <DialogContent className="max-w-md rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden">
@@ -428,10 +352,10 @@ export default function InvestigationOfficersRegistry() {
                      <DialogTitle className="text-2xl font-headline font-bold">Registry Reset</DialogTitle>
                   </div>
                   <div className="p-8 space-y-6">
-                     <p className="text-sm font-bold text-red-900 bg-red-50 p-4 rounded-xl leading-relaxed">
-                        This will permanently purge ALL investigation officers (except Raisa Das) and their associated access credentials.
+                     <p className="text-sm font-bold text-red-900 bg-red-50 p-6 rounded-2xl leading-relaxed italic">
+                        "This will permanently purge ALL investigation officers (except Raisa Das) and their associated access credentials. Authorization required."
                      </p>
-                     <Button onClick={handlePurgeAllExceptRaisa} disabled={isActionLoading} className="w-full h-14 bg-red-600 hover:bg-red-700 text-white font-black uppercase text-xs">
+                     <Button onClick={handlePurgeAllExceptRaisa} disabled={isActionLoading} className="w-full h-14 bg-red-600 hover:bg-red-700 text-white font-black uppercase text-xs tracking-widest shadow-xl shadow-red-900/40">
                         {isActionLoading ? <Loader2 className="animate-spin" /> : "Authorize Registry Reset"}
                      </Button>
                   </div>
@@ -440,38 +364,38 @@ export default function InvestigationOfficersRegistry() {
 
             <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
               <DialogTrigger asChild>
-                <Button className="bg-accent text-primary font-bold rounded-xl h-11 px-8 shadow-xl shadow-accent/20">
-                  <Plus className="w-4 h-4" /> Add Investigator
+                <Button className="bg-accent text-primary font-bold rounded-2xl h-12 px-10 shadow-2xl shadow-accent/20 hover:bg-secondary hover:text-white transition-all transform hover:scale-105 active:scale-95">
+                  <Plus className="w-5 h-5 mr-2" /> Add Investigator
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-xl rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden">
-                 <div className="bg-slate-900 p-8 text-white"><DialogTitle className="text-2xl font-headline font-bold">Provision Officer</DialogTitle></div>
+              <DialogContent className="max-w-xl rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden bg-white dark:bg-slate-900">
+                 <div className="bg-slate-900 p-8 text-white"><DialogTitle className="text-3xl font-headline font-bold">Provision Officer</DialogTitle><p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">Establishing Digital Investigative Identity</p></div>
                  <form onSubmit={handleAdd} className="p-8 space-y-6">
                     <div className="grid md:grid-cols-2 gap-6">
-                      <div className="space-y-1.5"><Label className="text-[10px] font-bold uppercase text-slate-400">Name *</Label><Input value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} required /></div>
-                      <div className="space-y-1.5"><Label className="text-[10px] font-bold uppercase text-slate-400">Employee ID *</Label><Input value={formData.employeeId} onChange={e => setFormData({...formData, employeeId: e.target.value.toUpperCase()})} required /></div>
+                      <div className="space-y-1.5"><Label className="text-[10px] font-black uppercase text-slate-500">Name *</Label><Input value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="rounded-xl h-11" required /></div>
+                      <div className="space-y-1.5"><Label className="text-[10px] font-black uppercase text-slate-500">Employee ID *</Label><Input value={formData.employeeId} onChange={e => setFormData({...formData, employeeId: e.target.value.toUpperCase()})} className="rounded-xl h-11 font-mono font-bold" required /></div>
                     </div>
                     <div className="grid md:grid-cols-2 gap-6">
-                      <div className="space-y-1.5"><Label className="text-[10px] font-bold uppercase text-slate-400">Official Email *</Label><Input type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} required /></div>
+                      <div className="space-y-1.5"><Label className="text-[10px] font-black uppercase text-slate-500">Official Email *</Label><Input type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} className="rounded-xl h-11" required /></div>
                       <div className="space-y-1.5">
-                         <Label className="text-[10px] font-bold uppercase text-slate-400">Passphrase *</Label>
+                         <Label className="text-[10px] font-black uppercase text-slate-500">Passphrase *</Label>
                          <div className="relative">
-                            <Input type={showPassword ? "text" : "password"} value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} required />
+                            <Input type={showPassword ? "text" : "password"} value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} className="rounded-xl h-11" required />
                             <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400">{showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}</button>
                          </div>
                       </div>
                     </div>
                     <div className="grid md:grid-cols-2 gap-6">
-                      <div className="space-y-1.5 flex-1">
-                         <Label className="text-[10px] font-bold uppercase text-slate-400">Designation *</Label>
+                      <div className="space-y-1.5">
+                         <Label className="text-[10px] font-black uppercase text-slate-500">Designation *</Label>
                          <Select value={formData.designation} onValueChange={(val) => setFormData({...formData, designation: val})}>
                             <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
-                            <SelectContent className="bg-white">{OFFICER_DESIGNATIONS.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
+                            <SelectContent className="bg-white z-[1000000]">{OFFICER_DESIGNATIONS.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
                          </Select>
                       </div>
-                      <div className="space-y-1.5"><Label className="text-[10px] font-bold uppercase text-slate-400">Phone</Label><Input value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} /></div>
+                      <div className="space-y-1.5"><Label className="text-[10px] font-black uppercase text-slate-500">Phone</Label><Input value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} className="rounded-xl h-11" /></div>
                     </div>
-                    <Button type="submit" disabled={isActionLoading} className="w-full h-14 bg-primary text-white font-bold rounded-2xl">Provision Account</Button>
+                    <Button type="submit" disabled={isActionLoading} className="w-full h-14 bg-primary text-white font-bold rounded-2xl shadow-xl hover:bg-secondary transition-all">Provision Account</Button>
                  </form>
               </DialogContent>
             </Dialog>
@@ -479,204 +403,301 @@ export default function InvestigationOfficersRegistry() {
         </div>
       </header>
 
-      <section className="py-8 container mx-auto px-4 max-w-5xl">
-         <div className="relative mb-12">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <Input placeholder="Search registry..." className="pl-10 h-12 rounded-xl bg-white dark:bg-slate-900 shadow-sm border-none" value={search} onChange={e => setSearch(e.target.value)} />
+      <section className="py-8 container mx-auto px-4 max-w-6xl">
+         
+         {/* Strategic Intelligence Row */}
+         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-12 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-200">
+            {[
+              { label: "Registry Total", val: stats.total, icon: <Users className="text-blue-500" />, bg: "bg-blue-50/50" },
+              { label: "Field Ready", val: stats.active, icon: <UserCheck className="text-emerald-500" />, bg: "bg-emerald-50/50" },
+              { label: "Active Dockets", val: stats.load, icon: <TrendingUp className="text-amber-500" />, bg: "bg-amber-50/50" }
+            ].map((s, i) => (
+              <Card key={i} className={cn("border-none shadow-sm rounded-3xl overflow-hidden p-6 flex items-center gap-6", s.bg)}>
+                 <div className="p-4 bg-white dark:bg-slate-900 rounded-[1.5rem] shadow-sm">{s.icon}</div>
+                 <div>
+                    <p className="text-3xl font-headline font-bold leading-none">{s.val}</p>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">{s.label}</p>
+                 </div>
+              </Card>
+            ))}
+         </div>
+
+         <div className="relative mb-12 animate-in fade-in duration-500 delay-300">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+            <Input 
+              placeholder="Search registry by name, rank or employee ID..." 
+              className="pl-12 h-14 rounded-2xl bg-white dark:bg-slate-900 shadow-xl border-none text-base font-medium focus:ring-accent"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+            />
          </div>
 
          {dataLoading ? (
-           <div className="text-center py-20"><Loader2 className="animate-spin text-accent" /></div>
+           <div className="text-center py-32 flex flex-col items-center gap-4">
+              <Loader2 className="w-12 h-12 animate-spin text-accent" />
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Synchronizing Live Feed...</p>
+           </div>
          ) : (
            <div className="grid gap-6">
               {filtered.map((officer: any) => (
-                <Card key={officer.id} className="border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-100 group">
+                <Card key={officer.id} className="border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-100 group transition-all hover:shadow-2xl hover:-translate-y-1 duration-500">
                   <CardContent className="p-0">
                     <div className="flex flex-col md:flex-row items-stretch">
-                       <div className="p-8 md:w-56 text-center border-r bg-slate-50 dark:bg-slate-800/50 flex flex-col items-center justify-center shrink-0">
-                          <Badge variant="outline" className="text-[8px] font-mono border-accent text-accent mb-4">{(officer.employeeId || 'IO-TEMP')}</Badge>
-                          <div className="w-16 h-16 rounded-[2rem] bg-white dark:bg-slate-900 shadow-sm flex items-center justify-center text-accent"><UserRoundCheck className="w-8 h-8" /></div>
-                          <Badge className={cn("mt-4 text-[8px] font-black uppercase h-5", officer.status === 'active' ? "bg-emerald-500" : "bg-red-500")}>{officer.status}</Badge>
-                       </div>
-                       <div className="flex-1 p-8 flex flex-col md:flex-row items-center justify-between gap-8">
-                          <div className="space-y-4 text-center md:text-left flex-1">
-                             <div className="space-y-1">
-                                <h3 className="text-2xl font-headline font-bold text-primary dark:text-white leading-tight">{officer.name}</h3>
-                                <p className="text-[10px] font-black text-accent uppercase tracking-widest">{officer.designation}</p>
-                             </div>
-                             <div className="flex flex-wrap items-center justify-center md:justify-start gap-6 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
-                                <span className="flex items-center gap-2"><Mail className="w-3.5 h-3.5 text-accent" /> {officer.email}</span>
-                                <span className="flex items-center gap-2"><Phone className="w-3.5 h-3.5 text-accent" /> {officer.phone || 'N/A'}</span>
+                       <div className="p-8 md:w-56 text-center border-r bg-slate-50 dark:bg-slate-800/50 flex flex-col items-center justify-center shrink-0 space-y-4">
+                          <div className="space-y-1">
+                             <span className="text-[8px] font-black text-slate-400 uppercase tracking-[0.3em]">RANK ID</span>
+                             <div className="text-sm font-black text-primary dark:text-white tracking-tighter bg-white dark:bg-slate-900 px-3 py-1 rounded-xl shadow-sm border border-slate-100">
+                                {officer.employeeId || 'PROVISIONING'}
                              </div>
                           </div>
-                          <div className="flex items-center gap-3">
+                          <div className="relative w-16 h-16 rounded-[2rem] bg-white dark:bg-slate-900 shadow-xl flex items-center justify-center text-accent group-hover:scale-110 transition-transform duration-500">
+                             <UserRoundCheck className="w-8 h-8" />
+                             <div className={cn("absolute -top-1 -right-1 w-3 h-3 rounded-full border-2 border-white", officer.status === 'active' ? "bg-emerald-500 animate-pulse" : "bg-red-500")} />
+                          </div>
+                          <Badge className={cn("text-[9px] font-black uppercase px-4 py-1 rounded-full border-none shadow-sm", officer.status === 'active' ? "bg-emerald-500" : "bg-red-500")}>
+                             {officer.status}
+                          </Badge>
+                       </div>
+                       <div className="flex-1 p-8 flex flex-col md:flex-row items-center justify-between gap-8">
+                          <div className="space-y-4 text-center md:text-left flex-1 min-w-0">
+                             <div className="space-y-1">
+                                <h3 className="text-3xl font-headline font-bold text-primary dark:text-white leading-tight group-hover:text-accent transition-colors truncate">{officer.name}</h3>
+                                <p className="text-[11px] font-black text-slate-500 uppercase tracking-[0.2em]">{officer.designation}</p>
+                             </div>
+                             <div className="flex flex-wrap items-center justify-center md:justify-start gap-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest pt-2 border-t border-slate-50 dark:border-slate-800">
+                                <span className="flex items-center gap-2"><Mail className="w-3.5 h-3.5 text-accent" /> {officer.email}</span>
+                                <span className="flex items-center gap-2"><Phone className="w-3.5 h-3.5 text-accent" /> {officer.phone || 'NO SECURE LINE'}</span>
+                             </div>
+                          </div>
+                          <div className="flex flex-wrap md:flex-nowrap items-center justify-center gap-3 shrink-0">
                              <Button 
                               onClick={() => setSelectedOfficerForDetails(officer)} 
                               variant="outline" 
                               size="sm" 
-                              className="h-10 px-5 rounded-xl text-[10px] font-bold uppercase tracking-widest border-indigo-100 text-indigo-600 hover:bg-indigo-50"
+                              className="h-11 px-8 rounded-2xl text-[10px] font-black uppercase tracking-widest border-2 hover:bg-accent hover:text-primary hover:border-accent transition-all"
                              >
-                               Details
+                               Examine
                              </Button>
-                             <Button onClick={() => setEditOfficer(officer)} variant="outline" size="sm" className="h-10 px-5 rounded-xl text-[10px] font-bold uppercase tracking-widest">Modify</Button>
-                             <button onClick={() => handleStartDelete(officer)} disabled={isActionLoading} className="h-10 w-10 text-slate-300 hover:text-red-500 rounded-xl flex items-center justify-center">{isActionLoading ? <Loader2 className="animate-spin" /> : <Trash2 className="w-5 h-5" />}</button>
+                             <Button onClick={() => setEditOfficer(officer)} variant="ghost" size="icon" className="h-11 w-11 text-slate-300 hover:text-accent hover:bg-accent/10 rounded-2xl transition-all"><Edit className="w-5 h-5" /></Button>
+                             <button 
+                                onClick={() => handleStartDelete(officer)} 
+                                disabled={isActionLoading} 
+                                className="h-11 w-11 text-slate-200 hover:text-red-500 hover:bg-red-50 rounded-2xl flex items-center justify-center transition-all"
+                             >
+                                {isActionLoading ? <Loader2 className="animate-spin w-5 h-5" /> : <Trash2 className="w-5 h-5" />}
+                             </button>
                           </div>
                        </div>
                     </div>
                   </CardContent>
                 </Card>
               ))}
+              {filtered.length === 0 && (
+                <div className="text-center py-40 bg-white dark:bg-slate-900 rounded-[4rem] border-4 border-dashed border-slate-100 dark:border-slate-800 opacity-30">
+                   <Activity className="w-20 h-20 mx-auto mb-6 text-slate-300" />
+                   <h3 className="text-2xl font-headline font-bold">Registry Entry Empty</h3>
+                   <p className="text-sm font-bold uppercase tracking-widest mt-2">Adjust search parameters or examine filters</p>
+                </div>
+              )}
            </div>
          )}
       </section>
 
-      {/* Forced Fault-Tolerant Deletion Dialog */}
+      {/* RE-ENGINEERED FAULT-TOLERANT DELETION WORKFLOW */}
       <Dialog open={!!deleteDialogStep} onOpenChange={(open) => { if(!open) { setDeleteDialogStep(null); setOfficerToDelete(null); setDeleteInputText(''); } }}>
-        <DialogContent className="max-w-2xl rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden bg-white dark:bg-slate-900">
+        <DialogContent className="max-w-2xl rounded-[3rem] border-none shadow-2xl p-0 overflow-hidden bg-white dark:bg-slate-900">
           {deleteDialogStep === 'confirm' && (
-            <div className="p-8 space-y-6">
-              <div className="flex flex-col items-center text-center space-y-4">
-                <div className="w-20 h-20 bg-red-50 dark:bg-red-950/30 text-red-500 rounded-full flex items-center justify-center animate-pulse"><ShieldAlert className="w-10 h-10" /></div>
-                <div className="space-y-2">
-                  <DialogTitle className="text-2xl font-headline font-bold text-primary dark:text-white">Confirm Identity Purge</DialogTitle>
-                  <DialogDescription className="text-sm font-medium">You are about to permanently delete this record. This action cannot be undone.</DialogDescription>
+            <div className="p-10 space-y-8 animate-in fade-in zoom-in-95 duration-500">
+              <div className="flex flex-col items-center text-center space-y-6">
+                <div className="w-24 h-24 bg-red-50 dark:bg-red-950/30 text-red-500 rounded-[2.5rem] flex items-center justify-center animate-pulsate shadow-xl shadow-red-500/10">
+                  <ShieldAlert className="w-12 h-12" />
+                </div>
+                <div className="space-y-3">
+                  <DialogTitle className="text-3xl font-headline font-bold text-primary dark:text-white">Initialize Identity Purge</DialogTitle>
+                  <DialogDescription className="text-base font-medium leading-relaxed">
+                    You are attempting to permanently remove <strong>{officerToDelete?.name}</strong> from the national investigative pool. This action requires administrative clearance and a dependency audit.
+                  </DialogDescription>
                 </div>
               </div>
-              <div className="flex gap-3">
-                <Button variant="outline" onClick={() => { setDeleteDialogStep(null); setOfficerToDelete(null); }} className="flex-1 h-12 rounded-xl font-bold">Cancel</Button>
-                <Button variant="destructive" onClick={executeGovernanceAudit} className="flex-1 h-12 rounded-xl font-bold">Authorize Audit</Button>
+              <div className="flex gap-4">
+                <Button variant="outline" onClick={() => { setDeleteDialogStep(null); setOfficerToDelete(null); }} className="flex-1 h-14 rounded-2xl font-bold border-2">Abort Session</Button>
+                <Button variant="destructive" onClick={executeGovernanceAudit} className="flex-1 h-14 rounded-2xl font-bold bg-red-600 hover:bg-red-700 shadow-xl shadow-red-600/20">Authorize Audit</Button>
               </div>
             </div>
           )}
 
           {deleteDialogStep === 'blocked' && (
             <div className="flex flex-col animate-in fade-in duration-500">
-              <div className="bg-red-600 p-8 text-white shrink-0">
-                <DialogTitle className="text-2xl font-headline font-bold">Operation Blocked</DialogTitle>
-                <p className="text-red-100 text-sm mt-2">Active investigative assignments must be resolved or reassigned before this officer can be purged from the registry.</p>
-              </div>
-              <div className="p-8 space-y-6">
-                <div className="rounded-2xl border bg-slate-50 overflow-hidden">
-                  <ScrollArea className="h-[150px]">
-                    <Table>
-                      <TableBody>
-                        {activeAssignments.map((c) => (
-                          <TableRow key={c.id}>
-                            <TableCell className="text-[10px] font-mono font-bold text-accent py-3">{c.caseId || c.token}</TableCell>
-                            <TableCell className="text-[10px] font-bold py-3 truncate">{c.subject}</TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </ScrollArea>
+              <div className="bg-red-600 p-10 text-white shrink-0 relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16 blur-2xl"></div>
+                <div className="flex items-center gap-4 mb-4">
+                  <ShieldAlert className="w-10 h-10" />
+                  <DialogTitle className="text-3xl font-headline font-bold">Operation Blocked</DialogTitle>
                 </div>
-                <Button onClick={() => setDeleteDialogStep(null)} className="w-full h-12 bg-primary text-white font-bold rounded-xl">Acknowledge</Button>
+                <p className="text-red-100 text-sm leading-relaxed font-medium">
+                  Active investigative assignments identified. The officer must resolve, complete, or reassign all pending mandates before the registry profile can be purged.
+                </p>
+              </div>
+              <div className="p-10 space-y-8">
+                <div className="space-y-4">
+                   <h4 className="text-[10px] font-black uppercase text-slate-400 tracking-[0.3em]">Dependency Summary ({activeAssignments.length} Cases)</h4>
+                   <div className="rounded-[2rem] border bg-slate-50 dark:bg-slate-950 overflow-hidden shadow-inner">
+                    <ScrollArea className="h-[200px]">
+                      <Table>
+                        <TableBody>
+                          {activeAssignments.map((c) => (
+                            <TableRow key={c.id} className="hover:bg-white transition-colors">
+                              <TableCell className="text-[10px] font-mono font-bold text-accent py-4">{c.caseId || c.token}</TableCell>
+                              <TableCell className="text-[10px] font-bold py-4 truncate max-w-[200px]">{c.subject}</TableCell>
+                              <TableCell className="text-right py-4">
+                                <Badge variant="outline" className="text-[8px] font-black uppercase border-slate-200">{c.status}</Badge>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </ScrollArea>
+                  </div>
+                </div>
+                <div className="flex gap-4">
+                   <Button onClick={() => setDeleteDialogStep(null)} variant="outline" className="flex-1 h-14 rounded-2xl font-bold border-2">Acknowledge</Button>
+                   <Button asChild className="flex-1 h-14 rounded-2xl bg-primary text-white font-bold shadow-xl">
+                      <Link href="/internal/public-complaints">View All Assignments <ArrowRight className="ml-2 w-4 h-4" /></Link>
+                   </Button>
+                </div>
               </div>
             </div>
           )}
 
           {deleteDialogStep === 'warning' && (
-            <div className="p-8 space-y-6">
-              <div className="flex flex-col items-center text-center space-y-4">
-                <div className="w-20 h-20 bg-red-50 text-red-500 rounded-full flex items-center justify-center"><ShieldAlert className="w-10 h-10" /></div>
-                <div className="space-y-2">
-                  <DialogTitle className="text-2xl font-headline font-bold">Security Final Warning</DialogTitle>
-                  <DialogDescription className="text-sm font-medium">This will permanently revoke all access credentials and delete every available record associated with {officerToDelete?.name || 'this official'}.</DialogDescription>
+            <div className="p-10 space-y-8 animate-in slide-in-from-right-4 duration-500">
+              <div className="flex flex-col items-center text-center space-y-6">
+                <div className="w-24 h-24 bg-amber-50 text-amber-600 rounded-[2.5rem] flex items-center justify-center shadow-xl shadow-amber-500/10">
+                  <AlertTriangle className="w-12 h-12" />
+                </div>
+                <div className="space-y-3">
+                  <DialogTitle className="text-3xl font-headline font-bold text-primary dark:text-white">Security Escalation</DialogTitle>
+                  <DialogDescription className="text-base font-medium leading-relaxed">
+                    Audit results confirmed. No active assignments found. This will permanently revoke all access credentials and delete every available record associated with <strong>{officerToDelete?.name}</strong>.
+                  </DialogDescription>
                 </div>
               </div>
-              <div className="flex gap-3">
-                <Button variant="outline" onClick={() => { setDeleteDialogStep(null); setOfficerToDelete(null); }} className="flex-1 h-12 rounded-xl font-bold">Cancel</Button>
-                <Button variant="destructive" onClick={() => setDeleteDialogStep('verify')} className="flex-1 h-12 rounded-xl font-bold bg-red-600 hover:bg-red-700">Proceed</Button>
+              <div className="flex gap-4">
+                <Button variant="outline" onClick={() => { setDeleteDialogStep(null); setOfficerToDelete(null); }} className="flex-1 h-14 rounded-2xl font-bold border-2">Cancel Purge</Button>
+                <Button variant="destructive" onClick={() => setDeleteDialogStep('verify')} className="flex-1 h-14 rounded-2xl font-bold bg-red-600 hover:bg-red-700 shadow-xl shadow-red-600/30">Proceed to Authentication</Button>
               </div>
             </div>
           )}
 
           {deleteDialogStep === 'verify' && (
-            <div className="p-8 space-y-6">
-              <div className="space-y-2 text-center">
-                <DialogTitle className="text-xl font-headline font-bold">Verification Protocol</DialogTitle>
-                <p className="text-xs text-slate-500">To authorize this purge, please type the word <strong className="text-red-600 uppercase">delete</strong> below.</p>
+            <div className="p-10 space-y-8 animate-in zoom-in-95 duration-500">
+              <div className="space-y-4 text-center">
+                <div className="inline-flex items-center gap-2 bg-slate-100 dark:bg-slate-800 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border">
+                   <Lock className="w-3.5 h-3.5" /> Verification Protocol
+                </div>
+                <div className="space-y-2">
+                   <DialogTitle className="text-2xl font-headline font-bold">Authorize Deletion</DialogTitle>
+                   <p className="text-sm text-slate-500 font-medium">To authorize this purge, please type the word <strong className="text-red-600 uppercase">delete</strong> below.</p>
+                </div>
               </div>
-              <Input placeholder="Type 'delete'..." value={deleteInputText} onChange={(e) => setDeleteInputText(e.target.value)} className="h-12 rounded-xl border-2 focus:ring-red-500 font-bold text-center" />
-              <div className="flex gap-3">
-                <Button variant="ghost" onClick={() => { setDeleteDialogStep(null); setOfficerToDelete(null); setDeleteInputText(''); }} className="flex-1 h-12 rounded-xl text-slate-400 font-bold">Abort</Button>
-                <Button 
-                  variant="destructive" 
-                  disabled={(deleteInputText || '').toLowerCase() !== 'delete' || isDeleting} 
-                  onClick={handleDelete}
-                  className="flex-1 h-12 rounded-xl font-bold bg-red-600 hover:bg-red-700"
-                >
-                  {isDeleting ? <Loader2 className="animate-spin" /> : "Verify & Force Purge"}
-                </Button>
+              <div className="space-y-6">
+                 <Input 
+                  placeholder="AUTHORIZATION TEXT" 
+                  value={deleteInputText} 
+                  onChange={(e) => setDeleteInputText(e.target.value)} 
+                  className="h-16 rounded-[1.5rem] border-2 border-slate-100 text-center text-2xl font-black focus:ring-red-500 tracking-[0.2em]" 
+                 />
+                 <div className="flex gap-4">
+                    <Button variant="ghost" onClick={() => { setDeleteDialogStep(null); setOfficerToDelete(null); setDeleteInputText(''); }} className="flex-1 h-14 rounded-2xl text-slate-400 font-bold">Abort Session</Button>
+                    <Button 
+                      variant="destructive" 
+                      disabled={(deleteInputText || '').toLowerCase() !== 'delete' || isDeleting} 
+                      onClick={handleDelete}
+                      className="flex-1 h-14 rounded-2xl font-bold bg-red-600 hover:bg-red-700 shadow-2xl shadow-red-600/30"
+                    >
+                      {isDeleting ? <Loader2 className="animate-spin" /> : "Verify & Force Purge"}
+                    </Button>
+                 </div>
               </div>
             </div>
           )}
         </DialogContent>
       </Dialog>
 
-      {/* Edit Dialog */}
+      {/* Multi-Functional Edit Dialog */}
       <Dialog open={!!editOfficer} onOpenChange={(val) => !val && setEditOfficer(null)}>
-        <DialogContent className="max-w-xl rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden">
+        <DialogContent className="max-w-xl rounded-[3rem] border-none shadow-2xl p-0 overflow-hidden bg-white dark:bg-slate-900">
           {editOfficer && (
             <>
-               <div className="bg-slate-900 p-8 text-white shrink-0"><DialogTitle className="text-2xl font-headline font-bold">Update Profile Meta</DialogTitle></div>
-               <div className="p-8 space-y-6">
+               <div className="bg-slate-900 p-10 text-white shrink-0 border-b-4 border-accent/20">
+                  <Badge className="bg-accent text-primary font-black uppercase text-[9px] mb-2 tracking-widest">Metadata Editor</Badge>
+                  <DialogTitle className="text-3xl font-headline font-bold">Update Profile Meta</DialogTitle>
+               </div>
+               <div className="p-10 space-y-8">
                   <div className="grid md:grid-cols-2 gap-6">
-                    <div className="space-y-1.5"><Label className="text-[10px] font-bold uppercase text-slate-400">Name</Label><Input value={editOfficer.name || ''} onChange={e => setEditOfficer({...editOfficer, name: e.target.value})} className="h-11 rounded-xl" /></div>
-                    <div className="space-y-1.5"><Label className="text-[10px] font-bold uppercase text-slate-400">Employee ID</Label><Input value={(editOfficer.employeeId || '')} disabled className="h-11 rounded-xl bg-slate-50 font-mono" /></div>
+                    <div className="space-y-1.5"><Label className="text-[10px] font-black uppercase text-slate-500">Legal Name</Label><Input value={editOfficer.name || ''} onChange={e => setEditOfficer({...editOfficer, name: e.target.value})} className="h-12 rounded-2xl shadow-inner border-none bg-slate-50 dark:bg-slate-950 font-bold" /></div>
+                    <div className="space-y-1.5"><Label className="text-[10px] font-black uppercase text-slate-500">Employee ID</Label><Input value={(editOfficer.employeeId || '')} disabled className="h-12 rounded-2xl bg-slate-100/50 dark:bg-slate-800/50 border-none font-mono font-bold text-slate-400" /></div>
                   </div>
                   <div className="grid md:grid-cols-2 gap-6">
                     <div className="space-y-1.5 flex-1">
-                       <Label className="text-[10px] font-bold uppercase text-slate-400">Rank</Label>
+                       <Label className="text-[10px] font-black uppercase text-slate-500">Official Rank</Label>
                        <Select value={editOfficer.designation || 'Investigation Officer'} onValueChange={(val) => setEditOfficer({...editOfficer, designation: val})}>
-                          <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
-                          <SelectContent className="bg-white">{OFFICER_DESIGNATIONS.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
+                          <SelectTrigger className="h-12 rounded-2xl shadow-inner border-none bg-slate-50 dark:bg-slate-950 font-bold"><SelectValue /></SelectTrigger>
+                          <SelectContent className="bg-white z-[1000000]">{OFFICER_DESIGNATIONS.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
                        </Select>
                     </div>
                     <div className="space-y-1.5">
-                       <Label className="text-[10px] font-bold uppercase text-slate-400">Status</Label>
+                       <Label className="text-[10px] font-black uppercase text-slate-500">Registry Status</Label>
                        <Select value={editOfficer.status || 'active'} onValueChange={(val: any) => setEditOfficer({...editOfficer, status: val})}>
-                          <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
-                          <SelectContent className="bg-white"><SelectItem value="active">Active</SelectItem><SelectItem value="inactive">Inactive</SelectItem></SelectContent>
+                          <SelectTrigger className="h-12 rounded-2xl shadow-inner border-none bg-slate-50 dark:bg-slate-950 font-bold"><SelectValue /></SelectTrigger>
+                          <SelectContent className="bg-white z-[1000000]"><SelectItem value="active">Active</SelectItem><SelectItem value="inactive">Inactive</SelectItem></SelectContent>
                        </Select>
                     </div>
                   </div>
-                  <Button onClick={handleUpdate} disabled={isActionLoading} className="w-full h-14 bg-primary text-white font-bold rounded-2xl">Commit Refresh</Button>
+                  <Button onClick={handleUpdate} disabled={isActionLoading} className="w-full h-16 bg-primary text-white font-bold rounded-2xl shadow-xl hover:bg-secondary transition-all flex gap-2">
+                     {isActionLoading ? <Loader2 className="animate-spin" /> : <><RefreshCw className="w-5 h-5" /> Commit Registry Refresh</>}
+                  </Button>
                </div>
             </>
           )}
         </DialogContent>
       </Dialog>
 
-      {/* View Details Dialog */}
+      {/* Personnel Detailed Account View */}
       <Dialog open={!!selectedOfficerForDetails} onOpenChange={(val) => !val && setSelectedOfficerForDetails(null)}>
-        <DialogContent className="max-w-xl rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden bg-white dark:bg-slate-900">
+        <DialogContent className="max-w-xl rounded-[3rem] border-none shadow-2xl p-0 overflow-hidden bg-white dark:bg-slate-900">
           {selectedOfficerForDetails && (
             <>
-              <div className="bg-slate-900 p-8 text-white relative">
+              <div className="bg-slate-900 p-10 text-white relative border-b-8 border-accent/20">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-accent/5 rounded-full -mr-16 -mt-16 blur-2xl"></div>
                 <div className="absolute right-6 top-6">
                   <DialogClose asChild>
-                    <Button variant="ghost" size="icon" className="rounded-full text-white/40 hover:text-white">
+                    <Button variant="ghost" size="icon" className="rounded-full text-white/40 hover:text-white hover:bg-white/10 transition-all">
                       <X className="w-5 h-5" />
                     </Button>
                   </DialogClose>
                 </div>
-                <Badge className="bg-accent text-primary font-black text-[8px] uppercase mb-2">Personnel Profile</Badge>
-                <DialogTitle className="text-2xl font-headline font-bold">{selectedOfficerForDetails.name}</DialogTitle>
-                <p className="text-slate-400 text-xs mt-1 uppercase tracking-widest font-bold flex items-center gap-1.5">
-                  <Hash className="w-3.5 h-3.5 text-accent" /> {selectedOfficerForDetails.employeeId || 'IO-PENDING'}
-                </p>
+                <Badge className="bg-accent text-primary font-black text-[10px] uppercase mb-4 tracking-[0.3em] px-5 h-7 rounded-full shadow-lg">Verified Official Record</Badge>
+                <DialogTitle className="text-4xl font-headline font-bold drop-shadow-md leading-tight">{selectedOfficerForDetails.name}</DialogTitle>
+                <div className="flex items-center gap-3 mt-4">
+                   <div className="flex items-center gap-2 bg-white/10 px-3 py-1 rounded-lg border border-white/10 backdrop-blur-sm">
+                      <Hash className="w-3.5 h-3.5 text-accent" />
+                      <span className="text-xs font-mono font-bold tracking-widest">{selectedOfficerForDetails.employeeId || 'IO-PENDING'}</span>
+                   </div>
+                </div>
               </div>
-              <div className="p-8 space-y-6">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-inner">
-                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Official Rank</p>
-                    <p className="text-sm font-bold text-primary dark:text-white leading-tight">{selectedOfficerForDetails.designation}</p>
+              <div className="p-10 space-y-10">
+                <div className="grid grid-cols-2 gap-6">
+                  <div className="p-6 bg-slate-50 dark:bg-slate-800 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-inner group hover:bg-white transition-all">
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2">
+                       <Star className="w-3 h-3 text-accent" /> Institutional Rank
+                    </p>
+                    <p className="text-sm md:text-base font-bold text-primary dark:text-white leading-tight">{selectedOfficerForDetails.designation}</p>
                   </div>
-                  <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-inner">
-                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Status</p>
+                  <div className="p-6 bg-slate-50 dark:bg-slate-800 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-inner flex flex-col items-center justify-center text-center">
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Registry Health</p>
                     <Badge className={cn(
-                      "text-[9px] font-black uppercase h-5 px-3 border-none",
+                      "text-[10px] font-black uppercase h-7 px-5 border-none shadow-md",
                       selectedOfficerForDetails.status === 'active' ? "bg-emerald-500 text-white" : "bg-red-500 text-white"
                     )}>
                       {selectedOfficerForDetails.status || 'active'}
@@ -684,49 +705,50 @@ export default function InvestigationOfficersRegistry() {
                   </div>
                 </div>
 
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 pb-2">
-                    <User className="w-4 h-4 text-accent" />
-                    <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-500">Contact Protocols</h4>
+                <div className="space-y-6">
+                  <div className="flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 pb-3">
+                    <Fingerprint className="w-5 h-5 text-accent" />
+                    <h4 className="text-xs font-black uppercase tracking-[0.25em] text-primary dark:text-white">Contact Protocols</h4>
                   </div>
-                  <div className="grid gap-3">
-                    <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700">
-                      <Mail className="w-4 h-4 text-slate-400" />
-                      <span className="text-sm font-bold text-primary dark:text-white truncate">{selectedOfficerForDetails.email}</span>
+                  <div className="grid gap-4">
+                    <div className="flex items-center gap-4 p-5 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm group hover:bg-white transition-all">
+                      <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center text-accent group-hover:bg-accent group-hover:text-white transition-all"><Mail className="w-5 h-5" /></div>
+                      <span className="text-sm font-bold truncate">{selectedOfficerForDetails.email}</span>
                     </div>
-                    <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700">
-                      <Phone className="w-4 h-4 text-slate-400" />
-                      <span className="text-sm font-bold text-primary dark:text-white">{selectedOfficerForDetails.phone || 'NO SECURE PHONE RECORDED'}</span>
+                    <div className="flex items-center gap-4 p-5 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm group hover:bg-white transition-all">
+                      <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center text-accent group-hover:bg-accent group-hover:text-white transition-all"><Phone className="w-5 h-5" /></div>
+                      <span className="text-sm font-bold">{selectedOfficerForDetails.phone || 'NO SECURE LINE RECORDED'}</span>
                     </div>
                   </div>
                 </div>
 
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 pb-2">
-                    <MapPin className="w-4 h-4 text-accent" />
-                    <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-500">Jurisdictional Node</h4>
+                <div className="space-y-6">
+                  <div className="flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 pb-3">
+                    <Navigation className="w-5 h-5 text-accent" />
+                    <h4 className="text-xs font-black uppercase tracking-[0.25em] text-primary dark:text-white">Jurisdictional Node</h4>
                   </div>
-                  <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700">
-                    <Navigation className="w-4 h-4 text-slate-400" />
-                    <span className="text-sm font-bold text-primary dark:text-white uppercase tracking-tight">{selectedOfficerForDetails.region || 'National Investigative Hub'}</span>
+                  <div className="flex items-center gap-4 p-5 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm">
+                    <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-500"><MapPin className="w-5 h-5" /></div>
+                    <span className="text-sm font-bold uppercase tracking-tight">{selectedOfficerForDetails.region || 'National Investigative Hub'}</span>
                   </div>
                 </div>
 
-                <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-3.5 h-3.5 text-slate-300" />
-                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
-                      Registered: {selectedOfficerForDetails.createdAt?.toDate ? selectedOfficerForDetails.createdAt.toDate().toLocaleDateString('en-IN') : 'Archive Entry'}
+                <div className="pt-8 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-slate-50 dark:bg-slate-800 rounded-lg"><Clock className="w-4 h-4 text-slate-400" /></div>
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                      Registered: {selectedOfficerForDetails.createdAt?.toDate ? selectedOfficerForDetails.createdAt.toDate().toLocaleDateString('en-IN') : 'N/A'}
                     </span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Briefcase className="w-3.5 h-3.5 text-slate-300" />
-                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Active Docket: {selectedOfficerForDetails.assignedCount || 0}</span>
+                  <div className="flex items-center gap-3">
+                    <Badge variant="outline" className="h-8 rounded-xl border-accent/20 text-accent font-black gap-2">
+                       <Briefcase className="w-3.5 h-3.5" /> DOCKET: {selectedOfficerForDetails.assignedCount || 0}
+                    </Badge>
                   </div>
                 </div>
 
-                <Button onClick={() => setSelectedOfficerForDetails(null)} className="w-full h-12 rounded-xl bg-slate-900 text-white font-bold hover:bg-slate-800 transition-all shadow-xl shadow-slate-900/20">
-                  Close Profile
+                <Button onClick={() => setSelectedOfficerForDetails(null)} className="w-full h-14 rounded-2xl bg-slate-900 text-white font-bold hover:bg-slate-800 transition-all shadow-xl shadow-slate-900/20 text-base">
+                  Dismiss Account Node
                 </Button>
               </div>
             </>
