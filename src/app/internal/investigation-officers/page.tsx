@@ -297,11 +297,18 @@ export default function InvestigationOfficersRegistry() {
       const email = (editOfficer.email || '').toLowerCase().trim();
       batch.update(doc(db, 'investigation_officers', editOfficer.id), { ...editOfficer, updatedAt: serverTimestamp() })
       if (email) {
-        batch.update(doc(db, 'users', email), { name: editOfficer.name, status: editOfficer.status, updatedAt: serverTimestamp() })
+        // This ensures the user profile stays in sync with basic display info
+        batch.set(doc(db, 'users', email), { 
+          name: editOfficer.name, 
+          status: editOfficer.status,
+          phone: editOfficer.phone || '',
+          updatedAt: serverTimestamp() 
+        }, { merge: true })
       }
       await batch.commit()
       toast({ title: "Profile Refreshed" })
       setEditOfficer(null)
+      setIsAddingEditDialogOpen(false)
     } catch (e: any) {
       toast({ variant: "destructive", title: "Update Error" });
     } finally {
@@ -720,6 +727,10 @@ export default function InvestigationOfficersRegistry() {
                   <div className="grid md:grid-cols-2 gap-6">
                     <div className="space-y-1.5"><Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Legal Name</Label><Input value={editOfficer.name || ''} onChange={e => setEditOfficer({...editOfficer, name: e.target.value})} className="h-12 rounded-2xl shadow-inner border-none bg-slate-50 dark:bg-slate-950 font-bold" /></div>
                     <div className="space-y-1.5"><Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Employee ID</Label><Input value={(editOfficer.employeeId || '')} disabled className="h-12 rounded-2xl bg-slate-100/50 dark:bg-slate-800/50 border-none font-mono font-bold text-slate-400" /></div>
+                  </div>
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div className="space-y-1.5"><Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Official Email</Label><Input value={editOfficer.email || ''} onChange={e => setEditOfficer({...editOfficer, email: e.target.value.toLowerCase()})} className="h-12 rounded-2xl shadow-inner border-none bg-slate-50 dark:bg-slate-950" /></div>
+                    <div className="space-y-1.5"><Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Secure Phone Number</Label><Input value={editOfficer.phone || ''} onChange={e => setEditOfficer({...editOfficer, phone: e.target.value})} className="h-12 rounded-2xl shadow-inner border-none bg-slate-50 dark:bg-slate-950" /></div>
                   </div>
                   <div className="grid md:grid-cols-2 gap-6">
                     <div className="space-y-1.5 flex-1">
