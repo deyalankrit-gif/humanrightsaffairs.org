@@ -149,13 +149,20 @@ export default function InvestigationOfficersRegistry() {
   };
 
   const handleStartDelete = async (officer: any) => {
-    if (!db || !user) return;
+    if (!db || !user || !officer) {
+      toast({ variant: "destructive", title: "Operation Blocked", description: "Officer record data is unavailable." });
+      return;
+    }
     setOfficerToDelete(officer);
     setDeleteDialogStep('confirm');
   };
 
   const executeGovernanceAudit = async () => {
-    if (!db || !user || !officerToDelete) return;
+    if (!db || !user || !officerToDelete) {
+       toast({ variant: "destructive", title: "Audit Cancelled", description: "Target information is incomplete." });
+       return;
+    }
+    
     setIsActionLoading(true);
 
     try {
@@ -166,11 +173,13 @@ export default function InvestigationOfficersRegistry() {
       );
       
       const snap = await getDocs(q);
+      const officerName = (officerToDelete.name || '').trim();
+      
       const conflictCases = snap.docs
         .map(d => ({ id: d.id, ...d.data() }))
         .filter((c: any) => 
-          c.assignedTo === officerToDelete.name || 
-          (c.assignedOfficers || []).some((o: any) => o.name === officerToDelete.name)
+          c.assignedTo === officerName || 
+          (c.assignedOfficers || []).some((o: any) => (o.name || '').trim() === officerName)
         );
       
       if (conflictCases.length > 0 || (officerToDelete.assignedCount || 0) > 0) {
@@ -192,8 +201,8 @@ export default function InvestigationOfficersRegistry() {
           adminId: user.uid,
           adminEmail: user.email,
           adminName: user.displayName || 'Root Administrator',
-          targetId: officerToDelete.employeeId,
-          targetName: officerToDelete.name,
+          targetId: officerToDelete.employeeId || 'N/A',
+          targetName: officerToDelete.name || 'Unknown',
           timestamp: new Date().toISOString(),
           status: "Blocked by Governance Validation",
           failureReason: Array.from(reasons).join(' | ')
@@ -204,7 +213,7 @@ export default function InvestigationOfficersRegistry() {
         setDeleteDialogStep('warning');
       }
     } catch (e: any) {
-      toast({ variant: "destructive", title: "Audit Error", description: "Verification protocol failed: " + e.message });
+      toast({ variant: "destructive", title: "Audit Error", description: "Verification protocol failed. Please refresh." });
     } finally {
       setIsActionLoading(false);
     }
@@ -217,25 +226,42 @@ export default function InvestigationOfficersRegistry() {
     try {
       const batch = writeBatch(db);
       let count = 0;
+      let failureCount = 0;
       
       for (const officer of officers) {
-        if (officer.name !== 'Raisa Das') {
+        const officerName = (officer.name || '').trim();
+        const officerEmail = (officer.email || '').toLowerCase().trim();
+
+        if (officerName !== 'Raisa Das') {
+          if (!officer.id || !officerEmail) {
+            console.error(`[PURGE-VALIDATION] Skipping incomplete record:`, officer);
+            failureCount++;
+            continue;
+          }
+
           batch.delete(doc(db, 'investigation_officers', officer.id));
-          batch.delete(doc(db, 'users', officer.email.toLowerCase().trim()));
+          batch.delete(doc(db, 'users', officerEmail));
           count++;
         }
       }
       
       if (count > 0) {
         await batch.commit();
-        toast({ title: "Registry Purged", description: `${count} personnel records removed. Raisa Das preserved.` });
+        toast({ 
+          title: "Registry Purged", 
+          description: failureCount > 0 
+            ? `${count} records removed. ${failureCount} invalid records skipped.` 
+            : `${count} personnel records removed. Raisa Das preserved.` 
+        });
         setIsPurgeOpen(false);
+      } else if (failureCount > 0) {
+        toast({ variant: "destructive", title: "Audit Incomplete", description: "Records were identified but contained invalid metadata (missing email/ID)." });
       } else {
-        toast({ title: "Audit Complete", description: "No conflicting records found. Raisa Das is the sole investigator." });
+        toast({ title: "Audit Complete", description: "No conflicting records found." });
         setIsPurgeOpen(false);
       }
     } catch (e: any) {
-      toast({ variant: "destructive", title: "Purge Failed", description: e.message });
+      toast({ variant: "destructive", title: "Purge Failed", description: "A system error occurred during bulk purge." });
     } finally {
       setIsActionLoading(false);
     }
@@ -243,10 +269,16 @@ export default function InvestigationOfficersRegistry() {
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!db || !formData.name.trim() || !formData.email.trim() || !formData.password.trim()) return
-    setIsActionLoading(true)
+    const emailVal = (formData.email || '').toLowerCase().trim();
+    const nameVal = (formData.name || '').trim();
+    const passVal = formData.password;
 
-    const officerEmail = formData.email.toLowerCase().trim()
+    if (!db || !isRoot || !nameVal || !emailVal || !passVal) {
+       toast({ variant: "destructive", title: "Validation Error", description: "All marked fields are mandatory." });
+       return;
+    }
+
+    setIsActionLoading(true)
     const tempAppName = `TempApp-${Date.now()}`
     const secondaryApp = initializeApp(firebaseConfig, tempAppName)
     const secondaryAuth = getAuth(secondaryApp)
@@ -254,25 +286,27 @@ export default function InvestigationOfficersRegistry() {
     let authUser: any = null
 
     try {
-      const authUserCredential = await createUserWithEmailAndPassword(secondaryAuth, officerEmail, formData.password)
+      const authUserCredential = await createUserWithEmailAndPassword(secondaryAuth, emailVal, passVal)
       authUser = authUserCredential.user
-      await updateProfile(authUser, { displayName: formData.name })
+      await updateProfile(authUser, { displayName: nameVal })
 
       const batch = writeBatch(db)
       
       const officerRef = doc(collection(db, 'investigation_officers'))
       batch.set(officerRef, {
         ...formData,
+        name: nameVal,
+        email: emailVal,
         uid: authUser.uid,
         assignedCount: 0,
         createdAt: serverTimestamp()
       })
 
-      const userRef = doc(db, 'users', officerEmail)
+      const userRef = doc(db, 'users', emailVal)
       batch.set(userRef, {
         uid: authUser.uid,
-        email: officerEmail,
-        name: formData.name,
+        email: emailVal,
+        name: nameVal,
         role: 'investigator',
         status: 'active',
         permissions: { publicView: true },
@@ -294,7 +328,17 @@ export default function InvestigationOfficersRegistry() {
   }
 
   const handleUpdate = async () => {
-    if (!db || !editOfficer) return
+    if (!db || !editOfficer || !editOfficer.id) {
+       toast({ variant: "destructive", title: "Refused", description: "Required investigator information is missing." });
+       return;
+    }
+    
+    const officerEmail = (editOfficer.email || '').toLowerCase().trim();
+    if (!officerEmail) {
+       toast({ variant: "destructive", title: "Refused", description: "Officer email is missing in registry." });
+       return;
+    }
+
     setIsActionLoading(true)
     try {
       const { id, ...data } = editOfficer
@@ -305,7 +349,7 @@ export default function InvestigationOfficersRegistry() {
         updatedAt: serverTimestamp()
       })
 
-      batch.update(doc(db, 'users', editOfficer.email.toLowerCase().trim()), {
+      batch.update(doc(db, 'users', officerEmail), {
         name: editOfficer.name,
         status: editOfficer.status,
         updatedAt: serverTimestamp()
@@ -315,28 +359,38 @@ export default function InvestigationOfficersRegistry() {
       toast({ title: "Profile Refreshed" })
       setEditOfficer(null)
     } catch (e: any) {
-      toast({ variant: "destructive", title: "Update Failed" })
+      toast({ variant: "destructive", title: "Update Failed", description: "Communication with governance node interrupted." });
     } finally {
       setIsActionLoading(false)
     }
   }
 
   const handleDelete = async () => {
-    if (!db || !officerToDelete || !isRoot || !user) return
+    if (!db || !officerToDelete || !officerToDelete.id || !isRoot || !user) {
+       toast({ variant: "destructive", title: "Purge Cancelled", description: "Record ID or administrator context is missing." });
+       return;
+    }
+
+    const officerEmail = (officerToDelete.email || '').toLowerCase().trim();
+    if (!officerEmail) {
+       toast({ variant: "destructive", title: "Purge Cancelled", description: "Email required for identity revocation." });
+       return;
+    }
+
     setIsDeleting(true)
     try {
       const batch = writeBatch(db)
       
       batch.delete(doc(db, 'investigation_officers', officerToDelete.id))
-      batch.delete(doc(db, 'users', officerToDelete.email.toLowerCase().trim()))
+      batch.delete(doc(db, 'users', officerEmail))
       
       const auditRef = doc(collection(db, 'deletion_audit_logs'))
       batch.set(auditRef, {
         adminId: user.uid,
         adminName: user.displayName || 'Root Administrator',
-        targetId: officerToDelete.employeeId,
-        targetName: officerToDelete.name,
-        targetEmail: officerToDelete.email,
+        targetId: officerToDelete.employeeId || 'N/A',
+        targetName: officerToDelete.name || 'Unknown',
+        targetEmail: officerEmail,
         timestamp: new Date().toISOString(),
         status: "Permanently Purged - Successful"
       })
@@ -348,7 +402,7 @@ export default function InvestigationOfficersRegistry() {
       setOfficerToDelete(null)
       setDeleteInputText('')
     } catch (e) {
-      toast({ variant: "destructive", title: "Purge Protocol Error" })
+      toast({ variant: "destructive", title: "Purge Protocol Error", description: "Failed to commit purge batch. Registry integrity preserved." });
     } finally {
       setIsDeleting(false)
     }
@@ -358,11 +412,14 @@ export default function InvestigationOfficersRegistry() {
     return <div className="min-h-screen flex items-center justify-center bg-slate-950"><Loader2 className="w-10 h-10 animate-spin text-accent" /></div>
   }
 
-  const filtered = (officers || []).filter((o: any) => 
-    o.name.toLowerCase().includes(search.toLowerCase()) || 
-    o.designation?.toLowerCase().includes(search.toLowerCase()) ||
-    o.employeeId?.toLowerCase().includes(search.toLowerCase())
-  )
+  const filtered = (officers || []).filter((o: any) => {
+    const name = (o.name || '').toLowerCase();
+    const designation = (o.designation || '').toLowerCase();
+    const empId = (o.employeeId || '').toLowerCase();
+    const s = (search || '').toLowerCase();
+
+    return name.includes(s) || designation.includes(s) || empId.includes(s);
+  });
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-20">
@@ -873,13 +930,13 @@ export default function InvestigationOfficersRegistry() {
                </div>
                <div className="p-8 space-y-6">
                   <div className="grid md:grid-cols-2 gap-6">
-                    <div className="space-y-1.5"><Label className="text-[10px] font-bold uppercase text-slate-400">Legal Name</Label><Input value={editOfficer.name} onChange={e => setEditOfficer({...editOfficer, name: e.target.value})} className="h-11 rounded-xl" /></div>
-                    <div className="space-y-1.5"><Label className="text-[10px] font-bold uppercase text-slate-400">Employee ID</Label><Input value={editOfficer.employeeId} disabled className="h-11 rounded-xl bg-slate-50 font-mono" /></div>
+                    <div className="space-y-1.5"><Label className="text-[10px] font-bold uppercase text-slate-400">Legal Name</Label><Input value={editOfficer.name || ''} onChange={e => setEditOfficer({...editOfficer, name: e.target.value})} className="h-11 rounded-xl" /></div>
+                    <div className="space-y-1.5"><Label className="text-[10px] font-bold uppercase text-slate-400">Employee ID</Label><Input value={editOfficer.employeeId || ''} disabled className="h-11 rounded-xl bg-slate-50 font-mono" /></div>
                   </div>
                   <div className="grid md:grid-cols-2 gap-6">
                     <div className="space-y-1.5 flex-1">
                        <Label className="text-[10px] font-bold uppercase text-slate-400">Assigned Rank</Label>
-                       <Select value={editOfficer.designation} onValueChange={(val) => setEditOfficer({...editOfficer, designation: val})}>
+                       <Select value={editOfficer.designation || 'Investigation Officer'} onValueChange={(val) => setEditOfficer({...editOfficer, designation: val})}>
                           <SelectTrigger className="h-11 rounded-xl">
                              <SelectValue />
                           </SelectTrigger>
@@ -890,7 +947,7 @@ export default function InvestigationOfficersRegistry() {
                     </div>
                     <div className="space-y-1.5">
                        <Label className="text-[10px] font-bold uppercase text-slate-400">Status</Label>
-                       <Select value={editOfficer.status} onValueChange={(val: any) => setEditOfficer({...editOfficer, status: val})}>
+                       <Select value={editOfficer.status || 'active'} onValueChange={(val: any) => setEditOfficer({...editOfficer, status: val})}>
                           <SelectTrigger className="h-11 rounded-xl">
                              <SelectValue />
                           </SelectTrigger>
