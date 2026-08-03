@@ -236,7 +236,26 @@ export default function LeadershipPage() {
   }
 
   const handleAdd = async () => {
-    if (!newLeader.name || !newLeader.title) return
+    const missingFields: string[] = [];
+    if (!newLeader.name.trim()) missingFields.push("Official Name");
+    if (!newLeader.title.trim()) missingFields.push("Official Designation");
+    if (!newLeader.imageId) missingFields.push("Profile Photo");
+    if (newLeader.level === 'State' || newLeader.level === 'District') {
+      if (!newLeader.parentRegion) missingFields.push("State / UT");
+    }
+    if (newLeader.level === 'District') {
+      if (!newLeader.districtName) missingFields.push("District");
+    }
+
+    if (missingFields.length > 0) {
+      toast({
+        variant: "destructive",
+        title: "Mandatory Fields Required",
+        description: `The following credentials must be established: ${missingFields.join(", ")}.`,
+      });
+      return;
+    }
+
     setIsActionLoading(true)
     try {
       await addDoc(collection(db, 'leadership'), { 
@@ -291,7 +310,7 @@ export default function LeadershipPage() {
             <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
               <DialogTrigger asChild>
                 <Button className="bg-accent text-primary font-bold rounded-2xl h-14 px-10 flex gap-2 hover:bg-secondary hover:text-white shadow-xl shadow-accent/20 mx-auto transform hover:scale-105 transition-all">
-                  <Plus className="w-5 h-5" /> Commission Leadership Member
+                  <Plus className="w-6 h-6" /> Commission Leadership Member
                 </Button>
               </DialogTrigger>
               <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="bg-white dark:bg-slate-900 rounded-[2.5rem] border-none shadow-2xl max-h-[90vh] overflow-y-auto flex flex-col p-0">
@@ -322,7 +341,7 @@ export default function LeadershipPage() {
                            {filteredMembers.map((m: any) => (
                               <button 
                                 key={m.id}
-                                onClick={() => handleSelectFromRegistry && handleFetchFromMember(m)}
+                                onClick={() => handleFetchFromMember(m)}
                                 className="flex items-center justify-between p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800 hover:border-accent transition-all group"
                               >
                                  <div className="flex items-center gap-3">
