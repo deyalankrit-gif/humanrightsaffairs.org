@@ -206,7 +206,7 @@ export default function InternalTerminatedMembers() {
             
             <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
               <DialogTrigger asChild>
-                <Button size="sm" className="bg-accent text-primary font-bold rounded-xl h-11 px-6 flex gap-2 shadow-lg hover:bg-secondary hover:text-white transition-all">
+                <Button size="sm" className="bg-accent text-primary font-bold rounded-xl h-11 px-8 flex gap-2 shadow-lg hover:bg-secondary hover:text-white transition-all">
                   <Plus className="w-4 h-4" /> Publish Revocation
                 </Button>
               </DialogTrigger>
@@ -282,7 +282,25 @@ export default function InternalTerminatedMembers() {
                           <div className="flex items-center gap-2">
                              <Button onClick={() => { setEditMember(m); setIsEditDialogOpen(true); }} variant="outline" size="sm" className="h-8 rounded-xl text-[10px] font-bold px-4 border-slate-200">Modify</Button>
                              {isRoot && (
-                               <Button onClick={() => handleDelete(m.id)} variant="ghost" size="sm" className="h-8 w-8 text-slate-300 hover:text-red-500"><Trash2 className="w-4 h-4" /></Button>
+                               <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <Button variant="ghost" size="sm" className="h-8 w-8 text-slate-300 hover:text-red-500 transition-colors">
+                                      <Trash2 className="w-4 h-4" />
+                                    </Button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent className="rounded-3xl border-none shadow-2xl">
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>Confirm Deletion</AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                        You are about to permanently delete this record. This action may permanently remove related data. This action cannot be undone. Please confirm that you want to continue.
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel className="rounded-xl h-11">Cancel</AlertDialogCancel>
+                                      <AlertDialogAction onClick={() => handleDelete(m.id)} className="bg-red-600 hover:bg-red-700 rounded-xl h-11">Delete Permanently</AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                               </AlertDialog>
                              )}
                           </div>
                         </div>

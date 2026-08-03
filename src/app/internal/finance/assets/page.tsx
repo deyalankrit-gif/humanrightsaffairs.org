@@ -193,18 +193,20 @@ export default function AssetRegistry() {
                                 <Button variant="outline" size="icon" className="h-8 w-8 rounded-lg hover:bg-emerald-50"><Edit className="w-3.5 h-3.5" /></Button>
                                 <AlertDialog>
                                   <AlertDialogTrigger asChild>
-                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-300 hover:text-red-500"><Trash2 className="w-3.5 h-3.5" /></Button>
+                                    <button className="h-8 w-8 text-slate-300 hover:text-red-500 flex items-center justify-center transition-colors">
+                                      <Trash2 className="w-3.5 h-3.5" />
+                                    </button>
                                   </AlertDialogTrigger>
                                   <AlertDialogContent className="rounded-3xl border-none shadow-2xl">
                                     <AlertDialogHeader>
-                                      <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                      <AlertDialogTitle>Confirm Deletion</AlertDialogTitle>
                                       <AlertDialogDescription>
-                                        This will permanently remove the asset "{asset.name}" from the institutional registry. This action cannot be undone.
+                                        You are about to permanently delete this record. This action may permanently remove related data. This action cannot be undone. Please confirm that you want to continue.
                                       </AlertDialogDescription>
                                     </AlertDialogHeader>
                                     <AlertDialogFooter>
                                       <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
-                                      <AlertDialogAction onClick={() => handleDelete(asset.id)} className="bg-red-600 hover:bg-red-700 rounded-xl">Purge Asset</AlertDialogAction>
+                                      <AlertDialogAction onClick={() => handleDelete(asset.id)} className="bg-red-600 hover:bg-red-700 rounded-xl">Delete Permanently</AlertDialogAction>
                                     </AlertDialogFooter>
                                   </AlertDialogContent>
                                 </AlertDialog>

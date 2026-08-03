@@ -96,7 +96,7 @@ export default function InvestigationOfficersRegistry() {
   const [showPassword, setShowPassword] = useState(false)
 
   // Deletion States
-  const [deleteDialogStep, setDeleteDialogStep] = useState<'warning' | 'verify' | 'blocked' | null>(null)
+  const [deleteDialogStep, setDeleteDialogStep] = useState<'confirm' | 'warning' | 'verify' | 'blocked' | null>(null)
   const [officerToDelete, setOfficerToDelete] = useState<any>(null)
   const [deleteInputText, setDeleteInputText] = useState('')
   const [isDeleting, setIsDeleting] = useState(false)
@@ -149,11 +149,15 @@ export default function InvestigationOfficersRegistry() {
   const handleStartDelete = async (officer: any) => {
     if (!db || !user) return;
     setOfficerToDelete(officer);
+    setDeleteDialogStep('confirm'); // Initialize with universal confirmation
+  };
+
+  const executeGovernanceAudit = async () => {
+    if (!db || !user || !officerToDelete) return;
     setIsActionLoading(true);
 
     try {
       const complaintsRef = collection(db, 'public_complaints');
-      // Governance Check: Find ALL active cases where the officer is assigned
       const q = query(
         complaintsRef, 
         where('status', 'not-in', ['Closed', 'Action Taken'])
@@ -163,14 +167,12 @@ export default function InvestigationOfficersRegistry() {
       const conflictCases = snap.docs
         .map(d => ({ id: d.id, ...d.data() }))
         .filter((c: any) => 
-          c.assignedTo === officer.name || 
-          (c.assignedOfficers || []).some((o: any) => o.name === officer.name)
+          c.assignedTo === officerToDelete.name || 
+          (c.assignedOfficers || []).some((o: any) => o.name === officerToDelete.name)
         );
       
       if (conflictCases.length > 0) {
         setActiveAssignments(conflictCases);
-        
-        // Derive specific reasons
         const reasons = new Set<string>();
         conflictCases.forEach(c => {
           if (c.status === 'New Complaint') reasons.add("Active complaint assignments exist.");
@@ -182,23 +184,21 @@ export default function InvestigationOfficersRegistry() {
         if (reasons.size === 0) reasons.add("The investigator is responsible for ongoing cases.");
         setBlockReasons(Array.from(reasons));
 
-        // Audit Log for the blocked attempt
         const blockedLogRef = doc(collection(db, 'deletion_audit_logs'));
         await setDoc(blockedLogRef, {
           adminId: user.uid,
           adminEmail: user.email,
-          targetId: officer.employeeId,
-          targetName: officer.name,
+          targetId: officerToDelete.employeeId,
+          targetName: officerToDelete.name,
           timestamp: new Date().toISOString(),
           status: "Blocked by Governance",
           reasons: Array.from(reasons)
         });
 
         setDeleteDialogStep('blocked');
-        return;
+      } else {
+        setDeleteDialogStep('warning');
       }
-
-      setDeleteDialogStep('warning');
     } catch (e) {
       toast({ variant: "destructive", title: "Audit Error", description: "Verification protocol failed." });
     } finally {
@@ -291,13 +291,9 @@ export default function InvestigationOfficersRegistry() {
     try {
       const batch = writeBatch(db)
       
-      // 1. Delete Officer Registry
       batch.delete(doc(db, 'investigation_officers', officerToDelete.id))
-      
-      // 2. Delete User Governance Record
       batch.delete(doc(db, 'users', officerToDelete.email.toLowerCase().trim()))
       
-      // 3. Create Permanent Deletion Audit Log
       const auditRef = doc(collection(db, 'deletion_audit_logs'))
       batch.set(auditRef, {
         adminId: user?.uid,
@@ -407,7 +403,7 @@ export default function InvestigationOfficersRegistry() {
                             <button 
                               type="button" 
                               onClick={() => setShowPassword(!showPassword)}
-                              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-accent"
+                              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-accent"
                             >
                               {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                             </button>
@@ -633,6 +629,26 @@ export default function InvestigationOfficersRegistry() {
       <Dialog open={!!deleteDialogStep} onOpenChange={(open) => { if(!open) { setDeleteDialogStep(null); setOfficerToDelete(null); setDeleteInputText(''); setActiveAssignments([]); } }}>
         <DialogContent className="max-w-2xl rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden bg-white dark:bg-slate-900">
           
+          {deleteDialogStep === 'confirm' && (
+            <div className="p-8 space-y-6">
+              <div className="flex flex-col items-center text-center space-y-4">
+                <div className="w-20 h-20 bg-red-50 dark:bg-red-950/30 text-red-500 rounded-full flex items-center justify-center animate-pulse">
+                  <ShieldAlert className="w-10 h-10" />
+                </div>
+                <div className="space-y-2">
+                  <DialogTitle className="text-2xl font-headline font-bold text-primary dark:text-white">Confirm Deletion</DialogTitle>
+                  <DialogDescription className="text-sm text-slate-500 leading-relaxed font-medium">
+                    You are about to permanently delete this record. This action may permanently remove related data. This action cannot be undone. Please confirm that you want to continue.
+                  </DialogDescription>
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <Button variant="outline" onClick={() => { setDeleteDialogStep(null); setOfficerToDelete(null); }} className="flex-1 h-12 rounded-xl font-bold">Cancel</Button>
+                <Button variant="destructive" onClick={executeGovernanceAudit} className="flex-1 h-12 rounded-xl font-bold">Delete Permanently</Button>
+              </div>
+            </div>
+          )}
+
           {deleteDialogStep === 'blocked' && (
             <div className="flex flex-col animate-in fade-in duration-500">
               <div className="bg-red-600 p-8 text-white relative shrink-0">

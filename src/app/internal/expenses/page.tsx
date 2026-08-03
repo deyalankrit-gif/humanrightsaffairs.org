@@ -345,12 +345,12 @@ export default function ExpensesManagementPage() {
                                 </AlertDialogTrigger>
                                 <AlertDialogContent className="rounded-3xl">
                                   <AlertDialogHeader>
-                                    <AlertDialogTitle>Delete category "{cat}"?</AlertDialogTitle>
-                                    <AlertDialogDescription>This will remove the category from the list. Existing expenses under this category will remain, but the category label will be unavailable for new entries.</AlertDialogDescription>
+                                    <AlertDialogTitle>Confirm Deletion</AlertDialogTitle>
+                                    <AlertDialogDescription>You are about to permanently delete this record. This action may permanently remove related data. This action cannot be undone. Please confirm that you want to continue.</AlertDialogDescription>
                                   </AlertDialogHeader>
                                   <AlertDialogFooter>
                                     <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
-                                    <AlertDialogAction onClick={() => handleDeleteCategory(idx)} className="bg-red-600 hover:bg-red-700 rounded-xl">Purge Category</AlertDialogAction>
+                                    <AlertDialogAction onClick={() => handleDeleteCategory(idx)} className="bg-red-600 hover:bg-red-700 rounded-xl">Delete Permanently</AlertDialogAction>
                                   </AlertDialogFooter>
                                 </AlertDialogContent>
                               </AlertDialog>
@@ -419,16 +419,16 @@ export default function ExpensesManagementPage() {
                       <div className="flex gap-2">
                          <AlertDialog>
                            <AlertDialogTrigger asChild>
-                             <Button variant="ghost" size="icon" className="h-10 w-10 text-slate-300 hover:text-red-500 hover:bg-red-50 transition-all rounded-xl"><Trash2 className="w-4.5 h-4.5" /></Button>
+                             <button className="h-10 w-10 text-slate-300 hover:text-red-500 hover:bg-red-50 transition-all rounded-xl flex items-center justify-center"><Trash2 className="w-4.5 h-4.5" /></button>
                            </AlertDialogTrigger>
                            <AlertDialogContent className="rounded-3xl border-none shadow-2xl">
                              <AlertDialogHeader>
-                               <AlertDialogTitle>Purge expense record?</AlertDialogTitle>
-                               <AlertDialogDescription>This will permanently remove "{expense.title}" from the registry. Note: This action does not automatically reverse any ledger balances already committed to the treasury summary.</AlertDialogDescription>
+                               <AlertDialogTitle>Confirm Deletion</AlertDialogTitle>
+                               <AlertDialogDescription>You are about to permanently delete this record. This action may permanently remove related data. This action cannot be undone. Please confirm that you want to continue.</AlertDialogDescription>
                              </AlertDialogHeader>
                              <AlertDialogFooter>
                                <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
-                               <AlertDialogAction onClick={() => handleDelete(expense.id)} className="bg-red-600 hover:bg-red-700 rounded-xl">Purge Record</AlertDialogAction>
+                               <AlertDialogAction onClick={() => handleDelete(expense.id)} className="bg-red-600 hover:bg-red-700 rounded-xl h-11">Delete Permanently</AlertDialogAction>
                              </AlertDialogFooter>
                            </AlertDialogContent>
                          </AlertDialog>

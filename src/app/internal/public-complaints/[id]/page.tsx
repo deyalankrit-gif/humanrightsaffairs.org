@@ -546,14 +546,14 @@ export default function CaseHubPage() {
                   </AlertDialogTrigger>
                   <AlertDialogContent className="rounded-[2.5rem]">
                     <AlertDialogHeader>
-                      <AlertDialogTitle>Permanent Deletion</AlertDialogTitle>
+                      <AlertDialogTitle>Confirm Deletion</AlertDialogTitle>
                       <AlertDialogDescription>
-                        You are about to permanently purge the complaint record for "{caseData.subject}". This will remove all timeline history, evidence, and audit logs.
+                        You are about to permanently delete this record. This action may permanently remove related data. This action cannot be undone. Please confirm that you want to continue.
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                       <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
-                      <AlertDialogAction onClick={handlePurgeCase} className="bg-red-600 hover:bg-red-700 rounded-xl">Authorize Deletion</AlertDialogAction>
+                      <AlertDialogAction onClick={handlePurgeCase} className="bg-red-600 hover:bg-red-700 rounded-xl">Delete Permanently</AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>
                 </AlertDialog>
@@ -576,7 +576,7 @@ export default function CaseHubPage() {
                   </div>
                   <div className="p-8 space-y-6">
                     <div className="space-y-1.5"><Label className="text-[10px] font-bold uppercase text-slate-400">Final Executive Findings</Label><Textarea value={commissionData.findings} onChange={e => setCommissionData({...commissionData, findings: e.target.value})} placeholder="Summarize findings..." className="min-h-[120px] rounded-2xl" /></div>
-                    <div className="space-y-1.5"><Label className="text-[10px] font-bold uppercase text-slate-400">Directives to Authorities</Label><Textarea value={commissionData.directives} onChange={e => setCommissionData({...commissionData, directives: e.target.value})} placeholder="Specify required actions..." className="min-h-[80px] rounded-2xl" /></div>
+                    <div className="space-y-1.5"><Label className="text-[10px] font-bold uppercase text-slate-400">Directives to Authorities</Label><Textarea value={commissionedData.directives} onChange={e => setCommissionData({...commissionData, directives: e.target.value})} placeholder="Specify required actions..." className="min-h-[80px] rounded-2xl" /></div>
                     <Button onClick={handleCommissionFindings} disabled={isActionLoading || !commissionData.findings.trim()} className="w-full h-14 rounded-2xl bg-primary text-white font-bold text-lg hover:bg-secondary transition-all">{isActionLoading ? <Loader2 className="animate-spin" /> : <><Send className="w-5 h-5 mr-2" /> Commit & Close</>}</Button>
                   </div>
                 </DialogContent>

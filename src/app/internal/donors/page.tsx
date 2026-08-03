@@ -182,7 +182,7 @@ export default function InternalDonorsManagement() {
         <div className="absolute top-0 right-0 w-1/3 h-full bg-accent/5 -skew-x-12"></div>
         <div className="container mx-auto px-4 relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="space-y-1">
-             <div className="inline-flex items-center gap-2 bg-accent/20 text-accent px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest border border-accent/30">
+             <div className="inline-flex items-center gap-2 bg-accent/20 text-accent px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest border border-accent/30 tracking-widest">
                <ShieldCheck className="w-2.5 h-2.5" /> Gratitude Governance
              </div>
              <h1 className="text-3xl md:text-4xl font-headline font-bold">Wall of <span className="text-accent italic">Donors</span></h1>
@@ -191,7 +191,7 @@ export default function InternalDonorsManagement() {
           
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-accent text-primary font-bold rounded-xl h-11 px-8 flex gap-2 shadow-2xl shadow-accent/20 hover:bg-secondary hover:text-white transition-all transform hover:scale-105">
+              <Button size="sm" className="bg-accent text-primary font-bold rounded-xl h-11 px-8 flex gap-2 shadow-2xl shadow-accent/20 hover:bg-secondary hover:text-white transition-all transform hover:scale-105">
                 <Plus className="w-4 h-4" /> Add Recognition Circle
               </Button>
             </DialogTrigger>
@@ -301,18 +301,18 @@ export default function InternalDonorsManagement() {
                                   <Button variant="outline" size="sm" onClick={() => { setEditTier(tier); setIsEditDialogOpen(true); }} className="h-10 px-5 rounded-xl text-[10px] font-bold border-slate-200 hover:bg-primary hover:text-white transition-all">Modify</Button>
                                   <AlertDialog>
                                     <AlertDialogTrigger asChild>
-                                      <Button variant="ghost" size="icon" className="h-10 w-10 text-slate-300 hover:text-red-500 transition-all rounded-xl"><Trash2 className="w-4.5 h-4.5" /></Button>
+                                      <button className="h-10 w-10 text-slate-300 hover:text-red-500 transition-all rounded-xl flex items-center justify-center"><Trash2 className="w-4.5 h-4.5" /></button>
                                     </AlertDialogTrigger>
                                     <AlertDialogContent className="rounded-3xl border-none shadow-2xl">
                                       <AlertDialogHeader>
-                                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                        <AlertDialogTitle>Confirm Deletion</AlertDialogTitle>
                                         <AlertDialogDescription>
-                                          This will permanently delete the recognition circle "{tier.title}". This action cannot be undone and it will be removed from the public Wall of Gratitude.
+                                          You are about to permanently delete this record. This action may permanently remove related data. This action cannot be undone. Please confirm that you want to continue.
                                         </AlertDialogDescription>
                                       </AlertDialogHeader>
                                       <AlertDialogFooter>
                                         <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
-                                        <AlertDialogAction onClick={() => handleDeleteTier(tier.id)} className="bg-red-600 hover:bg-red-700 rounded-xl">Purge Tier</AlertDialogAction>
+                                        <AlertDialogAction onClick={() => handleDeleteTier(tier.id)} className="bg-red-600 hover:bg-red-700 rounded-xl h-11">Delete Permanently</AlertDialogAction>
                                       </AlertDialogFooter>
                                     </AlertDialogContent>
                                   </AlertDialog>

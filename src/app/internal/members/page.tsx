@@ -49,6 +49,17 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar'
 import { format, parse, addYears } from 'date-fns'
 import { useToast } from '@/hooks/use-toast'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import Link from 'next/link'
 import { INDIA_DATA } from '@/lib/india-data'
 import { cn } from '@/lib/utils'
@@ -67,7 +78,7 @@ export default function InternalMembersDirectory() {
   const [isDialogOpen, setIsAddingDialogOpen] = useState(false)
 
   // Deletion States
-  const [deleteDialogStep, setDeleteDialogStep] = useState<'warning' | 'verify' | null>(null)
+  const [deleteDialogStep, setDeleteDialogStep] = useState<'confirm' | 'verify' | null>(null)
   const [memberToDelete, setMemberToDelete] = useState<any>(null)
   const [deleteInputText, setDeleteInputText] = useState('')
   const [isDeleting, setIsDeleting] = useState(false)
@@ -297,7 +308,7 @@ export default function InternalMembersDirectory() {
                 variant="destructive" 
                 size="sm" 
                 className="w-full sm:w-auto h-9 rounded-xl text-[10px] px-4 font-black uppercase tracking-widest flex gap-2"
-                onClick={() => { setMemberToDelete(member); setDeleteDialogStep('warning'); }}
+                onClick={() => { setMemberToDelete(member); setDeleteDialogStep('confirm'); }}
               >
                 <Trash2 className="w-3.5 h-3.5" /> Delete
               </Button>
@@ -575,18 +586,18 @@ export default function InternalMembersDirectory() {
       {/* Deletion Dialog */}
       <Dialog open={!!deleteDialogStep} onOpenChange={(open) => !open && setDeleteDialogStep(null)}>
         <DialogContent className="max-w-md rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden bg-white dark:bg-slate-900 w-[95vw]">
-          {deleteDialogStep === 'warning' && (
+          {deleteDialogStep === 'confirm' && (
             <div className="p-8 space-y-6">
               <div className="flex flex-col items-center text-center space-y-4">
                 <div className="w-20 h-20 bg-red-50 dark:bg-red-950/30 text-red-500 rounded-full flex items-center justify-center animate-pulse"><ShieldAlert className="w-10 h-10" /></div>
                 <div className="space-y-2">
-                  <DialogTitle className="text-2xl font-headline font-bold text-primary dark:text-white">Security Warning</DialogTitle>
-                  <DialogDescription className="text-sm text-slate-500 leading-relaxed font-medium">You are attempting to permanently purge the record for <strong className="text-primary dark:text-white">{memberToDelete?.name}</strong>. This action will erase all credentials associated with ID: <span className="font-mono font-bold text-red-500">{memberToDelete?.memberId}</span>.</DialogDescription>
+                  <DialogTitle className="text-2xl font-headline font-bold text-primary dark:text-white">Confirm Deletion</DialogTitle>
+                  <DialogDescription className="text-sm text-slate-500 leading-relaxed font-medium">You are about to permanently delete this record. This action may permanently remove related data. This action cannot be undone. Please confirm that you want to continue.</DialogDescription>
                 </div>
               </div>
               <div className="flex gap-3">
                 <Button variant="outline" onClick={() => setDeleteDialogStep(null)} className="flex-1 h-12 rounded-xl font-bold">Cancel</Button>
-                <Button variant="destructive" onClick={() => setDeleteDialogStep('verify')} className="flex-1 h-12 rounded-xl font-bold">Proceed</Button>
+                <Button variant="destructive" onClick={() => setDeleteDialogStep('verify')} className="flex-1 h-12 rounded-xl font-bold">Delete Permanently</Button>
               </div>
             </div>
           )}
@@ -595,8 +606,8 @@ export default function InternalMembersDirectory() {
               <div className="space-y-4 text-center">
                 <div className="inline-flex items-center gap-2 bg-amber-50 dark:bg-amber-950/30 text-amber-600 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border border-amber-100"><AlertTriangle className="w-3 h-3" /> Verification Protocol</div>
                 <div className="space-y-1">
-                  <DialogTitle className="text-xl font-headline font-bold">Confirm Delete</DialogTitle>
-                  <p className="text-xs text-slate-500">To prevent accidental deletion, please type <strong className="text-red-600 uppercase">Delete</strong> below.</p>
+                  <DialogTitle className="text-xl font-headline font-bold">Authorization Required</DialogTitle>
+                  <p className="text-xs text-slate-500">To prevent accidental deletion, please type <strong className="text-red-600 uppercase">Delete</strong> below to authorize the purge for {memberToDelete?.name}.</p>
                 </div>
               </div>
               <div className="space-y-2">
@@ -604,7 +615,7 @@ export default function InternalMembersDirectory() {
               </div>
               <div className="flex gap-3">
                 <Button variant="ghost" onClick={() => setDeleteDialogStep(null)} className="flex-1 h-12 rounded-xl text-slate-400 font-bold">Abort</Button>
-                <Button variant="destructive" disabled={deleteInputText !== 'Delete' || isDeleting} onClick={handleDeleteMember} className="flex-1 h-12 rounded-xl font-bold bg-red-600 hover:bg-red-700 shadow-xl shadow-red-600/20">{isDeleting ? <Loader2 className="animate-spin" /> : "Permanent Purge"}</Button>
+                <Button variant="destructive" disabled={deleteInputText !== 'Delete' || isDeleting} onClick={handleDeleteMember} className="flex-1 h-12 rounded-xl font-bold bg-red-600 hover:bg-red-700 shadow-xl shadow-red-600/20">{isDeleting ? <Loader2 className="animate-spin" /> : "Verify & Purge Record"}</Button>
               </div>
             </div>
           )}

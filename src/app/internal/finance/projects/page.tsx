@@ -139,7 +139,7 @@ export default function ProjectAccounting() {
 
       <section className="py-8 container mx-auto px-4">
         <div className="flex justify-between items-center mb-10">
-           <div className="relative w-full max-w-md">
+           <div className="relative w-full max-md:max-w-full max-w-md">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <Input 
                 placeholder="Search active missions..." 
@@ -168,16 +168,20 @@ export default function ProjectAccounting() {
                      </div>
                      <AlertDialog>
                        <AlertDialogTrigger asChild>
-                         <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl text-slate-300 hover:text-red-500"><Trash2 className="w-4.5 h-4.5" /></Button>
+                         <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl text-slate-300 hover:text-red-500 transition-colors">
+                           <Trash2 className="w-4.5 h-4.5" />
+                         </Button>
                        </AlertDialogTrigger>
                        <AlertDialogContent className="rounded-3xl border-none shadow-2xl">
                          <AlertDialogHeader>
-                           <AlertDialogTitle>Archive project "{proj.name}"?</AlertDialogTitle>
-                           <AlertDialogDescription>This will permanently remove the strategic accounting node for this mission. All budget data will be purged.</AlertDialogDescription>
+                           <AlertDialogTitle>Confirm Deletion</AlertDialogTitle>
+                           <AlertDialogDescription>
+                             You are about to permanently delete this record. This action may permanently remove related data. This action cannot be undone. Please confirm that you want to continue.
+                           </AlertDialogDescription>
                          </AlertDialogHeader>
                          <AlertDialogFooter>
-                           <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
-                           <AlertDialogAction onClick={() => handleDelete(proj.id)} className="bg-red-600 hover:bg-red-700 rounded-xl">Archive Project</AlertDialogAction>
+                           <AlertDialogCancel className="rounded-xl h-11">Cancel</AlertDialogCancel>
+                           <AlertDialogAction onClick={() => handleDelete(proj.id)} className="bg-red-600 hover:bg-red-700 rounded-xl h-11">Delete Permanently</AlertDialogAction>
                          </AlertDialogFooter>
                        </AlertDialogContent>
                      </AlertDialog>

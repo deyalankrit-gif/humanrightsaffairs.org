@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useEffect } from 'react'
@@ -41,6 +42,17 @@ import {
   DialogDescription,
   DialogClose
 } from "@/components/ui/dialog"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
 
@@ -166,7 +178,23 @@ export default function InstitutionalDonors() {
                        </div>
                        <div className="flex gap-1">
                           <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-300 hover:text-emerald-500"><Edit className="w-3.5 h-3.5" /></Button>
-                          <Button variant="ghost" size="icon" onClick={() => handleDelete(donor.id)} className="h-8 w-8 text-slate-300 hover:text-red-500"><Trash2 className="w-3.5 h-3.5" /></Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-300 hover:text-red-500 transition-colors">
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent className="rounded-[2.5rem] border-none shadow-2xl">
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Confirm Deletion</AlertDialogTitle>
+                                <AlertDialogDescription>You are about to permanently delete this record. This action may permanently remove related data. This action cannot be undone. Please confirm that you want to continue.</AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel className="rounded-xl h-11">Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => handleDelete(donor.id)} className="bg-red-600 hover:bg-red-700 rounded-xl h-11">Delete Permanently</AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
                        </div>
                     </div>
 
@@ -244,7 +272,7 @@ export default function InstitutionalDonors() {
                   <Label className="text-[10px] font-bold uppercase text-slate-400">PAN (For 80G Receipts)</Label>
                   <Input value={formData.pan} onChange={e => setFormData({...formData, pan: e.target.value.toUpperCase()})} placeholder="ABCDE1234F" className="font-mono" />
                </div>
-               <Button type="submit" disabled={isActionLoading} className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 text-white font-bold mt-4 shadow-xl">
+               <Button type="submit" disabled={isActionLoading} className="w-full h-12 bg-emerald-600 hover:bg-emerald-500 text-white font-bold mt-4 shadow-xl">
                  {isActionLoading ? <Loader2 className="animate-spin" /> : "Commit Profile to Registry"}
                </Button>
             </form>

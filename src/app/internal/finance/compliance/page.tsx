@@ -170,18 +170,20 @@ export default function ComplianceHub() {
                                       <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-300 hover:text-emerald-500"><Download className="w-4 h-4" /></Button>
                                       <AlertDialog>
                                         <AlertDialogTrigger asChild>
-                                          <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-300 hover:text-red-500"><Trash2 className="w-4 h-4" /></Button>
+                                          <button className="h-8 w-8 text-slate-300 hover:text-red-500 flex items-center justify-center transition-colors">
+                                            <Trash2 className="w-4 h-4" />
+                                          </button>
                                         </AlertDialogTrigger>
                                         <AlertDialogContent className="rounded-3xl border-none shadow-2xl">
                                           <AlertDialogHeader>
-                                            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                            <AlertDialogTitle>Confirm Deletion</AlertDialogTitle>
                                             <AlertDialogDescription>
-                                              This will permanently remove the statutory record "{r.documentTitle}" from the legal vault.
+                                              You are about to permanently delete this record. This action may permanently remove related data. This action cannot be undone. Please confirm that you want to continue.
                                             </AlertDialogDescription>
                                           </AlertDialogHeader>
                                           <AlertDialogFooter>
-                                            <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
-                                            <AlertDialogAction onClick={() => handleDelete(r.id)} className="bg-red-600 hover:bg-red-700 rounded-xl">Remove Document</AlertDialogAction>
+                                            <AlertDialogCancel className="rounded-xl h-11">Cancel</AlertDialogCancel>
+                                            <AlertDialogAction onClick={() => handleDelete(r.id)} className="bg-red-600 hover:bg-red-700 rounded-xl h-11">Delete Permanently</AlertDialogAction>
                                           </AlertDialogFooter>
                                         </AlertDialogContent>
                                       </AlertDialog>

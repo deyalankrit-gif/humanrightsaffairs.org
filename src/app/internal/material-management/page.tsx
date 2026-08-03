@@ -373,7 +373,7 @@ export default function MaterialManagementPage() {
         </div>
       </header>
 
-      <section className="py-6 bg-white dark:bg-slate-900 border-b sticky top-10 z-30 shadow-sm">
+      <section className="py-6 bg-white dark:bg-slate-900 border-b sticky top-10 z-30 shadow-sm transition-colors">
         <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl border">
              <Button 
@@ -404,7 +404,11 @@ export default function MaterialManagementPage() {
            ) : (
              <div className="grid gap-6">
                 {filtered.map((item: any) => (
-                  <Card key={item.id} className="border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 group hover:shadow-xl transition-all duration-300">
+                  <Card key={item.id} className={cn(
+                    "border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900 rounded-[2.5rem] border transition-all active:scale-[0.99]",
+                    item.status === 'Out of Stock' ? "border-l-4 border-l-red-600" : 
+                    item.status === 'Low Stock' ? "border-l-4 border-l-amber-500" : "border-l-4 border-l-emerald-500"
+                  )}>
                     <CardContent className="p-0">
                        <div className="flex flex-col md:flex-row items-stretch">
                           <div className="p-8 md:w-56 text-center border-r border-slate-100 dark:border-slate-700 flex flex-col items-center justify-center shrink-0 bg-slate-50 dark:bg-slate-800/50">
@@ -445,16 +449,16 @@ export default function MaterialManagementPage() {
                                    <Button onClick={() => { setEditItem(item); setIsEditDialogOpen(true); }} variant="outline" size="icon" className="h-10 w-10 rounded-xl border-slate-100 hover:bg-slate-50 transition-all"><Edit className="w-4.5 h-4.5 text-slate-400" /></Button>
                                    <AlertDialog>
                                       <AlertDialogTrigger asChild>
-                                        <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl text-slate-300 hover:text-red-500 hover:bg-red-50 transition-all"><Trash2 className="w-4.5 h-4.5" /></Button>
+                                        <button className="h-10 w-10 rounded-xl text-slate-300 hover:text-red-500 hover:bg-red-50 transition-all flex items-center justify-center"><Trash2 className="w-4.5 h-4.5" /></button>
                                       </AlertDialogTrigger>
                                       <AlertDialogContent className="rounded-[2.5rem] border-none shadow-2xl">
                                          <AlertDialogHeader>
-                                            <AlertDialogTitle>Purge Registry Record?</AlertDialogTitle>
-                                            <AlertDialogDescription>This will permanently remove "{item.name}" from the institutional logistics registry. This action cannot be undone.</AlertDialogDescription>
+                                            <AlertDialogTitle>Confirm Deletion</AlertDialogTitle>
+                                            <AlertDialogDescription>You are about to permanently delete this record. This action may permanently remove related data. This action cannot be undone. Please confirm that you want to continue.</AlertDialogDescription>
                                          </AlertDialogHeader>
                                          <AlertDialogFooter>
                                             <AlertDialogCancel className="rounded-xl h-11 font-bold">Cancel</AlertDialogCancel>
-                                            <AlertDialogAction onClick={() => handleDeleteMaterial(item.id)} className="bg-red-600 hover:bg-red-700 rounded-xl h-11 font-bold">Purge Record</AlertDialogAction>
+                                            <AlertDialogAction onClick={() => handleDeleteMaterial(item.id)} className="bg-red-600 hover:bg-red-700 rounded-xl h-11 font-bold">Delete Permanently</AlertDialogAction>
                                          </AlertDialogFooter>
                                       </AlertDialogContent>
                                    </AlertDialog>

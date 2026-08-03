@@ -300,14 +300,14 @@ export default function PublicComplaintsTerminal() {
                               </AlertDialogTrigger>
                               <AlertDialogContent className="rounded-[2.5rem]">
                                 <AlertDialogHeader>
-                                  <AlertDialogTitle>Permanent Deletion</AlertDialogTitle>
+                                  <AlertDialogTitle>Confirm Deletion</AlertDialogTitle>
                                   <AlertDialogDescription>
-                                    You are about to permanently purge the complaint record for "{c.subject}". This will remove all timeline history, evidence, and audit logs.
+                                    You are about to permanently delete this record. This action may permanently remove related data. This action cannot be undone. Please confirm that you want to continue.
                                   </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
                                   <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
-                                  <AlertDialogAction onClick={() => handleDelete(c.id)} className="bg-red-600 hover:bg-red-700 rounded-xl">Authorize Deletion</AlertDialogAction>
+                                  <AlertDialogAction onClick={() => handleDelete(c.id)} className="bg-red-600 hover:bg-red-700 rounded-xl">Delete Permanently</AlertDialogAction>
                                 </AlertDialogFooter>
                               </AlertDialogContent>
                             </AlertDialog>

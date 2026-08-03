@@ -172,7 +172,7 @@ export default function InternalOccasionsManagement() {
             </DialogTrigger>
             <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="max-w-2xl rounded-[2.5rem] max-h-[90vh] overflow-y-auto border-none shadow-2xl">
               <DialogHeader>
-                <DialogTitle className="text-2xl font-headline font-bold">Greeting Setup Protocol</DialogTitle>
+                <DialogTitle>Greeting Setup Protocol</DialogTitle>
                 <DialogDescription>Banners are pushed to the homepage in real-time based on priority and dates.</DialogDescription>
               </DialogHeader>
               <div className="space-y-6 py-2">
@@ -267,16 +267,16 @@ export default function InternalOccasionsManagement() {
                               <Button variant="outline" size="sm" onClick={() => { setEditOccasion(occ); setIsEditDialogOpen(true); }} className="h-10 px-5 rounded-xl text-[10px] font-bold border-slate-200 hover:bg-accent hover:text-primary hover:border-accent transition-all">Modify</Button>
                               <AlertDialog>
                                 <AlertDialogTrigger asChild>
-                                  <Button variant="ghost" size="icon" className="h-10 w-10 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"><Trash2 className="w-4.5 h-4.5" /></Button>
+                                  <button className="h-10 w-10 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all flex items-center justify-center"><Trash2 className="w-4.5 h-4.5" /></button>
                                 </AlertDialogTrigger>
                                 <AlertDialogContent className="rounded-3xl border-none shadow-2xl">
                                   <AlertDialogHeader>
-                                    <AlertDialogTitle>Purge occasion record?</AlertDialogTitle>
-                                    <AlertDialogDescription>This will permanently remove "{occ.title}" from the broadcast registry. The banner will vanish from the homepage instantly.</AlertDialogDescription>
+                                    <AlertDialogTitle>Confirm Deletion</AlertDialogTitle>
+                                    <AlertDialogDescription>You are about to permanently delete this record. This action may permanently remove related data. This action cannot be undone. Please confirm that you want to continue.</AlertDialogDescription>
                                   </AlertDialogHeader>
                                   <AlertDialogFooter>
                                     <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
-                                    <AlertDialogAction onClick={() => handleDeleteOccasion(occ.id)} className="bg-red-600 hover:bg-red-700 rounded-xl">Purge Greeting</AlertDialogAction>
+                                    <AlertDialogAction onClick={() => handleDeleteOccasion(occ.id)} className="bg-red-600 hover:bg-red-700 rounded-xl h-11">Delete Permanently</AlertDialogAction>
                                   </AlertDialogFooter>
                                 </AlertDialogContent>
                               </AlertDialog>
@@ -304,7 +304,7 @@ export default function InternalOccasionsManagement() {
 
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="max-w-2xl rounded-[2.5rem] max-h-[90vh] overflow-y-auto border-none shadow-2xl">
-          <DialogHeader><DialogTitle className="text-2xl font-headline font-bold">Refine Greeting Metadata</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>Refine Greeting Metadata</DialogTitle></DialogHeader>
           {editOccasion && (
             <div className="space-y-6 py-2">
                 <div className="flex flex-col items-center gap-4 p-5 border-2 border-dashed rounded-[2rem] bg-slate-50 dark:bg-slate-900 shadow-inner">
@@ -327,7 +327,7 @@ export default function InternalOccasionsManagement() {
                   <Label className="font-bold">Active Broadcast</Label>
                   <Switch checked={editOccasion.isActive} onCheckedChange={val => setEditOccasion({...editOccasion, isActive: val})} />
                 </div>
-                <Button onClick={handleUpdateOccasion} disabled={isActionLoading} className="w-full h-14 bg-primary text-white font-bold rounded-2xl shadow-2xl mt-4 hover:bg-secondary transition-all">Commit Profile Refresh</Button>
+                <Button onClick={handleUpdateOccasion} disabled={isActionLoading} className="w-full h-14 rounded-2xl bg-primary text-white font-bold rounded-2xl shadow-2xl mt-4 hover:bg-secondary transition-all">Commit Profile Refresh</Button>
             </div>
           )}
         </DialogContent>

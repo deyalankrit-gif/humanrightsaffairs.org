@@ -164,16 +164,18 @@ export default function InternalGrievancesPage() {
                           <Button size="sm" variant="outline" className="h-8 rounded-lg text-[10px] px-3 font-bold" onClick={() => handleUpdateStatus(g.id, 'Resolved')}>Resolve</Button>
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
-                              <Button size="sm" variant="ghost" className="h-8 w-8 text-slate-300 hover:text-red-500"><Trash2 className="w-3.5 h-3.5" /></Button>
+                              <Button size="sm" variant="ghost" className="h-8 w-8 text-slate-300 hover:text-red-500 transition-colors">
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
                             </AlertDialogTrigger>
-                            <AlertDialogContent className="rounded-3xl">
+                            <AlertDialogContent className="rounded-3xl border-none shadow-2xl">
                               <AlertDialogHeader>
-                                <AlertDialogTitle>Purge grievance record?</AlertDialogTitle>
-                                <AlertDialogDescription>This will permanently remove the record for token "{g.token}" from the institutional registry. This action cannot be undone.</AlertDialogDescription>
+                                <AlertDialogTitle>Confirm Deletion</AlertDialogTitle>
+                                <AlertDialogDescription>You are about to permanently delete this record. This action may permanently remove related data. This action cannot be undone. Please confirm that you want to continue.</AlertDialogDescription>
                               </AlertDialogHeader>
                               <AlertDialogFooter>
-                                <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => handleDelete(g.id)} className="bg-red-600 hover:bg-red-700 rounded-xl">Purge Record</AlertDialogAction>
+                                <AlertDialogCancel className="rounded-xl h-11">Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => handleDelete(g.id)} className="bg-red-600 hover:bg-red-700 rounded-xl h-11">Delete Permanently</AlertDialogAction>
                               </AlertDialogFooter>
                             </AlertDialogContent>
                           </AlertDialog>

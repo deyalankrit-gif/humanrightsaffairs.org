@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo, useEffect, useState } from 'react'
@@ -263,18 +264,18 @@ export default function DonationAnalyticsPage() {
                             <td className="px-8 py-6 text-right">
                               <AlertDialog>
                                 <AlertDialogTrigger asChild>
-                                  <Button variant="ghost" size="icon" className="h-9 w-9 text-slate-300 hover:text-red-500 rounded-xl">
+                                  <button className="h-9 w-9 text-slate-300 hover:text-red-500 rounded-xl flex items-center justify-center transition-colors">
                                     <Trash2 className="w-4 h-4" />
-                                  </Button>
+                                  </button>
                                 </AlertDialogTrigger>
                                 <AlertDialogContent className="rounded-[2rem] border-none shadow-2xl w-[95vw] md:w-full">
                                   <AlertDialogHeader>
-                                    <AlertDialogTitle className="text-xl">Purge Record?</AlertDialogTitle>
-                                    <AlertDialogDescription className="text-sm">Permanent deletion of this contribution from the master ledger. This action is irreversible.</AlertDialogDescription>
+                                    <AlertDialogTitle>Confirm Deletion</AlertDialogTitle>
+                                    <AlertDialogDescription className="text-sm">You are about to permanently delete this record. This action may permanently remove related data. This action cannot be undone. Please confirm that you want to continue.</AlertDialogDescription>
                                   </AlertDialogHeader>
                                   <AlertDialogFooter className="mt-4">
                                     <AlertDialogCancel className="rounded-xl h-12">Cancel</AlertDialogCancel>
-                                    <AlertDialogAction onClick={() => handleDelete(d.id)} className="bg-red-500 hover:bg-red-600 rounded-xl h-12">Purge Transaction</AlertDialogAction>
+                                    <AlertDialogAction onClick={() => handleDelete(d.id)} className="bg-red-500 hover:bg-red-600 rounded-xl h-12">Delete Permanently</AlertDialogAction>
                                   </AlertDialogFooter>
                                 </AlertDialogContent>
                               </AlertDialog>

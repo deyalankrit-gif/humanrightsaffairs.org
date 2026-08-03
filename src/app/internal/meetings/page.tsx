@@ -472,12 +472,12 @@ export default function InternalMeetingsManagement() {
                               </AlertDialogTrigger>
                               <AlertDialogContent className="rounded-3xl border-none shadow-2xl bg-white dark:bg-slate-900">
                                 <AlertDialogHeader>
-                                  <AlertDialogTitle>Delete Assembly Record?</AlertDialogTitle>
-                                  <AlertDialogDescription>This action will permanently remove the meeting and its associated minutes from the registry.</AlertDialogDescription>
+                                  <AlertDialogTitle>Confirm Deletion</AlertDialogTitle>
+                                  <AlertDialogDescription>You are about to permanently delete this record. This action may permanently remove related data. This action cannot be undone. Please confirm that you want to continue.</AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
                                   <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
-                                  <AlertDialogAction onClick={() => handleDeleteMeeting(meeting.id)} className="bg-red-600 hover:bg-red-700 rounded-xl border-none text-white font-bold transition-colors">Confirm Delete</AlertDialogAction>
+                                  <AlertDialogAction onClick={() => handleDeleteMeeting(meeting.id)} className="bg-red-600 hover:bg-red-700 rounded-xl border-none text-white font-bold transition-colors">Delete Permanently</AlertDialogAction>
                                 </AlertDialogFooter>
                               </AlertDialogContent>
                            </AlertDialog>

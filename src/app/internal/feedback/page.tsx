@@ -218,12 +218,12 @@ export default function FeedbackManagementPage() {
                               </AlertDialogTrigger>
                               <AlertDialogContent className="rounded-3xl border-none shadow-2xl">
                                 <AlertDialogHeader>
-                                  <AlertDialogTitle>Purge Testimonial?</AlertDialogTitle>
-                                  <AlertDialogDescription>This will permanently remove the feedback from "{t.name}" from the institutional registry and the public marquee.</AlertDialogDescription>
+                                  <AlertDialogTitle>Confirm Deletion</AlertDialogTitle>
+                                  <AlertDialogDescription>You are about to permanently delete this record. This action may permanently remove related data. This action cannot be undone. Please confirm that you want to continue.</AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
                                   <AlertDialogCancel className="rounded-xl h-11">Cancel</AlertDialogCancel>
-                                  <AlertDialogAction onClick={() => handleDelete(t.id)} className="bg-red-600 hover:bg-red-700 rounded-xl h-11">Purge Record</AlertDialogAction>
+                                  <AlertDialogAction onClick={() => handleDelete(t.id)} className="bg-red-600 hover:bg-red-700 rounded-xl h-11">Delete Permanently</AlertDialogAction>
                                 </AlertDialogFooter>
                               </AlertDialogContent>
                            </AlertDialog>
