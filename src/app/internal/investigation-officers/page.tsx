@@ -57,6 +57,7 @@ import {
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription as AlertDialogDesc,
+  AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
