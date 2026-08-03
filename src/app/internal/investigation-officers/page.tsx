@@ -118,7 +118,16 @@ export default function InvestigationOfficersRegistry() {
   }
 
   const generateOfficerId = () => `HRAT-IO-${generateAlphanumeric(4)}`;
-  const generatePassword = () => generateAlphanumeric(12);
+
+  /**
+   * generateSmartPassword: First 3 letters of name + # + last 3 digits of phone
+   */
+  const generateSmartPassword = (name: string, phone: string) => {
+    const prefix = (name || 'HRAT').trim().substring(0, 3);
+    const cleanPhone = (phone || '000').replace(/\D/g, '');
+    const suffix = cleanPhone.length >= 3 ? cleanPhone.slice(-3) : '000';
+    return `${prefix}#${suffix}`;
+  };
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -267,9 +276,9 @@ export default function InvestigationOfficersRegistry() {
                             type="button" 
                             variant="outline" 
                             size="icon" 
-                            title="Generate Password"
+                            title="Generate Protocol Password"
                             className="h-11 w-11 shrink-0 rounded-xl border-dashed hover:bg-accent/10"
-                            onClick={() => setFormData({...formData, password: generatePassword()})}
+                            onClick={() => setFormData({...formData, password: generateSmartPassword(formData.name, formData.phone)})}
                           >
                             <Lock className="w-4 h-4 text-accent" />
                           </Button>
@@ -433,7 +442,9 @@ export default function InvestigationOfficersRegistry() {
                               type={showPassword ? "text" : "password"}
                               value={editOfficer.password || ''} 
                               onChange={e => setEditOfficer({...editOfficer, password: e.target.value})} 
+                              placeholder="Min 8 chars" 
                               className="h-11 rounded-xl pr-10" 
+                              required 
                             />
                             <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-accent">
                                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -443,9 +454,9 @@ export default function InvestigationOfficersRegistry() {
                             type="button" 
                             variant="outline" 
                             size="icon" 
-                            title="Regenerate Password"
-                            className="h-11 w-11 shrink-0 rounded-xl border-dashed"
-                            onClick={() => setEditOfficer({...editOfficer, password: generatePassword()})}
+                            title="Generate Protocol Password"
+                            className="h-11 w-11 shrink-0 rounded-xl border-dashed hover:bg-accent/10"
+                            onClick={() => setEditOfficer({...editOfficer, password: generateSmartPassword(editOfficer.name, editOfficer.phone)})}
                           >
                             <Lock className="w-4 h-4 text-accent" />
                           </Button>
