@@ -1,3 +1,4 @@
+
 {
   "entities": {
     "UserAccount": {
@@ -19,6 +20,7 @@
       "type": "object",
       "properties": {
         "email": { "type": "string" },
+        "phone": { "type": "string" },
         "name": { "type": "string" },
         "employeeId": { "type": "string" },
         "designation": { "type": "string" },
