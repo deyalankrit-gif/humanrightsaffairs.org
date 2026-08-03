@@ -5,13 +5,36 @@ import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { Footer } from '@/components/footer'
 import { PlaceHolderImages } from '@/lib/placeholder-images'
-import { Shield, Award, Plus, Edit, Trash2, Loader2, Upload, Globe, MapPin, ChevronRight, Users } from 'lucide-react'
+import { 
+  Shield, 
+  Award, 
+  Plus, 
+  Edit, 
+  Trash2, 
+  Loader2, 
+  Upload, 
+  Globe, 
+  MapPin, 
+  ChevronRight, 
+  Users,
+  Search,
+  UserCheck,
+  CheckCircle2,
+  RefreshCw,
+  X,
+  User,
+  Star,
+  ShieldCheck,
+  Building2,
+  Info
+} from 'lucide-react'
 import { useCollection, useFirestore, useMemoFirebase, useUser } from '@/firebase'
-import { collection, query, orderBy, addDoc, deleteDoc, doc, updateDoc, serverTimestamp } from 'firebase/firestore'
+import { collection, query, orderBy, addDoc, deleteDoc, doc, updateDoc, serverTimestamp, where } from 'firebase/firestore'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Label } from '@/components/ui/label'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
   Dialog,
@@ -20,9 +43,12 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogFooter,
+  DialogDescription,
+  DialogClose
 } from "@/components/ui/dialog"
 import { useToast } from '@/hooks/use-toast'
 import { INDIA_DATA } from '@/lib/india-data'
+import { cn } from '@/lib/utils'
 
 type Leader = {
   id: string
@@ -58,8 +84,9 @@ function LeaderCard({ leader, variant = "default", isAdmin, onEdit, onDelete }: 
     <div className="flex flex-col items-center group relative">
       <div className={`relative ${sizeClasses[variant]} rounded-2xl overflow-hidden shadow-xl border-2 md:border-4 border-white group-hover:border-secondary transition-all duration-500 bg-slate-100 dark:bg-slate-800`}>
         <Image src={img!} alt={leader.name} fill className="object-cover group-hover:scale-110 transition-transform duration-700" />
-        {/* Administrative Overlay - Positioned further down the image */}
-        <div className="absolute inset-0 bg-gradient-to-t from-primary/90 via-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-end justify-center pb-10 z-10">
+        
+        {/* Administrative Overlay - Positioned further down the image to clear face */}
+        <div className="absolute inset-0 bg-gradient-to-t from-primary/90 via-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-end justify-center pb-8 z-10">
           {isAdmin && (
             <div className="flex gap-3 animate-in fade-in slide-in-from-bottom-2 duration-300">
               <Button onClick={() => onEdit?.(leader)} size="icon" className="bg-white dark:bg-slate-800 text-primary dark:text-white rounded-full hover:bg-secondary hover:text-white transition-colors border border-white/20 shadow-2xl h-11 w-11">
@@ -88,6 +115,8 @@ export default function LeadershipPage() {
   const db = useFirestore()
   const { toast } = useToast()
 
+  const [memberSearch, setMemberSearch] = useState("")
+
   // Administrative actions in the mirror are strictly Root-only
   const isAdmin = user?.email === 'deydhritiman@gmail.com' && isMirror
 
@@ -102,20 +131,13 @@ export default function LeadershipPage() {
     return query(collection(db, 'leadership'), orderBy('createdAt', 'asc'));
   }, [db]);
 
-  const { data: firestoreLeaders, loading: dataLoading } = useCollection(leadersQuery);
+  const membersQuery = useMemoFirebase(() => {
+    if (!db || !isAdmin) return null;
+    return query(collection(db, 'memberProfiles'), where('isDemi', '==', false), orderBy('name', 'asc'));
+  }, [db, isAdmin]);
 
-  const [activeState, setActiveState] = useState<string | null>("West Bengal")
-  const [activeDistrict, setActiveDistrict] = useState<string | null>("Howrah")
-  const [editLeader, setEditLeader] = useState<any>(null)
-  const [newLeader, setNewMember] = useState({
-    name: '',
-    title: '',
-    gender: 'male' as const,
-    level: 'Central' as 'Central' | 'State' | 'District',
-    parentRegion: '',
-    districtName: '',
-    imageId: ''
-  })
+  const { data: firestoreLeaders, loading: dataLoading } = useCollection(leadersQuery);
+  const { data: membersList } = useCollection(membersQuery);
 
   const leaders = React.useMemo(() => {
     const base = (firestoreLeaders || []) as Leader[];
@@ -156,12 +178,35 @@ export default function LeadershipPage() {
     
     return result;
   }, [firestoreLeaders]);
+
+  const filteredMembers = React.useMemo(() => {
+    if (!membersList || !memberSearch.trim()) return [];
+    return (membersList as any[]).filter(m => 
+      m.name.toLowerCase().includes(memberSearch.toLowerCase()) ||
+      m.memberId?.toLowerCase().includes(memberSearch.toLowerCase())
+    ).slice(0, 5);
+  }, [membersList, memberSearch]);
   
   const allStates = Object.keys(INDIA_DATA).sort()
-  const districtsInState = activeState ? INDIA_DATA[activeState] : []
+  const districtsInState = allStates.reduce((acc, state) => {
+    acc[state] = INDIA_DATA[state] || [];
+    return acc;
+  }, {} as Record<string, string[]>);
+
+  const [activeState, setActiveState] = useState<string | null>("West Bengal")
+  const [activeDistrict, setActiveDistrict] = useState<string | null>("Howrah")
+  const [editLeader, setEditLeader] = useState<any>(null)
+  const [newLeader, setNewMember] = useState({
+    name: '',
+    title: '',
+    gender: 'male' as const,
+    level: 'Central' as 'Central' | 'State' | 'District',
+    parentRegion: '',
+    districtName: '',
+    imageId: ''
+  })
 
   const centralTeam = leaders.filter(l => l.level === 'Central')
-  
   const activeStateLeaders = leaders.filter(l => l.level === 'State' && l.parentRegion === activeState)
   const activeDistrictLeaders = leaders.filter(l => l.level === 'District' && l.parentRegion === activeState && l.districtName === activeDistrict)
 
@@ -176,6 +221,20 @@ export default function LeadershipPage() {
       }
       reader.readAsDataURL(file)
     }
+  }
+
+  const handleFetchFromMember = (member: any) => {
+    setNewMember({
+      name: member.name || '',
+      title: member.designation || '',
+      gender: (member.gender?.toLowerCase() === 'female' ? 'female' : 'male'),
+      level: member.level || 'Central',
+      parentRegion: member.stateName || '',
+      districtName: member.districtName || '',
+      imageId: member.imageId || ''
+    });
+    setMemberSearch("");
+    toast({ title: "Profile Synced", description: `${member.name}'s data has been buffered.` });
   }
 
   const handleAdd = async () => {
@@ -228,55 +287,125 @@ export default function LeadershipPage() {
           
           {isAdmin && (
             <Dialog>
-              <DialogTrigger asChild><Button className="bg-accent text-primary font-bold rounded-2xl h-14 px-8 flex gap-2 hover:bg-secondary hover:text-white shadow-xl shadow-accent/20 mx-auto"><Plus className="w-5 h-5" /> Commission Leadership Member</Button></DialogTrigger>
-              <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="bg-white dark:bg-slate-900 rounded-[2rem] border-none shadow-2xl max-h-[90vh] overflow-y-auto">
-                <DialogHeader><DialogTitle>New Leader Profile</DialogTitle></DialogHeader>
-                <div className="space-y-4 py-4">
-                  <div className="flex flex-col items-center gap-4 p-4 border-2 border-dashed rounded-2xl">
-                    <div className="relative w-32 h-40 bg-slate-100 dark:bg-slate-800 rounded-xl overflow-hidden border">
-                      <Image src={newLeader.imageId?.startsWith('data:') ? newLeader.imageId : (newLeader.gender.toLowerCase() === 'female' ? '/dummy w.png' : '/dummy m.png')} alt="Preview" fill className="object-cover" />
-                    </div>
-                    <Button variant="outline" className="w-full relative h-12 rounded-xl">
-                      <Upload className="w-4 h-4 mr-2" /> Upload Photo
-                      <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => handleFileChange(e, false)} />
-                    </Button>
-                  </div>
-                  <input className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" value={newLeader.name} onChange={e => setNewMember({...newLeader, name: e.target.value})} placeholder="Full Name" />
-                  <input className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" value={newLeader.title} onChange={e => setNewMember({...newLeader, title: e.target.value})} placeholder="Designation" />
-                  <div className="grid grid-cols-2 gap-4">
-                    <Select value={newLeader.level} onValueChange={(val: any) => setNewMember({...newLeader, level: val, parentRegion: '', districtName: ''})}>
-                      <SelectTrigger><SelectValue placeholder="Level" /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Central">Central Council</SelectItem>
-                        <SelectItem value="State">State Level</SelectItem>
-                        <SelectItem value="District">District Level</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <Select value={newLeader.gender} onValueChange={(val: any) => setNewMember({...newLeader, gender: val})}>
-                      <SelectTrigger><SelectValue placeholder="Gender" /></SelectTrigger>
-                      <SelectContent><SelectItem value="male">Male</SelectItem><SelectItem value="female">Female</SelectItem></SelectContent>
-                    </Select>
-                  </div>
-                  {(newLeader.level === 'State' || newLeader.level === 'District') && (
-                    <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
-                      <Label className="flex items-center gap-2 text-primary dark:text-white"><Globe className="w-3 h-3 text-accent" /> State / UT</Label>
-                      <Select value={newLeader.parentRegion} onValueChange={(val) => setNewMember({...newLeader, parentRegion: val, districtName: ''})}>
-                        <SelectTrigger className="h-11 rounded-xl"><SelectValue placeholder="Choose State" /></SelectTrigger>
-                        <SelectContent className="max-h-60">{allStates.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
-                      </Select>
-                    </div>
-                  )}
-                  {newLeader.level === 'District' && newLeader.parentRegion && (
-                    <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
-                      <Label className="flex items-center gap-2 text-primary dark:text-white"><MapPin className="w-3 h-3 text-accent" /> District</Label>
-                      <Select value={newLeader.districtName} onValueChange={(val) => setNewMember({...newLeader, districtName: val})}>
-                        <SelectTrigger className="h-11 rounded-xl"><SelectValue placeholder="Choose District" /></SelectTrigger>
-                        <SelectContent className="max-h-60">{(INDIA_DATA[newLeader.parentRegion] || []).map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
-                      </Select>
-                    </div>
-                  )}
+              <DialogTrigger asChild>
+                <Button className="bg-accent text-primary font-bold rounded-2xl h-14 px-10 flex gap-2 hover:bg-secondary hover:text-white shadow-xl shadow-accent/20 mx-auto transform hover:scale-105 transition-all">
+                  <Plus className="w-5 h-5" /> Commission Leadership Member
+                </Button>
+              </DialogTrigger>
+              <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="bg-white dark:bg-slate-900 rounded-[2.5rem] border-none shadow-2xl max-h-[90vh] overflow-y-auto flex flex-col p-0">
+                <div className="bg-slate-900 p-8 text-white relative border-b-4 border-accent/20 shrink-0">
+                   <div className="absolute right-6 top-6"><DialogClose asChild><Button variant="ghost" size="icon" className="rounded-full text-white hover:bg-white/10 h-10 w-10"><X className="w-6 h-6" /></Button></DialogClose></div>
+                   <DialogTitle className="text-2xl font-headline font-bold">Commission Official</DialogTitle>
+                   <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">Establishing Leadership Identity</p>
                 </div>
-                <DialogFooter><Button onClick={handleAdd} disabled={isActionLoading} className="w-full h-12 rounded-xl bg-accent text-primary font-bold hover:bg-secondary hover:text-white">Publish Profile</Button></DialogFooter>
+
+                <div className="flex-1 overflow-y-auto p-8 space-y-8 custom-scrollbar">
+                  {/* Fetch from Registry Module */}
+                  <div className="p-6 bg-slate-50 dark:bg-slate-950 rounded-3xl border-2 border-dashed border-slate-200 dark:border-slate-800 space-y-4">
+                     <div className="flex items-center gap-2 mb-2">
+                        <Users className="w-4 h-4 text-accent" />
+                        <h4 className="text-[10px] font-black uppercase text-slate-500 tracking-widest">Fetch from Member Registry</h4>
+                     </div>
+                     <div className="relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                        <Input 
+                          placeholder="Search members by name or ID to auto-fill..." 
+                          className="pl-10 h-11 rounded-xl bg-white dark:bg-slate-900 shadow-inner border-none"
+                          value={memberSearch}
+                          onChange={e => setMemberSearch(e.target.value)}
+                        />
+                     </div>
+                     {filteredMembers.length > 0 && (
+                        <div className="grid gap-2 animate-in fade-in slide-in-from-top-1 duration-300">
+                           {filteredMembers.map((m: any) => (
+                              <button 
+                                key={m.id}
+                                onClick={() => handleFetchFromMember(m)}
+                                className="flex items-center justify-between p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800 hover:border-accent transition-all group"
+                              >
+                                 <div className="flex items-center gap-3">
+                                    <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-300 overflow-hidden relative">
+                                       {m.imageId ? <Image src={m.imageId} alt="m" fill className="object-cover" /> : <User className="w-4 h-4" />}
+                                    </div>
+                                    <div className="text-left">
+                                       <p className="text-xs font-bold text-primary dark:text-white leading-none">{m.name}</p>
+                                       <p className="text-[8px] font-black text-slate-400 uppercase tracking-tighter mt-1">{m.memberId}</p>
+                                    </div>
+                                 </div>
+                                 <RefreshCw className="w-3.5 h-3.5 text-slate-200 group-hover:text-accent group-hover:rotate-180 transition-all duration-500" />
+                              </button>
+                           ))}
+                        </div>
+                     )}
+                  </div>
+
+                  <div className="space-y-6">
+                    <div className="flex flex-col items-center gap-4">
+                      <div className="relative w-32 h-40 bg-slate-100 dark:bg-slate-800 rounded-2xl overflow-hidden border-4 border-white shadow-xl">
+                        <Image src={newLeader.imageId?.startsWith('data:') ? newLeader.imageId : (newLeader.gender.toLowerCase() === 'female' ? '/dummy w.png' : '/dummy m.png')} alt="Preview" fill className="object-cover" />
+                        <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer z-10" onChange={(e) => handleFileChange(e, false)} />
+                      </div>
+                      <Badge variant="outline" className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Click Image area to upload</Badge>
+                    </div>
+
+                    <div className="grid md:grid-cols-2 gap-6">
+                      <div className="space-y-1.5">
+                        <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Official Name *</Label>
+                        <Input value={newLeader.name} onChange={e => setNewMember({...newLeader, name: e.target.value})} placeholder="Full Legal Identity" className="h-11 rounded-xl bg-slate-50 border-none shadow-inner font-bold" required />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Official Designation *</Label>
+                        <Input value={newLeader.title} onChange={e => setNewMember({...newLeader, title: e.target.value})} placeholder="e.g. State Chairman" className="h-11 rounded-xl bg-slate-50 border-none shadow-inner font-bold" required />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-6">
+                      <div className="space-y-1.5">
+                        <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Chapter Level</Label>
+                        <Select value={newLeader.level} onValueChange={(val: any) => setNewMember({...newLeader, level: val, parentRegion: '', districtName: ''})}>
+                          <SelectTrigger className="h-11 rounded-xl bg-slate-50 border-none shadow-inner font-bold"><SelectValue placeholder="Level" /></SelectTrigger>
+                          <SelectContent className="bg-white z-[1000000]">
+                            <SelectItem value="Central">Central Council</SelectItem>
+                            <SelectItem value="State">State Level</SelectItem>
+                            <SelectItem value="District">District Level</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Gender</Label>
+                        <Select value={newLeader.gender} onValueChange={(val: any) => setNewMember({...newLeader, gender: val})}>
+                          <SelectTrigger className="h-11 rounded-xl bg-slate-50 border-none shadow-inner font-bold"><SelectValue placeholder="Gender" /></SelectTrigger>
+                          <SelectContent className="bg-white z-[1000000]"><SelectItem value="male">Male</SelectItem><SelectItem value="female">Female</SelectItem></SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
+                    {(newLeader.level === 'State' || newLeader.level === 'District') && (
+                      <div className="grid md:grid-cols-2 gap-6 p-6 rounded-3xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 animate-in fade-in slide-in-from-top-2 duration-300">
+                        <div className="space-y-1.5">
+                          <Label className="text-[10px] font-black uppercase text-accent flex items-center gap-2"><Globe className="w-3.5 h-3.5" /> State / UT</Label>
+                          <Select value={newLeader.parentRegion} onValueChange={(val) => setNewMember({...newLeader, parentRegion: val, districtName: ''})}>
+                            <SelectTrigger className="h-11 rounded-xl bg-white dark:bg-slate-800 border-accent/20 font-bold"><SelectValue placeholder="Choose State" /></SelectTrigger>
+                            <SelectContent className="bg-white z-[1000000] max-h-60">{allStates.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+                          </Select>
+                        </div>
+                        {newLeader.level === 'District' && (
+                          <div className="space-y-1.5">
+                            <Label className="text-[10px] font-black uppercase text-accent flex items-center gap-2"><MapPin className="w-3.5 h-3.5" /> District</Label>
+                            <Select value={newLeader.districtName} onValueChange={(val) => setNewMember({...newLeader, districtName: val})}>
+                              <SelectTrigger className="h-11 rounded-xl bg-white dark:bg-slate-800 border-accent/20 font-bold"><SelectValue placeholder="Choose District" /></SelectTrigger>
+                              <SelectContent className="bg-white z-[1000000] max-h-60">{newLeader.parentRegion && (INDIA_DATA[newLeader.parentRegion] || []).map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
+                            </Select>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <DialogFooter className="p-8 bg-slate-50 dark:bg-slate-900 border-t shrink-0">
+                  <Button onClick={handleAdd} disabled={isActionLoading} className="w-full h-14 bg-primary text-white font-bold rounded-2xl shadow-xl hover:bg-secondary transition-all text-base md:text-lg">Commission to Leadership</Button>
+                </DialogFooter>
               </DialogContent>
             </Dialog>
           )}
@@ -329,7 +458,7 @@ export default function LeadershipPage() {
                       <SelectTrigger className="w-[180px] md:w-[220px] h-10 rounded-full bg-white dark:bg-slate-900 border-emerald-100 shadow-sm font-bold text-xs">
                         <SelectValue placeholder="Select State/UT" />
                       </SelectTrigger>
-                      <SelectContent className="max-h-80">
+                      <SelectContent className="max-h-80 bg-white">
                         {allStates.map(r => <SelectItem key={r} value={r} className="font-bold text-xs">{r}</SelectItem>)}
                       </SelectContent>
                     </Select>
@@ -380,8 +509,8 @@ export default function LeadershipPage() {
                                 <SelectTrigger className="w-[180px] h-8 rounded-full bg-slate-50 dark:bg-slate-950 border-indigo-100 text-[10px] font-bold shadow-inner">
                                   <SelectValue placeholder="Select District" />
                                 </SelectTrigger>
-                                <SelectContent className="max-h-80">
-                                  {districtsInState.map(d => <SelectItem key={d} value={d} className="text-[10px] font-bold">{d}</SelectItem>)}
+                                <SelectContent className="max-h-80 bg-white">
+                                  {districtsInState[activeState]?.map(d => <SelectItem key={d} value={d} className="text-[10px] font-bold">{d}</SelectItem>)}
                                 </SelectContent>
                               </Select>
                             </div>
@@ -432,51 +561,77 @@ export default function LeadershipPage() {
 
       {/* Edit Dialog */}
       <Dialog open={!!editLeader} onOpenChange={(open) => !open && setEditLeader(null)}>
-        <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="bg-white dark:bg-slate-900 rounded-[2rem] border-none shadow-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader><DialogTitle>Edit Leader Profile</DialogTitle></DialogHeader>
+        <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="bg-white dark:bg-slate-900 rounded-[2.5rem] border-none shadow-2xl max-h-[90vh] overflow-y-auto flex flex-col p-0">
+          <div className="bg-slate-900 p-8 text-white relative border-b-4 border-accent/20 shrink-0">
+             <div className="absolute right-6 top-6"><DialogClose asChild><Button variant="ghost" size="icon" className="rounded-full text-white hover:bg-white/10 h-10 w-10"><X className="w-6 h-6" /></Button></DialogClose></div>
+             <DialogTitle className="text-2xl font-headline font-bold">Refine Leader Profile</DialogTitle>
+             <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">Registry Update Protocol</p>
+          </div>
+          
           {editLeader && (
-            <div className="space-y-4 py-4">
-              <div className="flex flex-col items-center gap-4 p-4 border-2 border-dashed rounded-2xl">
-                <div className="relative w-32 h-40 bg-slate-100 dark:bg-slate-800 rounded-xl overflow-hidden border">
+            <div className="flex-1 overflow-y-auto p-8 space-y-6 custom-scrollbar">
+              <div className="flex flex-col items-center gap-4">
+                <div className="relative w-32 h-40 bg-slate-100 dark:bg-slate-800 rounded-xl overflow-hidden border-4 border-white shadow-xl">
                   <Image src={editLeader.imageId?.startsWith('data:') ? editLeader.imageId : (editLeader.gender?.trim().toLowerCase() === 'female' || editLeader.gender?.trim().toLowerCase() === 'f' ? '/dummy w.png' : '/dummy m.png')} alt="Preview" fill className="object-cover" />
+                  <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer z-10" onChange={(e) => handleFileChange(e, true)} />
                 </div>
-                <Button variant="outline" className="w-full relative h-12 rounded-xl"><Upload className="w-4 h-4 mr-2" /> Change Photo<input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => handleFileChange(e, true)} /></Button>
+                <Badge variant="outline" className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Click Image area to update</Badge>
               </div>
-              <input className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" value={editLeader.name} onChange={e => setEditLeader({...editLeader, name: e.target.value})} placeholder="Name" />
-              <input className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" value={editLeader.title} onChange={e => setEditLeader({...editLeader, title: e.target.value})} placeholder="Title" />
-              <div className="grid grid-cols-2 gap-4">
-                <Select value={editLeader.level} onValueChange={(val: any) => setEditLeader({...editLeader, level: val, parentRegion: '', districtName: ''})}>
-                  <SelectTrigger><SelectValue placeholder="Level" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Central">Central Council</SelectItem>
-                    <SelectItem value="State">State Level</SelectItem>
-                    <SelectItem value="District">District Level</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Select value={editLeader.gender} onValueChange={(val: any) => setEditLeader({...editLeader, gender: val})}>
-                  <SelectTrigger><SelectValue placeholder="Gender" /></SelectTrigger>
-                  <SelectContent><SelectItem value="male">Male</SelectItem><SelectItem value="female">Female</SelectItem></SelectContent>
-                </Select>
+
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="space-y-1.5">
+                  <Label className="text-[10px] font-black uppercase text-slate-500">Legal Name</Label>
+                  <Input value={editLeader.name} onChange={e => setEditLeader({...editLeader, name: e.target.value})} className="h-11 rounded-xl bg-slate-50 border-none shadow-inner font-bold" />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-[10px] font-black uppercase text-slate-500">Official Designation</Label>
+                  <Input value={editLeader.title} onChange={e => setEditLeader({...editLeader, title: e.target.value})} className="h-11 rounded-xl bg-slate-50 border-none shadow-inner font-bold" />
+                </div>
               </div>
+
+              <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-1.5">
+                  <Label className="text-[10px] font-black uppercase text-slate-500">Chapter Level</Label>
+                  <Select value={editLeader.level} onValueChange={(val: any) => setEditLeader({...editLeader, level: val, parentRegion: '', districtName: ''})}>
+                    <SelectTrigger className="h-11 rounded-xl bg-slate-50 border-none shadow-inner font-bold"><SelectValue placeholder="Level" /></SelectTrigger>
+                    <SelectContent className="bg-white z-[1000000]">
+                      <SelectItem value="Central">Central Council</SelectItem>
+                      <SelectItem value="State">State Level</SelectItem>
+                      <SelectItem value="District">District Level</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-[10px] font-black uppercase text-slate-500">Gender</Label>
+                  <Select value={editLeader.gender} onValueChange={(val: any) => setEditLeader({...editLeader, gender: val})}>
+                    <SelectTrigger className="h-11 rounded-xl bg-slate-50 border-none shadow-inner font-bold"><SelectValue placeholder="Gender" /></SelectTrigger>
+                    <SelectContent className="bg-white z-[1000000]"><SelectItem value="male">Male</SelectItem><SelectItem value="female">Female</SelectItem></SelectContent>
+                  </Select>
+                </div>
+              </div>
+
               {(editLeader.level === 'State' || editLeader.level === 'District') && (
-                <div className="space-y-2">
-                  <Label className="text-primary dark:text-white">State / UT</Label>
-                  <Select value={editLeader.parentRegion} onValueChange={(val) => setEditLeader({...editLeader, parentRegion: val, districtName: ''})}>
-                    <SelectTrigger className="h-11 rounded-xl"><SelectValue placeholder="Choose State" /></SelectTrigger>
-                    <SelectContent className="max-h-60">{allStates.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
-                  </Select>
+                <div className="grid md:grid-cols-2 gap-6 p-6 rounded-3xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
+                  <div className="space-y-1.5">
+                    <Label className="text-[10px] font-black uppercase text-accent flex items-center gap-2"><Globe className="w-3.5 h-3.5" /> State / UT</Label>
+                    <Select value={editLeader.parentRegion} onValueChange={(val) => setEditLeader({...editLeader, parentRegion: val, districtName: ''})}>
+                      <SelectTrigger className="h-11 rounded-xl bg-white dark:bg-slate-800 border-accent/20 font-bold"><SelectValue placeholder="Choose State" /></SelectTrigger>
+                      <SelectContent className="bg-white z-[1000000] max-h-60">{allStates.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+                    </Select>
+                  </div>
+                  {editLeader.level === 'District' && (
+                    <div className="space-y-1.5">
+                      <Label className="text-[10px] font-black uppercase text-accent flex items-center gap-2"><MapPin className="w-3.5 h-3.5" /> District</Label>
+                      <Select value={editLeader.districtName} onValueChange={(val) => setEditLeader({...editLeader, districtName: val})}>
+                        <SelectTrigger className="h-11 rounded-xl bg-white dark:bg-slate-800 border-accent/20 font-bold"><SelectValue placeholder="Choose District" /></SelectTrigger>
+                        <SelectContent className="bg-white z-[1000000] max-h-60">{editLeader.parentRegion && (INDIA_DATA[editLeader.parentRegion] || []).map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
+                      </Select>
+                    </div>
+                  )}
                 </div>
               )}
-              {editLeader.level === 'District' && editLeader.parentRegion && (
-                <div className="space-y-2">
-                  <Label className="text-primary dark:text-white">District</Label>
-                  <Select value={editLeader.districtName} onValueChange={(val) => setEditLeader({...editLeader, districtName: val})}>
-                    <SelectTrigger className="h-11 rounded-xl"><SelectValue placeholder="Choose District" /></SelectTrigger>
-                    <SelectContent className="max-h-60">{(INDIA_DATA[editLeader.parentRegion] || []).map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
-                  </Select>
-                </div>
-              )}
-              <Button onClick={handleUpdate} disabled={isActionLoading} className="w-full h-12 rounded-xl mt-4 bg-accent text-white hover:bg-secondary hover:text-white font-bold transition-all">Save Changes</Button>
+              
+              <Button onClick={handleUpdate} disabled={isActionLoading} className="w-full h-14 bg-primary text-white font-bold rounded-2xl shadow-xl hover:bg-secondary transition-all text-base md:text-lg">Save Profile Changes</Button>
             </div>
           )}
         </DialogContent>
