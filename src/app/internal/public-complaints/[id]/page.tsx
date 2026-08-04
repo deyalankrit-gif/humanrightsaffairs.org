@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useEffect, useState, useMemo } from 'react'
@@ -422,7 +423,7 @@ export default function CaseHubPage() {
         <div className="container mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
            <div className="flex items-center gap-6 w-full md:w-auto order-2 md:order-1">
               <div className="flex flex-col items-center shrink-0">
-                 <span className="text-[8px] font-black text-sky-400 uppercase tracking-widest animate-pulse mb-1">Process Navigation</span>
+                 <span className="text-[8px] font-black text-sky-400 uppercase tracking-widest animate-pulse mb-1">Go to Next Process</span>
                  <Select onValueChange={handleUpdateStatus} value={activeStatus}>
                     <SelectTrigger className="w-full md:w-56 h-10 bg-white/5 border-white/10 text-white font-bold text-[9px] uppercase">
                        <SelectValue />
@@ -439,7 +440,7 @@ export default function CaseHubPage() {
               </Link>
               <div className="space-y-1 min-w-0">
                 <div className="flex items-center gap-2">
-                   <h1 className="text-xl md:text-2xl font-headline font-bold whitespace-nowrap truncate">{caseData.caseId || 'DOCKET-ENTRY'}</h1>
+                   <h1 className="text-xl md:text-2xl font-headline font-bold whitespace-nowrap truncate">{caseData.caseId || 'DOCKET NO'}</h1>
                    <Badge className={cn("text-[8px] font-black uppercase h-5 shrink-0", getStatusColor(caseData.status))}>{caseData.status}</Badge>
                 </div>
                 <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
@@ -705,21 +706,39 @@ export default function CaseHubPage() {
                  <div className="lg:col-span-8 space-y-6">
                     <Card className="rounded-[2rem] md:rounded-[2.5rem] border-none shadow-sm p-6 md:p-10 bg-white">
                        <CardTitle className="text-lg md:text-xl font-headline font-bold flex items-center gap-3 mb-6"><Gavel className="w-6 h-6 text-accent" /> Findings Terminal</CardTitle>
-                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-3">
-                          {REPORT_TEMPLATES.map((report) => (
-                             <button
-                               key={report.id}
-                               onClick={() => setSelectedReportType(report.id)}
-                               className={cn(
-                                 "p-3 md:p-4 rounded-xl border-2 text-left transition-all text-[10px] md:text-xs font-bold leading-tight flex items-center justify-between",
-                                 selectedReportType === report.id ? "bg-accent/10 border-accent text-primary" : "bg-white border-slate-50 hover:border-slate-200"
-                               )}
-                             >
-                               {report.label}
-                               {selectedReportType === report.id && <CheckCircle2 className="w-4 h-4 text-accent" />}
-                             </button>
-                          ))}
-                       </div>
+                       <TooltipProvider>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-3">
+                            {REPORT_TEMPLATES.map((report) => {
+                               const guidance = REPORT_GUIDANCE[report.id];
+                               return (
+                                  <Tooltip key={report.id}>
+                                     <TooltipTrigger asChild>
+                                        <button
+                                          onClick={() => setSelectedReportType(report.id)}
+                                          className={cn(
+                                            "p-3 md:p-4 rounded-xl border-2 text-left transition-all text-[10px] md:text-xs font-bold leading-tight flex items-center justify-between",
+                                            selectedReportType === report.id ? "bg-accent/10 border-accent text-primary" : "bg-white border-slate-50 hover:border-slate-200"
+                                          )}
+                                        >
+                                          {report.label}
+                                          {selectedReportType === report.id && <CheckCircle2 className="w-4 h-4 text-accent" />}
+                                        </button>
+                                     </TooltipTrigger>
+                                     <TooltipContent className="max-w-xs p-4 bg-slate-900 text-white border-none rounded-2xl shadow-2xl z-[1000000]">
+                                        <div className="space-y-2">
+                                          <p className="font-bold text-accent text-xs uppercase tracking-widest">{report.label}</p>
+                                          <p className="text-[11px] leading-relaxed italic">"{guidance?.purpose}"</p>
+                                          <div className="pt-2 border-t border-white/10">
+                                            <p className="text-[9px] font-black text-slate-500 uppercase tracking-tighter">Use When:</p>
+                                            <p className="text-[10px] text-slate-300">{guidance?.useWhen}</p>
+                                          </div>
+                                        </div>
+                                     </TooltipContent>
+                                  </Tooltip>
+                               );
+                            })}
+                        </div>
+                       </TooltipProvider>
                     </Card>
                  </div>
                  
