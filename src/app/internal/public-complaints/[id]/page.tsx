@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useEffect, useState, useMemo } from 'react'
@@ -62,11 +61,12 @@ import {
 } from "@/components/ui/tooltip"
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
-import { CASE_STATUSES, CASE_PRIORITIES, REPORT_TEMPLATES, REPORT_GUIDANCE, TASK_STATUSES } from '@/lib/complaint-constants'
+import { CASE_STATUSES, CASE_PRIORITIES, REPORT_TEMPLATES, REPORT_GUIDANCE, TASK_STATUSES, STANDARD_RESPONSIBILITIES } from '@/lib/complaint-constants'
 import { getStatusColor } from '@/lib/complaint-utils'
 import { sendTimelineEmailUpdate, sendReportEmail } from '@/lib/notification-service'
 import { InvestigationJourney } from '@/components/investigation-journey'
 import Link from 'next/link'
+import Image from 'next/image'
 
 export default function CaseHubPage() {
   const { id } = useParams()
@@ -370,12 +370,12 @@ export default function CaseHubPage() {
                   </AlertDialogTrigger>
                   <AlertDialogContent className="rounded-[2.5rem]">
                     <AlertDialogHeader>
-                      <AlertDialogTitle>Confirm Irreversible Purge</AlertDialogTitle>
-                      <AlertDialogDescription>This action will permanently remove this case and all associated evidence from the National Registry. This cannot be undone.</AlertDialogDescription>
+                      <AlertDialogTitle>Confirm Deletion</AlertDialogTitle>
+                      <AlertDialogDescription>Are you sure you want to delete this item? This action may be irreversible. Please confirm before continuing.</AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                       <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
-                      <AlertDialogAction onClick={() => {}} className="bg-red-600 hover:bg-red-700 rounded-xl">Authorize Purge</AlertDialogAction>
+                      <AlertDialogAction onClick={() => {}} className="bg-red-600 hover:bg-red-700 rounded-xl">Confirm Deletion</AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>
                 </AlertDialog>
@@ -717,7 +717,7 @@ export default function CaseHubPage() {
                                          "w-5 h-5 rounded-full flex items-center justify-center transition-all",
                                          selectedReportType === report.id ? "bg-accent text-primary" : "bg-slate-50 text-slate-300 group-hover:bg-slate-100"
                                       )}>
-                                         {selectedReportType === report.id ? <CheckCircle2 className="w-3 h-3" /> : <Info className="w-3 h-3" />}
+                                         {selectedReportType === report.id ? <CheckCircle2 className="w-3.5 h-3.5" /> : <Info className="w-3.5 h-3.5" />}
                                       </div>
                                     </button>
                                   </TooltipTrigger>

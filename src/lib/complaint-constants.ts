@@ -27,6 +27,20 @@ export const TASK_STATUSES = [
 
 export type TaskStatus = (typeof TASK_STATUSES)[number];
 
+export const STANDARD_RESPONSIBILITIES = [
+  "Collect Evidence",
+  "Visit Incident Location",
+  "Meet the Complainant",
+  "Interview Witnesses",
+  "Contact the Respondent",
+  "Verify Documents",
+  "Capture Photos/Videos",
+  "Upload Evidence",
+  "Submit Daily Progress",
+  "Prepare Investigation Report",
+  "Submit Final Report"
+] as const;
+
 export const REPORT_TEMPLATES = [
   { id: "preliminary_assessment", label: "1. Preliminary Assessment Report" },
   { id: "complaint_verification", label: "2. Complaint Verification Report" },
