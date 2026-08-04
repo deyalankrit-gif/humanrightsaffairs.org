@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useEffect, useState, useMemo } from 'react'
@@ -54,7 +53,12 @@ import {
   ClipboardCheck,
   AlertTriangle,
   ChevronDown,
-  Languages
+  Languages,
+  BookOpenCheck,
+  GraduationCap,
+  MessageSquareWarning,
+  BadgeCheck,
+  FileQuestion
 } from 'lucide-react'
 import {
   Dialog,
@@ -884,13 +888,64 @@ export default function CaseHubPage() {
                                           {selectedReportType === report.id && <CheckCircle2 className="w-4 h-4 text-accent" />}
                                         </button>
                                      </TooltipTrigger>
-                                     <TooltipContent className="max-w-xs p-4 bg-slate-900 text-white border-none rounded-2xl shadow-2xl z-[1000000]">
-                                        <div className="space-y-2">
-                                          <p className="font-bold text-accent text-xs uppercase tracking-widest">{report.label}</p>
-                                          <p className="text-[11px] leading-relaxed italic">"{guidance?.purpose}"</p>
-                                          <div className="pt-2 border-t border-white/10">
-                                            <p className="text-[9px] font-black text-slate-500 uppercase tracking-tighter">Use When:</p>
-                                            <p className="text-[10px] text-slate-300">{guidance?.useWhen}</p>
+                                     <TooltipContent className="max-w-md p-6 bg-slate-900 text-white border-none rounded-3xl shadow-2xl z-[1000000] overflow-y-auto max-h-[60vh] scroll-smooth custom-scrollbar">
+                                        <div className="space-y-6">
+                                          <div className="border-b border-white/10 pb-3">
+                                            <p className="font-headline font-bold text-accent text-lg leading-tight">{report.label}</p>
+                                          </div>
+                                          
+                                          <div className="space-y-4 text-[11px] leading-relaxed">
+                                            <div>
+                                              <p className="font-black text-white uppercase tracking-widest text-[9px] mb-1 flex items-center gap-2">
+                                                <Target className="w-3 h-3 text-accent" /> Objective & Purpose
+                                              </p>
+                                              <p className="text-slate-300 italic">"{guidance?.purpose}"</p>
+                                            </div>
+
+                                            <div>
+                                              <p className="font-black text-white uppercase tracking-widest text-[9px] mb-1 flex items-center gap-2">
+                                                <Clock className="w-3 h-3 text-accent" /> Deployment Scenario
+                                              </p>
+                                              <p className="text-slate-300">{guidance?.useWhen}</p>
+                                            </div>
+
+                                            <div className="grid grid-cols-1 gap-4 pt-2 border-t border-white/5">
+                                              <div>
+                                                <p className="font-black text-emerald-400 uppercase tracking-widest text-[9px] mb-1 flex items-center gap-2">
+                                                  <BadgeCheck className="w-3 h-3" /> Mandatory Exhibits
+                                                </p>
+                                                <p className="text-slate-400">{guidance?.evidence}</p>
+                                              </div>
+                                              <div>
+                                                <p className="font-black text-emerald-400 uppercase tracking-widest text-[9px] mb-1 flex items-center gap-2">
+                                                  <ClipboardCheck className="w-3 h-3" /> Required Particulars
+                                                </p>
+                                                <p className="text-slate-400">{guidance?.mandatory}</p>
+                                              </div>
+                                            </div>
+
+                                            <div className="p-4 bg-white/5 rounded-2xl border border-white/10">
+                                              <p className="font-black text-sky-400 uppercase tracking-widest text-[9px] mb-1 flex items-center gap-2">
+                                                <Sparkles className="w-3 h-3" /> Procedural Best Practices
+                                              </p>
+                                              <p className="text-slate-300">{guidance?.bestPractices}</p>
+                                            </div>
+
+                                            <div className="flex items-center justify-between gap-4 pt-2">
+                                              <div className="flex-1">
+                                                <p className="font-black text-white uppercase tracking-widest text-[9px] mb-1 flex items-center gap-2">
+                                                  <ArrowRight className="w-3 h-3 text-accent" /> Expected Outcome
+                                                </p>
+                                                <p className="text-slate-400">{guidance?.output}</p>
+                                              </div>
+                                            </div>
+
+                                            {guidance?.warnings && (
+                                              <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl flex items-start gap-2">
+                                                <AlertTriangle className="w-3.5 h-3.5 text-red-500 shrink-0 mt-0.5" />
+                                                <p className="text-red-200 text-[10px] leading-tight font-medium">{guidance.warnings}</p>
+                                              </div>
+                                            )}
                                           </div>
                                         </div>
                                      </TooltipContent>
