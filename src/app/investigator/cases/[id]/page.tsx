@@ -303,7 +303,7 @@ export default function InvestigationCaseHub() {
                               className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100 hover:bg-slate-100 transition-all group"
                             >
                                <div className="flex items-center gap-3">
-                                  <FileIcon className="w-4 h-4 text-slate-400 group-hover:text-primary" />
+                                  <FileText className="w-4 h-4 text-slate-400 group-hover:text-primary" />
                                   <span className="text-xs font-bold text-slate-600 truncate max-w-[150px]">{att.name}</span>
                                </div>
                                <ExternalLink className="w-3.5 h-3.5 text-slate-300" />

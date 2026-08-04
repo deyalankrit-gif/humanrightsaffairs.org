@@ -4,7 +4,7 @@
 import React, { useEffect, useState, useMemo } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useUser, useFirestore, useDoc, useMemoFirebase, useCollection } from '@/firebase'
-import { doc, updateDoc, serverTimestamp, arrayUnion, collection, query, orderBy, where, getDocs, addDoc, deleteDoc } from 'firebase/firestore'
+import { doc, updateDoc, serverTimestamp, arrayUnion, collection, query, orderBy, where, getDocs, addDoc, deleteDoc, writeBatch } from 'firebase/firestore'
 import { Footer } from '@/components/footer'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -16,10 +16,29 @@ import { Textarea } from '@/components/ui/textarea'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { 
-  ArrowLeft, ShieldCheck, Loader2, User, Mail, Phone, MapPin, Hash, 
-  Clock, FileText, Gavel, Scale, CheckCircle2, 
-  Activity, History, Eye, Download, Upload, Plus, X,
-  Target, FileSearch, ExternalLink,
+  ArrowLeft, 
+  ShieldCheck, 
+  Loader2, 
+  User, 
+  Mail, 
+  Phone, 
+  MapPin, 
+  Hash, 
+  Clock, 
+  FileText, 
+  Gavel, 
+  Scale, 
+  CheckCircle2, 
+  Activity, 
+  History, 
+  Eye, 
+  Download, 
+  Upload, 
+  Plus, 
+  X,
+  Target, 
+  FileSearch, 
+  ExternalLink,
   ChevronRight,
   UserPlus,
   Users,
@@ -29,7 +48,8 @@ import {
   Lock,
   Info,
   Trash2,
-  UserCheck
+  UserCheck,
+  Search
 } from 'lucide-react'
 import {
   Dialog,
