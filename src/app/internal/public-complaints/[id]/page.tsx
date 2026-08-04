@@ -99,7 +99,7 @@ export default function CaseHubPage() {
   const [activeTab, setActiveTab] = useState('overview')
   const [isActionLoading, setIsActionLoading] = useState(false)
   const [remark, setRemark] = useState('')
-  const [selectedReportType, setSelectedReportType] = useState<string>('preliminary_assessment')
+  const [activeStatus, setActiveStatus] = useState('')
   
   // Investigation Team States
   const [isAssigningOfficer, setIsAssigningOfficer] = useState(false)
@@ -446,7 +446,7 @@ export default function CaseHubPage() {
 
       <section className="py-8 container mx-auto px-4">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
-           <TabsList className="bg-white p-1 rounded-2xl border shadow-sm w-full md:w-auto overflow-x-auto no-scrollbar justify-start">
+           <TabsList className="bg-white p-1 rounded-2xl border shadow-sm w-full flex flex-nowrap overflow-x-auto no-scrollbar justify-start items-center">
               {[
                 { id: 'overview', label: 'Overview', icon: Eye },
                 { id: 'team', label: 'Investigation Team', icon: Users },
@@ -455,8 +455,12 @@ export default function CaseHubPage() {
                 { id: 'evidence', label: 'Evidence Vault', icon: ShieldCheck },
                 { id: 'reports', label: 'Commission Findings', icon: Gavel }
               ].map(tab => (
-                <TabsTrigger key={tab.id} value={tab.id} className="data-[state=active]:bg-accent data-[state=active]:text-primary rounded-xl px-6 py-2 text-xs font-bold uppercase tracking-widest transition-all">
-                  <tab.icon className="w-3.5 h-3.5 mr-2" /> {tab.label}
+                <TabsTrigger 
+                  key={tab.id} 
+                  value={tab.id} 
+                  className="data-[state=active]:bg-accent data-[state=active]:text-primary rounded-xl px-4 md:px-6 py-2 text-[10px] md:text-xs font-bold uppercase tracking-widest transition-all whitespace-nowrap flex-shrink-0 flex items-center gap-2"
+                >
+                  <tab.icon className="w-3.5 h-3.5" /> {tab.label}
                 </TabsTrigger>
               ))}
            </TabsList>
@@ -764,6 +768,29 @@ export default function CaseHubPage() {
                        </div>
                     </div>
 
+                    {/* NEW FIELDS FOR FULL SYNC COMPLIANCE */}
+                    <div className="grid md:grid-cols-2 gap-8">
+                       <div className="space-y-1.5">
+                          <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Witnesses to Contact</Label>
+                          <Textarea value={mandate.witnessesToContact} onChange={e => setMandate({...mandate, witnessesToContact: e.target.value})} placeholder="Names and identifiers..." className="min-h-[100px] rounded-xl" />
+                       </div>
+                       <div className="space-y-1.5">
+                          <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Locations to Visit</Label>
+                          <Textarea value={mandate.locationsToVisit} onChange={e => setMandate({...mandate, locationsToVisit: e.target.value})} placeholder="Specific addresses or coordinates..." className="min-h-[100px] rounded-xl" />
+                       </div>
+                    </div>
+
+                    <div className="grid md:grid-cols-2 gap-8">
+                       <div className="space-y-1.5">
+                          <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Reporting Instructions</Label>
+                          <Textarea value={mandate.reportingInstructions} onChange={e => setMandate({...mandate, reportingInstructions: e.target.value})} placeholder="Frequency and format requirements..." className="min-h-[100px] rounded-xl" />
+                       </div>
+                       <div className="space-y-1.5">
+                          <Label className="text-[10px] font-black uppercase text-indigo-500 tracking-widest">Internal Administration Notes</Label>
+                          <Textarea value={mandate.internalNotes} onChange={e => setMandate({...mandate, internalNotes: e.target.value})} placeholder="Strictly for officer background knowledge..." className="min-h-[100px] rounded-xl border-indigo-100" />
+                       </div>
+                    </div>
+
                     <div className="p-8 rounded-3xl bg-slate-50 dark:bg-slate-950 p-6 space-y-4">
                        <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-500 flex items-center gap-2"><LinkIcon className="w-4 h-4" /> Official Reference Links</h4>
                        <div className="flex gap-3">
@@ -771,9 +798,17 @@ export default function CaseHubPage() {
                           <Input value={newAttachment.url} onChange={e => setNewAttachment({...newAttachment, url: e.target.value})} placeholder="https://..." className="flex-1 rounded-xl" />
                           <Button onClick={() => setMandate({...mandate, attachments: [...(mandate.attachments || []), newAttachment]})} variant="outline" className="rounded-xl h-10 px-6">Append</Button>
                        </div>
+                       <div className="flex flex-wrap gap-2 mt-4">
+                          {(mandate.attachments || []).map((att: any, idx: number) => (
+                             <Badge key={idx} variant="secondary" className="bg-white dark:bg-slate-800 text-[10px] font-bold px-3 py-1 gap-2">
+                                <FileText className="w-3 h-3 text-accent" /> {att.name}
+                                <button onClick={() => setMandate({...mandate, attachments: mandate.attachments.filter((_:any, i:number) => i !== idx)})} className="hover:text-red-500"><X className="w-3 h-3" /></button>
+                             </Badge>
+                          ))}
+                       </div>
                     </div>
 
-                    <Button onClick={handleSaveMandate} disabled={isActionLoading} className="w-full h-16 bg-accent text-primary font-black uppercase tracking-widest text-lg rounded-[1.5rem] shadow-xl shadow-accent/20">
+                    <Button onClick={handleUpdateStatus} disabled={isActionLoading} className="w-full h-16 bg-accent text-primary font-black uppercase tracking-widest text-lg rounded-[1.5rem] shadow-xl shadow-accent/20">
                        {isActionLoading ? <Loader2 className="animate-spin mr-2" /> : <><ShieldCheck className="w-6 h-6 mr-3" /> Authorize & Synchronize Mandate</>}
                     </Button>
                  </div>
