@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useMemo, useEffect } from 'react'
@@ -163,9 +164,17 @@ export default function UserAccountDashboard() {
     )
   }
 
+  const nameLower = (profile?.name || user.displayName || '').toLowerCase();
   const genderKey = (profile?.gender || '').trim().toLowerCase();
+  
+  // Intelligent Gender Inference for Fallback
+  const isMs = nameLower.startsWith('ms.') || nameLower.startsWith('mrs.') || nameLower.startsWith('miss');
+  const femaleNames = ["moumita", "raisa", "rumpa", "anjali", "sujata", "fatema", "mousumi", "savita", "rajeshwari", "meenakshi", "pallavi", "suchitra", "amita", "debjani", "deepali", "tapasya", "priyanka", "anita", "sneha", "mitali"];
+  const firstName = (profile?.name || user.displayName || '').split(' ')[0].toLowerCase();
+  const isKnownFemale = femaleNames.includes(firstName);
+
   let fallbackImg = '/dummy m.png';
-  if (genderKey === 'female' || genderKey === 'f' || genderKey === 'woman') {
+  if (genderKey === 'female' || genderKey === 'f' || genderKey === 'woman' || isMs || isKnownFemale) {
     fallbackImg = '/dummy w.png';
   } else if (genderKey === 'male' || genderKey === 'm' || genderKey === 'man') {
     fallbackImg = '/dummy m.png';

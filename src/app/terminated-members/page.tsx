@@ -337,9 +337,17 @@ export default function TerminatedMembersPage() {
               <div className="grid gap-6">
                 {filtered.length > 0 ? (
                   filtered.map((member) => {
+                    const nameLower = (member.name || '').toLowerCase();
                     const genderKey = (member.gender || '').trim().toLowerCase();
+                    
+                    // Intelligent Gender Inference for Fallback
+                    const isMs = nameLower.startsWith('ms.') || nameLower.startsWith('mrs.') || nameLower.startsWith('miss');
+                    const femaleNames = ["moumita", "raisa", "rumpa", "anjali", "sujata", "fatema", "mousumi", "savita", "rajeshwari", "meenakshi", "pallavi", "suchitra", "amita", "debjani", "deepali", "tapasya", "priyanka", "anita", "sneha", "mitali"];
+                    const firstName = (member.name || '').split(' ')[0].toLowerCase();
+                    const isKnownFemale = femaleNames.includes(firstName);
+
                     let fallback = '/dummy m.png';
-                    if (genderKey === 'female' || genderKey === 'f' || genderKey === 'woman') fallback = '/dummy w.png';
+                    if (genderKey === 'female' || genderKey === 'f' || genderKey === 'woman' || isMs || isKnownFemale) fallback = '/dummy w.png';
                     
                     const isCustomPhoto = member.imageId && (member.imageId.startsWith('data:') || member.imageId.startsWith('http'));
                     const placeholder = PlaceHolderImages.find(i => i.id === member.imageId)?.imageUrl;

@@ -55,7 +55,10 @@ import { cn } from '@/lib/utils'
 import { Footer } from '@/components/footer'
 import { INDIA_DATA } from '@/lib/india-data'
 
-const FIRST_NAMES = ["Sourav", "Abhishek", "Rumpa", "Sahil", "Gurpreet", "Bikash", "Krishna", "Subhankar", "Anthony", "Anjali", "Zakir", "Sujata", "David", "Fatema", "Buddhadeb", "Harpreet", "Arpan", "Mousumi", "Tanmoy", "Savita", "Mayank", "Piyush", "Rajeshwari", "Vikram", "Indranil", "Meenakshi", "Ritam", "Pallavi", "Amarendra", "Alok", "Suchitra", "Amita", "Krishnamurthy", "Sanjeev", "Pankaj", "Atanu", "Debjani", "Nirmal", "Deepali", "Jishnu", "Tarun", "Tapasya"]
+const MALE_FIRST_NAMES = ["Sourav", "Abhishek", "Sahil", "Bikash", "Krishna", "Subhankar", "Anthony", "Zakir", "David", "Buddhadeb", "Arpan", "Tanmoy", "Mayank", "Piyush", "Vikram", "Indranil", "Ritam", "Amarendra", "Alok", "Krishnamurthy", "Sanjeev", "Pankaj", "Atanu", "Nirmal", "Jishnu", "Tarun"]
+const FEMALE_FIRST_NAMES = ["Rumpa", "Anjali", "Sujata", "Fatema", "Mousumi", "Savita", "Rajeshwari", "Meenakshi", "Pallavi", "Suchitra", "Amita", "Debjani", "Deepali", "Tapasya"]
+const UNISEX_FIRST_NAMES = ["Gurpreet", "Harpreet"]
+
 const LAST_NAMES = ["Chatterjee", "Bhattacharya", "Naskar", "Sheikh", "Kaur", "Halder", "Biswas", "Roy", "Gomes", "Mukhopadhyay", "Molla", "Mondal", "D'Souza", "Khatun", "Sardar", "Dhillon", "Sengupta", "Das", "Biswas", "Kumari", "Tiwari", "Mahanta", "Khanna", "Singh", "Iyer", "Mohanty", "Sharma", "Bhardwaj", "Patil", "Patra", "V", "Yadav", "Joshi", "Sarkar", "Rawat", "Kumar", "Reddy", "Dutta", "Jena"]
 const DESIGNATIONS = ["District Observer", "General Member", "Volunteer", "Executive Member", "Publicity Secretary", "District Secretary", "Treasurer", "Board Member", "Chapter Advisor"]
 
@@ -98,13 +101,22 @@ export default function DemiMembersTerminal() {
       const batch = writeBatch(db)
       const count = seedOptions.level === 'National' ? 5 : 10;
       
+      const ALL_FIRST_NAMES = [...MALE_FIRST_NAMES, ...FEMALE_FIRST_NAMES, ...UNISEX_FIRST_NAMES];
+
       for (let i = 0; i < count; i++) {
-        const firstName = FIRST_NAMES[Math.floor(Math.random() * FIRST_NAMES.length)];
+        const firstName = ALL_FIRST_NAMES[Math.floor(Math.random() * ALL_FIRST_NAMES.length)];
         const lastName = LAST_NAMES[Math.floor(Math.random() * LAST_NAMES.length)];
         const name = `${firstName} ${lastName}`;
         const designation = DESIGNATIONS[Math.floor(Math.random() * DESIGNATIONS.length)];
-        const gender = ['male', 'female'][Math.floor(Math.random() * 2)] as 'male' | 'female';
         
+        // Intelligent Gender Assignment
+        let gender: 'male' | 'female' = 'male';
+        if (FEMALE_FIRST_NAMES.includes(firstName)) {
+          gender = 'female';
+        } else if (UNISEX_FIRST_NAMES.includes(firstName)) {
+          gender = Math.random() > 0.5 ? 'male' : 'female';
+        }
+
         const memberId = `${seedOptions.level === 'National' ? 'NAT' : seedOptions.state.substring(0,3).toUpperCase()}DEM${Math.floor(1000 + Math.random() * 9000)}`;
         
         const docRef = doc(collection(db, 'memberProfiles'))

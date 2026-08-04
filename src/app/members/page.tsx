@@ -344,17 +344,22 @@ export default function MembersPage() {
   const MemberGrid = ({ items }: { items: Member[] }) => (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-8 xl:grid-cols-10 gap-2 md:gap-3">
       {items.map((member) => {
+        const nameLower = (member.name || '').toLowerCase();
         const genderKey = (member.gender || '').trim().toLowerCase();
-        let fallback = '/dummy m.png'; // Default
-        if (genderKey === 'female' || genderKey === 'f' || genderKey === 'woman') {
+        
+        // Intelligent Gender Inference for Fallback
+        const isMs = nameLower.startsWith('ms.') || nameLower.startsWith('mrs.') || nameLower.startsWith('miss');
+        const femaleNames = ["moumita", "raisa", "rumpa", "anjali", "sujata", "fatema", "mousumi", "savita", "rajeshwari", "meenakshi", "pallavi", "suchitra", "amita", "debjani", "deepali", "tapasya", "priyanka", "anita", "sneha", "mitali"];
+        const firstName = (member.name || '').split(' ')[0].toLowerCase();
+        const isKnownFemale = femaleNames.includes(firstName);
+
+        let fallback = '/dummy m.png'; // Global Default
+        if (genderKey === 'female' || genderKey === 'f' || genderKey === 'woman' || isMs || isKnownFemale) {
           fallback = '/dummy w.png';
-        } else if (genderKey === 'male' || genderKey === 'm' || genderKey === 'man') {
-          fallback = '/dummy m.png';
         }
         
         const isCustomPhoto = member.imageId && (member.imageId.startsWith('data:') || member.imageId.startsWith('http'));
         const placeholder = PlaceHolderImages.find(i => i.id === member.imageId)?.imageUrl;
-        
         const displayImg = isCustomPhoto ? member.imageId : (placeholder || fallback)
         
         const isOfficeBearer = member.designationCategory === 'Office-bearing Member';

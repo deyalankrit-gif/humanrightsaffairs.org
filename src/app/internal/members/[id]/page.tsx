@@ -158,9 +158,17 @@ export default function MemberDetailsPage() {
     )
   }
 
+  const nameLower = (profile.name || '').toLowerCase();
   const genderKey = (profile.gender || '').trim().toLowerCase();
-  let fallback = '/dummy m.png';
-  if (genderKey === 'female' || genderKey === 'f' || genderKey === 'woman') {
+  
+  // Intelligent Gender Inference for Fallback
+  const isMs = nameLower.startsWith('ms.') || nameLower.startsWith('mrs.') || nameLower.startsWith('miss');
+  const femaleNames = ["moumita", "raisa", "rumpa", "anjali", "sujata", "fatema", "mousumi", "savita", "rajeshwari", "meenakshi", "pallavi", "suchitra", "amita", "debjani", "deepali", "tapasya", "priyanka", "anita", "sneha", "mitali"];
+  const firstName = (profile.name || '').split(' ')[0].toLowerCase();
+  const isKnownFemale = femaleNames.includes(firstName);
+
+  let fallback = '/dummy m.png'; // Default
+  if (genderKey === 'female' || genderKey === 'f' || genderKey === 'woman' || isMs || isKnownFemale) {
     fallback = '/dummy w.png';
   } else if (genderKey === 'male' || genderKey === 'm' || genderKey === 'man') {
     fallback = '/dummy m.png';

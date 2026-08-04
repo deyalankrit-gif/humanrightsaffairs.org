@@ -74,9 +74,21 @@ type Leader = {
 }
 
 function LeaderCard({ leader, variant = "default", isAdmin, onEdit, onDelete }: { leader: Leader, variant?: "xl" | "large" | "default" | "small", isAdmin?: boolean, onEdit?: (l: Leader) => void, onDelete?: (id: string) => void }) {
+  const nameLower = (leader.name || '').toLowerCase();
   const genderKey = (leader.gender || '').trim().toLowerCase();
+  
+  // Intelligent Gender Inference for Fallback
+  const isMs = nameLower.startsWith('ms.') || nameLower.startsWith('mrs.') || nameLower.startsWith('miss');
+  const femaleNames = ["moumita", "raisa", "rumpa", "anjali", "sujata", "fatema", "mousumi", "savita", "rajeshwari", "meenakshi", "pallavi", "suchitra", "amita", "debjani", "deepali", "tapasya", "priyanka", "anita", "sneha", "mitali"];
+  const firstName = (leader.name || '').split(' ')[0].toLowerCase();
+  const isKnownFemale = femaleNames.includes(firstName);
+
   let fallback = '/dummy m.png';
-  if (genderKey === 'female' || genderKey === 'f' || genderKey === 'woman') fallback = '/dummy w.png';
+  if (genderKey === 'female' || genderKey === 'f' || genderKey === 'woman' || isMs || isKnownFemale) {
+    fallback = '/dummy w.png';
+  } else if (genderKey === 'male' || genderKey === 'm' || genderKey === 'man') {
+    fallback = '/dummy m.png';
+  }
   
   const isCustomPhoto = leader.imageId && (leader.imageId.startsWith('data:') || leader.imageId.startsWith('http'));
   const placeholder = PlaceHolderImages.find(i => i.id === leader.imageId)?.imageUrl;
