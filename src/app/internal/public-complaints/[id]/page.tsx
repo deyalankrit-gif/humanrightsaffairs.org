@@ -517,9 +517,9 @@ export default function CaseHubPage() {
         <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-6">
            
            <div className="flex items-center gap-6 w-full md:w-auto order-2 md:order-1">
-              {/* Pulsing Blue "Go to Next Process" Label */}
+              {/* Pulsing Sky Blue "Go to Next Process" Label */}
               <div className="flex flex-col items-center shrink-0">
-                 <span className="text-[9px] font-black text-blue-500 uppercase tracking-widest animate-pulse mb-1">
+                 <span className="text-[9px] font-black text-sky-400 uppercase tracking-widest animate-pulse mb-1">
                     Go to Next Process
                  </span>
                  <Select onValueChange={updateCaseStatus} defaultValue={caseData.status}>
@@ -681,7 +681,7 @@ export default function CaseHubPage() {
                        <CardHeader className="p-0 mb-8"><CardTitle className="text-xl font-headline font-bold flex items-center gap-3"><Network className="w-6 h-6 text-emerald-500" /> Council Review Panel</CardTitle></CardHeader>
                        <div className="space-y-6">
                           <div className="space-y-1.5"><Label className="text-[9px] font-black uppercase text-slate-400">Jurisdiction</Label><Select value={selectedReviewLevel} onValueChange={setSelectedLevel}><SelectTrigger className="rounded-xl h-11"><SelectValue /></SelectTrigger><SelectContent position="popper" className="bg-white z-[1000000]"><SelectItem value="District">District Committee</SelectItem><SelectItem value="State">State Chapter</SelectItem><SelectItem value="National">National Council</SelectItem></SelectContent></Select></div>
-                          <div className="space-y-2"><Label className="text-[9px] font-black uppercase text-slate-400">Review Summary</Label><Textarea value={levelReviewNote} onChange={e => setLevelNote(e.target.value)} placeholder={`Input ${selectedReviewLevel} observations...`} className="min-h-[100px] rounded-2xl bg-slate-50 dark:bg-slate-950" /></div>
+                          <div className="space-y-2"><Label className="text-[9px] font-black uppercase text-slate-400">Review Summary</Label><Textarea value={levelReviewNote} onChange={e => setLevelNote(e.target.value)} placeholder={`Input ${selectedReviewLevel} observations...`} className="min-h-[120px] rounded-2xl bg-slate-50 dark:bg-slate-950" /></div>
                           <Button onClick={handleLevelReview} disabled={isActionLoading || !levelReviewNote.trim()} className="w-full h-12 bg-emerald-600 text-white font-bold rounded-xl shadow-xl">Commit Review</Button>
                        </div>
                     </Card>
