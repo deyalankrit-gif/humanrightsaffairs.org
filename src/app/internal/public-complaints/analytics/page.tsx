@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo, useEffect, useState } from 'react'
@@ -42,7 +43,8 @@ import {
   UserRoundX,
   Scale,
   Navigation,
-  Download
+  Download,
+  UserCheck
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -58,7 +60,7 @@ export default function ComplaintAnalyticsPage() {
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    setMounted(true)
+    setMounted(true);
   }, [])
 
   useEffect(() => {
@@ -127,7 +129,8 @@ export default function ComplaintAnalyticsPage() {
 
       // Trend logic
       if (c.createdAt?.toDate) {
-        const month = format(c.createdAt.toDate(), 'MMM yy');
+        const d = c.createdAt.toDate();
+        const month = `${['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][d.getMonth()]} ${d.getFullYear().toString().slice(-2)}`;
         monthMap[month] = (monthMap[month] || 0) + 1;
       }
     });
@@ -206,7 +209,7 @@ export default function ComplaintAnalyticsPage() {
                  { label: "Complaint Intake", value: stats.total, icon: <Activity className="text-blue-500" />, trend: "Registry Total" },
                  { label: "Resolution Rate", value: `${stats.resolved}%`, icon: <CheckCircle2 className="text-emerald-500" />, trend: "Finalized Cases" },
                  { label: "Minor at Risk", value: stats.atRisk, icon: <AlertCircle className="text-red-500" />, trend: "Critical Intervention" },
-                 { label: "Avg Workload", value: stats.avgLoad, icon: <Target className="text-accent" />, trend: "Cases Per Official" }
+                 { label: "Avg Workload", value: stats.avgLoad, icon: <UserCheck className="text-accent" />, trend: "Cases Per Official" }
                ].map((s, i) => (
                  <Card key={i} className="border-none shadow-sm rounded-3xl overflow-hidden group">
                    <CardContent className="p-6">
@@ -401,11 +404,4 @@ export default function ComplaintAnalyticsPage() {
       <Footer />
     </main>
   )
-}
-
-function format(date: Date, str: string) {
-  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  const month = months[date.getMonth()];
-  const year = date.getFullYear().toString().slice(-2);
-  return `${month} ${year}`;
 }

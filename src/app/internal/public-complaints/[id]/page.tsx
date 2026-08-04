@@ -28,7 +28,8 @@ import {
   Settings2,
   Lock,
   Info,
-  Trash2
+  Trash2,
+  UserCheck
 } from 'lucide-react'
 import {
   Dialog,
@@ -53,9 +54,9 @@ import {
 } from "@/components/ui/alert-dialog"
 import {
   Tooltip,
-  TooltipContent,
   TooltipProvider,
   TooltipTrigger,
+  TooltipContent
 } from "@/components/ui/tooltip"
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
