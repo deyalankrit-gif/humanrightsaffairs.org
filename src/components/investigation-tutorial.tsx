@@ -36,7 +36,9 @@ import {
   Lock,
   FileSearch,
   UserCheck,
-  Camera
+  Camera,
+  RefreshCw,
+  Hash
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -456,7 +458,7 @@ export function InvestigationTutorial() {
                             <DialogContent className="max-w-md bg-slate-900 border-white/10 text-white rounded-3xl z-[2000000]">
                                <DialogHeader>
                                   <DialogTitle>Search Tutorial Index</DialogTitle>
-                               </DialogHeader>
+                                </DialogHeader>
                                <div className="py-4 space-y-4">
                                   <div className="relative">
                                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
