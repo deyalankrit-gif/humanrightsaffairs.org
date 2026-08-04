@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo } from 'react'
@@ -31,45 +32,53 @@ export default function InvestigatorDashboard() {
   const { user } = useUser()
   const db = useFirestore()
 
+  // 1. Fetch current investigator's profile metadata from the registry
   const userRef = useMemoFirebase(() => {
     if (!db || !user?.email) return null;
     return doc(db, 'users', user.email.toLowerCase());
   }, [db, user?.email]);
   const { data: userData } = useDoc(userRef);
 
+  /**
+   * 2. CASE STREAM PROTOCOL:
+   * We query cases where the current investigator's email is present in the optimized
+   * 'investigatorEmails' index. This ensures 100% adherence to Firestore security rules.
+   */
   const casesQuery = useMemoFirebase(() => {
-    if (!db || !user) return null;
+    if (!db || !user?.email) return null;
     return query(
-      collection(db, 'public_complaints'), 
-      where('status', 'not-in', ['Closed', 'Action Taken']),
-      orderBy('status'),
+      collection(db, 'public_complaints'),
+      where('investigatorEmails', 'array-contains', user.email.toLowerCase().trim()),
       orderBy('createdAt', 'desc')
     );
-  }, [db, user]);
+  }, [db, user?.email]);
 
-  const { data: allCases, loading } = useCollection(casesQuery);
+  const { data: allAssignedRaw, loading } = useCollection(casesQuery);
 
+  /**
+   * TACTICAL FILTERING:
+   * Perform status-based filtering client-side to maintain a simple, reliable indexing strategy.
+   */
   const assignedCases = useMemo(() => {
-    if (!allCases || !user) return [];
-    const name = userData?.name || '';
-    return allCases.filter((c: any) => 
-      c.assignedTo === name || 
-      c.assignedOfficers?.some((o: any) => o.name === name) ||
-      c.investigationTeam?.some((m: any) => m.email === user.email) ||
-      c.email === user.email
-    );
-  }, [allCases, user, userData]);
+    if (!allAssignedRaw) return [];
+    return allAssignedRaw.filter((c: any) => !['Closed', 'Action Taken'].includes(c.status));
+  }, [allAssignedRaw]);
 
   const stats = useMemo(() => {
+    if (!assignedCases || !user?.email) return { active: 0, high: 0, tasks: 0 };
+    
     const active = assignedCases.length;
     const high = assignedCases.filter((c: any) => c.priority === 'High').length;
     
     let pendingTasks = 0;
     assignedCases.forEach((c: any) => {
-       const myMember = (c.investigationTeam || []).find((m: any) => m.email === user?.email);
+       const myMember = (c.investigationTeam || []).find((m: any) => (m.email || '').toLowerCase().trim() === user.email.toLowerCase().trim());
        if (myMember) {
-          pendingTasks += (myMember.tasks?.filter((t: any) => t.status !== 'Completed').length || 0);
-          // Also count responsibilities as pending tasks if no tasks defined
+          // Aggregate detailed tasks
+          const taskCount = myMember.tasks?.filter((t: any) => t.status !== 'Completed').length || 0;
+          pendingTasks += taskCount;
+          
+          // Fallback to responsibility matrix count if no tasks are defined
           if ((myMember.tasks?.length || 0) === 0) {
              pendingTasks += (myMember.responsibilities?.length || 0);
           }
@@ -77,7 +86,7 @@ export default function InvestigatorDashboard() {
     });
 
     return { active, high, tasks: pendingTasks };
-  }, [assignedCases, user]);
+  }, [assignedCases, user?.email]);
 
   if (loading) return (
     <div className="py-20 text-center flex flex-col items-center gap-4">
@@ -97,7 +106,7 @@ export default function InvestigatorDashboard() {
         {[
           { label: 'Active Dockets', value: stats.active, icon: <Activity className="text-indigo-500" />, bg: 'bg-indigo-50' },
           { label: 'High Priority', value: stats.high, icon: <AlertCircle className="text-red-500" />, bg: 'bg-red-50' },
-          { label: 'Assigned Tasks', value: stats.tasks, icon: <ListTodo className="text-amber-500" />, bg: 'bg-amber-50' }
+          { label: 'Pending Mandates', value: stats.tasks, icon: <ListTodo className="text-amber-500" />, bg: 'bg-amber-50' }
         ].map((s, i) => (
           <Card key={i} className="border-none shadow-sm rounded-3xl overflow-hidden">
             <CardContent className="p-6 flex items-center gap-5">
@@ -121,7 +130,7 @@ export default function InvestigatorDashboard() {
         <CardContent className="p-0">
            <div className="divide-y divide-slate-50">
              {assignedCases.length > 0 ? assignedCases.map((c: any) => {
-               const myMember = (c.investigationTeam || []).find((m: any) => m.email === user?.email);
+               const myMember = (c.investigationTeam || []).find((m: any) => (m.email || '').toLowerCase().trim() === user?.email?.toLowerCase().trim());
                const taskCount = (myMember?.tasks?.length || 0) + (myMember?.responsibilities?.length || 0);
                const completedCount = myMember?.tasks?.filter((t:any) => t.status === 'Completed').length || 0;
 

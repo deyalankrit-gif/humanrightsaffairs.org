@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo } from 'react'
@@ -25,7 +26,7 @@ import { cn } from '@/lib/utils'
 
 /**
  * Investigator Notifications Page: Real-time activity stream for investigative personnel.
- * Aggregates timeline events from all cases assigned to the authenticated investigator.
+ * Aggregates timeline events from cases where the investigator is assigned via 'investigatorEmails' index.
  */
 export default function InvestigatorNotificationsPage() {
   const { user } = useUser()
@@ -38,34 +39,29 @@ export default function InvestigatorNotificationsPage() {
   }, [db, user?.email]);
   const { data: userData } = useDoc(userRef);
 
-  // 2. Fetch all cases where the investigator is active
+  /**
+   * 2. SECURE CASE QUERY:
+   * Using the optimized 'investigatorEmails' array to filter for permitted case dockets.
+   */
   const casesQuery = useMemoFirebase(() => {
-    if (!db || !user) return null;
+    if (!db || !user?.email) return null;
     return query(
       collection(db, 'public_complaints'),
-      where('status', 'not-in', ['Closed']), // Only track active cases
-      orderBy('status'),
+      where('investigatorEmails', 'array-contains', user.email.toLowerCase().trim()),
       orderBy('createdAt', 'desc')
     );
-  }, [db, user]);
+  }, [db, user?.email]);
 
-  const { data: allCases, loading } = useCollection(casesQuery);
+  const { data: relevantCasesRaw, loading } = useCollection(casesQuery);
 
   /**
    * Derive logical notifications from the timeline of assigned cases.
    */
   const notifications = useMemo(() => {
-    if (!allCases || !user || !userData) return [];
+    if (!relevantCasesRaw || !user?.email) return [];
     
-    const investigatorName = userData.name || '';
-    const relevantCases = allCases.filter((c: any) => 
-      c.assignedTo === investigatorName || 
-      (c.assignedOfficers || []).some((o: any) => o.name === investigatorName) ||
-      c.email === user.email
-    );
-
     const stream: any[] = [];
-    relevantCases.forEach((c: any) => {
+    relevantCasesRaw.forEach((c: any) => {
       // Add individual timeline entries as notifications
       (c.timeline || []).forEach((entry: any) => {
         stream.push({
@@ -95,12 +91,12 @@ export default function InvestigatorNotificationsPage() {
 
     // Sort by most recent activity first
     return stream.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-  }, [allCases, user, userData]);
+  }, [relevantCasesRaw, user?.email]);
 
   if (loading) {
     return (
       <div className="py-20 text-center flex flex-col items-center gap-4">
-        <Clock className="w-10 h-10 animate-spin text-indigo-600" />
+        <Clock className="w-10 h-10 animate-spin text-indigo-600 mx-auto" />
         <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Synchronizing Notification Node...</p>
       </div>
     );

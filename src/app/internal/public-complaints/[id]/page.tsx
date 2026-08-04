@@ -53,7 +53,8 @@ import {
   ListTodo,
   ClipboardCheck,
   AlertTriangle,
-  ChevronDown
+  ChevronDown,
+  Languages
 } from 'lucide-react'
 import {
   Dialog,
@@ -180,7 +181,7 @@ export default function CaseHubPage() {
   // --- ACTIONS ---
 
   const handleAddMember = async (officer: any) => {
-    if (!docRef || !user) return;
+    if (!docRef || !user || !caseData) return;
     
     if (teamMembers.some(m => m.investigatorId === officer.employeeId)) {
       toast({ variant: "destructive", title: "Already Assigned", description: "Officer is already in the case team." });
@@ -188,11 +189,14 @@ export default function CaseHubPage() {
     }
 
     setIsActionLoading(true);
+    const newOfficerEmail = officer.email.toLowerCase().trim();
+    const newOfficerName = officer.name.trim();
+
     const newMember = {
       investigatorId: officer.employeeId,
-      investigatorName: officer.name,
+      investigatorName: newOfficerName,
       designation: officer.designation,
-      email: officer.email,
+      email: newOfficerEmail,
       phone: officer.phone || '',
       responsibilities: [],
       tasks: [],
@@ -204,9 +208,14 @@ export default function CaseHubPage() {
       remarks: ''
     };
 
+    const currentEmails = caseData.investigatorEmails || [];
+    const currentNames = caseData.assignedOfficersNames || [];
+
     try {
       await updateDoc(docRef, {
         investigationTeam: arrayUnion(newMember),
+        investigatorEmails: arrayUnion(newOfficerEmail),
+        assignedOfficersNames: arrayUnion(newOfficerName),
         updatedAt: serverTimestamp(),
         timeline: arrayUnion({
           action: "Investigator Provisioned",
@@ -300,10 +309,16 @@ export default function CaseHubPage() {
 
     const removedMember = teamMembers[index];
     const updatedTeam = teamMembers.filter((_, i) => i !== index);
+    
+    // Regenerate helper arrays for efficient querying and rules
+    const updatedEmails = updatedTeam.map(m => (m.email || '').toLowerCase().trim());
+    const updatedNames = updatedTeam.map(m => (m.investigatorName || '').trim());
 
     try {
       await updateDoc(docRef, { 
         investigationTeam: updatedTeam,
+        investigatorEmails: updatedEmails,
+        assignedOfficersNames: updatedNames,
         updatedAt: serverTimestamp(),
         timeline: arrayUnion({
           action: "Clearance Revoked",
@@ -402,7 +417,6 @@ export default function CaseHubPage() {
     });
 
     try {
-      // Simulate institutional data extraction delay
       await new Promise(resolve => setTimeout(resolve, 2000));
       
       toast({

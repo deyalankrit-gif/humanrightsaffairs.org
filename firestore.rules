@@ -1,3 +1,4 @@
+
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -132,7 +133,8 @@ service cloud.firestore {
       allow read: if hasPermission('publicComplaints') || 
         (isInvestigator() && (
           resource.data.assignedTo == get(/databases/$(database)/documents/users/$(getAuthEmail())).data.name ||
-          resource.data.email == getAuthEmail()
+          resource.data.email == getAuthEmail() ||
+          getAuthEmail() in resource.data.get('investigatorEmails', [])
         ));
       allow update: if hasPermission('publicComplaints') || isInvestigator();
     }
