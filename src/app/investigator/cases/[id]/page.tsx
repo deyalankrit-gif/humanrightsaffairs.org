@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Progress } from '@/components/ui/progress'
+import { Input } from '@/components/ui/input'
 import { 
   ArrowLeft, 
   Search, 
@@ -49,12 +50,29 @@ import {
   MessageSquareWarning,
   Hash,
   Paperclip,
-  Settings
+  Settings,
+  ChevronDown,
+  X
 } from 'lucide-react'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from '@/components/ui/select'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogDescription,
+  DialogClose,
+  DialogFooter
+} from "@/components/ui/dialog"
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
-import { TASK_STATUSES } from '@/lib/complaint-constants'
 
 export default function InvestigationCaseHub() {
   const { id } = useParams()
@@ -67,13 +85,26 @@ export default function InvestigationCaseHub() {
   const [isActionLoading, setIsActionLoading] = useState(false)
   const [remark, setRemark] = useState('')
   const [activeStatus, setActiveStatus] = useState('')
+  
+  // Reporting State
+  const [isReportingTask, setIsReportingTask] = useState<string | null>(null)
+  const [reportForm, setReportForm] = useState({
+    title: '',
+    workPerformed: '',
+    findings: '',
+    evidence: '',
+    actions: '',
+    recommendations: '',
+    progress: 100,
+    status: 'Completed'
+  })
 
   const docRef = useMemoFirebase(() => {
     if (!db || !id) return null;
     return doc(db, 'public_complaints', id as string);
   }, [db, id]);
 
-  const { data: c, loading, error: fetchError } = useDoc(docRef);
+  const { data: c, loading } = useDoc(docRef);
 
   useEffect(() => {
     if (c) setActiveStatus(c.status);
@@ -106,7 +137,7 @@ export default function InvestigationCaseHub() {
     }
   };
 
-  const handleUpdateAssignment = async (index: number, progress: number, status: string) => {
+  const handleUpdateAssignmentProgress = async (index: number, progress: number, status: string) => {
     if (!docRef || !c || isActionLoading) return;
     setIsActionLoading(true);
     try {
@@ -140,35 +171,54 @@ export default function InvestigationCaseHub() {
     }
   };
 
-  const handlePostNote = async (isOfficial: boolean) => {
-    if (!remark.trim() || !docRef || !user) return;
+  const handleSubmitTaskReport = async (memberIndex: number, taskIndex: number) => {
+    if (!docRef || !c || !user) return;
     setIsActionLoading(true);
+    
     try {
-      const entry = {
-        action: isOfficial ? "Official Investigative Note" : "Private Field Note",
-        user: user.email,
+      const updatedTeam = [...(c.investigationTeam || [])];
+      const member = updatedTeam[memberIndex];
+      const task = member.tasks[taskIndex];
+      
+      const reportEntry = {
+        ...reportForm,
+        investigatorId: member.investigatorId,
+        investigatorName: member.investigatorName,
         timestamp: new Date().toISOString(),
-        remark: remark.trim(),
-        type: isOfficial ? 'official_note' : 'private_note',
-        visibility: isOfficial ? 'public' : 'investigator'
+        taskId: task.id
       };
-      
+
+      // Update task status and progress
+      member.tasks[taskIndex] = {
+        ...task,
+        status: reportForm.status,
+        progress: reportForm.progress,
+        reports: [...(task.reports || []), reportEntry]
+      };
+
       await updateDoc(docRef, { 
-        timeline: arrayUnion(entry),
-        updatedAt: serverTimestamp()
+        investigationTeam: updatedTeam,
+        updatedAt: serverTimestamp(),
+        timeline: arrayUnion({
+          action: "Task Report Submitted",
+          user: user.email,
+          timestamp: new Date().toISOString(),
+          remark: `Submitted completion report for task: ${task.title}`,
+          type: 'task_report'
+        })
       });
-      
-      toast({ title: isOfficial ? "Note Published" : "Note Archived" });
-      setRemark('');
+
+      toast({ title: "Report Published" });
+      setIsReportingTask(null);
+      setReportForm({ title: '', workPerformed: '', findings: '', evidence: '', actions: '', recommendations: '', progress: 100, status: 'Completed' });
     } catch (e) {
-      toast({ variant: "destructive", title: "Save Failed" });
+      toast({ variant: "destructive", title: "Submission Failed" });
     } finally {
       setIsActionLoading(false);
     }
   };
 
   if (loading) return <div className="min-h-screen flex items-center justify-center bg-slate-50"><GlobalLoader className="animate-spin text-indigo-600" /></div>
-  
   if (!c) return <div className="p-20 text-center font-bold text-slate-400">FILE NOT IDENTIFIED</div>
 
   const mandate = c.mandate || {};
@@ -192,13 +242,13 @@ export default function InvestigationCaseHub() {
                   </Badge>
                </div>
                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
-                 National Registry Node • Assigned: {c.assignedAt?.toDate?.()?.toLocaleDateString()}
+                 National Registry Node • Assigned: {c.createdAt?.toDate?.()?.toLocaleDateString()}
                </p>
             </div>
          </div>
          <Card className="border-none shadow-sm rounded-2xl bg-indigo-600 text-white p-4 flex items-center gap-6">
             <div className="space-y-1">
-               <p className="text-[8px] font-black uppercase text-indigo-200 tracking-widest leading-none mb-1">Global Status Sync</p>
+               <p className="text-[8px] font-black uppercase text-indigo-200 tracking-widest leading-none mb-1">Field Lifecycle Sync</p>
                <Select value={activeStatus} onValueChange={handleUpdateStatus}>
                   <SelectTrigger className="bg-white/10 border-white/20 h-9 text-[10px] font-bold min-w-[200px]">
                      <SelectValue />
@@ -216,7 +266,7 @@ export default function InvestigationCaseHub() {
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
          <TabsList className="bg-white p-1 rounded-2xl border shadow-sm w-full md:w-auto overflow-x-auto no-scrollbar justify-start">
             <TabsTrigger value="mandate" className="rounded-xl px-8 font-bold text-[10px] uppercase tracking-widest data-[state=active]:bg-indigo-600 data-[state=active]:text-white">Mission Mandate</TabsTrigger>
-            <TabsTrigger value="responsibilities" className="rounded-xl px-8 font-bold text-[10px] uppercase tracking-widest data-[state=active]:bg-indigo-600 data-[state=active]:text-white flex gap-2">My Responsibilities {myAssignment && <Badge className="h-4 px-1 bg-accent text-primary text-[8px]">{myAssignment.responsibilities?.length || 0}</Badge>}</TabsTrigger>
+            <TabsTrigger value="tasks" className="rounded-xl px-8 font-bold text-[10px] uppercase tracking-widest data-[state=active]:bg-indigo-600 data-[state=active]:text-white flex gap-2">Assigned Tasks {myAssignment && <Badge className="h-4 px-1 bg-accent text-primary text-[8px]">{ (myAssignment.tasks?.length || 0) + (myAssignment.responsibilities?.length || 0) }</Badge>}</TabsTrigger>
             <TabsTrigger value="team" className="rounded-xl px-8 font-bold text-[10px] uppercase tracking-widest data-[state=active]:bg-indigo-600 data-[state=active]:text-white">Unit Members</TabsTrigger>
             <TabsTrigger value="evidence" className="rounded-xl px-8 font-bold text-[10px] uppercase tracking-widest data-[state=active]:bg-indigo-600 data-[state=active]:text-white">Evidence Vault</TabsTrigger>
             <TabsTrigger value="timeline" className="rounded-xl px-8 font-bold text-[10px] uppercase tracking-widest data-[state=active]:bg-indigo-600 data-[state=active]:text-white">Audit Trail</TabsTrigger>
@@ -225,7 +275,7 @@ export default function InvestigationCaseHub() {
          <TabsContent value="mandate" className="animate-in fade-in duration-500">
             {!hasMandate ? (
               <div className="py-24 text-center bg-white rounded-[3rem] border-2 border-dashed border-slate-100">
-                 <h3 className="text-xl font-headline font-bold text-slate-400">Mission mandate pending issuance from Central Council.</h3>
+                 <h3 className="text-xl font-headline font-bold text-slate-400">Mission mandate pending issuance.</h3>
               </div>
             ) : (
               <div className="grid lg:grid-cols-12 gap-8 items-start">
@@ -256,7 +306,7 @@ export default function InvestigationCaseHub() {
                         <div className="grid md:grid-cols-2 gap-10">
                            <div className="space-y-4">
                               <h4 className="text-[11px] font-black uppercase text-indigo-600 tracking-[0.2em] flex items-center gap-3">
-                                 <Activity className="w-4 h-4" /> Required Field Actions
+                                 <Activity className="w-4 h-4" /> Field Actions
                               </h4>
                               <div className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap pl-7 border-l-2 border-indigo-100">
                                  {mandate.requiredActions || "No specific field actions listed."}
@@ -264,7 +314,7 @@ export default function InvestigationCaseHub() {
                            </div>
                            <div className="space-y-4">
                               <h4 className="text-[11px] font-black uppercase text-emerald-600 tracking-[0.2em] flex items-center gap-3">
-                                 <CheckCircle2 className="w-4 h-4" /> Evidence Requirements
+                                 <CheckCircle2 className="w-4 h-4" /> Evidence Req
                               </h4>
                               <div className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap pl-7 border-l-2 border-emerald-100">
                                  {mandate.evidenceToCollect || "Visual site verification and authenticated testimonials."}
@@ -278,7 +328,7 @@ export default function InvestigationCaseHub() {
                 <div className="lg:col-span-4 space-y-6">
                   <Card className="rounded-[2.5rem] border-none shadow-sm p-8 bg-slate-900 text-white relative overflow-hidden">
                      <div className="absolute top-0 right-0 w-24 h-24 bg-accent/10 rounded-full -mr-12 -mt-12 blur-2xl"></div>
-                     <h3 className="text-xs font-black uppercase text-accent tracking-[0.2em] mb-8 flex items-center gap-2"><Clock className="w-4 h-4" /> Mission Timeline</h3>
+                     <h3 className="text-xs font-black uppercase text-accent tracking-[0.2em] mb-8 flex items-center gap-2"><Clock className="w-4 h-4" /> Timeline</h3>
                      <div className="space-y-6">
                         <div className="flex gap-4 p-5 bg-white/5 rounded-[1.5rem] border border-white/5">
                            <div className="w-12 h-12 rounded-xl bg-accent/20 flex items-center justify-center text-accent shrink-0"><CalendarIcon className="w-6 h-6" /></div>
@@ -289,97 +339,153 @@ export default function InvestigationCaseHub() {
                         </div>
                      </div>
                   </Card>
-
-                  {mandate.attachments && mandate.attachments.length > 0 && (
-                    <Card className="rounded-[2.5rem] border-none shadow-sm p-8 bg-white overflow-hidden">
-                       <h3 className="text-xs font-black uppercase text-primary tracking-[0.2em] mb-6 flex items-center gap-2"><Paperclip className="w-4 h-4 text-accent" /> Institutional Assets</h3>
-                       <div className="space-y-3">
-                          {mandate.attachments.map((att: any, i: number) => (
-                            <a 
-                              key={i} 
-                              href={att.url} 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100 hover:bg-slate-100 transition-all group"
-                            >
-                               <div className="flex items-center gap-3">
-                                  <FileText className="w-4 h-4 text-slate-400 group-hover:text-primary" />
-                                  <span className="text-xs font-bold text-slate-600 truncate max-w-[150px]">{att.name}</span>
-                               </div>
-                               <ExternalLink className="w-3.5 h-3.5 text-slate-300" />
-                            </a>
-                          ))}
-                       </div>
-                    </Card>
-                  )}
                 </div>
               </div>
             )}
          </TabsContent>
 
-         <TabsContent value="responsibilities" className="animate-in slide-in-from-right-4 duration-500">
+         <TabsContent value="tasks" className="animate-in slide-in-from-right-4 duration-500">
             {!myAssignment ? (
                <div className="py-24 text-center bg-white rounded-[2.5rem] border-2 border-dashed">
-                  <p className="text-slate-400 font-bold uppercase tracking-widest">No individual responsibilities assigned to your identity node.</p>
+                  <p className="text-slate-400 font-bold uppercase tracking-widest">No individual assignments identified for your identity node.</p>
                </div>
             ) : (
-               <div className="grid lg:grid-cols-12 gap-8 items-start">
-                  <div className="lg:col-span-8 space-y-6">
-                     <Card className="rounded-[2.5rem] border-none shadow-sm p-8 md:p-12 bg-white">
-                        <CardHeader className="p-0 mb-8">
-                           <div className="flex items-center justify-between">
-                              <div>
-                                 <CardTitle className="text-2xl font-headline font-bold">My Tactical Responsibilities</CardTitle>
-                                 <CardDescription>Individual objectives assigned to you by the Central Council.</CardDescription>
-                              </div>
-                              <Badge className="bg-indigo-600 text-white font-black px-4">{myAssignment.status}</Badge>
-                           </div>
-                        </CardHeader>
-                        
-                        <div className="space-y-4">
-                           {myAssignment.responsibilities?.map((resp: string, i: number) => (
-                              <div key={i} className="flex items-center gap-4 p-5 bg-slate-50 rounded-2xl border group hover:border-indigo-600 transition-all">
-                                 <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-indigo-600 shadow-sm"><CheckCircle2 className="w-5 h-5" /></div>
-                                 <span className="text-sm font-bold text-primary uppercase tracking-tight">{resp}</span>
-                              </div>
-                           ))}
-                           {(!myAssignment.responsibilities || myAssignment.responsibilities.length === 0) && (
-                              <p className="text-slate-400 italic text-center py-10">No granular duties assigned yet.</p>
-                           )}
-                        </div>
-                     </Card>
+               <div className="space-y-8">
+                  {/* Detailed Tasks Section */}
+                  <div className="space-y-6">
+                    <div className="flex items-center gap-3">
+                       <ListTodo className="w-6 h-6 text-indigo-600" />
+                       <h3 className="text-xl font-headline font-bold">Tactical Task Queue</h3>
+                    </div>
+                    
+                    <div className="grid gap-6">
+                       {myAssignment.tasks?.length > 0 ? myAssignment.tasks.map((task: any, taskIdx: number) => (
+                          <Card key={task.id} className="rounded-3xl border-none shadow-sm bg-white overflow-hidden group border-2 border-transparent hover:border-indigo-100 transition-all">
+                             <CardContent className="p-8">
+                                <div className="flex flex-col md:flex-row justify-between gap-8">
+                                   <div className="flex-1 space-y-4">
+                                      <div className="flex flex-wrap items-center gap-3">
+                                         <Badge className={cn(
+                                            "text-[8px] font-black uppercase px-3 h-5",
+                                            task.priority === 'High' ? 'bg-red-500' : 'bg-blue-500'
+                                         )}>{task.priority} Priority</Badge>
+                                         <Badge variant="outline" className="text-[8px] font-bold uppercase border-indigo-100 text-indigo-600 h-5">{task.status}</Badge>
+                                         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-auto">Due: {task.deadline || 'ASAP'}</span>
+                                      </div>
+                                      <h4 className="text-2xl font-headline font-bold text-primary">{task.title}</h4>
+                                      <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap italic">"{task.description}"</p>
+                                      
+                                      {task.reports?.length > 0 && (
+                                         <div className="pt-4 space-y-3">
+                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Previous Reports</p>
+                                            <div className="space-y-2">
+                                               {task.reports.map((r: any, rIdx: number) => (
+                                                  <div key={rIdx} className="p-4 bg-slate-50 rounded-2xl border border-slate-100 text-xs flex items-center justify-between">
+                                                     <div className="flex items-center gap-3">
+                                                        <ClipboardCheck className="w-4 h-4 text-emerald-500" />
+                                                        <span className="font-bold text-slate-700">{r.title}</span>
+                                                     </div>
+                                                     <span className="text-[10px] text-slate-400">{new Date(r.timestamp).toLocaleDateString()}</span>
+                                                  </div>
+                                               ))}
+                                            </div>
+                                         </div>
+                                      )}
+                                   </div>
+
+                                   <div className="md:w-64 space-y-6 shrink-0 pt-4 border-t md:border-t-0 md:border-l md:pl-8 border-slate-100">
+                                      <div className="space-y-2">
+                                         <div className="flex justify-between items-center text-[10px] font-black uppercase text-slate-400">
+                                            <span>Task Progress</span>
+                                            <span className="text-indigo-600">{task.progress}%</span>
+                                         </div>
+                                         <Progress value={task.progress} className="h-1.5" />
+                                      </div>
+                                      
+                                      <Dialog open={isReportingTask === task.id} onOpenChange={val => setIsReportingTask(val ? task.id : null)}>
+                                         <DialogTrigger asChild>
+                                            <Button className="w-full h-12 bg-indigo-600 text-white font-bold rounded-xl shadow-lg hover:bg-indigo-700">Submit Report</Button>
+                                         </DialogTrigger>
+                                         <DialogContent className="max-w-3xl rounded-[2.5rem] p-0 overflow-hidden border-none shadow-2xl max-h-[90vh] flex flex-col">
+                                            <div className="bg-indigo-600 p-8 text-white shrink-0">
+                                               <DialogTitle className="text-2xl font-headline font-bold">Field Report Documentation</DialogTitle>
+                                               <p className="text-xs text-indigo-100 mt-1 uppercase tracking-widest">Task: {task.title}</p>
+                                            </div>
+                                            <ScrollArea className="flex-1 p-8 space-y-8 custom-scrollbar">
+                                               <div className="space-y-6">
+                                                  <div className="space-y-1.5">
+                                                     <Label className="text-[10px] font-black uppercase text-slate-400">Report Headline *</Label>
+                                                     <Input value={reportForm.title} onChange={e => setReportForm({...reportForm, title: e.target.value})} placeholder="e.g. Findings from Site Inspection" className="h-11 rounded-xl" />
+                                                  </div>
+                                                  <div className="space-y-1.5">
+                                                     <Label className="text-[10px] font-black uppercase text-slate-400">Work Performed / কার্যক্রমের বিবরণ</Label>
+                                                     <Textarea value={reportForm.workPerformed} onChange={e => setReportForm({...reportForm, workPerformed: e.target.value})} className="min-h-[100px] rounded-xl" placeholder="Detailed log of field activities..." />
+                                                  </div>
+                                                  <div className="grid md:grid-cols-2 gap-6">
+                                                     <div className="space-y-1.5">
+                                                        <Label className="text-[10px] font-black uppercase text-slate-400">Key Findings / প্রাপ্ত ফলাফল</Label>
+                                                        <Textarea value={reportForm.findings} onChange={e => setReportForm({...reportForm, findings: e.target.value})} className="min-h-[100px] rounded-xl" />
+                                                     </div>
+                                                     <div className="space-y-1.5">
+                                                        <Label className="text-[10px] font-black uppercase text-slate-400">Recommendations / সুপারিশ</Label>
+                                                        <Textarea value={reportForm.recommendations} onChange={e => setReportForm({...reportForm, recommendations: e.target.value})} className="min-h-[100px] rounded-xl" />
+                                                     </div>
+                                                  </div>
+                                                  <div className="grid grid-cols-2 gap-6 p-6 bg-slate-50 rounded-3xl border">
+                                                     <div className="space-y-1.5">
+                                                        <Label className="text-[10px] font-black uppercase text-indigo-600">Completion (%)</Label>
+                                                        <Select value={reportForm.progress.toString()} onValueChange={v => setReportForm({...reportForm, progress: parseInt(v)})}>
+                                                           <SelectTrigger className="h-10 rounded-xl"><SelectValue /></SelectTrigger>
+                                                           <SelectContent className="bg-white">
+                                                              {[0, 25, 50, 75, 90, 100].map(v => <SelectItem key={v} value={v.toString()}>{v}%</SelectItem>)}
+                                                           </SelectContent>
+                                                        </Select>
+                                                     </div>
+                                                     <div className="space-y-1.5">
+                                                        <Label className="text-[10px] font-black uppercase text-indigo-600">Updated Status</Label>
+                                                        <Select value={reportForm.status} onValueChange={v => setReportForm({...reportForm, status: v})}>
+                                                           <SelectTrigger className="h-10 rounded-xl"><SelectValue /></SelectTrigger>
+                                                           <SelectContent className="bg-white">
+                                                              {['Pending', 'In Progress', 'Completed'].map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                                                           </SelectContent>
+                                                        </Select>
+                                                     </div>
+                                                  </div>
+                                               </div>
+                                            </ScrollArea>
+                                            <div className="p-8 border-t bg-slate-50 shrink-0 flex gap-4">
+                                               <DialogClose asChild><Button variant="ghost" className="flex-1 rounded-xl">Cancel</Button></DialogClose>
+                                               <Button onClick={() => handleSubmitTaskReport(myAssignmentIndex, taskIdx)} disabled={isActionLoading || !reportForm.title} className="flex-1 bg-indigo-600 text-white font-bold h-12 rounded-xl">Authorize & Submit Report</Button>
+                                            </div>
+                                         </DialogContent>
+                                      </Dialog>
+                                   </div>
+                                </div>
+                             </CardContent>
+                          </Card>
+                       )) : (
+                          <div className="py-20 text-center bg-white rounded-[2.5rem] border-2 border-dashed border-slate-100 flex flex-col items-center gap-4">
+                             <Users className="w-12 h-12 text-slate-100" />
+                             <h3 className="text-xl font-headline font-bold text-slate-300 uppercase">No task assigned.</h3>
+                          </div>
+                       )}
+                    </div>
                   </div>
 
-                  <div className="lg:col-span-4 space-y-6">
-                     <Card className="rounded-[2rem] border-none shadow-xl bg-indigo-600 text-white p-8">
-                        <h4 className="text-xs font-black uppercase text-indigo-200 tracking-widest mb-6 flex items-center gap-2"><Settings className="w-4 h-4" /> Progress Sync</h4>
-                        <div className="space-y-6">
-                           <div className="space-y-2">
-                              <Label className="text-[10px] font-black uppercase text-indigo-200">Current Completion (%)</Label>
-                              <Select 
-                                 value={myAssignment.progressPercentage.toString()} 
-                                 onValueChange={v => handleUpdateAssignment(myAssignmentIndex, parseInt(v), myAssignment.status)}
-                              >
-                                 <SelectTrigger className="bg-white/10 border-white/20 h-12 text-white font-black"><SelectValue /></SelectTrigger>
-                                 <SelectContent className="bg-white z-[1000000]">
-                                    {[0, 25, 50, 75, 90, 100].map(v => <SelectItem key={v} value={v.toString()}>{v}% Completed</SelectItem>)}
-                                 </SelectContent>
-                              </Select>
-                           </div>
-                           <div className="space-y-2">
-                              <Label className="text-[10px] font-black uppercase text-indigo-200">Assignment Status</Label>
-                              <Select 
-                                 value={myAssignment.status} 
-                                 onValueChange={v => handleUpdateAssignment(myAssignmentIndex, myAssignment.progressPercentage, v)}
-                              >
-                                 <SelectTrigger className="bg-white/10 border-white/20 h-12 text-white font-black"><SelectValue /></SelectTrigger>
-                                 <SelectContent className="bg-white z-[1000000]">
-                                    {['Assigned', 'Active', 'Completed', 'On Hold'].map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-                                 </SelectContent>
-                              </Select>
-                           </div>
-                        </div>
-                     </Card>
+                  {/* Legacy Responsibilities Section */}
+                  <div className="space-y-6 pt-10 border-t">
+                    <div className="flex items-center gap-3">
+                       <CheckCircle2 className="w-6 h-6 text-emerald-500" />
+                       <h3 className="text-xl font-headline font-bold">General Responsibilities</h3>
+                    </div>
+                    <div className="grid md:grid-cols-2 gap-4">
+                       {myAssignment.responsibilities?.map((resp: string, i: number) => (
+                          <div key={i} className="flex items-center gap-4 p-5 bg-white rounded-2xl border shadow-sm">
+                             <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600"><CheckCircle2 className="w-5 h-5" /></div>
+                             <span className="text-sm font-bold text-primary uppercase tracking-tight">{resp}</span>
+                          </div>
+                       ))}
+                    </div>
                   </div>
                </div>
             )}
@@ -431,7 +537,7 @@ export default function InvestigationCaseHub() {
                              <h4 className="text-lg font-bold text-primary">{entry.action}</h4>
                              <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{new Date(entry.timestamp).toLocaleString()}</span>
                           </div>
-                          <div className="p-4 bg-slate-50 rounded-2xl italic text-sm text-slate-500 leading-relaxed border">"{entry.remark}"</div>
+                          <div className="p-4 bg-slate-50 rounded-2xl italic text-sm text-slate-500 leading-relaxed border whitespace-pre-wrap">"{entry.remark}"</div>
                           <div className="mt-3 flex items-center gap-2"><Badge variant="outline" className="text-[7px] font-black uppercase opacity-60 border-slate-200">{entry.user}</Badge></div>
                        </div>
                     </div>
@@ -442,4 +548,8 @@ export default function InvestigationCaseHub() {
       </Tabs>
     </div>
   )
+}
+
+function GlobalLoader({ className }: { className?: string }) {
+  return <Clock className={cn("animate-spin", className)} />
 }

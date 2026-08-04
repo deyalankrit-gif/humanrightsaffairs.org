@@ -3,9 +3,9 @@
 
 import React, { useEffect, useState, useMemo } from 'react'
 import { useParams, useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { useUser, useFirestore, useDoc, useMemoFirebase, useCollection } from '@/firebase'
 import { doc, updateDoc, serverTimestamp, arrayUnion, collection, query, orderBy, where, getDocs, addDoc, deleteDoc, writeBatch } from 'firebase/firestore'
-import { Footer } from '@/components/footer'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -49,7 +49,11 @@ import {
   Info,
   Trash2,
   UserCheck,
-  Search
+  Search,
+  ListTodo,
+  ClipboardCheck,
+  AlertTriangle,
+  ChevronDown
 } from 'lucide-react'
 import {
   Dialog,
@@ -84,7 +88,6 @@ import { CASE_STATUSES, REPORT_TEMPLATES, REPORT_GUIDANCE, STANDARD_RESPONSIBILI
 import { getStatusColor } from '@/lib/complaint-utils'
 import { InvestigationJourney } from '@/components/investigation-journey'
 import Link from 'next/link'
-import Image from 'next/image'
 
 export default function CaseHubPage() {
   const { id } = useParams()
@@ -103,6 +106,15 @@ export default function CaseHubPage() {
   const [teamSearch, setTeamSearch] = useState('')
   const [teamMembers, setTeamMembers] = useState<any[]>([])
   
+  // Task Management States
+  const [isAddingTask, setIsAddingTask] = useState<number | null>(null)
+  const [newTask, setNewTask] = useState({
+    title: '',
+    description: '',
+    priority: 'Medium',
+    deadline: ''
+  })
+
   // Mandate State
   const [mandate, setMandate] = useState({
     title: '',
@@ -172,6 +184,7 @@ export default function CaseHubPage() {
       email: officer.email,
       phone: officer.phone || '',
       responsibilities: [],
+      tasks: [],
       status: 'Assigned',
       progressPercentage: 0,
       assignedBy: user.email,
@@ -220,7 +233,7 @@ export default function CaseHubPage() {
           action: "Assignment Profile Updated",
           user: user.email,
           timestamp: new Date().toISOString(),
-          remark: `Modified responsibilities/status for ${updatedTeam[index].investigatorName}.`,
+          remark: `Modified duties/status for ${updatedTeam[index].investigatorName}.`,
           type: 'assignment_update'
         })
       });
@@ -229,6 +242,44 @@ export default function CaseHubPage() {
       toast({ variant: "destructive", title: "Update Failed" });
     } finally {
       setIsActionLoading(false);
+    }
+  };
+
+  const handleAddTask = async (memberIndex: number) => {
+    if (!newTask.title.trim()) return;
+    
+    const updatedTeam = [...teamMembers];
+    const memberTasks = updatedTeam[memberIndex].tasks || [];
+    
+    const taskEntry = {
+      id: `task-${Date.now()}`,
+      ...newTask,
+      status: 'Pending',
+      progress: 0,
+      assignedBy: user?.email,
+      assignedAt: new Date().toISOString(),
+      reports: []
+    };
+
+    updatedTeam[memberIndex].tasks = [...memberTasks, taskEntry];
+    
+    try {
+      await updateDoc(docRef!, { 
+        investigationTeam: updatedTeam,
+        updatedAt: serverTimestamp(),
+        timeline: arrayUnion({
+          action: "Tactical Task Assigned",
+          user: user?.email,
+          timestamp: new Date().toISOString(),
+          remark: `Assigned task "${newTask.title}" to ${updatedTeam[memberIndex].investigatorName}.`,
+          type: 'task_assignment'
+        })
+      });
+      toast({ title: "Task Assigned" });
+      setNewTask({ title: '', description: '', priority: 'Medium', deadline: '' });
+      setIsAddingTask(null);
+    } catch (e) {
+      toast({ variant: "destructive", title: "Assignment Failed" });
     }
   };
 
@@ -384,7 +435,7 @@ export default function CaseHubPage() {
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                       <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
-                      <AlertDialogAction onClick={handleDeleteCase} className="bg-red-600 hover:bg-red-700 rounded-xl">Confirm Deletion</AlertDialogAction>
+                      <AlertDialogAction onClick={() => handleDeleteCase} className="bg-red-600 hover:bg-red-700 rounded-xl">Confirm Deletion</AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>
                 </AlertDialog>
@@ -415,7 +466,7 @@ export default function CaseHubPage() {
                  <div className="lg:col-span-2 space-y-8">
                     <Card className="rounded-[2.5rem] border-none shadow-sm p-10 bg-white">
                        <h3 className="text-xl font-headline font-bold text-primary mb-6 flex items-center gap-3"><FileText className="w-6 h-6 text-accent" /> Violation Narrative</h3>
-                       <div className="p-8 bg-slate-50 rounded-[2rem] border italic text-slate-600 leading-relaxed">
+                       <div className="p-8 bg-slate-50 rounded-[2rem] border italic text-slate-600 leading-relaxed whitespace-pre-wrap">
                           "{caseData.description}"
                        </div>
                     </Card>
@@ -558,6 +609,75 @@ export default function CaseHubPage() {
                                         </DialogContent>
                                      </Dialog>
 
+                                     {/* Detailed Task Management Dialog */}
+                                     <Dialog open={isAddingTask === idx} onOpenChange={(val) => setIsAddingTask(val ? idx : null)}>
+                                        <DialogTrigger asChild>
+                                           <Button variant="outline" size="sm" className="h-9 rounded-xl text-[10px] font-black uppercase tracking-widest border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-600 hover:text-white transition-all">
+                                              <ListTodo className="w-3.5 h-3.5 mr-1.5" /> Manage Tasks
+                                           </Button>
+                                        </DialogTrigger>
+                                        <DialogContent className="max-w-xl rounded-[2.5rem] p-0 overflow-hidden border-none shadow-2xl">
+                                           <div className="bg-indigo-600 p-8 text-white relative">
+                                              <DialogTitle className="text-xl font-headline font-bold">Tactical Task Assignment</DialogTitle>
+                                              <p className="text-xs text-indigo-100 mt-1 uppercase tracking-widest">{member.investigatorName}</p>
+                                           </div>
+                                           <div className="p-8 space-y-6">
+                                              <div className="space-y-4">
+                                                 <div className="space-y-1.5">
+                                                    <Label className="text-[10px] font-bold uppercase text-slate-400">Task Title *</Label>
+                                                    <Input value={newTask.title} onChange={e => setNewTask({...newTask, title: e.target.value})} placeholder="e.g. Conduct Victim Interview" className="h-11 rounded-xl" />
+                                                 </div>
+                                                 <div className="space-y-1.5">
+                                                    <Label className="text-[10px] font-bold uppercase text-slate-400">Description / Directives</Label>
+                                                    <Textarea value={newTask.description} onChange={e => setNewTask({...newTask, description: e.target.value})} placeholder="Specific instructions for this task..." className="min-h-[80px] rounded-xl" />
+                                                 </div>
+                                                 <div className="grid grid-cols-2 gap-4">
+                                                    <div className="space-y-1.5">
+                                                       <Label className="text-[10px] font-bold uppercase text-slate-400">Priority</Label>
+                                                       <Select value={newTask.priority} onValueChange={v => setNewTask({...newTask, priority: v})}>
+                                                          <SelectTrigger className="h-10 rounded-xl"><SelectValue /></SelectTrigger>
+                                                          <SelectContent className="bg-white">
+                                                             {['High', 'Medium', 'Low'].map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}
+                                                          </SelectContent>
+                                                       </Select>
+                                                    </div>
+                                                    <div className="space-y-1.5">
+                                                       <Label className="text-[10px] font-bold uppercase text-slate-400">Deadline</Label>
+                                                       <Input type="date" value={newTask.deadline} onChange={e => setNewTask({...newTask, deadline: e.target.value})} className="h-10 rounded-xl" />
+                                                    </div>
+                                                 </div>
+                                                 <Button onClick={() => handleAddTask(idx)} className="w-full h-12 bg-indigo-600 text-white font-bold rounded-xl shadow-lg">Assign Task</Button>
+                                              </div>
+                                              
+                                              <div className="pt-6 border-t">
+                                                 <h4 className="text-[10px] font-black uppercase text-slate-500 mb-4 tracking-widest">Active Task Queue</h4>
+                                                 <ScrollArea className="h-[180px] pr-4">
+                                                    <div className="space-y-3">
+                                                       {(member.tasks || []).map((t: any) => (
+                                                          <div key={t.id} className="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between group">
+                                                             <div className="space-y-1">
+                                                                <p className="text-xs font-bold text-primary">{t.title}</p>
+                                                                <div className="flex items-center gap-3">
+                                                                   <Badge variant="outline" className="text-[7px] font-black uppercase h-4 px-1.5">{t.priority}</Badge>
+                                                                   <span className="text-[8px] font-bold text-slate-400 uppercase">{t.status}</span>
+                                                                </div>
+                                                             </div>
+                                                             <div className="flex items-center gap-2">
+                                                                <Badge className="bg-emerald-500 text-white text-[7px] h-4">{t.progress}%</Badge>
+                                                                <button className="text-slate-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"><Trash2 className="w-3.5 h-3.5" /></button>
+                                                             </div>
+                                                          </div>
+                                                       ))}
+                                                       {(!member.tasks || member.tasks.length === 0) && (
+                                                          <p className="text-[10px] text-slate-400 italic text-center py-8">No detailed tasks assigned yet.</p>
+                                                       )}
+                                                    </div>
+                                                 </ScrollArea>
+                                              </div>
+                                           </div>
+                                        </DialogContent>
+                                     </Dialog>
+
                                      <button onClick={() => handleRemoveMember(idx)} className="h-9 w-9 rounded-xl text-slate-300 hover:text-red-500 hover:bg-red-50 transition-all flex items-center justify-center shrink-0">
                                         <X className="w-5 h-5" />
                                      </button>
@@ -568,7 +688,12 @@ export default function CaseHubPage() {
                                   {member.responsibilities?.map((r: string) => (
                                     <Badge key={r} variant="outline" className="bg-white dark:bg-slate-800 text-[8px] font-bold border-slate-200 py-0.5">{r}</Badge>
                                   ))}
-                                  {(!member.responsibilities || member.responsibilities.length === 0) && <span className="text-[9px] text-slate-400 italic">No duties mapped yet.</span>}
+                                  {member.tasks?.length > 0 && (
+                                     <Badge className="bg-indigo-600 text-white text-[8px] font-black uppercase tracking-tighter h-5 px-3">
+                                        {member.tasks.length} Detailed Tasks
+                                     </Badge>
+                                  )}
+                                  {(!member.responsibilities || member.responsibilities.length === 0) && (!member.tasks || member.tasks.length === 0) && <span className="text-[9px] text-slate-400 italic">No duties mapped yet.</span>}
                                </div>
                             </Card>
                           ))}
@@ -587,7 +712,7 @@ export default function CaseHubPage() {
                           <History className="w-4 h-4" /> Tactical Log
                        </h3>
                        <div className="space-y-6">
-                          {caseData.timeline?.filter((t: any) => t.type?.includes('assignment')).slice(0, 3).map((log: any, i: number) => (
+                          {caseData.timeline?.filter((t: any) => t.type?.includes('assignment') || t.type?.includes('task')).slice(0, 3).map((log: any, i: number) => (
                             <div key={i} className="space-y-1 relative pl-6 border-l-2 border-accent/30">
                                <p className="text-[10px] font-bold text-white leading-tight">{log.action}</p>
                                <p className="text-[9px] text-slate-400 italic">"{log.remark}"</p>
