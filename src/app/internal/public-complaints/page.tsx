@@ -124,33 +124,12 @@ export default function PublicComplaintsTerminal() {
     return { total, pending, inProgress, actionTaken, closed };
   }, [complaints]);
 
-  // Bulk ID Migration (One-time or persistent check)
-  useEffect(() => {
-    if (!db || !complaints || !isRoot) return;
-    const triggerMigration = async () => {
-      const batch = writeBatch(db);
-      let modified = false;
-      complaints.forEach((c: any, index: number) => {
-        if (!c.caseId) {
-          const caseId = generateCaseId(complaints.length - index);
-          batch.update(doc(db, 'public_complaints', c.id), { 
-            caseId,
-            status: c.status === 'Pending' ? 'New Complaint' : c.status 
-          });
-          modified = true;
-        }
-      });
-      if (modified) await batch.commit();
-    };
-    triggerMigration();
-  }, [db, complaints, isRoot]);
-
   const handleDelete = async (id: string) => {
     if (!db || !isRoot) return
     setIsActionLoading(true)
     try {
       await deleteDoc(doc(db, 'public_complaints', id))
-      toast({ title: "Record Purged", description: "Case has been removed from all institutional indices." })
+      toast({ title: "Record Purged" })
     } catch (e) {
       toast({ variant: "destructive", title: "Purge Denied" })
     } finally {
@@ -180,7 +159,7 @@ export default function PublicComplaintsTerminal() {
   })
 
   return (
-    <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
+    <main className="min-h-screen bg-slate-50 dark:bg-slate-950 w-full overflow-x-hidden">
       <section className="pt-16 pb-12 bg-slate-900 text-white border-b-8 border-accent/20 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-1/3 h-full bg-accent/5 -skew-x-12"></div>
         <div className="container mx-auto px-4 relative z-10">
@@ -193,16 +172,16 @@ export default function PublicComplaintsTerminal() {
               <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">National Investigative & Reporting Terminal</p>
             </div>
             
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 w-full md:w-auto">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 md:gap-4 w-full md:w-auto">
                {[
-                 { label: 'Force Total', val: stats.total, color: 'text-white' },
-                 { label: 'Unprocessed', val: stats.pending, color: 'text-red-500' },
-                 { label: 'In Progress', val: stats.inProgress, color: 'text-blue-400' },
-                 { label: 'Finalized', val: stats.closed, color: 'text-emerald-400' },
+                 { label: 'Total', val: stats.total, color: 'text-white' },
+                 { label: 'New', val: stats.pending, color: 'text-red-500' },
+                 { label: 'Active', val: stats.inProgress, color: 'text-blue-400' },
+                 { label: 'Done', val: stats.closed, color: 'text-emerald-400' },
                ].map((s) => (
-                 <div key={s.label} className="bg-white/5 px-6 py-3 rounded-2xl border border-white/10 text-center shadow-xl">
-                   <p className="text-[9px] text-slate-500 font-black uppercase mb-1 tracking-widest">{s.label}</p>
-                   <p className={cn("text-2xl font-black leading-none", s.color)}>{s.val}</p>
+                 <div key={s.label} className="bg-white/5 px-4 py-3 rounded-2xl border border-white/10 text-center shadow-xl">
+                   <p className="text-[8px] text-slate-500 font-black uppercase mb-1 tracking-widest">{s.label}</p>
+                   <p className={cn("text-xl md:text-2xl font-black leading-none", s.color)}>{s.val}</p>
                  </div>
                ))}
             </div>
@@ -210,16 +189,16 @@ export default function PublicComplaintsTerminal() {
         </div>
       </section>
 
-      <section className="py-8 border-b bg-white dark:bg-slate-900 sticky top-10 z-30 shadow-sm transition-colors">
+      <section className="py-6 border-b bg-white dark:bg-slate-900 sticky top-12 md:top-10 z-30 shadow-sm transition-colors">
         <div className="container mx-auto px-4">
           <div className="flex flex-col lg:flex-row items-center justify-between gap-6">
-            <div className="flex flex-wrap w-full md:w-auto gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-2xl border border-slate-200">
-               {['All', ...CASE_STATUSES.slice(0, 4), 'Action Taken', 'Closed'].map(st => (
+            <div className="flex w-full overflow-x-auto no-scrollbar gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-2xl border">
+               {['All', ...CASE_STATUSES.slice(0, 3), 'Action Taken', 'Closed'].map(st => (
                  <button 
                   key={st} 
                   onClick={() => setStatusFilter(st)} 
                   className={cn(
-                    "whitespace-normal text-center leading-tight px-5 py-2 rounded-xl text-[9px] md:text-[10px] font-black uppercase tracking-tight transition-all min-w-[90px] flex items-center justify-center", 
+                    "whitespace-nowrap px-4 py-2 rounded-xl text-[9px] md:text-[10px] font-black uppercase tracking-tight transition-all shrink-0", 
                     statusFilter === st ? "bg-primary text-white shadow-lg" : "text-slate-500 hover:bg-white"
                   )}
                  >
@@ -228,84 +207,76 @@ export default function PublicComplaintsTerminal() {
                ))}
             </div>
             
-            <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto items-center">
+            <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto items-center">
               <Button 
                 onClick={() => router.push('/internal/public-complaints/analytics')}
                 variant="outline" 
-                className="h-12 md:h-14 rounded-2xl bg-accent/5 border-accent/20 text-accent font-black text-[10px] uppercase tracking-widest px-6"
+                className="w-full sm:w-auto h-11 rounded-xl bg-accent/5 border-accent/20 text-accent font-black text-[9px] uppercase tracking-widest px-6"
               >
-                <BarChart3 className="w-4 h-4 mr-2" /> Detailed Analytics
+                <BarChart3 className="w-3.5 h-3.5 mr-2" /> Analytics
               </Button>
 
               <Select value={investigatorFilter} onValueChange={setInvestigatorFilter}>
-                <SelectTrigger className="w-full sm:w-48 h-12 md:h-14 rounded-2xl border-slate-200 bg-white dark:bg-slate-950 font-bold text-[10px] uppercase tracking-widest"><SelectValue placeholder="Investigator" /></SelectTrigger>
+                <SelectTrigger className="w-full sm:w-44 h-11 rounded-xl border-slate-200 bg-white font-bold text-[9px] uppercase tracking-widest"><SelectValue placeholder="Officer" /></SelectTrigger>
                 <SelectContent className="bg-white z-[1000000]"><SelectItem value="All">All Officers</SelectItem>{investigators.map(name => <SelectItem key={name} value={name}>{name}</SelectItem>)}</SelectContent>
               </Select>
 
-              <div className="relative w-full max-md:max-w-full max-w-sm"><Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" /><Input placeholder="Docket No, Token, Name..." className="pl-12 h-12 md:h-14 rounded-2xl border-slate-200 text-sm shadow-inner bg-slate-50 dark:bg-slate-950 font-medium" value={search} onChange={(e) => setSearch(e.target.value)} /></div>
+              <div className="relative w-full sm:w-64"><Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" /><Input placeholder="Search Docket, Name..." className="pl-10 h-11 rounded-xl border-slate-200 text-xs shadow-inner bg-slate-50 dark:bg-slate-950" value={search} onChange={(e) => setSearch(e.target.value)} /></div>
             </div>
           </div>
         </div>
       </section>
 
       <section className="py-8 pb-32">
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto px-4 max-w-6xl">
           {dataLoading ? (
-            <div className="text-center py-32"><Loader2 className="w-12 h-12 animate-spin text-accent mx-auto mb-4" /><p className="text-slate-400 font-bold uppercase tracking-widest text-[10px]">Synchronizing Case Registry...</p></div>
+            <div className="text-center py-32"><Loader2 className="w-12 h-12 animate-spin text-accent mx-auto mb-4" /><p className="text-slate-400 font-bold uppercase tracking-widest text-[10px]">Syncing...</p></div>
           ) : filtered.length > 0 ? (
-            <div className="grid gap-6 max-w-6xl mx-auto">
+            <div className="grid gap-6">
               {filtered.map((c: any) => (
-                <Card key={c.id} className="border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-100 relative group hover:shadow-2xl transition-all duration-500 hover:-translate-y-1">
+                <Card key={c.id} className="border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900 rounded-[2rem] md:rounded-[2.5rem] border border-slate-100 group hover:shadow-xl transition-all duration-500">
                   <CardContent className="p-0">
                     <div className="flex flex-col md:flex-row items-stretch">
-                      <div className="p-8 bg-slate-50 dark:bg-slate-800 md:w-56 text-center border-r border-slate-100 flex flex-col items-center justify-center shrink-0 space-y-4">
-                         <div className="space-y-1"><span className="text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">DOCKET NO</span><div className="text-sm font-black text-primary dark:text-white tracking-tighter bg-white dark:bg-slate-950 px-3 py-1 rounded-lg border border-slate-100 shadow-sm whitespace-nowrap">{c.caseId || 'PROVISIONING'}</div></div>
-                         <div className="space-y-1"><span className="text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">TOKEN</span><div className="text-[11px] font-mono font-bold text-accent whitespace-nowrap">{c.token}</div></div>
-                         <Badge className={cn("text-[9px] font-black uppercase px-4 py-1.5 rounded-full border-none shadow-md", getStatusColor(c.status))}>{c.status}</Badge>
+                      <div className="p-6 md:p-8 bg-slate-50 dark:bg-slate-800 md:w-56 text-center border-r border-slate-100 flex flex-col items-center justify-center shrink-0 space-y-3">
+                         <div className="space-y-1"><span className="text-[8px] font-black text-slate-400 uppercase tracking-[0.3em]">DOCKET</span><div className="text-xs md:text-sm font-black text-primary dark:text-white tracking-tighter bg-white dark:bg-slate-950 px-3 py-1 rounded-lg shadow-sm whitespace-nowrap">{c.caseId || 'NEW'}</div></div>
+                         <div className="space-y-1"><span className="text-[8px] font-black text-slate-400 uppercase tracking-[0.3em]">TOKEN</span><div className="text-[10px] font-mono font-bold text-accent whitespace-nowrap">{c.token}</div></div>
+                         <Badge className={cn("text-[8px] font-black uppercase px-4 py-1 rounded-full border-none shadow-sm", getStatusColor(c.status))}>{c.status}</Badge>
                       </div>
-                      <div className="flex-1 p-8 grid lg:grid-cols-4 gap-8 items-center">
+                      <div className="flex-1 p-6 md:p-8 grid grid-cols-1 lg:grid-cols-4 gap-6 md:gap-8 items-center">
                         <div className="lg:col-span-3 space-y-4">
-                          <div className="space-y-1"><div className="flex items-center gap-3"><h3 className="text-2xl font-headline font-bold text-primary dark:text-white leading-tight group-hover:text-accent transition-colors whitespace-nowrap">{c.subject}</h3>{c.victimIsMinor && <Badge className="bg-red-600 text-white text-[8px] font-black animate-pulse">MINOR AT RISK</Badge>}{c.priority && <Badge variant="outline" className={cn("text-[8px] font-black border-none", c.priority === 'High' ? "bg-red-50 text-red-600" : "bg-blue-50 text-blue-600")}>{c.priority} PRIORITY</Badge>}</div><p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest flex items-center gap-1.5"><MapPin className="w-3 h-3 text-accent" /> {c.incidentLocation} • {c.stateName || 'National Scope'}</p></div>
+                          <div className="space-y-1">
+                             <div className="flex flex-wrap items-center gap-3">
+                               <h3 className="text-xl md:text-2xl font-headline font-bold text-primary dark:text-white leading-tight group-hover:text-accent transition-colors">{c.subject}</h3>
+                               {c.victimIsMinor && <Badge className="bg-red-600 text-white text-[7px] font-black animate-pulse">MINOR</Badge>}
+                             </div>
+                             <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest flex items-center gap-1.5"><MapPin className="w-3 h-3 text-accent" /> {c.incidentLocation}</p>
+                          </div>
                           <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 pt-4 border-t border-slate-50 dark:border-slate-800">
-                             <div className="space-y-1"><p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Complainant</p><p className="text-xs font-bold flex items-center gap-1.5"><User className="w-3 h-3 text-accent" /> {c.fullName}</p></div>
-                             <div className="space-y-1"><p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Filed On</p><p className="text-xs font-bold flex items-center gap-1.5"><Clock className="w-3 h-3 text-accent" /> {c.createdAt?.toDate ? c.createdAt.toDate().toLocaleDateString('en-IN') : 'Just now'}</p></div>
-                             <div className="space-y-1">
-                                <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Investigative Team</p>
-                                <div className="flex items-center gap-2">
-                                  <p className="text-xs font-black text-emerald-600 uppercase flex items-center gap-1.5">
-                                     <Users className="w-3 h-3 text-accent" /> 
-                                     {(c.investigationTeam || []).length > 0 
-                                       ? `${(c.investigationTeam || []).length} Officials` 
-                                       : c.assignedTo || 'Unassigned'}
-                                  </p>
-                                  <Link href={`/internal/public-complaints/${c.id}?tab=team`} title="Update investigation status and team">
-                                    <Edit3 className="w-3.5 h-3.5 text-slate-300 hover:text-accent cursor-pointer transition-colors" />
-                                  </Link>
-                                </div>
+                             <div className="space-y-1"><p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Name</p><p className="text-xs font-bold truncate">{c.fullName}</p></div>
+                             <div className="space-y-1"><p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Date</p><p className="text-xs font-bold">{c.createdAt?.toDate ? c.createdAt.toDate().toLocaleDateString() : 'Now'}</p></div>
+                             <div className="space-y-1 col-span-2 sm:col-span-1">
+                                <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Team</p>
+                                <p className="text-xs font-black text-emerald-600 uppercase truncate">
+                                   {(c.investigationTeam || []).length > 0 ? `${(c.investigationTeam || []).length} Officers` : 'Unassigned'}
+                                </p>
                              </div>
                           </div>
                         </div>
-                        <div className="flex flex-col gap-3 h-full justify-center">
-                          <Button size="lg" className="w-full bg-primary text-white font-bold h-12 rounded-xl text-[11px] uppercase tracking-widest gap-2 shadow-xl shadow-primary/20 hover:bg-secondary transition-all" onClick={() => router.push(`/internal/public-complaints/${c.id}`)}>
-                            <LayoutDashboard className="w-4 h-4" /> Manage Case
+                        <div className="flex flex-col gap-2.5 h-full justify-center">
+                          <Button size="lg" className="w-full bg-primary text-white font-bold h-11 rounded-xl text-[10px] uppercase tracking-widest gap-2 shadow-lg hover:bg-secondary transition-all" onClick={() => router.push(`/internal/public-complaints/${c.id}`)}>
+                            <LayoutDashboard className="w-4 h-4" /> Manage
                           </Button>
                           
                           {isRoot && (
                             <AlertDialog>
                               <AlertDialogTrigger asChild>
-                                <Button variant="ghost" size="sm" className="h-10 text-red-500/60 hover:text-red-500 transition-colors uppercase font-black text-[10px] tracking-widest">
-                                  <Trash2 className="w-4 h-4 mr-2" /> Purge Record
+                                <Button variant="ghost" size="sm" className="h-10 text-red-500/60 hover:text-red-500 transition-colors uppercase font-black text-[9px] tracking-widest">
+                                  <Trash2 className="w-4 h-4 mr-2" /> Purge
                                 </Button>
                               </AlertDialogTrigger>
-                              <AlertDialogContent className="rounded-[2.5rem]">
-                                <AlertDialogHeader>
-                                  <AlertDialogTitle>Confirm Deletion</AlertDialogTitle>
-                                  <AlertDialogDescription>Are you sure you want to delete this item? This action may be irreversible. Please confirm before continuing.</AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                  <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
-                                  <AlertDialogAction onClick={() => handleDelete(c.id)} className="bg-red-600 hover:bg-red-700 rounded-xl">Confirm Deletion</AlertDialogAction>
-                                </AlertDialogFooter>
+                              <AlertDialogContent className="rounded-[2.5rem] w-[95vw] md:w-full">
+                                <AlertDialogHeader><AlertDialogTitle>Purge Record?</AlertDialogTitle><AlertDialogDescription>This action is irreversible.</AlertDialogDescription></AlertDialogHeader>
+                                <AlertDialogFooter><AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel><AlertDialogAction onClick={() => handleDelete(c.id)} className="bg-red-600 hover:bg-red-700 rounded-xl">Confirm</AlertDialogAction></AlertDialogFooter>
                               </AlertDialogContent>
                             </AlertDialog>
                           )}
@@ -317,7 +288,7 @@ export default function PublicComplaintsTerminal() {
               ))}
             </div>
           ) : (
-            <div className="text-center py-40 bg-white dark:bg-slate-900 rounded-[3rem] border-4 border-dashed border-slate-100 dark:border-slate-800"><Activity className="w-20 h-20 mx-auto mb-6 text-slate-200" /><h3 className="text-2xl font-headline font-bold text-slate-400">No active cases identified</h3><p className="text-sm text-slate-500 mt-2">Adjust your filters or examine the search parameters.</p></div>
+            <div className="text-center py-40 opacity-30"><Activity className="w-20 h-20 mx-auto mb-6" /><p className="text-xl font-headline font-bold uppercase tracking-widest">Registry Empty</p></div>
           )}
         </div>
       </section>

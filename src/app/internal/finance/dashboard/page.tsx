@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo } from 'react'
@@ -21,26 +20,24 @@ import {
 import { cn } from '@/lib/utils'
 
 /**
- * Financial Intelligence Dashboard: Complete Real-Time Sync.
+ * Financial Intelligence Dashboard: Full Responsive High-Fidelity Design.
  */
 export default function FinanceDashboard() {
   const { user, loading: authLoading } = useUser()
   const db = useFirestore()
   const router = useRouter()
 
-  // Real-Time Global Financial State
   const summaryRef = useMemoFirebase(() => {
     if (!db || !user) return null;
     return doc(db, 'finance_summary', 'state');
   }, [db, user]);
   const { data: summary, loading: summaryLoading } = useDoc(summaryRef);
 
-  // Real-Time Transaction Stream
   const txQuery = useMemoFirebase(() => {
     if (!db || !user) return null;
     return query(collection(db, 'finance_transactions'), orderBy('createdAt', 'desc'), limit(10));
   }, [db, user]);
-  const { data: recentTransactions, loading: txLoading } = useCollection(txQuery);
+  const { data: recentTransactions } = useCollection(txQuery);
 
   const stats = useMemo(() => {
     const s = summary || {
@@ -77,53 +74,53 @@ export default function FinanceDashboard() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-20">
+    <main className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-20 w-full overflow-x-hidden">
       <header className="pt-10 md:pt-16 pb-8 bg-slate-900 text-white border-b-8 border-emerald-500/20 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-1/3 h-full bg-emerald-500/5 -skew-x-12"></div>
         <div className="container mx-auto px-4 relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="space-y-1">
+          <div className="space-y-1 text-center md:text-left">
             <div className="inline-flex items-center gap-2 bg-emerald-500/20 text-emerald-400 px-3 py-1 rounded-full text-[9px] font-black uppercase border border-accent/30 tracking-widest">
               <ShieldCheck className="w-3 h-3" /> Treasury Governance
             </div>
             <h1 className="text-3xl md:text-5xl font-headline font-bold leading-tight">Financial <span className="text-emerald-400 italic">Intelligence</span></h1>
           </div>
-          <Button className="bg-emerald-600 text-white hover:bg-emerald-500 shadow-xl font-bold text-[10px] uppercase h-11 px-8 rounded-xl">
+          <Button className="bg-emerald-600 text-white hover:bg-emerald-500 shadow-xl font-bold text-[9px] md:text-[10px] uppercase h-11 px-8 rounded-xl w-full md:w-auto">
             <Download className="w-4 h-4 mr-2" /> Export Ledgers
           </Button>
         </div>
       </header>
 
       <section className="py-8 container mx-auto px-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
           {[
-            { label: 'Net Treasury Balance', val: stats.net, icon: Wallet, color: 'text-blue-500', up: true },
-            { label: 'Total Inflow', val: stats.income, icon: TrendingUp, color: 'text-emerald-500', up: true },
-            { label: 'Total Outflow', val: stats.expense, icon: TrendingDown, color: 'text-rose-500', up: false },
-            { label: 'Liquid Assets', val: stats.bank + stats.cash, icon: Building, color: 'text-amber-500', up: true }
+            { label: 'Treasury Net', val: stats.net, icon: Wallet, color: 'text-blue-500' },
+            { label: 'Total Inflow', val: stats.income, icon: TrendingUp, color: 'text-emerald-500' },
+            { label: 'Total Outflow', val: stats.expense, icon: TrendingDown, color: 'text-rose-500' },
+            { label: 'Liquid Assets', val: stats.bank + stats.cash, icon: Building, color: 'text-amber-500' }
           ].map((stat, i) => (
-            <Card key={i} className="border-none shadow-sm rounded-3xl overflow-hidden bg-white dark:bg-slate-900 transition-all hover:shadow-lg">
-              <CardContent className="p-6">
+            <Card key={i} className="border-none shadow-sm rounded-2xl md:rounded-3xl overflow-hidden bg-white dark:bg-slate-900 transition-all hover:shadow-lg">
+              <CardContent className="p-5 md:p-6">
                  <div className="flex justify-between items-start mb-4">
-                    <div className={cn("p-3 rounded-2xl bg-slate-50 dark:bg-slate-800", stat.color)}><stat.icon className="w-6 h-6" /></div>
-                    <Badge variant="outline" className="text-[9px] border-emerald-100 text-emerald-600 font-black uppercase">Real-Time</Badge>
+                    <div className={cn("p-2.5 md:p-3 rounded-xl md:rounded-2xl bg-slate-50 dark:bg-slate-800", stat.color)}><stat.icon className="w-5 h-5 md:w-6 md:h-6" /></div>
+                    <Badge variant="outline" className="text-[7px] md:text-[9px] border-emerald-100 text-emerald-600 font-black uppercase">Live</Badge>
                  </div>
-                 <p className="text-2xl md:text-3xl font-headline font-bold text-primary dark:text-white leading-none">₹{stat.val.toLocaleString()}</p>
-                 <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mt-1">{stat.label}</p>
+                 <p className="text-lg md:text-3xl font-headline font-bold text-primary dark:text-white leading-none truncate">₹{stat.val.toLocaleString()}</p>
+                 <p className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-slate-400 mt-1">{stat.label}</p>
               </CardContent>
             </Card>
           ))}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-10">
-          <Card className="lg:col-span-2 border-none shadow-sm rounded-[2.5rem] bg-white dark:bg-slate-900 p-8">
-            <CardHeader className="p-0 mb-8 flex flex-row items-center justify-between">
+          <Card className="lg:col-span-2 border-none shadow-sm rounded-[2rem] md:rounded-[2.5rem] overflow-hidden bg-white dark:bg-slate-900 p-6 md:p-8">
+            <CardHeader className="p-0 mb-8 flex flex-row items-center justify-between gap-4">
                <div>
-                  <CardTitle className="text-xl font-headline font-bold">Operational Cash Flow</CardTitle>
-                  <CardDescription>Live Income vs. Expenditure Analytics</CardDescription>
+                  <CardTitle className="text-lg md:text-xl font-headline font-bold">Operational Cash Flow</CardTitle>
+                  <CardDescription className="text-xs">Live Income vs. Expenditure Analytics</CardDescription>
                </div>
-               <RefreshCw className={cn("w-5 h-5 text-emerald-500", txLoading && "animate-spin")} />
+               <RefreshCw className="w-5 h-5 text-emerald-500 shrink-0" />
             </CardHeader>
-            <div className="h-[350px]">
+            <div className="h-[250px] md:h-[350px]">
                <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={stats.charts}>
                     <defs>
@@ -142,14 +139,14 @@ export default function FinanceDashboard() {
             </div>
           </Card>
 
-          <Card className="border-none shadow-sm rounded-[2.5rem] bg-white dark:bg-slate-900 p-8">
+          <Card className="border-none shadow-sm rounded-[2rem] md:rounded-[2.5rem] bg-white dark:bg-slate-900 p-6 md:p-8">
              <CardHeader className="p-0 mb-6">
-                <CardTitle className="text-xl font-headline font-bold">Fund Utilization</CardTitle>
+                <CardTitle className="text-lg md:text-xl font-headline font-bold">Fund Utilization</CardTitle>
              </CardHeader>
-             <div className="h-[250px]">
+             <div className="h-[200px] md:h-[250px]">
                 <ResponsiveContainer width="100%" height="100%">
                    <PieChart>
-                      <Pie data={stats.pie} cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={5} dataKey="value">
+                      <Pie data={stats.pie} cx="50%" cy="50%" innerRadius={50} outerRadius={80} paddingAngle={5} dataKey="value">
                          {stats.pie.map((entry: any, index: number) => <Cell key={index} fill={entry.color} />)}
                       </Pie>
                       <Tooltip />
@@ -158,8 +155,8 @@ export default function FinanceDashboard() {
              </div>
              <div className="grid grid-cols-2 gap-3 mt-6">
                 {stats.pie.map((entry: any, i: number) => (
-                  <div key={i} className="flex items-center gap-2 text-[9px] font-black uppercase text-slate-500">
-                     <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: entry.color }}></div>
+                  <div key={i} className="flex items-center gap-2 text-[8px] md:text-[9px] font-black uppercase text-slate-500">
+                     <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: entry.color }}></div>
                      <span className="truncate">{entry.name}</span>
                   </div>
                 ))}

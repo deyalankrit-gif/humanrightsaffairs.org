@@ -200,8 +200,6 @@ export function AppSidebar() {
 
   /**
    * Tactical isActive check.
-   * Ensures that parent routes (like /public-complaints) are NOT highlighted when a 
-   * more specific sibling/child menu item (like /public-complaints/analytics) is active.
    */
   const checkIsActive = (href: string) => {
     if (!pathname) return false;
@@ -265,8 +263,8 @@ export function AppSidebar() {
   }, [pinnedHrefs]);
 
   return (
-    <Sidebar collapsible="icon" className="border-r bg-sidebar print:hidden">
-      <SidebarHeader className="h-20 border-b flex items-center justify-center">
+    <Sidebar collapsible="icon" className="border-r bg-sidebar print:hidden overflow-hidden">
+      <SidebarHeader className="h-20 border-b flex items-center justify-center shrink-0">
         <Link href="/" className="flex items-center gap-3 px-4 w-full">
           <div className="relative w-10 h-10 shrink-0">
             <Image src="/HRAT%20Logo.jpeg" alt="Logo" fill className="object-contain" />
@@ -278,7 +276,7 @@ export function AppSidebar() {
         </Link>
       </SidebarHeader>
       
-      <SidebarContent className="py-6 custom-scrollbar scroll-smooth">
+      <SidebarContent className="py-6 custom-scrollbar scroll-smooth overflow-x-hidden">
         {isAdminPortal ? (
           <>
             {filteredTopAnalyticsLinks.length > 0 && (
@@ -489,7 +487,7 @@ export function AppSidebar() {
                   <SidebarMenuItem key={link.name} ref={isActive ? activeItemRef : null}>
                     <SidebarMenuButton asChild isActive={isActive} tooltip={link.name} className={cn("h-11 rounded-xl transition-all px-4", isActive ? "bg-accent text-white font-bold" : "hover:bg-secondary/10 hover:text-secondary")}>
                       <Link href={link.href} className="flex items-center gap-3">
-                        <link.icon className={cn("w-3 h-3 md:w-3.5 md:h-3.5 transition-colors", isActive ? "text-white" : "text-muted-foreground group-hover:text-white")} />
+                        <link.icon className={cn("w-4 h-4 md:w-5 md:h-5 transition-colors", isActive ? "text-white" : "text-muted-foreground group-hover:text-white")} />
                         <span className="group-data-[collapsible=icon]:hidden">{link.name}</span>
                       </Link>
                     </SidebarMenuButton>
@@ -513,7 +511,7 @@ export function AppSidebar() {
         )}
       </SidebarContent>
 
-      <SidebarFooter className="border-t p-4 space-y-4">
+      <SidebarFooter className="border-t p-4 space-y-4 shrink-0">
         {!isAdminPortal && (
           <div className="group-data-[collapsible=icon]:hidden">
             <DonationDialog>
@@ -524,12 +522,12 @@ export function AppSidebar() {
           </div>
         )}
         {isAdminPortal && (
-           <div className="p-4 bg-white/5 rounded-xl border border-white/10 group-data-[collapsible=icon]:hidden">
+           <div className="p-4 bg-white/5 rounded-xl border border-white/10 group-data-[collapsible=icon]:hidden overflow-hidden">
               <div className="flex items-center gap-2 mb-2">
                  <div className={cn("w-2 h-2 rounded-full animate-pulse", isRoot ? "bg-red-600" : "bg-emerald-500")}></div>
                  <span className="text-[10px] font-black uppercase text-sidebar-foreground/70">{isRoot ? "Root Terminal" : "Operational"}</span>
               </div>
-              <p className="text-[9px] font-bold text-sidebar-foreground/50 truncate">{user?.email}</p>
+              <p className="text-[9px] font-bold text-sidebar-foreground/50 truncate w-full">{user?.email}</p>
            </div>
         )}
       </SidebarFooter>

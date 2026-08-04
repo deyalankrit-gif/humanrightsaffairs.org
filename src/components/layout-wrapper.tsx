@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useEffect, useState } from 'react';
@@ -21,6 +20,7 @@ import { cn } from '@/lib/utils';
  * LayoutWrapper manages the global layout structure, switching between
  * the public portal (with top navbar and PublicFooter) and the administrative 
  * portal (with left-hand sidebar and AdminFooter).
+ * Optimized for full responsiveness across all viewports.
  */
 export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -51,12 +51,12 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
       <SidebarProvider defaultOpen={true}>
         <div className="flex min-h-screen bg-background w-full">
           <AppSidebar />
-          <SidebarInset className="flex flex-col min-w-0">
-            <header className="flex h-12 md:h-10 shrink-0 items-center gap-2 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 px-4 transition-all duration-300 print:hidden">
+          <SidebarInset className="flex flex-col min-w-0 w-full">
+            <header className="flex h-14 md:h-10 shrink-0 items-center gap-2 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 px-4 transition-all duration-300 print:hidden">
               <SidebarTrigger className="-ml-1 scale-90" />
               <Separator orientation="vertical" className="mr-2 h-4" />
               <div className="flex-1 min-w-0">
-                 <h1 className="text-[8px] md:text-[9px] font-bold uppercase tracking-[0.15em] md:tracking-[0.2em] text-slate-400 truncate">
+                 <h1 className="text-[7px] md:text-[9px] font-bold uppercase tracking-[0.15em] md:tracking-[0.2em] text-slate-400 truncate">
                     Personnel Portal <span className={cn("ml-1 md:ml-2 font-black", isRoot ? "text-red-500" : "text-emerald-500")}>
                       {isRoot ? "Root Terminal" : "Staff Terminal"}
                     </span>
@@ -69,7 +69,9 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
             <main className="flex-1 overflow-x-hidden w-full">
               {/* Contextual Help Injected into Admin Layout */}
               <ContextualHelp />
-              {children}
+              <div className="w-full px-2 sm:px-4 md:px-0">
+                {children}
+              </div>
             </main>
             <AdminFooter />
           </SidebarInset>
