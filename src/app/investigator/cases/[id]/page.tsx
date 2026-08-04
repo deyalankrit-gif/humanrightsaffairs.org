@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useEffect, useMemo } from 'react'
@@ -17,7 +16,7 @@ import {
   ArrowLeft, 
   Search, 
   ShieldCheck, 
-  Loader2 as GlobalLoader, 
+  Loader2, 
   MapPin, 
   Clock, 
   FileText, 
@@ -52,7 +51,8 @@ import {
   Paperclip,
   Settings,
   ChevronDown,
-  X
+  X,
+  Clock as GlobalLoader
 } from 'lucide-react'
 import { 
   Select, 
@@ -314,7 +314,7 @@ export default function InvestigationCaseHub() {
                            </div>
                            <div className="space-y-4">
                               <h4 className="text-[11px] font-black uppercase text-emerald-600 tracking-[0.2em] flex items-center gap-3">
-                                 <CheckCircle2 className="w-4 h-4" /> Evidence Req
+                                 <CheckCircle2 className="w-4 h-4 text-emerald-500" /> Evidence Req
                               </h4>
                               <div className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap pl-7 border-l-2 border-emerald-100">
                                  {mandate.evidenceToCollect || "Visual site verification and authenticated testimonials."}
@@ -455,7 +455,9 @@ export default function InvestigationCaseHub() {
                                             </ScrollArea>
                                             <div className="p-8 border-t bg-slate-50 shrink-0 flex gap-4">
                                                <DialogClose asChild><Button variant="ghost" className="flex-1 rounded-xl">Cancel</Button></DialogClose>
-                                               <Button onClick={() => handleSubmitTaskReport(myAssignmentIndex, taskIdx)} disabled={isActionLoading || !reportForm.title} className="flex-1 bg-indigo-600 text-white font-bold h-12 rounded-xl">Authorize & Submit Report</Button>
+                                               <Button onClick={() => handleSubmitTaskReport(myAssignmentIndex, taskIdx)} disabled={isActionLoading || !reportForm.title} className="flex-1 bg-indigo-600 text-white font-bold h-12 rounded-xl">
+                                                  {isActionLoading ? <Loader2 className="animate-spin mr-2" /> : "Authorize & Submit Report"}
+                                               </Button>
                                             </div>
                                          </DialogContent>
                                       </Dialog>
@@ -518,7 +520,7 @@ export default function InvestigationCaseHub() {
          </TabsContent>
 
          <TabsContent value="evidence" className="animate-in fade-in zoom-in-95 duration-500">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                <Card className="rounded-3xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center p-12 text-center space-y-4 hover:border-indigo-600 transition-all cursor-pointer bg-white group">
                   <div className="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center text-slate-300 group-hover:bg-indigo-600 group-hover:text-white transition-all"><Plus className="w-8 h-8" /></div>
                   <p className="font-bold text-primary uppercase text-xs">Append Document</p>
@@ -548,8 +550,4 @@ export default function InvestigationCaseHub() {
       </Tabs>
     </div>
   )
-}
-
-function GlobalLoader({ className }: { className?: string }) {
-  return <Clock className={cn("animate-spin", className)} />
 }

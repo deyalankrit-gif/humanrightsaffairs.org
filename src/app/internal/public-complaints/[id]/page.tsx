@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useEffect, useState, useMemo } from 'react'
@@ -63,7 +62,7 @@ import {
   DialogTrigger,
   DialogDescription,
   DialogClose,
-  DialogFooter as UiDialogFooter
+  DialogFooter
 } from "@/components/ui/dialog"
 import {
   AlertDialog,
@@ -87,6 +86,7 @@ import { cn } from '@/lib/utils'
 import { CASE_STATUSES, REPORT_TEMPLATES, REPORT_GUIDANCE, STANDARD_RESPONSIBILITIES } from '@/lib/complaint-constants'
 import { getStatusColor } from '@/lib/complaint-utils'
 import { InvestigationJourney } from '@/components/investigation-journey'
+import { Footer } from '@/components/footer'
 import Link from 'next/link'
 
 export default function CaseHubPage() {
@@ -99,7 +99,6 @@ export default function CaseHubPage() {
   
   const [activeTab, setActiveTab] = useState('overview')
   const [isActionLoading, setIsActionLoading] = useState(false)
-  const [remark, setRemark] = useState('')
   const [activeStatus, setActiveStatus] = useState('')
   const [selectedReportType, setSelectedReportType] = useState('preliminary_assessment')
   
@@ -172,6 +171,7 @@ export default function CaseHubPage() {
     if (caseData) {
       if (caseData.investigationTeam) setTeamMembers(caseData.investigationTeam);
       if (caseData.mandate) setMandate(prev => ({ ...prev, ...caseData.mandate }));
+      setActiveStatus(caseData.status);
     }
   }, [caseData]);
 
@@ -344,6 +344,7 @@ export default function CaseHubPage() {
         })
       });
       toast({ title: "Lifecycle Updated" });
+      setActiveStatus(newStatus);
     } catch (e) {
       toast({ variant: "destructive", title: "Transition Denied" });
     } finally {
@@ -427,7 +428,7 @@ export default function CaseHubPage() {
            <div className="flex items-center gap-6 w-full md:w-auto order-2 md:order-1">
               <div className="flex flex-col items-center shrink-0">
                  <span className="text-[9px] font-black text-sky-400 uppercase tracking-widest animate-pulse mb-1">Go to Next Process</span>
-                 <Select onValueChange={handleUpdateStatus} value={caseData.status}>
+                 <Select onValueChange={handleUpdateStatus} value={activeStatus}>
                     <SelectTrigger className="w-full md:w-56 h-11 bg-white/5 border-white/10 text-white font-bold text-[10px] uppercase">
                        <SelectValue />
                     </SelectTrigger>
@@ -473,7 +474,7 @@ export default function CaseHubPage() {
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                       <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
-                      <AlertDialogAction onClick={() => handleDeleteCase} className="bg-red-600 hover:bg-red-700 rounded-xl">Confirm Deletion</AlertDialogAction>
+                      <AlertDialogAction onClick={handleDeleteCase} className="bg-red-600 hover:bg-red-700 rounded-xl">Confirm Deletion</AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>
                 </AlertDialog>

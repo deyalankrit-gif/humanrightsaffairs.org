@@ -103,7 +103,7 @@ export default function InvestigatorDashboard() {
             <CardContent className="p-6 flex items-center gap-5">
               <div className={cn("p-4 rounded-2xl", s.bg)}>{s.icon}</div>
               <div>
-                <p className="text-3xl font-headline font-bold leading-none">{s.val}</p>
+                <p className="text-3xl font-headline font-bold leading-none">{s.value}</p>
                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">{s.label}</p>
               </div>
             </CardContent>
@@ -138,7 +138,7 @@ export default function InvestigatorDashboard() {
                               <h4 className="text-xl font-bold text-primary group-hover:text-indigo-600 transition-colors leading-tight truncate">{c.subject}</h4>
                               <Badge className={cn(
                                 "text-[7px] font-black uppercase border-none h-4",
-                                c.priority === 'High' ? "bg-red-500 text-white" : "bg-blue-500 text-white"
+                                c.priority === 'High' ? "bg-red-50 text-red-600" : "bg-blue-50 text-blue-600"
                               )}>{c.priority}</Badge>
                            </div>
                            <p className="text-xs text-slate-400 font-bold uppercase flex items-center gap-1.5"><MapPin className="w-3 h-3 text-accent" /> {c.districtName}, {c.stateName}</p>
