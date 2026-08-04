@@ -78,17 +78,26 @@ const syncNewsFlow = ai.defineFlow(
     // 1. Fetch raw news from high-fidelity sources
     for (const source of RSS_SOURCES) {
       try {
-        const response = await fetch(source.url, { next: { revalidate: 0 } });
+        const response = await fetch(source.url, { 
+          next: { revalidate: 0 },
+          signal: AbortSignal.timeout(8000) // 8s timeout per source
+        });
+        
+        if (!response.ok) continue;
+
         const xml = await response.text();
         const data = await parser.parseString(xml);
-        rawItems = rawItems.concat(data.items.map(i => ({
-          title: (i.title || '').substring(0, 300),
-          link: i.link || '',
-          source: source.name,
-          content: (i.contentSnippet || i.content || '').substring(0, 800)
-        })));
+        
+        if (data && data.items) {
+          rawItems = rawItems.concat(data.items.map(i => ({
+            title: (i.title || '').substring(0, 300),
+            link: i.link || '',
+            source: source.name,
+            content: (i.contentSnippet || i.content || '').substring(0, 800)
+          })));
+        }
       } catch (err) {
-        console.warn(`[NEWS-SYNC] Source ${source.name} unreachable.`);
+        console.warn(`[NEWS-SYNC] Source ${source.name} unreachable or timeout.`);
       }
     }
 
@@ -128,27 +137,35 @@ const syncNewsFlow = ai.defineFlow(
     // 3. Sequential Translation (Prevents Rate-Limit Crashes)
     const finalizedNews = [];
     for (const item of processedStories) {
-      const translation = await translateNews({
-        title: item.title,
-        content: item.content,
-        category: item.category || 'Human Rights'
-      });
+      try {
+        const translation = await translateNews({
+          title: item.title,
+          content: item.content,
+          category: item.category || 'Human Rights'
+        });
 
-      // Await the hasBengali check as it is now an async Server Action
-      const isSuccess = (await hasBengali(translation.title)) || (await hasBengali(translation.content));
+        const isSuccess = (await hasBengali(translation.title)) || (await hasBengali(translation.content));
 
-      finalizedNews.push({
-        ...item,
-        originalEnglish: { 
-          title: item.title, 
-          content: item.content, 
-          category: item.category || 'General' 
-        },
-        bengaliTranslation: translation,
-        translationStatus: isSuccess ? "Success" : "Failed",
-        scope: item.scope || "India",
-        scopePriority: (item.scope || '').includes('Bengal') ? 1 : 2
-      });
+        finalizedNews.push({
+          ...item,
+          originalEnglish: { 
+            title: item.title, 
+            content: item.content, 
+            category: item.category || 'General' 
+          },
+          bengaliTranslation: translation,
+          translationStatus: isSuccess ? "Success" : "Failed",
+          scope: item.scope || "India",
+          scopePriority: (item.scope || '').includes('Bengal') ? 1 : 2
+        });
+      } catch (transErr) {
+        // Continue with original item if translation fails
+        finalizedNews.push({
+          ...item,
+          originalEnglish: { title: item.title, content: item.content, category: item.category || 'General' },
+          translationStatus: "Failed"
+        });
+      }
     }
 
     return {

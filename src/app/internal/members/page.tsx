@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useEffect, useState } from 'react'
@@ -155,6 +154,15 @@ export default function InternalMembersDirectory() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
+      // PROXY STABILITY: Check size before processing to avoid "Unexpected response" from server action timeouts
+      if (file.size > 153600) { // 150KB limit
+        toast({
+          variant: "destructive",
+          title: "File Too Heavy",
+          description: "Profile photo must be under 150KB for optimized registry sync."
+        });
+        return;
+      }
       const reader = new FileReader()
       reader.onloadend = () => {
         setNewMember(prev => ({ ...prev, imageId: reader.result as string }))
@@ -287,7 +295,7 @@ export default function InternalMembersDirectory() {
         <div className="flex flex-col md:flex-row items-stretch">
           <div className="p-5 bg-slate-50 dark:bg-slate-800 md:w-44 text-center border-r border-slate-100 dark:border-slate-700 flex flex-col items-center justify-center shrink-0">
              <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">ID</span>
-             <span className="text-xl font-headline font-bold text-primary dark:text-white tracking-tighter">{member.memberId || 'PENDING'}</span>
+             <span className="text-xl font-headline font-bold text-primary dark:text-white tracking-tighter whitespace-nowrap">{member.memberId || 'PENDING'}</span>
           </div>
           <div className="flex-1 p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="space-y-2 text-center sm:text-left w-full sm:w-auto">
@@ -520,7 +528,7 @@ export default function InternalMembersDirectory() {
             </div>
             <div className="relative w-full max-md:max-w-full max-w-md">
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-              <Input placeholder="Filter by name, ID or location..." className="pl-10 h-12 md:h-11 rounded-2xl border-slate-200 text-sm shadow-inner bg-slate-50 dark:bg-slate-950" value={search} onChange={(e) => setSearch(e.target.value)} />
+              <Input placeholder="Filter by name, ID or location..." className="pl-10 h-12 md:h-11 rounded-2xl border-slate-200 text-sm shadow-inner bg-slate-50 dark:bg-slate-950 font-medium" value={search} onChange={(e) => setSearch(e.target.value)} />
             </div>
           </div>
         </div>

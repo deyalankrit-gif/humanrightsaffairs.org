@@ -1,11 +1,14 @@
 import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import { initializeFirestore, getFirestore, Firestore } from 'firebase/firestore';
 import { firebaseConfig } from './config';
 
 /**
  * initializeFirebase: Core institutional utility for establishing Firebase connections.
  * Supports named application instances to enable independent authenticated sessions (Auth Isolation).
+ * 
+ * [STABILITY]: Configures Firestore with long-polling to prevent "Unexpected Response" errors
+ * caused by workstation proxy interference with streaming connections.
  * 
  * @param name - Optional unique identifier for the application node (e.g. 'AdminTerminal')
  */
@@ -22,7 +25,11 @@ export function initializeFirebase(name?: string) {
   }
 
   const auth = getAuth(app);
-  const db = getFirestore(app);
+  
+  // Initialize Firestore with long-polling for maximum stability in proxy environments
+  const db = initializeFirestore(app, {
+    experimentalForceLongPolling: true,
+  });
   
   return { app, auth, db };
 }
