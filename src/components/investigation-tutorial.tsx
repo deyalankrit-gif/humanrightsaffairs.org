@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
@@ -26,7 +25,18 @@ import {
   Info,
   Layers,
   Sparkles,
-  Bot
+  Bot,
+  UserPlus,
+  Target,
+  LogIn,
+  ClipboardList,
+  Activity,
+  FileText,
+  Gavel,
+  Lock,
+  FileSearch,
+  UserCheck,
+  Camera
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -38,6 +48,7 @@ import {
   DialogContent, 
   DialogHeader, 
   DialogTitle,
+  DialogDescription,
   DialogClose 
 } from '@/components/ui/dialog';
 import { 
@@ -54,20 +65,20 @@ import { cn } from '@/lib/utils';
  * TUTORIAL_STEPS: Registry of the 14 procedural chapters.
  */
 const TUTORIAL_STEPS = [
-  { id: 1, title: "Welcome", subtitle: "Institutional Overview", duration: 30, desc: "Introduction to the Justice Shield investigative framework and organizational roles." },
-  { id: 2, title: "Registration", subtitle: "Public Intake", duration: 45, desc: "Step-by-step guide to filing a formal complaint via the national portal." },
-  { id: 3, title: "Verification", subtitle: "Triage Protocol", duration: 40, desc: "How administrators perform initial vetting, duplicate checks, and case validation." },
-  { id: 4, title: "Case Creation", subtitle: "Docket Assignment", duration: 35, desc: "Understanding Docket Numbers, timestamps, and initial status baselines." },
-  { id: 5, title: "Team Deployment", subtitle: "Personnel Selection", duration: 50, desc: "The administrative process of selecting and assigning investigation officers from the registry." },
-  { id: 6, title: "Mission Mandate", subtitle: "Directives & Goals", duration: 40, desc: "Defining objectives, special instructions, and evidence requirements for the team." },
-  { id: 7, title: "Officer Login", subtitle: "Terminal Access", duration: 30, desc: "How investigators access their dedicated tactical portal with secure credentials." },
-  { id: 8, title: "Assigned Tasks", subtitle: "Tactical Queue", duration: 45, desc: "Reviewing assigned dockets, priorities, and specific field mandates." },
-  { id: 9, title: "Evidence Vault", subtitle: "Fact-Finding", duration: 55, desc: "The protocol for uploading photos, witness statements, and GPS-tagged evidence." },
-  { id: 10, title: "Progress Sync", subtitle: "Real-time Updates", duration: 40, desc: "Updating case milestones and maintaining transparency with the central cell." },
-  { id: 11, title: "Field Reporting", subtitle: "Documenting Findings", duration: 50, desc: "Drafting and submitting structured task reports with findings and recommendations." },
-  { id: 12, title: "Supervisor Audit", subtitle: "Decision Review", duration: 45, desc: "The administrative review process for field reports and evidence verification." },
-  { id: 13, title: "Commission Findings", subtitle: "Final Document", duration: 40, desc: "Generating the final investigative report and institutional resolutions." },
-  { id: 14, title: "Case Closure", subtitle: "Mission Completion", duration: 30, desc: "Archiving the record and finalizing the audit trail after rights restoration." },
+  { id: 1, title: "Welcome", subtitle: "Institutional Overview", duration: 15, icon: ShieldCheck, desc: "Introduction to the Justice Shield investigative framework and organizational roles." },
+  { id: 2, title: "Registration", subtitle: "Public Intake", duration: 20, icon: FileText, desc: "Step-by-step guide to filing a formal complaint via the national portal." },
+  { id: 3, title: "Verification", subtitle: "Triage Protocol", duration: 15, icon: UserCheck, desc: "How administrators perform initial vetting, duplicate checks, and case validation." },
+  { id: 4, title: "Case Creation", subtitle: "Docket Assignment", duration: 15, icon: Hash, desc: "Understanding Docket Numbers, timestamps, and initial status baselines." },
+  { id: 5, title: "Team Deployment", subtitle: "Personnel Selection", duration: 20, icon: UserPlus, desc: "The administrative process of selecting and assigning investigation officers from the registry." },
+  { id: 6, title: "Mission Mandate", subtitle: "Directives & Goals", duration: 15, icon: Target, desc: "Defining objectives, special instructions, and evidence requirements for the team." },
+  { id: 7, title: "Officer Login", subtitle: "Terminal Access", duration: 12, icon: LogIn, desc: "How investigators access their dedicated tactical portal with secure credentials." },
+  { id: 8, title: "Assigned Tasks", subtitle: "Tactical Queue", duration: 15, icon: ClipboardList, desc: "Reviewing assigned dockets, priorities, and specific field mandates." },
+  { id: 9, title: "Evidence Vault", subtitle: "Fact-Finding", duration: 20, icon: Camera, desc: "The protocol for uploading photos, witness statements, and GPS-tagged evidence." },
+  { id: 10, title: "Progress Sync", subtitle: "Real-time Updates", duration: 15, icon: RefreshCw, desc: "Updating case milestones and maintaining transparency with the central cell." },
+  { id: 11, title: "Field Reporting", subtitle: "Documenting Findings", duration: 20, icon: FileSearch, desc: "Drafting and submitting structured task reports with findings and recommendations." },
+  { id: 12, title: "Supervisor Audit", subtitle: "Decision Review", duration: 18, icon: CheckCircle2, desc: "The administrative review process for field reports and evidence verification." },
+  { id: 13, title: "Commission Findings", subtitle: "Final Document", duration: 15, icon: Gavel, desc: "Generating the final investigative report and institutional resolutions." },
+  { id: 14, title: "Case Closure", subtitle: "Mission Completion", duration: 12, icon: Lock, desc: "Archiving the record and finalizing the audit trail after rights restoration." },
 ];
 
 /**
@@ -203,7 +214,7 @@ export function InvestigationTutorial() {
                     <Sparkles className="w-4 h-4" />
                     <span>Educational Hub</span>
                   </div>
-                  <h3 className="text-3xl font-headline font-bold text-primary dark:text-white">Interactive Investigation <span className="text-accent italic">Tutorial</span></h3>
+                  <h3 className="text-3xl font-headline font-bold text-primary dark:text-white">Step-by-Step <span className="text-accent italic">Investigation Guide</span></h3>
                   <p className="text-slate-500 text-sm md:text-base leading-relaxed max-w-xl">
                     Master the high-fidelity investigative lifecycle. This animated walkthrough teaches citizens and officials how to navigate every stage from intake to closure.
                   </p>
@@ -319,7 +330,7 @@ export function InvestigationTutorial() {
                          )}
 
                          <div className="p-8 bg-white/10 rounded-full border border-white/20 relative group">
-                            <activeStep.id className="w-20 h-20 text-accent" />
+                            <activeStep.icon className="w-20 h-20 text-accent" />
                             {currentStep === 0 && <Bot className="absolute -top-4 -right-4 w-12 h-12 text-indigo-400 animate-bounce" />}
                             {currentStep === 8 && <Camera className="absolute -top-4 -right-4 w-12 h-12 text-emerald-400 animate-pulse" />}
                          </div>
