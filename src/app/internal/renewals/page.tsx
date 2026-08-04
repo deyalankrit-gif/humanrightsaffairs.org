@@ -35,6 +35,11 @@ export default function MembershipRenewalsPage() {
   const router = useRouter()
   const db = useFirestore()
   const [search, setSearch] = useState('')
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const profilesQuery = useMemoFirebase(() => {
     if (!db || !user) return null;
@@ -50,7 +55,7 @@ export default function MembershipRenewalsPage() {
   }, [user, authLoading, router])
 
   const renewalData = useMemo(() => {
-    if (!profiles) return []
+    if (!profiles || !mounted) return []
     return (profiles as any[]).filter(m => m.isDemi !== true).map(member => {
       let expiryDate: Date | null = null
       let status: 'Safe' | 'Due' | 'Expired' = 'Safe'
@@ -70,7 +75,7 @@ export default function MembershipRenewalsPage() {
        return matchesSearch && (m.renewalStatus === 'Due' || m.renewalStatus === 'Expired');
     })
     .sort((a, b) => a.daysRemaining - b.daysRemaining)
-  }, [profiles, search])
+  }, [profiles, search, mounted])
 
   if (authLoading || !user) {
     return <div className="min-h-screen flex items-center justify-center bg-slate-50"><Loader2 className="w-10 h-10 animate-spin text-accent" /></div>

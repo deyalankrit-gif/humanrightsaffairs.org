@@ -18,7 +18,7 @@ import {
   Search, 
   Edit, 
   Trash2, 
-  Loader2, 
+  Loader2 as GlobalLoader, 
   ShieldCheck, 
   UserRoundCheck,
   X,
@@ -360,7 +360,7 @@ export default function InvestigationOfficersRegistry() {
     return 'bg-primary';
   }
 
-  if (authLoading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="animate-spin text-red-600" /></div>
+  if (authLoading) return <div className="min-h-screen flex items-center justify-center"><GlobalLoader className="animate-spin text-red-600" /></div>
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-20">
@@ -507,7 +507,7 @@ export default function InvestigationOfficersRegistry() {
 
          {dataLoading ? (
            <div className="text-center py-32 flex flex-col items-center gap-4">
-              <Loader2 className="w-12 h-12 animate-spin text-accent" />
+              <GlobalLoader className="w-12 h-12 animate-spin text-accent" />
               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Synchronizing Live Feed...</p>
            </div>
          ) : (
@@ -561,7 +561,7 @@ export default function InvestigationOfficersRegistry() {
                                 disabled={isActionLoading} 
                                 className="h-11 w-11 text-slate-200 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-2xl flex items-center justify-center transition-all active:scale-95"
                              >
-                                {isActionLoading ? <Loader2 className="animate-spin w-5 h-5 text-red-500" /> : <Trash2 className="w-5 h-5" />}
+                                {isActionLoading ? <GlobalLoader className="animate-spin w-5 h-5 text-red-500" /> : <Trash2 className="w-5 h-5" />}
                              </button>
                           </div>
                        </div>
@@ -712,7 +712,7 @@ export default function InvestigationOfficersRegistry() {
                       onClick={handleDelete}
                       className="flex-1 h-14 rounded-2xl font-bold bg-red-600 hover:bg-red-700 shadow-2xl shadow-red-600/30 uppercase text-[10px] tracking-widest"
                     >
-                      {isDeleting ? <Loader2 className="animate-spin w-5 h-5" /> : "Verify & Force Purge"}
+                      {isDeleting ? <GlobalLoader className="animate-spin w-5 h-5" /> : "Verify & Force Purge"}
                     </Button>
                  </div>
               </div>
@@ -775,7 +775,7 @@ export default function InvestigationOfficersRegistry() {
                     </div>
                   </div>
                   <Button type="submit" disabled={isActionLoading} className="w-full h-16 rounded-2xl bg-primary text-white font-bold shadow-xl hover:bg-secondary transition-all flex gap-2">
-                     {isActionLoading ? <Loader2 className="animate-spin w-5 h-5" /> : <><RefreshCw className="w-5 h-5" /> Commit Registry Refresh</>}
+                     {isActionLoading ? <GlobalLoader className="animate-spin w-5 h-5" /> : <><RefreshCw className="w-5 h-5" /> Commit Registry Refresh</>}
                   </Button>
                </form>
             </>
@@ -864,7 +864,7 @@ export default function InvestigationOfficersRegistry() {
 
       <div className="mt-20 flex flex-col items-center gap-6 opacity-30 animate-in fade-in duration-1000">
          <div className="h-px w-48 bg-slate-300 dark:bg-slate-700" />
-         <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.5em] text-center">National Governance Node • HRAT INDIA</p>
+         <p className="text-[8px] font-black text-slate-400 uppercase tracking-[0.5em] text-center">National Governance Node • HRAT INDIA</p>
       </div>
 
       <Footer />
@@ -872,6 +872,6 @@ export default function InvestigationOfficersRegistry() {
   )
 }
 
-function Loader2({ className }: { className?: string }) {
+function LocalLoader({ className }: { className?: string }) {
   return <Clock className={cn("animate-spin", className)} />
 }

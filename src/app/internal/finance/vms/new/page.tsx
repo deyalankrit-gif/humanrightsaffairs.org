@@ -66,11 +66,12 @@ export default function NewVoucherPage() {
   const router = useRouter()
   const { toast } = useToast()
   const [isSaving, setIsSaving] = useState(false)
+  const [mounted, setMounted] = useState(false)
 
   const [formData, setFormData] = useState({
     type: 'Payment Voucher',
-    date: format(new Date(), 'yyyy-MM-dd'),
-    financialYear: getCurrentFinancialYear(),
+    date: '',
+    financialYear: '',
     branch: 'National HQ',
     state: 'Delhi',
     district: 'Central Delhi',
@@ -92,6 +93,15 @@ export default function NewVoucherPage() {
     narration: ''
   })
 
+  useEffect(() => {
+    setMounted(true)
+    setFormData(prev => ({ 
+      ...prev, 
+      date: format(new Date(), 'yyyy-MM-dd'),
+      financialYear: getCurrentFinancialYear()
+    }))
+  }, [])
+
   // Sync account head whenever category changes
   useEffect(() => {
     const availableHeads = ACCOUNT_HEADS_MAP[formData.type] || [];
@@ -101,8 +111,8 @@ export default function NewVoucherPage() {
   }, [formData.type]);
 
   useEffect(() => {
-    if (!authLoading && !user) router.push('/internal/login')
-  }, [user, authLoading, router])
+    if (mounted && !authLoading && !user) router.push('/internal/login')
+  }, [user, authLoading, router, mounted])
 
   const handleGenerateId = async (type: string) => {
     if (!db) return "TEMP-ID";
@@ -183,7 +193,7 @@ export default function NewVoucherPage() {
     }
   }
 
-  if (authLoading) {
+  if (!mounted || authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
         <Loader2 className="w-10 h-10 animate-spin text-emerald-500" />

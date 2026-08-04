@@ -1,6 +1,7 @@
+
 "use client"
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { 
@@ -24,6 +25,7 @@ import { cn } from '@/lib/utils'
 
 export default function AGMFormatPage() {
   const { toast } = useToast()
+  const [mounted, setMounted] = useState(false)
   const [formData, setFormData] = useState({
     agmNo: '',
     financialYear: '',
@@ -42,6 +44,10 @@ export default function AGMFormatPage() {
     secretaryName: '',
     treasurerName: ''
   })
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target

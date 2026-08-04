@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useEffect, useState, useMemo } from 'react'
@@ -425,6 +426,41 @@ export default function CaseHubPage() {
     }
   };
 
+  const handleManualEmailReport = async () => {
+    if (!caseData?.email || !docRef || !user) return;
+    setIsActionLoading(true);
+    try {
+      const result = await sendReportEmail({
+        recipientEmail: caseData.email,
+        recipientName: caseData.fullName,
+        caseId: caseData.caseId || caseData.token,
+        reportType: selectedReportType,
+        senderEmail: user.email!
+      });
+
+      if (result.success) {
+        toast({ title: "Report Dispatched", description: "Complainant has been notified." });
+        await updateDoc(docRef, {
+          emailLogs: arrayUnion({
+            timestamp: new Date().toLocaleString('en-IN'),
+            subject: `Investigative Report: ${selectedReportType}`,
+            recipient: caseData.email,
+            status: 'Success',
+            sender: user.email,
+            traceId: result.traceId,
+            type: 'Manual Report'
+          })
+        });
+      } else {
+        throw new Error(result.error);
+      }
+    } catch (e: any) {
+      toast({ variant: "destructive", title: "Email Failed", description: e.message });
+    } finally {
+      setIsActionLoading(false);
+    }
+  };
+
   const handlePurgeCase = async () => {
     if (!db || !isRoot || !id) return;
     setIsActionLoading(true);
@@ -493,7 +529,7 @@ export default function CaseHubPage() {
 
       <section className="py-8 container mx-auto px-4">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
-           <TabsList className="bg-white p-1 rounded-2xl border shadow-sm w-full md:w-auto overflow-x-auto no-scrollbar">
+           <TabsList className="bg-white p-1 rounded-2xl border shadow-sm w-full md:w-auto overflow-x-auto no-scrollbar justify-start">
               {[
                 { id: 'overview', label: 'Overview', icon: Eye },
                 { id: 'investigation', label: 'Team & Review', icon: Briefcase },

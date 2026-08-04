@@ -266,7 +266,7 @@ export default function ActivityHubDashboard() {
                     <CardTitle className="text-lg font-headline font-bold flex items-center gap-2">
                       <ShieldCheck className="w-5 h-5 text-emerald-500" /> Current Month Observances
                     </CardTitle>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{format(new Date(), 'MMMM yyyy')}</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{mounted ? format(new Date(), 'MMMM yyyy') : '---'}</p>
                   </CardHeader>
                   <div className="space-y-4">
                      {currentMonthObservances.map((o, idx) => {

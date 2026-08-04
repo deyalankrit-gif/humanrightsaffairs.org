@@ -103,7 +103,7 @@ export default function DailyUpdatePage() {
   const [newTask, setNewTask] = useState({
     title: '',
     priority: 'Medium' as 'High' | 'Medium' | 'Low',
-    dueDate: format(new Date(), 'yyyy-MM-dd')
+    dueDate: ''
   })
 
   const [newNote, setNewNote] = useState('')
@@ -111,6 +111,7 @@ export default function DailyUpdatePage() {
   const [mounted, setMounted] = useState(false)
   useEffect(() => {
     setMounted(true)
+    setNewTask(prev => ({ ...prev, dueDate: format(new Date(), 'yyyy-MM-dd') }))
   }, [])
 
   // Data Streams
@@ -192,6 +193,8 @@ export default function DailyUpdatePage() {
 
   // Derived Summary Logic
   const summary = useMemo(() => {
+    if (!mounted) return { newComplaintsToday: 0, newAppsToday: 0, casesClosedToday: 0, pendingReview: 0, underInvestigation: 0, highPriority: 0, staleCases: [], suggestions: [] };
+    
     const today = startOfDay(new Date());
     const complaintList = complaints || [];
     const appList = applications || [];
@@ -246,9 +249,10 @@ export default function DailyUpdatePage() {
       staleCases,
       suggestions
     };
-  }, [complaints, applications, upcomingSpecialDays, upcomingAssemblies]);
+  }, [complaints, applications, upcomingSpecialDays, upcomingAssemblies, mounted]);
 
   const filteredTasks = useMemo(() => {
+    if (!mounted) return [];
     const list = tasks || [];
     const now = startOfDay(new Date());
     
@@ -259,7 +263,7 @@ export default function DailyUpdatePage() {
       if (todoFilter === 'Overdue') return isOverdue;
       return true;
     });
-  }, [tasks, todoFilter]);
+  }, [tasks, todoFilter, mounted]);
 
   // Handlers
   const handleAddTask = async () => {
@@ -333,7 +337,7 @@ export default function DailyUpdatePage() {
             </div>
             <h1 className="text-3xl md:text-5xl font-headline font-bold">Daily <span className="text-accent italic">Update</span></h1>
             <p className="text-slate-400 text-[10px] uppercase font-black tracking-widest flex items-center justify-center md:justify-start gap-2">
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" /> Operational Oversight: {format(new Date(), 'PPPP')}
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" /> Operational Oversight: {mounted ? format(new Date(), 'PPPP') : '---'}
             </p>
           </div>
           <div className="flex flex-wrap justify-center gap-3 w-full md:w-auto">

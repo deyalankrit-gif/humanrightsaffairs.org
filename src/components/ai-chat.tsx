@@ -1,9 +1,9 @@
 
 "use client"
 
-import React from 'react'
+import React, { useEffect } from 'react'
 import Image from 'next/image'
-import { MessageSquare, Send, X, Bot, ShieldAlert, Sparkles } from 'lucide-react'
+import { MessageSquare, Send, X, Bot, ShieldAlert, Sparkles, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
@@ -21,16 +21,20 @@ type Message = {
 export function AIChat() {
   const [isOpen, setIsOpen] = React.useState(false)
   const aiAvatar = PlaceHolderImages.find(i => i.id === 'ai-bot-avatar')
-  const [messages, setMessages] = React.useState<Message[]>([
-    {
+  const [messages, setMessages] = React.useState<Message[]>([])
+  const [input, setInput] = React.useState('')
+  const [isLoading, setIsLoading] = React.useState(false)
+  const [mounted, setMounted] = React.useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+    setMessages([{
       id: '1',
       text: "Hello! I am JusticeBot, your AI legal assistant. How can I help you understand your rights today?",
       sender: 'ai',
       timestamp: new Date()
-    }
-  ])
-  const [input, setInput] = React.useState('')
-  const [isLoading, setIsLoading] = React.useState(false)
+    }])
+  }, [])
 
   const handleSend = async () => {
     if (!input.trim() || isLoading) return
@@ -69,6 +73,8 @@ export function AIChat() {
       setIsLoading(false)
     }
   }
+
+  if (!mounted) return null;
 
   return (
     <div className="fixed bottom-6 right-6 z-[100] print:hidden">

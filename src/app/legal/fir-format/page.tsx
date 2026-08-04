@@ -1,6 +1,7 @@
+
 "use client"
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { 
   ArrowLeft, 
@@ -21,6 +22,7 @@ import { cn } from '@/lib/utils'
 
 export default function FIRFormatPage() {
   const { toast } = useToast()
+  const [mounted, setMounted] = useState(false)
   const [formData, setFormData] = useState({
     policeStation: '',
     district: '',
@@ -39,7 +41,7 @@ export default function FIRFormatPage() {
     witness2: '',
     mobileNo: '',
     email: '',
-    submissionDate: new Date().toLocaleDateString('en-IN'),
+    submissionDate: '',
     submissionPlace: '',
     evidenceDocs: 'Relevant documents/records',
     evidencePhotos: 'Photographs and/or video recordings',
@@ -47,6 +49,14 @@ export default function FIRFormatPage() {
     evidenceMedical: 'Medical reports/documents (if applicable)',
     evidenceOther: 'Any other supporting evidence'
   })
+
+  useEffect(() => {
+    setMounted(true)
+    setFormData(prev => ({ 
+      ...prev, 
+      submissionDate: new Date().toLocaleDateString('en-IN') 
+    }))
+  }, [])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target

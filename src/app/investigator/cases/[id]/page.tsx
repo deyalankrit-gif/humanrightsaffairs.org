@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useEffect } from 'react'
@@ -15,7 +16,7 @@ import {
   ArrowLeft, 
   Search, 
   ShieldCheck, 
-  Loader2, 
+  Loader2 as GlobalLoader, 
   MapPin, 
   Clock, 
   FileText, 
@@ -163,7 +164,7 @@ export default function InvestigationCaseHub() {
     }
   };
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="animate-spin text-indigo-600" /></div>
+  if (loading) return <div className="min-h-screen flex items-center justify-center"><GlobalLoader className="animate-spin text-indigo-600" /></div>
   if (!c) return <div className="p-20 text-center font-bold text-slate-400">FILE NOT IDENTIFIED</div>
 
   return (
@@ -419,6 +420,6 @@ export default function InvestigationCaseHub() {
   )
 }
 
-function Loader2({ className }: { className?: string }) {
+function TacticalLoader({ className }: { className?: string }) {
   return <Clock className={cn("animate-spin", className)} />
 }
