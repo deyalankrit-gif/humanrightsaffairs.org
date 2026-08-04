@@ -24,7 +24,8 @@ import {
   Landmark,
   Building2,
   Info,
-  User
+  User,
+  Hash
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -107,7 +108,7 @@ export function InvestigationJourney({ complaint }: { complaint: any }) {
                   </div>
 
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-6 pt-6 border-t border-white/5">
-                     <div><p className="text-[8px] font-black text-slate-500 uppercase">Case Number</p><p className="font-bold text-xs truncate">{complaint.caseId || 'Pending'}</p></div>
+                     <div><p className="text-[8px] font-black text-slate-500 uppercase">Docket Number</p><p className="font-bold text-xs truncate">{complaint.caseId || 'Pending'}</p></div>
                      <div><p className="text-[8px] font-black text-slate-500 uppercase">Priority</p><p className="font-bold text-xs text-accent">{complaint.priority || 'Medium'}</p></div>
                      <div><p className="text-[8px] font-black text-slate-500 uppercase">Filed On</p><p className="font-bold text-xs">{complaint.createdAt?.toDate?.()?.toLocaleDateString() || 'Just now'}</p></div>
                      <div><p className="text-[8px] font-black text-slate-500 uppercase">Next Sync</p><p className="font-bold text-xs text-emerald-400">Within 48h</p></div>

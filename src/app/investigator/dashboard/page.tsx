@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo } from 'react'
@@ -22,7 +21,8 @@ import {
   CalendarCheck,
   UserRoundCheck,
   Loader2,
-  ListTodo
+  ListTodo,
+  Hash
 } from 'lucide-react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
@@ -103,7 +103,7 @@ export default function InvestigatorDashboard() {
             <CardContent className="p-6 flex items-center gap-5">
               <div className={cn("p-4 rounded-2xl", s.bg)}>{s.icon}</div>
               <div>
-                <p className="text-3xl font-headline font-bold leading-none">{s.value}</p>
+                <p className="text-3xl font-headline font-bold leading-none">{s.val}</p>
                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">{s.label}</p>
               </div>
             </CardContent>

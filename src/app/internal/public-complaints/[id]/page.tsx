@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useEffect, useState, useMemo } from 'react'
@@ -641,7 +640,7 @@ export default function CaseHubPage() {
                                                  </div>
                                                  <div className="space-y-1.5">
                                                     <Label className="text-[10px] font-bold uppercase text-slate-400">Description / Directives</Label>
-                                                    <Textarea value={newTask.description} onChange={e => setNewTask({...newTask, description: e.target.value})} placeholder="Specific instructions for this task..." className="min-h-[80px] rounded-xl" />
+                                                    <Textarea value={newTask.description} onChange={e => setNewTask({...newTask, description: e.target.value})} placeholder="Specific instructions for this task..." className="min-h-[120px] rounded-2xl p-6 bg-slate-50" />
                                                  </div>
                                                  <div className="grid grid-cols-2 gap-4">
                                                     <div className="space-y-1.5">
@@ -845,7 +844,7 @@ export default function CaseHubPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                  {(caseData.incidentPhotos || []).map((img: string, i: number) => (
                    <Card key={i} className="rounded-3xl overflow-hidden border-none shadow-xl group cursor-zoom-in">
-                      <div className="relative aspect-square"><Image src={img} alt="Evidence" fill className="object-cover group-hover:scale-110 transition-transform duration-700" /></div>
+                      <div className="relative aspect-square"><Image src={img} alt="Evidence" fill className="object-cover" /></div>
                    </Card>
                  ))}
                  <Card className="rounded-3xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center p-12 text-center space-y-4 bg-white group relative overflow-hidden">

@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useEffect, useState, useMemo } from 'react'
@@ -243,7 +242,7 @@ export default function PublicComplaintsTerminal() {
                 <SelectContent className="bg-white z-[1000000]"><SelectItem value="All">All Officers</SelectItem>{investigators.map(name => <SelectItem key={name} value={name}>{name}</SelectItem>)}</SelectContent>
               </Select>
 
-              <div className="relative w-full max-md:max-w-full max-w-sm"><Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" /><Input placeholder="Case ID, Token, Name..." className="pl-12 h-12 md:h-14 rounded-2xl border-slate-200 text-sm shadow-inner bg-slate-50 dark:bg-slate-950 font-medium" value={search} onChange={(e) => setSearch(e.target.value)} /></div>
+              <div className="relative w-full max-md:max-w-full max-w-sm"><Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" /><Input placeholder="Docket No, Token, Name..." className="pl-12 h-12 md:h-14 rounded-2xl border-slate-200 text-sm shadow-inner bg-slate-50 dark:bg-slate-950 font-medium" value={search} onChange={(e) => setSearch(e.target.value)} /></div>
             </div>
           </div>
         </div>
@@ -260,7 +259,7 @@ export default function PublicComplaintsTerminal() {
                   <CardContent className="p-0">
                     <div className="flex flex-col md:flex-row items-stretch">
                       <div className="p-8 bg-slate-50 dark:bg-slate-800 md:w-56 text-center border-r border-slate-100 flex flex-col items-center justify-center shrink-0 space-y-4">
-                         <div className="space-y-1"><span className="text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">CASE ID</span><div className="text-sm font-black text-primary dark:text-white tracking-tighter bg-white dark:bg-slate-950 px-3 py-1 rounded-lg border border-slate-100 shadow-sm whitespace-nowrap">{c.caseId || 'PROVISIONING'}</div></div>
+                         <div className="space-y-1"><span className="text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">DOCKET NO</span><div className="text-sm font-black text-primary dark:text-white tracking-tighter bg-white dark:bg-slate-950 px-3 py-1 rounded-lg border border-slate-100 shadow-sm whitespace-nowrap">{c.caseId || 'PROVISIONING'}</div></div>
                          <div className="space-y-1"><span className="text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">TOKEN</span><div className="text-[11px] font-mono font-bold text-accent whitespace-nowrap">{c.token}</div></div>
                          <Badge className={cn("text-[9px] font-black uppercase px-4 py-1.5 rounded-full border-none shadow-md", getStatusColor(c.status))}>{c.status}</Badge>
                       </div>
