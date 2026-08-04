@@ -37,7 +37,8 @@ import {
   Type,
   AlignVerticalJustifyStart,
   AlignVerticalJustifyEnd,
-  ListVideo
+  ListVideo,
+  Sparkles
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -530,7 +531,7 @@ export function InvestigationTutorial() {
                       
                       <Button 
                         onClick={togglePlay}
-                        className="w-16 h-16 rounded-full bg-white text-primary hover:bg-accent hover:text-white transition-all shadow-2xl"
+                        className="w-16 h-16 rounded-full bg-white text-primary hover:bg-accent hover:text-white transition-all shadow-xl"
                       >
                         {isPlaying ? <Pause className="w-8 h-8 fill-current" /> : <Play className="w-8 h-8 fill-current ml-1" />}
                       </Button>
