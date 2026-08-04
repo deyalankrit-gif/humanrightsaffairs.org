@@ -388,6 +388,73 @@ export default function CaseHubPage() {
     }
   };
 
+  const handleUploadEvidence = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !docRef || !user) return;
+
+    if (file.size > 102400) { // 100KB limit
+      toast({ variant: "destructive", title: "File Too Large", description: "Vault sync is limited to 100KB per file." });
+      return;
+    }
+
+    setIsActionLoading(true);
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      const dataUri = reader.result as string;
+      const evidenceEntry = {
+        name: file.name,
+        type: file.type,
+        url: dataUri,
+        uploadedBy: user.email,
+        timestamp: new Date().toISOString()
+      };
+
+      try {
+        await updateDoc(docRef, {
+          investigativeEvidence: arrayUnion(evidenceEntry),
+          timeline: arrayUnion({
+            action: "Exhibit Buffered",
+            user: user.email,
+            timestamp: new Date().toISOString(),
+            remark: `New evidence uploaded to vault: ${file.name}`,
+            type: 'evidence'
+          })
+        });
+        toast({ title: "Exhibit Secured" });
+      } catch (err) {
+        toast({ variant: "destructive", title: "Upload Failed" });
+      } finally {
+        setIsActionLoading(false);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemoveEvidence = async (index: number) => {
+    if (!docRef || !caseData || !user || !isRoot) return;
+    setIsActionLoading(true);
+    const updatedEvidence = [...(caseData.investigativeEvidence || [])];
+    const removed = updatedEvidence.splice(index, 1)[0];
+
+    try {
+      await updateDoc(docRef, {
+        investigativeEvidence: updatedEvidence,
+        timeline: arrayUnion({
+          action: "Exhibit Purged",
+          user: user.email,
+          timestamp: new Date().toISOString(),
+          remark: `Evidence removed from vault: ${removed.name}`,
+          type: 'evidence_removed'
+        })
+      });
+      toast({ title: "Vault Updated" });
+    } catch (err) {
+      toast({ variant: "destructive", title: "Removal Denied" });
+    } finally {
+      setIsActionLoading(false);
+    }
+  };
+
   const handleDeleteCase = async () => {
     if (!db || !id || !isRoot) return;
     setIsActionLoading(true);
@@ -697,6 +764,99 @@ export default function CaseHubPage() {
                     <Button onClick={handleSaveMandate} disabled={isActionLoading} className="w-full h-14 bg-accent text-primary font-black uppercase tracking-widest text-xs md:text-sm rounded-2xl shadow-xl hover:bg-secondary hover:text-white transition-all">
                        {isActionLoading ? <Loader2 className="animate-spin mr-2" /> : <><ShieldCheck className="w-5 h-5 mr-3" /> Synchronize Mandate</>}
                     </Button>
+                 </div>
+              </Card>
+           </TabsContent>
+
+           <TabsContent value="evidence" className="animate-in fade-in zoom-in-95 duration-500">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                 {/* Upload Trigger Card */}
+                 <Card 
+                  onClick={() => document.getElementById('vault-upload')?.click()}
+                  className="rounded-3xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center p-8 text-center space-y-4 hover:border-accent transition-all cursor-pointer bg-slate-50/30 group h-[200px]"
+                 >
+                    <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center text-slate-300 group-hover:bg-accent group-hover:text-primary transition-all shadow-sm">
+                       {isActionLoading ? <Loader2 className="w-6 h-6 animate-spin" /> : <Plus className="w-6 h-6" />}
+                    </div>
+                    <div className="space-y-1">
+                       <p className="font-bold text-primary dark:text-white uppercase text-[10px] tracking-widest">Append Document</p>
+                       <p className="text-[8px] text-slate-400 font-bold uppercase">Max 100KB per file</p>
+                    </div>
+                    <input 
+                      type="file" 
+                      id="vault-upload" 
+                      className="hidden" 
+                      onChange={handleUploadEvidence}
+                      disabled={isActionLoading}
+                    />
+                 </Card>
+
+                 {/* Render Administrative Exhibits */}
+                 {((caseData.investigativeEvidence || []) as any[]).map((file, idx) => (
+                    <Card key={idx} className="rounded-3xl overflow-hidden border shadow-sm group h-[200px] flex flex-col">
+                       <div className="relative flex-1 bg-slate-100 flex items-center justify-center overflow-hidden">
+                          {file.type?.includes('image') ? (
+                            <Image src={file.url} alt="Evidence" fill className="object-cover group-hover:scale-110 transition-all duration-700" />
+                          ) : (
+                            <FileText className="w-12 h-12 text-slate-300" />
+                          )}
+                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                             <Button variant="ghost" size="icon" className="text-white hover:bg-accent rounded-full h-10 w-10" onClick={() => window.open(file.url, '_blank')}>
+                                <ExternalLink className="w-5 h-5" />
+                             </Button>
+                             {isRoot && (
+                               <Button variant="ghost" size="icon" className="text-white hover:bg-red-500 rounded-full h-10 w-10" onClick={() => handleRemoveEvidence(idx)}>
+                                  <Trash2 className="w-5 h-5" />
+                               </Button>
+                             )}
+                          </div>
+                       </div>
+                       <div className="p-3 bg-white dark:bg-slate-900 border-t">
+                          <p className="text-[9px] font-bold text-primary dark:text-white truncate uppercase">{file.name}</p>
+                          <p className="text-[7px] text-slate-400 font-bold uppercase">{file.type?.split('/')[1] || 'FILE'}</p>
+                       </div>
+                    </Card>
+                 ))}
+
+                 {/* Render Public Exhibits */}
+                 {((caseData.incidentPhotos || []) as string[]).map((url, idx) => (
+                    <Card key={`pub-${idx}`} className="rounded-3xl overflow-hidden border shadow-sm group h-[200px] flex flex-col">
+                       <div className="relative flex-1 bg-slate-100 overflow-hidden">
+                          <Image src={url} alt="Public Photo" fill className="object-cover" />
+                          <div className="absolute top-2 left-2">
+                             <Badge className="bg-red-600 text-white text-[7px] font-black uppercase border-none">Public Exhibit</Badge>
+                          </div>
+                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                             <Button variant="ghost" size="icon" className="text-white hover:bg-accent rounded-full h-10 w-10" onClick={() => window.open(url, '_blank')}>
+                                <Eye className="w-5 h-5" />
+                             </Button>
+                          </div>
+                       </div>
+                       <div className="p-3 bg-white dark:bg-slate-900 border-t">
+                          <p className="text-[9px] font-bold text-primary dark:text-white uppercase truncate">Citizen Upload #{idx + 1}</p>
+                          <p className="text-[7px] text-slate-400 font-bold uppercase">Incident Proof</p>
+                       </div>
+                    </Card>
+                 ))}
+              </div>
+           </TabsContent>
+
+           <TabsContent value="timeline" className="animate-in fade-in duration-500">
+              <Card className="rounded-[2.5rem] border-none shadow-sm p-10 bg-white">
+                 <div className="space-y-10">
+                    {(caseData.timeline || []).slice().reverse().map((entry: any, i: number) => (
+                      <div key={i} className="flex gap-8 relative group">
+                       <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 relative z-10 shadow-sm transition-all bg-slate-50 text-accent"><History className="w-5 h-5" /></div>
+                       <div className="flex-1 pt-1 pb-10 border-l-2 border-slate-100 pl-8 ml-[-40px] group-last:border-transparent">
+                          <div className="flex justify-between items-center mb-3">
+                             <h4 className="text-lg font-bold text-primary">{entry.action}</h4>
+                             <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{new Date(entry.timestamp).toLocaleString()}</span>
+                          </div>
+                          <div className="p-4 bg-slate-50 rounded-2xl italic text-sm text-slate-500 leading-relaxed border whitespace-pre-wrap">"{entry.remark}"</div>
+                          <div className="mt-3 flex items-center gap-2"><Badge variant="outline" className="text-[7px] font-black uppercase opacity-60 border-slate-200">{entry.user}</Badge></div>
+                       </div>
+                    </div>
+                    ))}
                  </div>
               </Card>
            </TabsContent>
