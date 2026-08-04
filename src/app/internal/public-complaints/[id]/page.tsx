@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useEffect, useState, useMemo } from 'react'
@@ -86,6 +87,7 @@ import { cn } from '@/lib/utils'
 import { CASE_STATUSES, REPORT_TEMPLATES, REPORT_GUIDANCE, STANDARD_RESPONSIBILITIES } from '@/lib/complaint-constants'
 import { getStatusColor } from '@/lib/complaint-utils'
 import { InvestigationJourney } from '@/components/investigation-journey'
+import { InvestigationTutorial } from '@/components/investigation-tutorial'
 import { Footer } from '@/components/footer'
 import Link from 'next/link'
 
@@ -988,6 +990,11 @@ export default function CaseHubPage() {
         
         <div className="mt-20 pt-20 border-t border-slate-200">
            <InvestigationJourney complaint={caseData} />
+        </div>
+
+        {/* INVESTIGATION TUTORIAL SECTION */}
+        <div className="mt-12">
+           <InvestigationTutorial />
         </div>
       </section>
       <Footer />
