@@ -253,7 +253,7 @@ export default function PublicComplaintsTerminal() {
         <div className="container mx-auto px-4">
           {dataLoading ? (
             <div className="text-center py-32"><Loader2 className="w-12 h-12 animate-spin text-accent mx-auto mb-4" /><p className="text-slate-400 font-bold uppercase tracking-widest text-[10px]">Synchronizing Case Registry...</p></div>
-          ) : (
+          ) : filtered.length > 0 ? (
             <div className="grid gap-6 max-w-6xl mx-auto">
               {filtered.map((c: any) => (
                 <Card key={c.id} className="border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-100 relative group hover:shadow-2xl transition-all duration-500 hover:-translate-y-1">
@@ -266,7 +266,7 @@ export default function PublicComplaintsTerminal() {
                       </div>
                       <div className="flex-1 p-8 grid lg:grid-cols-4 gap-8 items-center">
                         <div className="lg:col-span-3 space-y-4">
-                          <div className="space-y-1"><div className="flex items-center gap-3"><h3 className="text-2xl font-headline font-bold text-primary dark:text-white leading-tight group-hover:text-accent transition-colors">{c.subject}</h3>{c.victimIsMinor && <Badge className="bg-red-600 text-white text-[8px] font-black animate-pulse">MINOR AT RISK</Badge>}{c.priority && <Badge variant="outline" className={cn("text-[8px] font-black border-none", c.priority === 'High' ? 'bg-red-50 text-red-600' : 'bg-blue-50 text-blue-600')}>{c.priority} PRIORITY</Badge>}</div><p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest flex items-center gap-1.5"><MapPin className="w-3 h-3 text-accent" /> {c.incidentLocation} • {c.stateName || 'National Scope'}</p></div>
+                          <div className="space-y-1"><div className="flex items-center gap-3"><h3 className="text-2xl font-headline font-bold text-primary dark:text-white leading-tight group-hover:text-accent transition-colors whitespace-nowrap">{c.subject}</h3>{c.victimIsMinor && <Badge className="bg-red-600 text-white text-[8px] font-black animate-pulse">MINOR AT RISK</Badge>}{c.priority && <Badge variant="outline" className={cn("text-[8px] font-black border-none", c.priority === 'High' ? 'bg-red-50 text-red-600' : 'bg-blue-50 text-blue-600')}>{c.priority} PRIORITY</Badge>}</div><p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest flex items-center gap-1.5"><MapPin className="w-3 h-3 text-accent" /> {c.incidentLocation} • {c.stateName || 'National Scope'}</p></div>
                           <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 pt-4 border-t border-slate-50 dark:border-slate-800">
                              <div className="space-y-1"><p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Complainant</p><p className="text-xs font-bold flex items-center gap-1.5"><User className="w-3 h-3 text-accent" /> {c.fullName}</p></div>
                              <div className="space-y-1"><p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Filed On</p><p className="text-xs font-bold flex items-center gap-1.5"><Clock className="w-3 h-3 text-accent" /> {c.createdAt?.toDate ? c.createdAt.toDate().toLocaleDateString('en-IN') : 'Just now'}</p></div>
@@ -275,8 +275,8 @@ export default function PublicComplaintsTerminal() {
                                 <div className="flex items-center gap-2">
                                   <p className="text-xs font-black text-emerald-600 uppercase flex items-center gap-1.5">
                                      <Users className="w-3 h-3 text-accent" /> 
-                                     {(c.assignedOfficers || []).length > 0 
-                                       ? `${(c.assignedOfficers || []).length} Officials` 
+                                     {(c.investigationTeam || []).length > 0 
+                                       ? `${(c.investigationTeam || []).length} Officials` 
                                        : c.assignedTo || 'Unassigned'}
                                   </p>
                                   <Link href={`/internal/public-complaints/${c.id}`} title="Update investigation status and team">
@@ -294,8 +294,8 @@ export default function PublicComplaintsTerminal() {
                           {isRoot && (
                             <AlertDialog>
                               <AlertDialogTrigger asChild>
-                                <Button variant="ghost" size="sm" className="h-10 text-slate-300 hover:text-red-500 transition-colors uppercase font-bold text-[10px]">
-                                  <Trash2 className="w-4 h-4 mr-2" /> Purge Case
+                                <Button variant="ghost" size="sm" className="h-10 text-red-500/60 hover:text-red-500 transition-colors uppercase font-black text-[10px] tracking-widest">
+                                  <Trash2 className="w-4 h-4 mr-2" /> Purge Record
                                 </Button>
                               </AlertDialogTrigger>
                               <AlertDialogContent className="rounded-[2.5rem]">
@@ -305,7 +305,7 @@ export default function PublicComplaintsTerminal() {
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
                                   <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
-                                  <AlertDialogAction onClick={() => handleDelete(c.id)} className="bg-red-600 hover:bg-red-700 rounded-xl">Delete</AlertDialogAction>
+                                  <AlertDialogAction onClick={() => handleDelete(c.id)} className="bg-red-600 hover:bg-red-700 rounded-xl">Confirm Deletion</AlertDialogAction>
                                 </AlertDialogFooter>
                               </AlertDialogContent>
                             </AlertDialog>
@@ -316,8 +316,9 @@ export default function PublicComplaintsTerminal() {
                   </CardContent>
                 </Card>
               ))}
-              {filtered.length === 0 && (<div className="text-center py-40 bg-white dark:bg-slate-900 rounded-[3rem] border-4 border-dashed border-slate-100 dark:border-slate-800"><Activity className="w-20 h-20 mx-auto mb-6 text-slate-200" /><h3 className="text-2xl font-headline font-bold text-slate-400">No active cases identified</h3><p className="text-sm text-slate-500 mt-2">Adjust your filters or examine the search parameters.</p></div>)}
             </div>
+          ) : (
+            <div className="text-center py-40 bg-white dark:bg-slate-900 rounded-[3rem] border-4 border-dashed border-slate-100 dark:border-slate-800"><Activity className="w-20 h-20 mx-auto mb-6 text-slate-200" /><h3 className="text-2xl font-headline font-bold text-slate-400">No active cases identified</h3><p className="text-sm text-slate-500 mt-2">Adjust your filters or examine the search parameters.</p></div>
           )}
         </div>
       </section>

@@ -17,21 +17,18 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { 
   ArrowLeft, ShieldCheck, Loader2, User, Mail, Phone, MapPin, Hash, 
-  Clock, FileText, Gavel, Scale, CheckCircle2, MoreVertical, 
-  Activity, ClipboardList, Briefcase, Trash2, Edit3, MessageSquare, 
-  History, Eye, Download, Share2, Upload, Camera, FileWarning, Search,
-  GraduationCap, AlertCircle, Info, Landmark, Layers, UserCheck, ShieldAlert,
-  Plus, X, Send, Network, Target, BookOpenCheck, FileAudio, FileIcon, Video,
-  RefreshCw, MailCheck, MailWarning, MailQuestion,
-  UserRoundCheck,
+  Clock, FileText, Gavel, Scale, CheckCircle2, 
+  Activity, History, Eye, Download, Upload, Plus, X,
+  Target, FileSearch, ExternalLink,
+  ChevronRight,
   UserPlus,
   Users,
-  ListTodo,
   Link as LinkIcon,
   Check,
   Settings2,
   Lock,
-  ChevronRight
+  Info,
+  Trash2
 } from 'lucide-react'
 import {
   Dialog,
@@ -62,9 +59,8 @@ import {
 } from "@/components/ui/tooltip"
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
-import { CASE_STATUSES, CASE_PRIORITIES, REPORT_TEMPLATES, REPORT_GUIDANCE, TASK_STATUSES, STANDARD_RESPONSIBILITIES } from '@/lib/complaint-constants'
+import { CASE_STATUSES, REPORT_TEMPLATES, REPORT_GUIDANCE, STANDARD_RESPONSIBILITIES } from '@/lib/complaint-constants'
 import { getStatusColor } from '@/lib/complaint-utils'
-import { sendTimelineEmailUpdate, sendReportEmail } from '@/lib/notification-service'
 import { InvestigationJourney } from '@/components/investigation-journey'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -104,6 +100,8 @@ export default function CaseHubPage() {
   
   const [newAttachment, setNewAttachment] = useState({ name: '', url: '' })
 
+  const isRoot = user?.email?.toLowerCase() === 'deydhritiman@gmail.com';
+
   // Data Fetching: Target Case
   const docRef = useMemoFirebase(() => {
     if (!db || !id) return null;
@@ -127,8 +125,6 @@ export default function CaseHubPage() {
       o.employeeId.toLowerCase().includes(teamSearch.toLowerCase())
     );
   }, [registryOfficers, teamSearch]);
-
-  const isRoot = user?.email?.toLowerCase() === 'deydhritiman@gmail.com';
 
   useEffect(() => {
     if (caseData) {
@@ -274,29 +270,6 @@ export default function CaseHubPage() {
     }
   };
 
-  const handleAddRemark = async () => {
-    if (!remark.trim() || !docRef || !user) return;
-    setIsActionLoading(true)
-    try {
-      await updateDoc(docRef, { 
-        timeline: arrayUnion({
-          action: "Investigative Remark",
-          user: user.email,
-          timestamp: new Date().toISOString(),
-          remark: remark.trim(),
-          type: 'remark'
-        }),
-        updatedAt: serverTimestamp()
-      });
-      toast({ title: "Remark Authenticated" });
-      setRemark('');
-    } catch (e) {
-      toast({ variant: "destructive", title: "Sync Failed" });
-    } finally {
-      setIsActionLoading(false);
-    }
-  };
-
   const handleSaveMandate = async () => {
     if (!docRef || !user) return;
     setIsActionLoading(true);
@@ -315,6 +288,20 @@ export default function CaseHubPage() {
       toast({ title: "Mandate Dispatched", description: "Instructions pushed to assigned investigators." });
     } catch (e) {
       toast({ variant: "destructive", title: "Sync Failed" });
+    } finally {
+      setIsActionLoading(false);
+    }
+  };
+
+  const handleDeleteCase = async () => {
+    if (!db || !id || !isRoot) return;
+    setIsActionLoading(true);
+    try {
+      await deleteDoc(doc(db, 'public_complaints', id as string));
+      toast({ title: "Record Purged", description: "The case has been permanently removed from the registry." });
+      router.push('/internal/public-complaints');
+    } catch (e) {
+      toast({ variant: "destructive", title: "Purge Failed" });
     } finally {
       setIsActionLoading(false);
     }
@@ -355,7 +342,7 @@ export default function CaseHubPage() {
               </div>
            </div>
            
-           <div className="flex items-center gap-3 order-1 md:order-2">
+           <div className="flex items-center gap-3 order-1 md:order-2 flex-wrap justify-center">
               <Button onClick={() => setActiveTab('reports')} className="bg-accent text-primary font-bold h-11 px-8 rounded-xl shadow-xl hover:bg-secondary hover:text-white transition-all">
                 <Gavel className="w-4 h-4 mr-2" /> Commission Findings
               </Button>
@@ -376,7 +363,7 @@ export default function CaseHubPage() {
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                       <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
-                      <AlertDialogAction onClick={() => {}} className="bg-red-600 hover:bg-red-700 rounded-xl">Confirm Deletion</AlertDialogAction>
+                      <AlertDialogAction onClick={handleDeleteCase} className="bg-red-600 hover:bg-red-700 rounded-xl">Confirm Deletion</AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>
                 </AlertDialog>
