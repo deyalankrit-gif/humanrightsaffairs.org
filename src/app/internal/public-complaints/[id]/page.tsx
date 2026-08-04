@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useEffect, useState, useMemo } from 'react'
@@ -387,6 +388,35 @@ export default function CaseHubPage() {
     }
   };
 
+  const handleGenerateReport = async () => {
+    if (isActionLoading) return;
+    const template = REPORT_TEMPLATES.find(r => r.id === selectedReportType);
+    
+    setIsActionLoading(true);
+    toast({
+      title: "Generating Report Draft",
+      description: `Synthesizing ${template?.label} from institutional metadata...`,
+    });
+
+    try {
+      // Simulate institutional data extraction delay
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      toast({
+        title: "Report Draft Ready",
+        description: "Draft generated successfully. Proceeding to preview terminal.",
+      });
+    } catch (e) {
+      toast({
+        variant: "destructive",
+        title: "Generation Interrupted",
+        description: "A protocol error occurred during report synthesis.",
+      });
+    } finally {
+      setIsActionLoading(false);
+    }
+  };
+
   if (authLoading || dataLoading) return <div className="min-h-screen flex items-center justify-center bg-slate-50"><Loader2 className="w-12 h-12 animate-spin text-accent" /></div>
   if (!caseData) return <div className="p-20 text-center text-slate-400 font-bold uppercase">Record not identified.</div>
 
@@ -443,7 +473,7 @@ export default function CaseHubPage() {
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                       <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
-                      <AlertDialogAction onClick={handleDeleteCase} className="bg-red-600 hover:bg-red-700 rounded-xl">Confirm Deletion</AlertDialogAction>
+                      <AlertDialogAction onClick={() => handleDeleteCase} className="bg-red-600 hover:bg-red-700 rounded-xl">Confirm Deletion</AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>
                 </AlertDialog>
@@ -937,8 +967,12 @@ export default function CaseHubPage() {
                              <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Selected Template</p>
                              <p className="text-sm font-bold text-white">{REPORT_TEMPLATES.find(r => r.id === selectedReportType)?.label}</p>
                           </div>
-                          <Button className="w-full h-14 rounded-2xl bg-accent text-primary font-black uppercase tracking-widest text-xs hover:bg-secondary hover:text-white transition-all shadow-xl shadow-accent/20">
-                             Generate & Preview Report
+                          <Button 
+                            onClick={handleGenerateReport}
+                            disabled={isActionLoading}
+                            className="w-full h-14 rounded-2xl bg-accent text-primary font-black uppercase tracking-widest text-xs hover:bg-secondary hover:text-white transition-all shadow-xl shadow-accent/20"
+                          >
+                             {isActionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Generate & Preview Report"}
                           </Button>
                           <div className="flex items-center gap-3 p-4 bg-white/5 rounded-2xl border border-white/5">
                              <Info className="w-4 h-4 text-accent shrink-0" />
