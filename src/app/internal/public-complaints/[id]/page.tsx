@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useEffect, useState, useMemo } from 'react'
@@ -26,7 +27,8 @@ import {
   UserRoundCheck,
   UserPlus,
   Users,
-  ListTodo
+  ListTodo,
+  Link as LinkIcon
 } from 'lucide-react'
 import {
   Dialog,
@@ -78,15 +80,23 @@ export default function CaseHubPage() {
   // Assignment & Mandate State
   const [officers, setOfficers] = useState<any[]>([])
   const [mandate, setMandate] = useState({
+    title: '',
+    description: '',
     objective: '',
     instructions: '',
     requiredActions: '',
     evidenceToCollect: '',
     witnessesToContact: '',
     locationsToVisit: '',
-    deadline: ''
+    reportingInstructions: '',
+    internalNotes: '',
+    deadline: '',
+    attachments: [] as { name: string, url: string }[]
   })
   
+  // Attachments temp state
+  const [newAttachment, setNewAttachment] = useState({ name: '', url: '' })
+
   // Tasks State
   const [tasks, setTasks] = useState<any[]>([])
   const [isAddingTask, setIsAddingTask] = useState(false)
@@ -133,7 +143,7 @@ export default function CaseHubPage() {
   useEffect(() => {
     if (caseData) {
       if (caseData.assignedOfficers) setOfficers(caseData.assignedOfficers);
-      if (caseData.mandate) setMandate(caseData.mandate);
+      if (caseData.mandate) setMandate(prev => ({ ...prev, ...caseData.mandate }));
       if (caseData.tasks) setTasks(caseData.tasks);
     }
   }, [caseData]);
@@ -187,16 +197,31 @@ export default function CaseHubPage() {
           action: "Mission Mandate Established",
           user: user.email,
           timestamp: new Date().toISOString(),
-          remark: "Updated investigation instructions and primary objectives.",
+          remark: `Updated mission directives: ${mandate.title || 'Untitled Mission'}`,
           type: 'mandate_update'
         })
       });
-      toast({ title: "Mandate Synchronized", description: "Instructions pushed to investigator terminal." });
+      toast({ title: "Mandate Synchronized", description: "All instructions and objectives pushed to investigator terminal." });
     } catch (e) {
       toast({ variant: "destructive", title: "Update Failed" });
     } finally {
       setIsActionLoading(false);
     }
+  };
+
+  const addAttachment = () => {
+    if (!newAttachment.name || !newAttachment.url) return;
+    setMandate({
+      ...mandate,
+      attachments: [...(mandate.attachments || []), newAttachment]
+    });
+    setNewAttachment({ name: '', url: '' });
+  };
+
+  const removeAttachment = (idx: number) => {
+    const updated = [...(mandate.attachments || [])];
+    updated.splice(idx, 1);
+    setMandate({ ...mandate, attachments: updated });
   };
 
   const handleAddTask = async () => {
@@ -573,22 +598,93 @@ export default function CaseHubPage() {
            </TabsContent>
 
            <TabsContent value="mandate" className="animate-in slide-in-from-right-4 duration-500">
-              <Card className="rounded-[2.5rem] border-none shadow-sm p-10 bg-white">
+              <Card className="rounded-[2.5rem] border-none shadow-sm p-8 md:p-12 bg-white">
                  <CardHeader className="p-0 mb-8">
-                    <CardTitle className="text-2xl font-headline font-bold flex items-center gap-3"><Target className="w-7 h-7 text-accent" /> Investigation Mandate</CardTitle>
-                    <CardDescription>Primary objectives and instructions pushed to the investigator's terminal.</CardDescription>
+                    <CardTitle className="text-2xl font-headline font-bold flex items-center gap-3"><Target className="w-7 h-7 text-accent" /> Investigation Mandate Hub</CardTitle>
+                    <CardDescription>Comprehensive tactical directives for authorized field personnel.</CardDescription>
                  </CardHeader>
-                 <div className="space-y-6">
-                    <div className="grid md:grid-cols-2 gap-6">
-                       <div className="space-y-1.5"><Label className="text-[10px] font-bold uppercase text-slate-400">Primary Objective</Label><Input value={mandate.objective} onChange={e => setMandate({...mandate, objective: e.target.value})} placeholder="Main goal of this investigation" /></div>
-                       <div className="space-y-1.5"><Label className="text-[10px] font-bold uppercase text-slate-400">Investigation Deadline</Label><Input type="date" value={mandate.deadline} onChange={e => setMandate({...mandate, deadline: e.target.value})} /></div>
+                 <div className="space-y-10">
+                    <div className="grid md:grid-cols-2 gap-8">
+                       <div className="space-y-1.5">
+                          <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Mission Title *</Label>
+                          <Input value={mandate.title} onChange={e => setMandate({...mandate, title: e.target.value})} placeholder="e.g. Ground Verification Operation" className="h-12 rounded-xl" />
+                       </div>
+                       <div className="space-y-1.5">
+                          <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Investigation Deadline</Label>
+                          <Input type="date" value={mandate.deadline} onChange={e => setMandate({...mandate, deadline: e.target.value})} className="h-12 rounded-xl" />
+                       </div>
                     </div>
-                    <div className="space-y-1.5"><Label className="text-[10px] font-bold uppercase text-slate-400">Official Instructions</Label><Textarea value={mandate.instructions} onChange={e => setMandate({...mandate, instructions: e.target.value})} placeholder="Detailed procedural steps..." className="min-h-[100px]" /></div>
-                    <div className="grid md:grid-cols-2 gap-6">
-                       <div className="space-y-1.5"><Label className="text-[10px] font-bold uppercase text-slate-400">Required Actions</Label><Textarea value={mandate.requiredActions} onChange={e => setMandate({...mandate, requiredActions: e.target.value})} placeholder="Specific legal or field actions..." /></div>
-                       <div className="space-y-1.5"><Label className="text-[10px] font-bold uppercase text-slate-400">Evidence to Collect</Label><Textarea value={mandate.evidenceToCollect} onChange={e => setMandate({...mandate, evidenceToCollect: e.target.value})} placeholder="Photos, documents, signatures..." /></div>
+
+                    <div className="space-y-1.5">
+                       <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Mission Context / Brief Description</Label>
+                       <Textarea value={mandate.description} onChange={e => setMandate({...mandate, description: e.target.value})} placeholder="Brief background of the mission..." className="min-h-[80px] rounded-xl" />
                     </div>
-                    <Button onClick={handleSaveMandate} disabled={isActionLoading} className="w-full h-14 bg-accent text-primary font-bold rounded-2xl shadow-xl">Commit Mandate to Registry</Button>
+
+                    <div className="space-y-1.5">
+                       <Label className="text-[10px] font-black uppercase text-accent tracking-widest">Primary Operational Objective *</Label>
+                       <Input value={mandate.objective} onChange={e => setMandate({...mandate, objective: e.target.value})} placeholder="What is the singular goal of this probe?" className="h-12 rounded-xl border-accent/20 font-bold" />
+                    </div>
+
+                    <div className="space-y-1.5">
+                       <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Official Instructions (Step-by-Step)</Label>
+                       <Textarea value={mandate.instructions} onChange={e => setMandate({...mandate, instructions: e.target.value})} placeholder="Detailed procedural steps for the officer..." className="min-h-[150px] rounded-2xl p-6 bg-slate-50" />
+                    </div>
+
+                    <div className="grid md:grid-cols-2 gap-8">
+                       <div className="space-y-1.5">
+                          <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Mandatory Field Actions</Label>
+                          <Textarea value={mandate.requiredActions} onChange={e => setMandate({...mandate, requiredActions: e.target.value})} placeholder="Specific tasks (e.g. Visit local PS)..." className="min-h-[100px] rounded-xl" />
+                       </div>
+                       <div className="space-y-1.5">
+                          <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Critical Evidence Requirements</Label>
+                          <Textarea value={mandate.evidenceToCollect} onChange={e => setMandate({...mandate, evidenceToCollect: e.target.value})} placeholder="What must be retrieved (e.g. Video, Affidavits)..." className="min-h-[100px] rounded-xl" />
+                       </div>
+                    </div>
+
+                    <div className="grid md:grid-cols-2 gap-8">
+                       <div className="space-y-1.5">
+                          <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Witnesses / Persons to Contact</Label>
+                          <Textarea value={mandate.witnessesToContact} onChange={e => setMandate({...mandate, witnessesToContact: e.target.value})} placeholder="List of individuals for interview..." className="min-h-[100px] rounded-xl" />
+                       </div>
+                       <div className="space-y-1.5">
+                          <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Target Operational Locations</Label>
+                          <Textarea value={mandate.locationsToVisit} onChange={e => setMandate({...mandate, locationsToVisit: e.target.value})} placeholder="Places to be inspected..." className="min-h-[100px] rounded-xl" />
+                       </div>
+                    </div>
+
+                    <div className="grid md:grid-cols-2 gap-8">
+                       <div className="space-y-1.5">
+                          <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Reporting Instructions</Label>
+                          <Textarea value={mandate.reportingInstructions} onChange={e => setMandate({...mandate, reportingInstructions: e.target.value})} placeholder="How and when should updates be sent?" className="min-h-[100px] rounded-xl" />
+                       </div>
+                       <div className="space-y-1.5">
+                          <Label className="text-[10px] font-black uppercase text-red-500 tracking-widest">Internal / Confidential Notes</Label>
+                          <Textarea value={mandate.internalNotes} onChange={e => setMandate({...mandate, internalNotes: e.target.value})} placeholder="Sensitive administrative guidance (Hidden from complainant)..." className="min-h-[100px] rounded-xl border-red-100" />
+                       </div>
+                    </div>
+
+                    <div className="p-8 rounded-3xl bg-slate-50 dark:bg-slate-900 border-2 border-dashed border-slate-200 dark:border-slate-800 space-y-6">
+                       <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-500 flex items-center gap-2">
+                          <LinkIcon className="w-4 h-4" /> Official Document & Reference Links
+                       </h4>
+                       <div className="flex gap-3">
+                          <Input value={newAttachment.name} onChange={e => setNewAttachment({...newAttachment, name: e.target.value})} placeholder="Label (e.g. Case Guideline PDF)" className="flex-1 rounded-xl" />
+                          <Input value={newAttachment.url} onChange={e => setNewAttachment({...newAttachment, url: e.target.value})} placeholder="https://..." className="flex-1 rounded-xl" />
+                          <Button onClick={addAttachment} variant="outline" className="rounded-xl h-10 px-6"><Plus className="w-4 h-4 mr-1.5" /> Append</Button>
+                       </div>
+                       <div className="flex flex-wrap gap-2">
+                          {(mandate.attachments || []).map((att, idx) => (
+                             <Badge key={idx} variant="secondary" className="pl-4 pr-1 py-1 h-9 rounded-xl gap-3 bg-white dark:bg-slate-800 border-slate-200">
+                                <span className="text-[10px] font-bold">{att.name}</span>
+                                <button onClick={() => removeAttachment(idx)} className="p-1 hover:text-red-500"><X className="w-3.5 h-3.5" /></button>
+                             </Badge>
+                          ))}
+                       </div>
+                    </div>
+
+                    <Button onClick={handleSaveMandate} disabled={isActionLoading} className="w-full h-16 bg-accent text-primary font-black uppercase tracking-widest text-lg rounded-[1.5rem] shadow-xl shadow-accent/20 hover:scale-[1.02] transition-all">
+                       {isActionLoading ? <Loader2 className="animate-spin mr-2" /> : <><ShieldCheck className="w-6 h-6 mr-3" /> Authorize & Synchronize Mandate</>}
+                    </Button>
                  </div>
               </Card>
            </TabsContent>
