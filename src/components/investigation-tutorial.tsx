@@ -50,6 +50,7 @@ import {
   DialogContent, 
   DialogHeader, 
   DialogTitle,
+  DialogTrigger,
   DialogDescription,
   DialogClose 
 } from '@/components/ui/dialog';
@@ -74,12 +75,12 @@ const TUTORIAL_STEPS = [
   { id: 5, title: "Team Deployment", subtitle: "Personnel Selection", duration: 20, icon: UserPlus, desc: "The administrative process of selecting and assigning investigation officers from the registry." },
   { id: 6, title: "Mission Mandate", subtitle: "Directives & Goals", duration: 15, icon: Target, desc: "Defining objectives, special instructions, and evidence requirements for the team." },
   { id: 7, title: "Officer Login", subtitle: "Terminal Access", duration: 12, icon: LogIn, desc: "How investigators access their dedicated tactical portal with secure credentials." },
-  { id: 8, title: "Assigned Tasks", subtitle: "Tactical Queue", duration: 15, icon: ClipboardList, desc: "Reviewing assigned dockets, priorities, and specific field mandates." },
-  { id: 9, title: "Evidence Vault", subtitle: "Fact-Finding", duration: 20, icon: Camera, desc: "The protocol for uploading photos, witness statements, and GPS-tagged evidence." },
-  { id: 10, title: "Progress Sync", subtitle: "Real-time Updates", duration: 15, icon: RefreshCw, desc: "Updating case milestones and maintaining transparency with the central cell." },
-  { id: 11, title: "Field Reporting", subtitle: "Documenting Findings", duration: 20, icon: FileSearch, desc: "Drafting and submitting structured task reports with findings and recommendations." },
-  { id: 12, title: "Supervisor Audit", subtitle: "Decision Review", duration: 18, icon: CheckCircle2, desc: "The administrative review process for field reports and evidence verification." },
-  { id: 13, title: "Commission Findings", subtitle: "Final Document", duration: 15, icon: Gavel, desc: "Generating the final investigative report and institutional resolutions." },
+  { id: 8, title: "Assigned Task", subtitle: "Tactical Queue", duration: 15, icon: ClipboardList, desc: "Reviewing assigned dockets, priorities, and specific field mandates." },
+  { id: 9, title: "Evidence Collection", subtitle: "Fact-Finding", duration: 20, icon: Camera, desc: "The protocol for uploading photos, witness statements, and GPS-tagged evidence." },
+  { id: 10, title: "Investigation Progress", subtitle: "Real-time Updates", duration: 15, icon: RefreshCw, desc: "Updating case milestones and maintaining transparency with the central cell." },
+  { id: 11, title: "Submit Task Report", subtitle: "Documenting Findings", duration: 20, icon: FileSearch, desc: "Drafting and submitting structured task reports with findings and recommendations." },
+  { id: 12, title: "Supervisor Review", subtitle: "Decision Review", duration: 18, icon: CheckCircle2, desc: "The administrative review process for field reports and evidence verification." },
+  { id: 13, title: "Final Investigation Report", subtitle: "Final Document", duration: 15, icon: Gavel, desc: "Generating the final investigative report and institutional resolutions." },
   { id: 14, title: "Case Closure", subtitle: "Mission Completion", duration: 12, icon: Lock, desc: "Archiving the record and finalizing the audit trail after rights restoration." },
 ];
 
