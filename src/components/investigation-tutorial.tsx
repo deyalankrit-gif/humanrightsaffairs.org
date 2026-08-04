@@ -45,6 +45,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { 
   Dialog, 
   DialogContent, 
@@ -600,7 +601,7 @@ export function InvestigationTutorial() {
                                       <p className="text-xs font-bold uppercase">High Contrast</p>
                                       <p className="text-[9px] text-slate-400">Black/Yellow accessibility theme</p>
                                    </div>
-                                   <button onClick={() => setIsHighContrast(!isHighContrast)} className={cn("w-10 h-5 rounded-full relative transition-all", isHighContrast ? "bg-emerald-500" : "bg-slate-700")}>
+                                   <button onClick={() => setIsHighContrast(!isHighContrast)} className={cn("w-10 h-5 rounded-full relative transition-all", isHighContrast ? "bg-emerald-50" : "bg-slate-700")}>
                                       <div className={cn("absolute top-1 w-3 h-3 bg-white rounded-full transition-all", isHighContrast ? "left-6" : "left-1")} />
                                    </button>
                                 </div>
@@ -653,9 +654,9 @@ export function InvestigationTutorial() {
                       <div className="w-px h-8 bg-white/10 mx-2" />
 
                       <div className="hidden lg:flex items-center gap-4">
-                         <Button variant="ghost" size="icon" onClick={() => setIsMuted(!isMuted)} className="text-white/60 hover:text-white">
+                         <button onClick={() => setIsMuted(!isMuted)} className="text-white/60 hover:text-white">
                            {isMuted ? <VolumeX className="w-6 h-6 text-red-500" /> : <Volume2 className="w-6 h-6" />}
-                         </Button>
+                         </button>
                          <Select value={playbackSpeed.toString()} onValueChange={v => setPlaybackSpeed(parseFloat(v))}>
                             <SelectTrigger className="h-9 w-20 bg-white/5 border-white/10 text-white text-[10px] font-black">
                                <SelectValue />
