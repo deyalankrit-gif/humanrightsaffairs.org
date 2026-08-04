@@ -18,6 +18,15 @@ export const CASE_STATUSES = [
 
 export type CaseStatus = (typeof CASE_STATUSES)[number];
 
+export const TASK_STATUSES = [
+  "Pending",
+  "In Progress",
+  "Completed",
+  "Returned"
+] as const;
+
+export type TaskStatus = (typeof TASK_STATUSES)[number];
+
 export const REPORT_TEMPLATES = [
   { id: "preliminary_assessment", label: "1. Preliminary Assessment Report" },
   { id: "complaint_verification", label: "2. Complaint Verification Report" },

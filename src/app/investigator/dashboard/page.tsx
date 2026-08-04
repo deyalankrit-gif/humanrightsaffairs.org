@@ -17,7 +17,9 @@ import {
   Target,
   FileText,
   User,
-  ShieldCheck
+  ShieldCheck,
+  CalendarCheck,
+  UserRoundCheck
 } from 'lucide-react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
@@ -34,7 +36,6 @@ export default function InvestigatorDashboard() {
 
   const casesQuery = useMemoFirebase(() => {
     if (!db || !user) return null;
-    // Query cases where this investigator is assigned
     return query(
       collection(db, 'public_complaints'), 
       where('status', 'not-in', ['Closed', 'Action Taken']),
@@ -45,22 +46,21 @@ export default function InvestigatorDashboard() {
 
   const { data: allCases, loading } = useCollection(casesQuery);
 
-  // Filter in memory for investigators (Firestore index requirements simplified)
   const assignedCases = useMemo(() => {
     if (!allCases || !user) return [];
     const name = userData?.name || '';
     return allCases.filter((c: any) => 
       c.assignedTo === name || 
       c.assignedOfficers?.some((o: any) => o.name === name) ||
-      c.email === user.email // Support for legacy email assignment
+      c.email === user.email
     );
   }, [allCases, user, userData]);
 
   const stats = useMemo(() => {
     const active = assignedCases.length;
     const high = assignedCases.filter((c: any) => c.priority === 'High').length;
-    const review = assignedCases.filter((c: any) => c.status === 'Under Preliminary Review').length;
-    return { active, high, review };
+    const tasks = assignedCases.reduce((acc, c: any) => acc + (c.tasks?.filter((t: any) => t.status !== 'Completed').length || 0), 0);
+    return { active, high, tasks };
   }, [assignedCases]);
 
   if (loading) return <div className="py-20 text-center"><Loader2 className="animate-spin text-indigo-600 mx-auto" /></div>
@@ -68,15 +68,15 @@ export default function InvestigatorDashboard() {
   return (
     <div className="space-y-10 animate-in fade-in duration-700">
       <section className="space-y-2">
-        <h2 className="text-3xl font-headline font-bold text-primary">Welcome, <span className="text-indigo-600">{userData?.name || 'Investigator'}</span></h2>
-        <p className="text-slate-500 font-medium">You have {assignedCases.length} active investigations in your docket.</p>
+        <h2 className="text-3xl font-headline font-bold text-primary">Mission <span className="text-indigo-600">Overview</span></h2>
+        <p className="text-slate-500 font-medium">Hello, {userData?.name || 'Officer'}. Accessing assigned tactical responsibilities.</p>
       </section>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {[
-          { label: 'Active Cases', value: stats.active, icon: <Activity className="text-indigo-500" />, bg: 'bg-indigo-50' },
+          { label: 'Active Dockets', value: stats.active, icon: <Activity className="text-indigo-500" />, bg: 'bg-indigo-50' },
           { label: 'High Priority', value: stats.high, icon: <AlertCircle className="text-red-500" />, bg: 'bg-red-50' },
-          { label: 'Pending Review', value: stats.review, icon: <Clock className="text-amber-500" />, bg: 'bg-amber-50' }
+          { label: 'Tactical Tasks', value: stats.tasks, icon: <Target className="text-amber-500" />, bg: 'bg-amber-50' }
         ].map((s, i) => (
           <Card key={i} className="border-none shadow-sm rounded-3xl overflow-hidden">
             <CardContent className="p-6 flex items-center gap-5">
@@ -93,44 +93,64 @@ export default function InvestigatorDashboard() {
       <Card className="rounded-[2.5rem] border-none shadow-sm overflow-hidden bg-white">
         <CardHeader className="bg-slate-900 text-white p-8">
            <CardTitle className="text-xl font-headline font-bold flex items-center gap-3">
-             <Target className="w-6 h-6 text-indigo-400" /> Assigned Docket
+             <Target className="w-6 h-6 text-indigo-400" /> Active Assignments
            </CardTitle>
-           <CardDescription className="text-slate-400">Current mission-critical investigations assigned to your node.</CardDescription>
+           <CardDescription className="text-slate-400 text-xs font-bold uppercase tracking-widest">Mandatory directives and responsibilities from Central Oversight</CardDescription>
         </CardHeader>
         <CardContent className="p-0">
            <div className="divide-y divide-slate-50">
              {assignedCases.length > 0 ? assignedCases.map((c: any) => (
-               <div key={c.id} className="p-6 hover:bg-slate-50 transition-colors flex flex-col md:flex-row items-center justify-between gap-6 group">
-                  <div className="flex items-start gap-6 flex-1">
-                     <div className="w-14 h-14 rounded-2xl bg-indigo-50 flex flex-col items-center justify-center text-indigo-600 shrink-0 font-bold shadow-sm">
-                        <span className="text-[8px] uppercase font-black">ID</span>
-                        <span className="text-sm tracking-tighter">{c.caseId?.split('-').pop()}</span>
+               <div key={c.id} className="p-8 hover:bg-slate-50 transition-all flex flex-col xl:flex-row items-center justify-between gap-8 group">
+                  <div className="flex items-start gap-6 flex-1 min-w-0">
+                     <div className="w-16 h-16 rounded-2xl bg-indigo-50 flex flex-col items-center justify-center text-indigo-600 shrink-0 font-black shadow-inner">
+                        <span className="text-[7px] uppercase tracking-widest">REF</span>
+                        <span className="text-xs">{c.caseId?.split('-').pop() || c.token.slice(-4)}</span>
                      </div>
-                     <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                           <h4 className="text-lg font-bold text-primary group-hover:text-indigo-600 transition-colors leading-tight">{c.subject}</h4>
-                           <Badge variant="outline" className={cn(
-                             "text-[7px] font-black uppercase border-none",
-                             c.priority === 'High' ? "bg-red-50 text-red-600" : "bg-blue-50 text-blue-600"
-                           )}>{c.priority} PRIORITY</Badge>
+                     <div className="space-y-3 min-w-0">
+                        <div className="space-y-1">
+                           <div className="flex items-center gap-2">
+                              <h4 className="text-xl font-bold text-primary group-hover:text-indigo-600 transition-colors leading-tight truncate">{c.subject}</h4>
+                              <Badge className={cn(
+                                "text-[7px] font-black uppercase border-none h-4",
+                                c.priority === 'High' ? "bg-red-500 text-white" : "bg-blue-500 text-white"
+                              )}>{c.priority}</Badge>
+                           </div>
+                           <p className="text-xs text-slate-400 font-bold uppercase flex items-center gap-1.5"><MapPin className="w-3 h-3 text-accent" /> {c.districtName}, {c.stateName}</p>
                         </div>
-                        <div className="flex flex-wrap items-center gap-4 text-[10px] font-bold text-slate-400 uppercase">
-                           <span className="flex items-center gap-1.5"><MapPin className="w-3 h-3 text-accent" /> {c.districtName}, {c.stateName}</span>
-                           <span className="flex items-center gap-1.5"><Clock className="w-3 h-3 text-accent" /> Filed: {c.createdAt?.toDate?.()?.toLocaleDateString()}</span>
-                           <span className="flex items-center gap-1.5 text-indigo-600"><CheckCircle2 className="w-3 h-3" /> {c.status}</span>
+
+                        <div className="flex flex-wrap items-center gap-6">
+                           <div className="flex items-center gap-1.5">
+                              <UserRoundCheck className="w-3.5 h-3.5 text-indigo-400" />
+                              <span className="text-[10px] font-bold text-slate-500 uppercase">Assigned: {c.createdAt?.toDate?.()?.toLocaleDateString()}</span>
+                           </div>
+                           <div className="flex items-center gap-1.5">
+                              <CalendarCheck className="w-3.5 h-3.5 text-rose-500" />
+                              <span className="text-[10px] font-black text-rose-600 uppercase">Deadline: {c.mandate?.deadline || 'ASAP'}</span>
+                           </div>
+                           <div className="flex items-center gap-1.5">
+                              <Activity className="w-3.5 h-3.5 text-emerald-500" />
+                              <span className="text-[10px] font-black text-emerald-600 uppercase">Status: {c.status}</span>
+                           </div>
                         </div>
                      </div>
                   </div>
-                  <Link href={`/investigator/cases/${c.id}`} className="w-full md:w-auto">
-                    <Button variant="outline" className="w-full md:w-auto h-11 px-8 rounded-xl font-bold uppercase text-[10px] tracking-widest gap-2 hover:bg-indigo-600 hover:text-white transition-all">
-                      Access File <ChevronRight className="w-4 h-4" />
-                    </Button>
-                  </Link>
+
+                  <div className="flex flex-col sm:flex-row items-center gap-4 w-full xl:w-auto">
+                    <div className="flex-1 text-center sm:text-right px-4">
+                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Tasks Fulfilled</p>
+                       <p className="text-lg font-black text-primary">{c.tasks?.filter((t:any) => t.status === 'Completed').length || 0} / {c.tasks?.length || 0}</p>
+                    </div>
+                    <Link href={`/investigator/cases/${c.id}`} className="w-full sm:w-auto">
+                      <Button className="w-full sm:w-auto h-12 px-10 rounded-2xl bg-primary text-white font-bold uppercase text-[10px] tracking-widest shadow-xl hover:bg-secondary transition-all">
+                        Execute Responsibilities <ChevronRight className="ml-1 w-4 h-4" />
+                      </Button>
+                    </Link>
+                  </div>
                </div>
              )) : (
-               <div className="py-24 text-center opacity-30">
-                  <ShieldCheck className="w-16 h-16 mx-auto mb-4" />
-                  <p className="text-sm font-black uppercase tracking-[0.2em]">Docket Empty</p>
+               <div className="py-32 text-center opacity-30">
+                  <ShieldCheck className="w-20 h-20 mx-auto mb-6" />
+                  <p className="text-lg font-black uppercase tracking-[0.3em]">No Active Assignments</p>
                </div>
              )}
            </div>
