@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useEffect, useState, useMemo } from 'react';
@@ -301,7 +300,7 @@ export default function InternalNewsManagement() {
            <div className="text-center py-20"><Loader2 className="animate-spin w-10 h-10 text-accent mx-auto" /></div>
          ) : (
            <div className="grid gap-6">
-             {newsItems?.filter(n => (n.originalEnglish?.title || n.title || '').toLowerCase().includes(search.toLowerCase())).map((n: any) => (
+             {(newsItems || []).filter(n => (n.originalEnglish?.title || n.title || '').toLowerCase().includes(search.toLowerCase())).map((n: any) => (
                <Card key={n.id} className={cn(
                  "rounded-3xl overflow-hidden border transition-all group",
                  n.isActive ? "bg-white dark:bg-slate-900 border-emerald-500/20 shadow-lg shadow-emerald-500/5" : "bg-white/60 dark:bg-slate-950/60 border-slate-100 dark:border-slate-800 grayscale opacity-60"

@@ -19,7 +19,8 @@ import {
   User,
   ShieldCheck,
   CalendarCheck,
-  UserRoundCheck
+  UserRoundCheck,
+  Loader2
 } from 'lucide-react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
@@ -63,7 +64,12 @@ export default function InvestigatorDashboard() {
     return { active, high, tasks };
   }, [assignedCases]);
 
-  if (loading) return <div className="py-20 text-center"><Loader2 className="animate-spin text-indigo-600 mx-auto" /></div>
+  if (loading) return (
+    <div className="py-20 text-center flex flex-col items-center gap-4">
+      <Loader2 className="w-10 h-10 animate-spin text-indigo-600 mx-auto" />
+      <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Synchronizing Assignments...</p>
+    </div>
+  );
 
   return (
     <div className="space-y-10 animate-in fade-in duration-700">
@@ -158,8 +164,4 @@ export default function InvestigatorDashboard() {
       </Card>
     </div>
   )
-}
-
-function Loader2({ className }: { className?: string }) {
-  return <Clock className={cn("animate-spin", className)} />
 }

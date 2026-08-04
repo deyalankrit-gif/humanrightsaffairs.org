@@ -13,7 +13,7 @@ import { JsonLd } from './json-ld';
 import { getNewsSchema } from '@/lib/seo-utils';
 
 /**
- * DigitalClock: Isolated timer node to prevent news card re-renders.
+ * DigitalClock: Isolated timer node with hydration guard.
  */
 function DigitalClock() {
   const [time, setTime] = useState<Date | null>(null);
@@ -44,7 +44,7 @@ function DigitalClock() {
 /**
  * CurrentNews: Real-time institutional news broadcast node.
  * Features: 2-hour autonomous sync, persistent AI translation, and fixed layout.
- * Updated: Isolated digital clock to prevent frequent reconciliation errors.
+ * Updated: Standardized recency sorting with hydration safety.
  */
 export function CurrentNews({ className }: { className?: string }) {
   const db = useFirestore();
@@ -52,6 +52,11 @@ export function CurrentNews({ className }: { className?: string }) {
   const [isSyncing, setIsSyncing] = useState(false);
   const [isTranslating, setIsTranslating] = useState(false);
   const [isBangla, setIsBangla] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Registry metadata for sync monitoring
   const metaRef = useMemoFirebase(() => {
@@ -70,18 +75,18 @@ export function CurrentNews({ className }: { className?: string }) {
   const { data: newsItems, loading } = useCollection(newsQuery);
 
   const activeNews = useMemo(() => {
-    if (!newsItems || newsItems.length === 0) return null;
+    if (!mounted || !newsItems || newsItems.length === 0) return null;
     // Prioritize Regional (West Bengal) first, then Recency
     return [...newsItems].sort((a: any, b: any) => {
       const pA = a.scopePriority ?? 99;
       const pB = b.scopePriority ?? 99;
       if (pA !== pB) return pA - pB;
       
-      const dateA = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : Date.now();
-      const dateB = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : Date.now();
+      const dateA = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : 0;
+      const dateB = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : 0;
       return dateB - dateA;
     })[0];
-  }, [newsItems]);
+  }, [newsItems, mounted]);
 
   // Reset language view when news content changes
   useEffect(() => {
@@ -90,11 +95,11 @@ export function CurrentNews({ className }: { className?: string }) {
 
   // Autonomous Sync Logic
   const lastSyncTime = (meta as any)?.lastSyncAt?.toDate?.()?.getTime() || 0;
-  const activeCount = newsItems?.length || 0;
+  const activeCount = (newsItems || []).length;
 
   useEffect(() => {
     const triggerSync = async () => {
-      if (!db || isSyncing || loading) return;
+      if (!db || isSyncing || loading || !mounted) return;
       
       const now = new Date().getTime();
       const hoursSinceSync = (now - lastSyncTime) / (1000 * 60 * 60);
@@ -132,7 +137,7 @@ export function CurrentNews({ className }: { className?: string }) {
     };
 
     triggerSync();
-  }, [db, isSyncing, loading, lastSyncTime, activeCount]);
+  }, [db, isSyncing, loading, lastSyncTime, activeCount, mounted]);
 
   const handleTranslateToggle = async () => {
     if (isTranslating || !activeNews || !db) return;
@@ -188,6 +193,8 @@ export function CurrentNews({ className }: { className?: string }) {
     }
     return activeNews.originalEnglish || activeNews;
   }, [activeNews, isBangla]);
+
+  if (!mounted) return null;
 
   if (loading && !isSyncing) return (
     <div className={cn("flex flex-col gap-2 p-6 animate-pulse", className)}>
