@@ -139,12 +139,12 @@ function CategoryManagement({
                   </AlertDialogTrigger>
                   <AlertDialogContent className="rounded-3xl">
                     <AlertDialogHeader>
-                      <AlertDialogTitle>Purge category "{cat}"?</AlertDialogTitle>
-                      <AlertDialogDescription>This will remove the category from the list. Existing vendor records will not be deleted.</AlertDialogDescription>
+                      <AlertDialogTitle>Confirm Deletion</AlertDialogTitle>
+                      <AlertDialogDescription>Are you sure you want to delete this item? This action may be irreversible. Please confirm before continuing.</AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                       <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
-                      <AlertDialogAction onClick={() => onDelete(idx)} className="bg-red-600 hover:bg-red-700 rounded-xl">Remove Category</AlertDialogAction>
+                      <AlertDialogAction onClick={() => onDelete(idx)} className="bg-red-600 hover:bg-red-700 rounded-xl">Delete</AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>
                 </AlertDialog>
@@ -540,12 +540,12 @@ export default function InternalVendorsPage() {
                              </AlertDialogTrigger>
                              <AlertDialogContent className="rounded-[2.5rem] border-none shadow-2xl">
                                <AlertDialogHeader>
-                                 <AlertDialogTitle>Purge vendor record?</AlertDialogTitle>
-                                 <AlertDialogDescription>This will permanently remove the record for "{vendor.companyName}" from the institutional vendor registry. This action is irreversible.</AlertDialogDescription>
+                                 <AlertDialogTitle>Confirm Deletion</AlertDialogTitle>
+                                 <AlertDialogDescription>Are you sure you want to delete this item? This action may be irreversible. Please confirm before continuing.</AlertDialogDescription>
                                </AlertDialogHeader>
                                <AlertDialogFooter>
                                  <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
-                                 <AlertDialogAction onClick={() => handleDeleteVendor(vendor.id)} className="bg-red-600 hover:bg-red-700 rounded-xl">Remove Record</AlertDialogAction>
+                                 <AlertDialogAction onClick={() => handleDeleteVendor(vendor.id)} className="bg-red-600 hover:bg-red-700 rounded-xl h-11">Delete</AlertDialogAction>
                                </AlertDialogFooter>
                              </AlertDialogContent>
                            </AlertDialog>

@@ -346,11 +346,11 @@ export default function ExpensesManagementPage() {
                                 <AlertDialogContent className="rounded-3xl">
                                   <AlertDialogHeader>
                                     <AlertDialogTitle>Confirm Deletion</AlertDialogTitle>
-                                    <AlertDialogDescription>You are about to permanently delete this record. This action may permanently remove related data. This action cannot be undone. Please confirm that you want to continue.</AlertDialogDescription>
+                                    <AlertDialogDescription>Are you sure you want to delete this item? This action may be irreversible. Please confirm before continuing.</AlertDialogDescription>
                                   </AlertDialogHeader>
                                   <AlertDialogFooter>
                                     <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
-                                    <AlertDialogAction onClick={() => handleDeleteCategory(idx)} className="bg-red-600 hover:bg-red-700 rounded-xl">Delete Permanently</AlertDialogAction>
+                                    <AlertDialogAction onClick={() => handleDeleteCategory(idx)} className="bg-red-600 hover:bg-red-700 rounded-xl">Delete</AlertDialogAction>
                                   </AlertDialogFooter>
                                 </AlertDialogContent>
                               </AlertDialog>
@@ -424,11 +424,11 @@ export default function ExpensesManagementPage() {
                            <AlertDialogContent className="rounded-3xl border-none shadow-2xl">
                              <AlertDialogHeader>
                                <AlertDialogTitle>Confirm Deletion</AlertDialogTitle>
-                               <AlertDialogDescription>You are about to permanently delete this record. This action may permanently remove related data. This action cannot be undone. Please confirm that you want to continue.</AlertDialogDescription>
+                               <AlertDialogDescription>Are you sure you want to delete this item? This action may be irreversible. Please confirm before continuing.</AlertDialogDescription>
                              </AlertDialogHeader>
                              <AlertDialogFooter>
                                <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
-                               <AlertDialogAction onClick={() => handleDelete(expense.id)} className="bg-red-600 hover:bg-red-700 rounded-xl h-11">Delete Permanently</AlertDialogAction>
+                               <AlertDialogAction onClick={() => handleDelete(expense.id)} className="bg-red-600 hover:bg-red-700 rounded-xl h-11">Delete</AlertDialogAction>
                              </AlertDialogFooter>
                            </AlertDialogContent>
                          </AlertDialog>

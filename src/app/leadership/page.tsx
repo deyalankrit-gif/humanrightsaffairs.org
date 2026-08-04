@@ -47,6 +47,17 @@ import {
   DialogDescription,
   DialogClose
 } from "@/components/ui/dialog"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { useToast } from '@/hooks/use-toast'
 import { INDIA_DATA } from '@/lib/india-data'
 import { cn } from '@/lib/utils'
@@ -93,9 +104,23 @@ function LeaderCard({ leader, variant = "default", isAdmin, onEdit, onDelete }: 
               <Button onClick={() => onEdit?.(leader)} size="icon" className="bg-white dark:bg-slate-800 text-primary dark:text-white rounded-full hover:bg-secondary hover:text-white transition-colors border border-white/20 shadow-2xl h-11 w-11">
                 <Edit className="w-5 h-5" />
               </Button>
-              <Button onClick={() => onDelete?.(leader.id)} size="icon" className="bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors border border-white/20 shadow-2xl h-11 w-11">
-                <Trash2 className="w-5 h-5" />
-              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button size="icon" className="bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors border border-white/20 shadow-2xl h-11 w-11">
+                    <Trash2 className="w-5 h-5" />
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent className="rounded-[2rem] border-none shadow-2xl">
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Confirm Deletion</AlertDialogTitle>
+                    <AlertDialogDescription>Are you sure you want to delete this item? This action may be irreversible. Please confirm before continuing.</AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={() => onDelete?.(leader.id)} className="bg-red-600 hover:bg-red-700 rounded-xl">Delete</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
           )}
         </div>
@@ -396,7 +421,7 @@ export default function LeadershipPage() {
                     </div>
 
                     {(newLeader.level === 'State' || newLeader.level === 'District') && (
-                      <div className="grid md:grid-cols-2 gap-6 p-6 rounded-3xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 animate-in fade-in slide-in-from-top-2 duration-300">
+                      <div className="grid md:grid-cols-2 gap-6 p-6 rounded-3xl bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 animate-in fade-in slide-in-from-top-2 duration-300">
                         <div className="space-y-1.5">
                           <Label className="text-[10px] font-black uppercase text-accent flex items-center gap-2"><Globe className="w-3.5 h-3.5" /> State / UT *</Label>
                           <Select value={newLeader.parentRegion} onValueChange={(val) => setNewLeader({...newLeader, parentRegion: val, districtName: ''})}>
@@ -621,7 +646,7 @@ export default function LeadershipPage() {
               </div>
 
               {(editLeader.level === 'State' || editLeader.level === 'District') && (
-                <div className="grid md:grid-cols-2 gap-6 p-6 rounded-3xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 animate-in fade-in slide-in-from-top-2 duration-300">
+                <div className="grid md:grid-cols-2 gap-6 p-6 rounded-3xl bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 animate-in fade-in slide-in-from-top-2 duration-300">
                   <div className="space-y-1.5">
                     <Label className="text-[10px] font-black uppercase text-accent flex items-center gap-2"><Globe className="w-3.5 h-3.5" /> State / UT *</Label>
                     <Select value={editLeader.parentRegion} onValueChange={(val) => setEditLeader({...editLeader, parentRegion: val, districtName: ''})}>

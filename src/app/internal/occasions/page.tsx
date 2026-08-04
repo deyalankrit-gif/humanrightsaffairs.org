@@ -208,7 +208,7 @@ export default function InternalOccasionsManagement() {
 
                 <div className="space-y-1">
                   <Label className="text-[10px] font-bold uppercase text-slate-400">Greeting Narrative</Label>
-                  <Textarea placeholder="Wishing every citizen a prosperous year ahead..." value={newOccasion.message} onChange={e => setNewOccasion({...newOccasion, message: e.target.value})} className="rounded-xl min-h-[80px]" />
+                  <Textarea placeholder="Wishing every citizen a prosperous year ahead..." value={newOccasion.message} onChange={e => setNewOccasion({...newOccasion, message: e.target.value})} className="rounded-xl min-h-[100px]" />
                 </div>
 
                 <div className="flex items-center justify-between p-5 bg-emerald-50/50 dark:bg-emerald-950/20 rounded-2xl border border-emerald-100 dark:border-emerald-900">
@@ -272,11 +272,11 @@ export default function InternalOccasionsManagement() {
                                 <AlertDialogContent className="rounded-3xl border-none shadow-2xl">
                                   <AlertDialogHeader>
                                     <AlertDialogTitle>Confirm Deletion</AlertDialogTitle>
-                                    <AlertDialogDescription>You are about to permanently delete this record. This action may permanently remove related data. This action cannot be undone. Please confirm that you want to continue.</AlertDialogDescription>
+                                    <AlertDialogDescription>Are you sure you want to delete this item? This action may be irreversible. Please confirm before continuing.</AlertDialogDescription>
                                   </AlertDialogHeader>
                                   <AlertDialogFooter>
                                     <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
-                                    <AlertDialogAction onClick={() => handleDeleteOccasion(occ.id)} className="bg-red-600 hover:bg-red-700 rounded-xl h-11">Delete Permanently</AlertDialogAction>
+                                    <AlertDialogAction onClick={() => handleDeleteOccasion(occ.id)} className="bg-red-600 hover:bg-red-700 rounded-xl h-11">Delete</AlertDialogAction>
                                   </AlertDialogFooter>
                                 </AlertDialogContent>
                               </AlertDialog>

@@ -473,11 +473,11 @@ export default function InternalMeetingsManagement() {
                               <AlertDialogContent className="rounded-3xl border-none shadow-2xl bg-white dark:bg-slate-900">
                                 <AlertDialogHeader>
                                   <AlertDialogTitle>Confirm Deletion</AlertDialogTitle>
-                                  <AlertDialogDescription>You are about to permanently delete this record. This action may permanently remove related data. This action cannot be undone. Please confirm that you want to continue.</AlertDialogDescription>
+                                  <AlertDialogDescription>Are you sure you want to delete this item? This action may be irreversible. Please confirm before continuing.</AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
                                   <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
-                                  <AlertDialogAction onClick={() => handleDeleteMeeting(meeting.id)} className="bg-red-600 hover:bg-red-700 rounded-xl border-none text-white font-bold transition-colors">Delete Permanently</AlertDialogAction>
+                                  <AlertDialogAction onClick={() => handleDeleteMeeting(meeting.id)} className="bg-red-600 hover:bg-red-700 rounded-xl border-none text-white font-bold transition-colors">Delete</AlertDialogAction>
                                 </AlertDialogFooter>
                               </AlertDialogContent>
                            </AlertDialog>
@@ -520,7 +520,7 @@ export default function InternalMeetingsManagement() {
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0 z-[1000000]" align="start">
-                        <Calendar
+                        <CalendarComponent
                           mode="single"
                           selected={parseMeetingDate(editMeeting.date)}
                           onSelect={(date) => setEditMeeting({...editMeeting, date: date ? format(date, "PPP") : ''})}

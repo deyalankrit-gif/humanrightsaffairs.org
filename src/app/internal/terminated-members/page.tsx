@@ -4,7 +4,7 @@
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useUser, useCollection, useFirestore, useMemoFirebase, useDoc } from '@/firebase'
-import { collection, query, orderBy, addDoc, deleteDoc, doc, updateDoc, serverTimestamp } from 'firebase/firestore'
+import { collection, query, orderBy, deleteDoc, doc, updateDoc, serverTimestamp } from 'firebase/firestore'
 import { Footer } from '@/components/footer'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -256,7 +256,7 @@ export default function InternalTerminatedMembers() {
           {dataLoading ? (
             <div className="text-center py-20"><Loader2 className="w-10 h-10 animate-spin text-accent mx-auto" /></div>
           ) : (
-            <div className="grid gap-4 max-w-4xl mx-auto">
+            <div className="grid gap-4 max-w-5xl mx-auto">
               {filtered.map((m: any) => {
                 const gender = (m.gender || '').trim().toLowerCase();
                 let fallback = '/dummy m.png';
@@ -284,20 +284,18 @@ export default function InternalTerminatedMembers() {
                              {isRoot && (
                                <AlertDialog>
                                   <AlertDialogTrigger asChild>
-                                    <Button variant="ghost" size="sm" className="h-8 w-8 text-slate-300 hover:text-red-500 transition-colors">
+                                    <Button size="sm" variant="ghost" className="h-8 w-8 text-slate-300 hover:text-red-500 transition-colors">
                                       <Trash2 className="w-4 h-4" />
                                     </Button>
                                   </AlertDialogTrigger>
                                   <AlertDialogContent className="rounded-3xl border-none shadow-2xl">
                                     <AlertDialogHeader>
                                       <AlertDialogTitle>Confirm Deletion</AlertDialogTitle>
-                                      <AlertDialogDescription>
-                                        You are about to permanently delete this record. This action may permanently remove related data. This action cannot be undone. Please confirm that you want to continue.
-                                      </AlertDialogDescription>
+                                      <AlertDialogDescription>Are you sure you want to delete this item? This action may be irreversible. Please confirm before continuing.</AlertDialogDescription>
                                     </AlertDialogHeader>
                                     <AlertDialogFooter>
                                       <AlertDialogCancel className="rounded-xl h-11">Cancel</AlertDialogCancel>
-                                      <AlertDialogAction onClick={() => handleDelete(m.id)} className="bg-red-600 hover:bg-red-700 rounded-xl h-11">Delete Permanently</AlertDialogAction>
+                                      <AlertDialogAction onClick={() => handleDelete(m.id)} className="bg-red-600 hover:bg-red-700 rounded-xl h-11">Delete</AlertDialogAction>
                                     </AlertDialogFooter>
                                   </AlertDialogContent>
                                </AlertDialog>

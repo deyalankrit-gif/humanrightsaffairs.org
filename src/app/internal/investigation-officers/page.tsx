@@ -70,6 +70,17 @@ import {
   TableCell,
   TableRow,
 } from "@/components/ui/table"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
@@ -382,9 +393,21 @@ export default function InvestigationOfficersRegistry() {
                      <p className="text-sm font-bold text-red-900 bg-red-50 p-6 rounded-2xl leading-relaxed italic border border-red-100">
                         "Warning: This will permanently purge ALL investigation officers (except Raisa Das) and their associated credentials. This action is irreversible."
                      </p>
-                     <Button onClick={handlePurgeAllExceptRaisa} disabled={isActionLoading} className="w-full h-14 bg-red-600 hover:bg-red-700 text-white font-black uppercase text-xs tracking-widest shadow-xl shadow-red-900/40">
-                        {isActionLoading ? <Loader2 className="animate-spin" /> : "Authorize Registry Reset"}
-                     </Button>
+                     <AlertDialog>
+                       <AlertDialogTrigger asChild>
+                        <Button className="w-full h-14 bg-red-600 hover:bg-red-700 text-white font-black uppercase text-xs tracking-widest shadow-xl shadow-red-900/40">Authorize Registry Reset</Button>
+                       </AlertDialogTrigger>
+                       <AlertDialogContent className="rounded-[2rem]">
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Confirm Deletion</AlertDialogTitle>
+                            <AlertDialogDescription>Are you sure you want to delete this item? This action may be irreversible. Please confirm before continuing.</AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={handlePurgeAllExceptRaisa} className="bg-red-600 hover:bg-red-700 rounded-xl">Delete</AlertDialogAction>
+                          </AlertDialogFooter>
+                       </AlertDialogContent>
+                     </AlertDialog>
                   </div>
                </DialogContent>
             </Dialog>
@@ -559,7 +582,7 @@ export default function InvestigationOfficersRegistry() {
 
       {/* FAULT-TOLERANT DELETION WORKFLOW */}
       <Dialog open={!!deleteDialogStep} onOpenChange={(open) => { if(!open) { setDeleteDialogStep(null); setOfficerToDelete(null); setDeleteInputText(''); } }}>
-        <DialogContent className="max-w-2xl rounded-[3rem] border-none shadow-2xl p-0 overflow-hidden bg-white dark:bg-slate-900 [&>button]:hidden">
+        <DialogContent className="max-w-2xl rounded-[3rem] border-none shadow-2xl p-0 overflow-hidden bg-white dark:bg-slate-900 [&>button]:hidden max-h-[90vh] flex flex-col">
           {deleteDialogStep === 'confirm' && (
             <div className="p-10 space-y-8 animate-in fade-in zoom-in-95 duration-500">
               <div className="absolute right-6 top-6">
@@ -572,15 +595,15 @@ export default function InvestigationOfficersRegistry() {
                   <ShieldAlert className="w-12 h-12" />
                 </div>
                 <div className="space-y-3">
-                  <DialogTitle className="text-3xl font-headline font-bold text-primary dark:text-white">Initialize Identity Purge</DialogTitle>
+                  <DialogTitle className="text-3xl font-headline font-bold text-primary dark:text-white uppercase">Confirm Deletion</DialogTitle>
                   <DialogDescription className="text-base font-medium leading-relaxed max-w-md mx-auto">
-                    You are attempting to permanently remove <strong>{officerToDelete?.name}</strong> from the national pool. This action requires administrative clearance and a dependency audit.
+                    Are you sure you want to delete this item? This action may be irreversible. Please confirm before continuing.
                   </DialogDescription>
                 </div>
               </div>
               <div className="flex gap-4">
-                <Button variant="outline" onClick={() => { setDeleteDialogStep(null); setOfficerToDelete(null); }} className="flex-1 h-14 rounded-2xl font-bold border-2 text-xs uppercase tracking-widest">Abort Session</Button>
-                <Button variant="destructive" onClick={executeGovernanceAudit} className="flex-1 h-14 rounded-2xl font-bold bg-red-600 hover:bg-red-700 shadow-xl shadow-red-600/20 text-xs uppercase tracking-widest border-none">Authorize Audit</Button>
+                <Button variant="outline" onClick={() => { setDeleteDialogStep(null); setOfficerToDelete(null); }} className="flex-1 h-14 rounded-2xl font-bold border-2 text-xs uppercase tracking-widest">Cancel</Button>
+                <Button variant="destructive" onClick={executeGovernanceAudit} className="flex-1 h-14 rounded-2xl font-bold bg-red-600 hover:bg-red-700 shadow-xl shadow-red-600/20 text-xs uppercase tracking-widest border-none">Delete</Button>
               </div>
             </div>
           )}
@@ -847,4 +870,8 @@ export default function InvestigationOfficersRegistry() {
       <Footer />
     </main>
   )
+}
+
+function Loader2({ className }: { className?: string }) {
+  return <Clock className={cn("animate-spin", className)} />
 }

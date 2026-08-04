@@ -437,8 +437,8 @@ export default function AccessRolesPage() {
                               <AlertDialog>
                                 <AlertDialogTrigger asChild><Button variant="ghost" size="icon" className="h-9 w-9 text-slate-600 hover:text-red-500 rounded-xl transition-colors"><Trash2 className="w-4 h-4" /></Button></AlertDialogTrigger>
                                 <AlertDialogContent className="bg-slate-900 border-white/10 text-white rounded-[2rem]">
-                                  <AlertDialogHeader><AlertDialogTitle className="flex items-center gap-2 text-red-500">Confirm Deletion</AlertDialogTitle><AlertDialogDescription className="text-slate-400 uppercase tracking-widest text-[10px]">You are about to permanently delete this record. This action may permanently remove related data. This action cannot be undone. Please confirm that you want to continue.</AlertDialogDescription></AlertDialogHeader>
-                                  <AlertDialogFooter><AlertDialogCancel className="bg-white/5 border-white/10 text-white rounded-xl">Cancel</AlertDialogCancel><AlertDialogAction onClick={() => handleDeleteUser(u.id)} className="bg-red-600 hover:bg-red-700 rounded-xl font-bold">{isDeleting === u.id ? <Loader2 className="animate-spin" /> : "Delete Permanently"}</AlertDialogAction></AlertDialogFooter>
+                                  <AlertDialogHeader><AlertDialogTitle>Confirm Deletion</AlertDialogTitle><AlertDialogDescription>Are you sure you want to delete this item? This action may be irreversible. Please confirm before continuing.</AlertDialogDescription></AlertDialogHeader>
+                                  <AlertDialogFooter><AlertDialogCancel className="bg-white/5 border-white/10 text-white rounded-xl">Cancel</AlertDialogCancel><AlertDialogAction onClick={() => handleDeleteUser(u.id)} className="bg-red-600 hover:bg-red-700 rounded-xl font-bold">{isDeleting === u.id ? <Loader2 className="animate-spin" /> : "Delete"}</AlertDialogAction></AlertDialogFooter>
                                 </AlertDialogContent>
                               </AlertDialog>
                            </div>
