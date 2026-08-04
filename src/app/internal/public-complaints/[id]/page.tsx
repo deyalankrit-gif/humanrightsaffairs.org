@@ -515,7 +515,23 @@ export default function CaseHubPage() {
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-20">
       <header className="pt-16 pb-8 bg-slate-900 text-white border-b-8 border-accent/20 sticky top-0 z-40 px-4 shadow-2xl">
         <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-6">
-           <div className="flex items-center gap-6">
+           
+           <div className="flex items-center gap-6 w-full md:w-auto order-2 md:order-1">
+              {/* Pulsing Blue "Go to Next Process" Label */}
+              <div className="flex flex-col items-center shrink-0">
+                 <span className="text-[9px] font-black text-blue-500 uppercase tracking-widest animate-pulse mb-1">
+                    Go to Next Process
+                 </span>
+                 <Select onValueChange={updateCaseStatus} defaultValue={caseData.status}>
+                    <SelectTrigger className="w-full md:w-56 h-11 bg-white/5 border-white/10 text-white font-bold text-[10px] uppercase tracking-widest">
+                       <SelectValue placeholder="Transition Status" />
+                    </SelectTrigger>
+                    <SelectContent position="popper" className="z-[1000000] bg-white">
+                       {CASE_STATUSES.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                    </SelectContent>
+                 </Select>
+              </div>
+
               <Link href="/internal/public-complaints" className="flex flex-col items-center group shrink-0 transition-all active:scale-95">
                 <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-accent group-hover:text-primary transition-all border border-white/10 shadow-sm">
                   <ArrowLeft className="w-6 h-6" />
@@ -535,7 +551,8 @@ export default function CaseHubPage() {
                 </p>
               </div>
            </div>
-           <div className="flex items-center gap-3 w-full md:w-auto">
+
+           <div className="flex items-center gap-3 w-full md:w-auto order-1 md:order-2">
               {isRoot && (
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
@@ -547,7 +564,7 @@ export default function CaseHubPage() {
                     <AlertDialogHeader>
                       <AlertDialogTitle>Confirm Deletion</AlertDialogTitle>
                       <AlertDialogDescription>
-                        You are about to permanently delete this record. This action may permanently remove related data. This action cannot be undone. Please confirm that you want to continue.
+                        Are you sure you want to delete this item? This action may be irreversible. Please confirm before continuing.
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
@@ -558,12 +575,6 @@ export default function CaseHubPage() {
                 </AlertDialog>
               )}
               
-              <div className="flex-1 md:flex-none">
-                 <Select onValueChange={updateCaseStatus} defaultValue={caseData.status}>
-                    <SelectTrigger className="w-full md:w-56 h-11 bg-white/5 border-white/10 text-white font-bold text-[10px] uppercase tracking-widest"><SelectValue placeholder="Transition Status" /></SelectTrigger>
-                    <SelectContent position="popper" className="z-[1000000] bg-white">{CASE_STATUSES.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
-                 </Select>
-              </div>
               <Dialog open={isCommissionOpen} onOpenChange={setIsCommissionOpen}>
                 <DialogTrigger asChild><Button className="bg-accent text-primary font-bold h-11 px-8 rounded-xl shadow-xl hover:bg-secondary hover:text-white transition-all"><Edit3 className="w-4 h-4 mr-2" /> Commission Findings</Button></DialogTrigger>
                 <DialogContent className="max-w-xl rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden bg-white dark:bg-slate-900">
