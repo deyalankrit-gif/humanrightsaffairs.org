@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useEffect, useMemo } from 'react'
@@ -61,16 +62,7 @@ import {
   SelectTrigger, 
   SelectValue 
 } from '@/components/ui/select'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogDescription,
-  DialogClose,
-  DialogFooter
-} from "@/components/ui/dialog"
+import { ScrollArea } from '@/components/ui/scroll-area'
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
 
@@ -83,7 +75,6 @@ export default function InvestigationCaseHub() {
   
   const [activeTab, setActiveTab] = useState('mandate')
   const [isActionLoading, setIsActionLoading] = useState(false)
-  const [remark, setRemark] = useState('')
   const [activeStatus, setActiveStatus] = useState('')
   
   // Reporting State
@@ -99,6 +90,7 @@ export default function InvestigationCaseHub() {
     status: 'Completed'
   })
 
+  // Real-Time Document Listener
   const docRef = useMemoFirebase(() => {
     if (!db || !id) return null;
     return doc(db, 'public_complaints', id as string);
@@ -132,40 +124,6 @@ export default function InvestigationCaseHub() {
       setActiveStatus(newStatus);
     } catch (e) {
       toast({ variant: "destructive", title: "Update Failed" });
-    } finally {
-      setIsActionLoading(false);
-    }
-  };
-
-  const handleUpdateAssignmentProgress = async (index: number, progress: number, status: string) => {
-    if (!docRef || !c || isActionLoading) return;
-    setIsActionLoading(true);
-    try {
-      const updatedTeam = [...(c.investigationTeam || [])];
-      const member = updatedTeam[index];
-      
-      updatedTeam[index] = {
-        ...member,
-        progressPercentage: progress,
-        status: status,
-        updatedDate: new Date().toISOString()
-      };
-
-      await updateDoc(docRef, { 
-        investigationTeam: updatedTeam,
-        updatedAt: serverTimestamp(),
-        timeline: arrayUnion({
-          action: "Assignment Progress Update",
-          user: user?.email,
-          timestamp: new Date().toISOString(),
-          remark: `${member.investigatorName} updated progress to ${progress}% (${status}).`,
-          type: 'assignment_progress'
-        })
-      });
-
-      toast({ title: "Progress Synchronized" });
-    } catch (e) {
-      toast({ variant: "destructive", title: "Sync Failed" });
     } finally {
       setIsActionLoading(false);
     }
@@ -351,7 +309,7 @@ export default function InvestigationCaseHub() {
                </div>
             ) : (
                <div className="space-y-8">
-                  {/* Detailed Tasks Section */}
+                  {/* Detailed Tasks Section (Real-Time Reactive) */}
                   <div className="space-y-6">
                     <div className="flex items-center gap-3">
                        <ListTodo className="w-6 h-6 text-indigo-600" />
@@ -474,7 +432,7 @@ export default function InvestigationCaseHub() {
                     </div>
                   </div>
 
-                  {/* Legacy Responsibilities Section */}
+                  {/* General Responsibilities Section */}
                   <div className="space-y-6 pt-10 border-t">
                     <div className="flex items-center gap-3">
                        <CheckCircle2 className="w-6 h-6 text-emerald-500" />

@@ -139,7 +139,7 @@ export default function CaseHubPage() {
 
   const isRoot = user?.email?.toLowerCase() === 'deydhritiman@gmail.com';
 
-  // Data Fetching: Target Case
+  // Data Fetching: Target Case (Real-Time)
   const docRef = useMemoFirebase(() => {
     if (!db || !id) return null;
     return doc(db, 'public_complaints', id as string);
@@ -147,7 +147,7 @@ export default function CaseHubPage() {
 
   const { data: caseData, loading: dataLoading } = useDoc(docRef);
 
-  // Data Fetching: Registered Investigators
+  // Data Fetching: Registered Investigators (Real-Time)
   const officersQuery = useMemoFirebase(() => {
     if (!db) return null;
     return query(collection(db, 'investigation_officers'), where('status', '==', 'active'));
@@ -207,9 +207,6 @@ export default function CaseHubPage() {
       updatedDate: new Date().toISOString(),
       remarks: ''
     };
-
-    const currentEmails = caseData.investigatorEmails || [];
-    const currentNames = caseData.assignedOfficersNames || [];
 
     try {
       await updateDoc(docRef, {
@@ -310,7 +307,6 @@ export default function CaseHubPage() {
     const removedMember = teamMembers[index];
     const updatedTeam = teamMembers.filter((_, i) => i !== index);
     
-    // Regenerate helper arrays for efficient querying and rules
     const updatedEmails = updatedTeam.map(m => (m.email || '').toLowerCase().trim());
     const updatedNames = updatedTeam.map(m => (m.investigatorName || '').trim());
 
@@ -418,7 +414,6 @@ export default function CaseHubPage() {
 
     try {
       await new Promise(resolve => setTimeout(resolve, 2000));
-      
       toast({
         title: "Report Draft Ready",
         description: "Draft generated successfully. Proceeding to preview terminal.",
