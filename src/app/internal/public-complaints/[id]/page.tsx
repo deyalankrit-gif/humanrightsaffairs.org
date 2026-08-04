@@ -899,14 +899,14 @@ export default function CaseHubPage() {
                                               <p className="font-black text-white uppercase tracking-widest text-[9px] mb-1 flex items-center gap-2">
                                                 <Target className="w-3 h-3 text-accent" /> Objective & Purpose
                                               </p>
-                                              <p className="text-slate-300 italic">"{guidance?.purpose}"</p>
+                                              <p className="text-slate-300 italic whitespace-pre-line">"{guidance?.purpose}"</p>
                                             </div>
 
                                             <div>
                                               <p className="font-black text-white uppercase tracking-widest text-[9px] mb-1 flex items-center gap-2">
                                                 <Clock className="w-3 h-3 text-accent" /> Deployment Scenario
                                               </p>
-                                              <p className="text-slate-300">{guidance?.useWhen}</p>
+                                              <p className="text-slate-300 whitespace-pre-line">{guidance?.useWhen}</p>
                                             </div>
 
                                             <div className="grid grid-cols-1 gap-4 pt-2 border-t border-white/5">
@@ -914,13 +914,13 @@ export default function CaseHubPage() {
                                                 <p className="font-black text-emerald-400 uppercase tracking-widest text-[9px] mb-1 flex items-center gap-2">
                                                   <BadgeCheck className="w-3 h-3" /> Mandatory Exhibits
                                                 </p>
-                                                <p className="text-slate-400">{guidance?.evidence}</p>
+                                                <p className="text-slate-400 whitespace-pre-line">{guidance?.evidence}</p>
                                               </div>
                                               <div>
                                                 <p className="font-black text-emerald-400 uppercase tracking-widest text-[9px] mb-1 flex items-center gap-2">
                                                   <ClipboardCheck className="w-3 h-3" /> Required Particulars
                                                 </p>
-                                                <p className="text-slate-400">{guidance?.mandatory}</p>
+                                                <p className="text-slate-400 whitespace-pre-line">{guidance?.mandatory}</p>
                                               </div>
                                             </div>
 
@@ -928,7 +928,7 @@ export default function CaseHubPage() {
                                               <p className="font-black text-sky-400 uppercase tracking-widest text-[9px] mb-1 flex items-center gap-2">
                                                 <Sparkles className="w-3 h-3" /> Procedural Best Practices
                                               </p>
-                                              <p className="text-slate-300">{guidance?.bestPractices}</p>
+                                              <p className="text-slate-300 whitespace-pre-line">{guidance?.bestPractices}</p>
                                             </div>
 
                                             <div className="flex items-center justify-between gap-4 pt-2">
@@ -936,14 +936,14 @@ export default function CaseHubPage() {
                                                 <p className="font-black text-white uppercase tracking-widest text-[9px] mb-1 flex items-center gap-2">
                                                   <ArrowRight className="w-3 h-3 text-accent" /> Expected Outcome
                                                 </p>
-                                                <p className="text-slate-400">{guidance?.output}</p>
+                                                <p className="text-slate-400 whitespace-pre-line">{guidance?.output}</p>
                                               </div>
                                             </div>
 
                                             {guidance?.warnings && (
                                               <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl flex items-start gap-2">
                                                 <AlertTriangle className="w-3.5 h-3.5 text-red-500 shrink-0 mt-0.5" />
-                                                <p className="text-red-200 text-[10px] leading-tight font-medium">{guidance.warnings}</p>
+                                                <p className="text-red-200 text-[10px] leading-tight font-medium whitespace-pre-line">{guidance.warnings}</p>
                                               </div>
                                             )}
                                           </div>
