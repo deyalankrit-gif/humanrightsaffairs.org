@@ -42,7 +42,11 @@ import {
   AlertTriangle,
   Camera,
   Layers,
-  Users
+  Users,
+  BookOpen,
+  FileSearch,
+  ExternalLink,
+  MessageSquareWarning
 } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useToast } from '@/hooks/use-toast'
@@ -66,7 +70,7 @@ export default function InvestigationCaseHub() {
     return doc(db, 'public_complaints', id as string);
   }, [db, id]);
 
-  const { data: c, loading } = useDoc(docRef);
+  const { data: c, loading, error: fetchError } = useDoc(docRef);
 
   useEffect(() => {
     if (c) setActiveStatus(c.status);
@@ -165,7 +169,19 @@ export default function InvestigationCaseHub() {
   };
 
   if (loading) return <div className="min-h-screen flex items-center justify-center"><GlobalLoader className="animate-spin text-indigo-600" /></div>
+  if (fetchError) return (
+    <div className="min-h-screen flex flex-col items-center justify-center p-8 text-center space-y-4">
+      <AlertCircle className="w-12 h-12 text-red-500" />
+      <h2 className="text-2xl font-bold">Synchronization Failure</h2>
+      <p className="text-slate-500">The connection to the National Registry could not be established.</p>
+      <Button onClick={() => window.location.reload()} className="bg-indigo-600 text-white rounded-xl">Retry Connection</Button>
+    </div>
+  )
   if (!c) return <div className="p-20 text-center font-bold text-slate-400">FILE NOT IDENTIFIED</div>
+
+  // Known mandate fields to display in specific sections
+  const mandate = c.mandate || {};
+  const hasMandate = Object.keys(mandate).length > 0;
 
   return (
     <div className="max-w-6xl mx-auto space-y-8 animate-in fade-in duration-700">
@@ -206,7 +222,7 @@ export default function InvestigationCaseHub() {
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
          <TabsList className="bg-white p-1 rounded-2xl border shadow-sm w-full md:w-auto overflow-x-auto no-scrollbar justify-start">
-            <TabsTrigger value="mandate" className="rounded-xl px-8 font-bold text-[10px] uppercase tracking-widest data-[state=active]:bg-indigo-600 data-[state=active]:text-white">Responsibilities</TabsTrigger>
+            <TabsTrigger value="mandate" className="rounded-xl px-8 font-bold text-[10px] uppercase tracking-widest data-[state=active]:bg-indigo-600 data-[state=active]:text-white">Mission Mandate</TabsTrigger>
             <TabsTrigger value="tasks" className="rounded-xl px-8 font-bold text-[10px] uppercase tracking-widest data-[state=active]:bg-indigo-600 data-[state=active]:text-white flex gap-2">Tactical Tasks <Badge className="h-4 px-1 bg-accent text-primary text-[8px]">{c.tasks?.length || 0}</Badge></TabsTrigger>
             <TabsTrigger value="evidence" className="rounded-xl px-8 font-bold text-[10px] uppercase tracking-widest data-[state=active]:bg-indigo-600 data-[state=active]:text-white">Evidence Vault</TabsTrigger>
             <TabsTrigger value="timeline" className="rounded-xl px-8 font-bold text-[10px] uppercase tracking-widest data-[state=active]:bg-indigo-600 data-[state=active]:text-white">Audit Trail</TabsTrigger>
@@ -214,62 +230,149 @@ export default function InvestigationCaseHub() {
          </TabsList>
 
          <TabsContent value="mandate" className="space-y-8 animate-in fade-in duration-500">
-            <div className="grid lg:grid-cols-3 gap-8">
-               <div className="lg:col-span-2 space-y-8">
-                  <Card className="rounded-[2.5rem] border-none shadow-sm p-10 bg-white relative overflow-hidden group">
-                     <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-50 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-1000"></div>
-                     <CardHeader className="p-0 mb-8">
-                        <CardTitle className="text-2xl font-headline font-bold flex items-center gap-3"><Target className="w-7 h-7 text-accent" /> Primary Mission Objective</CardTitle>
-                        <p className="text-lg text-primary font-bold italic mt-4 border-l-4 border-accent pl-6">"{c.mandate?.objective || "Objective pending administrative input."}"</p>
+            {!hasMandate ? (
+              <div className="py-24 text-center bg-white rounded-[3rem] border-2 border-dashed border-slate-100 flex flex-col items-center justify-center gap-4">
+                 <div className="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center text-slate-300">
+                    <BookOpen className="w-8 h-8" />
+                 </div>
+                 <h3 className="text-xl font-headline font-bold text-slate-400 uppercase tracking-widest">No Mission Mandate has been assigned to this case.</h3>
+              </div>
+            ) : (
+              <div className="grid lg:grid-cols-12 gap-8 items-start">
+                <div className="lg:col-span-8 space-y-8">
+                  {/* Mission Overview */}
+                  <Card className="rounded-[2.5rem] border-none shadow-sm p-8 md:p-12 bg-white relative overflow-hidden group">
+                     <div className="absolute top-0 right-0 w-48 h-48 bg-indigo-50 rounded-full -mr-24 -mt-24 group-hover:scale-110 transition-transform duration-1000"></div>
+                     <CardHeader className="p-0 mb-10">
+                        <div className="inline-flex items-center gap-2 bg-indigo-50 text-indigo-600 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border border-indigo-100 mb-6">
+                           <Target className="w-3.5 h-3.5" /> Order of Command
+                        </div>
+                        <CardTitle className="text-3xl font-headline font-bold text-primary">Mission Overview</CardTitle>
+                        <div className="mt-6 p-6 bg-slate-50 rounded-[2rem] border-l-8 border-accent shadow-inner italic">
+                           <p className="text-lg md:text-xl text-primary font-bold leading-relaxed whitespace-pre-wrap">"{mandate.objective || "Objective text pending."}"</p>
+                        </div>
                      </CardHeader>
-                     <div className="space-y-10">
+
+                     <div className="space-y-12">
+                        {/* Official Instructions */}
                         <div className="space-y-4">
-                           <h4 className="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em] flex items-center gap-2 leading-none"><FileText className="w-3.5 h-3.5" /> Investigation Instructions</h4>
-                           <p className="text-sm text-slate-600 leading-relaxed font-medium bg-slate-50 p-6 rounded-2xl shadow-inner italic">"{c.mandate?.instructions || "No specific instructions provided."}"</p>
-                        </div>
-                        <div className="grid md:grid-cols-2 gap-8">
-                           <div className="space-y-4">
-                              <h4 className="text-[10px] font-black uppercase text-indigo-600 tracking-[0.2em] flex items-center gap-2"><Activity className="w-3.5 h-3.5" /> Required Actions</h4>
-                              <p className="text-xs text-slate-500 leading-relaxed font-medium">{c.mandate?.requiredActions || "Standard field protocols apply."}</p>
-                           </div>
-                           <div className="space-y-4">
-                              <h4 className="text-[10px] font-black uppercase text-emerald-600 tracking-[0.2em] flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5" /> Evidence to Secure</h4>
-                              <p className="text-xs text-slate-500 leading-relaxed font-medium">{c.mandate?.evidenceToCollect || "Visual and documentary evidence required."}</p>
+                           <h4 className="text-[11px] font-black uppercase text-slate-400 tracking-[0.3em] flex items-center gap-3">
+                              <div className="w-6 h-6 rounded-lg bg-slate-100 flex items-center justify-center text-slate-500"><FileSearch className="w-3.5 h-3.5" /></div>
+                              Official Investigation Instructions
+                           </h4>
+                           <div className="text-sm md:text-base text-slate-700 leading-relaxed font-medium whitespace-pre-wrap">
+                              {mandate.instructions || "Standard operating procedures apply."}
                            </div>
                         </div>
+
+                        {/* Tactical Directives Grid */}
+                        <div className="grid md:grid-cols-2 gap-10 pt-4">
+                           <div className="space-y-4">
+                              <h4 className="text-[11px] font-black uppercase text-indigo-600 tracking-[0.2em] flex items-center gap-3">
+                                 <Activity className="w-4 h-4" /> Required Actions
+                              </h4>
+                              <div className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">
+                                 {mandate.requiredActions || "No specific actions defined."}
+                              </div>
+                           </div>
+                           <div className="space-y-4">
+                              <h4 className="text-[11px] font-black uppercase text-emerald-600 tracking-[0.2em] flex items-center gap-3">
+                                 <CheckCircle2 className="w-4 h-4" /> Evidence Collection
+                              </h4>
+                              <div className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">
+                                 {mandate.evidenceToCollect || "Visual/documentary evidence as per merit."}
+                              </div>
+                           </div>
+                        </div>
+
+                        {/* Witnesses & Locations */}
+                        <div className="grid md:grid-cols-2 gap-10">
+                           <div className="space-y-4">
+                              <h4 className="text-[11px] font-black uppercase text-amber-600 tracking-[0.2em] flex items-center gap-3">
+                                 <Users className="w-4 h-4" /> Witness Information
+                              </h4>
+                              <div className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">
+                                 {mandate.witnessesToContact || "Identify and interview local witnesses."}
+                              </div>
+                           </div>
+                           <div className="space-y-4">
+                              <h4 className="text-[11px] font-black uppercase text-rose-600 tracking-[0.2em] flex items-center gap-3">
+                                 <MapPin className="w-4 h-4" /> Locations to Visit
+                              </h4>
+                              <div className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">
+                                 {mandate.locationsToVisit || "Incident venue and surrounding areas."}
+                              </div>
+                           </div>
+                        </div>
+                        
+                        {/* Dynamic/Other Fields */}
+                        {Object.keys(mandate).filter(key => 
+                          !['objective', 'instructions', 'requiredActions', 'evidenceToCollect', 'witnessesToContact', 'locationsToVisit', 'deadline', 'reportingInstructions', 'internalNotes'].includes(key)
+                        ).length > 0 && (
+                          <div className="pt-8 border-t border-slate-100">
+                             <h4 className="text-[11px] font-black uppercase text-slate-400 tracking-[0.3em] mb-6">Additional Metadata</h4>
+                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {Object.keys(mandate).filter(key => 
+                                  !['objective', 'instructions', 'requiredActions', 'evidenceToCollect', 'witnessesToContact', 'locationsToVisit', 'deadline', 'reportingInstructions', 'internalNotes'].includes(key)
+                                ).map((key) => (
+                                  <div key={key} className="space-y-1">
+                                     <Label className="text-[9px] font-black uppercase text-slate-500">{key.replace(/([A-Z])/g, ' $1').trim()}</Label>
+                                     <p className="text-sm font-bold text-primary">{String(mandate[key])}</p>
+                                  </div>
+                                ))}
+                             </div>
+                          </div>
+                        )}
                      </div>
                   </Card>
-               </div>
+                </div>
 
-               <div className="space-y-6">
+                <div className="lg:col-span-4 space-y-6">
                   <Card className="rounded-[2rem] border-none shadow-sm p-8 bg-slate-900 text-white relative overflow-hidden">
                      <div className="absolute top-0 right-0 w-24 h-24 bg-accent/10 rounded-full -mr-12 -mt-12 blur-2xl"></div>
-                     <h3 className="text-xs font-black uppercase text-accent tracking-[0.2em] mb-6 flex items-center gap-2"><Clock className="w-4 h-4" /> Mission Logistics</h3>
+                     <h3 className="text-xs font-black uppercase text-accent tracking-[0.2em] mb-8 flex items-center gap-2"><Clock className="w-4 h-4" /> Tactical Schedule</h3>
                      <div className="space-y-6">
-                        <div className="flex gap-4 p-4 bg-white/5 rounded-2xl border border-white/5">
-                           <div className="w-10 h-10 rounded-xl bg-accent/20 flex items-center justify-center text-accent shrink-0"><CalendarIcon className="w-5 h-5" /></div>
-                           <div><p className="text-[8px] font-black text-slate-500 uppercase">Target Deadline</p><p className="text-sm font-bold text-white">{c.mandate?.deadline || 'PRIORITY'}</p></div>
+                        <div className="flex gap-4 p-5 bg-white/5 rounded-[1.5rem] border border-white/5 group hover:bg-white/10 transition-colors">
+                           <div className="w-12 h-12 rounded-xl bg-accent/20 flex items-center justify-center text-accent shrink-0"><CalendarIcon className="w-6 h-6" /></div>
+                           <div className="min-w-0">
+                              <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Final Deadline</p>
+                              <p className="text-lg font-headline font-bold text-white truncate">{mandate.deadline || 'PRIORITY-ASAP'}</p>
+                           </div>
                         </div>
-                        <div className="flex gap-4 p-4 bg-white/5 rounded-2xl border border-white/5">
-                           <div className="w-10 h-10 rounded-xl bg-accent/20 flex items-center justify-center text-accent shrink-0"><MapPin className="w-5 h-5" /></div>
-                           <div><p className="text-[8px] font-black text-slate-500 uppercase">Field Location</p><p className="text-sm font-bold text-white">{c.incidentLocation}</p></div>
-                        </div>
-                        <div className="flex gap-4 p-4 bg-white/5 rounded-2xl border border-white/5">
-                           <div className="w-10 h-10 rounded-xl bg-accent/20 flex items-center justify-center text-accent shrink-0"><Users className="w-5 h-5" /></div>
-                           <div><p className="text-[8px] font-black text-slate-500 uppercase">Witnesses</p><p className="text-sm font-bold text-white line-clamp-1">{c.mandate?.witnessesToContact || 'Field Verification Req.'}</p></div>
+                        <div className="flex gap-4 p-5 bg-white/5 rounded-[1.5rem] border border-white/5 group hover:bg-white/10 transition-colors">
+                           <div className="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center text-blue-400 shrink-0"><FileText className="w-6 h-6" /></div>
+                           <div className="min-w-0">
+                              <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Reporting Requirements</p>
+                              <p className="text-sm font-bold text-white leading-snug">{mandate.reportingInstructions || 'Standard daily reporting.'}</p>
+                           </div>
                         </div>
                      </div>
                   </Card>
+
+                  {mandate.internalNotes && (
+                    <Card className="rounded-[2rem] border-none shadow-sm p-8 bg-indigo-50 border-2 border-indigo-100">
+                       <div className="flex items-center gap-3 mb-4">
+                          <MessageSquareWarning className="w-5 h-5 text-indigo-600" />
+                          <h4 className="text-[10px] font-black uppercase tracking-widest text-indigo-600">Institutional Notes</h4>
+                       </div>
+                       <p className="text-xs text-indigo-800 leading-relaxed font-medium italic">"{mandate.internalNotes}"</p>
+                    </Card>
+                  )}
                   
-                  <div className="p-8 rounded-[2.5rem] bg-amber-50 border-2 border-dashed border-amber-200 text-center space-y-4">
-                     <AlertTriangle className="w-10 h-10 text-amber-600 mx-auto" />
-                     <h4 className="text-xs font-black uppercase text-amber-700 tracking-widest">Procedural Mandate</h4>
-                     <p className="text-[10px] text-amber-800 font-bold leading-relaxed uppercase">
-                        "Failure to adhere to investigation instructions may result in case reassignment. All field notes must be logged daily."
-                     </p>
+                  <div className="p-10 rounded-[3rem] bg-amber-50 border-2 border-dashed border-amber-200 text-center space-y-5 shadow-inner">
+                     <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center text-amber-500 mx-auto shadow-sm">
+                        <AlertTriangle className="w-8 h-8 animate-pulse" />
+                     </div>
+                     <div className="space-y-2">
+                        <h4 className="text-sm font-black uppercase text-amber-700 tracking-[0.2em]">Oversight Notice</h4>
+                        <p className="text-[10px] text-amber-800 font-bold leading-relaxed uppercase">
+                           "All field actions must be logged in real-time. Unauthorized deviation from these instructions may result in administrative audit."
+                        </p>
+                     </div>
                   </div>
-               </div>
-            </div>
+                </div>
+              </div>
+            )}
          </TabsContent>
 
          <TabsContent value="tasks" className="space-y-8 animate-in slide-in-from-right-4 duration-500">
