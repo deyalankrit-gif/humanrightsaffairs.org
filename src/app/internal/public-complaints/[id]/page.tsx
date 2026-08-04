@@ -58,7 +58,8 @@ import {
   GraduationCap,
   MessageSquareWarning,
   BadgeCheck,
-  FileQuestion
+  FileQuestion,
+  Sparkles
 } from 'lucide-react'
 import {
   Dialog,
