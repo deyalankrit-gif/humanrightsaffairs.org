@@ -68,20 +68,6 @@ import { sendTimelineEmailUpdate, sendReportEmail } from '@/lib/notification-ser
 import { InvestigationJourney } from '@/components/investigation-journey'
 import Link from 'next/link'
 
-const STANDARD_RESPONSIBILITIES = [
-  "Collect Evidence",
-  "Visit Incident Location",
-  "Meet the Complainant",
-  "Interview Witnesses",
-  "Contact the Respondent",
-  "Verify Documents",
-  "Capture Photos/Videos",
-  "Upload Evidence",
-  "Submit Daily Progress",
-  "Prepare Investigation Report",
-  "Submit Final Report"
-];
-
 export default function CaseHubPage() {
   const { id } = useParams()
   const { user, loading: authLoading } = useUser()
@@ -202,7 +188,6 @@ export default function CaseHubPage() {
     setIsActionLoading(true);
 
     const updatedTeam = [...teamMembers];
-    const prevValue = { ...updatedTeam[index] };
     updatedTeam[index] = { 
       ...updatedTeam[index], 
       ...updates, 
@@ -370,6 +355,9 @@ export default function CaseHubPage() {
            </div>
            
            <div className="flex items-center gap-3 order-1 md:order-2">
+              <Button onClick={() => setActiveTab('reports')} className="bg-accent text-primary font-bold h-11 px-8 rounded-xl shadow-xl hover:bg-secondary hover:text-white transition-all">
+                <Gavel className="w-4 h-4 mr-2" /> Commission Findings
+              </Button>
               <Button asChild variant="outline" className="bg-white/5 border-white/10 text-white hover:bg-white/10 h-11 rounded-xl font-bold text-[10px] uppercase tracking-widest">
                 <Link href={`/internal/public-complaints/analytics`}><Activity className="w-4 h-4 mr-2" /> Analytics</Link>
               </Button>
@@ -404,7 +392,8 @@ export default function CaseHubPage() {
                 { id: 'team', label: 'Investigation Team', icon: Users },
                 { id: 'mandate', label: 'Mission Mandate', icon: Target },
                 { id: 'timeline', label: 'Audit Trail', icon: History },
-                { id: 'evidence', label: 'Evidence Vault', icon: ShieldCheck }
+                { id: 'evidence', label: 'Evidence Vault', icon: ShieldCheck },
+                { id: 'reports', label: 'Commission Findings', icon: Gavel }
               ].map(tab => (
                 <TabsTrigger key={tab.id} value={tab.id} className="data-[state=active]:bg-accent data-[state=active]:text-primary rounded-xl px-6 py-2 text-xs font-bold uppercase tracking-widest transition-all">
                   <tab.icon className="w-3.5 h-3.5 mr-2" /> {tab.label}
@@ -415,7 +404,7 @@ export default function CaseHubPage() {
            <TabsContent value="overview" className="animate-in fade-in duration-500">
               <div className="grid lg:grid-cols-3 gap-8">
                  <div className="lg:col-span-2 space-y-8">
-                    <Card className="rounded-[2.5rem] border-none shadow-sm bg-white p-10">
+                    <Card className="rounded-[2.5rem] border-none shadow-sm p-10 bg-white">
                        <h3 className="text-xl font-headline font-bold text-primary mb-6 flex items-center gap-3"><FileText className="w-6 h-6 text-accent" /> Violation Narrative</h3>
                        <div className="p-8 bg-slate-50 rounded-[2rem] border italic text-slate-600 leading-relaxed">
                           "{caseData.description}"
@@ -641,7 +630,7 @@ export default function CaseHubPage() {
                        </div>
                     </div>
 
-                    <div className="p-8 rounded-3xl bg-slate-50 dark:bg-slate-900 border-2 border-dashed border-slate-200 dark:border-slate-800 space-y-6">
+                    <div className="p-8 rounded-3xl bg-slate-50 dark:bg-slate-950 p-6 space-y-4">
                        <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-500 flex items-center gap-2"><LinkIcon className="w-4 h-4" /> Official Reference Links</h4>
                        <div className="flex gap-3">
                           <Input value={newAttachment.name} onChange={e => setNewAttachment({...newAttachment, name: e.target.value})} placeholder="Label (e.g. Case Guideline PDF)" className="flex-1 rounded-xl" />
@@ -687,6 +676,102 @@ export default function CaseHubPage() {
                     <div className="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center text-slate-300 group-hover:bg-accent group-hover:text-white transition-all"><Plus className="w-8 h-8" /></div>
                     <div><p className="font-bold text-primary uppercase text-xs">Append Evidence</p></div>
                  </Card>
+              </div>
+           </TabsContent>
+
+           <TabsContent value="reports" className="animate-in slide-in-from-right-4 duration-500">
+              <div className="grid lg:grid-cols-12 gap-8 items-start">
+                 <div className="lg:col-span-8 space-y-6">
+                    <Card className="rounded-[2.5rem] border-none shadow-sm p-8 bg-white">
+                       <div className="mb-8">
+                          <CardTitle className="text-xl font-headline font-bold flex items-center gap-3"><Gavel className="w-6 h-6 text-accent" /> Document Generation Hub</CardTitle>
+                          <CardDescription>Select a mandated template to generate an official investigative report.</CardDescription>
+                       </div>
+                       
+                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          {REPORT_TEMPLATES.map((report) => {
+                            const guidance = REPORT_GUIDANCE[report.id];
+                            return (
+                              <TooltipProvider key={report.id}>
+                                <Tooltip delayDuration={300}>
+                                  <TooltipTrigger asChild>
+                                    <button
+                                      onClick={() => setSelectedReportType(report.id)}
+                                      className={cn(
+                                        "p-4 rounded-2xl border-2 text-left transition-all group flex items-start justify-between",
+                                        selectedReportType === report.id 
+                                          ? "bg-accent/10 border-accent shadow-lg shadow-accent/5" 
+                                          : "bg-white border-slate-100 hover:border-slate-200"
+                                      )}
+                                    >
+                                      <div className="space-y-1 pr-2">
+                                         <div className="flex items-center gap-2">
+                                            <FileText className={cn("w-4 h-4", selectedReportType === report.id ? "text-accent" : "text-slate-400")} />
+                                            <span className={cn("text-xs font-bold leading-tight", selectedReportType === report.id ? "text-primary" : "text-slate-600")}>
+                                              {report.label}
+                                            </span>
+                                         </div>
+                                         {selectedReportType === report.id && <div className="h-0.5 w-8 bg-accent rounded-full animate-in slide-in-from-left-2" />}
+                                      </div>
+                                      <div className={cn(
+                                         "w-5 h-5 rounded-full flex items-center justify-center transition-all",
+                                         selectedReportType === report.id ? "bg-accent text-primary" : "bg-slate-50 text-slate-300 group-hover:bg-slate-100"
+                                      )}>
+                                         {selectedReportType === report.id ? <CheckCircle2 className="w-3 h-3" /> : <Info className="w-3 h-3" />}
+                                      </div>
+                                    </button>
+                                  </TooltipTrigger>
+                                  <TooltipContent side="right" className="max-w-[280px] p-5 bg-white dark:bg-slate-900 border-none shadow-2xl rounded-2xl space-y-4">
+                                     <div className="space-y-1">
+                                        <p className="text-xs font-black uppercase text-accent tracking-widest">{report.label}</p>
+                                        <div className="h-0.5 w-12 bg-accent/30 rounded-full" />
+                                     </div>
+                                     <div className="space-y-3">
+                                        <div className="space-y-1">
+                                           <p className="text-[10px] font-black text-primary dark:text-white uppercase tracking-tighter">Purpose</p>
+                                           <p className="text-[11px] text-slate-500 leading-relaxed italic">"{guidance.purpose}"</p>
+                                        </div>
+                                        <div className="space-y-1">
+                                           <p className="text-[10px] font-black text-primary dark:text-white uppercase tracking-tighter">Use When</p>
+                                           <p className="text-[11px] text-slate-500 leading-relaxed">"{guidance.useWhen}"</p>
+                                        </div>
+                                        <div className="space-y-1">
+                                           <p className="text-[10px] font-black text-primary dark:text-white uppercase tracking-tighter">Includes</p>
+                                           <p className="text-[11px] text-slate-500 leading-relaxed">"{guidance.includes}"</p>
+                                        </div>
+                                        <div className="space-y-1">
+                                           <p className="text-[10px] font-black text-emerald-600 uppercase tracking-tighter">Outcome</p>
+                                           <p className="text-[11px] text-slate-500 leading-relaxed font-bold">"{guidance.outcome}"</p>
+                                        </div>
+                                     </div>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                            );
+                          })}
+                       </div>
+                    </Card>
+                 </div>
+                 
+                 <div className="lg:col-span-4 space-y-6">
+                    <Card className="rounded-3xl bg-slate-900 text-white p-8 relative overflow-hidden">
+                       <div className="absolute top-0 right-0 w-24 h-24 bg-accent/10 rounded-full -mr-12 -mt-12 blur-2xl"></div>
+                       <CardTitle className="text-base text-accent mb-6 flex items-center gap-2"><Settings2 className="w-4 h-4" /> Generation Control</CardTitle>
+                       <div className="space-y-6">
+                          <div className="p-5 bg-white/5 rounded-2xl border border-white/10">
+                             <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Selected Template</p>
+                             <p className="text-sm font-bold text-white">{REPORT_TEMPLATES.find(r => r.id === selectedReportType)?.label}</p>
+                          </div>
+                          <Button className="w-full h-14 rounded-2xl bg-accent text-primary font-black uppercase tracking-widest text-xs hover:bg-secondary hover:text-white transition-all shadow-xl shadow-accent/20">
+                             Generate & Preview Report
+                          </Button>
+                          <div className="flex items-center gap-3 p-4 bg-white/5 rounded-2xl border border-white/5">
+                             <Info className="w-4 h-4 text-accent shrink-0" />
+                             <p className="text-[10px] text-slate-400 leading-relaxed italic">"Generation creates a pre-filled draft based on the case metadata. You can further edit before final synchronization."</p>
+                          </div>
+                       </div>
+                    </Card>
+                 </div>
               </div>
            </TabsContent>
         </Tabs>
