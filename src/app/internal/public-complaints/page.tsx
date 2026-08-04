@@ -266,7 +266,7 @@ export default function PublicComplaintsTerminal() {
                       </div>
                       <div className="flex-1 p-8 grid lg:grid-cols-4 gap-8 items-center">
                         <div className="lg:col-span-3 space-y-4">
-                          <div className="space-y-1"><div className="flex items-center gap-3"><h3 className="text-2xl font-headline font-bold text-primary dark:text-white leading-tight group-hover:text-accent transition-colors whitespace-nowrap">{c.subject}</h3>{c.victimIsMinor && <Badge className="bg-red-600 text-white text-[8px] font-black animate-pulse">MINOR AT RISK</Badge>}{c.priority && <Badge variant="outline" className={cn("text-[8px] font-black border-none", c.priority === 'High' ? 'bg-red-50 text-red-600' : 'bg-blue-50 text-blue-600')}>{c.priority} PRIORITY</Badge>}</div><p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest flex items-center gap-1.5"><MapPin className="w-3 h-3 text-accent" /> {c.incidentLocation} • {c.stateName || 'National Scope'}</p></div>
+                          <div className="space-y-1"><div className="flex items-center gap-3"><h3 className="text-2xl font-headline font-bold text-primary dark:text-white leading-tight group-hover:text-accent transition-colors whitespace-nowrap">{c.subject}</h3>{c.victimIsMinor && <Badge className="bg-red-600 text-white text-[8px] font-black animate-pulse">MINOR AT RISK</Badge>}{c.priority && <Badge variant="outline" className={cn("text-[8px] font-black border-none", c.priority === 'High' ? "bg-red-50 text-red-600" : "bg-blue-50 text-blue-600")}>{c.priority} PRIORITY</Badge>}</div><p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest flex items-center gap-1.5"><MapPin className="w-3 h-3 text-accent" /> {c.incidentLocation} • {c.stateName || 'National Scope'}</p></div>
                           <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 pt-4 border-t border-slate-50 dark:border-slate-800">
                              <div className="space-y-1"><p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Complainant</p><p className="text-xs font-bold flex items-center gap-1.5"><User className="w-3 h-3 text-accent" /> {c.fullName}</p></div>
                              <div className="space-y-1"><p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Filed On</p><p className="text-xs font-bold flex items-center gap-1.5"><Clock className="w-3 h-3 text-accent" /> {c.createdAt?.toDate ? c.createdAt.toDate().toLocaleDateString('en-IN') : 'Just now'}</p></div>
@@ -279,7 +279,7 @@ export default function PublicComplaintsTerminal() {
                                        ? `${(c.investigationTeam || []).length} Officials` 
                                        : c.assignedTo || 'Unassigned'}
                                   </p>
-                                  <Link href={`/internal/public-complaints/${c.id}`} title="Update investigation status and team">
+                                  <Link href={`/internal/public-complaints/${c.id}?tab=team`} title="Update investigation status and team">
                                     <Edit3 className="w-3.5 h-3.5 text-slate-300 hover:text-accent cursor-pointer transition-colors" />
                                   </Link>
                                 </div>

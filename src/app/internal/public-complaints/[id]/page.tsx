@@ -2,7 +2,7 @@
 "use client"
 
 import React, { useEffect, useState, useMemo } from 'react'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import { useUser, useFirestore, useDoc, useMemoFirebase, useCollection } from '@/firebase'
 import { doc, updateDoc, serverTimestamp, arrayUnion, collection, query, orderBy, where, getDocs, addDoc, deleteDoc, writeBatch } from 'firebase/firestore'
@@ -93,6 +93,7 @@ export default function CaseHubPage() {
   const { id } = useParams()
   const { user, loading: authLoading } = useUser()
   const router = useRouter()
+  const searchParams = useSearchParams()
   const db = useFirestore()
   const { toast } = useToast()
   
@@ -100,6 +101,7 @@ export default function CaseHubPage() {
   const [isActionLoading, setIsActionLoading] = useState(false)
   const [remark, setRemark] = useState('')
   const [activeStatus, setActiveStatus] = useState('')
+  const [selectedReportType, setSelectedReportType] = useState('preliminary_assessment')
   
   // Investigation Team States
   const [isAssigningOfficer, setIsAssigningOfficer] = useState(false)
@@ -158,6 +160,13 @@ export default function CaseHubPage() {
       o.employeeId.toLowerCase().includes(teamSearch.toLowerCase())
     );
   }, [registryOfficers, teamSearch]);
+
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab && ['overview', 'team', 'mandate', 'timeline', 'evidence', 'reports'].includes(tab)) {
+      setActiveTab(tab);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (caseData) {
@@ -435,7 +444,7 @@ export default function CaseHubPage() {
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                       <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
-                      <AlertDialogAction onClick={() => handleDeleteCase} className="bg-red-600 hover:bg-red-700 rounded-xl">Confirm Deletion</AlertDialogAction>
+                      <AlertDialogAction onClick={handleDeleteCase} className="bg-red-600 hover:bg-red-700 rounded-xl">Confirm Deletion</AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>
                 </AlertDialog>
@@ -613,7 +622,6 @@ export default function CaseHubPage() {
                                         </DialogContent>
                                      </Dialog>
 
-                                     {/* Detailed Task Management Dialog */}
                                      <Dialog open={isAddingTask === idx} onOpenChange={(val) => setIsAddingTask(val ? idx : null)}>
                                         <DialogTrigger asChild>
                                            <Button variant="outline" size="sm" className="h-9 rounded-xl text-[10px] font-black uppercase tracking-widest border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-600 hover:text-white transition-all">
@@ -768,7 +776,6 @@ export default function CaseHubPage() {
                        </div>
                     </div>
 
-                    {/* NEW FIELDS FOR FULL SYNC COMPLIANCE */}
                     <div className="grid md:grid-cols-2 gap-8">
                        <div className="space-y-1.5">
                           <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Witnesses to Contact</Label>
@@ -808,7 +815,7 @@ export default function CaseHubPage() {
                        </div>
                     </div>
 
-                    <Button onClick={handleUpdateStatus} disabled={isActionLoading} className="w-full h-16 bg-accent text-primary font-black uppercase tracking-widest text-lg rounded-[1.5rem] shadow-xl shadow-accent/20">
+                    <Button onClick={handleSaveMandate} disabled={isActionLoading} className="w-full h-16 bg-accent text-primary font-black uppercase tracking-widest text-lg rounded-[1.5rem] shadow-xl shadow-accent/20">
                        {isActionLoading ? <Loader2 className="animate-spin mr-2" /> : <><ShieldCheck className="w-6 h-6 mr-3" /> Authorize & Synchronize Mandate</>}
                     </Button>
                  </div>
