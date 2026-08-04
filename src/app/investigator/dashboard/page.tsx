@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo } from 'react'
@@ -110,7 +111,7 @@ export default function InvestigatorDashboard() {
                   <div className="flex items-start gap-6 flex-1 min-w-0">
                      <div className="w-16 h-16 rounded-2xl bg-indigo-50 flex flex-col items-center justify-center text-indigo-600 shrink-0 font-black shadow-inner">
                         <span className="text-[7px] uppercase tracking-widest">REF</span>
-                        <span className="text-xs">{c.caseId?.split('-').pop() || c.token.slice(-4)}</span>
+                        <span className="text-xs whitespace-nowrap">{c.caseId?.split('-').pop() || c.token.slice(-4)}</span>
                      </div>
                      <div className="space-y-3 min-w-0">
                         <div className="space-y-1">

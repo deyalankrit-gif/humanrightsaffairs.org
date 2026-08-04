@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useEffect, useState, useMemo } from 'react'
@@ -345,7 +346,7 @@ export default function CaseHubPage() {
               </Link>
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
-                   <h1 className="text-xl md:text-3xl font-headline font-bold">{caseData.caseId || 'DOCKET-ENTRY'}</h1>
+                   <h1 className="text-xl md:text-3xl font-headline font-bold whitespace-nowrap">{caseData.caseId || 'DOCKET-ENTRY'}</h1>
                    <Badge className={cn("text-[9px] font-black uppercase h-5", getStatusColor(caseData.status))}>{caseData.status}</Badge>
                 </div>
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">

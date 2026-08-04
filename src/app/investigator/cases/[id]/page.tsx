@@ -186,7 +186,7 @@ export default function InvestigationCaseHub() {
             </Button>
             <div>
                <div className="flex items-center gap-3">
-                  <h1 className="text-2xl md:text-3xl font-headline font-bold text-primary">{c.caseId || 'Tactical Case File'}</h1>
+                  <h1 className="text-2xl md:text-3xl font-headline font-bold text-primary whitespace-nowrap">{c.caseId || 'Tactical Case File'}</h1>
                   <Badge className={cn("text-[9px] font-black uppercase px-4", c.priority === 'High' ? "bg-red-500" : "bg-blue-500")}>
                     {c.priority} PRIORITY
                   </Badge>
