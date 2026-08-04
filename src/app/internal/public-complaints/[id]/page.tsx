@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useEffect, useState, useMemo } from 'react'
@@ -50,9 +49,15 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
-import { CASE_STATUSES, CASE_PRIORITIES, REPORT_TEMPLATES, TASK_STATUSES } from '@/lib/complaint-constants'
+import { CASE_STATUSES, CASE_PRIORITIES, REPORT_TEMPLATES, REPORT_GUIDANCE, TASK_STATUSES } from '@/lib/complaint-constants'
 import { getStatusColor } from '@/lib/complaint-utils'
 import { sendTimelineEmailUpdate, sendReportEmail } from '@/lib/notification-service'
 import { InvestigationJourney } from '@/components/investigation-journey'
@@ -662,7 +667,51 @@ export default function CaseHubPage() {
 
            <TabsContent value="reports" className="animate-in zoom-in-95 duration-500">
               <div id="reports" className="grid lg:grid-cols-12 gap-8 items-start">
-                 <div className="lg:col-span-4"><Card className="rounded-3xl border-none shadow-sm bg-white overflow-hidden"><CardHeader className="bg-slate-50 p-6 border-b"><CardTitle className="text-sm font-black uppercase tracking-widest">Template Selection</CardTitle></CardHeader><CardContent className="p-2"><ScrollArea className="h-[500px] pr-4"><div className="space-y-1">{REPORT_TEMPLATES.map(temp => (<button key={temp.id} onClick={() => setSelectedReportType(temp.id)} className={cn("w-full text-left p-4 rounded-xl text-xs font-bold uppercase transition-all", selectedReportType === temp.id ? "bg-accent/10 text-accent shadow-sm" : "hover:bg-slate-50 text-slate-500")}>{temp.label}</button>))}</div></ScrollArea></CardContent></Card></div>
+                 <div className="lg:col-span-4">
+                    <Card className="rounded-3xl border-none shadow-sm bg-white overflow-hidden">
+                       <CardHeader className="bg-slate-50 p-6 border-b">
+                          <CardTitle className="text-sm font-black uppercase tracking-widest">Template Selection</CardTitle>
+                       </CardHeader>
+                       <CardContent className="p-2">
+                          <TooltipProvider>
+                            <ScrollArea className="h-[500px] pr-4">
+                               <div className="space-y-1">
+                                  {REPORT_TEMPLATES.map(temp => {
+                                    const guidance = REPORT_GUIDANCE[temp.id as keyof typeof REPORT_GUIDANCE];
+                                    return (
+                                      <Tooltip key={temp.id}>
+                                        <TooltipTrigger asChild>
+                                          <button 
+                                            onClick={() => setSelectedReportType(temp.id)} 
+                                            className={cn(
+                                              "w-full text-left p-4 rounded-xl text-xs font-bold uppercase transition-all flex items-center justify-between group", 
+                                              selectedReportType === temp.id ? "bg-accent/10 text-accent shadow-sm" : "hover:bg-slate-50 text-slate-500"
+                                            )}
+                                          >
+                                            <span className="truncate">{temp.label}</span>
+                                            <Info className={cn("w-3.5 h-3.5 opacity-40 group-hover:opacity-100", selectedReportType === temp.id && "text-accent opacity-100")} />
+                                          </button>
+                                        </TooltipTrigger>
+                                        <TooltipContent side="right" className="max-w-[280px] p-4 bg-slate-900 text-white rounded-2xl shadow-2xl border-none">
+                                          <div className="space-y-3">
+                                            <p className="font-bold text-accent text-[10px] uppercase border-b border-white/10 pb-1 mb-2">{temp.label}</p>
+                                            <div className="space-y-2 text-[9px] uppercase tracking-wide leading-relaxed">
+                                              <p><span className="text-slate-500 font-black">Purpose:</span> {guidance.purpose}</p>
+                                              <p><span className="text-slate-500 font-black">Use When:</span> {guidance.useWhen}</p>
+                                              <p><span className="text-slate-500 font-black">Includes:</span> {guidance.includes}</p>
+                                              <p><span className="text-slate-500 font-black">Outcome:</span> {guidance.outcome}</p>
+                                            </div>
+                                          </div>
+                                        </TooltipContent>
+                                      </Tooltip>
+                                    )
+                                  })}
+                               </div>
+                            </ScrollArea>
+                          </TooltipProvider>
+                       </CardContent>
+                    </Card>
+                 </div>
                  <div className="lg:col-span-8 space-y-6">
                     <Card className="rounded-[2.5rem] border-none shadow-2xl bg-white p-12 min-h-[600px] flex flex-col">
                        <div className="flex-1 space-y-10">
