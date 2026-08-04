@@ -30,7 +30,8 @@ import {
   Link as LinkIcon,
   Check,
   Settings2,
-  Lock
+  Lock,
+  ChevronRight
 } from 'lucide-react'
 import {
   Dialog,
