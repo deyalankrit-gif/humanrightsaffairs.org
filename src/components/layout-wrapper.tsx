@@ -14,6 +14,8 @@ import { FeedbackSystem } from '@/components/feedback-system';
 import { ContextualHelp } from '@/components/contextual-help';
 import { useUser } from '@/firebase';
 import { cn } from '@/lib/utils';
+import { AiAudioPlayer } from '@/components/ai-audio-player';
+import { AudioAnnouncement } from '@/components/audio-announcement';
 
 /**
  * LayoutWrapper manages the global layout structure, switching between
@@ -79,7 +81,9 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex flex-col min-h-screen relative bg-background w-full overflow-x-hidden">
       <VisitorTracker />
+      <AudioAnnouncement />
       {!isAdmin && <Navbar />}
+      {!isAdmin && !isLoginPage && <AiAudioPlayer />}
       
       <div className="flex-1 w-full">
         {children}

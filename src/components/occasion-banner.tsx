@@ -111,6 +111,13 @@ export function OccasionBanner() {
           <p className="text-[#CFFF04] font-headline font-bold text-[10px] md:text-sm leading-tight md:leading-snug transition-colors drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)]">
             {activeOccasion.message}
           </p>
+
+          {!isDefault && (
+             <div className="flex items-center gap-1.5 mt-2 bg-emerald-500/20 px-2 py-0.5 rounded-lg border border-emerald-500/30 w-fit">
+                <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse"></div>
+                <span className="text-[7px] font-black text-emerald-400 uppercase tracking-widest">Live Official Broadcast</span>
+             </div>
+          )}
         </div>
       </div>
     </div>
