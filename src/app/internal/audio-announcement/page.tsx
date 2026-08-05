@@ -38,7 +38,8 @@ import {
   Settings2,
   Lock,
   Waves,
-  Wind
+  Wind,
+  RotateCcw
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -139,6 +140,20 @@ export default function AiAudioCenter() {
     if (!announcements) return null;
     return announcements.find((a: any) => a.status === 'Published');
   }, [announcements]);
+
+  const handleResetDefaults = () => {
+    updateForm({
+      speed: 1,
+      pitch: 0,
+      volume: 0.8,
+      reverbMix: 8,
+      echoMix: 0
+    });
+    toast({
+      title: "Parameters Reset",
+      description: "Institutional sound profile restored to defaults.",
+    });
+  };
 
   const handleGenerate = async () => {
     if (!form.fullText.trim()) {
@@ -558,6 +573,15 @@ export default function AiAudioCenter() {
                           className="w-full h-16 rounded-2xl bg-primary text-white font-black text-lg hover:bg-secondary transition-all shadow-xl shadow-primary/20 flex gap-3 group"
                         >
                            {isGenerating ? <Loader2 className="w-7 h-7 animate-spin" /> : <><Mic2 className="w-6 h-6 group-hover:scale-110" /> {form.audioData ? "Regenerate AI Voice" : "Generate AI Voice"}</>}
+                        </Button>
+                        
+                        <Button 
+                          type="button" 
+                          variant="outline"
+                          onClick={handleResetDefaults}
+                          className="w-full h-12 rounded-xl border-slate-200 text-slate-500 font-bold uppercase text-[10px] tracking-widest hover:bg-slate-50 transition-all gap-2"
+                        >
+                           <RotateCcw className="w-4 h-4" /> Reset Defaults
                         </Button>
                      </div>
                   </div>
