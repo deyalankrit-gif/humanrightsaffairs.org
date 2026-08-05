@@ -36,7 +36,9 @@ import {
   Edit,
   Waveform,
   Settings2,
-  Lock
+  Lock,
+  Waves,
+  Wind
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -98,6 +100,8 @@ export default function AiAudioCenter() {
     emotion: 'Official' as any,
     speed: 1,
     pitch: 0,
+    reverbMix: 8,
+    echoMix: 0,
     audioData: '',
     status: 'Draft' as any
   });
@@ -198,7 +202,7 @@ export default function AiAudioCenter() {
       
       setIsAddOpen(false);
       setEditingId(null);
-      setForm({ title: '', fullText: '', category: 'Official Notice', language: 'English', voice: 'Male', emotion: 'Official', speed: 1, pitch: 0, audioData: '', status: 'Draft' });
+      setForm({ title: '', fullText: '', category: 'Official Notice', language: 'English', voice: 'Male', emotion: 'Official', speed: 1, pitch: 0, reverbMix: 8, echoMix: 0, audioData: '', status: 'Draft' });
     } catch (e: any) {
       toast({ variant: "destructive", title: "Archive Error", description: e.message });
     } finally {
@@ -217,6 +221,8 @@ export default function AiAudioCenter() {
       emotion: ann.emotion || 'Official',
       speed: ann.speed || 1,
       pitch: ann.pitch || 0,
+      reverbMix: ann.reverbMix || 8,
+      echoMix: ann.echoMix || 0,
       audioData: ann.audioData || '',
       status: ann.status || 'Draft'
     });
@@ -271,7 +277,7 @@ export default function AiAudioCenter() {
              <h1 className="text-3xl md:text-4xl font-headline font-bold">Audio <span className="text-accent italic">Announcement Center</span></h1>
              <p className="text-slate-400 text-[11px] uppercase font-black">Autonomous Speech Generation Node</p>
           </div>
-          <Button onClick={() => { setEditingId(null); setIsAddOpen(true); setForm({ title: '', fullText: '', category: 'Official Notice', language: 'English', voice: 'Male', emotion: 'Official', speed: 1, pitch: 0, audioData: '', status: 'Draft' }); }} className="bg-accent text-primary hover:bg-secondary hover:text-white h-11 px-8 rounded-xl font-bold gap-2 shadow-xl shadow-accent/20 transition-all">
+          <Button onClick={() => { setEditingId(null); setIsAddOpen(true); setForm({ title: '', fullText: '', category: 'Official Notice', language: 'English', voice: 'Male', emotion: 'Official', speed: 1, pitch: 0, reverbMix: 8, echoMix: 0, audioData: '', status: 'Draft' }); }} className="bg-accent text-primary hover:bg-secondary hover:text-white h-11 px-8 rounded-xl font-bold gap-2 shadow-xl shadow-accent/20 transition-all">
              <Plus className="w-4 h-4" /> Initialize New Announcement
           </Button>
         </div>
@@ -529,7 +535,7 @@ export default function AiAudioCenter() {
                               { label: 'Air Brilliance', val: '+2dB @ 10kHz', ok: true },
                               { label: 'Dynamics Comp', val: '3:1 Ratio', ok: true },
                               { label: 'Audio Ceiling', val: '-1dB Limiter', ok: true },
-                              { label: 'Ambience', val: '8% Room Mix', ok: true }
+                              { label: 'Ambience', val: 'Custom Mix', ok: true }
                            ].map((p, i) => (
                               <div key={i} className="flex items-center justify-between p-2.5 bg-white/5 rounded-xl border border-white/5 transition-colors hover:bg-white/10">
                                  <span className="text-[9px] font-bold text-slate-400 uppercase">{p.label}</span>
@@ -540,16 +546,11 @@ export default function AiAudioCenter() {
                               </div>
                            ))}
                         </div>
-                        <div className="mt-6 pt-4 border-t border-white/5 text-center">
-                           <p className="text-[8px] font-bold text-slate-500 uppercase tracking-widest leading-relaxed">
-                              Broadcast-quality processing is applied to every playback session.
-                           </p>
-                        </div>
                      </Card>
 
                      <div className="space-y-4">
                         <Button 
-                          type="button"
+                          type="button" 
                           onClick={handleGenerate}
                           disabled={isGenerating}
                           className="w-full h-16 rounded-2xl bg-primary text-white font-black text-lg hover:bg-secondary transition-all shadow-xl shadow-primary/20 flex gap-3 group"
@@ -563,7 +564,7 @@ export default function AiAudioCenter() {
                {/* MASTER PREVIEW TERMINAL */}
                {form.audioData && (
                  <div className="w-full space-y-4 animate-in slide-in-from-bottom-2 duration-500">
-                    {/* High-Fidelity Verification Protocol - Now Full Width */}
+                    {/* Verification Protocol Banner */}
                     <div className="p-6 rounded-[2rem] bg-indigo-50 dark:bg-indigo-900/10 border-2 border-dashed border-indigo-200 dark:border-indigo-800 flex items-center gap-6 shadow-sm">
                        <div className="w-12 h-12 rounded-2xl bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center text-indigo-600 shrink-0">
                           <AlertCircle className="w-6 h-6" />
@@ -578,27 +579,53 @@ export default function AiAudioCenter() {
 
                     {/* Master Audio Terminal */}
                     <Card className="rounded-[2.5rem] border-none shadow-2xl bg-white dark:bg-slate-900 overflow-hidden border border-slate-100 dark:border-slate-800">
-                      <CardContent className="p-8 md:p-10 space-y-8">
-                        {/* Row 1: Large Audio Control + Wide Volume Slider */}
-                        <div className="flex flex-col md:flex-row items-center gap-10">
-                           <div className="flex-1 w-full h-14 flex items-center bg-slate-50 dark:bg-slate-950 rounded-2xl px-6 border border-slate-100 dark:border-slate-800">
+                      <CardContent className="p-8 md:p-10 space-y-10">
+                        {/* Row 1: Large Audio Control + Wide Integrated Controller */}
+                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                           <div className="lg:col-span-4 h-14 flex items-center bg-slate-50 dark:bg-slate-950 rounded-2xl px-6 border border-slate-100 dark:border-slate-800">
                               <audio src={form.audioData} controls className="w-full h-10" />
                            </div>
                            
-                           <div className="w-full md:w-[40%] space-y-3">
-                              <div className="flex justify-between items-center px-2">
-                                 <Label className="text-[10px] font-black uppercase text-accent tracking-widest flex items-center gap-2">
-                                   <Volume2 className="w-3.5 h-3.5" /> Output Gain Control
-                                 </Label>
-                                 <span className="text-[10px] font-mono font-bold text-slate-400">NORMALIZED</span>
+                           <div className="lg:col-span-8 flex flex-col md:flex-row items-center gap-10">
+                              <div className="flex-1 w-full space-y-3">
+                                 <div className="flex justify-between items-center px-2">
+                                    <Label className="text-[10px] font-black uppercase text-accent tracking-widest flex items-center gap-2">
+                                      <Volume2 className="w-3.5 h-3.5" /> Output Gain Control
+                                    </Label>
+                                    <span className="text-[10px] font-mono font-bold text-slate-400">NORMALIZED</span>
+                                 </div>
+                                 <div className="px-2">
+                                   <Slider defaultValue={[80]} max={100} step={1} className="h-2" />
+                                 </div>
                               </div>
-                              <div className="px-2">
-                                <Slider defaultValue={[80]} max={100} step={1} className="h-2" />
+
+                              <div className="w-full md:w-64 space-y-3">
+                                 <div className="flex justify-between items-center px-2">
+                                    <Label className="text-[10px] font-black uppercase text-emerald-600 tracking-widest flex items-center gap-2">
+                                      <Waves className="w-3.5 h-3.5" /> Reverb Depth
+                                    </Label>
+                                    <span className="text-[10px] font-bold text-slate-400">{form.reverbMix}%</span>
+                                 </div>
+                                 <div className="px-2">
+                                   <Slider value={[form.reverbMix]} min={0} max={100} step={1} onValueChange={v => updateForm({reverbMix: v[0]})} className="h-2" />
+                                 </div>
+                              </div>
+
+                              <div className="w-full md:w-64 space-y-3">
+                                 <div className="flex justify-between items-center px-2">
+                                    <Label className="text-[10px] font-black uppercase text-indigo-600 tracking-widest flex items-center gap-2">
+                                      <Wind className="w-3.5 h-3.5" /> Echo Intensity
+                                    </Label>
+                                    <span className="text-[10px] font-bold text-slate-400">{form.echoMix}%</span>
+                                 </div>
+                                 <div className="px-2">
+                                   <Slider value={[form.echoMix]} min={0} max={100} step={1} onValueChange={v => updateForm({echoMix: v[0]})} className="h-2" />
+                                 </div>
                               </div>
                            </div>
                         </div>
 
-                        {/* Row 2: Vocal Signature (Below Preview) */}
+                        {/* Row 2: Vocal Signature Stack */}
                         <div className="flex flex-col md:flex-row items-center justify-between gap-6 pt-6 border-t border-slate-50 dark:border-slate-800">
                            <div className="flex items-center gap-5">
                               <div className="w-12 h-12 rounded-2xl bg-accent/10 flex items-center justify-center text-accent shadow-sm animate-pulse shrink-0">
