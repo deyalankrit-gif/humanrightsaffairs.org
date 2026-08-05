@@ -126,7 +126,7 @@ function LeaderCard({ leader, variant = "default", isAdmin, onEdit, onDelete }: 
                   <AlertDialogHeader>
                     <AlertDialogTitle className="text-xl font-headline font-bold text-red-600">Authorize Profile Purge</AlertDialogTitle>
                     <AlertDialogDescription className="text-slate-600 dark:text-slate-400 font-medium leading-relaxed">
-                      Are you sure you want to permanently delete this leader's information and photo from the institutional registry? This action is irreversible.
+                      Are you sure you want to permanently delete this leader's information and photo from the institutional registry? This action will erase all documentation and images. This action cannot be undone.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter className="mt-4">
@@ -140,9 +140,28 @@ function LeaderCard({ leader, variant = "default", isAdmin, onEdit, onDelete }: 
         </div>
       </div>
       <div className="mt-4 text-center px-2">
-        <h4 className={`font-headline font-bold text-primary dark:text-white ${variant === 'xl' || variant === 'large' || isChairman ? 'text-lg md:text-xl lg:text-2xl' : 'text-sm md:text-base'}`}>{leader.name}</h4>
-        <p className={`text-accent font-bold uppercase tracking-widest ${variant === 'xl' || variant === 'large' || leader.title.includes("Founder") ? 'text-[10px] md:text-xs' : 'text-[8px] md:text-[10px]'}`}>{leader.title}</p>
-        {leader.level === 'District' && leader.districtName && <p className="text-[8px] text-slate-400 font-bold uppercase tracking-tighter mt-1">{leader.districtName}</p>}
+        <h4 className={cn(
+          "font-headline font-bold text-primary dark:text-white leading-tight mb-1",
+          (variant === 'xl' || variant === 'large' || isChairman) ? 'text-lg md:text-xl lg:text-2xl' : 'text-sm md:text-base'
+        )}>
+          {leader.name}
+        </h4>
+        
+        <div className="flex flex-col items-center">
+          <p className={cn(
+            "text-accent font-black uppercase tracking-widest leading-none",
+            (variant === 'xl' || variant === 'large' || leader.title.includes("Founder")) ? 'text-[10px] md:text-xs' : 'text-[8px] md:text-[9px]'
+          )}>
+            {leader.title}
+          </p>
+          
+          <p className="text-[7px] md:text-[8px] text-slate-500 dark:text-slate-400 font-black uppercase tracking-[0.1em] mt-1.5 flex items-center justify-center gap-1">
+             <ShieldCheck className="w-2.5 h-2.5 text-slate-300 dark:text-slate-700" />
+             {leader.level === 'Central' && "National Committee"}
+             {leader.level === 'State' && `${leader.parentRegion} State Committee`}
+             {leader.level === 'District' && `${leader.districtName} District Committee`}
+          </p>
+        </div>
       </div>
     </div>
   )
@@ -321,7 +340,7 @@ export default function LeadershipPage() {
       <div>
         <h2 className={cn(
           "font-headline font-bold leading-tight",
-          title === "Central Council" ? "text-5xl md:text-7xl bg-gradient-to-r from-red-600 via-orange-500 to-red-600 bg-clip-text text-transparent animate-gradient-x py-2" : "text-3xl md:text-5xl text-primary dark:text-white"
+          title === "Central Committee" ? "text-5xl md:text-7xl bg-gradient-to-r from-red-600 via-orange-500 to-red-600 bg-clip-text text-transparent animate-gradient-x py-2" : "text-3xl md:text-5xl text-primary dark:text-white"
         )}>{title}</h2>
         <p className="text-[10px] font-black uppercase text-slate-400 tracking-[0.25em] mt-1">{subtitle || "Authorized Governance Tier"}</p>
       </div>
