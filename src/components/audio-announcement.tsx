@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
@@ -65,8 +64,8 @@ export function AudioAnnouncement() {
    * syncAudioNodes: Maps global Firestore parameters to local audio nodes.
    */
   const syncAudioNodes = useCallback(() => {
-    if (!audioContextRef.current || !settings) return;
-    const ctx = audioContextRef.current;
+    if (!audioCtxRef.current || !settings) return;
+    const ctx = audioCtxRef.current;
     const time = ctx.currentTime;
 
     const volume = isMuted ? 0 : (settings.volume ?? 0.8);
@@ -138,7 +137,7 @@ export function AudioAnnouncement() {
       // LIMITER
       const limiter = ctx.createDynamicsCompressor();
       limiter.threshold.value = -1;
-      limiter.ratio = 20 as any; // Limiter ratio
+      limiter.ratio.value = 20; 
       limiterNodeRef.current = limiter;
 
       // MASTER GAIN

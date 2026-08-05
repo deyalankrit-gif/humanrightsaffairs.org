@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
@@ -144,7 +143,6 @@ export default function AiAudioCenter() {
         updatedAt: serverTimestamp(),
         lastCommand: updates.isPlaying ? 'PLAY' : 'PAUSE'
       }, { merge: true });
-      console.log('[AUDIO-SYSTEM] Global state synchronized:', updates);
     } catch (e) {
       console.error('[AUDIO-SYSTEM] Failed to sync global state:', e);
     }
@@ -242,7 +240,6 @@ export default function AiAudioCenter() {
 
       mainGain.connect(ctx.destination);
       
-      // IMMEDIATE SYNC AFTER CONNECT
       syncAudioNodes();
     } catch (e) {
       console.warn("[AUDIO-SYSTEM] Web Audio initialization blocked.", e);
