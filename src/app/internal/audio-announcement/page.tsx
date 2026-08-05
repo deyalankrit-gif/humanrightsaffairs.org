@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
@@ -405,7 +406,7 @@ export default function AiAudioCenter() {
 
       {/* Initialize New/Edit Announcement Dialog */}
       <Dialog open={isAddOpen} onOpenChange={(val) => { setIsAddOpen(val); if(!val) setEditingId(null); }}>
-         <DialogContent className="max-w-4xl rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden bg-white dark:bg-slate-950 flex flex-col max-h-[95vh]">
+         <DialogContent className="max-w-5xl rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden bg-white dark:bg-slate-950 flex flex-col max-h-[95vh]">
             <div className="bg-slate-900 p-8 text-white relative shrink-0 border-b-4 border-accent/20">
                <div className="absolute right-6 top-6"><DialogClose asChild><Button variant="ghost" size="icon" className="rounded-full text-white/40 hover:text-white"><X className="w-5 h-5" /></Button></DialogClose></div>
                <Badge className="bg-accent text-primary font-black text-[8px] uppercase mb-2 tracking-widest">Administrative Node</Badge>
@@ -556,21 +557,6 @@ export default function AiAudioCenter() {
                            {isGenerating ? <Loader2 className="w-7 h-7 animate-spin" /> : <><Mic2 className="w-6 h-6 group-hover:scale-110" /> {form.audioData ? "Regenerate AI Voice" : "Generate AI Voice"}</>}
                         </Button>
 
-                        {form.audioData && (
-                          <div className="w-full py-5 px-8 bg-white dark:bg-slate-900 rounded-3xl flex items-center gap-6 animate-in zoom-in-95 duration-500 border border-slate-100 shadow-lg">
-                             <div className="flex items-center gap-3 shrink-0">
-                                <div className="w-10 h-10 rounded-xl bg-accent/20 flex items-center justify-center text-accent animate-pulse">
-                                   <Volume2 className="w-5 h-5" />
-                                </div>
-                                <div className="hidden sm:block">
-                                   <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Preview Node</p>
-                                   <h4 className="text-primary dark:text-white font-bold text-[10px] uppercase truncate max-w-[100px]">Voice: {form.voice}</h4>
-                                </div>
-                             </div>
-                             <audio src={form.audioData} controls className="flex-1 h-8" />
-                          </div>
-                        )}
-
                         <div className="p-6 rounded-3xl bg-indigo-50 dark:bg-indigo-950/20 border-2 border-dashed border-indigo-200 text-center space-y-2">
                            <AlertCircle className="w-8 h-8 text-indigo-500 mx-auto" />
                            <h4 className="text-[10px] font-black uppercase text-indigo-600">Verification protocol</h4>
@@ -581,6 +567,33 @@ export default function AiAudioCenter() {
                      </div>
                   </div>
                </div>
+
+               {/* WIDE HORIZONTAL PREVIEW BOX */}
+               {form.audioData && (
+                 <div className="w-full py-6 px-10 bg-white dark:bg-slate-900 rounded-[2rem] flex items-center gap-10 animate-in slide-in-from-bottom-2 duration-500 border border-slate-100 shadow-xl">
+                    <div className="flex items-center gap-5 shrink-0">
+                       <div className="w-14 h-14 rounded-2xl bg-accent/20 flex items-center justify-center text-accent shadow-sm animate-pulse">
+                          <Volume2 className="w-7 h-7" />
+                       </div>
+                       <div className="space-y-1">
+                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] leading-none">Vocal Signature Preview</p>
+                          <div className="flex items-center gap-3">
+                             <Badge variant="outline" className="text-[9px] font-bold border-accent/20 text-accent uppercase">{form.voice} Voice</Badge>
+                             <Badge variant="outline" className="text-[9px] font-bold border-slate-200 text-slate-500 uppercase">{form.emotion}</Badge>
+                          </div>
+                       </div>
+                    </div>
+                    <div className="flex-1 h-12 flex items-center bg-slate-50 dark:bg-slate-950 rounded-2xl px-6 border">
+                       <audio src={form.audioData} controls className="w-full h-8" />
+                    </div>
+                    <div className="hidden xl:flex items-center gap-3 shrink-0 opacity-40">
+                       <div className="flex gap-0.5">
+                          {[1,2,3,4,5].map(i => <div key={i} className="w-0.5 h-4 bg-accent rounded-full animate-bounce" style={{ animationDelay: `${i * 0.1}s` }} />)}
+                       </div>
+                       <span className="text-[8px] font-black uppercase text-slate-400">Broadcast Quality Processing Applied</span>
+                    </div>
+                 </div>
+               )}
             </div>
 
             <DialogFooter className="p-8 bg-slate-50 dark:bg-slate-900 border-t shrink-0">
