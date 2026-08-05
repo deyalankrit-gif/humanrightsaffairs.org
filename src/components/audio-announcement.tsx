@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { usePathname } from 'next/navigation';
 import { useFirestore, useDoc, useMemoFirebase } from '@/firebase';
 import { doc } from 'firebase/firestore';
@@ -26,9 +26,8 @@ import { cn } from '@/lib/utils';
 
 /**
  * AudioAnnouncement: Refined institutional broadcast player.
- * Optimized for automatic playback on refresh while respecting browser policies.
- * Background set to fully transparent.
- * Icons updated to specific blue color #2563EB as per user request.
+ * Features a Professional Broadcast Audio Pipeline (Web Audio API).
+ * Icons updated to specific blue color #2563EB.
  */
 export function AudioAnnouncement() {
   const db = useFirestore();
@@ -43,6 +42,7 @@ export function AudioAnnouncement() {
   const [error, setError] = useState(false);
   
   const audioRef = useRef<HTMLAudioElement>(null);
+  const audioCtxRef = useRef<AudioContext | null>(null);
 
   const announcementRef = useMemoFirebase(() => {
     if (!db) return null;
@@ -51,16 +51,79 @@ export function AudioAnnouncement() {
 
   const { data: settings, loading } = useDoc(announcementRef);
 
+  /**
+   * setupAudioGraph: Professional Audio Processing Chain.
+   */
+  const setupAudioGraph = useCallback(() => {
+    if (!audioRef.current || audioCtxRef.current) return;
+
+    try {
+      const AudioContextClass = (window.AudioContext || (window as any).webkitAudioContext);
+      const ctx = new AudioContextClass();
+      audioCtxRef.current = ctx;
+
+      const source = ctx.createMediaElementSource(audioRef.current);
+      
+      const hpf = ctx.createBiquadFilter();
+      hpf.type = 'highpass';
+      hpf.frequency.value = 100;
+
+      const eqPresence = ctx.createBiquadFilter();
+      eqPresence.type = 'peaking';
+      eqPresence.frequency.value = 3000;
+      eqPresence.gain.value = 2;
+
+      const compressor = ctx.createDynamicsCompressor();
+      compressor.threshold.value = -24;
+      compressor.ratio.value = 3;
+
+      const reverb = ctx.createConvolver();
+      const reverbDuration = 0.5;
+      const length = ctx.sampleRate * reverbDuration;
+      const impulse = ctx.createBuffer(2, length, ctx.sampleRate);
+      for (let i = 0; i < 2; i++) {
+        const data = impulse.getChannelData(i);
+        for (let j = 0; j < length; j++) {
+          data[j] = (Math.random() * 2 - 1) * Math.pow(1 - j / length, 2);
+        }
+      }
+      reverb.buffer = impulse;
+
+      const reverbGain = ctx.createGain();
+      reverbGain.gain.value = 0.08;
+
+      const dryGain = ctx.createGain();
+      dryGain.gain.value = 0.92;
+
+      const limiter = ctx.createDynamicsCompressor();
+      limiter.threshold.value = -1;
+      limiter.ratio.value = 20;
+
+      source.connect(hpf);
+      hpf.connect(eqPresence);
+      eqPresence.connect(compressor);
+      compressor.connect(dryGain);
+      compressor.connect(reverb);
+      reverb.connect(reverbGain);
+      dryGain.connect(limiter);
+      reverbGain.connect(limiter);
+      limiter.connect(ctx.destination);
+    } catch (e) {
+      console.warn("[AUDIO-PIPELINE] Web Audio init failed.", e);
+    }
+  }, []);
+
   useEffect(() => {
     setMounted(true);
     const savedMute = localStorage.getItem('hrat_audio_muted');
     if (savedMute === 'true') setIsMuted(true);
   }, []);
 
-  const attemptPlay = React.useCallback(() => {
+  const attemptPlay = useCallback(() => {
     const audio = audioRef.current;
     if (!audio || !settings?.enabled || isMuted || error) return;
 
+    setupAudioGraph();
     audio.volume = settings.volume ?? 0.5;
     audio.muted = isMuted;
     
@@ -73,25 +136,16 @@ export function AudioAnnouncement() {
           setError(false);
         })
         .catch((err) => {
-          console.warn("[AUDIO-AUTOPLAY] Playback blocked:", err.name);
           setShowAutoplayPrompt(true);
           setIsPlaying(false);
         });
     }
-  }, [settings, isMuted, error]);
+  }, [settings, isMuted, error, setupAudioGraph]);
 
   useEffect(() => {
     if (!mounted || loading || !settings?.enabled || !settings?.audioData || error) return;
-
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    audio.muted = isMuted;
-
-    if (settings.autoplay && !isMuted) {
-      if (audio.readyState >= 2) {
-        attemptPlay();
-      }
+    if (settings.autoplay && !isMuted && audioRef.current?.readyState >= 2) {
+      attemptPlay();
     }
   }, [mounted, loading, settings, isMuted, error, attemptPlay]);
 
@@ -101,6 +155,7 @@ export function AudioAnnouncement() {
     localStorage.setItem('hrat_audio_muted', nextMute.toString());
     
     if (audioRef.current) {
+      setupAudioGraph();
       audioRef.current.muted = nextMute;
       if (!nextMute && audioRef.current.paused && !error) {
         audioRef.current.play().then(() => {
@@ -116,6 +171,7 @@ export function AudioAnnouncement() {
 
   const handleManualPlay = () => {
     if (!audioRef.current || error) return;
+    setupAudioGraph();
     audioRef.current.muted = false;
     setIsMuted(false);
     localStorage.setItem('hrat_audio_muted', 'false');
@@ -128,6 +184,7 @@ export function AudioAnnouncement() {
 
   const handleReplay = () => {
     if (!audioRef.current || error) return;
+    setupAudioGraph();
     audioRef.current.currentTime = 0;
     audioRef.current.muted = false;
     setIsMuted(false);
@@ -245,12 +302,6 @@ export function AudioAnnouncement() {
               </TooltipProvider>
             )}
 
-            {error && (
-              <div className="p-2 text-red-500 animate-pulse">
-                <AlertCircle className="w-5 h-5" />
-              </div>
-            )}
-
             <div className="w-px h-6 bg-white/10 mx-1" />
 
             <TooltipProvider>
@@ -269,10 +320,6 @@ export function AudioAnnouncement() {
               </Tooltip>
             </TooltipProvider>
           </div>
-        </div>
-        
-        <div className="pr-3 opacity-0 group-hover:opacity-40 transition-all duration-700 delay-100">
-           <p className="text-[8px] font-black text-white uppercase tracking-[0.4em] drop-shadow-sm">National Registry Audio Station</p>
         </div>
       </div>
     </div>
