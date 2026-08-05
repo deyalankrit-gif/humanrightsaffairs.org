@@ -186,7 +186,7 @@ export default function LeadershipPage() {
     }
   }, [])
 
-  const leadersQuery = useMemoFirebase(() => {
+  const firestoreLeadersQuery = useMemoFirebase(() => {
     if (!db) return null;
     return query(collection(db, 'leadership'), orderBy('createdAt', 'asc'));
   }, [db]);
@@ -196,10 +196,44 @@ export default function LeadershipPage() {
     return query(collection(db, 'memberProfiles'), where('isDemi', '==', false), orderBy('name', 'asc'));
   }, [db, isAdmin]);
 
-  const { data: firestoreLeaders, loading: dataLoading } = useCollection(leadersQuery);
+  const { data: firestoreLeaders, loading: dataLoading } = useCollection(firestoreLeadersQuery);
   const { data: membersList } = useCollection(membersQuery);
 
-  const leaders = (firestoreLeaders || []) as Leader[];
+  /**
+   * LEADERSHIP SORTING ENGINE
+   * Orders personnel based on institutional rank hierarchy.
+   */
+  const leaders = React.useMemo(() => {
+    const raw = (firestoreLeaders || []) as Leader[];
+    
+    const getTitleWeight = (title: string) => {
+      const t = (title || '').toLowerCase();
+      // Tier 1: Primary Leadership (Chairman, President, Founder)
+      if (t.includes('founder') || (t.includes('chairman') && !t.includes('vice')) || (t.includes('president') && !t.includes('vice'))) return 1;
+      // Tier 2: Vice Leadership
+      if (t.includes('vice chairman') || t.includes('vice president')) return 2;
+      // Tier 3: General Secretary
+      if (t.includes('general secretary') && !t.includes('assistant')) return 3;
+      // Tier 4: Assistant General Secretary
+      if (t.includes('assistant general secretary')) return 4;
+      // Tier 5: Treasurer
+      if (t.includes('treasurer') && !t.includes('assistant')) return 5;
+      // Tier 6: Assistant Treasurer
+      if (t.includes('assistant treasurer')) return 6;
+      // Tier 7: Legal Advisor
+      if (t.includes('legal advisor')) return 7;
+      // Tier 8: Others
+      return 10;
+    };
+
+    return [...raw].sort((a, b) => {
+      const weightA = getTitleWeight(a.title);
+      const weightB = getTitleWeight(b.title);
+      if (weightA !== weightB) return weightA - weightB;
+      // Tertiary sort: Alphabetical Name
+      return (a.name || '').localeCompare(b.name || '');
+    });
+  }, [firestoreLeaders]);
 
   const filteredMembers = React.useMemo(() => {
     if (!membersList || !memberSearch.trim()) return [];
@@ -489,7 +523,7 @@ export default function LeadershipPage() {
                 <SectionHeading title="Central Committee" icon={ShieldCheck} color="text-red-600 border-red-100" subtitle={`${centralTeam.length} Officials`} />
                 <div className="flex flex-wrap justify-center gap-12">
                   {centralTeam.map((leader) => {
-                    const titleLower = leader.title.toLowerCase();
+                    const titleLower = (leader.title || '').toLowerCase();
                     const isChairman = titleLower.includes("chairman") && !titleLower.includes("vice");
                     const isPresident = titleLower.includes("president") && !titleLower.includes("vice");
                     const isFounder = titleLower.includes("founder");
@@ -547,7 +581,7 @@ export default function LeadershipPage() {
                         {activeStateLeaders.length > 0 ? (
                           <div className="flex flex-wrap justify-center gap-10">
                             {activeStateLeaders.map(leader => {
-                              const titleLower = leader.title.toLowerCase();
+                              const titleLower = (leader.title || '').toLowerCase();
                               const isChairman = titleLower.includes("chairman") && !titleLower.includes("vice");
                               const isPresident = titleLower.includes("president") && !titleLower.includes("vice");
                               
@@ -597,7 +631,7 @@ export default function LeadershipPage() {
                               {activeDistrictLeaders.length > 0 ? (
                                 <div className="flex flex-wrap justify-center gap-8">
                                    {activeDistrictLeaders.map(dl => {
-                                     const titleLower = dl.title.toLowerCase();
+                                     const titleLower = (dl.title || '').toLowerCase();
                                      const isChairman = titleLower.includes("chairman") && !titleLower.includes("vice");
                                      const isPresident = titleLower.includes("president") && !titleLower.includes("vice");
                                      
