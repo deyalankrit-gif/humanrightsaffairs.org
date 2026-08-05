@@ -96,20 +96,20 @@ function LeaderCard({ leader, variant = "default", isAdmin, onEdit, onDelete }: 
   const img = isCustomPhoto ? leader.imageId : (placeholder || fallback)
   
   const sizeClasses = {
-    xl: "w-64 h-80 md:w-80 md:h-[420px]", // Central Chairman
+    xl: "w-64 h-80 md:w-80 md:h-[420px]", // Central Chairman/Founder
     large: "w-48 h-64 md:w-64 md:h-80",   // State Chairman / Senior Chapter
-    default: "w-36 h-48 md:w-48 md:h-60",
-    small: "w-24 h-32 md:w-32 md:h-40"
+    default: "w-36 h-48 md:w-48 md:h-60", // District Chairman / State Support
+    small: "w-24 h-32 md:w-32 md:h-40"    // District Support
   }
 
-  const isChairman = leader.title.includes("Chairman")
+  const isChairman = leader.title.toLowerCase().includes("chairman")
+  const isPresident = leader.title.toLowerCase().includes("president")
 
   return (
     <div className="flex flex-col items-center group relative">
       <div className={`relative ${sizeClasses[variant]} rounded-2xl overflow-hidden shadow-xl border-2 md:border-4 border-white group-hover:border-secondary transition-all duration-500 bg-slate-100 dark:bg-slate-800`}>
         <Image src={img!} alt={leader.name} fill className="object-cover group-hover:scale-110 transition-transform duration-700" />
         
-        {/* Administrative Overlay - Positioned low */}
         <div className="absolute inset-0 bg-gradient-to-t from-primary/90 via-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-end justify-center pb-8 z-10">
           {isAdmin && (
             <div className="flex gap-3 animate-in fade-in slide-in-from-bottom-2 duration-300">
@@ -122,11 +122,11 @@ function LeaderCard({ leader, variant = "default", isAdmin, onEdit, onDelete }: 
                     <Trash2 className="w-5 h-5" />
                   </Button>
                 </AlertDialogTrigger>
-                <AlertDialogContent className="rounded-[2rem] border-none shadow-2xl bg-white dark:bg-slate-900">
+                <AlertDialogContent className="rounded-[2.5rem] border-none shadow-2xl bg-white dark:bg-slate-900">
                   <AlertDialogHeader>
                     <AlertDialogTitle className="text-xl font-headline font-bold text-red-600">Authorize Profile Purge</AlertDialogTitle>
                     <AlertDialogDescription className="text-slate-600 dark:text-slate-400 font-medium leading-relaxed">
-                      Are you sure you want to permanently delete this leader's information and photo from the institutional registry? This action will erase all documentation and images. This action cannot be undone.
+                      Are you sure you want to permanently delete this leader's profile, including their official information and photograph, from the National Registry? This action cannot be undone.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter className="mt-4">
@@ -142,7 +142,7 @@ function LeaderCard({ leader, variant = "default", isAdmin, onEdit, onDelete }: 
       <div className="mt-4 text-center px-2">
         <h4 className={cn(
           "font-headline font-bold text-primary dark:text-white leading-tight mb-1",
-          (variant === 'xl' || variant === 'large' || isChairman) ? 'text-lg md:text-xl lg:text-2xl' : 'text-sm md:text-base'
+          (variant === 'xl' || variant === 'large' || isChairman || isPresident) ? 'text-lg md:text-xl lg:text-2xl' : 'text-sm md:text-base'
         )}>
           {leader.name}
         </h4>
@@ -199,9 +199,7 @@ export default function LeadershipPage() {
   const { data: firestoreLeaders, loading: dataLoading } = useCollection(leadersQuery);
   const { data: membersList } = useCollection(membersQuery);
 
-  const leaders = React.useMemo(() => {
-    return (firestoreLeaders || []) as Leader[];
-  }, [firestoreLeaders]);
+  const leaders = (firestoreLeaders || []) as Leader[];
 
   const filteredMembers = React.useMemo(() => {
     if (!membersList || !memberSearch.trim()) return [];
@@ -279,7 +277,6 @@ export default function LeadershipPage() {
 
     setIsActionLoading(true)
     
-    // Automatic Photo Fallback Logic
     let finalImage = newLeader.imageId;
     if (!finalImage) {
       finalImage = newLeader.gender === 'female' ? '/dummy w.png' : '/dummy m.png';
@@ -314,7 +311,6 @@ export default function LeadershipPage() {
     if (!editLeader) return
     setIsActionLoading(true)
     
-    // Ensure update also respects fallback if manually cleared
     let finalImage = editLeader.imageId;
     if (!finalImage) {
       finalImage = editLeader.gender === 'female' ? '/dummy w.png' : '/dummy m.png';
@@ -365,7 +361,6 @@ export default function LeadershipPage() {
                 </Button>
               </DialogTrigger>
               <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="max-w-2xl bg-white dark:bg-slate-900 rounded-[2.5rem] border-none shadow-2xl max-h-[90vh] overflow-y-auto flex flex-col p-0">
-                {/* Header with increased padding */}
                 <div className="bg-slate-900 pt-14 pb-10 px-8 text-white relative border-b-4 border-accent/20 shrink-0">
                    <div className="absolute right-6 top-6"><DialogClose asChild><Button variant="ghost" size="icon" className="rounded-full text-white hover:bg-white/10 h-10 w-10"><X className="w-6 h-6" /></Button></DialogClose></div>
                    <DialogTitle className="text-2xl font-headline font-bold">Commission Official</DialogTitle>
@@ -373,7 +368,6 @@ export default function LeadershipPage() {
                 </div>
 
                 <div className="flex-1 overflow-y-auto p-8 space-y-8 custom-scrollbar">
-                  {/* Fetch from Registry Module */}
                   <div className="p-6 bg-slate-50 dark:bg-slate-950 rounded-3xl border-2 border-dashed border-slate-200 dark:border-slate-800 space-y-4">
                      <div className="flex items-center gap-2 mb-2">
                         <Users className="w-4 h-4 text-accent" />
@@ -476,7 +470,6 @@ export default function LeadershipPage() {
                   </div>
                 </div>
 
-                {/* Footer with increased padding */}
                 <div className="pb-16 pt-10 px-8 bg-slate-50 dark:bg-slate-900 border-t shrink-0">
                   <Button onClick={handleAdd} disabled={isActionLoading} className="w-full h-14 bg-primary text-white font-bold rounded-2xl shadow-xl hover:bg-secondary transition-all text-base md:text-lg">Commission to Leadership</Button>
                 </div>
@@ -492,17 +485,17 @@ export default function LeadershipPage() {
             <div className="text-center py-20"><Loader2 className="w-10 h-10 animate-spin text-accent mx-auto mb-4" /></div>
           ) : (
             <>
-              {/* Central Council Section */}
               <div className="flex flex-col items-center mb-32">
                 <SectionHeading title="Central Committee" icon={ShieldCheck} color="text-red-600 border-red-100" subtitle={`${centralTeam.length} Officials`} />
                 <div className="flex flex-wrap justify-center gap-12">
                   {centralTeam.map((leader) => {
-                    const isPrimary = leader.title.toLowerCase().includes("chairman") || leader.title.toLowerCase().includes("founder");
+                    const titleLower = leader.title.toLowerCase();
+                    const isTopTier = titleLower.includes("chairman") || titleLower.includes("president") || titleLower.includes("founder");
                     return (
                       <LeaderCard 
                         key={leader.id} 
                         leader={leader} 
-                        variant={isPrimary ? "xl" : "large"} 
+                        variant={isTopTier ? "xl" : "large"} 
                         isAdmin={isAdmin} 
                         onEdit={setEditLeader} 
                         onDelete={handleDelete} 
@@ -512,7 +505,6 @@ export default function LeadershipPage() {
                 </div>
               </div>
 
-              {/* Regional & District Chapters Section */}
               <div className="space-y-32">
                 <div className="flex flex-col items-center gap-8 mb-12">
                   <div className="flex items-center justify-center gap-4">
@@ -550,12 +542,13 @@ export default function LeadershipPage() {
                         {activeStateLeaders.length > 0 ? (
                           <div className="flex flex-wrap justify-center gap-10">
                             {activeStateLeaders.map(leader => {
-                              const isPrimary = leader.title.toLowerCase().includes("chairman");
+                              const titleLower = leader.title.toLowerCase();
+                              const isTopTier = titleLower.includes("chairman") || titleLower.includes("president");
                               return (
                                 <LeaderCard 
                                   key={leader.id} 
                                   leader={leader} 
-                                  variant={isPrimary ? "large" : "default"}
+                                  variant={isTopTier ? "large" : "default"}
                                   isAdmin={isAdmin} 
                                   onEdit={setEditLeader} 
                                   onDelete={handleDelete} 
@@ -595,12 +588,13 @@ export default function LeadershipPage() {
                               {activeDistrictLeaders.length > 0 ? (
                                 <div className="flex flex-wrap justify-center gap-8">
                                    {activeDistrictLeaders.map(dl => {
-                                     const isPrimary = dl.title.toLowerCase().includes("chairman") || dl.title.toLowerCase().includes("president");
+                                     const titleLower = dl.title.toLowerCase();
+                                     const isTopTier = titleLower.includes("chairman") || titleLower.includes("president");
                                      return (
                                        <LeaderCard 
                                          key={dl.id} 
                                          leader={dl} 
-                                         variant={isPrimary ? "default" : "small"} 
+                                         variant={isTopTier ? "default" : "small"} 
                                          isAdmin={isAdmin} 
                                          onEdit={setEditLeader} 
                                          onDelete={handleDelete} 
@@ -627,11 +621,10 @@ export default function LeadershipPage() {
         </div>
       </section>
 
-      {/* Edit Dialog */}
       <Dialog open={!!editLeader} onOpenChange={(open) => !open && setEditLeader(null)}>
         <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="bg-white dark:bg-slate-900 rounded-[2.5rem] border-none shadow-2xl max-h-[90vh] overflow-y-auto flex flex-col p-0">
           <div className="bg-slate-900 pt-14 pb-10 px-8 text-white relative border-b-4 border-accent/20 shrink-0">
-             <div className="absolute right-6 top-6"><DialogClose asChild><Button variant="ghost" size="icon" className="rounded-full text-white hover:bg-white/10 h-10 w-10"><X className="w-6 h-6" /></Button></DialogClose></div>
+             <div className="absolute right-6 top-6"><DialogClose asChild><Button variant="ghost" size="icon" className="rounded-full text-white hover:bg-white/10 h-10 w-10 transition-all"><X className="w-6 h-6" /></Button></DialogClose></div>
              <DialogTitle className="text-2xl font-headline font-bold">Refine Leader Profile</DialogTitle>
              <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">Registry Update Protocol</p>
           </div>
