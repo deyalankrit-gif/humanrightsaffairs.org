@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, query, orderBy, limit } from 'firebase/firestore';
+import { useFirestore, useDoc, useMemoFirebase } from '@/firebase';
+import { doc } from 'firebase/firestore';
 import { 
   Play, 
   Pause, 
@@ -26,9 +26,9 @@ import {
 import { cn } from '@/lib/utils';
 
 /**
- * AiAudioPlayer: Robust Institutional Audio Node.
- * Features a Professional Broadcast Audio Pipeline (Web Audio API).
- * Optimized for singleton execution across public pages via LayoutWrapper.
+ * AiAudioPlayer: High-fidelity Institutional Announcement Bar.
+ * Synchronized with the Global Command Node for real-time broadcasts.
+ * Features: Automatic playback attempt, interaction-aware activation, and DSP effects sync.
  */
 export function AiAudioPlayer({ className }: { className?: string }) {
   const db = useFirestore();
@@ -44,20 +44,32 @@ export function AiAudioPlayer({ className }: { className?: string }) {
   const [isVisible, setIsVisible] = useState(true);
   
   const audioRef = useRef<HTMLAudioElement>(null);
-  const autoPlayAttempted = useRef(false);
+  const autoPlayAttempted = useRef<string | null>(null);
   
-  // Web Audio Nodes
+  // Web Audio Nodes for Effects
   const audioCtxRef = useRef<AudioContext | null>(null);
   const sourceNodeRef = useRef<MediaElementAudioSourceNode | null>(null);
+  const gainNodeRef = useRef<GainNode | null>(null);
+  const reverbWetGainRef = useRef<GainNode | null>(null);
+  const reverbDryGainRef = useRef<GainNode | null>(null);
+  const echoWetGainRef = useRef<GainNode | null>(null);
+
+  // Listen to Global Command Node
+  const settingsRef = useMemoFirebase(() => {
+    if (!db) return null;
+    return doc(db, 'settings', 'audio_announcement');
+  }, [db]);
+
+  const { data: settings, loading } = useDoc(settingsRef);
 
   /**
    * setupAudioGraph: Initializes the professional broadcast processing pipeline.
-   * Chain: Source -> HighPass -> EQ Presence -> EQ Air -> Compressor -> Reverb(Wet/Dry) -> Limiter -> Destination.
    */
   const setupAudioGraph = useCallback(() => {
     if (!audioRef.current || audioCtxRef.current) return;
 
     try {
+      console.log('[AUDIO-SYSTEM] Establishing Audio Graph...');
       const AudioContextClass = (window.AudioContext || (window as any).webkitAudioContext);
       const ctx = new AudioContextClass();
       audioCtxRef.current = ctx;
@@ -65,33 +77,24 @@ export function AiAudioPlayer({ className }: { className?: string }) {
       const source = ctx.createMediaElementSource(audioRef.current);
       sourceNodeRef.current = source;
       
-      // 1. High-Pass Filter (100Hz) - Removes rumble
       const hpf = ctx.createBiquadFilter();
       hpf.type = 'highpass';
       hpf.frequency.value = 100;
 
-      // 2. EQ - Presence (3kHz +2dB) - Clarity
       const eqPresence = ctx.createBiquadFilter();
       eqPresence.type = 'peaking';
       eqPresence.frequency.value = 3000;
       eqPresence.gain.value = 2;
-      eqPresence.Q.value = 1;
 
-      // 3. EQ - Air (10kHz +2dB) - Brightness
       const eqAir = ctx.createBiquadFilter();
       eqAir.type = 'highshelf';
       eqAir.frequency.value = 10000;
       eqAir.gain.value = 2;
 
-      // 4. Compressor (3:1 Ratio) - Normalization
       const compressor = ctx.createDynamicsCompressor();
       compressor.threshold.value = -24;
-      compressor.knee.value = 30;
       compressor.ratio.value = 3;
-      compressor.attack.value = 0.003;
-      compressor.release.value = 0.25;
 
-      // 5. Subtle Reverb (Synthesis of Impulse Response)
       const reverb = ctx.createConvolver();
       const reverbDuration = 0.6;
       const length = ctx.sampleRate * reverbDuration;
@@ -104,40 +107,75 @@ export function AiAudioPlayer({ className }: { className?: string }) {
       }
       reverb.buffer = impulse;
 
-      const reverbGain = ctx.createGain();
-      reverbGain.gain.value = 0.07; // 7% wet mix
+      const reverbWet = ctx.createGain();
+      const reverbDry = ctx.createGain();
+      reverbWetGainRef.current = reverbWet;
+      reverbDryGainRef.current = reverbDry;
 
-      const dryGain = ctx.createGain();
-      dryGain.gain.value = 0.93;
+      const echoDelay = ctx.createDelay(1.0);
+      echoDelay.delayTime.value = 0.35;
+      const echoFeedback = ctx.createGain();
+      echoFeedback.gain.value = 0.4;
+      const echoWet = ctx.createGain();
+      echoWetGainRef.current = echoWet;
 
-      // 6. Limiter (-1dB) - Prevent clipping
       const limiter = ctx.createDynamicsCompressor();
       limiter.threshold.value = -1;
-      limiter.knee.value = 0;
       limiter.ratio.value = 20;
-      limiter.attack.value = 0;
-      limiter.release.value = 0.1;
 
-      // Establish Chain
+      const mainGain = ctx.createGain();
+      gainNodeRef.current = mainGain;
+
       source.connect(hpf);
       hpf.connect(eqPresence);
       eqPresence.connect(eqAir);
       eqAir.connect(compressor);
       
-      // Parallel Reverb Path
-      compressor.connect(dryGain);
+      compressor.connect(reverbDry);
       compressor.connect(reverb);
-      reverb.connect(reverbGain);
+      reverb.connect(reverbWet);
+
+      compressor.connect(echoDelay);
+      echoDelay.connect(echoFeedback);
+      echoFeedback.connect(echoDelay);
+      echoDelay.connect(echoWet);
       
-      // Summing to Limiter
-      dryGain.connect(limiter);
-      reverbGain.connect(limiter);
+      reverbDry.connect(mainGain);
+      reverbWet.connect(mainGain);
+      echoWet.connect(mainGain);
       
+      mainGain.connect(limiter);
       limiter.connect(ctx.destination);
     } catch (e) {
-      console.warn("[AUDIO-PIPELINE] Web Audio initialization failed. Falling back to native.", e);
+      console.warn("[AUDIO-PIPELINE] Web Audio initialization failed.", e);
     }
   }, []);
+
+  /**
+   * syncAudioNodes: Maps global Firestore parameters to local audio nodes.
+   */
+  const syncAudioNodes = useCallback(() => {
+    if (!audioCtxRef.current || !settings) return;
+    const ctx = audioCtxRef.current;
+    const time = ctx.currentTime;
+
+    const vol = isMuted ? 0 : (settings.volume ?? 0.8);
+    if (gainNodeRef.current) gainNodeRef.current.gain.setTargetAtTime(vol, time, 0.1);
+    
+    if (reverbWetGainRef.current && reverbDryGainRef.current) {
+      const mix = (settings.reverbMix ?? 8) / 100;
+      reverbWetGainRef.current.gain.setTargetAtTime(mix, time, 0.1);
+      reverbDryGainRef.current.gain.setTargetAtTime(1 - mix, time, 0.1);
+    }
+
+    if (echoWetGainRef.current) {
+      echoWetGainRef.current.gain.setTargetAtTime((settings.echoMix ?? 0) / 100, time, 0.1);
+    }
+
+    if (audioRef.current) {
+       audioRef.current.playbackRate = settings.speed || 1;
+    }
+  }, [settings, isMuted]);
 
   useEffect(() => {
     setMounted(true);
@@ -145,71 +183,44 @@ export function AiAudioPlayer({ className }: { className?: string }) {
     if (savedVol) setVolume(parseFloat(savedVol));
   }, []);
 
-  const announcementsQuery = useMemoFirebase(() => {
-    if (!db) return null;
-    return query(
-      collection(db, 'ai_announcements'), 
-      orderBy('updatedAt', 'desc'),
-      limit(20)
-    );
-  }, [db]);
+  // Handle Playback State Sync and Autoplay Logic
+  useEffect(() => {
+    if (!mounted || loading || !settings?.enabled || !settings?.audioData || !audioRef.current) return;
 
-  const { data: list, loading } = useCollection(announcementsQuery);
-  
-  const activeAnn = useMemo(() => {
-    if (!list || list.length === 0) return null;
-    return list.find((a: any) => a.status === 'Published');
-  }, [list]);
-
-  const triggerPlayback = useCallback(() => {
     const audio = audioRef.current;
-    if (!audio || autoPlayAttempted.current || loadError) return;
-
-    autoPlayAttempted.current = true;
-    setupAudioGraph();
+    const annId = settings.audioData.slice(-20);
     
-    audio.volume = volume;
-    audio.muted = isMuted;
+    setupAudioGraph();
+    syncAudioNodes();
 
-    const playPromise = audio.play();
-    if (playPromise !== undefined) {
-      playPromise
-        .then(() => {
-          setIsPlaying(true);
-          setAutoplayBlocked(false);
-        })
-        .catch((err) => {
-          if (err.name === 'NotAllowedError' || err.name === 'NotSupportedError') {
-            setAutoplayBlocked(true);
-          }
-          setIsPlaying(false);
-        });
-    }
-  }, [volume, isMuted, loadError, setupAudioGraph]);
-
-  useEffect(() => {
-    if (!mounted || loading || !activeAnn || autoPlayAttempted.current || !audioRef.current) return;
-
-    const audio = audioRef.current;
-    const handleCanPlay = () => {
-      triggerPlayback();
-      audio.removeEventListener('canplaythrough', handleCanPlay);
-    };
-
-    if (audio.readyState >= 3) {
-      triggerPlayback();
+    if (settings.isPlaying) {
+       const playPromise = audio.play();
+       if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              setIsPlaying(true);
+              setAutoplayBlocked(false);
+              autoPlayAttempted.current = annId;
+            })
+            .catch((err) => {
+              if (err.name === 'NotAllowedError') {
+                setAutoplayBlocked(true);
+              }
+              setIsPlaying(false);
+            });
+       }
     } else {
-      audio.addEventListener('canplaythrough', handleCanPlay);
+       audio.pause();
+       setIsPlaying(false);
     }
+  }, [settings, loading, mounted, setupAudioGraph, syncAudioNodes]);
 
-    return () => audio.removeEventListener('canplaythrough', handleCanPlay);
-  }, [mounted, loading, activeAnn, triggerPlayback]);
-
+  // Global Interaction Listener to Resume Blocked Autoplay
   useEffect(() => {
-    if (!autoplayBlocked || isPlaying || loadError || !audioRef.current) return;
+    if (!autoplayBlocked || isPlaying || !mounted) return;
 
-    const handleFirstInteraction = () => {
-      if (!audioRef.current || isPlaying) return;
+    const handleInteraction = () => {
+      if (!audioRef.current || isPlaying || !settings?.isPlaying) return;
       
       setupAudioGraph();
       audioRef.current.play()
@@ -222,17 +233,17 @@ export function AiAudioPlayer({ className }: { className?: string }) {
     };
 
     const cleanup = () => {
-      window.removeEventListener('mousedown', handleFirstInteraction);
-      window.removeEventListener('keydown', handleFirstInteraction);
-      window.removeEventListener('touchstart', handleFirstInteraction);
+      window.removeEventListener('mousedown', handleInteraction);
+      window.removeEventListener('keydown', handleInteraction);
+      window.removeEventListener('touchstart', handleInteraction);
     };
 
-    window.addEventListener('mousedown', handleFirstInteraction);
-    window.addEventListener('keydown', handleFirstInteraction);
-    window.addEventListener('touchstart', handleFirstInteraction);
+    window.addEventListener('mousedown', handleInteraction);
+    window.addEventListener('keydown', handleInteraction);
+    window.addEventListener('touchstart', handleInteraction);
 
     return cleanup;
-  }, [autoplayBlocked, isPlaying, loadError, setupAudioGraph]);
+  }, [autoplayBlocked, isPlaying, mounted, settings?.isPlaying, setupAudioGraph]);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -245,7 +256,7 @@ export function AiAudioPlayer({ className }: { className?: string }) {
     const handleTimeUpdate = () => setCurrentTime(audio.currentTime);
     const handleEnded = () => setIsPlaying(false);
     const handleAudioError = () => {
-      if (activeAnn?.audioData) setLoadError(true);
+      if (settings?.audioData) setLoadError(true);
     };
 
     audio.addEventListener('loadedmetadata', handleLoadedMetadata);
@@ -259,7 +270,7 @@ export function AiAudioPlayer({ className }: { className?: string }) {
       audio.removeEventListener('ended', handleEnded);
       audio.removeEventListener('error', handleAudioError);
     };
-  }, [activeAnn]);
+  }, [settings?.audioData]);
 
   const togglePlay = () => {
     if (!audioRef.current) return;
@@ -299,14 +310,14 @@ export function AiAudioPlayer({ className }: { className?: string }) {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  if (!mounted || loading || !activeAnn || !isVisible) return null;
+  if (!mounted || loading || !settings?.enabled || !settings?.audioData || !isVisible) return null;
 
   return (
     <div className={cn("w-full py-2 bg-white/95 dark:bg-slate-950/95 backdrop-blur-md border-b border-slate-100 dark:border-slate-800 transition-all duration-500", className)}>
       <div className="container mx-auto px-4 max-w-7xl">
         <audio 
           ref={audioRef} 
-          src={activeAnn.audioData} 
+          src={settings.audioData} 
           playsInline 
           preload="auto" 
         />
@@ -323,7 +334,10 @@ export function AiAudioPlayer({ className }: { className?: string }) {
             </Button>
 
             {autoplayBlocked && !isPlaying && !loadError && (
-              <div className="flex items-center gap-2 px-3 py-1 bg-accent/10 rounded-full border border-accent/20 animate-in zoom-in-95 duration-500 shrink-0">
+              <div 
+                className="flex items-center gap-2 px-3 py-1 bg-accent/10 rounded-full border border-accent/20 animate-in zoom-in-95 duration-500 shrink-0 cursor-pointer"
+                onClick={togglePlay}
+              >
                 <AlertCircle className="w-3 h-3 text-accent animate-pulse" />
                 <span className="text-[9px] font-black text-accent uppercase tracking-tighter">Interact to Play Broadcast</span>
               </div>
@@ -335,9 +349,9 @@ export function AiAudioPlayer({ className }: { className?: string }) {
                <Mic2 className="w-3.5 h-3.5 text-accent animate-pulse shrink-0" />
                <div className="min-w-0 flex flex-col">
                   <h2 className="text-[10px] md:text-xs font-black text-primary dark:text-white uppercase tracking-tight truncate max-w-[150px] md:max-w-xs">
-                    {activeAnn.title}
+                    {settings.title}
                   </h2>
-                  <span className="text-[7px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-0.5">{activeAnn.category}</span>
+                  <span className="text-[7px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-0.5">{settings.category}</span>
                </div>
             </div>
 
