@@ -1,7 +1,7 @@
 
 "use client"
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { signInWithEmailAndPassword } from 'firebase/auth'
 import { useAuth, useFirestore } from '@/firebase'
@@ -19,7 +19,6 @@ import { cn } from '@/lib/utils'
 
 /**
  * Root Login Page: High-security terminal for root administrator access.
- * Refined: Removed pre-filled state. Displays generic placeholders.
  */
 export default function RootLoginPage() {
   const [email, setEmail] = useState('')
@@ -27,11 +26,16 @@ export default function RootLoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [isCaptchaValid, setIsCaptchaValid] = useState(false)
+  const [mounted, setMounted] = useState(false)
   
   const auth = useAuth()
   const db = useFirestore()
   const router = useRouter()
   const { toast } = useToast()
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -125,6 +129,8 @@ export default function RootLoginPage() {
       setIsLoading(false)
     }
   }
+
+  if (!mounted) return null;
 
   return (
     <main className="min-h-screen flex items-center justify-center bg-slate-950 p-4 md:p-8">

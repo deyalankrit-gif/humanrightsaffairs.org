@@ -122,14 +122,16 @@ function LeaderCard({ leader, variant = "default", isAdmin, onEdit, onDelete }: 
                     <Trash2 className="w-5 h-5" />
                   </Button>
                 </AlertDialogTrigger>
-                <AlertDialogContent className="rounded-[2rem] border-none shadow-2xl">
+                <AlertDialogContent className="rounded-[2rem] border-none shadow-2xl bg-white dark:bg-slate-900">
                   <AlertDialogHeader>
-                    <AlertDialogTitle>Confirm Deletion</AlertDialogTitle>
-                    <AlertDialogDescription>Are you sure you want to delete this item? This action may be irreversible. Please confirm before continuing.</AlertDialogDescription>
+                    <AlertDialogTitle className="text-xl font-headline font-bold text-red-600">Authorize Profile Purge</AlertDialogTitle>
+                    <AlertDialogDescription className="text-slate-600 dark:text-slate-400 font-medium leading-relaxed">
+                      Are you sure you want to permanently delete this leader's information and photo from the institutional registry? This action is irreversible.
+                    </AlertDialogDescription>
                   </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={() => onDelete?.(leader.id)} className="bg-red-600 hover:bg-red-700 rounded-xl">Delete</AlertDialogAction>
+                  <AlertDialogFooter className="mt-4">
+                    <AlertDialogCancel className="rounded-xl h-11 font-bold">Abort</AlertDialogCancel>
+                    <AlertDialogAction onClick={() => onDelete?.(leader.id)} className="bg-red-600 hover:bg-red-700 rounded-xl h-11 font-bold">Delete Permanently</AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
@@ -522,7 +524,7 @@ export default function LeadershipPage() {
                   {activeState && (
                     <div className="bg-white dark:bg-slate-900 p-8 md:p-16 rounded-[4rem] shadow-sm border border-slate-100 dark:border-slate-800 animate-in fade-in zoom-in-95 duration-500">
                       <div className="flex flex-col items-center mb-16">
-                        <div className="bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 px-8 py-2 rounded-full font-bold text-lg mb-12 shadow-sm border border-emerald-100 dark:border-emerald-800 uppercase tracking-widest">
+                        <div className="bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 px-8 py-2 rounded-full font-bold text-lg mb-12 shadow-sm border border-emerald-100 dark:border-800 uppercase tracking-widest">
                           {activeState} Chapter
                         </div>
                         
