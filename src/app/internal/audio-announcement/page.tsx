@@ -582,13 +582,13 @@ export default function AiAudioCenter() {
                     {/* Master Audio Terminal */}
                     <Card className="rounded-[2.5rem] border-none shadow-2xl bg-white dark:bg-slate-900 overflow-hidden border border-slate-100 dark:border-slate-800">
                       <CardContent className="p-8 md:p-10 space-y-10">
-                        {/* Row 1: wide integrated controller */}
+                        {/* Row 1: wide integrated controller (Balanced 6/6 split) */}
                         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-                           <div className="lg:col-span-4 h-14 flex items-center bg-slate-50 dark:bg-slate-950 rounded-2xl px-6 border border-slate-100 dark:border-slate-800">
+                           <div className="lg:col-span-6 h-14 flex items-center bg-slate-50 dark:bg-slate-950 rounded-2xl px-6 border border-slate-100 dark:border-slate-800">
                               <audio src={form.audioData} controls className="w-full h-10" />
                            </div>
                            
-                           <div className="lg:col-span-8 space-y-3">
+                           <div className="lg:col-span-6 space-y-3">
                               <div className="flex justify-between items-center px-2">
                                  <Label className="text-[10px] font-black uppercase text-accent tracking-widest flex items-center gap-2">
                                    <Volume2 className="w-3.5 h-3.5" /> Output Gain Control
