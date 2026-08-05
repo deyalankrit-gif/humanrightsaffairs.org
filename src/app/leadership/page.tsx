@@ -490,7 +490,12 @@ export default function LeadershipPage() {
                 <div className="flex flex-wrap justify-center gap-12">
                   {centralTeam.map((leader) => {
                     const titleLower = leader.title.toLowerCase();
-                    const isTopTier = titleLower.includes("chairman") || titleLower.includes("president") || titleLower.includes("founder");
+                    const isChairman = titleLower.includes("chairman") && !titleLower.includes("vice");
+                    const isPresident = titleLower.includes("president") && !titleLower.includes("vice");
+                    const isFounder = titleLower.includes("founder");
+                    
+                    const isTopTier = isChairman || isPresident || isFounder;
+                    
                     return (
                       <LeaderCard 
                         key={leader.id} 
@@ -543,7 +548,11 @@ export default function LeadershipPage() {
                           <div className="flex flex-wrap justify-center gap-10">
                             {activeStateLeaders.map(leader => {
                               const titleLower = leader.title.toLowerCase();
-                              const isTopTier = titleLower.includes("chairman") || titleLower.includes("president");
+                              const isChairman = titleLower.includes("chairman") && !titleLower.includes("vice");
+                              const isPresident = titleLower.includes("president") && !titleLower.includes("vice");
+                              
+                              const isTopTier = isChairman || isPresident;
+                              
                               return (
                                 <LeaderCard 
                                   key={leader.id} 
@@ -589,7 +598,11 @@ export default function LeadershipPage() {
                                 <div className="flex flex-wrap justify-center gap-8">
                                    {activeDistrictLeaders.map(dl => {
                                      const titleLower = dl.title.toLowerCase();
-                                     const isTopTier = titleLower.includes("chairman") || titleLower.includes("president");
+                                     const isChairman = titleLower.includes("chairman") && !titleLower.includes("vice");
+                                     const isPresident = titleLower.includes("president") && !titleLower.includes("vice");
+                                     
+                                     const isTopTier = isChairman || isPresident;
+                                     
                                      return (
                                        <LeaderCard 
                                          key={dl.id} 
@@ -692,7 +705,7 @@ export default function LeadershipPage() {
                 </div>
               )}
               
-              <Button onClick={handleUpdate} disabled={isActionLoading} className="w-full h-14 bg-primary text-white font-bold rounded-2xl shadow-xl hover:bg-secondary transition-all text-base md:text-lg">Save Profile Changes</Button>
+              <Button type="submit" disabled={isActionLoading} className="w-full h-16 rounded-2xl bg-primary text-white font-bold rounded-2xl shadow-xl hover:bg-secondary transition-all text-base md:text-lg">Save Profile Changes</Button>
             </div>
           )}
         </DialogContent>
