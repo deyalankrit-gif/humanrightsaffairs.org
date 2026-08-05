@@ -69,7 +69,7 @@ export default function Home() {
     <main className="min-h-screen relative overflow-x-hidden">
       <BackgroundDecor />
       
-      <section className="relative min-h-[90vh] md:min-h-screen flex flex-col items-center pt-6 md:pt-10 pb-20 px-4">
+      <section className="relative min-h-[100vh] flex flex-col items-center pt-6 md:pt-10 pb-20 px-4">
         <div className="absolute inset-0 z-0">
           <Image 
             src="/Human%20R2.jpeg" 
@@ -81,8 +81,8 @@ export default function Home() {
           <div className="absolute inset-0 bg-gradient-to-b from-primary/40 via-primary/20 to-primary/60 dark:from-slate-950/70 dark:via-slate-950/50 dark:to-slate-950/80"></div>
         </div>
 
-        {/* Intelligence Node (Mobile-Adaptive Layout) */}
-        <div className="absolute top-2 left-0 z-20 w-full md:w-auto overflow-hidden">
+        {/* Intelligence Node (Responsive Stacking Correction) */}
+        <div className="absolute top-[70px] sm:top-2 left-0 z-20 w-full md:w-auto overflow-hidden">
           <CurrentNews />
         </div>
 
@@ -93,8 +93,8 @@ export default function Home() {
           </p>
         </div>
 
-        {/* Institutional Identity Node */}
-        <div className="absolute top-20 right-4 sm:top-8 sm:right-8 z-20 flex items-center gap-2 sm:gap-6 animate-in fade-in slide-in-from-right-4 duration-1000 scale-75 sm:scale-100 origin-right">
+        {/* Institutional Identity Node (Responsive Scaling) */}
+        <div className="absolute top-16 right-4 sm:top-8 sm:right-8 z-20 flex items-center gap-2 sm:gap-6 animate-in fade-in slide-in-from-right-4 duration-1000 scale-[0.6] sm:scale-100 origin-right">
           <div className="flex flex-col text-white text-right">
             <span className="font-headline font-bold text-xl md:text-3xl leading-none tracking-tight">HRAT</span>
             <span className="text-[7px] md:text-[10px] font-bold text-accent uppercase tracking-[0.3em]">Justice Shield</span>
@@ -104,7 +104,7 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="container mx-auto px-0 md:px-4 relative z-10 text-white text-center mt-32 sm:mt-0">
+        <div className="container mx-auto px-0 md:px-4 relative z-10 text-white text-center mt-40 sm:mt-0">
           <div className="max-w-5xl mx-auto space-y-4 md:space-y-6 flex flex-col items-center">
             
             {/* Logos and Flag */}
@@ -122,7 +122,7 @@ export default function Home() {
 
             {/* Main Headlines */}
             <div className="flex flex-col items-center gap-2 w-full mt-2 md:mt-4 overflow-hidden">
-              <div className="font-headline font-bold text-base sm:text-3xl md:text-5xl lg:text-6xl tracking-tight leading-tight min-h-[1.5em] flex justify-center items-center w-full">
+              <div className="font-headline font-bold text-lg sm:text-3xl md:text-5xl lg:text-6xl tracking-tight leading-tight min-h-[1.5em] flex justify-center items-center w-full">
                 <h1 className="bg-gradient-to-r from-[#FF9933] via-white to-[#138808] bg-clip-text text-transparent italic block drop-shadow-sm px-2 pb-4 text-center">
                   <Typewriter 
                     text="Human Rights Affairs Trust" 
@@ -133,11 +133,11 @@ export default function Home() {
               </div>
             </div>
             
-            <h2 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-headline font-bold leading-tight bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-cyan-400 bg-[length:200%_auto] bg-clip-text text-transparent animate-gradient-x py-2 w-full drop-shadow-md">
+            <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-headline font-bold leading-tight bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-cyan-400 bg-[length:200%_auto] bg-clip-text text-transparent animate-gradient-x py-2 w-full drop-shadow-md">
               Upholding Justice. Empowering Citizens.
             </h2>
             
-            <p className="text-[9px] sm:text-sm md:text-lg text-slate-300 font-body max-w-2xl leading-relaxed mx-auto px-6 opacity-90">
+            <p className="text-[10px] sm:text-sm md:text-lg text-slate-300 font-body max-w-2xl leading-relaxed mx-auto px-6 opacity-90">
               Providing a robust shield against injustice through expert legal guidance, community support, and constitutional transparency.
             </p>
             

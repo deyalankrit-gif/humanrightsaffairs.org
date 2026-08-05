@@ -44,7 +44,7 @@ function DigitalClock() {
 /**
  * CurrentNews: Real-time institutional news broadcast node.
  * Features: 2-hour autonomous sync, persistent AI translation, and fixed layout.
- * Updated: Standardized recency sorting with hydration safety.
+ * Updated: Responsive width and mobile-optimized padding.
  */
 export function CurrentNews({ className }: { className?: string }) {
   const db = useFirestore();
@@ -197,7 +197,7 @@ export function CurrentNews({ className }: { className?: string }) {
   if (!mounted) return null;
 
   if (loading && !isSyncing) return (
-    <div className={cn("flex flex-col gap-2 p-6 animate-pulse", className)}>
+    <div className={cn("flex flex-col gap-2 p-6 animate-pulse w-full max-w-[420px]", className)}>
       <Loader2 className="w-5 h-5 animate-spin text-[#CEFF00]" />
       <span className="text-[11px] font-black text-[#CEFF00] uppercase tracking-widest">Auditing Registry...</span>
     </div>
@@ -208,11 +208,11 @@ export function CurrentNews({ className }: { className?: string }) {
   return (
     <>
       <JsonLd data={getNewsSchema(activeNews)} />
-      <div className={cn("flex flex-col gap-5 p-7 animate-in fade-in duration-1000 max-w-[420px]", className)}>
-        <div className="flex items-center justify-between border-b border-white/20 pb-4">
+      <div className={cn("flex flex-col gap-4 md:gap-5 p-5 md:p-7 animate-in fade-in duration-1000 w-full max-w-[420px] bg-black/40 md:bg-transparent backdrop-blur-md md:backdrop-blur-none", className)}>
+        <div className="flex items-center justify-between border-b border-white/20 pb-3 md:pb-4">
           <div className="flex items-center gap-2.5">
-            <TrendingUp className="w-5 h-5 text-[#CEFF00] animate-pulse" />
-            <span className="text-[12px] font-black uppercase tracking-[0.3em] text-[#CEFF00]">
+            <TrendingUp className="w-4 h-4 md:w-5 md:h-5 text-[#CEFF00] animate-pulse" />
+            <span className="text-[10px] md:text-[12px] font-black uppercase tracking-[0.2em] md:tracking-[0.3em] text-[#CEFF00]">
               {activeNews.scope || 'India'}
             </span>
           </div>
@@ -220,43 +220,43 @@ export function CurrentNews({ className }: { className?: string }) {
           <DigitalClock />
         </div>
 
-        <div className="space-y-4">
-          <h3 className="text-sm md:text-lg font-headline font-bold text-white leading-tight">
+        <div className="space-y-3 md:space-y-4">
+          <h3 className="text-xs md:text-lg font-headline font-bold text-white leading-tight">
             {displayData.title}
           </h3>
-          <p className="text-[10px] md:text-xs text-white/80 font-medium leading-relaxed italic border-l-2 border-[#CEFF00]/40 pl-3">
+          <p className="text-[9px] md:text-xs text-white/80 font-medium leading-relaxed italic border-l-2 border-[#CEFF00]/40 pl-3 line-clamp-3">
             {displayData.content}
           </p>
           
-          <div className="flex items-center gap-2.5 pt-2">
-            <Button asChild variant="outline" className="h-8 w-fit rounded-xl border-[#CEFF00]/40 bg-[#CEFF00]/5 text-[#CEFF00] hover:bg-[#CEFF00] hover:text-primary text-[10px] font-black uppercase transition-all">
-              <a href={activeNews.url} target="_blank" rel="noopener noreferrer">Examine Story <ExternalLink className="w-3 h-3 ml-1.5" /></a>
+          <div className="flex items-center gap-2 md:gap-2.5 pt-1 md:pt-2">
+            <Button asChild variant="outline" className="h-7 md:h-8 w-fit rounded-lg md:rounded-xl border-[#CEFF00]/40 bg-[#CEFF00]/5 text-[#CEFF00] hover:bg-[#CEFF00] hover:text-primary text-[8px] md:text-[10px] font-black uppercase transition-all">
+              <a href={activeNews.url} target="_blank" rel="noopener noreferrer">Examine Story <ExternalLink className="w-2.5 h-2.5 md:w-3 md:h-3 ml-1.5" /></a>
             </Button>
             
             <button 
               onClick={handleTranslateToggle}
               disabled={isTranslating}
               className={cn(
-                "h-8 px-4 rounded-xl border transition-all flex items-center gap-1.5 active:scale-95", 
+                "h-7 md:h-8 px-3 md:px-4 rounded-lg md:rounded-xl border transition-all flex items-center gap-1.5 active:scale-95", 
                 isBangla ? "bg-[#CEFF00] text-primary border-[#CEFF00]" : "bg-white/5 text-[#CEFF00] border-white/10 hover:bg-white/10"
               )}
             >
-              {isTranslating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Languages className="w-3.5 h-3.5" />}
-              <span className="text-[9px] font-black uppercase tracking-widest">
+              {isTranslating ? <Loader2 className="w-3 md:w-3.5 h-3 md:h-3.5 animate-spin" /> : <Languages className="w-3 md:w-3.5 h-3 md:h-3.5" />}
+              <span className="text-[8px] md:text-[9px] font-black uppercase tracking-widest">
                 {isTranslating ? '...' : isBangla ? 'ORIGINAL' : 'BN'}
               </span>
             </button>
           </div>
         </div>
 
-        <div className="flex items-center justify-between pt-3 border-t border-white/10 opacity-60 pr-32 overflow-hidden gap-4">
-          <span className="text-[8px] font-black uppercase text-white truncate max-w-[120px] shrink-1">
+        <div className="flex items-center justify-between pt-2 md:pt-3 border-t border-white/10 opacity-60 pr-8 md:pr-32 overflow-hidden gap-4">
+          <span className="text-[7px] md:text-[8px] font-black uppercase text-white truncate max-w-[100px] md:max-w-[120px] shrink-1">
             {activeNews.source}
           </span>
           
           <div className="flex items-center gap-1 shrink-0">
-            <Zap className={cn("w-2.5 h-2.5", isSyncing && "animate-ping")} /> 
-            <span className="text-[8px] font-black uppercase text-white whitespace-nowrap">
+            <Zap className={cn("w-2 h-2 md:w-2.5 md:h-2.5", isSyncing && "animate-ping")} /> 
+            <span className="text-[7px] md:text-[8px] font-black uppercase text-white whitespace-nowrap">
               {isBangla ? 'Translated' : 'Live Sync'}
             </span>
           </div>

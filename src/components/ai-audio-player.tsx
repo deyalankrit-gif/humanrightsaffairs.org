@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useFirestore, useDoc, useMemoFirebase } from '@/firebase';
 import { doc } from 'firebase/firestore';
 import { 
@@ -102,7 +102,7 @@ export function AiAudioPlayer({ className }: { className?: string }) {
       for (let i = 0; i < 2; i++) {
         const data = impulse.getChannelData(i);
         for (let j = 0; j < length; j++) {
-          data[j] = (Math.random() * 2 - 1) * Math.pow(1 - j / length, 2);
+          data[j] = (Math.random() * 2 - 1) * Math.pow(1 - i / length, 2);
         }
       }
       reverb.buffer = impulse;
@@ -313,7 +313,7 @@ export function AiAudioPlayer({ className }: { className?: string }) {
   if (!mounted || loading || !settings?.enabled || !settings?.audioData || !isVisible) return null;
 
   return (
-    <div className={cn("w-full py-2 bg-white/95 dark:bg-slate-950/95 backdrop-blur-md border-b border-slate-100 dark:border-slate-800 transition-all duration-500", className)}>
+    <div className={cn("w-full py-3 bg-white/95 dark:bg-slate-950/95 backdrop-blur-md border-b border-slate-100 dark:border-slate-800 transition-all duration-500", className)}>
       <div className="container mx-auto px-4 max-w-7xl">
         <audio 
           ref={audioRef} 
@@ -322,40 +322,56 @@ export function AiAudioPlayer({ className }: { className?: string }) {
           preload="auto" 
         />
         
-        <div className="flex items-center gap-3 md:gap-4">
-          <div className="flex items-center gap-3 shrink-0">
-            <Button 
-              onClick={togglePlay}
-              disabled={loadError}
-              size="icon"
-              className="h-9 w-9 rounded-full bg-accent hover:bg-secondary text-primary hover:text-white shadow-sm shrink-0 border-none transition-all active:scale-90"
-            >
-              {isPlaying ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current ml-0.5" />}
-            </Button>
-
-            {autoplayBlocked && !isPlaying && !loadError && (
-              <div 
-                className="flex items-center gap-2 px-3 py-1 bg-accent/10 rounded-full border border-accent/20 animate-in zoom-in-95 duration-500 shrink-0 cursor-pointer"
+        <div className="flex flex-col md:flex-row items-center gap-3 md:gap-4">
+          <div className="flex items-center justify-between w-full md:w-auto gap-3 shrink-0">
+            <div className="flex items-center gap-2">
+              <Button 
                 onClick={togglePlay}
+                disabled={loadError}
+                size="icon"
+                className="h-9 w-9 rounded-full bg-accent hover:bg-secondary text-primary hover:text-white shadow-sm shrink-0 border-none transition-all active:scale-90"
               >
-                <AlertCircle className="w-3 h-3 text-accent animate-pulse" />
-                <span className="text-[9px] font-black text-accent uppercase tracking-tighter">Interact to Play Broadcast</span>
-              </div>
-            )}
+                {isPlaying ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current ml-0.5" />}
+              </Button>
+
+              {autoplayBlocked && !isPlaying && !loadError && (
+                <div 
+                  className="flex items-center gap-2 px-3 py-1 bg-accent/10 rounded-full border border-accent/20 animate-in zoom-in-95 duration-500 shrink-0 cursor-pointer"
+                  onClick={togglePlay}
+                >
+                  <AlertCircle className="w-3 h-3 text-accent animate-pulse" />
+                  <span className="text-[8px] sm:text-[9px] font-black text-accent uppercase tracking-tighter">Interact to Play Broadcast</span>
+                </div>
+              )}
+            </div>
+
+            <div className="flex md:hidden items-center gap-2">
+               <span className="text-[8px] font-mono text-slate-500 tabular-nums font-bold">
+                 {formatTime(currentTime)} / {formatTime(duration)}
+               </span>
+               <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => setIsVisible(false)}
+                className="h-8 w-8 rounded-lg text-slate-300"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
           </div>
 
-          <div className="flex-1 min-w-0 flex flex-col md:flex-row md:items-center gap-1 md:gap-6">
+          <div className="flex-1 min-w-0 flex flex-col md:flex-row md:items-center gap-1 md:gap-6 w-full">
             <div className="flex items-center gap-2 min-w-0 shrink-0">
                <Mic2 className="w-3.5 h-3.5 text-accent animate-pulse shrink-0" />
                <div className="min-w-0 flex flex-col">
-                  <h2 className="text-[10px] md:text-xs font-black text-primary dark:text-white uppercase tracking-tight truncate max-w-[150px] md:max-w-xs">
+                  <h2 className="text-[9px] md:text-xs font-black text-primary dark:text-white uppercase tracking-tight truncate max-w-[200px] md:max-w-xs">
                     {settings.title}
                   </h2>
                   <span className="text-[7px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-0.5">{settings.category}</span>
                </div>
             </div>
 
-            <div className="flex-1 flex items-center gap-3 min-w-0">
+            <div className="flex-1 flex items-center gap-3 min-w-0 w-full">
               <Slider 
                 value={[currentTime]} 
                 max={duration || 100} 
@@ -364,37 +380,37 @@ export function AiAudioPlayer({ className }: { className?: string }) {
                 disabled={loadError || !duration}
                 className="h-1 w-full"
               />
-              <span className="text-[9px] font-mono text-slate-500 tabular-nums shrink-0 font-bold">
+              <span className="hidden md:inline-block text-[9px] font-mono text-slate-500 tabular-nums shrink-0 font-bold">
                 {formatTime(currentTime)} / {formatTime(duration)}
               </span>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
-            <div className="hidden sm:flex items-center border-x border-slate-100 dark:border-slate-800 px-3 h-7">
-              <Select value={playbackSpeed.toString()} onValueChange={v => { setPlaybackSpeed(parseFloat(v)); if(audioRef.current) audioRef.current.playbackRate = parseFloat(v); }}>
-                <SelectTrigger className="h-7 w-[65px] rounded-lg bg-slate-50 dark:bg-slate-900 border-none text-[8px] font-black uppercase"><SelectValue /></SelectTrigger>
-                <SelectContent className="bg-white dark:bg-slate-900 z-[1000] min-w-[70px]">
-                  {[0.5, 0.75, 1, 1.25, 1.5, 2].map(s => <SelectItem key={s} value={s.toString()} className="text-[9px] font-bold">{s}x</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
-
+          <div className="flex items-center justify-between w-full md:w-auto gap-2 shrink-0 pt-2 md:pt-0">
             <div className="flex items-center gap-2">
-              <div className="hidden lg:flex items-center gap-2 bg-slate-50 dark:bg-slate-950 p-1.5 rounded-xl border border-slate-100 dark:border-slate-800">
+              <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-950 p-1.5 rounded-xl border border-slate-100 dark:border-slate-800">
                 {isMuted || volume === 0 ? <VolumeX className="w-3.5 h-3.5 text-slate-400" /> : <Volume2 className="w-3.5 h-3.5 text-accent" />}
-                <Slider value={[isMuted ? 0 : volume]} max={1} step={0.01} onValueChange={handleVolumeChange} className="w-14" />
+                <Slider value={[isMuted ? 0 : volume]} max={1} step={0.01} onValueChange={handleVolumeChange} className="w-14 sm:w-20" />
               </div>
               
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={() => setIsVisible(false)}
-                className="h-8 w-8 rounded-lg text-slate-300 hover:text-red-500 transition-all"
-              >
-                <X className="w-4 h-4" />
-              </Button>
+              <div className="flex items-center border-x border-slate-100 dark:border-slate-800 px-2 sm:px-3 h-7">
+                <Select value={playbackSpeed.toString()} onValueChange={v => { setPlaybackSpeed(parseFloat(v)); if(audioRef.current) audioRef.current.playbackRate = parseFloat(v); }}>
+                  <SelectTrigger className="h-7 w-[60px] sm:w-[65px] rounded-lg bg-slate-50 dark:bg-slate-900 border-none text-[8px] font-black uppercase"><SelectValue /></SelectTrigger>
+                  <SelectContent className="bg-white dark:bg-slate-900 z-[1000] min-w-[70px]">
+                    {[0.5, 0.75, 1, 1.25, 1.5, 2].map(s => <SelectItem key={s} value={s.toString()} className="text-[9px] font-bold">{s}x</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
+
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => setIsVisible(false)}
+              className="hidden md:flex h-8 w-8 rounded-lg text-slate-300 hover:text-red-500 transition-all"
+            >
+              <X className="w-4 h-4" />
+            </Button>
           </div>
         </div>
       </div>
