@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { collection, query, where } from 'firebase/firestore';
 import { isWithinInterval, parseISO, startOfDay, endOfDay } from 'date-fns';
-import { Sparkles, PartyPopper, ShieldCheck } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 /**
@@ -14,7 +14,6 @@ import { cn } from '@/lib/utils';
  * Features: Fully transparent background, #CFFF04 primary typography, and #FF00FF for "Welcome to HRAT".
  * Optimized for real-time synchronization with the administrative terminal.
  * Updated: Hides automatically when scrolling to prevent overlap with floating navigation.
- * Refinement: Positioned higher and further right to clear the NITI Aayog emblem and centered hero content.
  */
 export function OccasionBanner() {
   const db = useFirestore();
@@ -112,20 +111,6 @@ export function OccasionBanner() {
           <p className="text-[#CFFF04] font-headline font-bold text-[10px] md:text-sm leading-tight md:leading-snug transition-colors drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)]">
             {activeOccasion.message}
           </p>
-          
-          <div className="flex items-center gap-2 mt-3 opacity-60">
-             {isDefault ? (
-               <ShieldCheck className="w-3 h-3 text-[#FF00FF]" />
-             ) : (
-               <PartyPopper className="w-3 h-3 text-[#CFFF04]" />
-             )}
-             <span className={cn(
-               "text-[6px] md:text-[8px] font-black uppercase tracking-[0.2em]",
-               isDefault ? "text-[#FF00FF]" : "text-[#CFFF04]"
-             )}>
-               {isDefault ? 'Institutional Registry' : 'Live Official Broadcast'}
-             </span>
-          </div>
         </div>
       </div>
     </div>

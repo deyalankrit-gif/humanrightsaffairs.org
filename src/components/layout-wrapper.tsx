@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useEffect, useState } from 'react';
@@ -13,8 +12,6 @@ import { PublicFooter } from '@/components/public-footer';
 import { AdminFooter } from '@/components/admin-footer';
 import { FeedbackSystem } from '@/components/feedback-system';
 import { ContextualHelp } from '@/components/contextual-help';
-import { AiAudioPlayer } from '@/components/ai-audio-player';
-import { AudioAnnouncement } from '@/components/audio-announcement';
 import { useUser } from '@/firebase';
 import { cn } from '@/lib/utils';
 
@@ -84,14 +81,6 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
       <VisitorTracker />
       {!isAdmin && <Navbar />}
       
-      {/* Global Real-Time Audio Broadcast Node */}
-      {!isAdmin && !isLoginPage && <AudioAnnouncement />}
-
-      {/* Legacy AI Audio Player for all public pages */}
-      {!isAdmin && !isLoginPage && (
-        <AiAudioPlayer className="sticky top-14 md:top-16 z-40 shadow-sm" />
-      )}
-
       <div className="flex-1 w-full">
         {children}
       </div>
