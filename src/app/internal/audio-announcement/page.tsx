@@ -32,7 +32,10 @@ import {
   Activity,
   XCircle,
   Radio,
-  Edit
+  Edit,
+  Waveform,
+  Settings2,
+  Lock
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -402,143 +405,191 @@ export default function AiAudioCenter() {
 
       {/* Initialize New/Edit Announcement Dialog */}
       <Dialog open={isAddOpen} onOpenChange={(val) => { setIsAddOpen(val); if(!val) setEditingId(null); }}>
-         <DialogContent className="max-w-3xl rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden bg-white dark:bg-slate-950 flex flex-col max-h-[90vh]">
+         <DialogContent className="max-w-4xl rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden bg-white dark:bg-slate-950 flex flex-col max-h-[95vh]">
             <div className="bg-slate-900 p-8 text-white relative shrink-0 border-b-4 border-accent/20">
                <div className="absolute right-6 top-6"><DialogClose asChild><Button variant="ghost" size="icon" className="rounded-full text-white/40 hover:text-white"><X className="w-5 h-5" /></Button></DialogClose></div>
                <Badge className="bg-accent text-primary font-black text-[8px] uppercase mb-2 tracking-widest">Administrative Node</Badge>
                <DialogTitle className="text-2xl font-headline font-bold">{editingId ? "Update Announcement Protocol" : "AI Speech Synthesis Protocol"}</DialogTitle>
-               <DialogDescription className="text-slate-400">Institutional Voice Generation & Publishing Terminal</DialogDescription>
+               <DialogDescription className="text-slate-400 uppercase tracking-widest text-[9px] font-black mt-1">High-Fidelity Human Voice Generation Hub</DialogDescription>
             </div>
             
-            <div className="flex-1 overflow-y-auto p-8 space-y-8 custom-scrollbar">
-               <div className="grid md:grid-cols-2 gap-6">
-                  <div className="space-y-1.5">
-                     <Label className="text-[10px] font-bold uppercase text-slate-400">Announcement Title *</Label>
-                     <Input value={form.title} onChange={e => updateForm({title: e.target.value})} placeholder="e.g. Constitutional Awareness Update" className="h-11 rounded-xl" />
-                  </div>
-                  <div className="space-y-1.5">
-                     <Label className="text-[10px] font-bold uppercase text-slate-400">Categorization</Label>
-                     <Select value={form.category} onValueChange={v => updateForm({category: v})}>
-                        <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
-                        <SelectContent className="bg-white">
-                           {['Official Notice', 'Legal Update', 'Mission Alert', 'Event Greeting', 'Emergency Broadcast'].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                        </SelectContent>
-                     </Select>
-                  </div>
-               </div>
+            <div className="flex-1 overflow-y-auto p-8 space-y-10 custom-scrollbar">
+               <div className="grid lg:grid-cols-12 gap-8 items-start">
+                  
+                  {/* Left Column: Input Details */}
+                  <div className="lg:col-span-8 space-y-8">
+                     <div className="grid md:grid-cols-2 gap-6">
+                        <div className="space-y-1.5">
+                           <Label className="text-[10px] font-bold uppercase text-slate-400">Announcement Title *</Label>
+                           <Input value={form.title} onChange={e => updateForm({title: e.target.value})} placeholder="e.g. Constitutional Awareness Update" className="h-11 rounded-xl" />
+                        </div>
+                        <div className="space-y-1.5">
+                           <Label className="text-[10px] font-bold uppercase text-slate-400">Categorization</Label>
+                           <Select value={form.category} onValueChange={v => updateForm({category: v})}>
+                              <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
+                              <SelectContent className="bg-white">
+                                 {['Official Notice', 'Legal Update', 'Mission Alert', 'Event Greeting', 'Emergency Broadcast'].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                              </SelectContent>
+                           </Select>
+                        </div>
+                     </div>
 
-               <div className="space-y-1.5">
-                  <Label className="text-[10px] font-bold uppercase text-slate-400">Broadcast Narrative (Full Text) *</Label>
-                  <Textarea 
-                    value={form.fullText} 
-                    onChange={e => updateForm({fullText: e.target.value})} 
-                    placeholder="Type the message to be converted to human speech..." 
-                    className="min-h-[150px] rounded-2xl p-4 leading-relaxed" 
-                  />
-               </div>
-
-               <div className="grid md:grid-cols-3 gap-6">
-                  <div className="space-y-1.5">
-                     <Label className="text-[10px] font-bold uppercase text-slate-400">Language</Label>
-                     <Select value={form.language} onValueChange={(v: any) => updateForm({language: v})}>
-                        <SelectTrigger className="h-11 rounded-xl font-bold"><SelectValue /></SelectTrigger>
-                        <SelectContent className="bg-white">
-                           <SelectItem value="English">English (Global)</SelectItem>
-                           <SelectItem value="Bengali">Bengali (State)</SelectItem>
-                           <SelectItem value="Hindi">Hindi (National)</SelectItem>
-                        </SelectContent>
-                     </Select>
-                  </div>
-                  <div className="space-y-1.5">
-                     <Label className="text-[10px] font-bold uppercase text-slate-400">Vocal Profile</Label>
-                     <Select value={form.voice} onValueChange={(v: any) => updateForm({voice: v})}>
-                        <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
-                        <SelectContent className="bg-white">
-                           <SelectItem value="Male">Male (Lead)</SelectItem>
-                           <SelectItem value="Female">Female (Support)</SelectItem>
-                        </SelectContent>
-                     </Select>
-                  </div>
-                  <div className="space-y-1.5">
-                     <Label className="text-[10px] font-bold uppercase text-slate-400">Tonality / Emotion</Label>
-                     <Select value={form.emotion} onValueChange={(v: any) => updateForm({emotion: v})}>
-                        <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
-                        <SelectContent className="bg-white">
-                           {['Official', 'Professional', 'Calm', 'Friendly', 'Emergency', 'Authoritative', 'Inspirational', 'Empathetic', 'Urgent'].map(e => <SelectItem key={e} value={e}>{e}</SelectItem>)}
-                        </SelectContent>
-                     </Select>
-                  </div>
-               </div>
-
-               <div className="grid md:grid-cols-2 gap-8 p-6 bg-slate-50 dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-inner">
-                  <div className="space-y-4">
-                     <Label className="text-[10px] font-black uppercase text-accent flex items-center gap-2">
-                        <RefreshCw className={cn("w-3 h-3", isGenerating && "animate-spin")} /> Speech Velocity
-                     </Label>
-                     <div className="flex items-center gap-4">
-                        <Slider 
-                          value={[form.speed]} 
-                          min={0.5} 
-                          max={2} 
-                          step={0.1} 
-                          onValueChange={v => updateForm({speed: v[0]})}
-                          className="flex-1"
+                     <div className="space-y-1.5">
+                        <Label className="text-[10px] font-bold uppercase text-slate-400">Broadcast Narrative (Full Text) *</Label>
+                        <Textarea 
+                          value={form.fullText} 
+                          onChange={e => updateForm({fullText: e.target.value})} 
+                          placeholder="Type the message to be converted to human speech..." 
+                          className="min-h-[180px] rounded-2xl p-6 leading-relaxed bg-slate-50 dark:bg-slate-900 border-none shadow-inner" 
                         />
-                        <span className="text-xs font-bold w-12 text-center bg-white px-2 py-1 rounded-lg border">{form.speed}x</span>
+                     </div>
+
+                     <div className="grid md:grid-cols-3 gap-6">
+                        <div className="space-y-1.5">
+                           <Label className="text-[10px] font-bold uppercase text-slate-400">Language</Label>
+                           <Select value={form.language} onValueChange={(v: any) => updateForm({language: v})}>
+                              <SelectTrigger className="h-11 rounded-xl font-bold"><SelectValue /></SelectTrigger>
+                              <SelectContent className="bg-white">
+                                 <SelectItem value="English">English (Global)</SelectItem>
+                                 <SelectItem value="Bengali">Bengali (State)</SelectItem>
+                                 <SelectItem value="Hindi">Hindi (National)</SelectItem>
+                              </SelectContent>
+                           </Select>
+                        </div>
+                        <div className="space-y-1.5">
+                           <Label className="text-[10px] font-bold uppercase text-slate-400">Vocal Profile</Label>
+                           <Select value={form.voice} onValueChange={(v: any) => updateForm({voice: v})}>
+                              <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
+                              <SelectContent className="bg-white">
+                                 <SelectItem value="Male">Male (Lead)</SelectItem>
+                                 <SelectItem value="Female">Female (Support)</SelectItem>
+                              </SelectContent>
+                           </Select>
+                        </div>
+                        <div className="space-y-1.5">
+                           <Label className="text-[10px] font-bold uppercase text-slate-400">Tonality / Emotion</Label>
+                           <Select value={form.emotion} onValueChange={(v: any) => updateForm({emotion: v})}>
+                              <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
+                              <SelectContent className="bg-white">
+                                 {['Official', 'Professional', 'Calm', 'Friendly', 'Emergency', 'Authoritative', 'Inspirational', 'Empathetic', 'Urgent'].map(e => <SelectItem key={e} value={e}>{e}</SelectItem>)}
+                              </SelectContent>
+                           </Select>
+                        </div>
+                     </div>
+
+                     <div className="grid md:grid-cols-2 gap-8 p-6 bg-slate-50 dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-inner">
+                        <div className="space-y-4">
+                           <Label className="text-[10px] font-black uppercase text-accent flex items-center gap-2">
+                              <RefreshCw className={cn("w-3 h-3", isGenerating && "animate-spin")} /> Speech Velocity
+                           </Label>
+                           <div className="flex items-center gap-4">
+                              <Slider 
+                                value={[form.speed]} 
+                                min={0.5} 
+                                max={2} 
+                                step={0.1} 
+                                onValueChange={v => updateForm({speed: v[0]})}
+                                className="flex-1"
+                              />
+                              <span className="text-xs font-bold w-12 text-center bg-white px-2 py-1 rounded-lg border">{form.speed}x</span>
+                           </div>
+                        </div>
+                        <div className="space-y-4">
+                           <Label className="text-[10px] font-black uppercase text-accent flex items-center gap-2">
+                              <Activity className="w-3 h-3" /> Vocal Pitch
+                           </Label>
+                           <div className="flex items-center gap-4">
+                              <Slider 
+                                value={[form.pitch]} 
+                                min={-20} 
+                                max={20} 
+                                step={1} 
+                                onValueChange={v => updateForm({pitch: v[0]})}
+                                className="flex-1"
+                              />
+                              <span className="text-xs font-bold w-12 text-center bg-white px-2 py-1 rounded-lg border">{form.pitch}</span>
+                           </div>
+                        </div>
                      </div>
                   </div>
-                  <div className="space-y-4">
-                     <Label className="text-[10px] font-black uppercase text-accent flex items-center gap-2">
-                        <Activity className="w-3 h-3" /> Vocal Pitch
-                     </Label>
-                     <div className="flex items-center gap-4">
-                        <Slider 
-                          value={[form.pitch]} 
-                          min={-20} 
-                          max={20} 
-                          step={1} 
-                          onValueChange={v => updateForm({pitch: v[0]})}
-                          className="flex-1"
-                        />
-                        <span className="text-xs font-bold w-12 text-center bg-white px-2 py-1 rounded-lg border">{form.pitch}</span>
+
+                  {/* Right Column: Audio Output & Parameters */}
+                  <div className="lg:col-span-4 space-y-8">
+                     {/* Technical Specifications Section */}
+                     <Card className="rounded-3xl border-none shadow-sm bg-slate-900 text-white p-6 relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/10 rounded-full -mr-12 -mt-12 blur-2xl"></div>
+                        <h4 className="text-[10px] font-black uppercase text-accent tracking-[0.2em] mb-6 flex items-center gap-2">
+                           <ShieldCheck className="w-4 h-4" /> Sound Profile Sync
+                        </h4>
+                        <div className="space-y-3">
+                           {[
+                              { label: 'High-Pass Filter', val: '100Hz', ok: true },
+                              { label: 'Presence Boost', val: '+2dB @ 3kHz', ok: true },
+                              { label: 'Air Brilliance', val: '+2dB @ 10kHz', ok: true },
+                              { label: 'Dynamics Comp', val: '3:1 Ratio', ok: true },
+                              { label: 'Audio Ceiling', val: '-1dB Limiter', ok: true },
+                              { label: 'Ambience', val: '8% Room Mix', ok: true }
+                           ].map((p, i) => (
+                              <div key={i} className="flex items-center justify-between p-2.5 bg-white/5 rounded-xl border border-white/5 transition-colors hover:bg-white/10">
+                                 <span className="text-[9px] font-bold text-slate-400 uppercase">{p.label}</span>
+                                 <div className="flex items-center gap-1.5">
+                                    <span className="text-[9px] font-black text-emerald-400">{p.val}</span>
+                                    {p.ok && <CheckCircle2 className="w-2.5 h-2.5 text-emerald-500" />}
+                                 </div>
+                              </div>
+                           ))}
+                        </div>
+                        <div className="mt-6 pt-4 border-t border-white/5 text-center">
+                           <p className="text-[8px] font-bold text-slate-500 uppercase tracking-widest leading-relaxed">
+                              Broadcast-quality processing is applied to every playback session.
+                           </p>
+                        </div>
+                     </Card>
+
+                     <div className="space-y-4">
+                        <Button 
+                          type="button"
+                          onClick={handleGenerate}
+                          disabled={isGenerating}
+                          className="w-full h-16 rounded-2xl bg-primary text-white font-black text-lg hover:bg-secondary transition-all shadow-xl shadow-primary/20 flex gap-3 group"
+                        >
+                           {isGenerating ? <Loader2 className="w-7 h-7 animate-spin" /> : <><Mic2 className="w-6 h-6 group-hover:scale-110" /> {form.audioData ? "Regenerate AI Voice" : "Generate AI Voice"}</>}
+                        </Button>
+
+                        {form.audioData && (
+                          <div className="w-full p-6 bg-white dark:bg-slate-900 rounded-3xl flex flex-col items-center gap-4 animate-in zoom-in-95 duration-500 border border-slate-100 shadow-lg">
+                             <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-xl bg-accent/20 flex items-center justify-center text-accent animate-pulse">
+                                   <Volume2 className="w-5 h-5" />
+                                </div>
+                                <div className="text-left">
+                                   <p className="text-[10px] font-black text-slate-500 uppercase leading-none mb-1">Generated Sample</p>
+                                   <h4 className="text-primary dark:text-white font-bold text-[11px] uppercase tracking-tight truncate max-w-[150px]">Vocal Signature: {form.voice}</h4>
+                                </div>
+                             </div>
+                             <audio src={form.audioData} controls className="w-full h-8" />
+                          </div>
+                        )}
+
+                        <div className="p-6 rounded-3xl bg-indigo-50 dark:bg-indigo-950/20 border-2 border-dashed border-indigo-200 text-center space-y-2">
+                           <AlertCircle className="w-8 h-8 text-indigo-500 mx-auto" />
+                           <h4 className="text-[10px] font-black uppercase text-indigo-600">Verification protocol</h4>
+                           <p className="text-[9px] text-slate-500 font-bold leading-relaxed italic">
+                              Always preview the audio to ensure clarity and emotional alignment before publishing to the live homepage.
+                           </p>
+                        </div>
                      </div>
                   </div>
-               </div>
-
-               <div className="pt-6 flex flex-col items-center gap-6">
-                  <Button 
-                    type="button"
-                    onClick={handleGenerate}
-                    disabled={isGenerating}
-                    className="w-full h-16 rounded-2xl bg-primary text-white font-black text-lg hover:bg-secondary transition-all shadow-xl shadow-primary/20 flex gap-3 group"
-                  >
-                     {isGenerating ? <Loader2 className="w-7 h-7 animate-spin" /> : <><Mic2 className="w-6 h-6 group-hover:scale-110" /> {form.audioData ? "Regenerate AI Voice" : "Generate AI Voice"}</>}
-                  </Button>
-
-                  {form.audioData && (
-                    <div className="w-full p-8 bg-slate-900 rounded-[2rem] flex flex-col items-center gap-6 animate-in zoom-in-95 duration-500 border border-white/10 shadow-2xl">
-                       <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 rounded-2xl bg-accent/20 flex items-center justify-center text-accent animate-pulse">
-                             <Volume2 className="w-6 h-6" />
-                          </div>
-                          <div className="text-center md:text-left">
-                             <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest leading-none mb-1">Generated Sample</p>
-                             <h4 className="text-white font-bold uppercase tracking-tight">Vocal Signature: {form.voice} ({form.language})</h4>
-                          </div>
-                       </div>
-                       <audio src={form.audioData} controls className="w-full rounded-full bg-white/5" />
-                    </div>
-                  )}
                </div>
             </div>
 
             <DialogFooter className="p-8 bg-slate-50 dark:bg-slate-900 border-t shrink-0">
                <div className="flex w-full gap-4">
-                  <Button onClick={() => handleSave('Draft')} disabled={isSaving || isGenerating || !form.audioData} variant="outline" className="flex-1 h-12 rounded-xl font-bold uppercase text-[10px] tracking-widest border-2">
-                     <Archive className="w-4 h-4 mr-2" /> {editingId ? "Save Changes" : "Save as Draft"}
+                  <Button onClick={() => handleSave('Draft')} disabled={isSaving || isGenerating || !form.audioData} variant="outline" className="flex-1 h-14 rounded-2xl font-black uppercase text-[10px] tracking-widest border-2">
+                     <Archive className="w-5 h-5 mr-2" /> {editingId ? "Save Changes" : "Save as Draft"}
                   </Button>
-                  <Button onClick={() => handleSave('Published')} disabled={isSaving || isGenerating || !form.audioData} className="flex-1 h-12 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold uppercase text-[10px] tracking-widest shadow-xl shadow-emerald-900/20">
-                     <CheckCircle2 className="w-4 h-4 mr-2" /> {editingId ? "Apply & Go Live" : "Verify & Go Live"}
+                  <Button onClick={() => handleSave('Published')} disabled={isSaving || isGenerating || !form.audioData} className="flex-1 h-14 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase text-[10px] tracking-widest shadow-xl shadow-emerald-900/40">
+                     <CheckCircle2 className="w-5 h-5 mr-2" /> {editingId ? "Apply & Go Live" : "Verify & Go Live"}
                   </Button>
                </div>
             </DialogFooter>
