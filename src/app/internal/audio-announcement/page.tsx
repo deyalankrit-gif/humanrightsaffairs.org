@@ -557,17 +557,17 @@ export default function AiAudioCenter() {
                         </Button>
 
                         {form.audioData && (
-                          <div className="w-full p-6 bg-white dark:bg-slate-900 rounded-3xl flex flex-col items-center gap-4 animate-in zoom-in-95 duration-500 border border-slate-100 shadow-lg">
-                             <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-xl bg-accent/20 flex items-center justify-center text-accent animate-pulse">
-                                   <Volume2 className="w-5 h-5" />
+                          <div className="w-full p-12 bg-white dark:bg-slate-900 rounded-3xl flex flex-col items-center gap-8 animate-in zoom-in-95 duration-500 border border-slate-100 shadow-lg">
+                             <div className="flex flex-col items-center gap-4">
+                                <div className="w-16 h-16 rounded-[2rem] bg-accent/20 flex items-center justify-center text-accent animate-pulse">
+                                   <Volume2 className="w-8 h-8" />
                                 </div>
-                                <div className="text-left">
-                                   <p className="text-[10px] font-black text-slate-500 uppercase leading-none mb-1">Generated Sample</p>
-                                   <h4 className="text-primary dark:text-white font-bold text-[11px] uppercase tracking-tight truncate max-w-[150px]">Vocal Signature: {form.voice}</h4>
+                                <div className="text-center">
+                                   <p className="text-[12px] font-black text-slate-500 uppercase tracking-widest mb-1">Generated Sample</p>
+                                   <h4 className="text-primary dark:text-white font-bold text-base uppercase tracking-tight">Vocal Signature: {form.voice}</h4>
                                 </div>
                              </div>
-                             <audio src={form.audioData} controls className="w-full h-8" />
+                             <audio src={form.audioData} controls className="w-full h-10" />
                           </div>
                         )}
 
