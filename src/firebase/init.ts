@@ -27,9 +27,19 @@ export function initializeFirebase(name?: string) {
   const auth = getAuth(app);
   
   // Initialize Firestore with long-polling for maximum stability in proxy environments
-  const db = initializeFirestore(app, {
-    experimentalForceLongPolling: true,
-  });
+  // [STABILITY FIX]: Wrapped in a try-catch to safely handle cases where the instance 
+  // is already active, which frequently occurs during hot-module replacement (HMR) 
+  // or nested provider mount cycles.
+  let db: Firestore;
+  try {
+    db = initializeFirestore(app, {
+      experimentalForceLongPolling: true,
+    });
+  } catch (e) {
+    // If Firestore is already initialized for this app node, retrieve the existing instance.
+    // Note: Settings for an app's Firestore instance are locked after the first initialization call.
+    db = getFirestore(app);
+  }
   
   return { app, auth, db };
 }
