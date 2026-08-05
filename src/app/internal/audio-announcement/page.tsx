@@ -282,7 +282,7 @@ export default function AiAudioCenter() {
               <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full -mr-16 -mt-16 blur-2xl"></div>
               <CardContent className="p-8 md:p-10 flex flex-col md:flex-row items-center justify-between gap-8">
                  <div className="flex items-center gap-6">
-                    <div className="w-20 h-20 rounded-[2rem] bg-emerald-500/20 flex items-center justify-center text-emerald-500 relative shrink-0">
+                    <div className="w-20 h-20 rounded-[2rem] bg-emerald-50/20 flex items-center justify-center text-emerald-500 relative shrink-0">
                        <Radio className="w-10 h-10 animate-pulse" />
                        <div className="absolute -top-1 -right-1 flex h-4 w-4">
                           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
@@ -464,7 +464,7 @@ export default function AiAudioCenter() {
                      <Select value={form.emotion} onValueChange={(v: any) => updateForm({emotion: v})}>
                         <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
                         <SelectContent className="bg-white">
-                           {['Official', 'Professional', 'Calm', 'Friendly', 'Emergency'].map(e => <SelectItem key={e} value={e}>{e}</SelectItem>)}
+                           {['Official', 'Professional', 'Calm', 'Friendly', 'Emergency', 'Authoritative', 'Inspirational', 'Empathetic', 'Urgent'].map(e => <SelectItem key={e} value={e}>{e}</SelectItem>)}
                         </SelectContent>
                      </Select>
                   </div>

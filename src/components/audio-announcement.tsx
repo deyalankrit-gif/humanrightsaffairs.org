@@ -27,7 +27,6 @@ import { cn } from '@/lib/utils';
 /**
  * AudioAnnouncement: Refined institutional broadcast player.
  * Features a Professional Broadcast Audio Pipeline (Web Audio API).
- * Icons updated to specific blue color #2563EB.
  */
 export function AudioAnnouncement() {
   const db = useFirestore();
@@ -53,6 +52,7 @@ export function AudioAnnouncement() {
 
   /**
    * setupAudioGraph: Professional Audio Processing Chain.
+   * Logic: 100Hz HPF -> 3kHz/10kHz EQ -> 3:1 Comp -> 8% Reverb -> -1dB Limiter.
    */
   const setupAudioGraph = useCallback(() => {
     if (!audioRef.current || audioCtxRef.current) return;
@@ -64,22 +64,33 @@ export function AudioAnnouncement() {
 
       const source = ctx.createMediaElementSource(audioRef.current);
       
+      // 1. High-Pass Filter (100Hz)
       const hpf = ctx.createBiquadFilter();
       hpf.type = 'highpass';
       hpf.frequency.value = 100;
 
+      // 2. EQ - Presence (3kHz +2dB)
       const eqPresence = ctx.createBiquadFilter();
       eqPresence.type = 'peaking';
       eqPresence.frequency.value = 3000;
       eqPresence.gain.value = 2;
 
+      // 3. EQ - Air (10kHz +2dB)
+      const eqAir = ctx.createBiquadFilter();
+      eqAir.type = 'highshelf';
+      eqAir.frequency.value = 10000;
+      eqAir.gain.value = 2;
+
+      // 4. Compressor (3:1 Ratio)
       const compressor = ctx.createDynamicsCompressor();
       compressor.threshold.value = -24;
       compressor.ratio.value = 3;
+      compressor.attack.value = 0.003;
+      compressor.release.value = 0.25;
 
+      // 5. Subtle Reverb
       const reverb = ctx.createConvolver();
-      const reverbDuration = 0.5;
-      const length = ctx.sampleRate * reverbDuration;
+      const length = ctx.sampleRate * 0.5;
       const impulse = ctx.createBuffer(2, length, ctx.sampleRate);
       for (let i = 0; i < 2; i++) {
         const data = impulse.getChannelData(i);
@@ -95,13 +106,15 @@ export function AudioAnnouncement() {
       const dryGain = ctx.createGain();
       dryGain.gain.value = 0.92;
 
+      // 6. Limiter (-1dB)
       const limiter = ctx.createDynamicsCompressor();
       limiter.threshold.value = -1;
       limiter.ratio.value = 20;
 
       source.connect(hpf);
       hpf.connect(eqPresence);
-      eqPresence.connect(compressor);
+      eqPresence.connect(eqAir);
+      eqAir.connect(compressor);
       compressor.connect(dryGain);
       compressor.connect(reverb);
       reverb.connect(reverbGain);

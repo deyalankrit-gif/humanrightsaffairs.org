@@ -1,4 +1,3 @@
-
 'use server';
 /**
  * @fileOverview AI Text-to-Speech Flow for Institutional Announcements.
@@ -15,7 +14,17 @@ const TtsInputSchema = z.object({
   text: z.string().describe('The content to convert to speech.'),
   language: z.enum(['English', 'Bengali', 'Hindi']).default('English'),
   voice: z.enum(['Male', 'Female']).default('Male'),
-  emotion: z.enum(['Professional', 'Calm', 'Friendly', 'Emergency', 'Official']).default('Professional'),
+  emotion: z.enum([
+    'Professional', 
+    'Calm', 
+    'Friendly', 
+    'Emergency', 
+    'Official', 
+    'Authoritative', 
+    'Inspirational', 
+    'Empathetic', 
+    'Urgent'
+  ]).default('Professional'),
   speed: z.number().min(0.5).max(2).default(1),
   pitch: z.number().min(-20).max(20).default(0),
 });
