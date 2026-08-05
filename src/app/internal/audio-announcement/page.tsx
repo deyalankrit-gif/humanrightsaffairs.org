@@ -100,6 +100,7 @@ export default function AiAudioCenter() {
     emotion: 'Official' as any,
     speed: 1,
     pitch: 0,
+    volume: 0.8,
     reverbMix: 8,
     echoMix: 0,
     audioData: '',
@@ -202,7 +203,7 @@ export default function AiAudioCenter() {
       
       setIsAddOpen(false);
       setEditingId(null);
-      setForm({ title: '', fullText: '', category: 'Official Notice', language: 'English', voice: 'Male', emotion: 'Official', speed: 1, pitch: 0, reverbMix: 8, echoMix: 0, audioData: '', status: 'Draft' });
+      setForm({ title: '', fullText: '', category: 'Official Notice', language: 'English', voice: 'Male', emotion: 'Official', speed: 1, pitch: 0, volume: 0.8, reverbMix: 8, echoMix: 0, audioData: '', status: 'Draft' });
     } catch (e: any) {
       toast({ variant: "destructive", title: "Archive Error", description: e.message });
     } finally {
@@ -221,6 +222,7 @@ export default function AiAudioCenter() {
       emotion: ann.emotion || 'Official',
       speed: ann.speed || 1,
       pitch: ann.pitch || 0,
+      volume: ann.volume || 0.8,
       reverbMix: ann.reverbMix || 8,
       echoMix: ann.echoMix || 0,
       audioData: ann.audioData || '',
@@ -277,7 +279,7 @@ export default function AiAudioCenter() {
              <h1 className="text-3xl md:text-4xl font-headline font-bold">Audio <span className="text-accent italic">Announcement Center</span></h1>
              <p className="text-slate-400 text-[11px] uppercase font-black">Autonomous Speech Generation Node</p>
           </div>
-          <Button onClick={() => { setEditingId(null); setIsAddOpen(true); setForm({ title: '', fullText: '', category: 'Official Notice', language: 'English', voice: 'Male', emotion: 'Official', speed: 1, pitch: 0, reverbMix: 8, echoMix: 0, audioData: '', status: 'Draft' }); }} className="bg-accent text-primary hover:bg-secondary hover:text-white h-11 px-8 rounded-xl font-bold gap-2 shadow-xl shadow-accent/20 transition-all">
+          <Button onClick={() => { setEditingId(null); setIsAddOpen(true); setForm({ title: '', fullText: '', category: 'Official Notice', language: 'English', voice: 'Male', emotion: 'Official', speed: 1, pitch: 0, volume: 0.8, reverbMix: 8, echoMix: 0, audioData: '', status: 'Draft' }); }} className="bg-accent text-primary hover:bg-secondary hover:text-white h-11 px-8 rounded-xl font-bold gap-2 shadow-xl shadow-accent/20 transition-all">
              <Plus className="w-4 h-4" /> Initialize New Announcement
           </Button>
         </div>
@@ -591,10 +593,10 @@ export default function AiAudioCenter() {
                                  <Label className="text-[10px] font-black uppercase text-accent tracking-widest flex items-center gap-2">
                                    <Volume2 className="w-3.5 h-3.5" /> Output Gain Control
                                  </Label>
-                                 <span className="text-[10px] font-mono font-bold text-slate-400">NORMALIZED ({(volume * 100).toFixed(0)}%)</span>
+                                 <span className="text-[10px] font-mono font-bold text-slate-400">NORMALIZED ({Math.round(form.volume * 100)}%)</span>
                               </div>
                               <div className="px-2">
-                                <Slider defaultValue={[80]} max={100} step={1} className="h-2" />
+                                <Slider value={[form.volume * 100]} max={100} step={1} onValueChange={(v) => updateForm({volume: v[0] / 100})} className="h-2" />
                               </div>
                            </div>
                         </div>
