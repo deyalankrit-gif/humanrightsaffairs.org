@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, query, orderBy, addDoc, deleteDoc, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
@@ -79,6 +79,7 @@ import { generateAiSpeech } from '@/ai/flows/tts-flow';
 /**
  * AI Audio Announcement Center: Full Enterprise Terminal.
  * Managed registry for AI-generated human voice broadcasts.
+ * Enhanced with real-time Web Audio API signal processing.
  */
 export default function AiAudioCenter() {
   const { user, loading: authLoading } = useUser();
@@ -91,6 +92,18 @@ export default function AiAudioCenter() {
   const [search, setSearch] = useState('');
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+
+  // Audio Engine Refs
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const sourceNodeRef = useRef<MediaElementAudioSourceNode | null>(null);
+  const gainNodeRef = useRef<GainNode | null>(null);
+  const reverbNodeRef = useRef<ConvolverNode | null>(null);
+  const reverbWetGainRef = useRef<GainNode | null>(null);
+  const reverbDryGainRef = useRef<GainNode | null>(null);
+  const echoDelayNodeRef = useRef<DelayNode | null>(null);
+  const echoWetGainRef = useRef<GainNode | null>(null);
+  const echoFeedbackGainRef = useRef<GainNode | null>(null);
 
   const [form, setForm] = useState({
     title: '',
@@ -109,8 +122,117 @@ export default function AiAudioCenter() {
   });
 
   /**
+   * initAudioEngine: Establishes the professional broadcast signal chain.
+   * Chain: Source -> Dry/Wet Parallel (Reverb) -> Echo (Feedback) -> Gain (Final Output).
+   */
+  const initAudioEngine = useCallback(() => {
+    if (!audioRef.current || audioContextRef.current) return;
+
+    try {
+      const AudioContextClass = (window.AudioContext || (window as any).webkitAudioContext);
+      const ctx = new AudioContextClass();
+      audioContextRef.current = ctx;
+
+      const source = ctx.createMediaElementSource(audioRef.current);
+      sourceNodeRef.current = source;
+
+      // REVERB: High-fidelity room synthesis
+      const reverb = ctx.createConvolver();
+      const length = ctx.sampleRate * 2;
+      const impulse = ctx.createBuffer(2, length, ctx.sampleRate);
+      for (let c = 0; c < 2; c++) {
+        const data = impulse.getChannelData(c);
+        for (let i = 0; i < length; i++) {
+          data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / length, 2);
+        }
+      }
+      reverb.buffer = impulse;
+      reverbNodeRef.current = reverb;
+
+      const reverbWet = ctx.createGain();
+      const reverbDry = ctx.createGain();
+      reverbWetGainRef.current = reverbWet;
+      reverbDryGainRef.current = reverbDry;
+
+      // ECHO: Temporal delay loop with feedback
+      const delay = ctx.createDelay(1.0);
+      delay.delayTime.value = 0.35; // 350ms standard delay
+      echoDelayNodeRef.current = delay;
+
+      const feedback = ctx.createGain();
+      feedback.gain.value = 0.4; // Controlled feedback
+      echoFeedbackGainRef.current = feedback;
+
+      const echoWet = ctx.createGain();
+      echoWetGainRef.current = echoWet;
+
+      // MASTER OUTPUT GAIN
+      const mainGain = ctx.createGain();
+      gainNodeRef.current = mainGain;
+
+      // CONNECTIONS
+      source.connect(reverbDry);
+      source.connect(reverb);
+      reverb.connect(reverbWet);
+
+      source.connect(delay);
+      delay.connect(feedback);
+      feedback.connect(delay);
+      delay.connect(echoWet);
+
+      reverbDry.connect(mainGain);
+      reverbWet.connect(mainGain);
+      echoWet.connect(mainGain);
+
+      mainGain.connect(ctx.destination);
+      
+      // Sync parameters to current form state
+      syncAudioParameters();
+    } catch (e) {
+      console.warn("[AUDIO-ENGINE] Web Audio initialization blocked or failed.", e);
+    }
+  }, [form.volume, form.reverbMix, form.echoMix]);
+
+  /**
+   * syncAudioParameters: Propagates form state to audio nodes with temporal smoothing.
+   */
+  const syncAudioParameters = useCallback(() => {
+    if (!audioContextRef.current) return;
+    const ctx = audioContextRef.current;
+    const time = ctx.currentTime;
+
+    if (gainNodeRef.current) {
+      gainNodeRef.current.gain.setTargetAtTime(form.volume, time, 0.05);
+    }
+    
+    if (reverbWetGainRef.current && reverbDryGainRef.current) {
+      const mix = form.reverbMix / 100;
+      reverbWetGainRef.current.gain.setTargetAtTime(mix, time, 0.05);
+      reverbDryGainRef.current.gain.setTargetAtTime(1 - mix, time, 0.05);
+    }
+
+    if (echoWetGainRef.current) {
+      const mix = form.echoMix / 100;
+      echoWetGainRef.current.gain.setTargetAtTime(mix, time, 0.05);
+    }
+  }, [form.volume, form.reverbMix, form.echoMix]);
+
+  const startAudio = useCallback(() => {
+    if (audioContextRef.current?.state === 'suspended') {
+      audioContextRef.current.resume();
+    }
+    if (!audioContextRef.current) {
+      initAudioEngine();
+    }
+  }, [initAudioEngine]);
+
+  // Real-time effect synchronization
+  useEffect(() => {
+    syncAudioParameters();
+  }, [form.volume, form.reverbMix, form.echoMix, syncAudioParameters]);
+
+  /**
    * updateForm: Tactical state helper that clears audioData on critical parameter changes.
-   * This ensures the saved audio always matches the current text/voice configuration.
    */
   const updateForm = (updates: Partial<typeof form>) => {
     setForm(prev => {
@@ -606,10 +728,16 @@ export default function AiAudioCenter() {
                     {/* Master Audio Terminal */}
                     <Card className="rounded-[2.5rem] border-none shadow-2xl bg-white dark:bg-slate-900 overflow-hidden border border-slate-100 dark:border-slate-800">
                       <CardContent className="p-8 md:p-10 space-y-10">
-                        {/* Row 1: wide integrated controller (Balanced 6/6 split) */}
+                        {/* Row 1: Balanced 6/6 split for Player and Master Gain */}
                         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
                            <div className="lg:col-span-6 h-14 flex items-center bg-slate-50 dark:bg-slate-950 rounded-2xl px-6 border border-slate-100 dark:border-slate-800">
-                              <audio src={form.audioData} controls className="w-full h-10" />
+                              <audio 
+                                ref={audioRef}
+                                src={form.audioData} 
+                                controls 
+                                className="w-full h-10"
+                                onPlay={startAudio}
+                              />
                            </div>
                            
                            <div className="lg:col-span-6 space-y-3">
@@ -625,7 +753,7 @@ export default function AiAudioCenter() {
                            </div>
                         </div>
 
-                        {/* Row 2: Echo & Reverb Controls */}
+                        {/* Row 2: Balanced 6/6 split for Reverb and Echo */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                            <div className="space-y-3">
                               <div className="flex justify-between items-center px-2">
@@ -652,7 +780,7 @@ export default function AiAudioCenter() {
                            </div>
                         </div>
 
-                        {/* Row 3: Vocal Signature Stack (Positioned below preview) */}
+                        {/* Row 3: Vocal Signature Stack */}
                         <div className="flex flex-col md:flex-row items-center justify-between gap-6 pt-6 border-t border-slate-50 dark:border-slate-800">
                            <div className="flex items-center gap-5">
                               <div className="w-12 h-12 rounded-2xl bg-accent/10 flex items-center justify-center text-accent shadow-sm animate-pulse shrink-0">
@@ -707,3 +835,4 @@ export default function AiAudioCenter() {
     </main>
   );
 }
+
