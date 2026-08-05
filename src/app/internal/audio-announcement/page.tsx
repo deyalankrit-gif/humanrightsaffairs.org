@@ -564,7 +564,7 @@ export default function AiAudioCenter() {
                {/* MASTER PREVIEW TERMINAL */}
                {form.audioData && (
                  <div className="w-full space-y-4 animate-in slide-in-from-bottom-2 duration-500">
-                    {/* Verification Protocol Banner */}
+                    {/* Verification Protocol Banner (Full Width) */}
                     <div className="p-6 rounded-[2rem] bg-indigo-50 dark:bg-indigo-900/10 border-2 border-dashed border-indigo-200 dark:border-indigo-800 flex items-center gap-6 shadow-sm">
                        <div className="w-12 h-12 rounded-2xl bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center text-indigo-600 shrink-0">
                           <AlertCircle className="w-6 h-6" />
@@ -580,52 +580,53 @@ export default function AiAudioCenter() {
                     {/* Master Audio Terminal */}
                     <Card className="rounded-[2.5rem] border-none shadow-2xl bg-white dark:bg-slate-900 overflow-hidden border border-slate-100 dark:border-slate-800">
                       <CardContent className="p-8 md:p-10 space-y-10">
-                        {/* Row 1: Large Audio Control + Wide Integrated Controller */}
+                        {/* Row 1: wide integrated controller */}
                         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
                            <div className="lg:col-span-4 h-14 flex items-center bg-slate-50 dark:bg-slate-950 rounded-2xl px-6 border border-slate-100 dark:border-slate-800">
                               <audio src={form.audioData} controls className="w-full h-10" />
                            </div>
                            
-                           <div className="lg:col-span-8 flex flex-col md:flex-row items-center gap-10">
-                              <div className="flex-1 w-full space-y-3">
-                                 <div className="flex justify-between items-center px-2">
-                                    <Label className="text-[10px] font-black uppercase text-accent tracking-widest flex items-center gap-2">
-                                      <Volume2 className="w-3.5 h-3.5" /> Output Gain Control
-                                    </Label>
-                                    <span className="text-[10px] font-mono font-bold text-slate-400">NORMALIZED</span>
-                                 </div>
-                                 <div className="px-2">
-                                   <Slider defaultValue={[80]} max={100} step={1} className="h-2" />
-                                 </div>
+                           <div className="lg:col-span-8 space-y-3">
+                              <div className="flex justify-between items-center px-2">
+                                 <Label className="text-[10px] font-black uppercase text-accent tracking-widest flex items-center gap-2">
+                                   <Volume2 className="w-3.5 h-3.5" /> Output Gain Control
+                                 </Label>
+                                 <span className="text-[10px] font-mono font-bold text-slate-400">NORMALIZED ({(volume * 100).toFixed(0)}%)</span>
                               </div>
-
-                              <div className="w-full md:w-64 space-y-3">
-                                 <div className="flex justify-between items-center px-2">
-                                    <Label className="text-[10px] font-black uppercase text-emerald-600 tracking-widest flex items-center gap-2">
-                                      <Waves className="w-3.5 h-3.5" /> Reverb Depth
-                                    </Label>
-                                    <span className="text-[10px] font-bold text-slate-400">{form.reverbMix}%</span>
-                                 </div>
-                                 <div className="px-2">
-                                   <Slider value={[form.reverbMix]} min={0} max={100} step={1} onValueChange={v => updateForm({reverbMix: v[0]})} className="h-2" />
-                                 </div>
-                              </div>
-
-                              <div className="w-full md:w-64 space-y-3">
-                                 <div className="flex justify-between items-center px-2">
-                                    <Label className="text-[10px] font-black uppercase text-indigo-600 tracking-widest flex items-center gap-2">
-                                      <Wind className="w-3.5 h-3.5" /> Echo Intensity
-                                    </Label>
-                                    <span className="text-[10px] font-bold text-slate-400">{form.echoMix}%</span>
-                                 </div>
-                                 <div className="px-2">
-                                   <Slider value={[form.echoMix]} min={0} max={100} step={1} onValueChange={v => updateForm({echoMix: v[0]})} className="h-2" />
-                                 </div>
+                              <div className="px-2">
+                                <Slider defaultValue={[80]} max={100} step={1} className="h-2" />
                               </div>
                            </div>
                         </div>
 
-                        {/* Row 2: Vocal Signature Stack */}
+                        {/* Row 2: Echo & Reverb Controls */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                           <div className="space-y-3">
+                              <div className="flex justify-between items-center px-2">
+                                 <Label className="text-[10px] font-black uppercase text-emerald-600 tracking-widest flex items-center gap-2">
+                                   <Waves className="w-3.5 h-3.5" /> Reverb Depth
+                                 </Label>
+                                 <span className="text-[10px] font-bold text-slate-400">{form.reverbMix}%</span>
+                              </div>
+                              <div className="px-2">
+                                <Slider value={[form.reverbMix]} min={0} max={100} step={1} onValueChange={v => updateForm({reverbMix: v[0]})} className="h-2" />
+                              </div>
+                           </div>
+
+                           <div className="space-y-3">
+                              <div className="flex justify-between items-center px-2">
+                                 <Label className="text-[10px] font-black uppercase text-indigo-600 tracking-widest flex items-center gap-2">
+                                   <Wind className="w-3.5 h-3.5" /> Echo Intensity
+                                 </Label>
+                                 <span className="text-[10px] font-bold text-slate-400">{form.echoMix}%</span>
+                              </div>
+                              <div className="px-2">
+                                <Slider value={[form.echoMix]} min={0} max={100} step={1} onValueChange={v => updateForm({echoMix: v[0]})} className="h-2" />
+                              </div>
+                           </div>
+                        </div>
+
+                        {/* Row 3: Vocal Signature Stack (Positioned below preview) */}
                         <div className="flex flex-col md:flex-row items-center justify-between gap-6 pt-6 border-t border-slate-50 dark:border-slate-800">
                            <div className="flex items-center gap-5">
                               <div className="w-12 h-12 rounded-2xl bg-accent/10 flex items-center justify-center text-accent shadow-sm animate-pulse shrink-0">
