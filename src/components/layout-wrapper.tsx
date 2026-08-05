@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useEffect, useState } from 'react';
@@ -13,14 +14,13 @@ import { AdminFooter } from '@/components/admin-footer';
 import { FeedbackSystem } from '@/components/feedback-system';
 import { ContextualHelp } from '@/components/contextual-help';
 import { AiAudioPlayer } from '@/components/ai-audio-player';
+import { AudioAnnouncement } from '@/components/audio-announcement';
 import { useUser } from '@/firebase';
 import { cn } from '@/lib/utils';
 
 /**
  * LayoutWrapper manages the global layout structure, switching between
- * the public portal (with top navbar and PublicFooter) and the administrative 
- * portal (with left-hand sidebar and AdminFooter).
- * Optimized for full responsiveness across all viewports.
+ * the public portal and the administrative portal.
  */
 export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -33,10 +33,9 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   // STRICT GOVERNANCE HIERARCHY
   const isRoot = user?.email?.toLowerCase() === 'deydhritiman@gmail.com';
   
-  // Both login pages should have the same clean layout without sidebar/header/footer
   const isLoginPage = pathname === '/internal/login' || pathname === '/internal/super-login';
 
-  // Prevent hydration mismatch by waiting for client-side mount
+  // Prevent hydration mismatch
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -45,7 +44,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
     return <div className="min-h-screen bg-background">{children}</div>;
   }
 
-  // Administrative Dashboard Layout (Sidebar + Action Bar + AdminFooter)
+  // Administrative Dashboard Layout
   if (isAdmin && !isLoginPage) {
     return (
       <SidebarProvider defaultOpen={true}>
@@ -67,7 +66,6 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
               </div>
             </header>
             <main className="flex-1 overflow-x-hidden w-full">
-              {/* Contextual Help Injected into Admin Layout */}
               <ContextualHelp />
               <div className="w-full px-2 sm:px-4 md:px-0">
                 {children}
@@ -80,13 +78,16 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
     );
   }
 
-  // Public Portal Layout or Admin Login Page
+  // Public Portal Layout
   return (
     <div className="flex flex-col min-h-screen relative bg-background w-full overflow-x-hidden">
       <VisitorTracker />
       {!isAdmin && <Navbar />}
       
-      {/* Global AI Audio Player for all public pages */}
+      {/* Global Real-Time Audio Broadcast Node */}
+      {!isAdmin && !isLoginPage && <AudioAnnouncement />}
+
+      {/* Legacy AI Audio Player for all public pages */}
       {!isAdmin && !isLoginPage && (
         <AiAudioPlayer className="sticky top-14 md:top-16 z-40 shadow-sm" />
       )}

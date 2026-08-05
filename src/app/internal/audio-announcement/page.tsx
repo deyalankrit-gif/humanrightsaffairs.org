@@ -4,7 +4,7 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, query, orderBy, addDoc, deleteDoc, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, query, orderBy, addDoc, deleteDoc, doc, updateDoc, serverTimestamp, setDoc } from 'firebase/firestore';
 import { 
   Speaker, 
   ShieldCheck, 
@@ -34,12 +34,11 @@ import {
   XCircle,
   Radio,
   Edit,
-  Waveform,
-  Settings2,
-  Lock,
   Waves,
   Wind,
-  RotateCcw
+  RotateCcw,
+  Settings2,
+  Lock
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -79,7 +78,7 @@ import { generateAiSpeech } from '@/ai/flows/tts-flow';
 /**
  * AI Audio Announcement Center: Full Enterprise Terminal.
  * Managed registry for AI-generated human voice broadcasts.
- * Enhanced with real-time Web Audio API signal processing.
+ * Single Source of Truth for National Public Portal Synchronization.
  */
 export default function AiAudioCenter() {
   const { user, loading: authLoading } = useUser();
@@ -118,17 +117,48 @@ export default function AiAudioCenter() {
     reverbMix: 8,
     echoMix: 0,
     audioData: '',
-    status: 'Draft' as any
+    status: 'Draft' as 'Draft' | 'Published' | 'Archived'
   });
+
+  const announcementsQuery = useMemoFirebase(() => {
+    if (!db || !user) return null;
+    return query(collection(db, 'ai_announcements'), orderBy('createdAt', 'desc'));
+  }, [db, user]);
+
+  const { data: announcements, loading: dataLoading } = useCollection(announcementsQuery);
+
+  const activeBroadcast = useMemo(() => {
+    if (!announcements) return null;
+    return announcements.find((a: any) => a.status === 'Published');
+  }, [announcements]);
+
+  /**
+   * syncGlobalState: Pushes the current audio settings to the global settings document.
+   * This document acts as the command node for all public portal clients.
+   */
+  const syncGlobalState = useCallback(async (updates: any) => {
+    if (!db) return;
+    const settingsRef = doc(db, 'settings', 'audio_announcement');
+    try {
+      await setDoc(settingsRef, {
+        ...updates,
+        updatedAt: serverTimestamp(),
+        lastCommand: updates.isPlaying ? 'PLAY' : 'PAUSE'
+      }, { merge: true });
+      console.log('[AUDIO-SYSTEM] Global state synchronized:', updates);
+    } catch (e) {
+      console.error('[AUDIO-SYSTEM] Failed to sync global state:', e);
+    }
+  }, [db]);
 
   /**
    * initAudioEngine: Establishes the professional broadcast signal chain.
-   * Chain: Source -> Dry/Wet Parallel (Reverb) -> Echo (Feedback) -> Gain (Final Output).
    */
   const initAudioEngine = useCallback(() => {
     if (!audioRef.current || audioContextRef.current) return;
 
     try {
+      console.log('[AUDIO-SYSTEM] Initializing Master Audio Graph...');
       const AudioContextClass = (window.AudioContext || (window as any).webkitAudioContext);
       const ctx = new AudioContextClass();
       audioContextRef.current = ctx;
@@ -136,7 +166,7 @@ export default function AiAudioCenter() {
       const source = ctx.createMediaElementSource(audioRef.current);
       sourceNodeRef.current = source;
 
-      // REVERB: High-fidelity room synthesis
+      // REVERB
       const reverb = ctx.createConvolver();
       const length = ctx.sampleRate * 2;
       const impulse = ctx.createBuffer(2, length, ctx.sampleRate);
@@ -154,23 +184,22 @@ export default function AiAudioCenter() {
       reverbWetGainRef.current = reverbWet;
       reverbDryGainRef.current = reverbDry;
 
-      // ECHO: Temporal delay loop with feedback
+      // ECHO
       const delay = ctx.createDelay(1.0);
-      delay.delayTime.value = 0.35; // 350ms standard delay
+      delay.delayTime.value = 0.35;
       echoDelayNodeRef.current = delay;
 
       const feedback = ctx.createGain();
-      feedback.gain.value = 0.4; // Controlled feedback
+      feedback.gain.value = 0.4;
       echoFeedbackGainRef.current = feedback;
 
       const echoWet = ctx.createGain();
       echoWetGainRef.current = echoWet;
 
-      // MASTER OUTPUT GAIN
+      // MASTER GAIN
       const mainGain = ctx.createGain();
       gainNodeRef.current = mainGain;
 
-      // CONNECTIONS
       source.connect(reverbDry);
       source.connect(reverb);
       reverb.connect(reverbWet);
@@ -185,107 +214,63 @@ export default function AiAudioCenter() {
       echoWet.connect(mainGain);
 
       mainGain.connect(ctx.destination);
-      
-      // Sync parameters to current form state
-      syncAudioParameters();
+      syncAudioNodes();
     } catch (e) {
-      console.warn("[AUDIO-ENGINE] Web Audio initialization blocked or failed.", e);
+      console.warn("[AUDIO-SYSTEM] Web Audio initialization blocked.", e);
     }
-  }, [form.volume, form.reverbMix, form.echoMix]);
+  }, []);
 
-  /**
-   * syncAudioParameters: Propagates form state to audio nodes with temporal smoothing.
-   */
-  const syncAudioParameters = useCallback(() => {
+  const syncAudioNodes = useCallback(() => {
     if (!audioContextRef.current) return;
     const ctx = audioContextRef.current;
     const time = ctx.currentTime;
 
-    if (gainNodeRef.current) {
-      gainNodeRef.current.gain.setTargetAtTime(form.volume, time, 0.05);
-    }
-    
+    if (gainNodeRef.current) gainNodeRef.current.gain.setTargetAtTime(form.volume, time, 0.05);
     if (reverbWetGainRef.current && reverbDryGainRef.current) {
       const mix = form.reverbMix / 100;
       reverbWetGainRef.current.gain.setTargetAtTime(mix, time, 0.05);
       reverbDryGainRef.current.gain.setTargetAtTime(1 - mix, time, 0.05);
     }
+    if (echoWetGainRef.current) echoWetGainRef.current.gain.setTargetAtTime(form.echoMix / 100, time, 0.05);
+    if (audioRef.current) audioRef.current.playbackRate = form.speed;
+  }, [form.volume, form.reverbMix, form.echoMix, form.speed]);
 
-    if (echoWetGainRef.current) {
-      const mix = form.echoMix / 100;
-      echoWetGainRef.current.gain.setTargetAtTime(mix, time, 0.05);
-    }
-  }, [form.volume, form.reverbMix, form.echoMix]);
-
-  const startAudio = useCallback(() => {
-    if (audioContextRef.current?.state === 'suspended') {
-      audioContextRef.current.resume();
-    }
-    if (!audioContextRef.current) {
-      initAudioEngine();
-    }
-  }, [initAudioEngine]);
-
-  // Real-time effect synchronization
   useEffect(() => {
-    syncAudioParameters();
-  }, [form.volume, form.reverbMix, form.echoMix, syncAudioParameters]);
-
-  /**
-   * updateForm: Tactical state helper that clears audioData on critical parameter changes.
-   */
-  const updateForm = (updates: Partial<typeof form>) => {
-    setForm(prev => {
-      const criticalFields = ['fullText', 'language', 'voice', 'emotion', 'speed', 'pitch'];
-      const hasCriticalChange = Object.keys(updates).some(k => criticalFields.includes(k));
-      
-      return {
-        ...prev,
-        ...updates,
-        audioData: hasCriticalChange ? '' : prev.audioData
-      };
-    });
-  };
+    syncAudioNodes();
+    // Real-time propagation if this announcement is the active live one
+    if (activeBroadcast && editingId === activeBroadcast.id) {
+       syncGlobalState({
+          volume: form.volume,
+          reverbMix: form.reverbMix,
+          echoMix: form.echoMix,
+          speed: form.speed,
+          isPlaying: !audioRef.current?.paused
+       });
+    }
+  }, [form.volume, form.reverbMix, form.echoMix, form.speed, syncAudioNodes, activeBroadcast, editingId, syncGlobalState]);
 
   useEffect(() => {
     if (!authLoading && !user) router.push('/internal/login');
   }, [user, authLoading, router]);
 
-  const announcementsQuery = useMemoFirebase(() => {
-    if (!db || !user) return null;
-    return query(collection(db, 'ai_announcements'), orderBy('createdAt', 'desc'));
-  }, [db, user]);
-
-  const { data: announcements, loading: dataLoading } = useCollection(announcementsQuery);
-
-  const activeBroadcast = useMemo(() => {
-    if (!announcements) return null;
-    return announcements.find((a: any) => a.status === 'Published');
-  }, [announcements]);
-
   const handleResetDefaults = () => {
-    updateForm({
+    setForm(prev => ({
+      ...prev,
       speed: 1,
       pitch: 0,
       volume: 0.8,
       reverbMix: 8,
       echoMix: 0
-    });
-    toast({
-      title: "Parameters Reset",
-      description: "Institutional sound profile restored to defaults.",
-    });
+    }));
+    toast({ title: "Institutional Defaults Restored" });
   };
 
   const handleGenerate = async () => {
     if (!form.fullText.trim()) {
-      toast({ variant: "destructive", title: "Content Missing", description: "Please provide the text for AI conversion." });
+      toast({ variant: "destructive", title: "Content Missing" });
       return;
     }
-    
     setIsGenerating(true);
-    toast({ title: "Initializing AI Synthesis", description: "Mapping text to high-fidelity human voice nodes..." });
-
     try {
       const result = await generateAiSpeech({
         text: form.fullText,
@@ -295,10 +280,9 @@ export default function AiAudioCenter() {
         speed: form.speed,
         pitch: form.pitch
       });
-
       if (result.success && result.audioData) {
         setForm(prev => ({ ...prev, audioData: result.audioData! }));
-        toast({ title: "Synthesis Complete", description: "The AI voice has been successfully generated." });
+        toast({ title: "Synthesis Complete" });
       } else {
         throw new Error(result.error);
       }
@@ -312,7 +296,7 @@ export default function AiAudioCenter() {
   const handleSave = async (status: 'Draft' | 'Published') => {
     if (!db || !user) return;
     if (!form.title || !form.audioData) {
-      toast({ variant: "destructive", title: "Incomplete Protocol", description: "Title and Generated Audio are mandatory." });
+      toast({ variant: "destructive", title: "Incomplete Protocol" });
       return;
     }
 
@@ -328,19 +312,32 @@ export default function AiAudioCenter() {
 
       if (editingId) {
         await updateDoc(doc(db, 'ai_announcements', editingId), docData);
-        toast({ title: "Registry Updated", description: "Record modified successfully." });
       } else {
         await addDoc(collection(db, 'ai_announcements'), {
           ...docData,
           createdAt: serverTimestamp(),
           createdBy: user.email,
         });
-        toast({ title: status === 'Published' ? "Broadcast Live" : "Draft Archived", description: "National registry successfully updated." });
+      }
+
+      if (status === 'Published') {
+         await syncGlobalState({
+            enabled: true,
+            audioData: form.audioData,
+            title: form.title,
+            category: form.category,
+            volume: form.volume,
+            reverbMix: form.reverbMix,
+            echoMix: form.echoMix,
+            speed: form.speed,
+            isPlaying: true,
+            autoplay: true
+         });
       }
       
       setIsAddOpen(false);
       setEditingId(null);
-      setForm({ title: '', fullText: '', category: 'Official Notice', language: 'English', voice: 'Male', emotion: 'Official', speed: 1, pitch: 0, volume: 0.8, reverbMix: 8, echoMix: 0, audioData: '', status: 'Draft' });
+      toast({ title: "Registry Updated" });
     } catch (e: any) {
       toast({ variant: "destructive", title: "Archive Error", description: e.message });
     } finally {
@@ -348,41 +345,36 @@ export default function AiAudioCenter() {
     }
   };
 
-  const handleStartEdit = (ann: any) => {
-    setEditingId(ann.id);
-    setForm({
-      title: ann.title || '',
-      fullText: ann.fullText || '',
-      category: ann.category || 'Official Notice',
-      language: ann.language || 'English',
-      voice: ann.voice || 'Male',
-      emotion: ann.emotion || 'Official',
-      speed: ann.speed || 1,
-      pitch: ann.pitch || 0,
-      volume: ann.volume || 0.8,
-      reverbMix: ann.reverbMix || 8,
-      echoMix: ann.echoMix || 0,
-      audioData: ann.audioData || '',
-      status: ann.status || 'Draft'
-    });
-    setIsAddOpen(true);
-  };
-
-  const handleStatusUpdate = async (id: string, newStatus: string) => {
+  const handleStatusUpdate = async (ann: any, newStatus: string) => {
     if (!db) return;
-    const ref = doc(db, 'ai_announcements', id);
+    const ref = doc(db, 'ai_announcements', ann.id);
     try {
       await updateDoc(ref, { 
         status: newStatus, 
         updatedAt: serverTimestamp(),
         publishedTime: newStatus === 'Published' ? serverTimestamp() : null
       });
-      toast({ 
-        title: newStatus === 'Published' ? "Broadcast Live" : "Broadcast Stopped",
-        description: newStatus === 'Published' ? "Audio is now active on the public page." : "Audio removed from live stream."
-      });
+
+      if (newStatus === 'Published') {
+         await syncGlobalState({
+            enabled: true,
+            audioData: ann.audioData,
+            title: ann.title,
+            category: ann.category,
+            volume: ann.volume || 0.8,
+            reverbMix: ann.reverbMix || 8,
+            echoMix: ann.echoMix || 0,
+            speed: ann.speed || 1,
+            isPlaying: true,
+            autoplay: true
+         });
+      } else {
+         await syncGlobalState({ enabled: false, isPlaying: false });
+      }
+
+      toast({ title: "Broadcast State Updated" });
     } catch (e) {
-      toast({ variant: "destructive", title: "Update Failed" });
+      toast({ variant: "destructive", title: "Sync Failed" });
     }
   };
 
@@ -394,6 +386,12 @@ export default function AiAudioCenter() {
     } catch (e) {
       toast({ variant: "destructive", title: "Delete Failed" });
     }
+  };
+
+  const startPlayback = () => {
+    if (!audioRef.current) return;
+    initAudioEngine();
+    audioRef.current.play();
   };
 
   const filtered = (announcements || []).filter(a => 
@@ -414,7 +412,7 @@ export default function AiAudioCenter() {
                <BrainCircuit className="w-2.5 h-2.5 animate-pulse" /> AI Voice Terminal
              </div>
              <h1 className="text-3xl md:text-4xl font-headline font-bold">Audio <span className="text-accent italic">Announcement Center</span></h1>
-             <p className="text-slate-400 text-[11px] uppercase font-black">Autonomous Speech Generation Node</p>
+             <p className="text-slate-400 text-[11px] uppercase font-black">Authorized Personnel Command Hub</p>
           </div>
           <Button onClick={() => { setEditingId(null); setIsAddOpen(true); setForm({ title: '', fullText: '', category: 'Official Notice', language: 'English', voice: 'Male', emotion: 'Official', speed: 1, pitch: 0, volume: 0.8, reverbMix: 8, echoMix: 0, audioData: '', status: 'Draft' }); }} className="bg-accent text-primary hover:bg-secondary hover:text-white h-11 px-8 rounded-xl font-bold gap-2 shadow-xl shadow-accent/20 transition-all">
              <Plus className="w-4 h-4" /> Initialize New Announcement
@@ -422,7 +420,7 @@ export default function AiAudioCenter() {
         </div>
       </header>
 
-      <section className="py-8 container mx-auto px-4">
+      <section className="py-8 container mx-auto px-4 max-w-6xl">
         
         {/* Live Broadcast Monitor Section */}
         {activeBroadcast ? (
@@ -449,7 +447,7 @@ export default function AiAudioCenter() {
                  </div>
                  <div className="flex items-center gap-4 w-full md:w-auto">
                     <Button 
-                      onClick={() => handleStatusUpdate(activeBroadcast.id, 'Archived')} 
+                      onClick={() => handleStatusUpdate(activeBroadcast, 'Archived')} 
                       className="flex-1 md:flex-none h-14 px-10 rounded-2xl bg-red-600 hover:bg-red-700 text-white font-black uppercase text-xs tracking-widest gap-2 shadow-xl shadow-red-900/40"
                     >
                       <XCircle className="w-5 h-5" /> Stop Live Broadcast
@@ -463,7 +461,7 @@ export default function AiAudioCenter() {
              <div className="p-8 rounded-[2.5rem] bg-slate-100 dark:bg-slate-900 border-2 border-dashed border-slate-200 dark:border-slate-800 text-center flex flex-col items-center gap-3">
                 <Radio className="w-10 h-10 text-slate-300" />
                 <h3 className="text-lg font-bold text-slate-400">No Active Broadcast</h3>
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Select a draft or archive to go live on the homepage player</p>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Select an existing announcement to push it live to the public portal.</p>
              </div>
           </div>
         )}
@@ -472,9 +470,6 @@ export default function AiAudioCenter() {
            <div className="relative w-full max-width-md">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <Input placeholder="Filter registry by title or category..." className="pl-10 h-11 rounded-xl bg-white dark:bg-slate-900 shadow-sm" value={search} onChange={e => setSearch(e.target.value)} />
-           </div>
-           <div className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 p-1.5 rounded-xl border">
-              <Badge variant="outline" className="text-[10px] uppercase font-bold border-slate-200">History: {announcements?.length || 0}</Badge>
            </div>
         </div>
 
@@ -508,14 +503,14 @@ export default function AiAudioCenter() {
                             </div>
                          </div>
                          <div className="flex items-center gap-3">
-                            <Button onClick={() => handleStartEdit(ann)} variant="ghost" size="icon" className="h-10 w-10 text-slate-300 hover:text-accent rounded-xl"><Edit className="w-5 h-5" /></Button>
+                            <Button onClick={() => { setEditingId(ann.id); setForm(ann); setIsAddOpen(true); }} variant="ghost" size="icon" className="h-10 w-10 text-slate-300 hover:text-accent rounded-xl"><Edit className="w-5 h-5" /></Button>
                             {(ann.status === 'Draft' || ann.status === 'Archived') && (
-                              <Button onClick={() => handleStatusUpdate(ann.id, 'Published')} variant="outline" size="sm" className="h-9 rounded-xl border-emerald-100 text-emerald-600 hover:bg-emerald-50 font-bold text-[10px] uppercase shadow-sm">
+                              <Button onClick={() => handleStatusUpdate(ann, 'Published')} variant="outline" size="sm" className="h-9 rounded-xl border-emerald-100 text-emerald-600 hover:bg-emerald-50 font-bold text-[10px] uppercase shadow-sm">
                                 <Zap className="w-3 h-3 mr-1.5" /> Go Live
                               </Button>
                             )}
                             {ann.status === 'Published' && (
-                              <Button onClick={() => handleStatusUpdate(ann.id, 'Archived')} variant="outline" size="sm" className="h-9 rounded-xl border-red-100 text-red-600 hover:bg-red-50 font-bold text-[10px] uppercase shadow-sm">
+                              <Button onClick={() => handleStatusUpdate(ann, 'Archived')} variant="outline" size="sm" className="h-9 rounded-xl border-red-100 text-red-600 hover:bg-red-50 font-bold text-[10px] uppercase shadow-sm">
                                 <XCircle className="w-3 h-3 mr-1.5" /> Stop Live
                               </Button>
                             )}
@@ -526,7 +521,7 @@ export default function AiAudioCenter() {
                               <AlertDialogContent className="rounded-[2.5rem]">
                                 <AlertDialogHeader>
                                   <AlertDialogTitle>Purge announcement record?</AlertDialogTitle>
-                                  <AlertDialogDescription>This will permanently remove "{ann.title}" from the registry. It will vanished from the public portal instantly.</AlertDialogDescription>
+                                  <AlertDialogDescription>This will permanently remove "{ann.title}" from the registry. This cannot be undone.</AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
                                   <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
@@ -540,16 +535,10 @@ export default function AiAudioCenter() {
                 </CardContent>
              </Card>
            ))}
-           {filtered.length === 0 && (
-             <div className="text-center py-32 opacity-30">
-                <Speaker className="w-20 h-20 text-slate-300 mx-auto mb-4" />
-                <p className="text-xl font-headline font-bold">No announcements found in history</p>
-             </div>
-           )}
         </div>
       </section>
 
-      {/* Initialize New/Edit Announcement Dialog */}
+      {/* Synthesis Dialog */}
       <Dialog open={isAddOpen} onOpenChange={(val) => { setIsAddOpen(val); if(!val) setEditingId(null); }}>
          <DialogContent className="max-w-5xl rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden bg-white dark:bg-slate-950 flex flex-col max-h-[95vh]">
             <div className="bg-slate-900 p-8 text-white relative shrink-0 border-b-4 border-accent/20">
@@ -567,11 +556,11 @@ export default function AiAudioCenter() {
                      <div className="grid md:grid-cols-2 gap-6">
                         <div className="space-y-1.5">
                            <Label className="text-[10px] font-bold uppercase text-slate-400">Announcement Title *</Label>
-                           <Input value={form.title} onChange={e => updateForm({title: e.target.value})} placeholder="e.g. Constitutional Awareness Update" className="h-11 rounded-xl" />
+                           <Input value={form.title} onChange={e => setForm({...form, title: e.target.value})} placeholder="e.g. Constitutional Awareness Update" className="h-11 rounded-xl" />
                         </div>
                         <div className="space-y-1.5">
                            <Label className="text-[10px] font-bold uppercase text-slate-400">Categorization</Label>
-                           <Select value={form.category} onValueChange={v => updateForm({category: v})}>
+                           <Select value={form.category} onValueChange={v => setForm({...form, category: v})}>
                               <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
                               <SelectContent className="bg-white">
                                  {['Official Notice', 'Legal Update', 'Mission Alert', 'Event Greeting', 'Emergency Broadcast'].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
@@ -584,7 +573,7 @@ export default function AiAudioCenter() {
                         <Label className="text-[10px] font-bold uppercase text-slate-400">Broadcast Narrative (Full Text) *</Label>
                         <Textarea 
                           value={form.fullText} 
-                          onChange={e => updateForm({fullText: e.target.value})} 
+                          onChange={e => setForm({...form, fullText: e.target.value})} 
                           placeholder="Type the message to be converted to human speech..." 
                           className="min-h-[180px] rounded-2xl p-6 leading-relaxed bg-slate-50 dark:bg-slate-900 border-none shadow-inner" 
                         />
@@ -593,7 +582,7 @@ export default function AiAudioCenter() {
                      <div className="grid md:grid-cols-3 gap-6">
                         <div className="space-y-1.5">
                            <Label className="text-[10px] font-bold uppercase text-slate-400">Language</Label>
-                           <Select value={form.language} onValueChange={(v: any) => updateForm({language: v})}>
+                           <Select value={form.language} onValueChange={(v: any) => setForm({...form, language: v})}>
                               <SelectTrigger className="h-11 rounded-xl font-bold"><SelectValue /></SelectTrigger>
                               <SelectContent className="bg-white">
                                  <SelectItem value="English">English (Global)</SelectItem>
@@ -604,7 +593,7 @@ export default function AiAudioCenter() {
                         </div>
                         <div className="space-y-1.5">
                            <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Vocal Profile</Label>
-                           <Select value={form.voice} onValueChange={(v: any) => updateForm({voice: v})}>
+                           <Select value={form.voice} onValueChange={(v: any) => setForm({...form, voice: v})}>
                               <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
                               <SelectContent className="bg-white">
                                  <SelectItem value="Male">Male (Lead)</SelectItem>
@@ -614,7 +603,7 @@ export default function AiAudioCenter() {
                         </div>
                         <div className="space-y-1.5">
                            <Label className="text-[10px] font-bold uppercase text-slate-400">Tonality / Emotion</Label>
-                           <Select value={form.emotion} onValueChange={(v: any) => updateForm({emotion: v})}>
+                           <Select value={form.emotion} onValueChange={(v: any) => setForm({...form, emotion: v})}>
                               <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
                               <SelectContent className="bg-white">
                                  {['Official', 'Professional', 'Calm', 'Friendly', 'Emergency', 'Authoritative', 'Inspirational', 'Empathetic', 'Urgent'].map(e => <SelectItem key={e} value={e}>{e}</SelectItem>)}
@@ -634,7 +623,7 @@ export default function AiAudioCenter() {
                                 min={0.5} 
                                 max={2} 
                                 step={0.1} 
-                                onValueChange={v => updateForm({speed: v[0]})}
+                                onValueChange={v => setForm({...form, speed: v[0]})}
                                 className="flex-1"
                               />
                               <span className="text-xs font-bold w-12 text-center bg-white px-2 py-1 rounded-lg border">{form.speed}x</span>
@@ -650,7 +639,7 @@ export default function AiAudioCenter() {
                                 min={-20} 
                                 max={20} 
                                 step={1} 
-                                onValueChange={v => updateForm({pitch: v[0]})}
+                                onValueChange={v => setForm({...form, pitch: v[0]})}
                                 className="flex-1"
                               />
                               <span className="text-xs font-bold w-12 text-center bg-white px-2 py-1 rounded-lg border">{form.pitch}</span>
@@ -661,7 +650,6 @@ export default function AiAudioCenter() {
 
                   {/* Right Column: Audio Output & Parameters */}
                   <div className="lg:col-span-4 space-y-8">
-                     {/* Technical Specifications Section */}
                      <Card className="rounded-3xl border-none shadow-sm bg-slate-900 text-white p-6 relative overflow-hidden">
                         <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/10 rounded-full -mr-12 -mt-12 blur-2xl"></div>
                         <h4 className="text-[10px] font-black uppercase text-accent tracking-[0.2em] mb-6 flex items-center gap-2">
@@ -673,10 +661,9 @@ export default function AiAudioCenter() {
                               { label: 'Presence Boost', val: '+2dB @ 3kHz', ok: true },
                               { label: 'Air Brilliance', val: '+2dB @ 10kHz', ok: true },
                               { label: 'Dynamics Comp', val: '3:1 Ratio', ok: true },
-                              { label: 'Audio Ceiling', val: '-1dB Limiter', ok: true },
-                              { label: 'Ambience', val: 'Custom Mix', ok: true }
+                              { label: 'Audio Ceiling', val: '-1dB Limiter', ok: true }
                            ].map((p, i) => (
-                              <div key={i} className="flex items-center justify-between p-2.5 bg-white/5 rounded-xl border border-white/5 transition-colors hover:bg-white/10">
+                              <div key={i} className="flex items-center justify-between p-2.5 bg-white/5 rounded-xl border border-white/5">
                                  <span className="text-[9px] font-bold text-slate-400 uppercase">{p.label}</span>
                                  <div className="flex items-center gap-1.5">
                                     <span className="text-[9px] font-black text-emerald-400">{p.val}</span>
@@ -694,7 +681,7 @@ export default function AiAudioCenter() {
                           disabled={isGenerating}
                           className="w-full h-16 rounded-2xl bg-primary text-white font-black text-lg hover:bg-secondary transition-all shadow-xl shadow-primary/20 flex gap-3 group"
                         >
-                           {isGenerating ? <Loader2 className="w-7 h-7 animate-spin" /> : <><Mic2 className="w-6 h-6 group-hover:scale-110" /> {form.audioData ? "Regenerate AI Voice" : "Generate AI Voice"}</>}
+                           {isGenerating ? <Loader2 className="w-7 h-7 animate-spin" /> : <><Mic2 className="w-6 h-6 group-hover:scale-110" /> Generate AI Voice</>}
                         </Button>
                         
                         <Button 
@@ -711,24 +698,22 @@ export default function AiAudioCenter() {
 
                {/* MASTER PREVIEW TERMINAL */}
                {form.audioData && (
-                 <div className="w-full space-y-4 animate-in slide-in-from-bottom-2 duration-500">
-                    {/* Verification Protocol Banner (Full Width) */}
-                    <div className="p-6 rounded-[2rem] bg-indigo-50 dark:bg-indigo-900/10 border-2 border-dashed border-indigo-200 dark:border-indigo-800 flex items-center gap-6 shadow-sm">
+                 <div className="w-full space-y-6 animate-in slide-in-from-bottom-2 duration-500">
+                    <div className="p-6 rounded-[2.5rem] bg-indigo-50 dark:bg-indigo-900/10 border-2 border-dashed border-indigo-200 dark:border-indigo-800 flex items-center gap-6">
                        <div className="w-12 h-12 rounded-2xl bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center text-indigo-600 shrink-0">
                           <AlertCircle className="w-6 h-6" />
                        </div>
                        <div className="flex-1">
                           <h4 className="text-xs font-black uppercase text-indigo-600 tracking-[0.2em] mb-1">Verification Protocol Active</h4>
-                          <p className="text-[10px] text-slate-500 font-bold leading-relaxed italic uppercase">
-                             "Critical: Always audit the vocal signature for emotional clarity and linguistic accuracy before committing to the National Registry. Playback quality must be verified across both channels."
+                          <p className="text-[10px] text-slate-500 font-bold leading-relaxed uppercase italic">
+                             Audit the vocal signature for emotional clarity and linguistic accuracy before committing to the National Registry. Playback quality must be verified across both channels.
                           </p>
                        </div>
                     </div>
 
-                    {/* Master Audio Terminal */}
                     <Card className="rounded-[2.5rem] border-none shadow-2xl bg-white dark:bg-slate-900 overflow-hidden border border-slate-100 dark:border-slate-800">
                       <CardContent className="p-8 md:p-10 space-y-10">
-                        {/* Row 1: Balanced 6/6 split for Player and Master Gain */}
+                        {/* Primary Control Row */}
                         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
                            <div className="lg:col-span-6 h-14 flex items-center bg-slate-50 dark:bg-slate-950 rounded-2xl px-6 border border-slate-100 dark:border-slate-800">
                               <audio 
@@ -736,7 +721,7 @@ export default function AiAudioCenter() {
                                 src={form.audioData} 
                                 controls 
                                 className="w-full h-10"
-                                onPlay={startAudio}
+                                onPlay={startPlayback}
                               />
                            </div>
                            
@@ -748,12 +733,12 @@ export default function AiAudioCenter() {
                                  <span className="text-[10px] font-mono font-bold text-slate-400">NORMALIZED ({Math.round(form.volume * 100)}%)</span>
                               </div>
                               <div className="px-2">
-                                <Slider value={[form.volume * 100]} max={100} step={1} onValueChange={(v) => updateForm({volume: v[0] / 100})} className="h-2" />
+                                <Slider value={[form.volume * 100]} max={100} step={1} onValueChange={(v) => setForm({...form, volume: v[0] / 100})} className="h-2" />
                               </div>
                            </div>
                         </div>
 
-                        {/* Row 2: Balanced 6/6 split for Reverb and Echo */}
+                        {/* Spatial Processing Row */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                            <div className="space-y-3">
                               <div className="flex justify-between items-center px-2">
@@ -763,7 +748,7 @@ export default function AiAudioCenter() {
                                  <span className="text-[10px] font-bold text-slate-400">{form.reverbMix}%</span>
                               </div>
                               <div className="px-2">
-                                <Slider value={[form.reverbMix]} min={0} max={100} step={1} onValueChange={v => updateForm({reverbMix: v[0]})} className="h-2" />
+                                <Slider value={[form.reverbMix]} min={0} max={100} step={1} onValueChange={v => setForm({...form, reverbMix: v[0]})} className="h-2" />
                               </div>
                            </div>
 
@@ -775,12 +760,12 @@ export default function AiAudioCenter() {
                                  <span className="text-[10px] font-bold text-slate-400">{form.echoMix}%</span>
                               </div>
                               <div className="px-2">
-                                <Slider value={[form.echoMix]} min={0} max={100} step={1} onValueChange={v => updateForm({echoMix: v[0]})} className="h-2" />
+                                <Slider value={[form.echoMix]} min={0} max={100} step={1} onValueChange={v => setForm({...form, echoMix: v[0]})} className="h-2" />
                               </div>
                            </div>
                         </div>
 
-                        {/* Row 3: Vocal Signature Stack */}
+                        {/* Vocal Signature Identification Row */}
                         <div className="flex flex-col md:flex-row items-center justify-between gap-6 pt-6 border-t border-slate-50 dark:border-slate-800">
                            <div className="flex items-center gap-5">
                               <div className="w-12 h-12 rounded-2xl bg-accent/10 flex items-center justify-center text-accent shadow-sm animate-pulse shrink-0">
@@ -821,10 +806,10 @@ export default function AiAudioCenter() {
             <DialogFooter className="p-8 bg-slate-50 dark:bg-slate-900 border-t shrink-0">
                <div className="flex w-full gap-4">
                   <Button onClick={() => handleSave('Draft')} disabled={isSaving || isGenerating || !form.audioData} variant="outline" className="flex-1 h-14 rounded-2xl font-black uppercase text-[10px] tracking-widest border-2">
-                     <Archive className="w-5 h-5 mr-2" /> {editingId ? "Save Changes" : "Save as Draft"}
+                     <Archive className="w-5 h-5 mr-2" /> Save as Draft
                   </Button>
                   <Button onClick={() => handleSave('Published')} disabled={isSaving || isGenerating || !form.audioData} className="flex-1 h-14 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase text-[10px] tracking-widest shadow-xl shadow-emerald-900/40">
-                     <CheckCircle2 className="w-5 h-5 mr-2" /> {editingId ? "Apply & Go Live" : "Verify & Go Live"}
+                     <CheckCircle2 className="w-5 h-5 mr-2" /> Verify & Go Live
                   </Button>
                </div>
             </DialogFooter>
@@ -835,4 +820,3 @@ export default function AiAudioCenter() {
     </main>
   );
 }
-
