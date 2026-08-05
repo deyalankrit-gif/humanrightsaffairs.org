@@ -458,7 +458,7 @@ export default function AiAudioCenter() {
                            </Select>
                         </div>
                         <div className="space-y-1.5">
-                           <Label className="text-[10px] font-bold uppercase text-slate-400">Vocal Profile</Label>
+                           <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Vocal Profile</Label>
                            <Select value={form.voice} onValueChange={(v: any) => updateForm({voice: v})}>
                               <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
                               <SelectContent className="bg-white">
@@ -556,42 +556,82 @@ export default function AiAudioCenter() {
                         >
                            {isGenerating ? <Loader2 className="w-7 h-7 animate-spin" /> : <><Mic2 className="w-6 h-6 group-hover:scale-110" /> {form.audioData ? "Regenerate AI Voice" : "Generate AI Voice"}</>}
                         </Button>
-
-                        <div className="p-6 rounded-3xl bg-indigo-50 dark:bg-indigo-950/20 border-2 border-dashed border-indigo-200 text-center space-y-2">
-                           <AlertCircle className="w-8 h-8 text-indigo-500 mx-auto" />
-                           <h4 className="text-[10px] font-black uppercase text-indigo-600">Verification protocol</h4>
-                           <p className="text-[9px] text-slate-500 font-bold leading-relaxed italic">
-                              Always preview the audio to ensure clarity and emotional alignment before publishing to the live homepage.
-                           </p>
-                        </div>
                      </div>
                   </div>
                </div>
 
-               {/* WIDE HORIZONTAL PREVIEW BOX */}
+               {/* MASTER PREVIEW TERMINAL */}
                {form.audioData && (
-                 <div className="w-full py-6 px-10 bg-white dark:bg-slate-900 rounded-[2rem] flex items-center gap-10 animate-in slide-in-from-bottom-2 duration-500 border border-slate-100 shadow-xl">
-                    <div className="flex items-center gap-5 shrink-0">
-                       <div className="w-14 h-14 rounded-2xl bg-accent/20 flex items-center justify-center text-accent shadow-sm animate-pulse">
-                          <Volume2 className="w-7 h-7" />
+                 <div className="w-full space-y-4 animate-in slide-in-from-bottom-2 duration-500">
+                    {/* High-Fidelity Verification Protocol - Now Full Width */}
+                    <div className="p-6 rounded-[2rem] bg-indigo-50 dark:bg-indigo-900/10 border-2 border-dashed border-indigo-200 dark:border-indigo-800 flex items-center gap-6 shadow-sm">
+                       <div className="w-12 h-12 rounded-2xl bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center text-indigo-600 shrink-0">
+                          <AlertCircle className="w-6 h-6" />
                        </div>
-                       <div className="space-y-1">
-                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] leading-none">Vocal Signature Preview</p>
-                          <div className="flex items-center gap-3">
-                             <Badge variant="outline" className="text-[9px] font-bold border-accent/20 text-accent uppercase">{form.voice} Voice</Badge>
-                             <Badge variant="outline" className="text-[9px] font-bold border-slate-200 text-slate-500 uppercase">{form.emotion}</Badge>
-                          </div>
+                       <div className="flex-1">
+                          <h4 className="text-xs font-black uppercase text-indigo-600 tracking-[0.2em] mb-1">Verification Protocol Active</h4>
+                          <p className="text-[10px] text-slate-500 font-bold leading-relaxed italic uppercase">
+                             "Critical: Always audit the vocal signature for emotional clarity and linguistic accuracy before committing to the National Registry. Playback quality must be verified across both channels."
+                          </p>
                        </div>
                     </div>
-                    <div className="flex-1 h-12 flex items-center bg-slate-50 dark:bg-slate-950 rounded-2xl px-6 border">
-                       <audio src={form.audioData} controls className="w-full h-8" />
-                    </div>
-                    <div className="hidden xl:flex items-center gap-3 shrink-0 opacity-40">
-                       <div className="flex gap-0.5">
-                          {[1,2,3,4,5].map(i => <div key={i} className="w-0.5 h-4 bg-accent rounded-full animate-bounce" style={{ animationDelay: `${i * 0.1}s` }} />)}
-                       </div>
-                       <span className="text-[8px] font-black uppercase text-slate-400">Broadcast Quality Processing Applied</span>
-                    </div>
+
+                    {/* Master Audio Terminal */}
+                    <Card className="rounded-[2.5rem] border-none shadow-2xl bg-white dark:bg-slate-900 overflow-hidden border border-slate-100 dark:border-slate-800">
+                      <CardContent className="p-8 md:p-10 space-y-8">
+                        {/* Row 1: Large Audio Control + Wide Volume Slider */}
+                        <div className="flex flex-col md:flex-row items-center gap-10">
+                           <div className="flex-1 w-full h-14 flex items-center bg-slate-50 dark:bg-slate-950 rounded-2xl px-6 border border-slate-100 dark:border-slate-800">
+                              <audio src={form.audioData} controls className="w-full h-10" />
+                           </div>
+                           
+                           <div className="w-full md:w-[40%] space-y-3">
+                              <div className="flex justify-between items-center px-2">
+                                 <Label className="text-[10px] font-black uppercase text-accent tracking-widest flex items-center gap-2">
+                                   <Volume2 className="w-3.5 h-3.5" /> Output Gain Control
+                                 </Label>
+                                 <span className="text-[10px] font-mono font-bold text-slate-400">NORMALIZED</span>
+                              </div>
+                              <div className="px-2">
+                                <Slider defaultValue={[80]} max={100} step={1} className="h-2" />
+                              </div>
+                           </div>
+                        </div>
+
+                        {/* Row 2: Vocal Signature (Below Preview) */}
+                        <div className="flex flex-col md:flex-row items-center justify-between gap-6 pt-6 border-t border-slate-50 dark:border-slate-800">
+                           <div className="flex items-center gap-5">
+                              <div className="w-12 h-12 rounded-2xl bg-accent/10 flex items-center justify-center text-accent shadow-sm animate-pulse shrink-0">
+                                 <Mic2 className="w-6 h-6" />
+                              </div>
+                              <div className="space-y-1">
+                                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] leading-none">Vocal Signature Identification</p>
+                                 <div className="flex items-center gap-3">
+                                    <Badge className="bg-primary text-white font-black text-[9px] uppercase px-4 h-6 rounded-lg">{form.voice} Node</Badge>
+                                    <Badge variant="outline" className="text-[9px] font-bold border-accent/30 text-accent uppercase px-4 h-6 rounded-lg">{form.emotion} Tonality</Badge>
+                                    <Badge variant="outline" className="text-[9px] font-bold border-slate-200 text-slate-500 uppercase px-4 h-6 rounded-lg">{form.language}</Badge>
+                                 </div>
+                              </div>
+                           </div>
+
+                           <div className="flex items-center gap-6 opacity-40">
+                              <div className="flex gap-1">
+                                 {[1,2,3,4,5,6,7,8].map(i => (
+                                    <div 
+                                      key={i} 
+                                      className="w-0.5 h-5 bg-accent rounded-full animate-bounce" 
+                                      style={{ animationDelay: `${i * 0.1}s`, animationDuration: '1.2s' }} 
+                                    />
+                                 ))}
+                              </div>
+                              <div className="text-right">
+                                 <p className="text-[8px] font-black uppercase text-slate-400 tracking-[0.2em]">Signal Processing</p>
+                                 <p className="text-[9px] font-bold text-emerald-500 uppercase">Broadcast Ready</p>
+                              </div>
+                           </div>
+                        </div>
+                      </CardContent>
+                    </Card>
                  </div>
                )}
             </div>
