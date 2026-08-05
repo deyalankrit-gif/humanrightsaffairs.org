@@ -134,7 +134,6 @@ export default function AiAudioCenter() {
 
   /**
    * syncGlobalState: Pushes the current audio settings to the global settings document.
-   * This document acts as the command node for all public portal clients.
    */
   const syncGlobalState = useCallback(async (updates: any) => {
     if (!db) return;
@@ -152,13 +151,41 @@ export default function AiAudioCenter() {
   }, [db]);
 
   /**
+   * syncAudioNodes: Maps state to the Web Audio API signal chain.
+   */
+  const syncAudioNodes = useCallback(() => {
+    if (!audioContextRef.current) return;
+    const ctx = audioContextRef.current;
+    const time = ctx.currentTime;
+
+    if (gainNodeRef.current) gainNodeRef.current.gain.setTargetAtTime(form.volume, time, 0.05);
+    
+    if (reverbWetGainRef.current && reverbDryGainRef.current) {
+      const mix = form.reverbMix / 100;
+      reverbWetGainRef.current.gain.setTargetAtTime(mix, time, 0.05);
+      reverbDryGainRef.current.gain.setTargetAtTime(1 - mix, time, 0.05);
+    }
+
+    if (echoWetGainRef.current) {
+      echoWetGainRef.current.gain.setTargetAtTime(form.echoMix / 100, time, 0.05);
+    }
+
+    if (audioRef.current) {
+       audioRef.current.playbackRate = form.speed;
+    }
+  }, [form.volume, form.reverbMix, form.echoMix, form.speed]);
+
+  /**
    * initAudioEngine: Establishes the professional broadcast signal chain.
    */
   const initAudioEngine = useCallback(() => {
-    if (!audioRef.current || audioContextRef.current) return;
+    if (!audioRef.current || audioContextRef.current) {
+      if (audioContextRef.current) syncAudioNodes();
+      return;
+    }
 
     try {
-      console.log('[AUDIO-SYSTEM] Initializing Master Audio Graph...');
+      console.log('[AUDIO-SYSTEM] Establishing Master Signal Chain...');
       const AudioContextClass = (window.AudioContext || (window as any).webkitAudioContext);
       const ctx = new AudioContextClass();
       audioContextRef.current = ctx;
@@ -214,26 +241,13 @@ export default function AiAudioCenter() {
       echoWet.connect(mainGain);
 
       mainGain.connect(ctx.destination);
+      
+      // IMMEDIATE SYNC AFTER CONNECT
       syncAudioNodes();
     } catch (e) {
       console.warn("[AUDIO-SYSTEM] Web Audio initialization blocked.", e);
     }
-  }, []);
-
-  const syncAudioNodes = useCallback(() => {
-    if (!audioContextRef.current) return;
-    const ctx = audioContextRef.current;
-    const time = ctx.currentTime;
-
-    if (gainNodeRef.current) gainNodeRef.current.gain.setTargetAtTime(form.volume, time, 0.05);
-    if (reverbWetGainRef.current && reverbDryGainRef.current) {
-      const mix = form.reverbMix / 100;
-      reverbWetGainRef.current.gain.setTargetAtTime(mix, time, 0.05);
-      reverbDryGainRef.current.gain.setTargetAtTime(1 - mix, time, 0.05);
-    }
-    if (echoWetGainRef.current) echoWetGainRef.current.gain.setTargetAtTime(form.echoMix / 100, time, 0.05);
-    if (audioRef.current) audioRef.current.playbackRate = form.speed;
-  }, [form.volume, form.reverbMix, form.echoMix, form.speed]);
+  }, [syncAudioNodes]);
 
   useEffect(() => {
     syncAudioNodes();
@@ -391,7 +405,7 @@ export default function AiAudioCenter() {
   const startPlayback = () => {
     if (!audioRef.current) return;
     initAudioEngine();
-    audioRef.current.play();
+    audioRef.current.play().then(() => syncAudioNodes());
   };
 
   const filtered = (announcements || []).filter(a => 

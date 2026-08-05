@@ -62,10 +62,39 @@ export function AudioAnnouncement() {
   const { data: settings, loading } = useDoc(announcementRef);
 
   /**
+   * syncAudioNodes: Maps global Firestore parameters to local audio nodes.
+   */
+  const syncAudioNodes = useCallback(() => {
+    if (!audioContextRef.current || !settings) return;
+    const ctx = audioContextRef.current;
+    const time = ctx.currentTime;
+
+    const volume = isMuted ? 0 : (settings.volume ?? 0.8);
+    if (gainNodeRef.current) gainNodeRef.current.gain.setTargetAtTime(volume, time, 0.1);
+    
+    if (reverbWetGainRef.current && reverbDryGainRef.current) {
+      const mix = (settings.reverbMix ?? 8) / 100;
+      reverbWetGainRef.current.gain.setTargetAtTime(mix, time, 0.1);
+      reverbDryGainRef.current.gain.setTargetAtTime(1 - mix, time, 0.1);
+    }
+
+    if (echoWetGainRef.current) {
+      echoWetGainRef.current.gain.setTargetAtTime((settings.echoMix ?? 0) / 100, time, 0.1);
+    }
+
+    if (audioRef.current) {
+       audioRef.current.playbackRate = settings.speed || 1;
+    }
+  }, [settings, isMuted]);
+
+  /**
    * setupAudioGraph: Initializes the professional signal chain.
    */
   const setupAudioGraph = useCallback(() => {
-    if (!audioRef.current || audioCtxRef.current) return;
+    if (!audioRef.current || audioCtxRef.current) {
+      if (audioCtxRef.current) syncAudioNodes();
+      return;
+    }
 
     try {
       console.log('[AUDIO-SYSTEM] Establishing Public Signal Chain...');
@@ -109,7 +138,7 @@ export function AudioAnnouncement() {
       // LIMITER
       const limiter = ctx.createDynamicsCompressor();
       limiter.threshold.value = -1;
-      limiter.ratio.value = 20;
+      limiter.ratio = 20 as any; // Limiter ratio
       limiterNodeRef.current = limiter;
 
       // MASTER GAIN
@@ -131,36 +160,13 @@ export function AudioAnnouncement() {
 
       mainGain.connect(limiter);
       limiter.connect(ctx.destination);
+
+      // IMMEDIATE SYNC
+      syncAudioNodes();
     } catch (e) {
       console.warn("[AUDIO-SYSTEM] Web Audio failed. Falling back to native.", e);
     }
-  }, []);
-
-  /**
-   * syncAudioNodes: Maps global Firestore parameters to local audio nodes.
-   */
-  const syncAudioNodes = useCallback(() => {
-    if (!audioContextRef.current || !settings) return;
-    const ctx = audioContextRef.current;
-    const time = ctx.currentTime;
-
-    const volume = isMuted ? 0 : (settings.volume ?? 0.8);
-    if (gainNodeRef.current) gainNodeRef.current.gain.setTargetAtTime(volume, time, 0.1);
-    
-    if (reverbWetGainRef.current && reverbDryGainRef.current) {
-      const mix = (settings.reverbMix ?? 8) / 100;
-      reverbWetGainRef.current.gain.setTargetAtTime(mix, time, 0.1);
-      reverbDryGainRef.current.gain.setTargetAtTime(1 - mix, time, 0.1);
-    }
-
-    if (echoWetGainRef.current) {
-      echoWetGainRef.current.gain.setTargetAtTime((settings.echoMix ?? 0) / 100, time, 0.1);
-    }
-
-    if (audioRef.current) {
-       audioRef.current.playbackRate = settings.speed || 1;
-    }
-  }, [settings, isMuted]);
+  }, [syncAudioNodes]);
 
   useEffect(() => {
     setMounted(true);
@@ -172,14 +178,20 @@ export function AudioAnnouncement() {
   useEffect(() => {
     if (!settings || !audioRef.current || loading) return;
     
+    // Ensure graph is established if playing
+    if (settings.enabled && settings.audioData && settings.isPlaying) {
+       setupAudioGraph();
+    }
+    
+    // Always sync nodes to document parameters
     syncAudioNodes();
 
     if (settings.enabled && settings.audioData && !error) {
        if (settings.isPlaying) {
-          setupAudioGraph();
           audioRef.current.play().then(() => {
              setIsPlaying(true);
              setShowAutoplayPrompt(false);
+             syncAudioNodes(); // Second sync to ensure nodes are at correct state during run
           }).catch((err) => {
              if (err.name === 'NotAllowedError') setShowAutoplayPrompt(true);
              setIsPlaying(false);
@@ -203,6 +215,7 @@ export function AudioAnnouncement() {
         setShowAutoplayPrompt(false);
         setIsMuted(false);
         localStorage.setItem('hrat_audio_muted', 'false');
+        syncAudioNodes();
       })
       .catch(() => setError(true));
   };
@@ -246,7 +259,7 @@ export function AudioAnnouncement() {
 
         <div className="bg-slate-900/90 backdrop-blur-xl p-2.5 rounded-full flex items-center gap-2 transition-all duration-500 hover:ring-2 hover:ring-accent/40 shadow-2xl border border-white/10">
           <div className="flex items-center gap-3 pl-4 pr-2 overflow-hidden max-w-0 group-hover:max-w-[250px] transition-all duration-700 ease-in-out">
-             <div className="flex flex-col min-w-0">
+             <div className="flex flex-col min-0">
                 <div className="flex items-center gap-2 mb-0.5">
                    <div className={cn("w-1.5 h-1.5 rounded-full", error ? "bg-red-500" : "bg-emerald-500 animate-pulse")} />
                    <span className={cn("text-[9px] font-black uppercase tracking-[0.2em] whitespace-nowrap", error ? "text-red-400" : "text-emerald-400")}>
