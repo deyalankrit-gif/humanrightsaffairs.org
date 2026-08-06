@@ -27,7 +27,8 @@ import {
   ShieldCheck,
   Building2,
   Info,
-  BadgeCheck as BadgeCheckIcon
+  BadgeCheck as BadgeCheckIcon,
+  Settings2
 } from 'lucide-react'
 import { useCollection, useFirestore, useMemoFirebase, useUser } from '@/firebase'
 import { collection, query, orderBy, addDoc, deleteDoc, doc, updateDoc, serverTimestamp, where } from 'firebase/firestore'
@@ -58,9 +59,16 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import { Calendar as CalendarComponent } from "@/components/ui/calendar"
+import { format, parse } from "date-fns"
 import { useToast } from '@/hooks/use-toast'
-import { INDIA_DATA } from '@/lib/india-data'
 import { cn } from '@/lib/utils'
+import { INDIA_DATA } from '@/lib/india-data'
 
 type Leader = {
   id: string
@@ -124,14 +132,14 @@ function LeaderCard({ leader, variant = "default", isAdmin, onEdit, onDelete }: 
                 </AlertDialogTrigger>
                 <AlertDialogContent className="rounded-[2.5rem] border-none shadow-2xl bg-white dark:bg-slate-900">
                   <AlertDialogHeader>
-                    <AlertDialogTitle className="text-xl font-headline font-bold text-red-600">Authorize Profile Purge</AlertDialogTitle>
+                    <AlertDialogTitle className="text-xl font-headline font-bold text-primary dark:text-white">Confirm Deletion</AlertDialogTitle>
                     <AlertDialogDescription className="text-slate-600 dark:text-slate-400 font-medium leading-relaxed">
-                      Are you sure you want to permanently delete this leader's profile, including their official information and photograph, from the National Registry? This action cannot be undone.
+                      Are you sure you want to delete this item? This action may be irreversible. Please confirm before continuing.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter className="mt-4">
-                    <AlertDialogCancel className="rounded-xl h-11 font-bold">Abort</AlertDialogCancel>
-                    <AlertDialogAction onClick={() => onDelete?.(leader.id)} className="bg-red-600 hover:bg-red-700 rounded-xl h-11 font-bold">Delete Permanently</AlertDialogAction>
+                    <AlertDialogCancel className="rounded-xl h-11 font-bold">Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={() => onDelete?.(leader.id)} className="bg-red-600 hover:bg-red-700 rounded-xl h-11 font-bold">Delete</AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
@@ -172,6 +180,7 @@ export default function LeadershipPage() {
   const [isMirror, setIsMirror] = useState(false)
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+  const [editStep, setEditStep] = useState<'confirm' | 'form'>('confirm')
   const { user } = useUser()
   const db = useFirestore()
   const { toast } = useToast()
@@ -353,6 +362,7 @@ export default function LeadershipPage() {
 
   const handleStartEdit = (leader: Leader) => {
     setEditLeader(leader);
+    setEditStep('confirm');
     setIsEditDialogOpen(true);
   }
 
@@ -661,79 +671,104 @@ export default function LeadershipPage() {
 
       <Dialog open={isEditDialogOpen} onOpenChange={(val) => { if(!val) { setIsEditDialogOpen(false); setEditLeader(null); } }}>
         <DialogContent className="max-w-xl bg-white dark:bg-slate-900 rounded-[2.5rem] border-none shadow-2xl max-h-[90vh] overflow-y-auto flex flex-col p-0 z-[1000001]">
-          <div className="bg-slate-900 pt-14 pb-10 px-8 text-white relative border-b-4 border-accent/20 shrink-0">
-             <div className="absolute right-6 top-6"><DialogClose asChild><Button variant="ghost" size="icon" className="rounded-full text-white hover:bg-white/10 h-10 w-10 transition-all"><X className="w-6 h-6" /></Button></DialogClose></div>
-             <DialogTitle className="text-2xl font-headline font-bold">Refine Leader Profile</DialogTitle>
-             <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">Registry Update Protocol</p>
-          </div>
-          
-          {editLeader && (
-            <div className="flex-1 overflow-y-auto p-8 space-y-6 custom-scrollbar">
-              <div className="flex flex-col items-center gap-4">
-                <div className="relative w-32 h-40 bg-slate-100 dark:bg-slate-800 rounded-xl overflow-hidden border-4 border-white shadow-xl">
-                  <Image src={editLeader.imageId?.startsWith('data:') ? editLeader.imageId : (editLeader.gender?.trim().toLowerCase() === 'female' || editLeader.gender?.trim().toLowerCase() === 'f' ? '/dummy w.png' : '/dummy m.png')} alt="Preview" fill className="object-cover" />
-                  <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer z-10" onChange={(e) => handleFileChange(e, true)} />
-                </div>
-                <Badge variant="outline" className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Click Image area to update</Badge>
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-6">
-                <div className="space-y-1.5">
-                  <Label className="text-[10px] font-black uppercase text-slate-500">Legal Name</Label>
-                  <Input value={editLeader.name} onChange={e => setEditLeader({...editLeader, name: e.target.value})} className="h-11 rounded-xl bg-slate-50 border-none shadow-inner font-bold" />
-                </div>
-                <div className="space-y-1.5">
-                  <Label className="text-[10px] font-black uppercase text-slate-500">Official Designation</Label>
-                  <Input value={editLeader.title} onChange={e => setEditLeader({...editLeader, title: e.target.value})} className="h-11 rounded-xl bg-slate-50 border-none shadow-inner font-bold" />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-6">
-                <div className="space-y-1.5">
-                  <Label className="text-[10px] font-black uppercase text-slate-500">Chapter Level</Label>
-                  <Select value={editLeader.level} onValueChange={(val: any) => setEditLeader({...editLeader, level: val, parentRegion: '', districtName: ''})}>
-                    <SelectTrigger className="h-11 rounded-xl bg-slate-50 border-none shadow-inner font-bold"><SelectValue placeholder="Level" /></SelectTrigger>
-                    <SelectContent className="bg-white z-[2000000]">
-                      <SelectItem value="Central">Central Council</SelectItem>
-                      <SelectItem value="State">State Level</SelectItem>
-                      <SelectItem value="District">District Level</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-1.5">
-                  <Label className="text-[10px] font-black uppercase text-slate-500">Gender</Label>
-                  <Select value={editLeader.gender} onValueChange={(val: any) => setEditLeader({...editLeader, gender: val})}>
-                    <SelectTrigger className="h-11 rounded-xl bg-slate-50 border-none shadow-inner font-bold"><SelectValue placeholder="Gender" /></SelectTrigger>
-                    <SelectContent className="bg-white z-[2000000]"><SelectItem value="male">Male</SelectItem><SelectItem value="female">Female</SelectItem></SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              {(editLeader.level === 'State' || editLeader.level === 'District') && (
-                <div className="grid md:grid-cols-2 gap-6 p-6 rounded-3xl bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 animate-in fade-in slide-in-from-top-2 duration-300">
-                  <div className="space-y-1.5">
-                    <Label className="text-[10px] font-black uppercase text-accent flex items-center gap-2"><Globe className="w-3.5 h-3.5" /> State / UT *</Label>
-                    <Select value={editLeader.parentRegion} onValueChange={(val) => setEditLeader({...editLeader, parentRegion: val, districtName: ''})}>
-                      <SelectTrigger className="h-11 rounded-xl bg-white dark:bg-slate-800 border-accent/20 font-bold"><SelectValue placeholder="Choose State" /></SelectTrigger>
-                      <SelectContent className="bg-white z-[2000000] max-h-60">{allStates.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
-                    </Select>
+          {editStep === 'confirm' ? (
+            <div className="p-10 space-y-8 animate-in fade-in zoom-in-95 duration-500">
+               <div className="flex flex-col items-center text-center space-y-6">
+                  <div className="w-20 h-20 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 rounded-[2rem] flex items-center justify-center shadow-xl shadow-indigo-500/10">
+                    <ShieldCheck className="w-12 h-12" />
                   </div>
-                  {editLeader.level === 'District' && (
+                  <div className="space-y-2">
+                    <DialogTitle className="text-3xl font-headline font-bold text-primary dark:text-white uppercase">Refine Leader Profile</DialogTitle>
+                    <DialogDescription className="text-base font-bold text-accent uppercase tracking-widest">
+                      Registry Update Protocol
+                    </DialogDescription>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 font-medium leading-relaxed max-w-sm mx-auto pt-4">
+                      Do you wish to authorize access to the high-fidelity profile editor for this leadership record?
+                    </p>
+                  </div>
+               </div>
+               <div className="flex gap-4">
+                  <Button variant="outline" onClick={() => setIsEditDialogOpen(false)} className="flex-1 h-14 rounded-2xl font-bold border-2 text-xs uppercase tracking-widest">No</Button>
+                  <Button onClick={() => setEditStep('form')} className="flex-1 h-14 rounded-2xl font-bold bg-primary text-white shadow-xl text-xs uppercase tracking-widest border-none">Yes</Button>
+               </div>
+            </div>
+          ) : (
+            <>
+              <div className="bg-slate-900 pt-14 pb-10 px-8 text-white relative border-b-4 border-accent/20 shrink-0">
+                 <div className="absolute right-6 top-6"><DialogClose asChild><Button variant="ghost" size="icon" className="rounded-full text-white hover:bg-white/10 h-10 w-10 transition-all"><X className="w-6 h-6" /></Button></DialogClose></div>
+                 <DialogTitle className="text-2xl font-headline font-bold">Refine Leader Profile</DialogTitle>
+                 <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">Registry Update Protocol</p>
+              </div>
+              
+              {editLeader && (
+                <div className="flex-1 overflow-y-auto p-8 space-y-6 custom-scrollbar">
+                  <div className="flex flex-col items-center gap-4">
+                    <div className="relative w-32 h-40 bg-slate-100 dark:bg-slate-800 rounded-xl overflow-hidden border-4 border-white shadow-xl">
+                      <Image src={editLeader.imageId?.startsWith('data:') ? editLeader.imageId : (PlaceHolderImages.find(i => i.id === editLeader.imageId)?.imageUrl || (editLeader.gender?.trim().toLowerCase() === 'female' || editLeader.gender?.trim().toLowerCase() === 'f' ? '/dummy w.png' : '/dummy m.png'))} alt="Preview" fill className="object-cover" />
+                      <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer z-10" onChange={(e) => handleFileChange(e, true)} />
+                    </div>
+                    <Badge variant="outline" className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Click Image area to update</Badge>
+                  </div>
+
+                  <div className="grid md:grid-cols-2 gap-6">
                     <div className="space-y-1.5">
-                      <Label className="text-[10px] font-black uppercase text-accent flex items-center gap-2"><MapPin className="w-3.5 h-3.5" /> District *</Label>
-                      <Select value={editLeader.districtName} onValueChange={(val) => setEditLeader({...editLeader, districtName: val})}>
-                        <SelectTrigger className="h-11 rounded-xl bg-white dark:bg-slate-800 border-accent/20 font-bold"><SelectValue placeholder="Choose District" /></SelectTrigger>
-                        <SelectContent className="bg-white z-[2000000] max-h-60">{editLeader.parentRegion && (INDIA_DATA[editLeader.parentRegion] || []).map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
+                      <Label className="text-[10px] font-black uppercase text-slate-500">Legal Name</Label>
+                      <Input value={editLeader.name} onChange={e => setEditLeader({...editLeader, name: e.target.value})} className="h-11 rounded-xl bg-slate-50 border-none shadow-inner font-bold" />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-[10px] font-black uppercase text-slate-500">Official Designation</Label>
+                      <Input value={editLeader.title} onChange={e => setEditLeader({...editLeader, title: e.target.value})} className="h-11 rounded-xl bg-slate-50 border-none shadow-inner font-bold" />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-6">
+                    <div className="space-y-1.5">
+                      <Label className="text-[10px] font-black uppercase text-slate-500">Chapter Level</Label>
+                      <Select value={editLeader.level} onValueChange={(val: any) => setEditLeader({...editLeader, level: val, parentRegion: '', districtName: ''})}>
+                        <SelectTrigger className="h-11 rounded-xl bg-slate-50 border-none shadow-inner font-bold"><SelectValue placeholder="Level" /></SelectTrigger>
+                        <SelectContent className="bg-white z-[2000000]">
+                          <SelectItem value="Central">Central Council</SelectItem>
+                          <SelectItem value="State">State Level</SelectItem>
+                          <SelectItem value="District">District Level</SelectItem>
+                        </SelectContent>
                       </Select>
                     </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-[10px] font-black uppercase text-slate-500">Gender</Label>
+                      <Select value={editLeader.gender} onValueChange={(val: any) => setEditLeader({...editLeader, gender: val})}>
+                        <SelectTrigger className="h-11 rounded-xl bg-slate-50 border-none shadow-inner font-bold"><SelectValue placeholder="Gender" /></SelectTrigger>
+                        <SelectContent className="bg-white z-[2000000]"><SelectItem value="male">Male</SelectItem><SelectItem value="female">Female</SelectItem></SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  {(editLeader.level === 'State' || editLeader.level === 'District') && (
+                    <div className="grid md:grid-cols-2 gap-6 p-6 rounded-3xl bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 animate-in fade-in slide-in-from-top-2 duration-300">
+                      <div className="space-y-1.5">
+                        <Label className="text-[10px] font-black uppercase text-accent flex items-center gap-2"><Globe className="w-3.5 h-3.5" /> State / UT *</Label>
+                        <Select value={editLeader.parentRegion} onValueChange={(val) => setEditLeader({...editLeader, parentRegion: val, districtName: ''})}>
+                          <SelectTrigger className="h-11 rounded-xl bg-white dark:bg-slate-800 border-accent/20 font-bold"><SelectValue placeholder="Choose State" /></SelectTrigger>
+                          <SelectContent className="bg-white z-[2000000] max-h-60">{allStates.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+                        </Select>
+                      </div>
+                      {editLeader.level === 'District' && (
+                        <div className="space-y-1.5">
+                          <Label className="text-[10px] font-black uppercase text-accent flex items-center gap-2"><MapPin className="w-3.5 h-3.5" /> District *</Label>
+                          <Select value={editLeader.districtName} onValueChange={(val) => setEditLeader({...editLeader, districtName: val})}>
+                            <SelectTrigger className="h-11 rounded-xl bg-white dark:bg-slate-800 border-accent/20 font-bold"><SelectValue placeholder="Choose District" /></SelectTrigger>
+                            <SelectContent className="bg-white z-[2000000] max-h-60">{editLeader.parentRegion && (INDIA_DATA[editLeader.parentRegion] || []).map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
+                          </Select>
+                        </div>
+                      )}
+                    </div>
                   )}
+                  
+                  <Button type="button" onClick={handleUpdate} disabled={isActionLoading} className="w-full h-16 rounded-2xl bg-primary text-white font-bold shadow-xl hover:bg-secondary transition-all text-base md:text-lg">
+                    {isActionLoading ? <Loader2 className="w-6 h-6 animate-spin" /> : "Save Profile Changes"}
+                  </Button>
                 </div>
               )}
-              
-              <Button type="button" onClick={handleUpdate} disabled={isActionLoading} className="w-full h-16 rounded-2xl bg-primary text-white font-bold shadow-xl hover:bg-secondary transition-all text-base md:text-lg">
-                {isActionLoading ? <Loader2 className="w-6 h-6 animate-spin" /> : "Save Profile Changes"}
-              </Button>
-            </div>
+            </>
           )}
         </DialogContent>
       </Dialog>
