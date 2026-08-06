@@ -3,8 +3,8 @@
 
 import React, { useEffect, useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import { useUser, useCollection, useFirestore, useMemoFirebase } from '@/firebase'
-import { collection, query, orderBy, addDoc, deleteDoc, doc, updateDoc, serverTimestamp, writeBatch, getDocs, where } from 'firebase/firestore'
+import { useUser, useCollection, useFirestore, useMemoFirebase, useDoc } from '@/firebase'
+import { collection, query, orderBy, addDoc, deleteDoc, doc, updateDoc, serverTimestamp, writeBatch, getDocs, where, setDoc } from 'firebase/firestore'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -73,7 +73,6 @@ export default function DemiMembersTerminal() {
   const [search, setSearch] = useState('')
   const [isActionLoading, setIsActionLoading] = useState(false)
   const [isSeedOpen, setIsSeedOpen] = useState(false)
-  const [isVisible, setIsVisible] = useState(true)
 
   const [seedOptions, setSeedOptions] = useState({
     level: 'District' as 'National' | 'State' | 'District',
@@ -82,6 +81,14 @@ export default function DemiMembersTerminal() {
   })
 
   const isRoot = user?.email?.toLowerCase() === 'deydhritiman@gmail.com'
+
+  // Global Visibility Node
+  const settingsRef = useMemoFirebase(() => {
+    if (!db) return null;
+    return doc(db, 'settings', 'demi_visibility');
+  }, [db]);
+  const { data: visibilitySettings, loading: settingsLoading } = useDoc(settingsRef);
+  const isVisible = visibilitySettings?.enabled !== false;
 
   useEffect(() => {
     if (!authLoading && !isRoot) {
@@ -107,6 +114,27 @@ export default function DemiMembersTerminal() {
     const load = officers.reduce((acc, curr: any) => acc + (curr.assignedCount || 0), 0);
     return { total, active, load };
   }, [officers]);
+
+  const handleToggleVisibility = async () => {
+    if (!db || !isRoot || !settingsRef) return;
+    setIsActionLoading(true);
+    try {
+      await setDoc(settingsRef, { 
+        enabled: !isVisible, 
+        updatedAt: serverTimestamp(),
+        updatedBy: user?.email 
+      }, { merge: true });
+      
+      toast({ 
+        title: isVisible ? "Registry Hidden Globally" : "Registry Visible Publicly",
+        description: isVisible ? "Demi members are now hidden from the public portal." : "Demi members are now visible on the public portal."
+      });
+    } catch (e: any) {
+      toast({ variant: "destructive", title: "Update Failed", description: e.message });
+    } finally {
+      setIsActionLoading(false);
+    }
+  };
 
   const handleSeedData = async () => {
     if (!db || !isRoot) return
@@ -158,7 +186,7 @@ export default function DemiMembersTerminal() {
     } catch (e: any) {
       toast({ variant: "destructive", title: "Seed Failed", description: e.message })
     } finally {
-      setIsActionLoading(false)
+      setIsActionLoading(true)
     }
   }
 
@@ -298,7 +326,7 @@ export default function DemiMembersTerminal() {
   const allStates = Object.keys(INDIA_DATA).sort()
   const districtsInState = INDIA_DATA[seedOptions.state] || []
 
-  if (authLoading || !isRoot) {
+  if (authLoading || settingsLoading || !isRoot) {
     return <div className="min-h-screen flex items-center justify-center bg-slate-950"><Loader2 className="w-10 h-10 animate-spin text-red-600" /></div>
   }
 
@@ -317,11 +345,15 @@ export default function DemiMembersTerminal() {
           <div className="flex flex-wrap justify-center gap-3">
              <Button 
                 variant="outline" 
-                onClick={() => setIsVisible(!isVisible)} 
-                className="h-11 px-6 rounded-xl font-bold bg-white/5 border-white/20 text-white hover:bg-white/10 gap-2"
+                onClick={handleToggleVisibility} 
+                disabled={isActionLoading}
+                className={cn(
+                  "h-11 px-6 rounded-xl font-bold bg-white/5 border-white/20 text-white hover:bg-white/10 gap-2",
+                  !isVisible && "text-amber-500 border-amber-500/30"
+                )}
              >
-                {isVisible ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                {isVisible ? "Hide Registry" : "Show Registry"}
+                {isActionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : isVisible ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                {isVisible ? "Hide Registry Globally" : "Show Registry Globally"}
              </Button>
 
              <AlertDialog>

@@ -36,8 +36,8 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { useCollection, useFirestore, useMemoFirebase, useUser } from '@/firebase'
-import { collection, query, orderBy, addDoc, serverTimestamp } from 'firebase/firestore'
+import { useCollection, useFirestore, useMemoFirebase, useUser, useDoc } from '@/firebase'
+import { collection, query, orderBy, addDoc, serverTimestamp, doc } from 'firebase/firestore'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -172,6 +172,14 @@ export default function MembersPage() {
     return result;
   }
 
+  // Global Visibility Node
+  const settingsRef = useMemoFirebase(() => {
+    if (!db) return null;
+    return doc(db, 'settings', 'demi_visibility');
+  }, [db]);
+  const { data: visibilitySettings } = useDoc(settingsRef);
+  const isDemiVisible = visibilitySettings?.enabled !== false;
+
   const membersQuery = useMemoFirebase(() => {
     if (!db) return null;
     return query(collection(db, 'memberProfiles'), orderBy('name', 'asc'));
@@ -286,8 +294,13 @@ export default function MembersPage() {
   }
 
   const members = React.useMemo(() => {
-    return (firestoreMembers || []) as Member[];
-  }, [firestoreMembers]);
+    let list = (firestoreMembers || []) as Member[];
+    // Filter out Demi members if global visibility is OFF
+    if (!isDemiVisible) {
+      list = list.filter(m => m.isDemi !== true);
+    }
+    return list;
+  }, [firestoreMembers, isDemiVisible]);
 
   const filteredMembers = members.filter(m => {
     const matchesSearch = 
@@ -536,7 +549,7 @@ export default function MembersPage() {
                           <div className="space-y-1">
                             <Label className="text-[10px] uppercase font-bold text-slate-400">Gender *</Label>
                             <Select value={newMember.gender} onValueChange={(val: any) => setNewMember({...newMember, gender: val})}>
-                              <SelectTrigger className="h-11 rounded-xl"><SelectValue placeholder="Select" /></SelectTrigger>
+                              <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
                               <SelectContent position="popper" className="z-[1000001] bg-white"><SelectItem value="male">Male</SelectItem><SelectItem value="female">Female</SelectItem></SelectContent>
                             </Select>
                           </div>
