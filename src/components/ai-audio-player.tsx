@@ -27,8 +27,6 @@ import { cn } from '@/lib/utils';
 
 /**
  * AiAudioPlayer: High-fidelity Institutional Announcement Bar.
- * Synchronized with the Global Command Node for real-time broadcasts.
- * Features: Automatic playback attempt, interaction-aware activation, and DSP effects sync.
  */
 export function AiAudioPlayer({ className }: { className?: string }) {
   const db = useFirestore();
@@ -44,7 +42,6 @@ export function AiAudioPlayer({ className }: { className?: string }) {
   const [isVisible, setIsVisible] = useState(true);
   
   const audioRef = useRef<HTMLAudioElement>(null);
-  const autoPlayAttempted = useRef<string | null>(null);
   
   // Web Audio Nodes for Effects
   const audioCtxRef = useRef<AudioContext | null>(null);
@@ -62,14 +59,10 @@ export function AiAudioPlayer({ className }: { className?: string }) {
 
   const { data: settings, loading } = useDoc(settingsRef);
 
-  /**
-   * setupAudioGraph: Initializes the professional broadcast processing pipeline.
-   */
   const setupAudioGraph = useCallback(() => {
     if (!audioRef.current || audioCtxRef.current) return;
 
     try {
-      console.log('[AUDIO-SYSTEM] Establishing Audio Graph...');
       const AudioContextClass = (window.AudioContext || (window as any).webkitAudioContext);
       const ctx = new AudioContextClass();
       audioCtxRef.current = ctx;
@@ -119,10 +112,6 @@ export function AiAudioPlayer({ className }: { className?: string }) {
       const echoWet = ctx.createGain();
       echoWetGainRef.current = echoWet;
 
-      const limiter = ctx.createDynamicsCompressor();
-      limiter.threshold.value = -1;
-      limiter.ratio.value = 20;
-
       const mainGain = ctx.createGain();
       gainNodeRef.current = mainGain;
 
@@ -144,16 +133,12 @@ export function AiAudioPlayer({ className }: { className?: string }) {
       reverbWet.connect(mainGain);
       echoWet.connect(mainGain);
       
-      mainGain.connect(limiter);
-      limiter.connect(ctx.destination);
+      mainGain.connect(ctx.destination);
     } catch (e) {
       console.warn("[AUDIO-PIPELINE] Web Audio initialization failed.", e);
     }
   }, []);
 
-  /**
-   * syncAudioNodes: Maps global Firestore parameters to local audio nodes.
-   */
   const syncAudioNodes = useCallback(() => {
     if (!audioCtxRef.current || !settings) return;
     const ctx = audioCtxRef.current;
@@ -183,13 +168,10 @@ export function AiAudioPlayer({ className }: { className?: string }) {
     if (savedVol) setVolume(parseFloat(savedVol));
   }, []);
 
-  // Handle Playback State Sync and Autoplay Logic
   useEffect(() => {
     if (!mounted || loading || !settings?.enabled || !settings?.audioData || !audioRef.current) return;
 
     const audio = audioRef.current;
-    const annId = settings.audioData.slice(-20);
-    
     setupAudioGraph();
     syncAudioNodes();
 
@@ -200,7 +182,6 @@ export function AiAudioPlayer({ className }: { className?: string }) {
             .then(() => {
               setIsPlaying(true);
               setAutoplayBlocked(false);
-              autoPlayAttempted.current = annId;
             })
             .catch((err) => {
               if (err.name === 'NotAllowedError') {
@@ -215,7 +196,6 @@ export function AiAudioPlayer({ className }: { className?: string }) {
     }
   }, [settings, loading, mounted, setupAudioGraph, syncAudioNodes]);
 
-  // Global Interaction Listener to Resume Blocked Autoplay
   useEffect(() => {
     if (!autoplayBlocked || isPlaying || !mounted) return;
 

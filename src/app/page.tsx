@@ -72,7 +72,7 @@ export default function Home() {
       <section className="relative min-h-[100vh] flex flex-col items-center pt-6 md:pt-10 pb-20 px-4">
         <div className="absolute inset-0 z-0">
           <Image 
-            src="/Human%20R2.jpeg" 
+            src="/Human R2.jpeg" 
             alt="Human Rights Heritage Mural" 
             fill 
             className="object-cover brightness-[0.25] scale-105"
@@ -81,33 +81,29 @@ export default function Home() {
           <div className="absolute inset-0 bg-gradient-to-b from-primary/40 via-primary/20 to-primary/60 dark:from-slate-950/70 dark:via-slate-950/50 dark:to-slate-950/80"></div>
         </div>
 
-        {/* Intelligence Node (Responsive Stacking Correction) */}
         <div className="absolute top-[70px] sm:top-2 left-0 z-20 w-full md:w-auto overflow-hidden">
           <CurrentNews />
         </div>
 
-        {/* NITI Aayog Registration Claim */}
         <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 w-full text-center pointer-events-none px-4">
-          <p className="text-[#D4AF37] font-bold text-[8px] sm:text-xs md:text-base uppercase tracking-[0.1em] sm:tracking-[0.25em] drop-shadow-lg animate-fade-in">
+          <p className="text-[#D4AF37] font-bold text-[8px] sm:text-xs md:text-base uppercase tracking-[0.1em] sm:tracking-[0.25em] drop-shadow-lg">
             Government of India ( Niti Aayog Registered )
           </p>
         </div>
 
-        {/* Institutional Identity Node (Responsive Scaling) */}
         <div className="absolute top-16 right-4 sm:top-8 sm:right-8 z-20 flex items-center gap-2 sm:gap-6 animate-in fade-in slide-in-from-right-4 duration-1000 scale-[0.6] sm:scale-100 origin-right">
           <div className="flex flex-col text-white text-right">
             <span className="font-headline font-bold text-xl md:text-3xl leading-none tracking-tight">HRAT</span>
             <span className="text-[7px] md:text-[10px] font-bold text-accent uppercase tracking-[0.3em]">Justice Shield</span>
           </div>
           <div className="relative w-14 h-14 md:w-24 md:h-24 transition-transform hover:scale-105">
-            <Image src="/HRAT%20Logo.jpeg" alt="HRAT Logo" fill className="object-contain" />
+            <Image src="/HRAT Logo.jpeg" alt="HRAT Logo" fill className="object-contain" />
           </div>
         </div>
 
         <div className="container mx-auto px-0 md:px-4 relative z-10 text-white text-center mt-40 sm:mt-0">
           <div className="max-w-5xl mx-auto space-y-4 md:space-y-6 flex flex-col items-center">
             
-            {/* Logos and Flag */}
             <div className="flex flex-col items-center gap-4">
               <div className="relative w-full max-w-[120px] h-[60px] sm:max-w-[200px] sm:h-[100px] md:max-w-[500px] md:h-[250px] transition-all duration-700">
                 <Image 
@@ -120,7 +116,6 @@ export default function Home() {
               <IndianFlag />
             </div>
 
-            {/* Main Headlines */}
             <div className="flex flex-col items-center gap-2 w-full mt-2 md:mt-4 overflow-hidden">
               <div className="font-headline font-bold text-lg sm:text-3xl md:text-5xl lg:text-6xl tracking-tight leading-tight min-h-[1.5em] flex justify-center items-center w-full">
                 <h1 className="bg-gradient-to-r from-[#FF9933] via-white to-[#138808] bg-clip-text text-transparent italic block drop-shadow-sm px-2 pb-4 text-center">
@@ -208,7 +203,7 @@ export default function Home() {
             </div>
             <h2 className="text-3xl md:text-6xl font-headline font-bold text-primary dark:text-white leading-tight">File a Formal <span className="text-accent italic">Grievance</span></h2>
             <p className="text-primary dark:text-white font-bold text-sm md:text-base">কেবলমাত্র অর্গানাইজেশনের সদস্যদের অভিযোগ জানানোর নিজস্ব ব্যবস্থা</p>
-            <p className="text-slate-500 dark:text-slate-400 text-sm md:text-lg leading-relaxed">
+            <p className="text-slate-50 dark:text-slate-400 text-sm md:text-lg leading-relaxed">
               Submit your concerns directly to our governance cell. Your submission is protected by strict privacy protocols and will be reviewed by the central administration.
             </p>
           </div>

@@ -6,14 +6,13 @@ import { usePathname } from 'next/navigation';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { collection, query, where } from 'firebase/firestore';
 import { isWithinInterval, parseISO, startOfDay, endOfDay } from 'date-fns';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, ShieldCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge';
 
 /**
  * OccasionBanner: High-fidelity festive display area.
  * Features: Fully transparent background, #CFFF04 primary typography, and #FF00FF for "Welcome to HRAT".
- * Optimized for real-time synchronization with the administrative terminal.
- * Updated: Responsive positioning to prevent overlap with central hero content.
  */
 export function OccasionBanner() {
   const db = useFirestore();
@@ -38,7 +37,7 @@ export function OccasionBanner() {
   const DEFAULT_BANNER = {
     title: 'Welcome to HRAT',
     message: 'Human Rights Affairs Trust (Justice Shield) — Standing for your constitutional rights.',
-    imageUrl: '/HRAT%20Logo.jpeg',
+    imageUrl: '/HRAT Logo.jpeg',
     isDefault: true
   };
 
@@ -75,14 +74,14 @@ export function OccasionBanner() {
   const isDefault = activeOccasion.isDefault === true;
 
   return (
-    <div className="absolute top-full md:right-[-200px] mt-24 md:mt-48 z-[110] animate-in fade-in slide-in-from-top-4 duration-700 pointer-events-auto w-full md:w-[500px] left-0 md:left-auto px-4 md:px-0">
+    <div className="absolute top-full md:-right-[200px] mt-24 md:mt-48 z-[110] animate-in fade-in slide-in-from-top-4 duration-700 pointer-events-auto w-full md:w-[500px] left-0 md:left-auto px-4 md:px-0">
       <div className={cn(
         "bg-black/20 md:bg-transparent p-4 md:p-6 rounded-3xl md:rounded-none flex items-center gap-4 md:gap-7 group transition-all duration-700 backdrop-blur-md md:backdrop-blur-none",
         loading && "opacity-80"
       )}>
         <div className="relative w-20 h-20 md:w-32 md:h-32 rounded-2xl md:rounded-[1.5rem] overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.4)] border-2 border-white/20 shrink-0 group-hover:scale-105 transition-transform duration-700 bg-slate-900/40">
           <Image 
-            src={activeOccasion.imageUrl || '/HRAT%20Logo.jpeg'} 
+            src={activeOccasion.imageUrl || '/HRAT Logo.jpeg'} 
             alt={activeOccasion.title} 
             fill 
             className="object-cover" 
