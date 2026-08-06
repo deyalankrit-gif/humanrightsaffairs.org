@@ -22,7 +22,7 @@ service cloud.firestore {
     }
 
     function isInternalStaff() {
-      return isAuthenticated() && getAuthEmail() == 'deyalankrit@gmail.com';
+      return isAuthenticated() && (getAuthEmail() == 'deyalankrit@gmail.com' || getUserRole() == 'admin' || getUserRole() == 'staff');
     }
 
     function isInvestigator() {
@@ -38,11 +38,11 @@ service cloud.firestore {
       );
     }
 
-    // 2. PUBLIC & SETTINGS (HIGH PRIORITY)
-    // These rules are independent of the global override and allow unauthenticated access where needed.
+    // 2. PUBLIC & SETTINGS (TOP PRIORITY)
+    // These must be at the top to ensure unauthenticated public access.
     
     match /settings/{settingId} {
-      allow read: if true;
+      allow get, list, read: if true;
       allow write: if isRoot() || (settingId == 'audio_announcement' && hasPermission('occasions'));
     }
 
@@ -53,7 +53,7 @@ service cloud.firestore {
 
     match /current_news/{newsId} {
       allow read: if true;
-      allow write: if true; 
+      allow write: if hasPermission('occasions') || isRoot(); 
     }
 
     match /ai_announcements/{id} {
@@ -63,7 +63,7 @@ service cloud.firestore {
 
     match /current_news_state/{docId} {
       allow read: if true;
-      allow write: if true;
+      allow write: if hasPermission('occasions') || isRoot();
     }
     
     match /donor_tiers/{tierId} {
@@ -124,7 +124,7 @@ service cloud.firestore {
       allow write: if isRoot();
     }
 
-    // 4. PUBLIC SUBMISSIONS (Atomic Write)
+    // 4. PUBLIC SUBMISSIONS
     match /public_complaints/{complaintId} {
       allow create: if true;
       allow read: if hasPermission('publicComplaints') || 

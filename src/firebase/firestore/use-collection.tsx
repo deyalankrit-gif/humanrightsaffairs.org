@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -66,6 +67,7 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
         
         // Exemption list for public-facing data streams or member-specific filtered queries
         const silentPaths = [
+          'settings',
           'occasions', 
           'events', 
           'current_news',
