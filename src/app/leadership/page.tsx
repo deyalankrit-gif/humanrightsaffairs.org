@@ -171,6 +171,7 @@ export default function LeadershipPage() {
   const [isActionLoading, setIsActionLoading] = useState(false)
   const [isMirror, setIsMirror] = useState(false)
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const { user } = useUser()
   const db = useFirestore()
   const { toast } = useToast()
@@ -178,7 +179,7 @@ export default function LeadershipPage() {
   const [memberSearch, setMemberSearch] = useState("")
 
   // Administrative actions in the mirror are strictly Root-only
-  const isAdmin = user?.email === 'deydhritiman@gmail.com' && isMirror
+  const isAdmin = user?.email?.toLowerCase() === 'deydhritiman@gmail.com' && isMirror
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -199,30 +200,18 @@ export default function LeadershipPage() {
   const { data: firestoreLeaders, loading: dataLoading } = useCollection(firestoreLeadersQuery);
   const { data: membersList } = useCollection(membersQuery);
 
-  /**
-   * LEADERSHIP SORTING ENGINE
-   * Orders personnel based on institutional rank hierarchy.
-   */
   const leaders = React.useMemo(() => {
     const raw = (firestoreLeaders || []) as Leader[];
     
     const getTitleWeight = (title: string) => {
       const t = (title || '').toLowerCase();
-      // Tier 1: Primary Leadership (Chairman, President, Founder)
       if (t.includes('founder') || (t.includes('chairman') && !t.includes('vice')) || (t.includes('president') && !t.includes('vice'))) return 1;
-      // Tier 2: Vice Leadership
       if (t.includes('vice chairman') || t.includes('vice president')) return 2;
-      // Tier 3: General Secretary
       if (t.includes('general secretary') && !t.includes('assistant')) return 3;
-      // Tier 4: Assistant General Secretary
       if (t.includes('assistant general secretary')) return 4;
-      // Tier 5: Treasurer
       if (t.includes('treasurer') && !t.includes('assistant')) return 5;
-      // Tier 6: Assistant Treasurer
       if (t.includes('assistant treasurer')) return 6;
-      // Tier 7: Legal Advisor
       if (t.includes('legal advisor')) return 7;
-      // Tier 8: Others
       return 10;
     };
 
@@ -230,7 +219,6 @@ export default function LeadershipPage() {
       const weightA = getTitleWeight(a.title);
       const weightB = getTitleWeight(b.title);
       if (weightA !== weightB) return weightA - weightB;
-      // Tertiary sort: Alphabetical Name
       return (a.name || '').localeCompare(b.name || '');
     });
   }, [firestoreLeaders]);
@@ -322,7 +310,7 @@ export default function LeadershipPage() {
         imageId: finalImage,
         createdAt: serverTimestamp() 
       })
-      toast({ title: "Leader Commissioned", description: !newLeader.imageId ? "Commissioned with demi photo fallback." : undefined })
+      toast({ title: "Leader Commissioned" })
       setNewLeader({ name: '', title: '', gender: 'male', level: 'Central', parentRegion: '', districtName: '', imageId: '' })
       setIsAddDialogOpen(false)
     } catch (e: any) {
@@ -355,11 +343,17 @@ export default function LeadershipPage() {
       await updateDoc(doc(db, 'leadership', id), { ...data, imageId: finalImage })
       toast({ title: "Leader Profile Updated" })
       setEditLeader(null)
+      setIsEditDialogOpen(false)
     } catch (e: any) {
       toast({ variant: "destructive", title: "Error", description: e.message })
     } finally {
       setIsActionLoading(false)
     }
+  }
+
+  const handleStartEdit = (leader: Leader) => {
+    setEditLeader(leader);
+    setIsEditDialogOpen(true);
   }
 
   const SectionHeading = ({ title, icon: Icon, color, subtitle }: { title: string, icon: any, color: string, subtitle?: string }) => (
@@ -378,8 +372,8 @@ export default function LeadershipPage() {
   )
 
   return (
-    <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
-      <section className="pt-32 md:pt-40 pb-16 md:pb-20 bg-primary text-primary-foreground relative overflow-hidden">
+    <main className="min-h-screen bg-slate-50 dark:bg-slate-950" onClick={() => setEditLeader(null)}>
+      <section className="pt-32 md:pt-40 pb-16 md:pb-20 bg-primary text-primary-foreground relative overflow-hidden" onClick={(e) => e.stopPropagation()}>
         <div className="absolute top-0 right-0 w-1/2 h-full bg-accent/5 -skew-x-12"></div>
         <div className="container mx-auto px-4 text-center relative z-10">
           <div className="inline-flex items-center gap-2 bg-accent/20 text-accent px-4 py-1.5 rounded-full text-xs md:text-sm font-bold border border-accent/30 mb-6">
@@ -513,7 +507,7 @@ export default function LeadershipPage() {
         </div>
       </section>
 
-      <section className="py-16 md:py-24">
+      <section className="py-16 md:py-24" onClick={(e) => e.stopPropagation()}>
         <div className="container mx-auto px-4">
           {dataLoading ? (
             <div className="text-center py-20"><Loader2 className="w-10 h-10 animate-spin text-accent mx-auto mb-4" /></div>
@@ -527,7 +521,6 @@ export default function LeadershipPage() {
                     const isChairman = titleLower.includes("chairman") && !titleLower.includes("vice");
                     const isPresident = titleLower.includes("president") && !titleLower.includes("vice");
                     const isFounder = titleLower.includes("founder");
-                    
                     const isTopTier = isChairman || isPresident || isFounder;
                     
                     return (
@@ -536,7 +529,7 @@ export default function LeadershipPage() {
                         leader={leader} 
                         variant={isTopTier ? "xl" : "large"} 
                         isAdmin={isAdmin} 
-                        onEdit={setEditLeader} 
+                        onEdit={handleStartEdit} 
                         onDelete={handleDelete} 
                       />
                     )
@@ -584,7 +577,6 @@ export default function LeadershipPage() {
                               const titleLower = (leader.title || '').toLowerCase();
                               const isChairman = titleLower.includes("chairman") && !titleLower.includes("vice");
                               const isPresident = titleLower.includes("president") && !titleLower.includes("vice");
-                              
                               const isTopTier = isChairman || isPresident;
                               
                               return (
@@ -593,7 +585,7 @@ export default function LeadershipPage() {
                                   leader={leader} 
                                   variant={isTopTier ? "large" : "default"}
                                   isAdmin={isAdmin} 
-                                  onEdit={setEditLeader} 
+                                  onEdit={handleStartEdit} 
                                   onDelete={handleDelete} 
                                 />
                               )
@@ -634,7 +626,6 @@ export default function LeadershipPage() {
                                      const titleLower = (dl.title || '').toLowerCase();
                                      const isChairman = titleLower.includes("chairman") && !titleLower.includes("vice");
                                      const isPresident = titleLower.includes("president") && !titleLower.includes("vice");
-                                     
                                      const isTopTier = isChairman || isPresident;
                                      
                                      return (
@@ -643,7 +634,7 @@ export default function LeadershipPage() {
                                          leader={dl} 
                                          variant={isTopTier ? "default" : "small"} 
                                          isAdmin={isAdmin} 
-                                         onEdit={setEditLeader} 
+                                         onEdit={handleStartEdit} 
                                          onDelete={handleDelete} 
                                        />
                                      )
@@ -668,8 +659,8 @@ export default function LeadershipPage() {
         </div>
       </section>
 
-      <Dialog open={!!editLeader} onOpenChange={(open) => !open && setEditLeader(null)}>
-        <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="bg-white dark:bg-slate-900 rounded-[2.5rem] border-none shadow-2xl max-h-[90vh] overflow-y-auto flex flex-col p-0">
+      <Dialog open={isEditDialogOpen} onOpenChange={(val) => { if(!val) { setIsEditDialogOpen(false); setEditLeader(null); } }}>
+        <DialogContent className="max-w-xl bg-white dark:bg-slate-900 rounded-[2.5rem] border-none shadow-2xl max-h-[90vh] overflow-y-auto flex flex-col p-0 z-[1000001]">
           <div className="bg-slate-900 pt-14 pb-10 px-8 text-white relative border-b-4 border-accent/20 shrink-0">
              <div className="absolute right-6 top-6"><DialogClose asChild><Button variant="ghost" size="icon" className="rounded-full text-white hover:bg-white/10 h-10 w-10 transition-all"><X className="w-6 h-6" /></Button></DialogClose></div>
              <DialogTitle className="text-2xl font-headline font-bold">Refine Leader Profile</DialogTitle>
@@ -702,7 +693,7 @@ export default function LeadershipPage() {
                   <Label className="text-[10px] font-black uppercase text-slate-500">Chapter Level</Label>
                   <Select value={editLeader.level} onValueChange={(val: any) => setEditLeader({...editLeader, level: val, parentRegion: '', districtName: ''})}>
                     <SelectTrigger className="h-11 rounded-xl bg-slate-50 border-none shadow-inner font-bold"><SelectValue placeholder="Level" /></SelectTrigger>
-                    <SelectContent className="bg-white z-[1000000]">
+                    <SelectContent className="bg-white z-[2000000]">
                       <SelectItem value="Central">Central Council</SelectItem>
                       <SelectItem value="State">State Level</SelectItem>
                       <SelectItem value="District">District Level</SelectItem>
@@ -713,7 +704,7 @@ export default function LeadershipPage() {
                   <Label className="text-[10px] font-black uppercase text-slate-500">Gender</Label>
                   <Select value={editLeader.gender} onValueChange={(val: any) => setEditLeader({...editLeader, gender: val})}>
                     <SelectTrigger className="h-11 rounded-xl bg-slate-50 border-none shadow-inner font-bold"><SelectValue placeholder="Gender" /></SelectTrigger>
-                    <SelectContent className="bg-white z-[1000000]"><SelectItem value="male">Male</SelectItem><SelectItem value="female">Female</SelectItem></SelectContent>
+                    <SelectContent className="bg-white z-[2000000]"><SelectItem value="male">Male</SelectItem><SelectItem value="female">Female</SelectItem></SelectContent>
                   </Select>
                 </div>
               </div>
@@ -724,7 +715,7 @@ export default function LeadershipPage() {
                     <Label className="text-[10px] font-black uppercase text-accent flex items-center gap-2"><Globe className="w-3.5 h-3.5" /> State / UT *</Label>
                     <Select value={editLeader.parentRegion} onValueChange={(val) => setEditLeader({...editLeader, parentRegion: val, districtName: ''})}>
                       <SelectTrigger className="h-11 rounded-xl bg-white dark:bg-slate-800 border-accent/20 font-bold"><SelectValue placeholder="Choose State" /></SelectTrigger>
-                      <SelectContent className="bg-white z-[1000000] max-h-60">{allStates.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+                      <SelectContent className="bg-white z-[2000000] max-h-60">{allStates.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
                     </Select>
                   </div>
                   {editLeader.level === 'District' && (
@@ -732,14 +723,16 @@ export default function LeadershipPage() {
                       <Label className="text-[10px] font-black uppercase text-accent flex items-center gap-2"><MapPin className="w-3.5 h-3.5" /> District *</Label>
                       <Select value={editLeader.districtName} onValueChange={(val) => setEditLeader({...editLeader, districtName: val})}>
                         <SelectTrigger className="h-11 rounded-xl bg-white dark:bg-slate-800 border-accent/20 font-bold"><SelectValue placeholder="Choose District" /></SelectTrigger>
-                        <SelectContent className="bg-white z-[1000000] max-h-60">{editLeader.parentRegion && (INDIA_DATA[editLeader.parentRegion] || []).map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
+                        <SelectContent className="bg-white z-[2000000] max-h-60">{editLeader.parentRegion && (INDIA_DATA[editLeader.parentRegion] || []).map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
                       </Select>
                     </div>
                   )}
                 </div>
               )}
               
-              <Button type="submit" disabled={isActionLoading} className="w-full h-16 rounded-2xl bg-primary text-white font-bold rounded-2xl shadow-xl hover:bg-secondary transition-all text-base md:text-lg">Save Profile Changes</Button>
+              <Button type="button" onClick={handleUpdate} disabled={isActionLoading} className="w-full h-16 rounded-2xl bg-primary text-white font-bold shadow-xl hover:bg-secondary transition-all text-base md:text-lg">
+                {isActionLoading ? <Loader2 className="w-6 h-6 animate-spin" /> : "Save Profile Changes"}
+              </Button>
             </div>
           )}
         </DialogContent>
