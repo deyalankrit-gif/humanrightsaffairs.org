@@ -28,6 +28,7 @@ import { cn } from '@/lib/utils';
 /**
  * AiAudioPlayer: High-fidelity Institutional Announcement Bar.
  * Redesigned for a sleek, minimal vertical footprint.
+ * Features: Auto-dismissal upon completion of playback.
  */
 export function AiAudioPlayer({ className }: { className?: string }) {
   const db = useFirestore();
@@ -41,6 +42,7 @@ export function AiAudioPlayer({ className }: { className?: string }) {
   const [autoplayBlocked, setAutoplayBlocked] = useState(false);
   const [loadError, setLoadError] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
+  const [hasCompleted, setHasCompleted] = useState(false);
   
   const audioRef = useRef<HTMLAudioElement>(null);
   
@@ -170,7 +172,7 @@ export function AiAudioPlayer({ className }: { className?: string }) {
   }, []);
 
   useEffect(() => {
-    if (!mounted || loading || !settings?.enabled || !settings?.audioData || !audioRef.current) return;
+    if (!mounted || loading || !settings?.enabled || !settings?.audioData || !audioRef.current || hasCompleted) return;
 
     const audio = audioRef.current;
     setupAudioGraph();
@@ -195,10 +197,10 @@ export function AiAudioPlayer({ className }: { className?: string }) {
        audio.pause();
        setIsPlaying(false);
     }
-  }, [settings, loading, mounted, setupAudioGraph, syncAudioNodes]);
+  }, [settings, loading, mounted, setupAudioGraph, syncAudioNodes, hasCompleted]);
 
   useEffect(() => {
-    if (!autoplayBlocked || isPlaying || !mounted) return;
+    if (!autoplayBlocked || isPlaying || !mounted || hasCompleted) return;
 
     const handleInteraction = () => {
       if (!audioRef.current || isPlaying || !settings?.isPlaying) return;
@@ -224,7 +226,7 @@ export function AiAudioPlayer({ className }: { className?: string }) {
     window.addEventListener('touchstart', handleInteraction);
 
     return cleanup;
-  }, [autoplayBlocked, isPlaying, mounted, settings?.isPlaying, setupAudioGraph]);
+  }, [autoplayBlocked, isPlaying, mounted, settings?.isPlaying, setupAudioGraph, hasCompleted]);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -235,7 +237,10 @@ export function AiAudioPlayer({ className }: { className?: string }) {
       setLoadError(false);
     };
     const handleTimeUpdate = () => setCurrentTime(audio.currentTime);
-    const handleEnded = () => setIsPlaying(false);
+    const handleEnded = () => {
+      setIsPlaying(false);
+      setHasCompleted(true);
+    };
     const handleAudioError = () => {
       if (settings?.audioData) setLoadError(true);
     };
@@ -291,7 +296,7 @@ export function AiAudioPlayer({ className }: { className?: string }) {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  if (!mounted || loading || !settings?.enabled || !settings?.audioData || !isVisible) return null;
+  if (!mounted || loading || !settings?.enabled || !settings?.audioData || !isVisible || hasCompleted) return null;
 
   return (
     <div className={cn("w-full py-1.5 md:py-2 bg-white/95 dark:bg-slate-950/95 backdrop-blur-md border-b border-slate-100 dark:border-slate-800 transition-all duration-500", className)}>
