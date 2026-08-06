@@ -119,6 +119,11 @@ service cloud.firestore {
       allow write: if hasPermission('occasions');
     }
 
+    match /settings/demi_visibility {
+      allow read: if true;
+      allow write: if isRoot();
+    }
+
     // 4. SECURE USER REGISTRY
     match /users/{userEmail} {
       allow read: if isAuthenticated() && (
