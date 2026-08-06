@@ -1,7 +1,7 @@
 
 "use client"
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { useUser, useCollection, useFirestore, useMemoFirebase } from '@/firebase'
 import { collection, query, orderBy, addDoc, deleteDoc, doc, updateDoc, serverTimestamp, writeBatch, getDocs, where } from 'firebase/firestore'
@@ -103,7 +103,7 @@ export default function DemiMembersTerminal() {
   const stats = useMemo(() => {
     if (!officers) return { total: 0, active: 0, load: 0 };
     const total = officers.length;
-    const active = officers.filter((o: any) => o.status === 'Active').length;
+    const active = officers.filter((o: any) => o.status === 'active').length;
     const load = officers.reduce((acc, curr: any) => acc + (curr.assignedCount || 0), 0);
     return { total, active, load };
   }, [officers]);
