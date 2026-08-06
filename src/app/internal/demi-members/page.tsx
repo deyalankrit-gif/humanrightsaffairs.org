@@ -24,7 +24,9 @@ import {
   CheckCircle2,
   Globe,
   Building2,
-  X
+  X,
+  Eye,
+  EyeOff
 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import {
@@ -71,6 +73,7 @@ export default function DemiMembersTerminal() {
   const [search, setSearch] = useState('')
   const [isActionLoading, setIsActionLoading] = useState(false)
   const [isSeedOpen, setIsSeedOpen] = useState(false)
+  const [isVisible, setIsVisible] = useState(true)
 
   const [seedOptions, setSeedOptions] = useState({
     level: 'District' as 'National' | 'State' | 'District',
@@ -93,6 +96,18 @@ export default function DemiMembersTerminal() {
 
   const { data: demiMembers, loading: dataLoading } = useCollection(demiQuery);
 
+  const officers = useMemo(() => {
+    return (demiMembers || []).filter(o => o && typeof o === 'object' && o.id);
+  }, [demiMembers]);
+
+  const stats = useMemo(() => {
+    if (!officers) return { total: 0, active: 0, load: 0 };
+    const total = officers.length;
+    const active = officers.filter((o: any) => o.status === 'Active').length;
+    const load = officers.reduce((acc, curr: any) => acc + (curr.assignedCount || 0), 0);
+    return { total, active, load };
+  }, [officers]);
+
   const handleSeedData = async () => {
     if (!db || !isRoot) return
     setIsActionLoading(true)
@@ -109,7 +124,6 @@ export default function DemiMembersTerminal() {
         const name = `${firstName} ${lastName}`;
         const designation = DESIGNATIONS[Math.floor(Math.random() * DESIGNATIONS.length)];
         
-        // Intelligent Gender Assignment
         let gender: 'male' | 'female' = 'male';
         if (FEMALE_FIRST_NAMES.includes(firstName)) {
           gender = 'female';
@@ -300,7 +314,16 @@ export default function DemiMembersTerminal() {
              <p className="text-slate-400 text-[11px] uppercase font-black">Visual Population Management Terminal</p>
           </div>
           
-          <div className="flex gap-3">
+          <div className="flex flex-wrap justify-center gap-3">
+             <Button 
+                variant="outline" 
+                onClick={() => setIsVisible(!isVisible)} 
+                className="h-11 px-6 rounded-xl font-bold bg-white/5 border-white/20 text-white hover:bg-white/10 gap-2"
+             >
+                {isVisible ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                {isVisible ? "Hide Registry" : "Show Registry"}
+             </Button>
+
              <AlertDialog>
                 <AlertDialogTrigger asChild>
                    <Button variant="destructive" disabled={isActionLoading || !demiMembers?.length} className="h-11 px-6 rounded-xl font-bold gap-2">
@@ -377,94 +400,104 @@ export default function DemiMembersTerminal() {
       </header>
 
       <section className="py-8 container mx-auto px-4 max-w-5xl">
-         <div className="relative mb-12">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <Input 
-              placeholder="Search demi members by name, state or district..." 
-              className="pl-10 h-12 rounded-xl bg-white dark:bg-slate-900 shadow-sm border-none"
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-            />
-         </div>
+         {isVisible ? (
+           <>
+             <div className="relative mb-12">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <Input 
+                  placeholder="Search demi members by name, state or district..." 
+                  className="pl-10 h-12 rounded-xl bg-white dark:bg-slate-900 shadow-sm border-none"
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                />
+             </div>
 
-         {dataLoading ? (
-           <div className="text-center py-20"><Loader2 className="w-10 h-10 animate-spin text-red-600 mx-auto" /></div>
-         ) : (
-           <div className="space-y-16">
-              {/* National Group */}
-              {groupings.central.length > 0 && (
-                <div className="space-y-6">
-                  <div className="flex items-center justify-between px-2">
-                    <div className="flex items-center gap-3">
-                      <ShieldCheck className="w-5 h-5 text-red-600" />
-                      <h4 className="text-sm font-black uppercase tracking-[0.25em] text-primary dark:text-white">Central Committee</h4>
-                    </div>
-                    <PurgeButton members={groupings.central} label="Central Council" />
-                  </div>
-                  <div className="h-px w-full bg-slate-200 dark:bg-slate-800 mb-6"></div>
-                  <div className="grid gap-4">
-                    {groupings.central.map(renderMemberCard)}
-                  </div>
-                </div>
-              )}
-
-              {/* State Groups */}
-              {Object.keys(groupings.stateGroups).length > 0 && (
-                <div className="space-y-12">
-                  {Object.keys(groupings.stateGroups).sort().map(state => (
-                    <div key={state} className="space-y-4">
+             {dataLoading ? (
+               <div className="text-center py-20"><Loader2 className="w-10 h-10 animate-spin text-red-600 mx-auto" /></div>
+             ) : (
+               <div className="space-y-16">
+                  {/* National Group */}
+                  {groupings.central.length > 0 && (
+                    <div className="space-y-6">
                       <div className="flex items-center justify-between px-2">
                         <div className="flex items-center gap-3">
-                          <Globe className="w-6 h-6 text-emerald-600" />
-                          <h4 className="text-base font-black uppercase tracking-[0.2em] text-primary dark:text-white">
-                            {state} <span className="text-emerald-500 font-bold ml-2">State Chapter</span>
-                          </h4>
+                          <ShieldCheck className="w-5 h-5 text-red-600" />
+                          <h4 className="text-sm font-black uppercase tracking-[0.25em] text-primary dark:text-white">Central Committee</h4>
                         </div>
-                        <PurgeButton members={groupings.stateGroups[state]} label={state} />
+                        <PurgeButton members={groupings.central} label="Central Council" />
                       </div>
                       <div className="h-px w-full bg-slate-200 dark:bg-slate-800 mb-6"></div>
                       <div className="grid gap-4">
-                        {groupings.stateGroups[state].map(renderMemberCard)}
+                        {groupings.central.map(renderMemberCard)}
                       </div>
                     </div>
-                  ))}
-                </div>
-              )}
+                  )}
 
-              {/* District Groups */}
-              {Object.keys(groupings.districtGroups).length > 0 && (
-                <div className="space-y-20">
-                  {Object.keys(groupings.districtGroups).sort().map(state => (
-                    <div key={state} className="space-y-12">
-                      {Object.keys(groupings.districtGroups[state]).sort().map(district => (
-                        <div key={district} className="space-y-4">
+                  {/* State Groups */}
+                  {Object.keys(groupings.stateGroups).length > 0 && (
+                    <div className="space-y-12">
+                      {Object.keys(groupings.stateGroups).sort().map(state => (
+                        <div key={state} className="space-y-4">
                           <div className="flex items-center justify-between px-2">
                             <div className="flex items-center gap-3">
-                              <Building2 className="w-6 h-6 text-blue-600" />
+                              <Globe className="w-6 h-6 text-emerald-600" />
                               <h4 className="text-base font-black uppercase tracking-[0.2em] text-primary dark:text-white">
-                                {district} <span className="text-blue-500 font-bold ml-2">District Cell</span>
-                                <span className="text-[10px] text-slate-400 font-medium ml-2">({state})</span>
+                                {state} <span className="text-emerald-500 font-bold ml-2">State Chapter</span>
                               </h4>
                             </div>
-                            <PurgeButton members={groupings.districtGroups[state][district]} label={`${district} (${state})`} />
+                            <PurgeButton members={groupings.stateGroups[state]} label={state} />
                           </div>
                           <div className="h-px w-full bg-slate-200 dark:bg-slate-800 mb-6"></div>
                           <div className="grid gap-4">
-                            {groupings.districtGroups[state][district].map(renderMemberCard)}
+                            {groupings.stateGroups[state].map(renderMemberCard)}
                           </div>
                         </div>
                       ))}
                     </div>
-                  ))}
-                </div>
-              )}
+                  )}
 
-              {filtered.length === 0 && (
-                <div className="text-center py-32 opacity-30">
-                   <Users className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-                   <p className="text-sm font-bold uppercase tracking-widest">Simulated registry empty</p>
-                </div>
-              )}
+                  {/* District Groups */}
+                  {Object.keys(groupings.districtGroups).length > 0 && (
+                    <div className="space-y-20">
+                      {Object.keys(groupings.districtGroups).sort().map(state => (
+                        <div key={state} className="space-y-12">
+                          {Object.keys(groupings.districtGroups[state]).sort().map(district => (
+                            <div key={district} className="space-y-4">
+                              <div className="flex items-center justify-between px-2">
+                                <div className="flex items-center gap-3">
+                                  <Building2 className="w-6 h-6 text-blue-600" />
+                                  <h4 className="text-base font-black uppercase tracking-[0.2em] text-primary dark:text-white">
+                                    {district} <span className="text-blue-500 font-bold ml-2">District Cell</span>
+                                    <span className="text-[10px] text-slate-400 font-medium ml-2">({state})</span>
+                                  </h4>
+                                </div>
+                                <PurgeButton members={groupings.districtGroups[state][district]} label={`${district} (${state})`} />
+                              </div>
+                              <div className="h-px w-full bg-slate-200 dark:bg-slate-800 mb-6"></div>
+                              <div className="grid gap-4">
+                                {groupings.districtGroups[state][district].map(renderMemberCard)}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {filtered.length === 0 && (
+                    <div className="text-center py-32 opacity-30">
+                       <Users className="w-16 h-16 text-slate-300 mx-auto mb-4" />
+                       <p className="text-sm font-bold uppercase tracking-widest">Simulated registry empty</p>
+                    </div>
+                  )}
+               </div>
+             )}
+           </>
+         ) : (
+           <div className="text-center py-48 bg-white dark:bg-slate-900 rounded-[4rem] border-4 border-dashed border-slate-100 dark:border-slate-800 opacity-40 animate-in fade-in zoom-in-95 duration-500">
+              <EyeOff className="w-24 h-24 mx-auto mb-6 text-slate-200" />
+              <h3 className="text-3xl font-headline font-bold text-slate-400">Registry Visibility Suspended</h3>
+              <p className="text-sm font-bold uppercase tracking-widest mt-2">Click "Show Registry" to restore population view</p>
            </div>
          )}
       </section>
