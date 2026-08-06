@@ -77,7 +77,8 @@ export default function DemiMembersTerminal() {
   const [seedOptions, setSeedOptions] = useState({
     level: 'District' as 'National' | 'State' | 'District',
     state: 'West Bengal',
-    district: 'North 24 Parganas'
+    district: 'North 24 Parganas',
+    gender: 'all' as 'all' | 'male' | 'female'
   })
 
   const isRoot = user?.email?.toLowerCase() === 'deydhritiman@gmail.com'
@@ -144,10 +145,15 @@ export default function DemiMembersTerminal() {
       const batch = writeBatch(db)
       const count = seedOptions.level === 'National' ? 5 : 10;
       
-      const ALL_FIRST_NAMES = [...MALE_FIRST_NAMES, ...FEMALE_FIRST_NAMES, ...UNISEX_FIRST_NAMES];
+      let availableFirstNames = [...MALE_FIRST_NAMES, ...FEMALE_FIRST_NAMES, ...UNISEX_FIRST_NAMES];
+      if (seedOptions.gender === 'male') {
+        availableFirstNames = [...MALE_FIRST_NAMES, ...UNISEX_FIRST_NAMES];
+      } else if (seedOptions.gender === 'female') {
+        availableFirstNames = [...FEMALE_FIRST_NAMES, ...UNISEX_FIRST_NAMES];
+      }
 
       for (let i = 0; i < count; i++) {
-        const firstName = ALL_FIRST_NAMES[Math.floor(Math.random() * ALL_FIRST_NAMES.length)];
+        const firstName = availableFirstNames[Math.floor(Math.random() * availableFirstNames.length)];
         const lastName = LAST_NAMES[Math.floor(Math.random() * LAST_NAMES.length)];
         const name = `${firstName} ${lastName}`;
         const designation = DESIGNATIONS[Math.floor(Math.random() * DESIGNATIONS.length)];
@@ -186,7 +192,7 @@ export default function DemiMembersTerminal() {
     } catch (e: any) {
       toast({ variant: "destructive", title: "Seed Failed", description: e.message })
     } finally {
-      setIsActionLoading(true)
+      setIsActionLoading(false)
     }
   }
 
@@ -385,7 +391,7 @@ export default function DemiMembersTerminal() {
                 <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="max-w-md rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden">
                    <div className="bg-slate-900 p-8 text-white">
                       <DialogTitle className="text-2xl font-headline font-bold">Seed Protocol</DialogTitle>
-                      <DialogDescription className="text-slate-400 mt-1">Select the target chapter for population simulation.</DialogDescription>
+                      <DialogDescription className="text-slate-400 mt-1">Select the target chapter and population parameters.</DialogDescription>
                    </div>
                    <div className="p-8 space-y-6">
                       <div className="space-y-4">
@@ -420,6 +426,18 @@ export default function DemiMembersTerminal() {
                               </Select>
                            </div>
                          )}
+
+                         <div className="space-y-2">
+                            <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Gender Protocol</Label>
+                            <Select value={seedOptions.gender} onValueChange={(val: any) => setSeedOptions({...seedOptions, gender: val})}>
+                               <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
+                               <SelectContent position="popper" className="bg-white z-[1000001]">
+                                  <SelectItem value="all">Mixed Population</SelectItem>
+                                  <SelectItem value="male">Male Only</SelectItem>
+                                  <SelectItem value="female">Female Only</SelectItem>
+                               </SelectContent>
+                            </Select>
+                         </div>
                       </div>
                       <Button onClick={handleSeedData} disabled={isActionLoading} className="w-full h-12 bg-primary text-white font-bold rounded-xl shadow-lg">
                          {isActionLoading ? <Loader2 className="animate-spin" /> : "Authorize Seeding"}
