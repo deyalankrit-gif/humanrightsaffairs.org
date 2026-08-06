@@ -121,16 +121,16 @@ function LeaderCard({ leader, variant = "default", isAdmin, onEdit, onDelete }: 
         <div className="absolute inset-0 bg-gradient-to-t from-primary/90 via-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-end justify-center pb-8 z-10">
           {isAdmin && (
             <div className="flex gap-3 animate-in fade-in slide-in-from-bottom-2 duration-300">
-              <Button onClick={() => onEdit?.(leader)} size="icon" className="bg-white dark:bg-slate-800 text-primary dark:text-white rounded-full hover:bg-secondary hover:text-white transition-colors border border-white/20 shadow-2xl h-11 w-11">
+              <Button onClick={(e) => { e.stopPropagation(); onEdit?.(leader); }} size="icon" className="bg-white dark:bg-slate-800 text-primary dark:text-white rounded-full hover:bg-secondary hover:text-white transition-colors border border-white/20 shadow-2xl h-11 w-11">
                 <Edit className="w-5 h-5" />
               </Button>
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button size="icon" className="bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors border border-white/20 shadow-2xl h-11 w-11">
+                  <Button size="icon" className="bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors border border-white/20 shadow-2xl h-11 w-11" onClick={(e) => e.stopPropagation()}>
                     <Trash2 className="w-5 h-5" />
                   </Button>
                 </AlertDialogTrigger>
-                <AlertDialogContent className="rounded-[2.5rem] border-none shadow-2xl bg-white dark:bg-slate-900">
+                <AlertDialogContent className="rounded-[2.5rem] border-none shadow-2xl bg-white dark:bg-slate-900" onClick={(e) => e.stopPropagation()}>
                   <AlertDialogHeader>
                     <AlertDialogTitle className="text-xl font-headline font-bold text-primary dark:text-white">Confirm Deletion</AlertDialogTitle>
                     <AlertDialogDescription className="text-slate-600 dark:text-slate-400 font-medium leading-relaxed">
@@ -382,8 +382,8 @@ export default function LeadershipPage() {
   )
 
   return (
-    <main className="min-h-screen bg-slate-50 dark:bg-slate-950" onClick={() => setEditLeader(null)}>
-      <section className="pt-32 md:pt-40 pb-16 md:pb-20 bg-primary text-primary-foreground relative overflow-hidden" onClick={(e) => e.stopPropagation()}>
+    <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
+      <section className="pt-32 md:pt-40 pb-16 md:pb-20 bg-primary text-primary-foreground relative overflow-hidden">
         <div className="absolute top-0 right-0 w-1/2 h-full bg-accent/5 -skew-x-12"></div>
         <div className="container mx-auto px-4 text-center relative z-10">
           <div className="inline-flex items-center gap-2 bg-accent/20 text-accent px-4 py-1.5 rounded-full text-xs md:text-sm font-bold border border-accent/30 mb-6">
@@ -517,7 +517,7 @@ export default function LeadershipPage() {
         </div>
       </section>
 
-      <section className="py-16 md:py-24" onClick={(e) => e.stopPropagation()}>
+      <section className="py-16 md:py-24">
         <div className="container mx-auto px-4">
           {dataLoading ? (
             <div className="text-center py-20"><Loader2 className="w-10 h-10 animate-spin text-accent mx-auto mb-4" /></div>
@@ -670,7 +670,7 @@ export default function LeadershipPage() {
       </section>
 
       <Dialog open={isEditDialogOpen} onOpenChange={(val) => { if(!val) { setIsEditDialogOpen(false); setEditLeader(null); } }}>
-        <DialogContent className="max-w-xl bg-white dark:bg-slate-900 rounded-[2.5rem] border-none shadow-2xl max-h-[90vh] overflow-y-auto flex flex-col p-0 z-[1000001]">
+        <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="max-w-xl bg-white dark:bg-slate-900 rounded-[2.5rem] border-none shadow-2xl max-h-[90vh] overflow-y-auto flex flex-col p-0 z-[1000001]">
           {editStep === 'confirm' ? (
             <div className="p-10 space-y-8 animate-in fade-in zoom-in-95 duration-500">
                <div className="flex flex-col items-center text-center space-y-6">
