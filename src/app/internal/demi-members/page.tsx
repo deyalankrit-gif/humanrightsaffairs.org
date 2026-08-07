@@ -57,11 +57,16 @@ import { cn } from '@/lib/utils'
 import { Footer } from '@/components/footer'
 import { INDIA_DATA } from '@/lib/india-data'
 
-const MALE_FIRST_NAMES = ["Sourav", "Abhishek", "Sahil", "Bikash", "Krishna", "Subhankar", "Anthony", "Zakir", "David", "Buddhadeb", "Arpan", "Tanmoy", "Mayank", "Piyush", "Vikram", "Indranil", "Ritam", "Amarendra", "Alok", "Krishnamurthy", "Sanjeev", "Pankaj", "Atanu", "Nirmal", "Jishnu", "Tarun"]
-const FEMALE_FIRST_NAMES = ["Rumpa", "Anjali", "Sujata", "Fatema", "Mousumi", "Savita", "Rajeshwari", "Meenakshi", "Pallavi", "Suchitra", "Amita", "Debjani", "Deepali", "Tapasya"]
-const UNISEX_FIRST_NAMES = ["Gurpreet", "Harpreet"]
+// --- HIGH-FIDELITY BENGALI DATASET (80% Distribution) ---
+const BENGALI_MALE = ["Sourav", "Subrata", "Anirban", "Debasish", "Proloy", "Abhijit", "Tapas", "Bikash", "Chiranjit", "Suman", "Pradip", "Aloke", "Niladri", "Swapan", "Uttam", "Biswajit", "Somnath", "Joydeep", "Rajat", "Sandip", "Arindam", "Partha", "Kalyan", "Indranil", "Tanmoy", "Sujit", "Buddhadeb", "Manik", "Atanu", "Shubhankar", "Kaushik", "Ritam", "Soumitra", "Satyajit", "Mrinal", "Palash", "Subhodeep", "Amartya", "Siddhartha", "Dipankar", "Arijit", "Barun", "Chinmoy", "Debabrata", "Gourab", "Hiran", "Jiban", "Kanchan", "Lokenath", "Mihir", "Narayan", "Probir", "Ranajit", "Samir", "Tarun"];
+const BENGALI_FEMALE = ["Moushumi", "Rumpa", "Sujata", "Fatema", "Anjali", "Priyanka", "Mousumi", "Savita", "Rajeshwari", "Meenakshi", "Pallavi", "Suchitra", "Amita", "Debjani", "Deepali", "Tapasya", "Sneha", "Mitali", "Keya", "Piyali", "Sarmistha", "Jhuma", "Kakoli", "Paramita", "Soma", "Madhumita", "Arpita", "Barnali", "Chandana", "Dolon", "Gargi", "Ishani", "Jui", "Koyel", "Lopamudra", "Monalisa", "Nandini", "Oindrila", "Payel", "Rimpa", "Sanchita", "Tanushree", "Urmila", "Vaishali", "Alokananda", "Basanti", "Chaitali", "Damini", "Eshana"];
+const BENGALI_SURNAME = ["Chatterjee", "Bhattacharya", "Naskar", "Halder", "Biswas", "Roy", "Mukherjee", "Molla", "Mondal", "Sardar", "Sengupta", "Das", "Sarkar", "Dutta", "Bannerjee", "Ghosh", "Bose", "Sen", "Maiti", "Samanta", "Pal", "Poddar", "Bhowmick", "Pramanik", "Adhikary", "Bagchi", "Chakraborty", "Ganguly", "Sanyal", "Thakur", "Acharya", "Banik", "Basak", "Chanda", "De", "Dhar", "Guha", "Hazra", "Jana", "Kar", "Kundu", "Laha", "Malakar", "Nag", "Nath", "Rakshit", "Ray", "Sil"];
 
-const LAST_NAMES = ["Chatterjee", "Bhattacharya", "Naskar", "Sheikh", "Kaur", "Halder", "Biswas", "Roy", "Gomes", "Mukhopadhyay", "Molla", "Mondal", "D'Souza", "Khatun", "Sardar", "Dhillon", "Sengupta", "Das", "Biswas", "Kumari", "Tiwari", "Mahanta", "Khanna", "Singh", "Iyer", "Mohanty", "Sharma", "Bhardwaj", "Patil", "Patra", "V", "Yadav", "Joshi", "Sarkar", "Rawat", "Kumar", "Reddy", "Dutta", "Jena"]
+// --- DIVERSE INDIAN DATASET (20% Distribution) ---
+const OTHER_MALE = ["Abhishek", "Sahil", "Krishna", "Anthony", "Zakir", "David", "Mayank", "Piyush", "Vikram", "Amarendra", "Sanjeev", "Pankaj", "Jishnu", "Tarun", "Rahul", "Arjun", "Manish", "Rohan", "Aditya", "Sameer", "Yash", "Veer", "Aryan", "Kabir", "Ishaan", "Vivaan", "Advait", "Vihaan", "Reyansh", "Aarav", "Ayaan", "Dhruv", "Krrish", "Madhav", "Parth", "Raghav", "Sai", "Tushar", "Utkarsh", "Yuvan"];
+const OTHER_FEMALE = ["Raisa", "Ananya", "Diya", "Ishani", "Kavya", "Myra", "Navya", "Saanvi", "Zara", "Zoya", "Aisha", "Meher", "Noor", "Sana", "Pari", "Jia", "Sia", "Tia", "Mira", "Leela", "Aditi", "Bhavna", "Isha", "Khushi", "Neha", "Pooja", "Riya", "Tanvi", "Vanya"];
+const OTHER_SURNAME = ["Sheikh", "Kaur", "D'Souza", "Khatun", "Dhillon", "Kumari", "Tiwari", "Khanna", "Singh", "Iyer", "Mohanty", "Sharma", "Bhardwaj", "Patil", "Patra", "Yadav", "Joshi", "Rawat", "Kumar", "Reddy", "Jena", "Gupta", "Malhotra", "Verma", "Kapoor", "Aggarwal", "Bansal", "Chauhan", "Deshmukh", "Hegde", "Kulkarni", "Menon", "Nair", "Pillai", "Rao", "Trivedi"];
+
 const DESIGNATIONS = ["District Observer", "General Member", "Volunteer", "Executive Member", "Publicity Secretary", "District Secretary", "Treasurer", "Board Member", "Chapter Advisor"]
 
 export default function DemiMembersTerminal() {
@@ -111,7 +116,7 @@ export default function DemiMembersTerminal() {
   const stats = useMemo(() => {
     if (!officers) return { total: 0, active: 0, load: 0 };
     const total = officers.length;
-    const active = officers.filter((o: any) => o.status === 'active').length;
+    const active = officers.filter((o: any) => o.status === 'Active').length;
     const load = officers.reduce((acc, curr: any) => acc + (curr.assignedCount || 0), 0);
     return { total, active, load };
   }, [officers]);
@@ -142,34 +147,66 @@ export default function DemiMembersTerminal() {
     setIsActionLoading(true)
     
     try {
+      // 1. Gather all existing names to ensure absolute uniqueness
+      const existingNames = new Set(
+        (demiMembers || []).map((m: any) => (m.name || '').toLowerCase().trim())
+      )
+
       const batch = writeBatch(db)
       const count = seedOptions.level === 'National' ? 5 : 10;
-      
-      let availableFirstNames = [...MALE_FIRST_NAMES, ...FEMALE_FIRST_NAMES, ...UNISEX_FIRST_NAMES];
-      if (seedOptions.gender === 'male') {
-        availableFirstNames = [...MALE_FIRST_NAMES, ...UNISEX_FIRST_NAMES];
-      } else if (seedOptions.gender === 'female') {
-        availableFirstNames = [...FEMALE_FIRST_NAMES, ...UNISEX_FIRST_NAMES];
-      }
+      const currentBatchNames = new Set<string>();
 
       for (let i = 0; i < count; i++) {
-        const firstName = availableFirstNames[Math.floor(Math.random() * availableFirstNames.length)];
-        const lastName = LAST_NAMES[Math.floor(Math.random() * LAST_NAMES.length)];
-        const name = `${firstName} ${lastName}`;
-        const designation = DESIGNATIONS[Math.floor(Math.random() * DESIGNATIONS.length)];
-        
+        let attempts = 0;
+        let finalName = '';
         let gender: 'male' | 'female' = 'male';
-        if (FEMALE_FIRST_NAMES.includes(firstName)) {
-          gender = 'female';
-        } else if (UNISEX_FIRST_NAMES.includes(firstName)) {
-          gender = Math.random() > 0.5 ? 'male' : 'female';
+
+        // 2. Optimized uniqueness generation loop
+        while (attempts < 100) {
+          // Determine Gender per profile
+          if (seedOptions.gender === 'all') {
+            gender = Math.random() > 0.5 ? 'male' : 'female';
+          } else {
+            gender = seedOptions.gender as 'male' | 'female';
+          }
+
+          // Determine Regional Origin (80% Bengali Distribution)
+          const isBengali = Math.random() < 0.8;
+          let firstName = '';
+          let lastName = '';
+
+          if (isBengali) {
+            firstName = gender === 'male' 
+              ? BENGALI_MALE[Math.floor(Math.random() * BENGALI_MALE.length)]
+              : BENGALI_FEMALE[Math.floor(Math.random() * BENGALI_FEMALE.length)];
+            lastName = BENGALI_SURNAME[Math.floor(Math.random() * BENGALI_SURNAME.length)];
+          } else {
+            firstName = gender === 'male' 
+              ? OTHER_MALE[Math.floor(Math.random() * OTHER_MALE.length)]
+              : OTHER_FEMALE[Math.floor(Math.random() * OTHER_FEMALE.length)];
+            lastName = OTHER_SURNAME[Math.floor(Math.random() * OTHER_SURNAME.length)];
+          }
+
+          const candidateName = `${firstName} ${lastName}`;
+          const normalized = candidateName.toLowerCase().trim();
+
+          // 3. Uniqueness Check
+          if (!existingNames.has(normalized) && !currentBatchNames.has(normalized)) {
+            finalName = candidateName;
+            currentBatchNames.add(normalized);
+            break;
+          }
+          attempts++;
         }
 
+        if (!finalName) continue; // Safety abort for low probability collisions
+
+        const designation = DESIGNATIONS[Math.floor(Math.random() * DESIGNATIONS.length)];
         const memberId = `${seedOptions.level === 'National' ? 'NAT' : seedOptions.state.substring(0,3).toUpperCase()}DEM${Math.floor(1000 + Math.random() * 9000)}`;
         
         const docRef = doc(collection(db, 'memberProfiles'))
         batch.set(docRef, {
-          name,
+          name: finalName,
           designation,
           level: seedOptions.level === 'National' ? 'National' : seedOptions.level,
           stateName: seedOptions.level === 'National' ? 'Central Council' : seedOptions.state,
@@ -556,3 +593,4 @@ export default function DemiMembersTerminal() {
     </main>
   )
 }
+
