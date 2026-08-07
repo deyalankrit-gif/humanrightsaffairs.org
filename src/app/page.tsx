@@ -101,7 +101,7 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="container mx-auto px-0 md:px-4 relative z-10 text-white text-center mt-52 sm:mt-0">
+        <div className="container mx-auto px-0 md:px-4 relative z-10 text-white text-center mt-80 sm:mt-0">
           <div className="max-w-5xl mx-auto space-y-4 md:space-y-6 flex flex-col items-center">
             
             <div className="flex flex-col items-center gap-4">
