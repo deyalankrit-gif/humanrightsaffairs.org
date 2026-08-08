@@ -8,7 +8,7 @@ import { doc, setDoc, serverTimestamp, increment, arrayUnion } from 'firebase/fi
 /**
  * VisitorTracker captures real-time technical and geographic metadata.
  * Updated: Now tracks both individual page views and full website visits (sessions) on a daily basis.
- * Refined: Added status checks to handle non-JSON responses from external APIs.
+ * Refined: Added IP Address capture and automated Bot/Crawler detection.
  */
 export function VisitorTracker() {
   const db = useFirestore();
@@ -30,6 +30,9 @@ export function VisitorTracker() {
       const userAgent = window.navigator.userAgent;
       const platform = window.navigator.platform;
       
+      // Automated Bot Detection Node
+      const isBot = /bot|googlebot|crawler|spider|robot|crawling|lighthouse|bingbot|yandex|slurp/i.test(userAgent);
+      
       const isTablet = /(ipad|tablet|(android(?!.*mobile))|(windows(?!.*phone)(.*touch))|kindle|playbook|silk|(puffin(?!.*(IP|AP|WP))))/i.test(userAgent);
       const isMobile = /iPhone|iPod|Android|BlackBerry|IEMobile|Opera Mini/i.test(userAgent) && !isTablet;
       
@@ -43,13 +46,14 @@ export function VisitorTracker() {
       else if (userAgent.includes("Safari")) browser = "Safari";
       else if (userAgent.includes("Edge")) browser = "Edge";
 
-      let geoData = { city: "Kolkata", country: "IN", state: "West Bengal", region: "Asia/Kolkata" };
+      let geoData = { ip: "0.0.0.0", city: "Kolkata", country: "IN", state: "West Bengal", region: "Asia/Kolkata" };
       try {
         const response = await fetch('https://ipapi.co/json/');
         if (response.ok) {
           const data = await response.json();
           if (data && !data.error) {
             geoData = {
+              ip: data.ip || "0.0.0.0",
               city: data.city || "Unknown",
               country: data.country_name || "IN",
               state: data.region || "Unknown",
@@ -67,6 +71,8 @@ export function VisitorTracker() {
       const updatePayload: any = {
         name: user?.displayName || 'Anonymous Guest',
         email: user?.email || '',
+        ipAddress: geoData.ip,
+        isBot,
         deviceType,
         browser,
         os: platform,

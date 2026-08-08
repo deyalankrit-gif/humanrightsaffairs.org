@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useEffect, useState, useMemo } from 'react'
@@ -31,7 +30,12 @@ import {
   Activity,
   Circle,
   Navigation,
-  Cpu
+  Cpu,
+  Fingerprint,
+  X,
+  FileSearch,
+  Eye,
+  Bot
 } from 'lucide-react'
 import { 
   BarChart, 
@@ -45,7 +49,17 @@ import {
   Pie,
   Cell
 } from 'recharts'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogClose
+} from "@/components/ui/dialog"
+import { ScrollArea } from '@/components/ui/scroll-area'
 import { cn } from '@/lib/utils'
+import { isToday } from 'date-fns'
 
 export default function WebsiteVisitorsPage() {
   const { user, loading: authLoading } = useUser()
@@ -54,6 +68,7 @@ export default function WebsiteVisitorsPage() {
   
   const [search, setSearch] = useState('')
   const [localVisitorId, setLocalVisitorId] = useState<string | null>(null)
+  const [selectedVisitor, setSelectedVisitor] = useState<any>(null)
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -62,7 +77,6 @@ export default function WebsiteVisitorsPage() {
   }, [user, authLoading, router])
 
   useEffect(() => {
-    // Identify the visitor ID of the current device
     const id = localStorage.getItem('hrat_visitor_id');
     setLocalVisitorId(id);
   }, []);
@@ -79,6 +93,7 @@ export default function WebsiteVisitorsPage() {
     if (!visitors) return { 
       total: 0, 
       unique: 0, 
+      uniqueIPs: 0,
       returning: 0, 
       new: 0, 
       wbCount: 0,
@@ -86,6 +101,7 @@ export default function WebsiteVisitorsPage() {
       intlCount: 0,
       todayPageViews: 0,
       todayWebsiteViews: 0,
+      todayUniqueIPs: 0,
       chartData: [], 
       deviceData: [] 
     }
@@ -98,6 +114,17 @@ export default function WebsiteVisitorsPage() {
     const unique = visitors.length
     const returning = visitors.filter((v: any) => v.status === 'Returning').length
     const newCount = visitors.filter((v: any) => v.status === 'New').length
+
+    // IP Specific Analytics
+    const uniqueIPsList = new Set(visitors.map((v: any) => v.ipAddress).filter(Boolean));
+    const uniqueIPs = uniqueIPsList.size;
+    
+    const todayUniqueIPs = new Set(
+      visitors
+        .filter((v: any) => v.lastActivity?.toDate && isToday(v.lastActivity.toDate()))
+        .map((v: any) => v.ipAddress)
+        .filter(Boolean)
+    ).size;
 
     // Calculate daily metrics across loaded visitors
     const todayPageViews = visitors.reduce((acc, v: any) => acc + (v[todayViewsKey] || 0), 0);
@@ -137,7 +164,7 @@ export default function WebsiteVisitorsPage() {
     })
     const deviceData = Object.keys(deviceMap).map(name => ({ name, value: deviceMap[name] }))
 
-    return { total, unique, returning, new: newCount, wbCount, otherStateCount, intlCount, todayPageViews, todayWebsiteViews, chartData, deviceData }
+    return { total, unique, uniqueIPs, returning, new: newCount, wbCount, otherStateCount, intlCount, todayPageViews, todayWebsiteViews, todayUniqueIPs, chartData, deviceData }
   }, [visitors])
 
   const handleExport = (format: 'PDF' | 'Excel' | 'CSV') => {
@@ -196,10 +223,11 @@ export default function WebsiteVisitorsPage() {
             <div className="text-center py-32"><Loader2 className="w-12 h-12 animate-spin text-accent mx-auto mb-4" /><p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Synchronizing Live Logs...</p></div>
           ) : (
             <div className="space-y-8">
-              <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-4">
+              <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-9 gap-4">
                  {[
                    { label: "Total Sessions", value: stats.total, icon: <Users className="w-4 h-4" />, color: "text-blue-500", trend: "Live" },
                    { label: "Unique Users", value: stats.unique, icon: <UserCheck className="w-4 h-4" />, color: "text-emerald-500", trend: "Steady" },
+                   { label: "Unique IPs", value: stats.uniqueIPs, icon: <Fingerprint className="w-4 h-4" />, color: "text-orange-500", trend: `+${stats.todayUniqueIPs} Today` },
                    { label: "Daily Page Views", value: stats.todayPageViews, icon: <Activity className="w-4 h-4" />, color: "text-indigo-500", trend: "Today" },
                    { label: "Website Views", value: stats.todayWebsiteViews, icon: <Monitor className="w-4 h-4" />, color: "text-rose-500", trend: "Today" },
                    { label: "WB Visitors", value: stats.wbCount, icon: <MapPin className="w-4 h-4" />, color: "text-emerald-600", trend: "State" },
@@ -211,7 +239,7 @@ export default function WebsiteVisitorsPage() {
                      <CardContent className="p-5 flex flex-col gap-2">
                         <div className="flex justify-between items-start">
                           <div className={cn("p-2 rounded-xl bg-slate-50 dark:bg-slate-800", stat.color)}>{stat.icon}</div>
-                          <Badge variant="outline" className="text-[7px] border-emerald-100 text-emerald-600 font-bold flex gap-1 items-center">
+                          <Badge variant="outline" className="text-[7px] border-emerald-100 text-emerald-600 font-bold flex gap-1 items-center whitespace-nowrap">
                             <span className="w-1 h-1 rounded-full bg-emerald-500 animate-ping" /> {stat.trend}
                           </Badge>
                         </div>
@@ -293,7 +321,7 @@ export default function WebsiteVisitorsPage() {
                         <CardTitle className="text-lg font-headline font-bold">Live Interaction Log</CardTitle>
                         <Badge className="bg-emerald-500 text-white font-bold text-[8px] animate-pulse">UPDATED INSTANTLY</Badge>
                       </div>
-                      <CardDescription className="text-[10px] font-bold uppercase text-slate-400">Geographic tracking with international & out-of-state flags</CardDescription>
+                      <CardDescription className="text-[10px] font-bold uppercase text-slate-400">Unique IP tracking with Bot/Human classification and session auditing</CardDescription>
                     </div>
                     <div className="relative w-full md:w-64">
                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
@@ -312,13 +340,13 @@ export default function WebsiteVisitorsPage() {
                           <thead className="bg-slate-50 dark:bg-slate-800/50 text-[8px] font-black text-slate-400 uppercase tracking-widest border-b dark:border-slate-800">
                              <tr>
                                <th className="px-6 py-4 min-w-[200px]">Visitor/Session</th>
-                               <th className="px-6 py-4">Current Status</th>
+                               <th className="px-6 py-4">IP Address</th>
+                               <th className="px-6 py-4">Identity Node</th>
                                <th className="px-6 py-4 min-w-[150px]">Platform Info</th>
                                <th className="px-6 py-4 min-w-[150px]">Geo Location</th>
                                <th className="px-6 py-4 min-w-[120px]">Current Page</th>
                                <th className="px-6 py-4">Date</th>
-                               <th className="px-6 py-4">Session Duration</th>
-                               <th className="px-6 py-4 text-right">Latest Action</th>
+                               <th className="px-6 py-4 text-right">Audit</th>
                              </tr>
                           </thead>
                           <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
@@ -328,10 +356,11 @@ export default function WebsiteVisitorsPage() {
                                const isInternational = country !== 'India' && country !== 'IN';
                                const isOutOfState = !isInternational && state !== 'West Bengal' && state !== 'Unknown';
                                const isCurrentDevice = v.id === localVisitorId;
+                               const isLikelyBot = v.isBot === true;
 
                                return (
                                <tr key={v.id} className={cn(
-                                 "hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors",
+                                 "hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors group",
                                  isInternational ? "bg-red-50/20 dark:bg-red-950/10" : isOutOfState ? "bg-amber-50/20 dark:bg-amber-950/10" : "",
                                  isCurrentDevice ? "bg-accent/5" : ""
                                )}>
@@ -355,24 +384,27 @@ export default function WebsiteVisitorsPage() {
                                      </div>
                                   </td>
                                   <td className="px-6 py-4">
+                                     <span className="text-[10px] font-mono font-bold text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-lg">
+                                       {v.ipAddress || '0.0.0.0'}
+                                     </span>
+                                  </td>
+                                  <td className="px-6 py-4">
                                      <Badge className={cn(
-                                       "text-[8px] font-bold px-2 py-0 h-4 rounded-full uppercase",
-                                       v.status === 'New' ? "bg-blue-500" : v.status === 'Returning' ? "bg-emerald-500" : "bg-accent"
+                                       "text-[8px] font-black px-3 h-5 border-none",
+                                       isLikelyBot ? "bg-slate-800 text-white" : "bg-emerald-500 text-white"
                                      )}>
-                                       {v.status || 'Active'}
+                                       {isLikelyBot ? <><Bot className="w-2.5 h-2.5 mr-1" /> LIKELY BOT</> : <><User className="w-2.5 h-2.5 mr-1" /> HUMAN</>}
                                      </Badge>
                                   </td>
                                   <td className="px-6 py-4">
-                                     <div className="flex items-center gap-4">
-                                        <div className="flex flex-col">
-                                           <span className="text-[9px] font-bold text-slate-600 dark:text-slate-300 flex items-center gap-1">
-                                              {v.deviceType === 'Smartphone' ? <Smartphone className="w-2.5 h-2.5" /> : 
-                                               v.deviceType === 'Tablet' ? <Tablet className="w-2.5 h-2.5" /> : 
-                                               <Laptop className="w-2.5 h-2.5" />}
-                                              {v.deviceType || 'Computer'} — {v.browser}
-                                           </span>
-                                           <span className="text-[7px] text-slate-400 uppercase font-black">{v.os}</span>
-                                        </div>
+                                     <div className="flex flex-col">
+                                        <span className="text-[9px] font-bold text-slate-600 dark:text-slate-300 flex items-center gap-1">
+                                           {v.deviceType === 'Smartphone' ? <Smartphone className="w-2.5 h-2.5" /> : 
+                                            v.deviceType === 'Tablet' ? <Tablet className="w-2.5 h-2.5" /> : 
+                                            <Laptop className="w-2.5 h-2.5" />}
+                                           {v.deviceType || 'Computer'} — {v.browser}
+                                        </span>
+                                        <span className="text-[7px] text-slate-400 uppercase font-black">{v.os}</span>
                                      </div>
                                   </td>
                                   <td className="px-6 py-4">
@@ -388,65 +420,38 @@ export default function WebsiteVisitorsPage() {
                                         </div>
                                         <div className="flex items-center gap-1.5 mt-1">
                                            <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">{country}</span>
-                                           {isInternational && (
-                                              <Badge className="bg-red-500 hover:bg-red-600 text-[6px] h-3 px-1 font-black border-none">INTERNATIONAL</Badge>
-                                           )}
-                                           {isOutOfState && (
-                                              <Badge className="bg-amber-500 hover:bg-amber-600 text-[6px] h-3 px-1 font-black border-none">OUT-OF-STATE</Badge>
-                                           )}
+                                           {isInternational && <Badge className="bg-red-500 text-[6px] h-3 px-1 border-none">INTL</Badge>}
+                                           {isOutOfState && <Badge className="bg-amber-500 text-[6px] h-3 px-1 border-none">OUT-STATE</Badge>}
                                         </div>
                                      </div>
                                   </td>
                                   <td className="px-6 py-4">
                                      <div className="flex items-center gap-1.5">
                                         <Navigation className="w-3 h-3 text-slate-400" />
-                                        <span className="text-[10px] font-mono text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded truncate max-w-[100px]">
+                                        <span className="text-[10px] font-mono text-slate-600 dark:text-slate-400 truncate max-w-[100px]">
                                            {getLatestPath(v)}
                                         </span>
                                      </div>
                                   </td>
                                   <td className="px-6 py-4">
                                      <div className="flex flex-col gap-1">
-                                        <div className="flex items-center gap-1.5">
-                                          <span className="text-[8px] font-black text-slate-400 uppercase tracking-tighter shrink-0">Start:</span>
-                                          <span className="text-[10px] font-bold text-slate-500">
-                                            {v.firstVisit?.toDate ? v.firstVisit.toDate().toLocaleDateString() : 'N/A'}
-                                          </span>
-                                        </div>
-                                        <div className="flex items-center gap-1.5">
-                                          <span className="text-[8px] font-black text-accent uppercase tracking-tighter shrink-0">Now:</span>
-                                          <span className="text-[10px] font-bold text-primary dark:text-white">
-                                            {v.lastActivity?.toDate ? v.lastActivity.toDate().toLocaleDateString() : 'N/A'}
-                                          </span>
-                                        </div>
-                                     </div>
-                                  </td>
-                                  <td className="px-6 py-4">
-                                     <div className="flex flex-col">
-                                        <span className="text-[10px] font-bold text-slate-700 dark:text-slate-300">
-                                           {(() => {
-                                             if (v.lastActivity?.toDate && v.firstVisit?.toDate) {
-                                               const diff = v.lastActivity.toDate().getTime() - v.firstVisit.toDate().getTime();
-                                               const hours = Math.floor(diff / (1000 * 60 * 60));
-                                               const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                                               const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-                                               return `${hours}h ${minutes}m ${seconds}s`;
-                                             }
-                                             return '0h 0m 0s';
-                                           })()}
+                                        <span className="text-[10px] font-bold text-primary dark:text-white">
+                                          {v.lastActivity?.toDate ? v.lastActivity.toDate().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) : 'N/A'}
+                                        </span>
+                                        <span className="text-[7px] font-black text-slate-400 uppercase">
+                                          {v.lastActivity?.toDate ? v.lastActivity.toDate().toLocaleDateString() : ''}
                                         </span>
                                      </div>
                                   </td>
                                   <td className="px-6 py-4 text-right">
-                                     <div className="flex flex-col items-end">
-                                        <div className="flex items-center gap-1 text-emerald-500">
-                                          <Circle className="w-1 h-1 fill-current animate-ping" />
-                                          <span className="text-xs font-bold">Active</span>
-                                        </div>
-                                        <span className="text-[7px] font-bold text-slate-400 uppercase tracking-widest">
-                                          {v.lastActivity?.toDate ? v.lastActivity.toDate().toLocaleTimeString() : 'Just now'}
-                                        </span>
-                                     </div>
+                                     <Button 
+                                      variant="ghost" 
+                                      size="icon" 
+                                      onClick={() => setSelectedVisitor(v)}
+                                      className="h-8 w-8 rounded-lg text-slate-300 hover:text-accent hover:bg-accent/10 transition-all opacity-0 group-hover:opacity-100"
+                                     >
+                                        <Eye className="w-4 h-4" />
+                                     </Button>
                                   </td>
                                </tr>
                              )})}
@@ -456,19 +461,92 @@ export default function WebsiteVisitorsPage() {
                     </div>
                  </CardContent>
               </Card>
-
-              <div className="bg-white dark:bg-slate-900 p-8 rounded-[3rem] border border-slate-100 dark:border-slate-800 text-center space-y-4 shadow-sm">
-                 <ShieldCheck className="w-10 h-10 text-emerald-500 mx-auto" />
-                 <h3 className="text-xl font-headline font-bold text-primary dark:text-white">Regional Engagement Intelligence</h3>
-                 <p className="text-sm text-slate-500 max-w-3xl mx-auto leading-relaxed italic">
-                   "Our tracking system automatically flags visitors from outside our core region to help the administration identify national and international interest. Highlights in amber indicate out-of-state Indian visitors, while red markers indicate international engagement."
-                 </p>
-                 <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">National Data Security Cell • Human Rights Affairs Trust</p>
-              </div>
             </div>
           )}
         </div>
       </section>
+
+      {/* Visitor Detail Audit Dialog */}
+      <Dialog open={!!selectedVisitor} onOpenChange={(val) => !val && setSelectedVisitor(null)}>
+         <DialogContent className="max-w-2xl rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden bg-white dark:bg-slate-950 flex flex-col max-h-[90vh]">
+            <DialogHeader className="sr-only"><DialogTitle>Visitor Examination</DialogTitle></DialogHeader>
+            {selectedVisitor && (
+              <>
+                <div className="bg-slate-900 p-8 text-white relative border-b-4 border-accent/20">
+                   <div className="absolute right-6 top-6"><DialogClose asChild><Button variant="ghost" size="icon" className="rounded-full text-white/40 hover:text-white"><X className="w-5 h-5" /></Button></DialogClose></div>
+                   <div className="flex items-center gap-4 mb-4">
+                      <div className="w-14 h-14 rounded-2xl bg-white/10 flex items-center justify-center text-accent">
+                         <Fingerprint className="w-8 h-8" />
+                      </div>
+                      <div>
+                         <DialogTitle className="text-2xl font-headline font-bold">{selectedVisitor.ipAddress || 'IP: 0.0.0.0'}</DialogTitle>
+                         <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Digital Footprint Audit Node</p>
+                      </div>
+                   </div>
+                   <div className="flex flex-wrap gap-2">
+                      <Badge className="bg-accent text-primary font-black uppercase text-[8px]">{selectedVisitor.status || 'Active'}</Badge>
+                      <Badge variant="outline" className="text-white border-white/20 text-[8px] uppercase">{selectedVisitor.deviceType}</Badge>
+                      <Badge variant="outline" className="text-white border-white/20 text-[8px] uppercase">{selectedVisitor.browser}</Badge>
+                   </div>
+                </div>
+
+                <ScrollArea className="flex-1 p-8 space-y-8 custom-scrollbar">
+                   <div className="grid md:grid-cols-2 gap-8">
+                      <div className="space-y-6">
+                         <h4 className="text-[10px] font-black uppercase text-accent tracking-[0.2em] flex items-center gap-2 border-b pb-2"><History className="w-3.5 h-3.5" /> Temporal Record</h4>
+                         <div className="space-y-4">
+                            <div><p className="text-[8px] font-black text-slate-400 uppercase mb-1">First Detection</p><p className="text-sm font-bold">{selectedVisitor.firstVisit?.toDate ? selectedVisitor.firstVisit.toDate().toLocaleString() : 'Legacy Data'}</p></div>
+                            <div><p className="text-[8px] font-black text-slate-400 uppercase mb-1">Latest Activity</p><p className="text-sm font-bold">{selectedVisitor.lastActivity?.toDate ? selectedVisitor.lastActivity.toDate().toLocaleString() : 'N/A'}</p></div>
+                            <div className="p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border flex items-center justify-between">
+                               <span className="text-[10px] font-black uppercase text-slate-500">Total Visits</span>
+                               <span className="text-xl font-headline font-bold text-primary dark:text-white">{selectedVisitor.totalVisits || 1}</span>
+                            </div>
+                         </div>
+                      </div>
+
+                      <div className="space-y-6">
+                         <h4 className="text-[10px] font-black uppercase text-accent tracking-[0.2em] flex items-center gap-2 border-b pb-2"><MapPin className="w-3.5 h-3.5" /> Geographic Node</h4>
+                         <div className="space-y-4">
+                            <div className="flex items-center gap-4">
+                               <div className="w-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-900 border flex items-center justify-center text-slate-400"><Globe className="w-5 h-5" /></div>
+                               <div><p className="text-[8px] font-black text-slate-400 uppercase">Nation</p><p className="text-sm font-bold">{selectedVisitor.country || 'India'}</p></div>
+                            </div>
+                            <div className="flex items-center gap-4">
+                               <div className="w-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-900 border flex items-center justify-center text-slate-400"><Navigation className="w-5 h-5" /></div>
+                               <div><p className="text-[8px] font-black text-slate-400 uppercase">Region / State</p><p className="text-sm font-bold">{selectedVisitor.city || 'Unknown'}, {selectedVisitor.state || 'Unknown'}</p></div>
+                            </div>
+                            <div className="p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border flex items-center justify-between">
+                               <span className="text-[10px] font-black uppercase text-slate-500">Page Views</span>
+                               <span className="text-xl font-headline font-bold text-primary dark:text-white">{selectedVisitor.pageViews || 0}</span>
+                            </div>
+                         </div>
+                      </div>
+                   </div>
+
+                   <div className="space-y-6 pt-8 border-t dark:border-slate-800">
+                      <h4 className="text-[10px] font-black uppercase text-accent tracking-[0.2em] flex items-center gap-2 mb-4"><FileSearch className="w-4 h-4" /> Navigational Audit Path</h4>
+                      <div className="grid gap-2">
+                         {((selectedVisitor.pagesVisited || []) as any[]).slice().reverse().map((path, pIdx) => (
+                           <div key={pIdx} className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800 transition-all hover:border-accent">
+                              <span className="text-[8px] font-black text-slate-300 dark:text-slate-700 w-4">{selectedVisitor.pagesVisited.length - pIdx}</span>
+                              <Badge variant="outline" className="text-[8px] h-5 border-slate-200">GET</Badge>
+                              <span className="text-xs font-mono font-bold text-primary dark:text-slate-300 truncate flex-1">{typeof path === 'object' ? path.path : path}</span>
+                              {pIdx === 0 && <Badge className="bg-emerald-500 text-[6px] h-3 px-1 leading-none border-none">EXIT NODE</Badge>}
+                              {pIdx === selectedVisitor.pagesVisited.length - 1 && <Badge className="bg-blue-600 text-[6px] h-3 px-1 leading-none border-none">ENTRY NODE</Badge>}
+                           </div>
+                         ))}
+                      </div>
+                   </div>
+                </ScrollArea>
+                
+                <div className="p-8 border-t bg-slate-50 dark:bg-slate-900 shrink-0 flex items-center justify-between">
+                   <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest italic">Institutional Registry Node: {selectedVisitor.id}</p>
+                   <Button onClick={() => setSelectedVisitor(null)} className="h-10 px-8 rounded-xl bg-primary text-white font-bold text-xs">Acknowledge</Button>
+                </div>
+              </>
+            )}
+         </DialogContent>
+      </Dialog>
 
       <Footer />
     </main>
