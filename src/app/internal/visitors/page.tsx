@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { useUser, useCollection, useFirestore, useMemoFirebase } from '@/firebase'
-import { collection, query, orderBy, limit } from 'firebase/firestore'
+import { collection, query, orderBy, limit, doc } from 'firebase/firestore'
 import { Footer } from '@/components/footer'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -36,7 +36,15 @@ import {
   FileSearch,
   Eye,
   Bot,
-  User
+  User,
+  Hash,
+  LaptopMinimal,
+  Maximize,
+  Languages,
+  ArrowRightLeft,
+  MousePointer2,
+  Lock,
+  Link as LinkIcon
 } from 'lucide-react'
 import { 
   BarChart, 
@@ -78,8 +86,10 @@ export default function WebsiteVisitorsPage() {
   }, [user, authLoading, router])
 
   useEffect(() => {
-    const id = localStorage.getItem('hrat_visitor_id');
-    setLocalVisitorId(id);
+    if (typeof window !== 'undefined') {
+      const id = localStorage.getItem('hrat_visitor_id');
+      setLocalVisitorId(id);
+    }
   }, []);
 
   // Real-time listener for the last 100 visitors
@@ -172,6 +182,23 @@ export default function WebsiteVisitorsPage() {
     alert(`Generating Real-Time Website Visitor Report in ${format} format...`)
   }
 
+  const getLatestPath = (visitor: any) => {
+    if (!visitor.pagesVisited || !visitor.pagesVisited.length) return '/';
+    const lastEntry = visitor.pagesVisited[visitor.pagesVisited.length - 1];
+    if (typeof lastEntry === 'object' && lastEntry !== null) {
+      return lastEntry.path || '/';
+    }
+    return lastEntry || '/';
+  };
+
+  const getEntryPage = (visitor: any) => {
+    if (visitor.landingPage) return visitor.landingPage;
+    if (!visitor.pagesVisited || !visitor.pagesVisited.length) return '/';
+    const firstEntry = visitor.pagesVisited[0];
+    if (typeof firstEntry === 'object' && firstEntry !== null) return firstEntry.path || '/';
+    return firstEntry || '/';
+  };
+
   if (authLoading || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
@@ -181,16 +208,6 @@ export default function WebsiteVisitorsPage() {
   }
 
   const COLORS = ['#D4AF37', '#138808', '#000080', '#FF9933'];
-
-  // Helper to extract path string from legacy object or string array
-  const getLatestPath = (visitor: any) => {
-    if (!visitor.pagesVisited || !visitor.pagesVisited.length) return '/';
-    const lastEntry = visitor.pagesVisited[visitor.pagesVisited.length - 1];
-    if (typeof lastEntry === 'object' && lastEntry !== null) {
-      return lastEntry.path || '/';
-    }
-    return lastEntry || '/';
-  };
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
@@ -469,80 +486,192 @@ export default function WebsiteVisitorsPage() {
 
       {/* Visitor Detail Audit Dialog */}
       <Dialog open={!!selectedVisitor} onOpenChange={(val) => !val && setSelectedVisitor(null)}>
-         <DialogContent className="max-w-2xl rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden bg-white dark:bg-slate-950 flex flex-col max-h-[90vh]">
+         <DialogContent className="max-w-4xl rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden bg-white dark:bg-slate-950 flex flex-col max-h-[95vh]">
             <DialogHeader className="sr-only"><DialogTitle>Visitor Examination</DialogTitle></DialogHeader>
             {selectedVisitor && (
               <>
                 <div className="bg-slate-900 p-8 text-white relative border-b-4 border-accent/20">
                    <div className="absolute right-6 top-6"><DialogClose asChild><Button variant="ghost" size="icon" className="rounded-full text-white/40 hover:text-white"><X className="w-5 h-5" /></Button></DialogClose></div>
                    <div className="flex items-center gap-4 mb-4">
-                      <div className="w-14 h-14 rounded-2xl bg-white/10 flex items-center justify-center text-accent">
-                         <Fingerprint className="w-8 h-8" />
+                      <div className="w-16 h-16 rounded-[1.5rem] bg-white/10 flex items-center justify-center text-accent border border-white/10">
+                         <Fingerprint className="w-10 h-10" />
                       </div>
-                      <div>
-                         <DialogTitle className="text-2xl font-headline font-bold">{selectedVisitor.ipAddress || 'IP: 0.0.0.0'}</DialogTitle>
-                         <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Digital Footprint Audit Node</p>
+                      <div className="space-y-1">
+                         <Badge className="bg-accent text-primary font-black uppercase text-[8px] tracking-widest">{selectedVisitor.status || 'Active'}</Badge>
+                         <DialogTitle className="text-3xl font-headline font-bold">{selectedVisitor.ipAddress || 'IP: 0.0.0.0'}</DialogTitle>
+                         <p className="text-slate-400 text-xs font-bold uppercase tracking-widest flex items-center gap-2">
+                           <Hash className="w-3.5 h-3.5" /> ID: {selectedVisitor.id}
+                         </p>
                       </div>
                    </div>
                    <div className="flex flex-wrap gap-2">
-                      <Badge className="bg-accent text-primary font-black uppercase text-[8px]">{selectedVisitor.status || 'Active'}</Badge>
-                      <Badge variant="outline" className="text-white border-white/20 text-[8px] uppercase">{selectedVisitor.deviceType}</Badge>
-                      <Badge variant="outline" className="text-white border-white/20 text-[8px] uppercase">{selectedVisitor.browser}</Badge>
+                      <Badge variant="outline" className="text-white border-white/20 text-[9px] uppercase px-3 h-6 flex gap-2 items-center">
+                        <Monitor className="w-3 h-3" /> {selectedVisitor.deviceType || 'Not Available'}
+                      </Badge>
+                      <Badge variant="outline" className="text-white border-white/20 text-[9px] uppercase px-3 h-6">
+                        {selectedVisitor.browser || 'Not Available'}
+                      </Badge>
+                      <Badge variant="outline" className="text-white border-white/20 text-[9px] uppercase px-3 h-6">
+                        {selectedVisitor.os || 'Not Available'}
+                      </Badge>
                    </div>
                 </div>
 
-                <ScrollArea className="flex-1 p-8 space-y-8 custom-scrollbar">
-                   <div className="grid md:grid-cols-2 gap-8">
+                <ScrollArea className="flex-1 p-8 space-y-10 custom-scrollbar">
+                   {/* ROW 1: Identity & Temporal Intelligence */}
+                   <div className="grid md:grid-cols-2 gap-10">
                       <div className="space-y-6">
-                         <h4 className="text-[10px] font-black uppercase text-accent tracking-[0.2em] flex items-center gap-2 border-b pb-2"><History className="w-3.5 h-3.5" /> Temporal Record</h4>
-                         <div className="space-y-4">
-                            <div><p className="text-[8px] font-black text-slate-400 uppercase mb-1">First Detection</p><p className="text-sm font-bold">{selectedVisitor.firstVisit?.toDate ? selectedVisitor.firstVisit.toDate().toLocaleString() : 'Legacy Data'}</p></div>
-                            <div><p className="text-[8px] font-black text-slate-400 uppercase mb-1">Latest Activity</p><p className="text-sm font-bold">{selectedVisitor.lastActivity?.toDate ? selectedVisitor.lastActivity.toDate().toLocaleString() : 'N/A'}</p></div>
-                            <div className="p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border flex items-center justify-between">
-                               <span className="text-[10px] font-black uppercase text-slate-500">Total Visits</span>
-                               <span className="text-xl font-headline font-bold text-primary dark:text-white">{selectedVisitor.totalVisits || 1}</span>
+                         <div className="flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 pb-2">
+                            <Clock className="w-4 h-4 text-accent" />
+                            <h4 className="text-[10px] font-black uppercase text-primary dark:text-white tracking-[0.25em]">Temporal Intelligence</h4>
+                         </div>
+                         <div className="grid gap-4">
+                            <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800">
+                               <div className="space-y-0.5">
+                                  <p className="text-[8px] font-black text-slate-400 uppercase">First Detection</p>
+                                  <p className="text-sm font-bold">{selectedVisitor.firstVisit?.toDate ? selectedVisitor.firstVisit.toDate().toLocaleString() : 'Not Available'}</p>
+                               </div>
+                            </div>
+                            <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800">
+                               <div className="space-y-0.5">
+                                  <p className="text-[8px] font-black text-slate-400 uppercase">Latest Handshake</p>
+                                  <p className="text-sm font-bold">{selectedVisitor.lastActivity?.toDate ? selectedVisitor.lastActivity.toDate().toLocaleString() : 'Not Available'}</p>
+                               </div>
+                               {isToday(selectedVisitor.lastActivity?.toDate?.() || new Date(0)) && <Badge className="bg-emerald-500 h-5">Today</Badge>}
                             </div>
                          </div>
                       </div>
 
                       <div className="space-y-6">
-                         <h4 className="text-[10px] font-black uppercase text-accent tracking-[0.2em] flex items-center gap-2 border-b pb-2"><MapPin className="w-3.5 h-3.5" /> Geographic Node</h4>
-                         <div className="space-y-4">
-                            <div className="flex items-center gap-4">
-                               <div className="w-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-900 border flex items-center justify-center text-slate-400"><Globe className="w-5 h-5" /></div>
-                               <div><p className="text-[8px] font-black text-slate-400 uppercase">Nation</p><p className="text-sm font-bold">{selectedVisitor.country || 'India'}</p></div>
+                         <div className="flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 pb-2">
+                            <Globe className="w-4 h-4 text-accent" />
+                            <h4 className="text-[10px] font-black uppercase text-primary dark:text-white tracking-[0.25em]">Geographic Node</h4>
+                         </div>
+                         <div className="grid gap-4">
+                            <div className="grid grid-cols-2 gap-4">
+                               <div className="p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800">
+                                  <p className="text-[8px] font-black text-slate-400 uppercase mb-1">Country</p>
+                                  <p className="text-sm font-bold truncate">{selectedVisitor.country || 'Not Available'}</p>
+                               </div>
+                               <div className="p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800">
+                                  <p className="text-[8px] font-black text-slate-400 uppercase mb-1">Region/State</p>
+                                  <p className="text-sm font-bold truncate">{selectedVisitor.state || 'Not Available'}</p>
+                               </div>
                             </div>
-                            <div className="flex items-center gap-4">
-                               <div className="w-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-900 border flex items-center justify-center text-slate-400"><Navigation className="w-5 h-5" /></div>
-                               <div><p className="text-[8px] font-black text-slate-400 uppercase">Region / State</p><p className="text-sm font-bold">{selectedVisitor.city || 'Unknown'}, {selectedVisitor.state || 'Unknown'}</p></div>
-                            </div>
-                            <div className="p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border flex items-center justify-between">
-                               <span className="text-[10px] font-black uppercase text-slate-500">Page Views</span>
-                               <span className="text-xl font-headline font-bold text-primary dark:text-white">{selectedVisitor.pageViews || 0}</span>
+                            <div className="p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800">
+                               <div className="flex justify-between items-center">
+                                  <div className="space-y-0.5">
+                                     <p className="text-[8px] font-black text-slate-400 uppercase">City & Timezone</p>
+                                     <p className="text-sm font-bold">{selectedVisitor.city || 'Unknown'} • {selectedVisitor.timeZone || 'Not Available'}</p>
+                                  </div>
+                                  <Navigation className="w-4 h-4 text-slate-300" />
+                               </div>
                             </div>
                          </div>
                       </div>
                    </div>
 
-                   <div className="space-y-6 pt-8 border-t dark:border-slate-800">
-                      <h4 className="text-[10px] font-black uppercase text-accent tracking-[0.2em] flex items-center gap-2 mb-4"><FileSearch className="w-4 h-4" /> Navigational Audit Path</h4>
-                      <div className="grid gap-2">
-                         {((selectedVisitor.pagesVisited || []) as any[]).slice().reverse().map((path, pIdx) => (
-                           <div key={pIdx} className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800 transition-all hover:border-accent">
-                              <span className="text-[8px] font-black text-slate-300 dark:text-slate-700 w-4">{selectedVisitor.pagesVisited.length - pIdx}</span>
-                              <Badge variant="outline" className="text-[8px] h-5 border-slate-200">GET</Badge>
-                              <span className="text-xs font-mono font-bold text-primary dark:text-slate-300 truncate flex-1">{typeof path === 'object' ? path.path : path}</span>
-                              {pIdx === 0 && <Badge className="bg-emerald-500 text-[6px] h-3 px-1 leading-none border-none">EXIT NODE</Badge>}
-                              {pIdx === selectedVisitor.pagesVisited.length - 1 && <Badge className="bg-blue-600 text-[6px] h-3 px-1 leading-none border-none">ENTRY NODE</Badge>}
+                   {/* ROW 2: Technical Specifications & Session Flow */}
+                   <div className="grid md:grid-cols-2 gap-10">
+                      <div className="space-y-6">
+                         <div className="flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 pb-2">
+                            <LaptopMinimal className="w-4 h-4 text-accent" />
+                            <h4 className="text-[10px] font-black uppercase text-primary dark:text-white tracking-[0.25em]">Technical Specifications</h4>
+                         </div>
+                         <div className="grid gap-4">
+                            <div className="grid grid-cols-2 gap-4">
+                               <div className="p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800">
+                                  <p className="text-[8px] font-black text-slate-400 uppercase mb-1 flex items-center gap-1.5"><Maximize className="w-2.5 h-2.5" /> Resolution</p>
+                                  <p className="text-sm font-bold font-mono">{selectedVisitor.screenResolution || 'Not Available'}</p>
+                               </div>
+                               <div className="p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800">
+                                  <p className="text-[8px] font-black text-slate-400 uppercase mb-1 flex items-center gap-1.5"><Languages className="w-2.5 h-2.5" /> Language</p>
+                                  <p className="text-sm font-bold uppercase">{selectedVisitor.language || 'Not Available'}</p>
+                               </div>
+                            </div>
+                            <div className="p-4 bg-slate-950 rounded-2xl border border-white/5 space-y-2">
+                               <p className="text-[8px] font-black text-slate-600 uppercase flex items-center gap-1.5"><Bot className="w-2.5 h-2.5" /> Raw User Agent</p>
+                               <p className="text-[10px] font-mono text-slate-400 break-all leading-relaxed bg-black/40 p-3 rounded-lg border border-white/5">
+                                  {selectedVisitor.userAgent || 'Not Available'}
+                               </p>
+                            </div>
+                         </div>
+                      </div>
+
+                      <div className="space-y-6">
+                         <div className="flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 pb-2">
+                            <Activity className="w-4 h-4 text-accent" />
+                            <h4 className="text-[10px] font-black uppercase text-primary dark:text-white tracking-[0.25em]">Session Flow Intelligence</h4>
+                         </div>
+                         <div className="grid gap-4">
+                            <div className="p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800">
+                               <div className="flex justify-between items-center">
+                                  <div className="space-y-0.5">
+                                     <p className="text-[8px] font-black text-slate-400 uppercase">Referral Source</p>
+                                     <p className="text-xs font-bold text-primary dark:text-white truncate max-w-[200px]">{selectedVisitor.referrer || 'Direct Entry / Secure'}</p>
+                                  </div>
+                                  <LinkIcon className="w-3.5 h-3.5 text-slate-300" />
+                               </div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                               <div className="p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800">
+                                  <p className="text-[8px] font-black text-slate-400 uppercase mb-1">Total Hits</p>
+                                  <p className="text-xl font-headline font-bold text-primary dark:text-white">{selectedVisitor.pageViews || 0}</p>
+                               </div>
+                               <div className="p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800">
+                                  <p className="text-[8px] font-black text-slate-400 uppercase mb-1">Session Depth</p>
+                                  <p className="text-xl font-headline font-bold text-emerald-600">{selectedVisitor.pagesVisited?.length || 0}</p>
+                               </div>
+                            </div>
+                         </div>
+                      </div>
+                   </div>
+
+                   {/* ROW 3: Full Navigational Path Audit */}
+                   <div className="space-y-6 pt-6 border-t dark:border-slate-800">
+                      <div className="flex items-center justify-between">
+                         <div className="flex items-center gap-3">
+                            <FileSearch className="w-4 h-4 text-accent" />
+                            <h4 className="text-[10px] font-black uppercase text-primary dark:text-white tracking-[0.25em]">Navigational Path Audit</h4>
+                         </div>
+                         <Badge variant="outline" className="text-[8px] border-slate-100 dark:border-slate-800 text-slate-400">CHRONOLOGICAL</Badge>
+                      </div>
+                      <div className="space-y-3">
+                         {((selectedVisitor.pagesVisited || []) as any[]).slice().reverse().map((path, pIdx) => {
+                           const pathStr = typeof path === 'object' ? path.path : path;
+                           const isEntry = pIdx === selectedVisitor.pagesVisited.length - 1;
+                           const isExit = pIdx === 0;
+
+                           return (
+                           <div key={pIdx} className="flex items-center gap-4 p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 transition-all hover:bg-white dark:hover:bg-slate-800 hover:shadow-sm">
+                              <span className="text-[8px] font-black text-slate-300 dark:text-slate-700 w-6 text-center">{selectedVisitor.pagesVisited.length - pIdx}</span>
+                              <Badge variant="outline" className="text-[8px] h-5 px-2 border-slate-200 uppercase font-black">GET</Badge>
+                              <span className="text-xs font-mono font-bold text-primary dark:text-slate-300 flex-1 truncate">{pathStr}</span>
+                              <div className="flex gap-2">
+                                 {isEntry && <Badge className="bg-blue-600 text-[6px] h-4 px-1.5 border-none">ENTRY NODE</Badge>}
+                                 {isExit && <Badge className="bg-red-500 text-[6px] h-4 px-1.5 border-none">EXIT NODE</Badge>}
+                              </div>
                            </div>
-                         ))}
+                         )})}
+                         {(!selectedVisitor.pagesVisited || selectedVisitor.pagesVisited.length === 0) && (
+                            <div className="py-10 text-center opacity-20 bg-slate-50 rounded-2xl border-2 border-dashed">
+                               <MousePointer2 className="w-10 h-10 mx-auto mb-2" />
+                               <p className="text-[10px] font-black uppercase">No path recorded</p>
+                            </div>
+                         )}
                       </div>
                    </div>
                 </ScrollArea>
                 
-                <div className="p-8 border-t bg-slate-50 dark:bg-slate-950 shrink-0 flex items-center justify-between">
-                   <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest italic">Institutional Registry Node: {selectedVisitor.id}</p>
-                   <Button onClick={() => setSelectedVisitor(null)} className="h-10 px-8 rounded-xl bg-primary text-white font-bold text-xs">Acknowledge</Button>
+                <div className="p-8 border-t bg-slate-50 dark:bg-slate-950 shrink-0 flex flex-col sm:flex-row items-center justify-between gap-6">
+                   <div className="flex items-center gap-4 text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                      <ShieldCheck className="w-4 h-4 text-emerald-500" />
+                      <span>Authorized Audit Session • Node-Alpha</span>
+                   </div>
+                   <div className="flex items-center gap-3 w-full sm:w-auto">
+                      <Button variant="ghost" onClick={() => setSelectedVisitor(null)} className="flex-1 sm:flex-none h-11 rounded-xl px-8 font-black uppercase text-[10px] tracking-widest text-slate-500">Dismiss</Button>
+                      <Button className="flex-1 sm:flex-none h-11 rounded-xl px-10 bg-primary text-white font-black uppercase text-[10px] tracking-widest shadow-xl shadow-primary/20">Acknowledge Node</Button>
+                   </div>
                 </div>
               </>
             )}

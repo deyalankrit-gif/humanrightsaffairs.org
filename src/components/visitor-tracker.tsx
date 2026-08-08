@@ -9,6 +9,7 @@ import { doc, setDoc, serverTimestamp, increment, arrayUnion } from 'firebase/fi
  * VisitorTracker captures real-time technical and geographic metadata.
  * Updated: Now tracks both individual page views and full website visits (sessions) on a daily basis.
  * Refined: Added IP Address capture and automated Bot/Crawler detection.
+ * Enhancement: Added referrer, language, screen resolution, and userAgent capture.
  */
 export function VisitorTracker() {
   const db = useFirestore();
@@ -29,9 +30,12 @@ export function VisitorTracker() {
 
       const userAgent = window.navigator.userAgent;
       const platform = window.navigator.platform;
+      const language = window.navigator.language;
+      const screenResolution = `${window.screen.width}x${window.screen.height}`;
+      const referrer = window.document.referrer || 'Direct / None';
       
       // Automated Bot Detection Node
-      const isBot = /bot|googlebot|crawler|spider|robot|crawling|lighthouse|bingbot|yandex|slurp/i.test(userAgent);
+      const isBot = /bot|googlebot|crawler|spider|robot|crawling|lighthouse|bingbot|yandex|slurp|headless/i.test(userAgent);
       
       const isTablet = /(ipad|tablet|(android(?!.*mobile))|(windows(?!.*phone)(.*touch))|kindle|playbook|silk|(puffin(?!.*(IP|AP|WP))))/i.test(userAgent);
       const isMobile = /iPhone|iPod|Android|BlackBerry|IEMobile|Opera Mini/i.test(userAgent) && !isTablet;
@@ -76,6 +80,9 @@ export function VisitorTracker() {
         deviceType,
         browser,
         os: platform,
+        userAgent,
+        language,
+        screenResolution,
         lastActivity: serverTimestamp(),
         lastVisit: serverTimestamp(),
         timeZone: geoData.region,
@@ -86,6 +93,7 @@ export function VisitorTracker() {
         userType: user ? 'Admin' : 'Guest',
         pagesVisited: arrayUnion(pathname),
         pageViews: increment(1),
+        referrer: referrer,
         [`views_${todayStr}`]: increment(1)
       };
 
@@ -98,6 +106,7 @@ export function VisitorTracker() {
           updatePayload.status = 'New';
           updatePayload.firstVisit = serverTimestamp();
           updatePayload.createdAt = serverTimestamp();
+          updatePayload.landingPage = pathname;
           localStorage.setItem('hrat_visitor_exists', 'true');
         }
       }
