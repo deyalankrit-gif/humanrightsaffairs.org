@@ -35,7 +35,8 @@ import {
   X,
   FileSearch,
   Eye,
-  Bot
+  Bot,
+  User
 } from 'lucide-react'
 import { 
   BarChart, 
@@ -539,7 +540,7 @@ export default function WebsiteVisitorsPage() {
                    </div>
                 </ScrollArea>
                 
-                <div className="p-8 border-t bg-slate-50 dark:bg-slate-900 shrink-0 flex items-center justify-between">
+                <div className="p-8 border-t bg-slate-50 dark:bg-slate-950 shrink-0 flex items-center justify-between">
                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest italic">Institutional Registry Node: {selectedVisitor.id}</p>
                    <Button onClick={() => setSelectedVisitor(null)} className="h-10 px-8 rounded-xl bg-primary text-white font-bold text-xs">Acknowledge</Button>
                 </div>
