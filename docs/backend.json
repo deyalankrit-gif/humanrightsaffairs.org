@@ -42,12 +42,42 @@
         "timestamp": { "type": "string", "format": "date-time" },
         "status": { "type": "string" }
       }
+    },
+    "WebsiteScan": {
+      "title": "Website SEO Scan",
+      "description": "Detailed snapshot of website technical health and SEO performance.",
+      "type": "object",
+      "properties": {
+        "healthScore": { "type": "number" },
+        "seoScore": { "type": "number" },
+        "criticalErrors": { "type": "number" },
+        "brokenLinks": { "type": "number" },
+        "indexedPages": { "type": "number" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "summary": { "type": "object" }
+      }
+    },
+    "SeoTask": {
+      "title": "SEO Action Task",
+      "description": "Individual actionable task derived from website health scans.",
+      "type": "object",
+      "properties": {
+        "priority": { "type": "string", "enum": ["Critical", "High", "Medium", "Low"] },
+        "issue": { "type": "string" },
+        "url": { "type": "string" },
+        "category": { "type": "string" },
+        "status": { "type": "string", "enum": ["Open", "In Progress", "Resolved", "Ignored"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      }
     }
   },
   "firestore": {
     "/users/{email}": { "schema": "UserAccount" },
     "/public_complaints/{id}": { "description": "Primary complaint registry linked to investigators via assignment fields." },
     "/investigation_officers/{id}": { "schema": "Investigator" },
-    "/deletion_audit_logs/{id}": { "schema": "DeletionAuditLog" }
+    "/deletion_audit_logs/{id}": { "schema": "DeletionAuditLog" },
+    "/website_scans/{id}": { "schema": "WebsiteScan" },
+    "/seo_tasks/{id}": { "schema": "SeoTask" },
+    "/seo_rankings/{id}": { "description": "Historical keyword ranking data" }
   }
 }
