@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useEffect, useState, useMemo } from 'react'
@@ -66,7 +67,6 @@ import {
   DialogDescription,
   DialogClose
 } from "@/components/ui/dialog"
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { cn } from '@/lib/utils'
 import { isToday } from 'date-fns'
 
@@ -462,14 +462,12 @@ export default function WebsiteVisitorsPage() {
                                      </div>
                                   </td>
                                   <td className="px-6 py-4 text-right">
-                                     <Button 
-                                      variant="ghost" 
-                                      size="icon" 
+                                     <button 
                                       onClick={() => setSelectedVisitor(v)}
-                                      className="h-8 w-8 rounded-lg text-slate-300 hover:text-accent hover:bg-accent/10 transition-all opacity-0 group-hover:opacity-100"
+                                      className="h-8 w-8 rounded-lg text-slate-300 hover:text-accent hover:bg-accent/10 transition-all opacity-0 group-hover:opacity-100 flex items-center justify-center"
                                      >
                                         <Eye className="w-4 h-4" />
-                                     </Button>
+                                     </button>
                                   </td>
                                </tr>
                              )})}
@@ -486,11 +484,11 @@ export default function WebsiteVisitorsPage() {
 
       {/* Visitor Detail Audit Dialog */}
       <Dialog open={!!selectedVisitor} onOpenChange={(val) => !val && setSelectedVisitor(null)}>
-         <DialogContent className="max-w-4xl rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden bg-white dark:bg-slate-950 flex flex-col max-h-[95vh]">
+         <DialogContent className="max-w-4xl rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden bg-white dark:bg-slate-950 flex flex-col max-h-[90vh]">
             <DialogHeader className="sr-only"><DialogTitle>Visitor Examination</DialogTitle></DialogHeader>
             {selectedVisitor && (
               <>
-                <div className="bg-slate-900 p-8 text-white relative border-b-4 border-accent/20">
+                <div className="bg-slate-900 p-8 text-white relative border-b-4 border-accent/20 shrink-0">
                    <div className="absolute right-6 top-6"><DialogClose asChild><Button variant="ghost" size="icon" className="rounded-full text-white/40 hover:text-white"><X className="w-5 h-5" /></Button></DialogClose></div>
                    <div className="flex items-center gap-4 mb-4">
                       <div className="w-16 h-16 rounded-[1.5rem] bg-white/10 flex items-center justify-center text-accent border border-white/10">
@@ -517,7 +515,7 @@ export default function WebsiteVisitorsPage() {
                    </div>
                 </div>
 
-                <ScrollArea className="flex-1 p-8 space-y-10 custom-scrollbar">
+                <ScrollArea className="flex-1 p-8 space-y-10 custom-scrollbar min-h-0">
                    {/* ROW 1: Identity & Temporal Intelligence */}
                    <div className="grid md:grid-cols-2 gap-10">
                       <div className="space-y-6">
@@ -681,4 +679,15 @@ export default function WebsiteVisitorsPage() {
       <Footer />
     </main>
   )
+}
+
+/**
+ * Enhanced Scroll Area to support flexbox layout constraints.
+ */
+function ScrollArea({ className, children }: { className?: string, children: React.ReactNode }) {
+  return (
+    <div className={cn("overflow-y-auto custom-scrollbar min-h-0", className)}>
+      {children}
+    </div>
+  );
 }

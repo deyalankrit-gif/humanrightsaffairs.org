@@ -80,7 +80,7 @@ export default function PublicViewPage() {
   }
 
   return (
-    <main className="flex flex-col h-[calc(100vh-40px)] bg-slate-100 dark:bg-slate-900 overflow-hidden">
+    <main className="flex flex-col h-[calc(100vh-140px)] md:h-[calc(100vh-100px)] bg-slate-100 dark:bg-slate-900 overflow-hidden rounded-[2rem] border border-slate-200 dark:border-slate-800 shadow-inner">
       {/* Mirror Header with Scrollbar */}
       <div className="bg-white dark:bg-slate-950 border-b flex flex-col shrink-0">
         <div className="flex items-center justify-between px-6 py-1.5 border-b border-slate-100 dark:border-slate-800">
@@ -110,7 +110,7 @@ export default function PublicViewPage() {
           </div>
         </div>
 
-        {/* Scrollable Navigation Area with Visible Scrollbar */}
+        {/* Scrollable Navigation Area */}
         <nav className="flex items-center overflow-x-auto admin-scrollbar px-4 py-2.5 gap-3 bg-slate-50/50 dark:bg-slate-900/50 scroll-smooth no-scrollbar">
           {publicLinks.map((link) => {
             const isActive = currentUrl === link.href;
@@ -135,7 +135,7 @@ export default function PublicViewPage() {
       </div>
 
       {/* Full-bleed Iframe Viewer */}
-      <div className="flex-1 relative bg-white">
+      <div className="flex-1 relative bg-white min-h-0">
         <iframe 
           key={iframeKey}
           src={currentUrl} 

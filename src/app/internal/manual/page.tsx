@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
@@ -155,7 +156,7 @@ export default function UserManualPage() {
         </div>
       </div>
 
-      <ScrollArea className="flex-1 px-2 pb-10">
+      <ScrollArea className="flex-1 px-2 pb-10 min-h-0">
         <div className="space-y-6">
           {navigationGroups.map((group, gIdx) => {
             const groupItems = group.items.filter(item => 
@@ -361,11 +362,11 @@ export default function UserManualPage() {
 }
 
 /**
- * Custom Simple Scroll Area to keep component lightweight
+ * Enhanced Scroll Area to support flexbox layout constraints.
  */
 function ScrollArea({ className, children }: { className?: string, children: React.ReactNode }) {
   return (
-    <div className={cn("overflow-y-auto custom-scrollbar", className)}>
+    <div className={cn("overflow-y-auto custom-scrollbar min-h-0", className)}>
       {children}
     </div>
   );
