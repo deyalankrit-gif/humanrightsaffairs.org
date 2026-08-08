@@ -40,6 +40,7 @@ export function AudioAnnouncement() {
   const [error, setError] = useState(false);
   
   const audioRef = useRef<HTMLAudioElement>(null);
+  const hasAttemptedAutoplay = useRef(false);
   
   // Web Audio API Nodes
   const audioCtxRef = useRef<AudioContext | null>(null);
@@ -191,16 +192,17 @@ export function AudioAnnouncement() {
     syncAudioNodes();
 
     if (settings.enabled && settings.audioData && !error) {
-       if (settings.isPlaying) {
+       if (settings.isPlaying && !hasAttemptedAutoplay.current) {
           audioRef.current.play().then(() => {
              setIsPlaying(true);
              setShowAutoplayPrompt(false);
-             syncAudioNodes(); // Second sync to ensure nodes are at correct state during run
+             hasAttemptedAutoplay.current = true;
+             syncAudioNodes(); 
           }).catch((err) => {
              if (err.name === 'NotAllowedError') setShowAutoplayPrompt(true);
              setIsPlaying(false);
           });
-       } else {
+       } else if (!settings.isPlaying) {
           audioRef.current.pause();
           setIsPlaying(false);
        }
@@ -227,6 +229,7 @@ export function AudioAnnouncement() {
           setIsPlaying(true);
           setShowAutoplayPrompt(false);
           setIsMuted(false);
+          hasAttemptedAutoplay.current = true;
           localStorage.setItem('hrat_audio_muted', 'false');
           syncAudioNodes();
           cleanup();
@@ -255,6 +258,7 @@ export function AudioAnnouncement() {
         setIsPlaying(true);
         setShowAutoplayPrompt(false);
         setIsMuted(false);
+        hasAttemptedAutoplay.current = true;
         localStorage.setItem('hrat_audio_muted', 'false');
         syncAudioNodes();
       })
@@ -278,6 +282,8 @@ export function AudioAnnouncement() {
         src={settings.audioData} 
         onEnded={() => setIsPlaying(false)}
         onError={handleAudioError}
+        playsInline
+        autoPlay={settings.isPlaying && !hasAttemptedAutoplay.current}
         preload="auto"
       />
       

@@ -45,6 +45,7 @@ export function AiAudioPlayer({ className }: { className?: string }) {
   const [hasCompleted, setHasCompleted] = useState(false);
   
   const audioRef = useRef<HTMLAudioElement>(null);
+  const hasAttemptedAutoplay = useRef(false);
   
   // Web Audio Nodes for Effects
   const audioCtxRef = useRef<AudioContext | null>(null);
@@ -134,7 +135,7 @@ export function AiAudioPlayer({ className }: { className?: string }) {
 
       compressor.connect(echoDelay);
       echoDelay.connect(echoFeedback);
-      feedback.connect(delay);
+      echoFeedback.connect(echoDelay);
       echoDelay.connect(echoWet);
       
       reverbDry.connect(mainGain);
@@ -183,13 +184,14 @@ export function AiAudioPlayer({ className }: { className?: string }) {
     setupAudioGraph();
     syncAudioNodes();
 
-    if (settings.isPlaying) {
+    if (settings.isPlaying && !hasAttemptedAutoplay.current) {
        const playPromise = audio.play();
        if (playPromise !== undefined) {
           playPromise
             .then(() => {
               setIsPlaying(true);
               setAutoplayBlocked(false);
+              hasAttemptedAutoplay.current = true;
             })
             .catch((err) => {
               if (err.name === 'NotAllowedError') {
@@ -198,7 +200,7 @@ export function AiAudioPlayer({ className }: { className?: string }) {
               setIsPlaying(false);
             });
        }
-    } else {
+    } else if (!settings.isPlaying) {
        audio.pause();
        setIsPlaying(false);
     }
@@ -220,6 +222,7 @@ export function AiAudioPlayer({ className }: { className?: string }) {
         .then(() => {
           setIsPlaying(true);
           setAutoplayBlocked(false);
+          hasAttemptedAutoplay.current = true;
           cleanup();
         })
         .catch(() => {});
@@ -315,6 +318,7 @@ export function AiAudioPlayer({ className }: { className?: string }) {
           ref={audioRef} 
           src={settings.audioData} 
           playsInline 
+          autoPlay={settings.isPlaying && !hasAttemptedAutoplay.current}
           preload="auto" 
         />
         
@@ -382,21 +386,19 @@ export function AiAudioPlayer({ className }: { className?: string }) {
             </div>
           </div>
 
-          <div className="flex items-center justify-between w-full md:w-auto gap-1.5 md:gap-2 shrink-0 pt-1 md:pt-0">
-            <div className="flex items-center gap-1.5">
-              <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-950 p-1 md:p-1.5 rounded-lg md:rounded-xl border border-slate-100 dark:border-slate-800">
-                {isMuted || volume === 0 ? <VolumeX className="w-3 h-3 md:w-3.5 md:h-3.5 text-slate-400" /> : <Volume2 className="w-3 h-3 md:w-3.5 md:h-3.5 text-accent" />}
-                <Slider value={[isMuted ? 0 : volume]} max={1} step={0.01} onValueChange={handleVolumeChange} className="w-12 md:w-20" />
-              </div>
-              
-              <div className="flex items-center border-x border-slate-100 dark:border-slate-800 px-1.5 md:px-3 h-6 md:h-7">
-                <Select value={playbackSpeed.toString()} onValueChange={v => { setPlaybackSpeed(parseFloat(v)); if(audioRef.current) audioRef.current.playbackRate = parseFloat(v); }}>
-                  <SelectTrigger className="h-6 md:h-7 w-[50px] md:w-[65px] rounded-md md:rounded-lg bg-slate-50 dark:bg-slate-900 border-none text-[7px] md:text-[8px] font-black uppercase"><SelectValue /></SelectTrigger>
-                  <SelectContent className="bg-white dark:bg-slate-900 z-[1000] min-w-[60px]">
-                    {[0.5, 0.75, 1, 1.25, 1.5, 2].map(s => <SelectItem key={s} value={s.toString()} className="text-[8px] font-bold">{s}x</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
+          <div className="flex items-center gap-1.5 md:gap-2 shrink-0 pt-1 md:pt-0">
+            <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-950 p-1 md:p-1.5 rounded-lg md:rounded-xl border border-slate-100 dark:border-slate-800">
+              {isMuted || volume === 0 ? <VolumeX className="w-3 h-3 md:w-3.5 md:h-3.5 text-slate-400" /> : <Volume2 className="w-3 h-3 md:w-3.5 md:h-3.5 text-accent" />}
+              <Slider value={[isMuted ? 0 : volume]} max={1} step={0.01} onValueChange={handleVolumeChange} className="w-12 md:w-20" />
+            </div>
+            
+            <div className="flex items-center border-x border-slate-100 dark:border-slate-800 px-1.5 md:px-3 h-6 md:h-7">
+              <Select value={playbackSpeed.toString()} onValueChange={v => { setPlaybackSpeed(parseFloat(v)); if(audioRef.current) audioRef.current.playbackRate = parseFloat(v); }}>
+                <SelectTrigger className="h-6 md:h-7 w-[50px] md:w-[65px] rounded-md md:rounded-lg bg-slate-50 dark:bg-slate-900 border-none text-[7px] md:text-[8px] font-black uppercase"><SelectValue /></SelectTrigger>
+                <SelectContent className="bg-white dark:bg-slate-900 z-[1000] min-w-[60px]">
+                  {[0.5, 0.75, 1, 1.25, 1.5, 2].map(s => <SelectItem key={s} value={s.toString()} className="text-[8px] font-bold">{s}x</SelectItem>)}
+                </SelectContent>
+              </Select>
             </div>
 
             <Button 
