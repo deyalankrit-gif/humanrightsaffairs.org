@@ -88,16 +88,35 @@ export function AudioAnnouncement() {
   }, [settings, isMuted]);
 
   /**
+   * resumeAudioContext: Explicitly resumes the AudioContext regardless of
+   * whether it already existed or was just created. Browsers frequently
+   * spin up new AudioContexts in a 'suspended' state, and since
+   * createMediaElementSource reroutes ALL of the <audio> element's output
+   * through this graph, a suspended context means total silence even
+   * though audio.play() resolves successfully.
+   */
+  const resumeAudioContext = useCallback(async () => {
+    if (audioCtxRef.current && audioCtxRef.current.state === 'suspended') {
+      try {
+        await audioCtxRef.current.resume();
+      } catch (e) {
+        console.warn('[AUDIO-SYSTEM] Failed to resume AudioContext.', e);
+      }
+    }
+  }, []);
+
+  /**
    * setupAudioGraph: Initializes the professional signal chain.
    */
   const setupAudioGraph = useCallback(() => {
-    // Proactively resume suspended context on user interaction
-    if (audioCtxRef.current?.state === 'suspended') {
-      audioCtxRef.current.resume();
-    }
+    if (!audioRef.current) return;
 
-    if (!audioRef.current || audioCtxRef.current) {
-      if (audioCtxRef.current) syncAudioNodes();
+    // If the graph already exists, just make sure it's running and synced.
+    if (audioCtxRef.current) {
+      if (audioCtxRef.current.state === 'suspended') {
+        audioCtxRef.current.resume();
+      }
+      syncAudioNodes();
       return;
     }
 
@@ -168,6 +187,11 @@ export function AudioAnnouncement() {
 
       // IMMEDIATE SYNC
       syncAudioNodes();
+
+      // Newly created contexts frequently start 'suspended' — resume immediately.
+      if (ctx.state === 'suspended') {
+        ctx.resume();
+      }
     } catch (e) {
       console.warn("[AUDIO-SYSTEM] Web Audio failed. Falling back to native.", e);
     }
@@ -193,7 +217,7 @@ export function AudioAnnouncement() {
 
     if (settings.enabled && settings.audioData && !error) {
        if (settings.isPlaying && !hasAttemptedAutoplay.current) {
-          audioRef.current.play().then(() => {
+          resumeAudioContext().then(() => audioRef.current!.play()).then(() => {
              setIsPlaying(true);
              setShowAutoplayPrompt(false);
              hasAttemptedAutoplay.current = true;
@@ -210,7 +234,7 @@ export function AudioAnnouncement() {
        audioRef.current.pause();
        setIsPlaying(false);
     }
-  }, [settings, loading, error, setupAudioGraph, syncAudioNodes]);
+  }, [settings, loading, error, setupAudioGraph, syncAudioNodes, resumeAudioContext]);
 
   // AUTO-PLAY FALLBACK: Immediate play on first user interaction if blocked
   useEffect(() => {
@@ -253,7 +277,8 @@ export function AudioAnnouncement() {
   const handleManualPlay = () => {
     if (!audioRef.current) return;
     setupAudioGraph();
-    audioRef.current.play()
+    resumeAudioContext()
+      .then(() => audioRef.current!.play())
       .then(() => {
         setIsPlaying(true);
         setShowAutoplayPrompt(false);
