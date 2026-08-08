@@ -66,7 +66,8 @@ import {
   AlertTriangle,
   History,
   X,
-  Check
+  Check,
+  LayoutDashboard
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useToast } from '@/hooks/use-toast'
