@@ -28,7 +28,7 @@ import { cn } from '@/lib/utils';
 /**
  * AiAudioPlayer: High-fidelity Institutional Announcement Bar.
  * Redesigned for a sleek, minimal vertical footprint.
- * Features: Auto-dismissal upon completion of playback.
+ * Features: Auto-dismissal upon completion of playback and robust autoplay recovery.
  */
 export function AiAudioPlayer({ className }: { className?: string }) {
   const db = useFirestore();
@@ -63,6 +63,11 @@ export function AiAudioPlayer({ className }: { className?: string }) {
   const { data: settings, loading } = useDoc(settingsRef);
 
   const setupAudioGraph = useCallback(() => {
+    // Proactively resume suspended context on user interaction
+    if (audioCtxRef.current?.state === 'suspended') {
+      audioCtxRef.current.resume();
+    }
+
     if (!audioRef.current || audioCtxRef.current) return;
 
     try {
@@ -129,7 +134,7 @@ export function AiAudioPlayer({ className }: { className?: string }) {
 
       compressor.connect(echoDelay);
       echoDelay.connect(echoFeedback);
-      echoFeedback.connect(echoDelay);
+      feedback.connect(delay);
       echoDelay.connect(echoWet);
       
       reverbDry.connect(mainGain);
@@ -199,6 +204,7 @@ export function AiAudioPlayer({ className }: { className?: string }) {
     }
   }, [settings, loading, mounted, setupAudioGraph, syncAudioNodes, hasCompleted]);
 
+  // AUTO-PLAY FALLBACK: Immediate play on first user interaction if blocked
   useEffect(() => {
     if (!autoplayBlocked || isPlaying || !mounted || hasCompleted) return;
 
@@ -206,6 +212,10 @@ export function AiAudioPlayer({ className }: { className?: string }) {
       if (!audioRef.current || isPlaying || !settings?.isPlaying) return;
       
       setupAudioGraph();
+      if (audioCtxRef.current && audioCtxRef.current.state === 'suspended') {
+        audioCtxRef.current.resume();
+      }
+
       audioRef.current.play()
         .then(() => {
           setIsPlaying(true);

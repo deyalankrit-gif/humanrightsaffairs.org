@@ -90,6 +90,11 @@ export function AudioAnnouncement() {
    * setupAudioGraph: Initializes the professional signal chain.
    */
   const setupAudioGraph = useCallback(() => {
+    // Proactively resume suspended context on user interaction
+    if (audioCtxRef.current?.state === 'suspended') {
+      audioCtxRef.current.resume();
+    }
+
     if (!audioRef.current || audioCtxRef.current) {
       if (audioCtxRef.current) syncAudioNodes();
       return;
@@ -204,6 +209,43 @@ export function AudioAnnouncement() {
        setIsPlaying(false);
     }
   }, [settings, loading, error, setupAudioGraph, syncAudioNodes]);
+
+  // AUTO-PLAY FALLBACK: Immediate play on first user interaction if blocked
+  useEffect(() => {
+    if (!showAutoplayPrompt || isPlaying || !mounted) return;
+
+    const handleInteraction = () => {
+      if (!audioRef.current || isPlaying || !settings?.isPlaying) return;
+      
+      setupAudioGraph();
+      if (audioCtxRef.current && audioCtxRef.current.state === 'suspended') {
+        audioCtxRef.current.resume();
+      }
+
+      audioRef.current.play()
+        .then(() => {
+          setIsPlaying(true);
+          setShowAutoplayPrompt(false);
+          setIsMuted(false);
+          localStorage.setItem('hrat_audio_muted', 'false');
+          syncAudioNodes();
+          cleanup();
+        })
+        .catch(() => {});
+    };
+
+    const cleanup = () => {
+      window.removeEventListener('mousedown', handleInteraction);
+      window.removeEventListener('keydown', handleInteraction);
+      window.removeEventListener('touchstart', handleInteraction);
+    };
+
+    window.addEventListener('mousedown', handleInteraction);
+    window.addEventListener('keydown', handleInteraction);
+    window.addEventListener('touchstart', handleInteraction);
+
+    return cleanup;
+  }, [showAutoplayPrompt, isPlaying, mounted, settings?.isPlaying, setupAudioGraph, syncAudioNodes]);
 
   const handleManualPlay = () => {
     if (!audioRef.current) return;
