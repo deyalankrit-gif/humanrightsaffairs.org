@@ -154,6 +154,16 @@ export default function WebsiteVisitorsPage() {
 
   const COLORS = ['#D4AF37', '#138808', '#000080', '#FF9933'];
 
+  // Helper to extract path string from legacy object or string array
+  const getLatestPath = (visitor: any) => {
+    if (!visitor.pagesVisited || !visitor.pagesVisited.length) return '/';
+    const lastEntry = visitor.pagesVisited[visitor.pagesVisited.length - 1];
+    if (typeof lastEntry === 'object' && lastEntry !== null) {
+      return lastEntry.path || '/';
+    }
+    return lastEntry || '/';
+  };
+
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
       <section className="pt-16 pb-8 bg-slate-900 text-white border-b-8 border-accent/20 relative overflow-hidden">
@@ -391,7 +401,7 @@ export default function WebsiteVisitorsPage() {
                                      <div className="flex items-center gap-1.5">
                                         <Navigation className="w-3 h-3 text-slate-400" />
                                         <span className="text-[10px] font-mono text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded truncate max-w-[100px]">
-                                           {v.pagesVisited?.[v.pagesVisited.length - 1] || '/'}
+                                           {getLatestPath(v)}
                                         </span>
                                      </div>
                                   </td>
