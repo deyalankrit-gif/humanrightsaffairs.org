@@ -31,7 +31,12 @@ import {
   RefreshCw,
   Clock,
   X,
-  History
+  History,
+  Info,
+  CalendarDays,
+  ChevronRight,
+  MapPin,
+  Circle
 } from 'lucide-react';
 import {
   Dialog,
@@ -54,15 +59,22 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import { Calendar } from "@/components/ui/calendar"
 import { useToast } from '@/hooks/use-toast';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
-import { format, addDays, startOfDay, isWithinInterval, endOfDay, isToday } from 'date-fns';
+import { format, addDays, startOfDay, isWithinInterval, endOfDay, isToday, getMonth } from 'date-fns';
 import { BUILT_IN_HOLIDAYS, BUILT_IN_OBSERVANCES } from '@/lib/activity-hub-data';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 /**
  * Internal Occasions Governance: Real-time management terminal.
- * Updated: Sequential conflict resolution logic for autonomous discovery mode.
+ * Updated: Integrated Visual Calendar Registry and Month-wise Discovery.
  */
 export default function InternalOccasionsManagement() {
   const { user, loading: authLoading } = useUser();
@@ -75,6 +87,7 @@ export default function InternalOccasionsManagement() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editOccasion, setEditOccasion] = useState<any>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [selectedCalendarDate, setSelectedCalendarDate] = useState<Date | undefined>(new Date());
 
   const [newOccasion, setNewOccasion] = useState({
     title: '',
@@ -106,38 +119,39 @@ export default function InternalOccasionsManagement() {
 
   const { data: occasions, loading: dataLoading } = useCollection(occasionsQuery);
 
-  const nextSpecialDay = useMemo(() => {
-    const allDays = [
+  const allSpecialDays = useMemo(() => {
+    return [
       ...BUILT_IN_HOLIDAYS.map(h => ({ ...h, isHoliday: true, date: startOfDay(new Date(new Date().getFullYear(), h.month - 1, h.day)) })),
       ...BUILT_IN_OBSERVANCES.map(o => ({ ...o, isHoliday: false, date: startOfDay(new Date(new Date().getFullYear(), o.month - 1, o.day)) }))
     ].sort((a, b) => a.date.getTime() - b.date.getTime());
-    
-    const now = startOfDay(new Date());
+  }, []);
 
+  const nextSpecialDay = useMemo(() => {
+    const now = startOfDay(new Date());
+    
     // 1. CHECK FOR TODAY
-    const todayMatch = allDays.find(d => d.date.getTime() === now.getTime());
+    const todayMatch = allSpecialDays.find(d => d.date.getTime() === now.getTime());
     if (todayMatch) return { ...todayMatch, currentStatus: 'Today' };
 
     // 2. CHECK FOR YESTERDAY
     const yesterday = addDays(now, -1);
-    const yesterdayMatch = allDays.find(d => d.date.getTime() === yesterday.getTime());
+    const yesterdayMatch = allSpecialDays.find(d => d.date.getTime() === yesterday.getTime());
     if (yesterdayMatch) return { ...yesterdayMatch, currentStatus: 'Recent (T+1)' };
 
     // 3. CHECK FOR UPCOMING
-    const upcomingMatch = allDays.find(d => {
+    const upcomingMatch = allSpecialDays.find(d => {
       if (d.date <= now) return false;
       if (d.date > addDays(now, 3)) return false;
       
       const dayBefore = addDays(d.date, -1);
-      const isConsecutive = allDays.some(prev => prev.date.getTime() === dayBefore.getTime());
+      const isConsecutive = allSpecialDays.some(prev => prev.date.getTime() === dayBefore.getTime());
       return !isConsecutive; // Only trigger early if not consecutive
     });
 
     if (upcomingMatch) return { ...upcomingMatch, currentStatus: 'Upcoming (T-3)' };
 
-    // Fallback: Next chronological event
-    return allDays.find(d => d.date > now) || allDays[0];
-  }, []);
+    return allSpecialDays.find(d => d.date > now) || allSpecialDays[0];
+  }, [allSpecialDays]);
 
   const handleToggleProtocol = async (val: boolean) => {
     if (!protocolRef) return;
@@ -221,11 +235,13 @@ export default function InternalOccasionsManagement() {
 
   const isAutoMode = protocol?.mode === 'auto';
 
+  // Highlight special days on the mini calendar
+  const specialDaysInMonth = allSpecialDays.filter(d => getMonth(d.date) === getMonth(selectedCalendarDate || new Date()));
+
   return (
-    <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
-      <header className="pt-16 pb-8 bg-slate-900 text-white border-b-8 border-accent/20 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-1/3 h-full bg-accent/5 -skew-x-12"></div>
-        <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-6 relative z-10">
+    <main className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-20">
+      <header className="pt-16 pb-8 bg-slate-900 text-white border-b-8 border-accent/20 px-4">
+        <div className="container mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="space-y-1">
             <div className="inline-flex items-center gap-2 bg-emerald-500/20 text-emerald-400 px-3 py-1 rounded-full text-[9px] font-bold uppercase border border-emerald-500/30 tracking-[0.2em]">
               <Wifi className="w-2.5 h-2.5 animate-pulse" /> Live Broadcast Control
@@ -299,168 +315,281 @@ export default function InternalOccasionsManagement() {
         </div>
       </header>
 
-      <section className="py-8 container mx-auto px-4 max-w-6xl">
-        
-        {/* Governance Protocol Control */}
-        <Card className="rounded-[2.5rem] border-none shadow-xl bg-white dark:bg-slate-900 overflow-hidden mb-12">
-           <div className="flex flex-col md:flex-row">
-              <div className="md:w-1/3 bg-slate-900 p-10 text-white relative flex flex-col justify-center">
-                 <div className="absolute top-0 right-0 w-24 h-24 bg-accent/10 rounded-full -mr-12 -mt-12 blur-2xl"></div>
-                 <Badge className="bg-accent text-primary font-black uppercase text-[8px] mb-4 tracking-widest w-fit">Registry Node</Badge>
-                 <h3 className="text-2xl font-headline font-bold">Governance <span className="text-accent italic">Protocol</span></h3>
-                 <p className="text-slate-400 text-xs mt-2 leading-relaxed">Toggle between manual curator control and autonomous multi-faith discovery.</p>
-              </div>
-              <div className="flex-1 p-10 flex flex-col md:flex-row items-center justify-between gap-8">
-                 <div className="space-y-6 flex-1">
-                    <div className="flex items-center justify-between p-6 rounded-3xl border-2 border-dashed border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
-                       <div className="flex items-center gap-4">
-                          <div className={cn(
-                            "w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-500 shadow-sm",
-                            isAutoMode ? "bg-accent text-primary animate-pulse" : "bg-white text-slate-300"
-                          )}>
-                             {isAutoMode ? <Zap className="w-6 h-6" /> : <Settings2 className="w-6 h-6" />}
-                          </div>
-                          <div>
-                             <h4 className="font-bold text-primary dark:text-white uppercase tracking-tight">Autonomous Discovery Mode</h4>
-                             <p className="text-[10px] font-bold text-slate-400 uppercase">Lead-time suppression for consecutive events.</p>
-                          </div>
-                       </div>
-                       <Switch 
-                         checked={isAutoMode} 
-                         onCheckedChange={handleToggleProtocol} 
-                         disabled={isActionLoading}
-                         className="data-[state=checked]:bg-accent"
-                       />
+      <section className="py-8 container mx-auto px-4 max-w-7xl">
+        <div className="grid lg:grid-cols-12 gap-8 items-start">
+           
+           {/* Primary Control Column */}
+           <div className="lg:col-span-8 space-y-8">
+              <Card className="rounded-[2.5rem] border-none shadow-xl bg-white dark:bg-slate-900 overflow-hidden">
+                <div className="flex flex-col md:flex-row">
+                    <div className="md:w-1/3 bg-slate-900 p-8 text-white relative flex flex-col justify-center border-b md:border-b-0 md:border-r border-white/10">
+                      <div className="absolute top-0 right-0 w-24 h-24 bg-accent/10 rounded-full -mr-12 -mt-12 blur-2xl"></div>
+                      <Badge className="bg-accent text-primary font-black uppercase text-[8px] mb-4 tracking-widest w-fit">Governance Node</Badge>
+                      <h3 className="text-2xl font-headline font-bold">Broadcast <span className="text-accent italic">Protocol</span></h3>
+                      <p className="text-slate-400 text-xs mt-2 leading-relaxed">Toggle between manual curation and autonomous discovery.</p>
                     </div>
-                    
-                    {isAutoMode && (
-                      <div className="flex items-start gap-4 p-5 bg-indigo-50/50 dark:bg-indigo-950/20 rounded-2xl border border-indigo-100 dark:border-indigo-900 animate-in slide-in-from-left-4 duration-700">
-                         <div className="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center text-indigo-600 shrink-0"><Clock className="w-4 h-4" /></div>
-                         <div className="space-y-1">
-                            <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest leading-none">
-                              Broadcast Identity: {nextSpecialDay?.currentStatus || 'Next Event'}
-                            </p>
-                            <div className="font-bold text-slate-700 dark:text-slate-300 flex items-center gap-2">
-                               {nextSpecialDay.title} 
-                               <Badge className="bg-primary text-white text-[8px]">{nextSpecialDay.category}</Badge>
+                    <div className="flex-1 p-8 flex flex-col gap-6">
+                      <div className="flex items-center justify-between p-6 rounded-3xl border-2 border-dashed border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
+                          <div className="flex items-center gap-4">
+                            <div className={cn(
+                              "w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-500 shadow-sm",
+                              isAutoMode ? "bg-accent text-primary animate-pulse" : "bg-white dark:bg-slate-800 text-slate-300"
+                            )}>
+                                {isAutoMode ? <Zap className="w-6 h-6" /> : <Settings2 className="w-6 h-6" />}
                             </div>
-                            <p className="text-[8px] font-bold text-slate-400 uppercase italic">
-                               Target Date: {format(nextSpecialDay.date, 'PPPP')}
-                            </p>
-                         </div>
-                      </div>
-                    )}
-                 </div>
-              </div>
-           </div>
-        </Card>
-
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-8">
-            <div className="flex items-center gap-3">
-               <History className="w-5 h-5 text-accent" />
-               <h2 className="text-xl font-headline font-bold text-primary dark:text-white">Manual Broadcast Registry</h2>
-            </div>
-            <div className="relative w-full max-sm:max-w-full max-w-md">
-               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-               <Input placeholder="Search active greetings..." className="pl-9 h-11 rounded-xl border-slate-200 text-sm shadow-inner" value={search} onChange={e => setSearch(e.target.value)} />
-            </div>
-        </div>
-
-        <div className="grid gap-6">
-          {dataLoading ? (
-            <div className="text-center py-20"><Loader2 className="w-10 h-10 animate-spin text-accent mx-auto" /></div>
-          ) : filtered.map((occ: any) => (
-            <Card key={occ.id} className={cn(
-              "border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900 rounded-[2.5rem] border transition-all duration-500 hover:shadow-xl",
-              occ.isActive ? "border-l-8 border-l-emerald-500" : "border-l-8 border-l-slate-200 opacity-60 grayscale"
-            )}>
-              <CardContent className="p-0">
-                <div className="flex flex-col md:flex-row items-stretch">
-                  <div className="relative w-full md:w-72 aspect-video md:aspect-auto overflow-hidden shrink-0 border-r border-slate-100 dark:border-slate-800">
-                     <Image src={occ.imageUrl} alt="Banner" fill className="object-cover group-hover:scale-110 transition-transform duration-1000" />
-                     <div className="absolute top-4 left-4">
-                       <Badge className={cn("text-[9px] font-black uppercase tracking-[0.1em] px-3 py-1 rounded-full", occ.isActive ? "bg-emerald-500 text-white" : "bg-slate-500 text-white")}>
-                         {occ.isActive ? "BROADCAST LIVE" : "OFFLINE"}
-                       </Badge>
-                     </div>
-                  </div>
-                  <div className="flex-1 p-8 space-y-6">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                       <div className="space-y-1.5">
-                          <h3 className="text-2xl font-headline font-bold text-primary dark:text-white leading-tight group-hover:text-accent transition-colors">{occ.title}</h3>
-                          <div className="flex items-center gap-4 text-[10px] font-black uppercase text-slate-400 tracking-[0.15em]">
-                             <span className="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-800 px-3 py-1 rounded-lg"><CalendarIcon className="w-3 h-3 text-accent" /> {occ.startDate} <ArrowRight className="w-2.5 h-2.5 mx-1" /> {occ.endDate}</span>
-                             <span className="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-800 px-3 py-1 rounded-lg"><Sparkles className="w-3 h-3 text-accent" /> Priority: {occ.priority}</span>
+                            <div>
+                                <h4 className="font-bold text-primary dark:text-white uppercase tracking-tight">Autonomous Discovery</h4>
+                                <p className="text-[10px] font-bold text-slate-400 uppercase">Synchronizes with institutional calendar.</p>
+                            </div>
                           </div>
-                       </div>
-                       <div className="flex items-center gap-2 shrink-0">
-                          <Button variant="outline" size="sm" onClick={() => { setEditOccasion(occ); setIsEditDialogOpen(true); }} className="h-10 px-5 rounded-xl text-[10px] font-bold border-slate-200 hover:bg-accent hover:text-primary transition-all">Modify</Button>
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <button className="h-10 w-10 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all flex items-center justify-center"><Trash2 className="w-4.5 h-4.5" /></button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent className="rounded-3xl border-none shadow-2xl">
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>Confirm Deletion</AlertDialogTitle>
-                                <AlertDialogDescription>Are you sure you want to delete this item? This action may be irreversible. Please confirm before continuing.</AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => handleDeleteOccasion(occ.id)} className="bg-red-600 hover:bg-red-700 rounded-xl h-11 font-bold">Delete</AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
-                       </div>
+                          <Switch 
+                            checked={isAutoMode} 
+                            onCheckedChange={handleToggleProtocol} 
+                            disabled={isActionLoading}
+                            className="data-[state=checked]:bg-accent"
+                          />
+                      </div>
+                      
+                      {isAutoMode && (
+                        <div className="flex items-center gap-5 p-5 bg-indigo-50 dark:bg-indigo-950/20 rounded-2xl border border-indigo-100 dark:border-indigo-900 animate-in slide-in-from-left-4 duration-700">
+                           <div className="w-12 h-12 rounded-2xl bg-white dark:bg-indigo-900 flex items-center justify-center text-indigo-600 shrink-0 shadow-sm"><Radio className="w-6 h-6 animate-pulse" /></div>
+                           <div className="space-y-1">
+                              <p className="text-[9px] font-black text-indigo-600 uppercase tracking-widest leading-none">Next Discovery Sequence</p>
+                              <div className="font-bold text-slate-700 dark:text-slate-300 flex items-center gap-2 text-lg">
+                                 {nextSpecialDay?.title} 
+                                 <Badge className="bg-primary text-white text-[8px]">{nextSpecialDay?.category}</Badge>
+                              </div>
+                              <p className="text-[9px] font-bold text-slate-400 uppercase italic">
+                                Target Date: {format(nextSpecialDay.date, 'PPPP')}
+                              </p>
+                           </div>
+                        </div>
+                      )}
                     </div>
-                    <div className="p-6 bg-slate-50 dark:bg-slate-800 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-inner italic text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                      "{occ.message}"
-                    </div>
+                </div>
+              </Card>
+
+              {/* Broadcast Registry Stream */}
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <History className="w-6 h-6 text-accent" />
+                    <h2 className="text-2xl font-headline font-bold text-primary dark:text-white">Manual Registry</h2>
+                  </div>
+                  <div className="relative w-full max-w-xs">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                    <Input placeholder="Search greetings..." className="pl-10 h-10 rounded-xl bg-white dark:bg-slate-900 border-none shadow-sm" value={search} onChange={e => setSearch(e.target.value)} />
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          ))}
 
-          {filtered.length === 0 && (
-            <div className="text-center py-24 bg-white dark:bg-slate-900 rounded-[3rem] border-4 border-dashed border-slate-100 dark:border-slate-800 opacity-40">
-               <ImageIcon className="w-16 h-16 text-slate-200 mx-auto mb-6" />
-               <p className="text-slate-400 font-black uppercase tracking-[0.3em] text-xs">Registry Node Empty</p>
-            </div>
-          )}
+                <div className="grid gap-4">
+                  {dataLoading ? (
+                    <div className="text-center py-20"><Loader2 className="w-10 h-10 animate-spin text-accent mx-auto" /></div>
+                  ) : filtered.map((occ: any) => (
+                    <Card key={occ.id} className={cn(
+                      "border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900 rounded-3xl border transition-all hover:shadow-lg",
+                      occ.isActive ? "border-l-8 border-l-emerald-500" : "border-l-8 border-l-slate-200 opacity-60 grayscale"
+                    )}>
+                      <CardContent className="p-0">
+                        <div className="flex flex-col md:flex-row items-stretch">
+                          <div className="relative w-full md:w-56 aspect-video md:aspect-auto overflow-hidden shrink-0 border-r border-slate-100 dark:border-slate-800">
+                             <Image src={occ.imageUrl} alt="Banner" fill className="object-cover" />
+                          </div>
+                          <div className="flex-1 p-6 flex flex-col md:flex-row items-center justify-between gap-6">
+                            <div className="space-y-1 flex-1 min-w-0">
+                               <h3 className="text-xl font-bold text-primary dark:text-white truncate">{occ.title}</h3>
+                               <div className="flex items-center gap-3 text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                                  <span>{occ.startDate} — {occ.endDate}</span>
+                                  <Badge variant="outline" className="h-4 text-[7px] border-accent text-accent">PRIORITY {occ.priority}</Badge>
+                               </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                               <Button variant="outline" size="sm" onClick={() => { setEditOccasion(occ); setEditStep('form'); setIsEditDialogOpen(true); }} className="h-9 px-4 rounded-xl text-[10px] font-bold border-slate-200">Modify</Button>
+                               <AlertDialog>
+                                 <AlertDialogTrigger asChild>
+                                   <button className="h-9 w-9 text-slate-300 hover:text-red-500 flex items-center justify-center transition-colors"><Trash2 className="w-4.5 h-4.5" /></button>
+                                 </AlertDialogTrigger>
+                                 <AlertDialogContent className="rounded-3xl border-none shadow-2xl">
+                                   <AlertDialogHeader>
+                                     <AlertDialogTitle>Confirm Purge</AlertDialogTitle>
+                                     <AlertDialogDescription>Remove this greeting record from the manual registry? This cannot be undone.</AlertDialogDescription>
+                                   </AlertDialogHeader>
+                                   <AlertDialogFooter>
+                                     <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+                                     <AlertDialogAction onClick={() => handleDeleteOccasion(occ.id)} className="bg-red-600 hover:bg-red-700 rounded-xl">Delete</AlertDialogAction>
+                                   </AlertDialogFooter>
+                                 </AlertDialogContent>
+                               </AlertDialog>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                  {filtered.length === 0 && !dataLoading && (
+                    <div className="text-center py-20 bg-white dark:bg-slate-900 rounded-[2.5rem] border-2 border-dashed border-slate-100 opacity-30">
+                       <ImageIcon className="w-12 h-12 mx-auto mb-4" />
+                       <p className="text-xs font-black uppercase tracking-widest">No manual records found</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+           </div>
+
+           {/* Insights & Calendar Column */}
+           <div className="lg:col-span-4 space-y-8">
+              
+              {/* MINI CALENDAR PREVIEW */}
+              <Card className="rounded-[2.5rem] border-none shadow-sm bg-white dark:bg-slate-900 p-6">
+                 <div className="flex items-center gap-2 mb-6">
+                    <CalendarDays className="w-5 h-5 text-accent" />
+                    <h3 className="text-sm font-black uppercase tracking-widest text-primary dark:text-white">Calendar Insight</h3>
+                 </div>
+                 <div className="p-2 bg-slate-50 dark:bg-slate-950 rounded-[2rem] border border-slate-100 dark:border-slate-800">
+                    <Calendar
+                      mode="single"
+                      selected={selectedCalendarDate}
+                      onSelect={setSelectedCalendarDate}
+                      className="rounded-md border-none p-0"
+                      classNames={{
+                        month: "space-y-4 w-full",
+                        caption: "flex justify-center pt-1 relative items-center mb-2",
+                        caption_label: "text-xs font-black uppercase tracking-widest text-accent",
+                        nav: "space-x-1 flex items-center",
+                        nav_button: cn(
+                          "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100"
+                        ),
+                        table: "w-full border-collapse space-y-1",
+                        head_row: "flex justify-between",
+                        head_cell: "text-slate-400 rounded-md w-8 font-bold text-[8px] uppercase tracking-tighter",
+                        row: "flex w-full mt-2 justify-between",
+                        cell: "text-center text-[10px] relative p-0 hover:bg-accent/10 rounded-lg transition-colors",
+                        day: cn(
+                          "h-8 w-8 p-0 font-bold aria-selected:opacity-100"
+                        ),
+                        day_selected: "bg-accent text-primary hover:bg-accent hover:text-primary focus:bg-accent focus:text-primary",
+                        day_today: "bg-slate-100 dark:bg-slate-800 text-primary dark:text-white",
+                        day_outside: "text-slate-300 opacity-50",
+                        day_disabled: "text-slate-300 opacity-50",
+                        day_hidden: "invisible",
+                      }}
+                    />
+                 </div>
+                 <div className="mt-6 space-y-3">
+                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3">Month Discovery Highlights</p>
+                    <div className="space-y-2 max-h-[150px] overflow-y-auto pr-2 custom-scrollbar">
+                       {specialDaysInMonth.map((d, i) => (
+                         <div key={i} className="flex items-center gap-3 p-2.5 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800 group hover:border-accent transition-all">
+                            <div className="w-8 h-8 rounded-lg bg-white dark:bg-slate-900 flex items-center justify-center text-[10px] font-black text-accent shrink-0 shadow-sm">{d.day}</div>
+                            <div className="min-w-0">
+                               <p className="text-[10px] font-bold text-primary dark:text-white truncate leading-none">{d.title}</p>
+                               <p className="text-[7px] font-black text-slate-400 uppercase mt-1">{d.category}</p>
+                            </div>
+                         </div>
+                       ))}
+                       {specialDaysInMonth.length === 0 && (
+                         <p className="text-[9px] text-slate-400 italic text-center py-4">No festive days registered this month.</p>
+                       )}
+                    </div>
+                 </div>
+              </Card>
+
+              {/* FULL REGISTRY LOOKUP (THE LIST REQUESTED) */}
+              <Card className="rounded-[2.5rem] border-none shadow-sm bg-slate-900 text-white p-8 overflow-hidden relative">
+                 <div className="absolute top-0 right-0 w-32 h-32 bg-accent/5 rounded-full -mr-16 -mt-16 blur-2xl"></div>
+                 <h3 className="text-xs font-black uppercase text-accent tracking-[0.2em] mb-8 flex items-center gap-2">
+                   <Database className="w-4 h-4" /> Institutional Registry
+                 </h3>
+                 <ScrollArea className="h-[400px] pr-4">
+                    <div className="space-y-8">
+                       {[1,2,3,4,5,6,7,8,9,10,11,12].map(month => {
+                         const monthDays = allSpecialDays.filter(d => d.month === month);
+                         if (monthDays.length === 0) return null;
+                         const monthName = format(new Date(2025, month - 1, 1), 'MMMM');
+                         return (
+                           <div key={month} className="space-y-3">
+                              <h4 className="text-[10px] font-black text-emerald-400 uppercase tracking-[0.3em] flex items-center gap-2">
+                                <span className="w-6 h-px bg-emerald-400/30"></span> {monthName}
+                              </h4>
+                              <div className="grid gap-2">
+                                 {monthDays.map((d, i) => (
+                                   <div key={i} className="flex justify-between items-center p-3 bg-white/5 rounded-xl border border-white/5 hover:bg-white/10 transition-colors group">
+                                      <div className="flex items-center gap-3">
+                                         <span className="text-[10px] font-black text-accent w-5">{d.day}</span>
+                                         <span className="text-[11px] font-bold opacity-80 group-hover:opacity-100">{d.title}</span>
+                                      </div>
+                                      <Badge variant="outline" className="text-[6px] h-4 border-white/20 opacity-50">{d.category}</Badge>
+                                   </div>
+                                 ))}
+                              </div>
+                           </div>
+                         );
+                       })}
+                    </div>
+                 </ScrollArea>
+                 <div className="mt-8 pt-4 border-t border-white/10">
+                    <div className="flex items-start gap-3">
+                       <Info className="w-4 h-4 text-accent shrink-0 mt-0.5" />
+                       <p className="text-[9px] text-slate-400 leading-relaxed font-bold uppercase italic">
+                         "These dates are strictly verified according to the Indian Multi-Faith Calendar. Sequential Guard logic is automatically applied to all entries."
+                       </p>
+                    </div>
+                 </div>
+              </Card>
+
+           </div>
         </div>
       </section>
 
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="max-w-2xl rounded-[2.5rem] max-h-[90vh] overflow-y-auto border-none shadow-2xl">
-          <DialogHeader><DialogTitle>Refine Greeting Metadata</DialogTitle></DialogHeader>
-          {editOccasion && (
-            <div className="space-y-6 py-2">
+      {/* Unified Edit Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={(val) => { if(!val) { setIsEditDialogOpen(false); setEditLeader(null); } }}>
+        <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="max-w-2xl bg-white dark:bg-slate-900 rounded-[2.5rem] border-none shadow-2xl max-h-[90vh] overflow-y-auto flex flex-col p-0 z-[1000001]">
+            <div className="bg-slate-900 pt-14 pb-10 px-8 text-white relative border-b-4 border-accent/20 shrink-0">
+               <div className="absolute right-6 top-6"><DialogClose asChild><Button variant="ghost" size="icon" className="rounded-full text-white hover:bg-white/10 h-10 w-10 transition-all"><X className="w-6 h-6" /></Button></DialogClose></div>
+               <DialogTitle className="text-2xl font-headline font-bold">Refine Greeting Record</DialogTitle>
+               <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">Registry Update Protocol</p>
+            </div>
+            
+            {editOccasion && (
+              <div className="flex-1 overflow-y-auto p-8 space-y-6 custom-scrollbar">
                 <div className="flex flex-col items-center gap-4 p-5 border-2 border-dashed rounded-[2rem] bg-slate-50 dark:bg-slate-900 shadow-inner">
                   <div className="relative w-full aspect-video rounded-2xl overflow-hidden bg-slate-200 border-4 border-white shadow-xl">
                     <Image src={editOccasion.imageUrl} alt="Banner" fill className="object-cover" />
-                    <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => handleFileChange(e, true)} />
+                    <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer z-10" onChange={(e) => handleFileChange(e, true)} />
                   </div>
-                  <Label className="text-[10px] font-black uppercase text-slate-400">Replace current banner</Label>
+                  <Badge variant="outline" className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Click Image area to update</Badge>
                 </div>
+
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="space-y-1.5"><Label className="text-[10px] font-black uppercase text-slate-500">Occasion Title</Label><Input value={editOccasion.title} onChange={e => setEditOccasion({...editOccasion, title: e.target.value})} className="h-11 rounded-xl bg-slate-50 border-none shadow-inner font-bold" /></div>
+                  <div className="space-y-1.5"><Label className="text-[10px] font-black uppercase text-slate-500">Display Priority</Label><Input type="number" value={editOccasion.priority} onChange={e => setEditOccasion({...editOccasion, priority: Number(e.target.value)})} className="h-11 rounded-xl bg-slate-50 border-none shadow-inner font-bold" /></div>
+                </div>
+
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">Title</Label><Input value={editOccasion.title} onChange={e => setEditOccasion({...editOccasion, title: e.target.value})} className="h-11 rounded-xl" /></div>
-                  <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">Priority</Label><Input type="number" value={editOccasion.priority} onChange={e => setEditOccasion({...editOccasion, priority: Number(e.target.value)})} className="h-11 rounded-xl" /></div>
+                  <div className="space-y-1.5"><Label className="text-[10px] uppercase font-bold text-slate-500">Start Date</Label><Input type="date" value={editOccasion.startDate} onChange={e => setEditOccasion({...editOccasion, startDate: e.target.value})} className="h-11 rounded-xl" /></div>
+                  <div className="space-y-1.5"><Label className="text-[10px] uppercase font-bold text-slate-500">End Date</Label><Input type="date" value={editOccasion.endDate} onChange={e => setEditOccasion({...editOccasion, endDate: e.target.value})} className="h-11 rounded-xl" /></div>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">Start Date</Label><Input type="date" value={editOccasion.startDate} onChange={e => setEditOccasion({...editOccasion, startDate: e.target.value})} className="h-11 rounded-xl" /></div>
-                  <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">End Date</Label><Input type="date" value={editOccasion.endDate} onChange={e => setEditOccasion({...editOccasion, endDate: e.target.value})} className="h-11 rounded-xl" /></div>
-                </div>
-                <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">Message</Label><Textarea value={editOccasion.message} onChange={e => setEditOccasion({...editOccasion, message: e.target.value})} className="rounded-xl min-h-[100px]" /></div>
-                <div className="flex items-center justify-between p-5 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-100">
-                  <Label className="font-bold">Active Broadcast</Label>
+
+                <div className="space-y-1.5"><Label className="text-[10px] uppercase font-bold text-slate-500">Greeting Narrative</Label><Textarea value={editOccasion.message} onChange={e => setEditOccasion({...editOccasion, message: e.target.value})} className="rounded-xl min-h-[100px]" /></div>
+                
+                <div className="flex items-center justify-between p-5 bg-emerald-50/50 dark:bg-emerald-950/20 rounded-2xl border border-emerald-100 dark:border-emerald-900">
+                  <Label className="font-bold text-primary dark:text-emerald-400">Active Broadcast Status</Label>
                   <Switch checked={editOccasion.isActive} onCheckedChange={val => setEditOccasion({...editOccasion, isActive: val})} className="data-[state=checked]:bg-emerald-500" />
                 </div>
-                <Button onClick={handleUpdateOccasion} disabled={isActionLoading} className="w-full h-14 rounded-2xl bg-primary text-white font-bold rounded-2xl shadow-2xl mt-4 hover:bg-secondary transition-all">Commit Profile Refresh</Button>
-            </div>
-          )}
+
+                <Button type="button" onClick={handleUpdateOccasion} disabled={isActionLoading} className="w-full h-16 rounded-2xl bg-primary text-white font-bold shadow-xl hover:bg-secondary transition-all text-base md:text-lg">
+                  {isActionLoading ? <Loader2 className="w-6 h-6 animate-spin mr-2" /> : "Save Profile Changes"}
+                </Button>
+              </div>
+            )}
         </DialogContent>
       </Dialog>
+
       <Footer />
     </main>
   );
+}
+
+function Circle({ className }: { className?: string }) {
+  return <div className={cn("rounded-full", className)} />
 }
