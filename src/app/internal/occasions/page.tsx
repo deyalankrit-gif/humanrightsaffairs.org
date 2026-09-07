@@ -73,6 +73,7 @@ import { cn } from '@/lib/utils';
 import { format, addDays, startOfDay, isWithinInterval, endOfDay, isToday, getMonth, parse } from 'date-fns';
 import { BUILT_IN_HOLIDAYS, BUILT_IN_OBSERVANCES } from '@/lib/activity-hub-data';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 export default function InternalOccasionsManagement() {
   const { user, loading: authLoading } = useUser();
@@ -399,10 +400,15 @@ export default function InternalOccasionsManagement() {
                            </div>
                            <Button 
                              onClick={() => {
+                               const visual = PlaceHolderImages.find(i => i.id === 'ganesh-puja' && nextSpecialDay.title.toLowerCase().includes('ganesh')) 
+                                 || PlaceHolderImages.find(i => i.id === 'durga-puja' && nextSpecialDay.title.toLowerCase().includes('durga'))
+                                 || PlaceHolderImages.find(i => i.id === 'kali-puja' && (nextSpecialDay.title.toLowerCase().includes('kali') || nextSpecialDay.title.toLowerCase().includes('diwali')))
+                                 || { imageUrl: '/HRAT Logo.jpeg' };
+
                                setNewOccasion({
                                  title: nextSpecialDay.title,
                                  message: `Human Rights Affairs Trust (Justice Shield) joins the nation in celebrating ${nextSpecialDay.title}.`,
-                                 imageUrl: '/HRAT Logo.jpeg',
+                                 imageUrl: visual.imageUrl,
                                  startDate: format(new Date(), 'yyyy-MM-dd'),
                                  endDate: format(nextSpecialDay.date, 'yyyy-MM-dd'),
                                  isActive: true,
