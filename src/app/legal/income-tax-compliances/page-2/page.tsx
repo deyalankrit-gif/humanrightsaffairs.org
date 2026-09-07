@@ -14,7 +14,9 @@ import {
   Building,
   ArrowRight,
   Calculator,
-  Globe
+  Globe,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
@@ -54,8 +56,8 @@ export default function IncomeTaxCompliancesPage2() {
         <div className="absolute top-0 right-0 w-1/2 h-full bg-accent/5 -skew-x-12"></div>
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-4xl mx-auto">
-            <Link href="/" className="inline-flex items-center gap-2 text-accent font-bold text-xs uppercase tracking-[0.2em] mb-6 hover:translate-x-[-4px] transition-transform">
-              <ArrowLeft className="w-4 h-4" /> Back to Portal
+            <Link href="/legal/income-tax-compliances" className="inline-flex items-center gap-2 text-accent font-bold text-xs uppercase tracking-[0.2em] mb-6 hover:translate-x-[-4px] transition-transform">
+              <ArrowLeft className="w-4 h-4" /> Back to Hub
             </Link>
             <div className="flex items-center gap-4 mb-4">
               <div className="p-3 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20">
@@ -130,6 +132,26 @@ export default function IncomeTaxCompliancesPage2() {
                      80G-approved Trust-এর জন্য Form 10BD এবং 10BE-এর annual compliance 31 May-এর মধ্যে করতে হয়।
                    </p>
                 </Card>
+             </div>
+
+             {/* Pagination Navigation */}
+             <div className="grid grid-cols-2 gap-4 pt-12 border-t border-slate-100 dark:border-slate-800 print:hidden">
+                <Link href="/legal/income-tax-compliances/page-1">
+                   <Button variant="outline" className="w-full h-20 rounded-2xl flex flex-col items-start gap-1 p-6 hover:border-accent group transition-all text-left">
+                     <span className="text-[10px] font-black uppercase text-slate-400 flex items-center gap-1 group-hover:-translate-x-1 transition-transform">
+                       <ChevronLeft className="w-3 h-3" /> Previous Section
+                     </span>
+                     <span className="text-sm font-bold text-primary dark:text-white truncate">General Rules & Basics</span>
+                   </Button>
+                </Link>
+                <Link href="/legal/income-tax-compliances/page-3">
+                   <Button variant="outline" className="w-full h-20 rounded-2xl flex flex-col items-end gap-1 p-6 hover:border-accent group transition-all text-right">
+                     <span className="text-[10px] font-black uppercase text-slate-400 flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                       Next Section <ChevronRight className="w-3 h-3" />
+                     </span>
+                     <span className="text-sm font-bold text-primary dark:text-white truncate">Master Audit Checklist</span>
+                   </Button>
+                </Link>
              </div>
         </div>
       </section>

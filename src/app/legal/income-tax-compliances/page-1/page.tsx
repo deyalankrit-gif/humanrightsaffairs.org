@@ -18,6 +18,7 @@ import {
   Building,
   ArrowRight,
   Info,
+  ChevronRight,
   ClipboardCheck,
   FileDigit,
   FileSpreadsheet,
@@ -72,8 +73,8 @@ export default function IncomeTaxCompliancesPage1() {
         <div className="absolute top-0 right-0 w-1/2 h-full bg-accent/5 -skew-x-12"></div>
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-4xl mx-auto">
-            <Link href="/" className="inline-flex items-center gap-2 text-accent font-bold text-xs uppercase tracking-[0.2em] mb-6 hover:translate-x-[-4px] transition-transform">
-              <ArrowLeft className="w-4 h-4" /> Back to Portal
+            <Link href="/legal/income-tax-compliances" className="inline-flex items-center gap-2 text-accent font-bold text-xs uppercase tracking-[0.2em] mb-6 hover:translate-x-[-4px] transition-transform">
+              <ArrowLeft className="w-4 h-4" /> Back to Hub
             </Link>
             <div className="flex items-center gap-4 mb-4">
               <div className="p-3 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20">
@@ -82,10 +83,10 @@ export default function IncomeTaxCompliancesPage1() {
               <Badge className="bg-accent text-primary font-bold px-3 py-1 uppercase text-[10px] tracking-widest border-none">Compliance Page 1</Badge>
             </div>
             <h1 className="text-4xl md:text-6xl font-headline font-bold mb-4 leading-tight">
-              Income Tax <span className="text-accent italic">Compliances</span>
+              General Rules <span className="text-accent italic">& Basics</span>
             </h1>
             <p className="text-lg md:text-xl text-primary-foreground/80 max-w-3xl font-medium leading-relaxed">
-              ভারতে একটি Charitable Trust-এর প্রতি বছর Income Tax-এর বেশ কিছু compliance থাকে। (Part 1: General Rules).
+              ভারতে একটি Charitable Trust-এর প্রতি বছর Income Tax-এর বেশ কিছু compliance থাকে। (General Rules).
             </p>
           </div>
         </div>
@@ -153,7 +154,7 @@ export default function IncomeTaxCompliancesPage1() {
                 </div>
                 <h4 className="text-xl font-headline font-bold">৮৫% নিয়ম (The 85% Rule)</h4>
                 <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed text-justify">
-                  12AB-এর অধীনে exemption নিতে চাইলে Trust-এর income-এর সাধারণভাবে <strong>৮৫%</strong> charitable/religious purpose-এ apply করতে হয়। ৮৫% পুরোপুরি apply না হলে <strong>Form 9A</strong> বা <strong>Form 10</strong> লাগতে পারে।
+                  12AB-এর অধীনে exemption নিতে চাইলে Trust-এর income-এর সাধারণভাবে <strong>৮৫%</strong> charitable/religious purpose-এ apply করতে হয়। ৮৫% পুরোপুরি apply না হলে পরিস্থিতি অনুযায়ী <strong>Form 9A</strong> বা <strong>Form 10</strong> লাগতে পারে।
                 </p>
              </Card>
 
@@ -183,6 +184,19 @@ export default function IncomeTaxCompliancesPage1() {
                   "Trust-এর Income Tax return file করলেই annual compliance শেষ নয়। Form 10B/10BB এবং ITR-7-এর তথ্যের মধ্যে পূর্ণ সামঞ্জস্য থাকা অত্যন্ত জরুরি।"
                 </p>
              </div>
+          </div>
+
+          {/* Pagination Navigation */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-12 border-t border-slate-100 dark:border-slate-800 print:hidden">
+             <div></div>
+             <Link href="/legal/income-tax-compliances/page-2">
+                <Button variant="outline" className="w-full h-20 rounded-2xl flex flex-col items-end gap-1 p-6 hover:border-accent group transition-all">
+                  <span className="text-[10px] font-black uppercase text-slate-400 flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                    Next Section <ChevronRight className="w-3 h-3" />
+                  </span>
+                  <span className="text-sm font-bold text-primary dark:text-white truncate">Yearly Compliance Calendar</span>
+                </Button>
+             </Link>
           </div>
         </div>
       </section>

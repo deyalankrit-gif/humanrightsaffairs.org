@@ -15,7 +15,8 @@ import {
   Calculator,
   Receipt,
   BookOpen,
-  ListChecks
+  ListChecks,
+  ChevronLeft
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -49,8 +50,8 @@ export default function IncomeTaxCompliancesPage3() {
         <div className="absolute top-0 right-0 w-1/2 h-full bg-accent/5 -skew-x-12"></div>
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-4xl mx-auto">
-            <Link href="/" className="inline-flex items-center gap-2 text-accent font-bold text-xs uppercase tracking-[0.2em] mb-6 hover:translate-x-[-4px] transition-transform">
-              <ArrowLeft className="w-4 h-4" /> Back to Portal
+            <Link href="/legal/income-tax-compliances" className="inline-flex items-center gap-2 text-accent font-bold text-xs uppercase tracking-[0.2em] mb-6 hover:translate-x-[-4px] transition-transform">
+              <ArrowLeft className="w-4 h-4" /> Back to Hub
             </Link>
             <div className="flex items-center gap-4 mb-4">
               <div className="p-3 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20">
@@ -65,6 +66,19 @@ export default function IncomeTaxCompliancesPage3() {
               Annual Accounts & Tax Compliance Audit Guide. (Part 3: Master Checklist).
             </p>
           </div>
+        </div>
+      </section>
+
+      {/* Toolbar */}
+      <section className="py-6 bg-white dark:bg-slate-900 border-b sticky top-[48px] md:top-[56px] z-30 shadow-sm print:hidden">
+        <div className="container mx-auto px-4 flex justify-between items-center max-w-5xl">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Audit Readiness Protocol</span>
+          </div>
+          <Button onClick={handlePrint} className="bg-primary text-white font-bold rounded-xl gap-2 shadow-lg hover:bg-secondary transition-all">
+            <Printer className="w-4 h-4" /> Print Checklist
+          </Button>
         </div>
       </section>
 
@@ -140,7 +154,20 @@ export default function IncomeTaxCompliancesPage3() {
                 </div>
              </Card>
 
-             <div className="text-center pt-8 border-t border-slate-200 dark:border-slate-800">
+             {/* Pagination Navigation */}
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-12 border-t border-slate-100 dark:border-slate-800 print:hidden">
+                <Link href="/legal/income-tax-compliances/page-2">
+                   <Button variant="outline" className="w-full h-20 rounded-2xl flex flex-col items-start gap-1 p-6 hover:border-accent group transition-all text-left">
+                     <span className="text-[10px] font-black uppercase text-slate-400 flex items-center gap-1 group-hover:-translate-x-1 transition-transform">
+                       <ChevronLeft className="w-3 h-3" /> Previous Section
+                     </span>
+                     <span className="text-sm font-bold text-primary dark:text-white truncate">Yearly Compliance Calendar</span>
+                   </Button>
+                </Link>
+                <div></div>
+             </div>
+
+             <div className="text-center pt-8 border-t border-slate-200 dark:border-slate-800 print:hidden">
                <Button onClick={handlePrint} className="bg-primary text-white h-14 px-10 rounded-xl font-bold">
                  <Printer className="w-4 h-4 mr-2" /> Download Full Checklist
                </Button>
