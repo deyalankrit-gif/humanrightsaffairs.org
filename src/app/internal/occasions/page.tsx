@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser, useCollection, useFirestore, useMemoFirebase, useDoc } from '@/firebase';
-import { collection, query, orderBy, addDoc, deleteDoc, doc, updateDoc, serverTimestamp, getDocs, writeBatch, where } from 'firebase/firestore';
+import { collection, query, orderBy, addDoc, deleteDoc, doc, updateDoc, serverTimestamp, getDocs, writeBatch, where, setDoc } from 'firebase/firestore';
 import { Footer } from '@/components/footer';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -87,12 +87,15 @@ export default function InternalOccasionsManagement() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedCalendarDate, setSelectedCalendarDate] = useState<Date | undefined>(new Date());
   
-  // Language Switching State
-  const [addNarrativeLang, setAddNarrativeLang] = useState<'en' | 'bn'>('en');
-  const [editNarrativeLang, setEditNarrativeLang] = useState<'en' | 'bn'>('en');
+  // Language Switching States for Form
+  const [addTitleLang, setAddTitleLang] = useState<'en' | 'bn'>('en');
+  const [addMsgLang, setAddMsgLang] = useState<'en' | 'bn'>('en');
+  const [editTitleLang, setEditTitleLang] = useState<'en' | 'bn'>('en');
+  const [editMsgLang, setEditMsgLang] = useState<'en' | 'bn'>('en');
 
   const [newOccasion, setNewOccasion] = useState({
     title: '',
+    titleBn: '',
     message: '',
     messageBn: '',
     imageUrl: '',
@@ -130,7 +133,7 @@ export default function InternalOccasionsManagement() {
 
   const nextSpecialDay = useMemo(() => {
     const now = startOfDay(new Date());
-    const upcomingMatch = allSpecialDays.find(d => d.date > now) || allSpecialDays[0];
+    const upcomingMatch = allSpecialDays.find(d => d.date >= now) || allSpecialDays[0];
     return upcomingMatch;
   }, [allSpecialDays]);
 
@@ -199,7 +202,7 @@ export default function InternalOccasionsManagement() {
       .then(() => {
         toast({ title: "Greeting Published" });
         setIsAddDialogOpen(false);
-        setNewOccasion({ title: '', message: '', messageBn: '', imageUrl: '', startDate: format(new Date(), 'yyyy-MM-dd'), endDate: format(new Date(), 'yyyy-MM-dd'), isActive: true, priority: 1 });
+        setNewOccasion({ title: '', titleBn: '', message: '', messageBn: '', imageUrl: '', startDate: format(new Date(), 'yyyy-MM-dd'), endDate: format(new Date(), 'yyyy-MM-dd'), isActive: true, priority: 1 });
       })
       .finally(() => setIsActionLoading(false));
   };
@@ -303,15 +306,19 @@ export default function InternalOccasionsManagement() {
                       <Label className="text-[10px] font-black uppercase text-slate-400">Click to upload seasonal banner (Max 200KB)</Label>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-1">
-                        <Label className="text-[10px] font-bold uppercase text-slate-400">Occasion Title</Label>
-                        <Input placeholder="e.g. Independence Day 2025" value={newOccasion.title} onChange={e => setNewOccasion({...newOccasion, title: e.target.value})} className="h-11 rounded-xl" />
-                      </div>
-                      <div className="space-y-1">
-                        <Label className="text-[10px] font-bold uppercase text-slate-400">Display Priority (Rank)</Label>
-                        <Input type="number" value={newOccasion.priority} onChange={e => setNewOccasion({...newOccasion, priority: Number(e.target.value)})} className="h-11 rounded-xl" />
-                      </div>
+                    <div className="space-y-2">
+                       <div className="flex items-center justify-between mb-1">
+                          <Label className="text-[10px] font-black uppercase text-slate-400">Occasion Title *</Label>
+                          <div className="flex bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg border">
+                             <button type="button" onClick={() => setAddTitleLang('en')} className={cn("px-3 py-0.5 rounded-md text-[8px] font-black uppercase transition-all", addTitleLang === 'en' ? "bg-white dark:bg-slate-700 text-primary shadow-sm" : "text-slate-400")}>EN</button>
+                             <button type="button" onClick={() => setAddTitleLang('bn')} className={cn("px-3 py-0.5 rounded-md text-[8px] font-black uppercase transition-all", addTitleLang === 'bn' ? "bg-white dark:bg-slate-700 text-primary shadow-sm" : "text-slate-400")}>BN</button>
+                          </div>
+                       </div>
+                       {addTitleLang === 'en' ? (
+                         <Input placeholder="e.g. Happy Independence Day 2026" value={newOccasion.title} onChange={e => setNewOccasion({...newOccasion, title: e.target.value})} className="h-11 rounded-xl font-bold animate-in fade-in duration-300" />
+                       ) : (
+                         <Input placeholder="উদা: শুভ স্বাধীনতা দিবস ২০২৬" value={newOccasion.titleBn} onChange={e => setNewOccasion({...newOccasion, titleBn: e.target.value})} className="h-11 rounded-xl font-bold animate-in fade-in duration-300" />
+                       )}
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
@@ -329,47 +336,26 @@ export default function InternalOccasionsManagement() {
                       <div className="flex items-center justify-between mb-1">
                         <Label className="text-[10px] font-bold uppercase text-slate-400">Greeting Narrative</Label>
                         <div className="flex bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg border">
-                           <button 
-                             type="button"
-                             onClick={() => setAddNarrativeLang('en')}
-                             className={cn(
-                               "px-4 py-1 rounded-md text-[9px] font-black uppercase transition-all",
-                               addNarrativeLang === 'en' ? "bg-white dark:bg-slate-700 text-primary shadow-sm" : "text-slate-400 hover:text-slate-600"
-                             )}
-                           >EN</button>
-                           <button 
-                             type="button"
-                             onClick={() => setAddNarrativeLang('bn')}
-                             className={cn(
-                               "px-4 py-1 rounded-md text-[9px] font-black uppercase transition-all",
-                               addNarrativeLang === 'bn' ? "bg-white dark:bg-slate-700 text-primary shadow-sm" : "text-slate-400 hover:text-slate-600"
-                             )}
-                           >BN</button>
+                           <button type="button" onClick={() => setAddMsgLang('en')} className={cn("px-3 py-0.5 rounded-md text-[8px] font-black uppercase transition-all", addMsgLang === 'en' ? "bg-white dark:bg-slate-700 text-primary shadow-sm" : "text-slate-400")}>EN</button>
+                           <button type="button" onClick={() => setAddMsgLang('bn')} className={cn("px-3 py-0.5 rounded-md text-[8px] font-black uppercase transition-all", addMsgLang === 'bn' ? "bg-white dark:bg-slate-700 text-primary shadow-sm" : "text-slate-400")}>BN</button>
                         </div>
                       </div>
-                      {addNarrativeLang === 'en' ? (
-                        <Textarea 
-                          placeholder="Wishing every citizen a prosperous year ahead..." 
-                          value={newOccasion.message} 
-                          onChange={e => setNewOccasion({...newOccasion, message: e.target.value})} 
-                          className="rounded-xl min-h-[120px] animate-in fade-in duration-300" 
-                        />
+                      {addMsgLang === 'en' ? (
+                        <Textarea placeholder="Wishing every citizen a prosperous year ahead..." value={newOccasion.message} onChange={e => setNewOccasion({...newOccasion, message: e.target.value})} className="rounded-xl min-h-[100px] animate-in fade-in duration-300" />
                       ) : (
-                        <Textarea 
-                          placeholder="সকল নাগরিকের উজ্জ্বল ভবিষ্যৎ কামনা করছি..." 
-                          value={newOccasion.messageBn} 
-                          onChange={e => setNewOccasion({...newOccasion, messageBn: e.target.value})} 
-                          className="rounded-xl min-h-[120px] font-medium animate-in fade-in duration-300" 
-                        />
+                        <Textarea placeholder="সকল নাগরিকের উজ্জ্বল ভবিষ্যৎ কামনা করছি..." value={newOccasion.messageBn} onChange={e => setNewOccasion({...newOccasion, messageBn: e.target.value})} className="rounded-xl min-h-[100px] font-medium animate-in fade-in duration-300" />
                       )}
                     </div>
 
-                    <div className="flex items-center justify-between p-5 bg-emerald-50/50 dark:bg-emerald-950/20 rounded-2xl border border-emerald-100 dark:border-emerald-900">
-                      <div className="flex items-center gap-3">
-                        <ShieldCheck className="w-5 h-5 text-emerald-500" />
-                        <Label className="font-bold text-primary dark:text-emerald-400">Enable Live Broadcast</Label>
-                      </div>
-                      <Switch checked={newOccasion.isActive} onCheckedChange={val => setNewOccasion({...newOccasion, isActive: val})} className="data-[state=checked]:bg-emerald-500" />
+                    <div className="grid grid-cols-2 gap-4">
+                       <div className="space-y-1">
+                          <Label className="text-[10px] font-bold uppercase text-slate-400">Display Priority (Rank)</Label>
+                          <Input type="number" value={newOccasion.priority} onChange={e => setNewOccasion({...newOccasion, priority: Number(e.target.value)})} className="h-11 rounded-xl" />
+                       </div>
+                       <div className="flex items-center justify-between p-5 bg-emerald-50/50 dark:bg-emerald-950/20 rounded-2xl border border-emerald-100 dark:border-emerald-900 self-end h-11">
+                         <Label className="text-[10px] font-bold uppercase text-emerald-600">Enable Live Broadcast</Label>
+                         <Switch checked={newOccasion.isActive} onCheckedChange={val => setNewOccasion({...newOccasion, isActive: val})} className="data-[state=checked]:bg-emerald-500 ml-4" />
+                       </div>
                     </div>
                   </div>
                   <DialogFooter className="mt-4">
@@ -407,12 +393,7 @@ export default function InternalOccasionsManagement() {
                                 <p className="text-[10px] font-bold text-slate-400 uppercase">Synchronizes with institutional calendar.</p>
                             </div>
                           </div>
-                          <Switch 
-                            checked={isAutoMode} 
-                            onCheckedChange={handleToggleProtocol} 
-                            disabled={isActionLoading}
-                            className="data-[state=checked]:bg-accent"
-                          />
+                          <Switch checked={isAutoMode} onCheckedChange={handleToggleProtocol} disabled={isActionLoading} className="data-[state=checked]:bg-accent" />
                       </div>
                       
                       {isAutoMode && (
@@ -425,9 +406,7 @@ export default function InternalOccasionsManagement() {
                                     {nextSpecialDay?.title} 
                                     <Badge className="bg-primary text-white text-[8px]">{nextSpecialDay?.category}</Badge>
                                  </div>
-                                 <p className="text-[9px] font-bold text-slate-400 uppercase italic">
-                                   Target Date: {format(nextSpecialDay.date, 'PPPP')}
-                                 </p>
+                                 <p className="text-[9px] font-bold text-slate-400 uppercase italic">Target Date: {format(nextSpecialDay.date, 'PPPP')}</p>
                               </div>
                            </div>
                            <Button 
@@ -439,7 +418,8 @@ export default function InternalOccasionsManagement() {
                                  || { imageUrl: '/HRAT Logo.jpeg' };
 
                                setNewOccasion({
-                                 title: nextSpecialDay.title,
+                                 title: `Happy ${nextSpecialDay.title}`,
+                                 titleBn: `শুভ ${nextSpecialDay.title}`,
                                  message: `Human Rights Affairs Trust (Justice Shield) joins the nation in celebrating ${nextSpecialDay.title}.`,
                                  messageBn: `হিউম্যান রাইটস অ্যাফেয়ার্স ট্রাস্ট (জাস্টিস শিল্ড) ${nextSpecialDay.title} উদযাপনে দেশবাসীর সাথে যোগ দিচ্ছে।`,
                                  imageUrl: visual.imageUrl,
@@ -490,11 +470,7 @@ export default function InternalOccasionsManagement() {
                             <div className="space-y-1 flex-1 min-w-0">
                                <div className="flex items-center gap-3 mb-2">
                                   <h3 className="text-xl font-bold text-primary dark:text-white truncate">{occ.title}</h3>
-                                  <Switch 
-                                    checked={occ.isActive} 
-                                    onCheckedChange={(val) => handleStatusUpdate(occ, val)} 
-                                    className="data-[state=checked]:bg-emerald-500 scale-75"
-                                  />
+                                  <Switch checked={occ.isActive} onCheckedChange={(val) => handleStatusUpdate(occ, val)} className="data-[state=checked]:bg-emerald-500 scale-75" />
                                </div>
                                <div className="flex items-center gap-3 text-[9px] font-black text-slate-400 uppercase tracking-widest">
                                   <span>{occ.startDate} — {occ.endDate}</span>
@@ -502,21 +478,10 @@ export default function InternalOccasionsManagement() {
                                </div>
                             </div>
                             <div className="flex items-center gap-2">
-                               <button onClick={() => { setEditOccasion(occ); setEditNarrativeLang('en'); setIsEditDialogOpen(true); }} className="h-9 px-4 rounded-xl text-[10px] font-bold border border-slate-200 hover:bg-accent hover:text-primary transition-all">Modify</button>
+                               <button onClick={() => { setEditOccasion(occ); setEditTitleLang('en'); setEditMsgLang('en'); setIsEditDialogOpen(true); }} className="h-9 px-4 rounded-xl text-[10px] font-bold border border-slate-200 hover:bg-accent hover:text-primary transition-all">Modify</button>
                                <AlertDialog>
-                                 <AlertDialogTrigger asChild>
-                                   <button className="h-9 w-9 text-slate-300 hover:text-red-500 flex items-center justify-center transition-colors"><Trash2 className="w-4.5 h-4.5" /></button>
-                                 </AlertDialogTrigger>
-                                 <AlertDialogContent className="rounded-3xl border-none shadow-2xl">
-                                   <AlertDialogHeader>
-                                     <AlertDialogTitle>Confirm Purge</AlertDialogTitle>
-                                     <AlertDialogDescription>Remove this greeting record from the manual registry? This cannot be undone.</AlertDialogDescription>
-                                   </AlertDialogHeader>
-                                   <AlertDialogFooter>
-                                     <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
-                                     <AlertDialogAction onClick={() => handleDeleteOccasion(occ.id)} className="bg-red-600 hover:bg-red-700 rounded-xl">Delete</AlertDialogAction>
-                                   </AlertDialogFooter>
-                                 </AlertDialogContent>
+                                 <AlertDialogTrigger asChild><button className="h-9 w-9 text-slate-300 hover:text-red-500 flex items-center justify-center transition-colors"><Trash2 className="w-4.5 h-4.5" /></button></AlertDialogTrigger>
+                                 <AlertDialogContent className="rounded-3xl border-none shadow-2xl"><AlertDialogHeader><AlertDialogTitle>Confirm Purge</AlertDialogTitle><AlertDialogDescription>Remove this greeting record from the manual registry?</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel><AlertDialogAction onClick={() => handleDeleteOccasion(occ.id)} className="bg-red-600 hover:bg-red-700 rounded-xl">Delete</AlertDialogAction></AlertDialogFooter></AlertDialogContent>
                                </AlertDialog>
                             </div>
                           </div>
@@ -524,12 +489,6 @@ export default function InternalOccasionsManagement() {
                       </CardContent>
                     </Card>
                   ))}
-                  {filtered.length === 0 && !dataLoading && (
-                    <div className="text-center py-20 bg-white dark:bg-slate-900 rounded-[2.5rem] border-2 border-dashed border-slate-100 opacity-30">
-                       <ImageIcon className="w-12 h-12 mx-auto mb-4" />
-                       <p className="text-xs font-black uppercase tracking-widest">No manual records found</p>
-                    </div>
-                  )}
                 </div>
               </div>
            </div>
@@ -551,17 +510,13 @@ export default function InternalOccasionsManagement() {
                         caption: "flex justify-center pt-1 relative items-center mb-2",
                         caption_label: "text-xs font-black uppercase tracking-widest text-accent",
                         nav: "space-x-1 flex items-center",
-                        nav_button: cn(
-                          "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100"
-                        ),
+                        nav_button: cn("h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100"),
                         table: "w-full border-collapse space-y-1",
                         head_row: "flex justify-between",
                         head_cell: "text-slate-400 rounded-md w-8 font-bold text-[8px] uppercase tracking-tighter",
                         row: "flex w-full mt-2 justify-between",
                         cell: "text-center text-[10px] relative p-0 hover:bg-accent/10 rounded-lg transition-colors",
-                        day: cn(
-                          "h-8 w-8 p-0 font-bold aria-selected:opacity-100"
-                        ),
+                        day: cn("h-8 w-8 p-0 font-bold aria-selected:opacity-100"),
                         day_selected: "bg-accent text-primary hover:bg-accent hover:text-primary focus:bg-accent focus:text-primary",
                         day_today: "bg-slate-100 dark:bg-slate-800 text-primary dark:text-white",
                         day_outside: "text-slate-300 opacity-50",
@@ -582,18 +537,13 @@ export default function InternalOccasionsManagement() {
                             </div>
                          </div>
                        ))}
-                       {specialDaysInMonth.length === 0 && (
-                         <p className="text-[9px] text-slate-400 italic text-center py-4">No festive days registered this month.</p>
-                       )}
                     </div>
                  </div>
               </Card>
 
               <Card className="rounded-[2.5rem] border-none shadow-sm bg-slate-900 text-white p-8 overflow-hidden relative">
                  <div className="absolute top-0 right-0 w-32 h-32 bg-accent/5 rounded-full -mr-16 -mt-16 blur-2xl"></div>
-                 <h3 className="text-xs font-black uppercase text-accent tracking-[0.2em] mb-8 flex items-center gap-2">
-                   <Database className="w-4 h-4" /> Institutional Registry
-                 </h3>
+                 <h3 className="text-xs font-black uppercase text-accent tracking-[0.2em] mb-8 flex items-center gap-2"><Database className="w-4 h-4" /> Institutional Registry</h3>
                  <ScrollArea className="h-[400px] pr-4">
                     <div className="space-y-8">
                        {[1,2,3,4,5,6,7,8,9,10,11,12].map(month => {
@@ -602,16 +552,11 @@ export default function InternalOccasionsManagement() {
                          const monthName = format(new Date(2026, month - 1, 1), 'MMMM');
                          return (
                            <div key={month} className="space-y-3">
-                              <h4 className="text-[10px] font-black text-emerald-400 uppercase tracking-[0.3em] flex items-center gap-2">
-                                <span className="w-6 h-px bg-emerald-400/30"></span> {monthName}
-                              </h4>
+                              <h4 className="text-[10px] font-black text-emerald-400 uppercase tracking-[0.3em] flex items-center gap-2"><span className="w-6 h-px bg-emerald-400/30"></span> {monthName}</h4>
                               <div className="grid gap-2">
                                  {monthDays.map((d, i) => (
                                    <div key={i} className="flex justify-between items-center p-3 bg-white/5 rounded-xl border border-white/5 hover:bg-white/10 transition-colors group">
-                                      <div className="flex items-center gap-3">
-                                         <span className="text-[10px] font-black text-accent w-5">{d.day}</span>
-                                         <span className="text-[11px] font-bold opacity-80 group-hover:opacity-100">{d.title}</span>
-                                      </div>
+                                      <div className="flex items-center gap-3"><span className="text-[10px] font-black text-accent w-5">{d.day}</span><span className="text-[11px] font-bold opacity-80 group-hover:opacity-100">{d.title}</span></div>
                                       <Badge variant="outline" className="text-[6px] h-4 border-white/20 opacity-50">{d.category}</Badge>
                                    </div>
                                  ))}
@@ -621,16 +566,7 @@ export default function InternalOccasionsManagement() {
                        })}
                     </div>
                  </ScrollArea>
-                 <div className="mt-8 pt-4 border-t border-white/10">
-                    <div className="flex items-start gap-3">
-                       <Info className="w-4 h-4 text-accent shrink-0 mt-0.5" />
-                       <p className="text-[9px] font-black text-slate-400 leading-relaxed font-bold uppercase italic">
-                         "These dates are strictly verified according to the Indian Multi-Faith Calendar. Sequential Guard logic is automatically applied to all entries."
-                       </p>
-                    </div>
-                 </div>
               </Card>
-
            </div>
         </div>
       </section>
@@ -653,9 +589,19 @@ export default function InternalOccasionsManagement() {
                   <Badge variant="outline" className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Click Image area to update</Badge>
                 </div>
 
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div className="space-y-1.5"><Label className="text-[10px] font-black uppercase text-slate-500">Occasion Title</Label><Input value={editOccasion.title} onChange={e => setEditOccasion({...editOccasion, title: e.target.value})} className="h-11 rounded-xl bg-slate-50 border-none shadow-inner font-bold" /></div>
-                  <div className="space-y-1.5"><Label className="text-[10px] font-black uppercase text-slate-500">Display Priority</Label><Input type="number" value={editOccasion.priority} onChange={e => setEditOccasion({...editOccasion, priority: Number(e.target.value)})} className="h-11 rounded-xl bg-slate-50 border-none shadow-inner font-bold" /></div>
+                <div className="space-y-2">
+                   <div className="flex items-center justify-between mb-1">
+                      <Label className="text-[10px] font-black uppercase text-slate-500">Occasion Title *</Label>
+                      <div className="flex bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg border">
+                         <button type="button" onClick={() => setEditTitleLang('en')} className={cn("px-3 py-0.5 rounded-md text-[8px] font-black uppercase transition-all", editTitleLang === 'en' ? "bg-white dark:bg-slate-700 text-primary shadow-sm" : "text-slate-400")}>EN</button>
+                         <button type="button" onClick={() => setEditTitleLang('bn')} className={cn("px-3 py-0.5 rounded-md text-[8px] font-black uppercase transition-all", editTitleLang === 'bn' ? "bg-white dark:bg-slate-700 text-primary shadow-sm" : "text-slate-400")}>BN</button>
+                      </div>
+                   </div>
+                   {editTitleLang === 'en' ? (
+                     <Input value={editOccasion.title} onChange={e => setEditOccasion({...editOccasion, title: e.target.value})} className="h-11 rounded-xl bg-slate-50 border-none shadow-inner font-bold animate-in fade-in duration-300" />
+                   ) : (
+                     <Input value={editOccasion.titleBn || ''} onChange={e => setEditOccasion({...editOccasion, titleBn: e.target.value})} className="h-11 rounded-xl bg-slate-50 border-none shadow-inner font-bold animate-in fade-in duration-300" />
+                   )}
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -667,47 +613,26 @@ export default function InternalOccasionsManagement() {
                   <div className="flex items-center justify-between mb-1">
                     <Label className="text-[10px] uppercase font-bold text-slate-500">Greeting Narrative</Label>
                     <div className="flex bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg border">
-                      <button 
-                        type="button"
-                        onClick={() => setEditNarrativeLang('en')}
-                        className={cn(
-                          "px-4 py-1 rounded-md text-[9px] font-black uppercase transition-all",
-                          editNarrativeLang === 'en' ? "bg-white dark:bg-slate-700 text-primary shadow-sm" : "text-slate-400 hover:text-slate-600"
-                        )}
-                      >EN</button>
-                      <button 
-                        type="button"
-                        onClick={() => setEditNarrativeLang('bn')}
-                        className={cn(
-                          "px-4 py-1 rounded-md text-[9px] font-black uppercase transition-all",
-                          editNarrativeLang === 'bn' ? "bg-white dark:bg-slate-700 text-primary shadow-sm" : "text-slate-400 hover:text-slate-600"
-                        )}
-                      >BN</button>
+                      <button type="button" onClick={() => setEditMsgLang('en')} className={cn("px-3 py-0.5 rounded-md text-[8px] font-black uppercase transition-all", editMsgLang === 'en' ? "bg-white dark:bg-slate-700 text-primary shadow-sm" : "text-slate-400")}>EN</button>
+                      <button type="button" onClick={() => setEditMsgLang('bn')} className={cn("px-3 py-0.5 rounded-md text-[8px] font-black uppercase transition-all", editMsgLang === 'bn' ? "bg-white dark:bg-slate-700 text-primary shadow-sm" : "text-slate-400")}>BN</button>
                     </div>
                   </div>
-                  {editNarrativeLang === 'en' ? (
-                    <Textarea 
-                      value={editOccasion.message} 
-                      onChange={e => setEditOccasion({...editOccasion, message: e.target.value})} 
-                      className="rounded-xl min-h-[120px] animate-in fade-in duration-300" 
-                    />
+                  {editMsgLang === 'en' ? (
+                    <Textarea value={editOccasion.message} onChange={e => setEditOccasion({...editOccasion, message: e.target.value})} className="rounded-xl min-h-[120px] animate-in fade-in duration-300" />
                   ) : (
-                    <Textarea 
-                      value={editOccasion.messageBn || ''} 
-                      onChange={e => setEditOccasion({...editOccasion, messageBn: e.target.value})} 
-                      className="rounded-xl min-h-[120px] font-medium animate-in fade-in duration-300" 
-                    />
+                    <Textarea value={editOccasion.messageBn || ''} onChange={e => setEditOccasion({...editOccasion, messageBn: e.target.value})} className="rounded-xl min-h-[120px] font-medium animate-in fade-in duration-300" />
                   )}
                 </div>
                 
-                <div className="flex items-center justify-between p-5 bg-emerald-50/50 dark:bg-emerald-950/20 rounded-2xl border border-emerald-100 dark:border-emerald-900">
-                  <Label className="font-bold text-primary dark:text-emerald-400">Active Broadcast Status</Label>
-                  <Switch checked={editOccasion.isActive} onCheckedChange={val => setEditOccasion({...editOccasion, isActive: val})} className="data-[state=checked]:bg-emerald-500" />
+                <div className="grid grid-cols-2 gap-4 items-center">
+                   <div className="space-y-1.5"><Label className="text-[10px] font-black uppercase text-slate-500">Display Priority</Label><Input type="number" value={editOccasion.priority} onChange={e => setEditOccasion({...editOccasion, priority: Number(e.target.value)})} className="h-11 rounded-xl bg-slate-50 border-none shadow-inner font-bold" /></div>
+                   <div className="flex items-center justify-between p-5 bg-emerald-50/50 dark:bg-emerald-950/20 rounded-2xl border border-emerald-100 dark:border-emerald-900 h-11 self-end">
+                      <Label className="text-[10px] font-bold text-primary dark:text-emerald-400 uppercase">Active Broadcast</Label>
+                      <Switch checked={editOccasion.isActive} onCheckedChange={val => setEditOccasion({...editOccasion, isActive: val})} className="data-[state=checked]:bg-emerald-500 ml-4" />
+                   </div>
                 </div>
 
-                <Button type="button" onClick={handleUpdateOccasion} disabled={isActionLoading} className="w-full h-16 rounded-2xl bg-primary text-white font-bold shadow-xl hover:bg-secondary transition-all text-base md:text-lg">
-                  {isActionLoading ? <Loader2 className="animate-spin mr-2" /> : "Save Profile Changes"}
-                </Button>
+                <Button type="button" onClick={handleUpdateOccasion} disabled={isActionLoading} className="w-full h-16 rounded-2xl bg-primary text-white font-bold shadow-xl hover:bg-secondary transition-all text-base md:text-lg">Save Profile Changes</Button>
               </div>
             )}
         </DialogContent>
