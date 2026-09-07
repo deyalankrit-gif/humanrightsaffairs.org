@@ -1,3 +1,4 @@
+
 import { MetadataRoute } from 'next'
 
 /**
@@ -37,6 +38,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/legal/resolution-format',
     '/legal/quotation-format',
     '/legal/police-duties',
+    '/legal/income-tax-compliances',
     '/legal/income-tax-compliances/page-1',
     '/legal/income-tax-compliances/page-2',
     '/legal/income-tax-compliances/page-3',

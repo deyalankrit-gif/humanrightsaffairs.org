@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useMemo, useState } from 'react';
@@ -150,7 +151,6 @@ export function PublicFooter() {
                 ))}
               </div>
               
-              {/* Bengali Orange Hyperlink */}
               <Link 
                 href="/legal/police-duties" 
                 className="text-accent hover:underline font-bold text-xl md:text-2xl mt-4 block transition-all"
@@ -176,9 +176,7 @@ export function PublicFooter() {
               <li><Link href="/legal/official-representation" className="text-[#CEFF00] hover:text-white font-bold flex items-center justify-between w-full group/link"><span>Representation</span><ArrowUpRight className="w-3.5 h-3.5 opacity-40 group-hover/link:opacity-100" /></Link></li>
               <li><Link href="/trust-responsibilities" className="text-[#CEFF00] hover:text-white font-medium flex items-center justify-between w-full group/link"><span>Duties</span><ArrowUpRight className="w-3.5 h-3.5 opacity-40 group-hover/link:opacity-100" /></Link></li>
               <li><button onClick={handleOpenGate('/legal/required-documents')} className="text-[#CEFF00] hover:text-white font-medium flex items-center justify-between w-full text-left group/link"><span>Docs Vault</span><Lock className="w-3 h-3 opacity-40 group-hover/link:opacity-100" /></button></li>
-              <li><button onClick={handleOpenGate('/legal/income-tax-compliances/page-1')} className="text-[#CEFF00] hover:text-white font-medium flex items-center justify-between w-full text-left group/link"><span>Income Tax Compliance (Page 1)</span><Lock className="w-3 h-3 opacity-40 group-hover/link:opacity-100" /></button></li>
-              <li><button onClick={handleOpenGate('/legal/income-tax-compliances/page-2')} className="text-[#CEFF00] hover:text-white font-medium flex items-center justify-between w-full text-left group/link"><span>Income Tax Compliance (Page 2)</span><Lock className="w-3 h-3 opacity-40 group-hover/link:opacity-100" /></button></li>
-              <li><button onClick={handleOpenGate('/legal/income-tax-compliances/page-3')} className="text-[#CEFF00] hover:text-white font-medium flex items-center justify-between w-full text-left group/link"><span>Income Tax Compliance (Page 3)</span><Lock className="w-3 h-3 opacity-40 group-hover/link:opacity-100" /></button></li>
+              <li><button onClick={handleOpenGate('/legal/income-tax-compliances')} className="text-[#CEFF00] hover:text-white font-bold flex items-center justify-between w-full text-left group/link"><span>Income Tax Compliances</span><Lock className="w-3 h-3 opacity-40 group-hover/link:opacity-100" /></button></li>
             </ul>
           </div>
 
