@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useEffect, useState, useMemo } from 'react';
@@ -337,10 +336,10 @@ export default function InternalOccasionsManagement() {
                             <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest leading-none">
                               {nextSpecialDay?.isActiveInWindow ? "Current Special Occasion" : "Next Identified Special Day"}
                             </p>
-                            <p className="font-bold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                            <div className="font-bold text-slate-700 dark:text-slate-300 flex items-center gap-2">
                                {nextSpecialDay.title} 
                                <Badge className="bg-primary text-white text-[8px]">{nextSpecialDay.category}</Badge>
-                            </p>
+                            </div>
                             <p className="text-[8px] font-bold text-slate-400 uppercase italic">
                                Window: {format(addDays(nextSpecialDay.eventDate, -3), 'MMM dd')} — {format(addDays(nextSpecialDay.eventDate, 1), 'MMM dd')}
                             </p>
@@ -448,7 +447,7 @@ export default function InternalOccasionsManagement() {
                   <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">End Date</Label><Input type="date" value={editOccasion.endDate} onChange={e => setEditOccasion({...editOccasion, endDate: e.target.value})} className="h-11 rounded-xl" /></div>
                 </div>
                 <div className="space-y-1"><Label className="text-[10px] uppercase font-bold text-slate-400">Message</Label><Textarea value={editOccasion.message} onChange={e => setEditOccasion({...editOccasion, message: e.target.value})} className="rounded-xl min-h-[100px]" /></div>
-                <div className="flex items-center justify-between p-5 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100">
+                <div className="flex items-center justify-between p-5 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-100">
                   <Label className="font-bold">Active Broadcast</Label>
                   <Switch checked={editOccasion.isActive} onCheckedChange={val => setEditOccasion({...editOccasion, isActive: val})} className="data-[state=checked]:bg-emerald-500" />
                 </div>
