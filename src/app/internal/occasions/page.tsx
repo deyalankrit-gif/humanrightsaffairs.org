@@ -1,10 +1,9 @@
-
 'use client';
 
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser, useCollection, useFirestore, useMemoFirebase, useDoc } from '@/firebase';
-import { collection, query, orderBy, addDoc, deleteDoc, doc, updateDoc, serverTimestamp, setDoc } from 'firebase/firestore';
+import { collection, query, orderBy, addDoc, deleteDoc, doc, updateDoc, serverTimestamp, setDoc, getDocs, writeBatch, where } from 'firebase/firestore';
 import { Footer } from '@/components/footer';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -75,10 +74,6 @@ import { format, addDays, startOfDay, isWithinInterval, endOfDay, isToday, getMo
 import { BUILT_IN_HOLIDAYS, BUILT_IN_OBSERVANCES } from '@/lib/activity-hub-data';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
-/**
- * Internal Occasions Governance: Real-time management terminal.
- * Updated: Integrated Visual Calendar Registry and Automatic Activation Toggle.
- */
 export default function InternalOccasionsManagement() {
   const { user, loading: authLoading } = useUser();
   const router = useRouter();
@@ -109,7 +104,6 @@ export default function InternalOccasionsManagement() {
     }
   }, [user, authLoading, router]);
 
-  // Protocol Settings Stream
   const protocolRef = useMemoFirebase(() => {
     if (!db) return null;
     return doc(db, 'settings', 'occasions_protocol');
@@ -132,43 +126,45 @@ export default function InternalOccasionsManagement() {
 
   const nextSpecialDay = useMemo(() => {
     const now = startOfDay(new Date());
-    
-    // 1. CHECK FOR TODAY
     const todayMatch = allSpecialDays.find(d => d.date.getTime() === now.getTime());
     if (todayMatch) return { ...todayMatch, currentStatus: 'Today' };
-
-    // 2. CHECK FOR YESTERDAY
     const yesterday = addDays(now, -1);
     const yesterdayMatch = allSpecialDays.find(d => d.date.getTime() === yesterday.getTime());
     if (yesterdayMatch) return { ...yesterdayMatch, currentStatus: 'Recent (T+1)' };
-
-    // 3. CHECK FOR UPCOMING
     const upcomingMatch = allSpecialDays.find(d => {
       if (d.date <= now) return false;
       if (d.date > addDays(now, 3)) return false;
-      
       const dayBefore = addDays(d.date, -1);
       const isConsecutive = allSpecialDays.some(prev => prev.date.getTime() === dayBefore.getTime());
-      return !isConsecutive; // Only trigger early if not consecutive
+      return !isConsecutive;
     });
-
     if (upcomingMatch) return { ...upcomingMatch, currentStatus: 'Upcoming (T-3)' };
-
     return allSpecialDays.find(d => d.date > now) || allSpecialDays[0];
   }, [allSpecialDays]);
 
   const handleToggleProtocol = async (val: boolean) => {
-    if (!protocolRef) return;
+    if (!protocolRef || !db) return;
     setIsActionLoading(true);
     try {
-      await setDoc(protocolRef, {
+      const batch = writeBatch(db);
+      
+      batch.set(protocolRef, {
         mode: val ? 'auto' : 'manual',
         updatedAt: serverTimestamp(),
         updatedBy: user?.email
       }, { merge: true });
+
+      if (val) {
+        const activeManualsSnap = await getDocs(query(collection(db, 'occasions'), where('isActive', '==', true)));
+        activeManualsSnap.docs.forEach(d => {
+          batch.update(d.ref, { isActive: false });
+        });
+      }
+
+      await batch.commit();
       toast({ 
         title: val ? "Autonomous Mode Active" : "Manual Curation Mode Active",
-        description: val ? "Lead-time lead suppression enabled for consecutive events." : "Govenance returned to manual registry."
+        description: val ? "All manual broadcasts suspended. Automatic calendar sync active." : "Governance returned to manual registry."
       });
     } catch (e) {
       toast({ variant: "destructive", title: "Protocol Sync Failed" });
@@ -201,6 +197,12 @@ export default function InternalOccasionsManagement() {
       return;
     }
     setIsActionLoading(true);
+
+    const isAutoMode = protocol?.mode === 'auto';
+    if (newOccasion.isActive && isAutoMode) {
+      await handleToggleProtocol(false);
+    }
+
     addDoc(collection(db, 'occasions'), { ...newOccasion, createdAt: serverTimestamp() })
       .then(() => {
         toast({ title: "Greeting Published" });
@@ -213,6 +215,12 @@ export default function InternalOccasionsManagement() {
   const handleUpdateOccasion = async () => {
     if (!db || !editOccasion) return;
     setIsActionLoading(true);
+
+    const isAutoMode = protocol?.mode === 'auto';
+    if (editOccasion.isActive && isAutoMode) {
+      await handleToggleProtocol(false);
+    }
+
     const { id, ...data } = editOccasion;
     updateDoc(doc(db, 'occasions', id), data)
       .then(() => {
@@ -220,6 +228,20 @@ export default function InternalOccasionsManagement() {
         setIsEditDialogOpen(false);
         setEditOccasion(null);
       })
+      .finally(() => setIsActionLoading(false));
+  };
+
+  const handleStatusUpdate = async (occ: any, val: boolean) => {
+    if (!db) return;
+    setIsActionLoading(true);
+
+    const isAutoMode = protocol?.mode === 'auto';
+    if (val && isAutoMode) {
+      await handleToggleProtocol(false);
+    }
+
+    updateDoc(doc(db, 'occasions', occ.id), { isActive: val, updatedAt: serverTimestamp() })
+      .then(() => toast({ title: val ? "Broadcast Active" : "Broadcast Suspended" }))
       .finally(() => setIsActionLoading(false));
   };
 
@@ -247,8 +269,6 @@ export default function InternalOccasionsManagement() {
   );
 
   const isAutoMode = protocol?.mode === 'auto';
-
-  // Highlight special days on the mini calendar
   const specialDaysInMonth = allSpecialDays.filter(d => getMonth(d.date) === getMonth(selectedCalendarDate || new Date()));
 
   return (
@@ -331,7 +351,6 @@ export default function InternalOccasionsManagement() {
       <section className="py-8 container mx-auto px-4 max-w-7xl">
         <div className="grid lg:grid-cols-12 gap-8 items-start">
            
-           {/* Primary Control Column */}
            <div className="lg:col-span-8 space-y-8">
               <Card className="rounded-[2.5rem] border-none shadow-xl bg-white dark:bg-slate-900 overflow-hidden">
                 <div className="flex flex-col md:flex-row">
@@ -402,7 +421,6 @@ export default function InternalOccasionsManagement() {
                 </div>
               </Card>
 
-              {/* Broadcast Registry Stream */}
               <div className="space-y-6">
                 <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-8">
                     <div className="flex items-center gap-3">
@@ -430,7 +448,14 @@ export default function InternalOccasionsManagement() {
                           </div>
                           <div className="flex-1 p-6 flex flex-col md:flex-row items-center justify-between gap-6">
                             <div className="space-y-1 flex-1 min-w-0">
-                               <h3 className="text-xl font-bold text-primary dark:text-white truncate">{occ.title}</h3>
+                               <div className="flex items-center gap-3 mb-2">
+                                  <h3 className="text-xl font-bold text-primary dark:text-white truncate">{occ.title}</h3>
+                                  <Switch 
+                                    checked={occ.isActive} 
+                                    onCheckedChange={(val) => handleStatusUpdate(occ, val)} 
+                                    className="data-[state=checked]:bg-emerald-500 scale-75"
+                                  />
+                               </div>
                                <div className="flex items-center gap-3 text-[9px] font-black text-slate-400 uppercase tracking-widest">
                                   <span>{occ.startDate} — {occ.endDate}</span>
                                   <Badge variant="outline" className="h-4 text-[7px] border-accent text-accent">PRIORITY {occ.priority}</Badge>
@@ -469,10 +494,7 @@ export default function InternalOccasionsManagement() {
               </div>
            </div>
 
-           {/* Insights & Calendar Column */}
            <div className="lg:col-span-4 space-y-8">
-              
-              {/* MINI CALENDAR PREVIEW */}
               <Card className="rounded-[2.5rem] border-none shadow-sm bg-white dark:bg-slate-900 p-6">
                  <div className="flex items-center gap-2 mb-6">
                     <CalendarDays className="w-5 h-5 text-accent" />
@@ -527,7 +549,6 @@ export default function InternalOccasionsManagement() {
                  </div>
               </Card>
 
-              {/* FULL REGISTRY LOOKUP */}
               <Card className="rounded-[2.5rem] border-none shadow-sm bg-slate-900 text-white p-8 overflow-hidden relative">
                  <div className="absolute top-0 right-0 w-32 h-32 bg-accent/5 rounded-full -mr-16 -mt-16 blur-2xl"></div>
                  <h3 className="text-xs font-black uppercase text-accent tracking-[0.2em] mb-8 flex items-center gap-2">
@@ -538,7 +559,7 @@ export default function InternalOccasionsManagement() {
                        {[1,2,3,4,5,6,7,8,9,10,11,12].map(month => {
                          const monthDays = allSpecialDays.filter(d => d.month === month);
                          if (monthDays.length === 0) return null;
-                         const monthName = format(new Date(2025, month - 1, 1), 'MMMM');
+                         const monthName = format(new Date(2026, month - 1, 1), 'MMMM');
                          return (
                            <div key={month} className="space-y-3">
                               <h4 className="text-[10px] font-black text-emerald-400 uppercase tracking-[0.3em] flex items-center gap-2">
@@ -574,7 +595,6 @@ export default function InternalOccasionsManagement() {
         </div>
       </section>
 
-      {/* Unified Edit Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={(val) => { if(!val) { setIsEditDialogOpen(false); setEditOccasion(null); } }}>
         <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="max-w-2xl bg-white dark:bg-slate-900 rounded-[2.5rem] border-none shadow-2xl max-h-[90vh] overflow-y-auto flex flex-col p-0 z-[1000001]">
             <div className="bg-slate-900 pt-14 pb-10 px-8 text-white relative border-b-4 border-accent/20 shrink-0">
@@ -611,7 +631,7 @@ export default function InternalOccasionsManagement() {
                 </div>
 
                 <Button type="button" onClick={handleUpdateOccasion} disabled={isActionLoading} className="w-full h-16 rounded-2xl bg-primary text-white font-bold shadow-xl hover:bg-secondary transition-all text-base md:text-lg">
-                  {isActionLoading ? <Loader2 className="w-6 h-6 animate-spin mr-2" /> : "Save Profile Changes"}
+                  {isActionLoading ? <Loader2 className="animate-spin mr-2" /> : "Save Profile Changes"}
                 </Button>
               </div>
             )}
