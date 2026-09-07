@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useEffect } from 'react'
@@ -11,6 +10,7 @@ import {
   Printer, 
   CheckCircle2, 
   AlertCircle, 
+  AlertTriangle,
   Scale, 
   Calendar, 
   Calculator, 
@@ -246,9 +246,8 @@ export default function IncomeTaxCompliancesPage() {
                 </table>
              </div>
 
-             {/* Detailed Practical Guide (8 Sections) */}
+             {/* Detailed Practical Guide (Cards) */}
              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {/* 1. April-May */}
                 <Card className="rounded-[2.5rem] border-none shadow-sm bg-white dark:bg-slate-900 overflow-hidden group hover:shadow-xl transition-all">
                    <CardHeader className="bg-slate-50 dark:bg-slate-800/50 p-8 border-b">
                       <div className="flex items-center gap-4">
@@ -268,7 +267,6 @@ export default function IncomeTaxCompliancesPage() {
                    </CardContent>
                 </Card>
 
-                {/* 2. 80G 10BD/10BE */}
                 <Card className="rounded-[2.5rem] border-none shadow-sm bg-white dark:bg-slate-900 overflow-hidden group hover:shadow-xl transition-all">
                    <CardHeader className="bg-slate-50 dark:bg-slate-800/50 p-8 border-b">
                       <div className="flex items-center gap-4">
@@ -287,7 +285,6 @@ export default function IncomeTaxCompliancesPage() {
                    </CardContent>
                 </Card>
 
-                {/* 3. 85% Application */}
                 <Card className="rounded-[2.5rem] border-none shadow-sm bg-white dark:bg-slate-900 overflow-hidden group hover:shadow-xl transition-all">
                    <CardHeader className="bg-slate-50 dark:bg-slate-800/50 p-8 border-b">
                       <div className="flex items-center gap-4">
@@ -305,7 +302,6 @@ export default function IncomeTaxCompliancesPage() {
                    </CardContent>
                 </Card>
 
-                {/* 4. Form 9A / 10 */}
                 <Card className="rounded-[2.5rem] border-none shadow-sm bg-white dark:bg-slate-900 overflow-hidden group hover:shadow-xl transition-all">
                    <CardHeader className="bg-slate-50 dark:bg-slate-800/50 p-8 border-b">
                       <div className="flex items-center gap-4">
@@ -322,35 +318,6 @@ export default function IncomeTaxCompliancesPage() {
                          <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center font-bold text-xs">10</div>
                          <p className="text-xs text-slate-500">আয় সঞ্চিত রাখতে ITR-এর ২ মাস আগে Form 10।</p>
                       </div>
-                   </CardContent>
-                </Card>
-
-                {/* 7. TDS */}
-                <Card className="rounded-[2.5rem] border-none shadow-sm bg-white dark:bg-slate-900 overflow-hidden group hover:shadow-xl transition-all">
-                   <CardHeader className="bg-slate-50 dark:bg-slate-800/50 p-8 border-b">
-                      <div className="flex items-center gap-4">
-                         <div className="p-3 bg-white dark:bg-slate-900 rounded-2xl shadow-sm text-sky-600"><Zap className="w-6 h-6" /></div>
-                         <CardTitle className="text-lg font-headline font-bold">TDS — সারা বছর</CardTitle>
-                      </div>
-                   </CardHeader>
-                   <CardContent className="p-8">
-                      <p className="text-xs text-slate-400 uppercase font-black mb-4">Applicable Payments:</p>
-                      <p className="text-[11px] font-bold text-slate-600 dark:text-slate-300 leading-relaxed">
-                        বেতন (Salary), প্রফেশনাল ফি, কন্টাক্টর পেমেন্ট এবং ভাড়ার ক্ষেত্রে TDS বিধিমালা মেনে চলতে হবে এবং ত্রৈমাসিক রিটার্ন জমা দিতে হবে।
-                      </p>
-                   </CardContent>
-                </Card>
-
-                {/* 8. Investment Records */}
-                <Card className="rounded-[2.5rem] border-none shadow-sm bg-white dark:bg-slate-900 overflow-hidden group hover:shadow-xl transition-all">
-                   <CardHeader className="bg-slate-50 dark:bg-slate-800/50 p-8 border-b">
-                      <div className="flex items-center gap-4">
-                         <div className="p-3 bg-white dark:bg-slate-900 rounded-2xl shadow-sm text-indigo-500"><Building className="w-6 h-6" /></div>
-                         <CardTitle className="text-lg font-headline font-bold">বিনিয়োগের রেকর্ড (Investments)</CardTitle>
-                      </div>
-                   </CardHeader>
-                   <CardContent className="p-8">
-                      <p className="text-sm text-slate-500 italic">"Trust-এর টাকা কোথায় রাখা হয়েছে (FD, Savings, Permitted Assets) তার সঠিক রেকর্ড ITR-7-এ প্রদর্শন করতে হবে।"</p>
                    </CardContent>
                 </Card>
              </div>
