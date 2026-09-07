@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
@@ -37,7 +38,8 @@ import {
   MapPin,
   Circle,
   Database,
-  Radio
+  Radio,
+  Check
 } from 'lucide-react';
 import {
   Dialog,
@@ -69,7 +71,7 @@ import { Calendar } from "@/components/ui/calendar"
 import { useToast } from '@/hooks/use-toast';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
-import { format, addDays, startOfDay, isWithinInterval, endOfDay, isToday, getMonth } from 'date-fns';
+import { format, addDays, startOfDay, isWithinInterval, endOfDay, isToday, getMonth, parse } from 'date-fns';
 import { BUILT_IN_HOLIDAYS, BUILT_IN_OBSERVANCES } from '@/lib/activity-hub-data';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
@@ -362,18 +364,38 @@ export default function InternalOccasionsManagement() {
                       </div>
                       
                       {isAutoMode && (
-                        <div className="flex items-center gap-5 p-5 bg-indigo-50 dark:bg-indigo-950/20 rounded-2xl border border-indigo-100 dark:border-indigo-900 animate-in slide-in-from-left-4 duration-700">
-                           <div className="w-12 h-12 rounded-2xl bg-white dark:bg-indigo-900 flex items-center justify-center text-indigo-600 shrink-0 shadow-sm"><Radio className="w-6 h-6 animate-pulse" /></div>
-                           <div className="space-y-1">
-                              <p className="text-[9px] font-black text-indigo-600 uppercase tracking-widest leading-none">Next Discovery Sequence</p>
-                              <div className="font-bold text-slate-700 dark:text-slate-300 flex items-center gap-2 text-lg">
-                                 {nextSpecialDay?.title} 
-                                 <Badge className="bg-primary text-white text-[8px]">{nextSpecialDay?.category}</Badge>
+                        <div className="flex items-center justify-between p-5 bg-indigo-50 dark:bg-indigo-950/20 rounded-2xl border border-indigo-100 dark:border-indigo-900 animate-in slide-in-from-left-4 duration-700">
+                           <div className="flex items-center gap-5">
+                              <div className="w-12 h-12 rounded-2xl bg-white dark:bg-indigo-900 flex items-center justify-center text-indigo-600 shrink-0 shadow-sm"><Radio className="w-6 h-6 animate-pulse" /></div>
+                              <div className="space-y-1">
+                                 <p className="text-[9px] font-black text-indigo-600 uppercase tracking-widest leading-none">Next Discovery Sequence</p>
+                                 <div className="font-bold text-slate-700 dark:text-slate-300 flex items-center gap-2 text-lg">
+                                    {nextSpecialDay?.title} 
+                                    <Badge className="bg-primary text-white text-[8px]">{nextSpecialDay?.category}</Badge>
+                                 </div>
+                                 <p className="text-[9px] font-bold text-slate-400 uppercase italic">
+                                   Target Date: {format(nextSpecialDay.date, 'PPPP')}
+                                 </p>
                               </div>
-                              <p className="text-[9px] font-bold text-slate-400 uppercase italic">
-                                Target Date: {format(nextSpecialDay.date, 'PPPP')}
-                              </p>
                            </div>
+                           <Button 
+                             onClick={() => {
+                               setNewOccasion({
+                                 title: nextSpecialDay.title,
+                                 message: `Human Rights Affairs Trust (Justice Shield) joins the nation in celebrating ${nextSpecialDay.title}.`,
+                                 imageUrl: '/HRAT Logo.jpeg',
+                                 startDate: format(new Date(), 'yyyy-MM-dd'),
+                                 endDate: format(nextSpecialDay.date, 'yyyy-MM-dd'),
+                                 isActive: true,
+                                 priority: 5
+                               });
+                               setIsAddDialogOpen(true);
+                             }}
+                             variant="outline" 
+                             className="h-9 px-4 rounded-xl border-indigo-200 text-indigo-700 bg-white hover:bg-indigo-50 font-bold text-[10px] uppercase tracking-widest shadow-sm transition-all"
+                           >
+                              <Zap className="w-3 h-3 mr-1.5" /> Broadcast Now
+                           </Button>
                         </div>
                       )}
                     </div>
