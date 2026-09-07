@@ -152,8 +152,8 @@ export function OccasionBanner() {
         if (!isConsecutive) {
            const visual = getFestivalImageConfig(next.title);
            return {
-             title: `Upcoming: ${next.title}`,
-             titleBn: `আসন্ন: ${next.title}`,
+             title: `Happy ${next.title} Coming Soon`,
+             titleBn: `শুভ ${next.title} আসন্ন`,
              message: next.isHoliday 
                ? `Human Rights Affairs Trust joins the nation in observing ${next.title}. Upholding unity and constitutional values.` 
                : `Observing ${next.title}. Our mission for global human rights remains constant.`,

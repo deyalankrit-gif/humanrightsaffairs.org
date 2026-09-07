@@ -329,7 +329,7 @@ export default function InternalOccasionsManagement() {
                        {addTitleLang === 'en' ? (
                          <Input placeholder="e.g. Happy Independence Day 2026" value={newOccasion.title} onChange={e => setNewOccasion({...newOccasion, title: e.target.value})} className="h-12 rounded-xl font-bold animate-in fade-in duration-300" />
                        ) : (
-                         <Input placeholder="উদা: শুভ স্বাধীনতা দিবস ২০২৬" value={newOccasion.titleBn} onChange={e => setNewOccasion({...newOccasion, titleBn: e.target.value})} className="h-12 rounded-xl font-medium leading-relaxed animate-in fade-in duration-300" />
+                         <Input placeholder="উদা: শুভ স্বাধীনতা দিবস ২০২৬" lang="bn" value={newOccasion.titleBn} onChange={e => setNewOccasion({...newOccasion, titleBn: e.target.value})} className="h-12 rounded-xl font-medium leading-relaxed animate-in fade-in duration-300" />
                        )}
                     </div>
 
@@ -355,7 +355,7 @@ export default function InternalOccasionsManagement() {
                       {addMsgLang === 'en' ? (
                         <Textarea placeholder="Wishing every citizen a prosperous year ahead..." value={newOccasion.message} onChange={e => setNewOccasion({...newOccasion, message: e.target.value})} className="rounded-xl min-h-[120px] animate-in fade-in duration-300" />
                       ) : (
-                        <Textarea placeholder="সকল নাগরিকের উজ্জ্বল ভবিষ্যৎ কামনা করছি..." value={newOccasion.messageBn} onChange={e => setNewOccasion({...newOccasion, messageBn: e.target.value})} className="rounded-xl min-h-[120px] font-medium leading-relaxed animate-in fade-in duration-300" />
+                        <Textarea placeholder="সকল নাগরিকের উজ্জ্বল ভবিষ্যৎ কামনা করছি..." lang="bn" value={newOccasion.messageBn} onChange={e => setNewOccasion({...newOccasion, messageBn: e.target.value})} className="rounded-xl min-h-[120px] font-medium leading-relaxed animate-in fade-in duration-300" />
                       )}
                     </div>
 
@@ -613,7 +613,7 @@ export default function InternalOccasionsManagement() {
                    {editTitleLang === 'en' ? (
                      <Input value={editOccasion.title} onChange={e => setEditOccasion({...editOccasion, title: e.target.value})} className="h-12 rounded-xl bg-slate-50 border-none shadow-inner font-bold animate-in fade-in duration-300" />
                    ) : (
-                     <Input value={editOccasion.titleBn || ''} onChange={e => setEditOccasion({...editOccasion, titleBn: e.target.value})} className="h-12 rounded-xl bg-slate-50 border-none shadow-inner font-medium leading-relaxed animate-in fade-in duration-300" />
+                     <Input value={editOccasion.titleBn || ''} lang="bn" onChange={e => setEditOccasion({...editOccasion, titleBn: e.target.value})} className="h-12 rounded-xl bg-slate-50 border-none shadow-inner font-medium leading-relaxed animate-in fade-in duration-300" />
                    )}
                 </div>
 
@@ -633,7 +633,7 @@ export default function InternalOccasionsManagement() {
                   {editMsgLang === 'en' ? (
                     <Textarea value={editOccasion.message} onChange={e => setEditOccasion({...editOccasion, message: e.target.value})} className="rounded-xl min-h-[120px] animate-in fade-in duration-300" />
                   ) : (
-                    <Textarea value={editOccasion.messageBn || ''} onChange={e => setEditOccasion({...editOccasion, messageBn: e.target.value})} className="rounded-xl min-h-[120px] font-medium leading-relaxed animate-in fade-in duration-300" />
+                    <Textarea value={editOccasion.messageBn || ''} lang="bn" onChange={e => setEditOccasion({...editOccasion, messageBn: e.target.value})} className="rounded-xl min-h-[120px] font-medium leading-relaxed animate-in fade-in duration-300" />
                   )}
                 </div>
                 
