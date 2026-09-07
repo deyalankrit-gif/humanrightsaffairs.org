@@ -176,6 +176,7 @@ export function PublicFooter() {
               <li><Link href="/legal/official-representation" className="text-[#CEFF00] hover:text-white font-bold flex items-center justify-between w-full group/link"><span>Representation</span><ArrowUpRight className="w-3.5 h-3.5 opacity-40 group-hover/link:opacity-100" /></Link></li>
               <li><Link href="/trust-responsibilities" className="text-[#CEFF00] hover:text-white font-medium flex items-center justify-between w-full group/link"><span>Duties</span><ArrowUpRight className="w-3.5 h-3.5 opacity-40 group-hover/link:opacity-100" /></Link></li>
               <li><button onClick={handleOpenGate('/legal/required-documents')} className="text-[#CEFF00] hover:text-white font-medium flex items-center justify-between w-full text-left group/link"><span>Docs Vault</span><Lock className="w-3 h-3 opacity-40 group-hover/link:opacity-100" /></button></li>
+              <li><button onClick={handleOpenGate('/legal/income-tax-compliances')} className="text-[#CEFF00] hover:text-white font-medium flex items-center justify-between w-full text-left group/link"><span>Income Tax Compliances</span><Lock className="w-3 h-3 opacity-40 group-hover/link:opacity-100" /></button></li>
             </ul>
           </div>
 
@@ -206,7 +207,7 @@ export function PublicFooter() {
             <div className="space-y-4">
               <h4 className="text-base md:text-lg font-headline font-bold text-accent">WB Chapter</h4>
               <div className="space-y-4 text-primary-foreground/80 text-[11px] md:text-sm">
-                <div className="flex gap-3"><MapPin className="w-4 h-4 text-accent shrink-0 mt-0.5" /><span>Deganga, 24 Parganas (N), WB</span></div>
+                <div className="flex gap-3"><MapPin className="w-4 h-4 text-accent shrink-0 mt-0.5" /><span>Biswanathpur, Deganga, 24 Parganas (N), WB</span></div>
                 
                 <div className="pt-2">
                   <p className="font-bold text-accent uppercase tracking-widest text-[9px]">Registered Office</p>
