@@ -1,7 +1,7 @@
 
 "use client"
 
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { 
@@ -17,7 +17,16 @@ import {
   FileSearch,
   Building,
   ArrowRight,
-  Info
+  Info,
+  ClipboardCheck,
+  FileDigit,
+  FileSpreadsheet,
+  Layers,
+  FolderOpen,
+  Clock,
+  Zap,
+  TrendingUp,
+  BookOpen
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -26,6 +35,12 @@ import { Footer } from '@/components/footer'
 import { cn } from '@/lib/utils'
 
 export default function IncomeTaxCompliancesPage() {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const handlePrint = () => {
     window.print()
   }
@@ -42,6 +57,22 @@ export default function IncomeTaxCompliancesPage() {
     { task: "TDS Compliance", doc: "TDS Return", deadline: "Quarterly" }
   ];
 
+  const yearlyCalendar = [
+    { period: "April–May", task: "আগের FY-এর accounts finalise শুরু", form: "Books, Ledger, Bank reconciliation" },
+    { period: "31 May", task: "80G-এর donation details জমা", form: "Form 10BD" },
+    { period: "31 May", task: "Donor-দের donation certificate", form: "Form 10BE" },
+    { period: "June–July", task: "Accounts finalise", form: "Income & Expenditure, Balance Sheet" },
+    { period: "July–August", task: "12AB compliance ও application of income হিসাব", form: "85% application calculation" },
+    { period: "August–September", task: "Tax audit, যদি applicable", form: "Form 10B / 10BB" },
+    { period: "Before ITR due date", task: "85% না হলে প্রয়োজনীয় ব্যবস্থা", form: "Form 9A / Form 10" },
+    { period: "ITR due date", task: "Income Tax Return", form: "ITR-7" },
+    { period: "Throughout year", task: "TDS compliance, যদি applicable", form: "TDS payment + quarterly returns" },
+    { period: "Throughout year", task: "Donation records maintain", form: "Donor PAN, address, amount, mode" },
+    { period: "Throughout year", task: "Trust expenditure/application records", form: "Bills, vouchers, payment proofs" }
+  ];
+
+  if (!mounted) return null;
+
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
       {/* Hero Section */}
@@ -56,7 +87,7 @@ export default function IncomeTaxCompliancesPage() {
               <div className="p-3 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20">
                 <ShieldCheck className="w-8 h-8 text-accent" />
               </div>
-              <Badge className="bg-emerald-500 text-white font-bold px-3 py-1 uppercase text-[10px] tracking-widest border-none">Statutory Audit Node</Badge>
+              <Badge className="bg-accent text-primary font-bold px-3 py-1 uppercase text-[10px] tracking-widest border-none">Statutory Audit Node</Badge>
             </div>
             <h1 className="text-4xl md:text-6xl font-headline font-bold mb-4 leading-tight">
               Income Tax <span className="text-accent italic">Compliances</span>
@@ -83,7 +114,7 @@ export default function IncomeTaxCompliancesPage() {
 
       {/* Main Content */}
       <section className="py-12 md:py-20 px-4">
-        <div className="container mx-auto max-w-5xl space-y-16">
+        <div className="container mx-auto max-w-5xl space-y-24">
           
           {/* Introduction Card */}
           <Card className="rounded-[2.5rem] border-none shadow-xl bg-white dark:bg-slate-900 overflow-hidden">
@@ -185,6 +216,176 @@ export default function IncomeTaxCompliancesPage() {
                 </div>
              </div>
           </Card>
+
+          {/* SECONDARY COMPREHENSIVE SECTION: YEARLY CALENDAR */}
+          <div className="space-y-12 pt-12 border-t-2 border-slate-100 dark:border-slate-800">
+             <div className="text-center space-y-4 max-w-3xl mx-auto">
+                <Badge variant="outline" className="text-accent border-accent/30 font-black px-6 py-1 tracking-widest text-[10px]">PRACTICAL WORKFLOW</Badge>
+                <h2 className="text-3xl md:text-5xl font-headline font-bold text-primary dark:text-white">Charitable Trust <br/> <span className="text-accent italic">Yearly Compliance Calendar</span></h2>
+                <p className="text-slate-500 dark:text-slate-400 text-sm md:text-lg italic">"A month-by-month roadmap for maintaining the 12AB and 80G status of your Trust."</p>
+             </div>
+
+             <div className="overflow-x-auto rounded-[2.5rem] border-2 border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl">
+                <table className="w-full text-left min-w-[600px]">
+                   <thead className="bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest">
+                      <tr>
+                         <th className="px-8 py-6">সময়কাল (Period)</th>
+                         <th className="px-8 py-6">করনীয় (Action)</th>
+                         <th className="px-8 py-6">ফর্ম / বিবরণ (Form / Details)</th>
+                      </tr>
+                   </thead>
+                   <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
+                      {yearlyCalendar.map((row, i) => (
+                        <tr key={i} className="hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-colors">
+                           <td className="px-8 py-6 font-black text-xs text-accent uppercase tracking-tighter">{row.period}</td>
+                           <td className="px-8 py-6 font-bold text-primary dark:text-slate-200 text-sm">{row.task}</td>
+                           <td className="px-8 py-6 text-sm text-slate-500 dark:text-slate-400">{row.form}</td>
+                        </tr>
+                      ))}
+                   </tbody>
+                </table>
+             </div>
+
+             {/* Detailed Practical Guide (8 Sections) */}
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {/* 1. April-May */}
+                <Card className="rounded-[2.5rem] border-none shadow-sm bg-white dark:bg-slate-900 overflow-hidden group hover:shadow-xl transition-all">
+                   <CardHeader className="bg-slate-50 dark:bg-slate-800/50 p-8 border-b">
+                      <div className="flex items-center gap-4">
+                         <div className="p-3 bg-white dark:bg-slate-900 rounded-2xl shadow-sm text-indigo-600"><ClipboardCheck className="w-6 h-6" /></div>
+                         <CardTitle className="text-lg font-headline font-bold">এপ্রিল–মে: হিসাব বন্ধ করা</CardTitle>
+                      </div>
+                   </CardHeader>
+                   <CardContent className="p-8">
+                      <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Mandatory Records:</p>
+                      <div className="grid grid-cols-2 gap-y-2 gap-x-4">
+                         {["Cash Book", "Bank Book", "General Ledger", "Donation Register", "Expense Register", "Balance Sheet"].map((item, idx) => (
+                           <div key={idx} className="flex items-center gap-2 text-[11px] font-bold text-slate-600 dark:text-slate-300">
+                              <CheckCircle2 className="w-3 h-3 text-emerald-500" /> {item}
+                           </div>
+                         ))}
+                      </div>
+                   </CardContent>
+                </Card>
+
+                {/* 2. 80G 10BD/10BE */}
+                <Card className="rounded-[2.5rem] border-none shadow-sm bg-white dark:bg-slate-900 overflow-hidden group hover:shadow-xl transition-all">
+                   <CardHeader className="bg-slate-50 dark:bg-slate-800/50 p-8 border-b">
+                      <div className="flex items-center gap-4">
+                         <div className="p-3 bg-white dark:bg-slate-900 rounded-2xl shadow-sm text-pink-600"><FileDigit className="w-6 h-6" /></div>
+                         <CardTitle className="text-lg font-headline font-bold">80G — Form 10BD ও 10BE</CardTitle>
+                      </div>
+                   </CardHeader>
+                   <CardContent className="p-8 space-y-4">
+                      <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed italic">
+                        "FY 2025-26-এর ডোনর তথ্য অবশ্যই ৩১শে মে ২০২৬-এর মধ্যে Form 10BD-তে জমা দিয়ে 10BE সার্টিফিকেট ইস্যু করতে হবে।"
+                      </p>
+                      <div className="flex gap-2">
+                         <Badge className="bg-primary">Due: 31 May</Badge>
+                         <Badge className="bg-emerald-600">Critical</Badge>
+                      </div>
+                   </CardContent>
+                </Card>
+
+                {/* 3. 85% Application */}
+                <Card className="rounded-[2.5rem] border-none shadow-sm bg-white dark:bg-slate-900 overflow-hidden group hover:shadow-xl transition-all">
+                   <CardHeader className="bg-slate-50 dark:bg-slate-800/50 p-8 border-b">
+                      <div className="flex items-center gap-4">
+                         <div className="p-3 bg-white dark:bg-slate-900 rounded-2xl shadow-sm text-amber-600"><TrendingUp className="w-6 h-6" /></div>
+                         <CardTitle className="text-lg font-headline font-bold">৮৫% আয়ের প্রয়োগ (85% Rule)</CardTitle>
+                      </div>
+                   </CardHeader>
+                   <CardContent className="p-8">
+                      <p className="text-sm text-slate-600 dark:text-slate-400 mb-6">আয়ের কমপক্ষে ৮৫% অনুমোদনযোগ্য দাতব্য কাজে ব্যয় হতে হবে। যেমন:</p>
+                      <div className="flex flex-wrap gap-2">
+                         {["শিক্ষা", "চিকিৎসা সহায়তা", "খাদ্য বিতরণ", "দরিদ্র কল্যাণ"].map((tag, i) => (
+                           <Badge key={i} variant="outline" className="bg-slate-50 dark:bg-slate-800 border-slate-100">{tag}</Badge>
+                         ))}
+                      </div>
+                   </CardContent>
+                </Card>
+
+                {/* 4. Form 9A / 10 */}
+                <Card className="rounded-[2.5rem] border-none shadow-sm bg-white dark:bg-slate-900 overflow-hidden group hover:shadow-xl transition-all">
+                   <CardHeader className="bg-slate-50 dark:bg-slate-800/50 p-8 border-b">
+                      <div className="flex items-center gap-4">
+                         <div className="p-3 bg-white dark:bg-slate-900 rounded-2xl shadow-sm text-red-600"><AlertTriangle className="w-6 h-6" /></div>
+                         <CardTitle className="text-lg font-headline font-bold">৮৫% প্রয়োগ না হলে করনীয়</CardTitle>
+                      </div>
+                   </CardHeader>
+                   <CardContent className="p-8 space-y-4">
+                      <div className="flex gap-4 items-start">
+                         <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center font-bold text-xs">9A</div>
+                         <p className="text-xs text-slate-500">Deemed Application অপশন নিতে Form 9A।</p>
+                      </div>
+                      <div className="flex gap-4 items-start">
+                         <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center font-bold text-xs">10</div>
+                         <p className="text-xs text-slate-500">আয় সঞ্চিত রাখতে ITR-এর ২ মাস আগে Form 10।</p>
+                      </div>
+                   </CardContent>
+                </Card>
+
+                {/* 7. TDS */}
+                <Card className="rounded-[2.5rem] border-none shadow-sm bg-white dark:bg-slate-900 overflow-hidden group hover:shadow-xl transition-all">
+                   <CardHeader className="bg-slate-50 dark:bg-slate-800/50 p-8 border-b">
+                      <div className="flex items-center gap-4">
+                         <div className="p-3 bg-white dark:bg-slate-900 rounded-2xl shadow-sm text-sky-600"><Zap className="w-6 h-6" /></div>
+                         <CardTitle className="text-lg font-headline font-bold">TDS — সারা বছর</CardTitle>
+                      </div>
+                   </CardHeader>
+                   <CardContent className="p-8">
+                      <p className="text-xs text-slate-400 uppercase font-black mb-4">Applicable Payments:</p>
+                      <p className="text-[11px] font-bold text-slate-600 dark:text-slate-300 leading-relaxed">
+                        বেতন (Salary), প্রফেশনাল ফি, কন্টাক্টর পেমেন্ট এবং ভাড়ার ক্ষেত্রে TDS বিধিমালা মেনে চলতে হবে এবং ত্রৈমাসিক রিটার্ন জমা দিতে হবে।
+                      </p>
+                   </CardContent>
+                </Card>
+
+                {/* 8. Investment Records */}
+                <Card className="rounded-[2.5rem] border-none shadow-sm bg-white dark:bg-slate-900 overflow-hidden group hover:shadow-xl transition-all">
+                   <CardHeader className="bg-slate-50 dark:bg-slate-800/50 p-8 border-b">
+                      <div className="flex items-center gap-4">
+                         <div className="p-3 bg-white dark:bg-slate-900 rounded-2xl shadow-sm text-indigo-500"><Building className="w-6 h-6" /></div>
+                         <CardTitle className="text-lg font-headline font-bold">বিনিয়োগের রেকর্ড (Investments)</CardTitle>
+                      </div>
+                   </CardHeader>
+                   <CardContent className="p-8">
+                      <p className="text-sm text-slate-500 italic">"Trust-এর টাকা কোথায় রাখা হয়েছে (FD, Savings, Permitted Assets) তার সঠিক রেকর্ড ITR-7-এ প্রদর্শন করতে হবে।"</p>
+                   </CardContent>
+                </Card>
+             </div>
+
+             {/* Annual Tax File Checklist */}
+             <Card className="rounded-[3rem] bg-indigo-900 text-white p-10 md:p-16 relative overflow-hidden shadow-2xl border-none">
+                <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-white/5 rounded-full -mr-48 -mt-48 blur-3xl"></div>
+                <div className="relative z-10 space-y-10">
+                   <div className="flex items-center gap-6 border-b border-white/10 pb-8">
+                      <div className="p-4 bg-white/10 rounded-[2rem] border border-white/20"><FolderOpen className="w-10 h-10 text-accent" /></div>
+                      <div>
+                         <h3 className="text-2xl md:text-4xl font-headline font-bold">Annual Tax File <span className="text-accent italic">Structure</span></h3>
+                         <p className="text-indigo-200 text-sm md:text-base mt-1">প্রতি বছরের জন্য আলাদা ফোল্ডার তৈরি করুন (Audit-Ready Checklist)</p>
+                      </div>
+                   </div>
+
+                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-4 gap-x-8">
+                      {[
+                        "Trust Reg/12AB/80G Copy", "PAN Card", "Bank Statements", "Donation Register", "Form 10BD & 10BE",
+                        "Bills & Vouchers", "Income & Expenditure", "Balance Sheet", "Form 10B/10BB", "Form 9A / Form 10",
+                        "ITR-7 & Ack", "TDS Returns", "TDS Certificates", "CA Audit Report"
+                      ].map((item, i) => (
+                        <div key={i} className="flex items-center gap-3 text-xs md:text-sm font-bold text-indigo-50">
+                           <div className="w-5 h-5 rounded-full bg-white/10 flex items-center justify-center shrink-0"><span className="text-[10px] text-accent">{i+1}</span></div>
+                           {item}
+                        </div>
+                      ))}
+                   </div>
+
+                   <div className="pt-8 flex justify-center">
+                      <Badge className="bg-accent text-primary px-8 py-2 text-xs font-black uppercase tracking-widest shadow-xl">Audit Readiness Guaranteed</Badge>
+                   </div>
+                </div>
+             </Card>
+          </div>
 
           {/* Crucial Note */}
           <div className="p-8 rounded-[2.5rem] bg-amber-50 dark:bg-amber-950/20 border-2 border-dashed border-amber-200 dark:border-amber-900/50 flex flex-col md:flex-row items-center gap-8 shadow-sm">
