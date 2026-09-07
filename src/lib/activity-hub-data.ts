@@ -13,9 +13,13 @@ export const BUILT_IN_HOLIDAYS = [
   { title: "Dr. B.R. Ambedkar Jayanti", month: 4, day: 14, type: "Important Day", category: "National" },
   
   // Hindu Festivals (Approximate dates for 2025/2026 alignment)
+  { title: "Saraswati Puja (Vasant Panchami)", month: 2, day: 2, type: "Religious", category: "Hindu" },
   { title: "Makar Sankranti", month: 1, day: 14, type: "Religious", category: "Hindu" },
   { title: "Holi", month: 3, day: 14, type: "Religious", category: "Hindu" },
-  { title: "Ganesh Chaturthi", month: 8, day: 27, type: "Religious", category: "Hindu" },
+  { title: "Raksha Bandhan", month: 8, day: 9, type: "Religious", category: "Hindu" },
+  { title: "Janmashtami", month: 8, day: 16, type: "Religious", category: "Hindu" },
+  { title: "Ganesh Puja (Chaturthi)", month: 8, day: 27, type: "Religious", category: "Hindu" },
+  { title: "Vishwakarma Puja", month: 9, day: 17, type: "Religious", category: "Hindu" },
   { title: "Durga Puja (Saptami)", month: 9, day: 29, type: "Religious", category: "Hindu" },
   { title: "Vijayadashami (Dussehra)", month: 10, day: 2, type: "Religious", category: "Hindu" },
   { title: "Diwali (Kali Puja)", month: 10, day: 20, type: "Religious", category: "Hindu" },
