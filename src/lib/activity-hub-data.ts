@@ -2,7 +2,7 @@
 /**
  * Institutional Calendar Registry: Comprehensive Multi-Faith and National Importance Days.
  * This registry powers the Autonomous Greeting Protocol.
- * Dates calibrated for 2025 primary cycles.
+ * Dates calibrated for 2026 primary cycles.
  */
 
 export const BUILT_IN_HOLIDAYS = [
@@ -13,26 +13,26 @@ export const BUILT_IN_HOLIDAYS = [
   { title: "Netaji Subhash Chandra Bose Jayanti", month: 1, day: 23, type: "Important Day", category: "National" },
   { title: "Dr. B.R. Ambedkar Jayanti", month: 4, day: 14, type: "Important Day", category: "National" },
   
-  // Hindu Festivals (2025 Alignment)
+  // Hindu Festivals (2026 Alignment)
   { title: "Saraswati Puja (Vasant Panchami)", month: 2, day: 2, type: "Religious", category: "Hindu" },
   { title: "Makar Sankranti", month: 1, day: 14, type: "Religious", category: "Hindu" },
   { title: "Holi", month: 3, day: 14, type: "Religious", category: "Hindu" },
   { title: "Raksha Bandhan", month: 8, day: 9, type: "Religious", category: "Hindu" },
   { title: "Janmashtami", month: 8, day: 16, type: "Religious", category: "Hindu" },
-  { title: "Ganesh Puja", month: 9, day: 5, type: "Religious", category: "Hindu" },
+  { title: "Ganesh Puja", month: 9, day: 14, type: "Religious", category: "Hindu" },
   { title: "Vishwakarma Puja", month: 9, day: 17, type: "Religious", category: "Hindu" },
   { title: "Durga Puja (Saptami)", month: 10, day: 20, type: "Religious", category: "Hindu" },
   { title: "Vijayadashami (Dussehra)", month: 10, day: 23, type: "Religious", category: "Hindu" },
   { title: "Kali Puja (Diwali)", month: 10, day: 31, type: "Religious", category: "Hindu" },
   { title: "Chhath Puja", month: 11, day: 7, type: "Religious", category: "Hindu" },
   
-  // Muslim Festivals (2025 Alignment)
+  // Muslim Festivals (2026 Alignment)
   { title: "Eid-ul-Fitr", month: 3, day: 31, type: "Religious", category: "Muslim" },
   { title: "Eid-ul-Adha", month: 6, day: 7, type: "Religious", category: "Muslim" },
   { title: "Muharram", month: 7, day: 6, type: "Religious", category: "Muslim" },
   { title: "Milad-un-Nabi", month: 9, day: 5, type: "Religious", category: "Muslim" },
 
-  // Christian Festivals (2025 Alignment)
+  // Christian Festivals (2026 Alignment)
   { title: "Good Friday", month: 4, day: 18, type: "Religious", category: "Christian" },
   { title: "Easter Sunday", month: 4, day: 20, type: "Religious", category: "Christian" },
   { title: "Christmas Day", month: 12, day: 25, type: "Religious", category: "Christian" },
