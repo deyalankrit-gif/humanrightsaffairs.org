@@ -76,7 +76,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 
 /**
  * Internal Occasions Governance: Real-time management terminal.
- * Updated: Integrated Visual Calendar Registry and Month-wise Discovery.
+ * Updated: Integrated Visual Calendar Registry and Automatic Activation Toggle.
  */
 export default function InternalOccasionsManagement() {
   const { user, loading: authLoading } = useUser();
@@ -341,7 +341,7 @@ export default function InternalOccasionsManagement() {
                                 {isAutoMode ? <Zap className="w-6 h-6" /> : <Settings2 className="w-6 h-6" />}
                             </div>
                             <div>
-                                <h4 className="font-bold text-primary dark:text-white uppercase tracking-tight">Autonomous Discovery</h4>
+                                <h4 className="font-bold text-primary dark:text-white uppercase tracking-tight">Enable Automatic Activation</h4>
                                 <p className="text-[10px] font-bold text-slate-400 uppercase">Synchronizes with institutional calendar.</p>
                             </div>
                           </div>
