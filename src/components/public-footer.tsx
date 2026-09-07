@@ -134,7 +134,7 @@ export function PublicFooter() {
               </div>
               <div className="flex flex-col">
                 <span className="font-headline font-bold text-lg md:text-xl leading-none">HRAT</span>
-                <span className="text-[8px] md:text-[10px] font-bold tracking-widest text-accent uppercase">Justice Shield</span>
+                <span className="text-[8px] font-bold tracking-widest text-accent uppercase">Justice Shield</span>
               </div>
             </Link>
             <p className="text-primary-foreground/80 text-xs md:text-sm leading-relaxed max-w-sm">
@@ -176,7 +176,9 @@ export function PublicFooter() {
               <li><Link href="/legal/official-representation" className="text-[#CEFF00] hover:text-white font-bold flex items-center justify-between w-full group/link"><span>Representation</span><ArrowUpRight className="w-3.5 h-3.5 opacity-40 group-hover/link:opacity-100" /></Link></li>
               <li><Link href="/trust-responsibilities" className="text-[#CEFF00] hover:text-white font-medium flex items-center justify-between w-full group/link"><span>Duties</span><ArrowUpRight className="w-3.5 h-3.5 opacity-40 group-hover/link:opacity-100" /></Link></li>
               <li><button onClick={handleOpenGate('/legal/required-documents')} className="text-[#CEFF00] hover:text-white font-medium flex items-center justify-between w-full text-left group/link"><span>Docs Vault</span><Lock className="w-3 h-3 opacity-40 group-hover/link:opacity-100" /></button></li>
-              <li><button onClick={handleOpenGate('/legal/income-tax-compliances')} className="text-[#CEFF00] hover:text-white font-medium flex items-center justify-between w-full text-left group/link"><span>Income Tax Compliances</span><Lock className="w-3 h-3 opacity-40 group-hover/link:opacity-100" /></button></li>
+              <li><button onClick={handleOpenGate('/legal/income-tax-compliances/page-1')} className="text-[#CEFF00] hover:text-white font-medium flex items-center justify-between w-full text-left group/link"><span>Income Tax Compliance (Page 1)</span><Lock className="w-3 h-3 opacity-40 group-hover/link:opacity-100" /></button></li>
+              <li><button onClick={handleOpenGate('/legal/income-tax-compliances/page-2')} className="text-[#CEFF00] hover:text-white font-medium flex items-center justify-between w-full text-left group/link"><span>Income Tax Compliance (Page 2)</span><Lock className="w-3 h-3 opacity-40 group-hover/link:opacity-100" /></button></li>
+              <li><button onClick={handleOpenGate('/legal/income-tax-compliances/page-3')} className="text-[#CEFF00] hover:text-white font-medium flex items-center justify-between w-full text-left group/link"><span>Income Tax Compliance (Page 3)</span><Lock className="w-3 h-3 opacity-40 group-hover/link:opacity-100" /></button></li>
             </ul>
           </div>
 
@@ -250,7 +252,7 @@ export function PublicFooter() {
                 <div className="space-y-6 text-center">
                    <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-800">
                       <p className="text-[10px] font-black uppercase text-slate-400 mb-2">Target Node</p>
-                      <p className="text-xs md:text-sm font-bold text-primary dark:text-white break-all">{maskedEmail}</p>
+                      <p className="text-xs md:sm font-bold text-primary dark:text-white break-all">{maskedEmail}</p>
                    </div>
                    <Button onClick={handleSendOtp} disabled={isVerifying} className="w-full h-12 bg-primary text-white font-bold rounded-xl hover:bg-secondary">
                      {isVerifying ? <Loader2 className="animate-spin w-5 h-5" /> : <>Request OTP <ArrowRight className="ml-2 w-4 h-4" /></>}
