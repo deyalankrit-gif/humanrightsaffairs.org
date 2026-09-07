@@ -30,7 +30,8 @@ import {
   Settings2,
   RefreshCw,
   Clock,
-  X
+  X,
+  History
 } from 'lucide-react';
 import {
   Dialog,
@@ -220,7 +221,7 @@ export default function InternalOccasionsManagement() {
               <Wifi className="w-2.5 h-2.5 animate-pulse" /> Live Broadcast Control
             </div>
             <h1 className="text-3xl md:text-4xl font-headline font-bold">Institutional <span className="text-accent italic">Occasions</span></h1>
-            <p className="text-slate-400 text-[11px] uppercase tracking-widest font-black">Central Greetings & Festival Registry</p>
+            <p className="text-slate-400 text-[11px] uppercase font-black">Central Greetings & Festival Registry</p>
           </div>
           
           <div className="flex gap-3">
