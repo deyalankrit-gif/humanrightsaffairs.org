@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useEffect, useState, useMemo } from 'react';
@@ -378,7 +379,7 @@ export default function InternalOccasionsManagement() {
                        <History className="w-5 h-5 text-accent" />
                        <h2 className="text-xl font-headline font-bold text-primary dark:text-white">Broadcast Registry</h2>
                     </div>
-                    <div className="relative w-full max-w-md">
+                    <div className="relative w-full max-md:max-w-full max-w-md">
                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                        <Input placeholder="Search greetings..." className="pl-10 h-10 rounded-xl bg-white dark:bg-slate-900 border-none shadow-sm" value={search} onChange={e => setSearch(e.target.value)} />
                     </div>
@@ -532,7 +533,7 @@ export default function InternalOccasionsManagement() {
                  <div className="mt-8 pt-4 border-t border-white/10">
                     <div className="flex items-start gap-3">
                        <Info className="w-4 h-4 text-accent shrink-0 mt-0.5" />
-                       <p className="text-[9px] text-slate-400 leading-relaxed font-bold uppercase italic">
+                       <p className="text-[9px] font-black text-slate-400 leading-relaxed font-bold uppercase italic">
                          "These dates are strictly verified according to the Indian Multi-Faith Calendar. Sequential Guard logic is automatically applied to all entries."
                        </p>
                     </div>
@@ -590,8 +591,4 @@ export default function InternalOccasionsManagement() {
       <Footer />
     </main>
   );
-}
-
-function Circle({ className }: { className?: string }) {
-  return <div className={cn("rounded-full", className)} />
 }

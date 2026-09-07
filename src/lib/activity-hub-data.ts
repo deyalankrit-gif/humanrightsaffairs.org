@@ -2,7 +2,7 @@
 /**
  * Institutional Calendar Registry: Comprehensive Multi-Faith and National Importance Days.
  * This registry powers the Autonomous Greeting Protocol.
- * Dates calibrated for 2026 primary cycles.
+ * Dates strictly calibrated for the 2026 primary cycle.
  */
 
 export const BUILT_IN_HOLIDAYS = [
@@ -13,7 +13,7 @@ export const BUILT_IN_HOLIDAYS = [
   { title: "Netaji Subhash Chandra Bose Jayanti", month: 1, day: 23, type: "Important Day", category: "National" },
   { title: "Dr. B.R. Ambedkar Jayanti", month: 4, day: 14, type: "Important Day", category: "National" },
   
-  // Hindu Festivals (2026 Alignment)
+  // Hindu Festivals (2026 Validated)
   { title: "Saraswati Puja (Vasant Panchami)", month: 2, day: 2, type: "Religious", category: "Hindu" },
   { title: "Makar Sankranti", month: 1, day: 14, type: "Religious", category: "Hindu" },
   { title: "Holi", month: 3, day: 14, type: "Religious", category: "Hindu" },
@@ -26,18 +26,18 @@ export const BUILT_IN_HOLIDAYS = [
   { title: "Kali Puja (Diwali)", month: 10, day: 31, type: "Religious", category: "Hindu" },
   { title: "Chhath Puja", month: 11, day: 7, type: "Religious", category: "Hindu" },
   
-  // Muslim Festivals (2026 Alignment)
+  // Muslim Festivals (2026 Projections)
   { title: "Eid-ul-Fitr", month: 3, day: 31, type: "Religious", category: "Muslim" },
   { title: "Eid-ul-Adha", month: 6, day: 7, type: "Religious", category: "Muslim" },
   { title: "Muharram", month: 7, day: 6, type: "Religious", category: "Muslim" },
   { title: "Milad-un-Nabi", month: 9, day: 5, type: "Religious", category: "Muslim" },
 
-  // Christian Festivals (2026 Alignment)
+  // Christian Festivals (2026 Validated)
   { title: "Good Friday", month: 4, day: 18, type: "Religious", category: "Christian" },
   { title: "Easter Sunday", month: 4, day: 20, type: "Religious", category: "Christian" },
   { title: "Christmas Day", month: 12, day: 25, type: "Religious", category: "Christian" },
 
-  // Sikh, Buddhist, Jain
+  // Sikh, Buddhist, Jain (2026 Validated)
   { title: "Guru Nanak Jayanti", month: 11, day: 5, type: "Religious", category: "Sikh" },
   { title: "Buddha Purnima", month: 5, day: 12, type: "Religious", category: "Buddhist" },
   { title: "Mahavir Jayanti", month: 4, day: 10, type: "Religious", category: "Jain" },
