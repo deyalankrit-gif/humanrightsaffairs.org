@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useEffect, useState, useMemo } from 'react';
@@ -36,7 +35,9 @@ import {
   CalendarDays,
   ChevronRight,
   MapPin,
-  Circle
+  Circle,
+  Database,
+  Radio
 } from 'lucide-react';
 import {
   Dialog,
@@ -87,6 +88,7 @@ export default function InternalOccasionsManagement() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editOccasion, setEditOccasion] = useState<any>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editStep, setEditStep] = useState<'confirm' | 'form'>('confirm');
   const [selectedCalendarDate, setSelectedCalendarDate] = useState<Date | undefined>(new Date());
 
   const [newOccasion, setNewOccasion] = useState({
@@ -371,15 +373,15 @@ export default function InternalOccasionsManagement() {
 
               {/* Broadcast Registry Stream */}
               <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <History className="w-6 h-6 text-accent" />
-                    <h2 className="text-2xl font-headline font-bold text-primary dark:text-white">Manual Registry</h2>
-                  </div>
-                  <div className="relative w-full max-w-xs">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                    <Input placeholder="Search greetings..." className="pl-10 h-10 rounded-xl bg-white dark:bg-slate-900 border-none shadow-sm" value={search} onChange={e => setSearch(e.target.value)} />
-                  </div>
+                <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-8">
+                    <div className="flex items-center gap-3">
+                       <History className="w-5 h-5 text-accent" />
+                       <h2 className="text-xl font-headline font-bold text-primary dark:text-white">Broadcast Registry</h2>
+                    </div>
+                    <div className="relative w-full max-w-md">
+                       <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                       <Input placeholder="Search greetings..." className="pl-10 h-10 rounded-xl bg-white dark:bg-slate-900 border-none shadow-sm" value={search} onChange={e => setSearch(e.target.value)} />
+                    </div>
                 </div>
 
                 <div className="grid gap-4">
@@ -404,7 +406,7 @@ export default function InternalOccasionsManagement() {
                                </div>
                             </div>
                             <div className="flex items-center gap-2">
-                               <Button variant="outline" size="sm" onClick={() => { setEditOccasion(occ); setEditStep('form'); setIsEditDialogOpen(true); }} className="h-9 px-4 rounded-xl text-[10px] font-bold border-slate-200">Modify</Button>
+                               <button onClick={() => { setEditOccasion(occ); setEditStep('form'); setIsEditDialogOpen(true); }} className="h-9 px-4 rounded-xl text-[10px] font-bold border border-slate-200 hover:bg-accent hover:text-primary transition-all">Modify</button>
                                <AlertDialog>
                                  <AlertDialogTrigger asChild>
                                    <button className="h-9 w-9 text-slate-300 hover:text-red-500 flex items-center justify-center transition-colors"><Trash2 className="w-4.5 h-4.5" /></button>
@@ -494,7 +496,7 @@ export default function InternalOccasionsManagement() {
                  </div>
               </Card>
 
-              {/* FULL REGISTRY LOOKUP (THE LIST REQUESTED) */}
+              {/* FULL REGISTRY LOOKUP */}
               <Card className="rounded-[2.5rem] border-none shadow-sm bg-slate-900 text-white p-8 overflow-hidden relative">
                  <div className="absolute top-0 right-0 w-32 h-32 bg-accent/5 rounded-full -mr-16 -mt-16 blur-2xl"></div>
                  <h3 className="text-xs font-black uppercase text-accent tracking-[0.2em] mb-8 flex items-center gap-2">
@@ -542,7 +544,7 @@ export default function InternalOccasionsManagement() {
       </section>
 
       {/* Unified Edit Dialog */}
-      <Dialog open={isEditDialogOpen} onOpenChange={(val) => { if(!val) { setIsEditDialogOpen(false); setEditLeader(null); } }}>
+      <Dialog open={isEditDialogOpen} onOpenChange={(val) => { if(!val) { setIsEditDialogOpen(false); setEditOccasion(null); } }}>
         <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="max-w-2xl bg-white dark:bg-slate-900 rounded-[2.5rem] border-none shadow-2xl max-h-[90vh] overflow-y-auto flex flex-col p-0 z-[1000001]">
             <div className="bg-slate-900 pt-14 pb-10 px-8 text-white relative border-b-4 border-accent/20 shrink-0">
                <div className="absolute right-6 top-6"><DialogClose asChild><Button variant="ghost" size="icon" className="rounded-full text-white hover:bg-white/10 h-10 w-10 transition-all"><X className="w-6 h-6" /></Button></DialogClose></div>
