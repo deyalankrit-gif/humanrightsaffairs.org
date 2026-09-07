@@ -1,7 +1,6 @@
-
 'use client';
 
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser, useCollection, useFirestore, useMemoFirebase, useDoc } from '@/firebase';
 import { collection, query, orderBy, addDoc, deleteDoc, doc, updateDoc, serverTimestamp, setDoc } from 'firebase/firestore';
@@ -227,6 +226,15 @@ export default function InternalOccasionsManagement() {
     deleteDoc(doc(db, 'occasions', id)).then(() => toast({ title: "Record Purged" }));
   };
 
+  const parseTerminationDate = (dateStr: string) => {
+    if (!dateStr) return undefined;
+    try {
+      return parse(dateStr, 'yyyy-MM-dd', new Date());
+    } catch (e) {
+      return undefined;
+    }
+  };
+
   if (authLoading || !user) {
     return <div className="min-h-screen flex items-center justify-center bg-slate-950"><Loader2 className="w-10 h-10 animate-spin text-accent" /></div>;
   }
@@ -256,7 +264,7 @@ export default function InternalOccasionsManagement() {
           <div className="flex gap-3">
              <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button className="bg-accent text-primary font-bold rounded-xl h-11 px-8 flex gap-2 shadow-2xl shadow-accent/20 mx-auto transform hover:scale-105 active:scale-95">
+                  <Button className="bg-accent text-primary hover:bg-secondary hover:text-white font-bold rounded-xl h-11 px-8 flex gap-2 shadow-2xl shadow-accent/20 mx-auto transform hover:scale-105 active:scale-95 transition-all">
                     <Plus className="w-4 h-4" /> New Occasion Greeting
                   </Button>
                 </DialogTrigger>
