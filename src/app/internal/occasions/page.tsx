@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useEffect, useState, useMemo, useCallback } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser, useCollection, useFirestore, useMemoFirebase, useDoc } from '@/firebase';
-import { collection, query, orderBy, addDoc, deleteDoc, doc, updateDoc, serverTimestamp, setDoc, getDocs, writeBatch, where } from 'firebase/firestore';
+import { collection, query, orderBy, addDoc, deleteDoc, doc, updateDoc, serverTimestamp, getDocs, writeBatch, where } from 'firebase/firestore';
 import { Footer } from '@/components/footer';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -34,11 +34,10 @@ import {
   Info,
   CalendarDays,
   ChevronRight,
-  MapPin,
   Circle,
   Database,
   Radio,
-  Check
+  Languages
 } from 'lucide-react';
 import {
   Dialog,
@@ -70,7 +69,7 @@ import { Calendar } from "@/components/ui/calendar"
 import { useToast } from '@/hooks/use-toast';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
-import { format, addDays, startOfDay, isWithinInterval, endOfDay, isToday, getMonth, parse } from 'date-fns';
+import { format, addDays, startOfDay, isWithinInterval, endOfDay, getMonth, parse } from 'date-fns';
 import { BUILT_IN_HOLIDAYS, BUILT_IN_OBSERVANCES } from '@/lib/activity-hub-data';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
@@ -86,12 +85,16 @@ export default function InternalOccasionsManagement() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editOccasion, setEditOccasion] = useState<any>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [editStep, setEditStep] = useState<'confirm' | 'form'>('confirm');
   const [selectedCalendarDate, setSelectedCalendarDate] = useState<Date | undefined>(new Date());
+  
+  // Language Switching State
+  const [addNarrativeLang, setAddNarrativeLang] = useState<'en' | 'bn'>('en');
+  const [editNarrativeLang, setEditNarrativeLang] = useState<'en' | 'bn'>('en');
 
   const [newOccasion, setNewOccasion] = useState({
     title: '',
     message: '',
+    messageBn: '',
     imageUrl: '',
     startDate: format(new Date(), 'yyyy-MM-dd'),
     endDate: format(new Date(), 'yyyy-MM-dd'),
@@ -120,27 +123,15 @@ export default function InternalOccasionsManagement() {
 
   const allSpecialDays = useMemo(() => {
     return [
-      ...BUILT_IN_HOLIDAYS.map(h => ({ ...h, isHoliday: true, date: startOfDay(new Date(new Date().getFullYear(), h.month - 1, h.day)) })),
-      ...BUILT_IN_OBSERVANCES.map(o => ({ ...o, isHoliday: false, date: startOfDay(new Date(new Date().getFullYear(), o.month - 1, o.day)) }))
+      ...BUILT_IN_HOLIDAYS.map(h => ({ ...h, isHoliday: true, date: startOfDay(new Date(2026, h.month - 1, h.day)) })),
+      ...BUILT_IN_OBSERVANCES.map(o => ({ ...o, isHoliday: false, date: startOfDay(new Date(2026, o.month - 1, o.day)) }))
     ].sort((a, b) => a.date.getTime() - b.date.getTime());
   }, []);
 
   const nextSpecialDay = useMemo(() => {
     const now = startOfDay(new Date());
-    const todayMatch = allSpecialDays.find(d => d.date.getTime() === now.getTime());
-    if (todayMatch) return { ...todayMatch, currentStatus: 'Today' };
-    const yesterday = addDays(now, -1);
-    const yesterdayMatch = allSpecialDays.find(d => d.date.getTime() === yesterday.getTime());
-    if (yesterdayMatch) return { ...yesterdayMatch, currentStatus: 'Recent (T+1)' };
-    const upcomingMatch = allSpecialDays.find(d => {
-      if (d.date <= now) return false;
-      if (d.date > addDays(now, 3)) return false;
-      const dayBefore = addDays(d.date, -1);
-      const isConsecutive = allSpecialDays.some(prev => prev.date.getTime() === dayBefore.getTime());
-      return !isConsecutive;
-    });
-    if (upcomingMatch) return { ...upcomingMatch, currentStatus: 'Upcoming (T-3)' };
-    return allSpecialDays.find(d => d.date > now) || allSpecialDays[0];
+    const upcomingMatch = allSpecialDays.find(d => d.date > now) || allSpecialDays[0];
+    return upcomingMatch;
   }, [allSpecialDays]);
 
   const handleToggleProtocol = async (val: boolean) => {
@@ -208,7 +199,7 @@ export default function InternalOccasionsManagement() {
       .then(() => {
         toast({ title: "Greeting Published" });
         setIsAddDialogOpen(false);
-        setNewOccasion({ title: '', message: '', imageUrl: '', startDate: format(new Date(), 'yyyy-MM-dd'), endDate: format(new Date(), 'yyyy-MM-dd'), isActive: true, priority: 1 });
+        setNewOccasion({ title: '', message: '', messageBn: '', imageUrl: '', startDate: format(new Date(), 'yyyy-MM-dd'), endDate: format(new Date(), 'yyyy-MM-dd'), isActive: true, priority: 1 });
       })
       .finally(() => setIsActionLoading(false));
   };
@@ -291,12 +282,19 @@ export default function InternalOccasionsManagement() {
                     <Plus className="w-4 h-4" /> New Occasion Greeting
                   </Button>
                 </DialogTrigger>
-                <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="max-w-2xl rounded-[2.5rem] max-h-[90vh] overflow-y-auto border-none shadow-2xl">
-                  <DialogHeader>
+                <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="max-w-2xl rounded-[2.5rem] max-h-[90vh] overflow-y-auto border-none shadow-2xl [&>button]:hidden">
+                  <DialogHeader className="relative">
+                    <div className="absolute right-0 top-0">
+                      <DialogClose asChild>
+                        <Button variant="ghost" size="icon" className="rounded-full text-slate-400 hover:text-primary h-8 w-8">
+                          <X className="w-5 h-5" />
+                        </Button>
+                      </DialogClose>
+                    </div>
                     <DialogTitle>Greeting Setup Protocol</DialogTitle>
                     <DialogDescription>Banners are pushed to the homepage in real-time based on priority and dates.</DialogDescription>
                   </DialogHeader>
-                  <div className="space-y-6 py-2">
+                  <div className="space-y-6 py-2 px-1">
                     <div className="flex flex-col items-center gap-4 p-5 border-2 border-dashed rounded-[2rem] bg-slate-50 dark:bg-slate-900 border-slate-200 shadow-inner">
                       <div className="relative w-full aspect-video rounded-2xl overflow-hidden bg-slate-200 border-4 border-white shadow-xl">
                         {newOccasion.imageUrl ? <Image src={newOccasion.imageUrl} alt="Preview" fill className="object-cover" /> : <div className="flex flex-col items-center justify-center h-full gap-2 text-slate-400"><ImageIcon className="w-10 h-10" /><span className="text-[10px] font-black uppercase">Banner Area</span></div>}
@@ -327,9 +325,43 @@ export default function InternalOccasionsManagement() {
                       </div>
                     </div>
 
-                    <div className="space-y-1">
-                      <Label className="text-[10px] font-bold uppercase text-slate-400">Greeting Narrative</Label>
-                      <Textarea placeholder="Wishing every citizen a prosperous year ahead..." value={newOccasion.message} onChange={e => setNewOccasion({...newOccasion, message: e.target.value})} className="rounded-xl min-h-[100px]" />
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between mb-1">
+                        <Label className="text-[10px] font-bold uppercase text-slate-400">Greeting Narrative</Label>
+                        <div className="flex bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg border">
+                           <button 
+                             type="button"
+                             onClick={() => setAddNarrativeLang('en')}
+                             className={cn(
+                               "px-4 py-1 rounded-md text-[9px] font-black uppercase transition-all",
+                               addNarrativeLang === 'en' ? "bg-white dark:bg-slate-700 text-primary shadow-sm" : "text-slate-400 hover:text-slate-600"
+                             )}
+                           >EN</button>
+                           <button 
+                             type="button"
+                             onClick={() => setAddNarrativeLang('bn')}
+                             className={cn(
+                               "px-4 py-1 rounded-md text-[9px] font-black uppercase transition-all",
+                               addNarrativeLang === 'bn' ? "bg-white dark:bg-slate-700 text-primary shadow-sm" : "text-slate-400 hover:text-slate-600"
+                             )}
+                           >BN</button>
+                        </div>
+                      </div>
+                      {addNarrativeLang === 'en' ? (
+                        <Textarea 
+                          placeholder="Wishing every citizen a prosperous year ahead..." 
+                          value={newOccasion.message} 
+                          onChange={e => setNewOccasion({...newOccasion, message: e.target.value})} 
+                          className="rounded-xl min-h-[120px] animate-in fade-in duration-300" 
+                        />
+                      ) : (
+                        <Textarea 
+                          placeholder="সকল নাগরিকের উজ্জ্বল ভবিষ্যৎ কামনা করছি..." 
+                          value={newOccasion.messageBn} 
+                          onChange={e => setNewOccasion({...newOccasion, messageBn: e.target.value})} 
+                          className="rounded-xl min-h-[120px] font-medium animate-in fade-in duration-300" 
+                        />
+                      )}
                     </div>
 
                     <div className="flex items-center justify-between p-5 bg-emerald-50/50 dark:bg-emerald-950/20 rounded-2xl border border-emerald-100 dark:border-emerald-900">
@@ -340,7 +372,7 @@ export default function InternalOccasionsManagement() {
                       <Switch checked={newOccasion.isActive} onCheckedChange={val => setNewOccasion({...newOccasion, isActive: val})} className="data-[state=checked]:bg-emerald-500" />
                     </div>
                   </div>
-                  <DialogFooter>
+                  <DialogFooter className="mt-4">
                     <Button onClick={handleAddOccasion} disabled={isActionLoading} className="w-full h-14 rounded-2xl bg-accent text-primary font-bold text-lg hover:bg-secondary hover:text-white shadow-2xl shadow-accent/20 transition-all">Establish Official Entry</Button>
                   </DialogFooter>
                 </DialogContent>
@@ -400,14 +432,16 @@ export default function InternalOccasionsManagement() {
                            </div>
                            <Button 
                              onClick={() => {
-                               const visual = PlaceHolderImages.find(i => i.id === 'ganesh-puja' && nextSpecialDay.title.toLowerCase().includes('ganesh')) 
-                                 || PlaceHolderImages.find(i => i.id === 'durga-puja' && nextSpecialDay.title.toLowerCase().includes('durga'))
-                                 || PlaceHolderImages.find(i => i.id === 'kali-puja' && (nextSpecialDay.title.toLowerCase().includes('kali') || nextSpecialDay.title.toLowerCase().includes('diwali')))
+                               const t = nextSpecialDay.title.toLowerCase();
+                               const visual = PlaceHolderImages.find(i => i.id === 'ganesh-puja' && t.includes('ganesh')) 
+                                 || PlaceHolderImages.find(i => i.id === 'durga-puja' && t.includes('durga'))
+                                 || PlaceHolderImages.find(i => i.id === 'kali-puja' && (t.includes('kali') || t.includes('diwali')))
                                  || { imageUrl: '/HRAT Logo.jpeg' };
 
                                setNewOccasion({
                                  title: nextSpecialDay.title,
                                  message: `Human Rights Affairs Trust (Justice Shield) joins the nation in celebrating ${nextSpecialDay.title}.`,
+                                 messageBn: `হিউম্যান রাইটস অ্যাফেয়ার্স ট্রাস্ট (জাস্টিস শিল্ড) ${nextSpecialDay.title} উদযাপনে দেশবাসীর সাথে যোগ দিচ্ছে।`,
                                  imageUrl: visual.imageUrl,
                                  startDate: format(new Date(), 'yyyy-MM-dd'),
                                  endDate: format(nextSpecialDay.date, 'yyyy-MM-dd'),
@@ -468,7 +502,7 @@ export default function InternalOccasionsManagement() {
                                </div>
                             </div>
                             <div className="flex items-center gap-2">
-                               <button onClick={() => { setEditOccasion(occ); setEditStep('form'); setIsEditDialogOpen(true); }} className="h-9 px-4 rounded-xl text-[10px] font-bold border border-slate-200 hover:bg-accent hover:text-primary transition-all">Modify</button>
+                               <button onClick={() => { setEditOccasion(occ); setEditNarrativeLang('en'); setIsEditDialogOpen(true); }} className="h-9 px-4 rounded-xl text-[10px] font-bold border border-slate-200 hover:bg-accent hover:text-primary transition-all">Modify</button>
                                <AlertDialog>
                                  <AlertDialogTrigger asChild>
                                    <button className="h-9 w-9 text-slate-300 hover:text-red-500 flex items-center justify-center transition-colors"><Trash2 className="w-4.5 h-4.5" /></button>
@@ -629,7 +663,42 @@ export default function InternalOccasionsManagement() {
                   <div className="space-y-1.5"><Label className="text-[10px] uppercase font-bold text-slate-500">End Date</Label><Input type="date" value={editOccasion.endDate} onChange={e => setEditOccasion({...editOccasion, endDate: e.target.value})} className="h-11 rounded-xl" /></div>
                 </div>
 
-                <div className="space-y-1.5"><Label className="text-[10px] uppercase font-bold text-slate-500">Greeting Narrative</Label><Textarea value={editOccasion.message} onChange={e => setEditOccasion({...editOccasion, message: e.target.value})} className="rounded-xl min-h-[100px]" /></div>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between mb-1">
+                    <Label className="text-[10px] uppercase font-bold text-slate-500">Greeting Narrative</Label>
+                    <div className="flex bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg border">
+                      <button 
+                        type="button"
+                        onClick={() => setEditNarrativeLang('en')}
+                        className={cn(
+                          "px-4 py-1 rounded-md text-[9px] font-black uppercase transition-all",
+                          editNarrativeLang === 'en' ? "bg-white dark:bg-slate-700 text-primary shadow-sm" : "text-slate-400 hover:text-slate-600"
+                        )}
+                      >EN</button>
+                      <button 
+                        type="button"
+                        onClick={() => setEditNarrativeLang('bn')}
+                        className={cn(
+                          "px-4 py-1 rounded-md text-[9px] font-black uppercase transition-all",
+                          editNarrativeLang === 'bn' ? "bg-white dark:bg-slate-700 text-primary shadow-sm" : "text-slate-400 hover:text-slate-600"
+                        )}
+                      >BN</button>
+                    </div>
+                  </div>
+                  {editNarrativeLang === 'en' ? (
+                    <Textarea 
+                      value={editOccasion.message} 
+                      onChange={e => setEditOccasion({...editOccasion, message: e.target.value})} 
+                      className="rounded-xl min-h-[120px] animate-in fade-in duration-300" 
+                    />
+                  ) : (
+                    <Textarea 
+                      value={editOccasion.messageBn || ''} 
+                      onChange={e => setEditOccasion({...editOccasion, messageBn: e.target.value})} 
+                      className="rounded-xl min-h-[120px] font-medium animate-in fade-in duration-300" 
+                    />
+                  )}
+                </div>
                 
                 <div className="flex items-center justify-between p-5 bg-emerald-50/50 dark:bg-emerald-950/20 rounded-2xl border border-emerald-100 dark:border-emerald-900">
                   <Label className="font-bold text-primary dark:text-emerald-400">Active Broadcast Status</Label>
@@ -646,5 +715,13 @@ export default function InternalOccasionsManagement() {
 
       <Footer />
     </main>
+  );
+}
+
+function ScrollArea({ className, children }: { className?: string, children: React.ReactNode }) {
+  return (
+    <div className={cn("overflow-y-auto custom-scrollbar", className)}>
+      {children}
+    </div>
   );
 }
