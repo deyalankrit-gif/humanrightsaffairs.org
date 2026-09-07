@@ -195,7 +195,7 @@ export default function InternalDonorsManagement() {
   ]
 
   return (
-    <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
+    <main className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-20">
       <header className="pt-16 pb-8 bg-slate-900 text-white border-b-8 border-accent/20 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-1/3 h-full bg-accent/5 -skew-x-12"></div>
         <div className="container mx-auto px-4 relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
@@ -332,13 +332,13 @@ export default function InternalDonorsManagement() {
                                           const portrait = typeof m === 'string' ? null : m.imageId;
                                           
                                           return (
-                                            <div key={i} className="flex items-center gap-3 p-2 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
-                                              <div className="w-8 h-8 rounded-lg overflow-hidden bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shrink-0 relative">
+                                            <div key={i} className="flex items-center gap-4 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800">
+                                              <div className="w-12 h-12 rounded-xl overflow-hidden bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 shrink-0 relative">
                                                 {portrait ? (
                                                   <Image src={portrait} alt={name} fill className="object-cover" />
-                                                ) : <User className="w-4 h-4 m-2 text-slate-300" />}
+                                                ) : <User className="w-6 h-6 m-3 text-slate-300" />}
                                               </div>
-                                              <span className="text-[10px] font-bold text-primary dark:text-slate-200 truncate">{name}</span>
+                                              <span className="text-xs font-bold text-primary dark:text-slate-200 truncate">{name}</span>
                                             </div>
                                           );
                                         })}

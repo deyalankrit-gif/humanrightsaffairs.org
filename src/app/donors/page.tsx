@@ -120,20 +120,20 @@ export default function DonorsPage() {
                             const imageId = typeof member === 'string' ? null : member.imageId;
                             
                             return (
-                              <li key={i} className="flex items-center gap-4 group/item">
-                                <div className="relative w-10 h-10 rounded-xl overflow-hidden bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-800 shrink-0 shadow-sm group-hover/item:scale-110 transition-transform">
+                              <li key={i} className="flex items-center gap-5 group/item">
+                                <div className="relative w-14 h-14 rounded-2xl overflow-hidden bg-slate-50 dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-800 shrink-0 shadow-md group-hover/item:scale-110 transition-transform">
                                    {imageId ? (
                                      <Image src={imageId} alt={name} fill className="object-cover" />
                                    ) : (
                                      <div className="w-full h-full flex items-center justify-center text-slate-300">
-                                       <User className="w-5 h-5" />
+                                       <User className="w-7 h-7" />
                                      </div>
                                    )}
                                 </div>
                                 <div className="flex-1 min-w-0">
                                    <div className="flex items-center gap-2">
-                                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-                                      <span className="text-sm font-bold text-primary dark:text-slate-200 truncate leading-tight">
+                                      <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                                      <span className="text-base font-bold text-primary dark:text-slate-200 truncate leading-tight">
                                         {name}
                                       </span>
                                    </div>
