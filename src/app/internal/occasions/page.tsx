@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useEffect, useState, useMemo } from 'react';
@@ -56,12 +57,12 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
-import { format, addDays, startOfDay, isWithinInterval, endOfDay } from 'date-fns';
+import { format, addDays, startOfDay, isWithinInterval, endOfDay, isToday } from 'date-fns';
 import { BUILT_IN_HOLIDAYS, BUILT_IN_OBSERVANCES } from '@/lib/activity-hub-data';
 
 /**
  * Internal Occasions Governance: Real-time management terminal.
- * Updated: Integrated Autonomous Discovery Protocol with expanded Indian Multi-Faith Calendar.
+ * Updated: Sequential conflict resolution logic for autonomous discovery mode.
  */
 export default function InternalOccasionsManagement() {
   const { user, loading: authLoading } = useUser();
@@ -107,32 +108,35 @@ export default function InternalOccasionsManagement() {
 
   const nextSpecialDay = useMemo(() => {
     const allDays = [
-      ...BUILT_IN_HOLIDAYS.map(h => ({ ...h, isHoliday: true })),
-      ...BUILT_IN_OBSERVANCES.map(o => ({ ...o, isHoliday: false }))
-    ];
+      ...BUILT_IN_HOLIDAYS.map(h => ({ ...h, isHoliday: true, date: startOfDay(new Date(new Date().getFullYear(), h.month - 1, h.day)) })),
+      ...BUILT_IN_OBSERVANCES.map(o => ({ ...o, isHoliday: false, date: startOfDay(new Date(new Date().getFullYear(), o.month - 1, o.day)) }))
+    ].sort((a, b) => a.date.getTime() - b.date.getTime());
     
     const now = startOfDay(new Date());
-    const currentYear = now.getFullYear();
 
-    // Map all days to current year and find ones where window (start-3 to end+1) includes today
-    // OR find the very next chronological event.
-    
-    const upcoming = allDays.map(d => {
-      const eventDate = startOfDay(new Date(currentYear, d.month - 1, d.day));
-      return { ...d, eventDate };
-    }).sort((a, b) => a.eventDate.getTime() - b.eventDate.getTime());
+    // 1. CHECK FOR TODAY
+    const todayMatch = allDays.find(d => d.date.getTime() === now.getTime());
+    if (todayMatch) return { ...todayMatch, currentStatus: 'Today' };
 
-    // 1. Check if any is currently active in the window
-    const active = upcoming.find(d => {
-      const windowStart = addDays(d.eventDate, -3);
-      const windowEnd = endOfDay(addDays(d.eventDate, 1));
-      return isWithinInterval(now, { start: windowStart, end: windowEnd });
+    // 2. CHECK FOR YESTERDAY
+    const yesterday = addDays(now, -1);
+    const yesterdayMatch = allDays.find(d => d.date.getTime() === yesterday.getTime());
+    if (yesterdayMatch) return { ...yesterdayMatch, currentStatus: 'Recent (T+1)' };
+
+    // 3. CHECK FOR UPCOMING
+    const upcomingMatch = allDays.find(d => {
+      if (d.date <= now) return false;
+      if (d.date > addDays(now, 3)) return false;
+      
+      const dayBefore = addDays(d.date, -1);
+      const isConsecutive = allDays.some(prev => prev.date.getTime() === dayBefore.getTime());
+      return !isConsecutive; // Only trigger early if not consecutive
     });
 
-    if (active) return { ...active, isActiveInWindow: true };
+    if (upcomingMatch) return { ...upcomingMatch, currentStatus: 'Upcoming (T-3)' };
 
-    // 2. Find next one after today
-    return upcoming.find(d => d.eventDate >= now) || upcoming[0];
+    // Fallback: Next chronological event
+    return allDays.find(d => d.date > now) || allDays[0];
   }, []);
 
   const handleToggleProtocol = async (val: boolean) => {
@@ -146,7 +150,7 @@ export default function InternalOccasionsManagement() {
       }, { merge: true });
       toast({ 
         title: val ? "Autonomous Mode Active" : "Manual Curation Mode Active",
-        description: val ? "System will automatically identify and broadcast multi-faith festivals and national days." : "Homepage greetings will be governed strictly by manual registry."
+        description: val ? "Lead-time lead suppression enabled for consecutive events." : "Govenance returned to manual registry."
       });
     } catch (e) {
       toast({ variant: "destructive", title: "Protocol Sync Failed" });
@@ -159,7 +163,7 @@ export default function InternalOccasionsManagement() {
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 204800) {
-        toast({ variant: "destructive", title: "Asset Size Alert", description: "Institutional banners must be under 200KB for optimized storage." });
+        toast({ variant: "destructive", title: "Asset Size Alert", description: "Institutional banners must be under 200KB." });
         return;
       }
       const reader = new FileReader();
@@ -181,7 +185,7 @@ export default function InternalOccasionsManagement() {
     setIsActionLoading(true);
     addDoc(collection(db, 'occasions'), { ...newOccasion, createdAt: serverTimestamp() })
       .then(() => {
-        toast({ title: "Greeting Published", description: "Real-time sync established with public home page." });
+        toast({ title: "Greeting Published" });
         setIsAddDialogOpen(false);
         setNewOccasion({ title: '', message: '', imageUrl: '', startDate: format(new Date(), 'yyyy-MM-dd'), endDate: format(new Date(), 'yyyy-MM-dd'), isActive: true, priority: 1 });
       })
@@ -194,7 +198,7 @@ export default function InternalOccasionsManagement() {
     const { id, ...data } = editOccasion;
     updateDoc(doc(db, 'occasions', id), data)
       .then(() => {
-        toast({ title: "Registry Updated", description: "Changes reflected instantly on public portal." });
+        toast({ title: "Registry Updated" });
         setIsEditDialogOpen(false);
         setEditOccasion(null);
       })
@@ -233,7 +237,7 @@ export default function InternalOccasionsManagement() {
           <div className="flex gap-3">
              <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button className="bg-accent text-primary font-bold rounded-xl h-11 px-8 flex gap-2 shadow-2xl shadow-accent/20 hover:bg-secondary hover:text-white transition-all transform hover:scale-105 active:scale-95">
+                  <Button className="bg-accent text-primary font-bold rounded-xl h-11 px-8 flex gap-2 shadow-2xl shadow-accent/20 mx-auto transform hover:scale-105 active:scale-95">
                     <Plus className="w-4 h-4" /> New Occasion Greeting
                   </Button>
                 </DialogTrigger>
@@ -318,7 +322,7 @@ export default function InternalOccasionsManagement() {
                           </div>
                           <div>
                              <h4 className="font-bold text-primary dark:text-white uppercase tracking-tight">Autonomous Discovery Mode</h4>
-                             <p className="text-[10px] font-bold text-slate-400 uppercase">Auto-trigger: 3 Days Before to 1 Day After</p>
+                             <p className="text-[10px] font-bold text-slate-400 uppercase">Lead-time suppression for consecutive events.</p>
                           </div>
                        </div>
                        <Switch 
@@ -334,14 +338,14 @@ export default function InternalOccasionsManagement() {
                          <div className="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center text-indigo-600 shrink-0"><Clock className="w-4 h-4" /></div>
                          <div className="space-y-1">
                             <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest leading-none">
-                              {nextSpecialDay?.isActiveInWindow ? "Current Special Occasion" : "Next Identified Special Day"}
+                              Broadcast Identity: {nextSpecialDay?.currentStatus || 'Next Event'}
                             </p>
                             <div className="font-bold text-slate-700 dark:text-slate-300 flex items-center gap-2">
                                {nextSpecialDay.title} 
                                <Badge className="bg-primary text-white text-[8px]">{nextSpecialDay.category}</Badge>
                             </div>
                             <p className="text-[8px] font-bold text-slate-400 uppercase italic">
-                               Window: {format(addDays(nextSpecialDay.eventDate, -3), 'MMM dd')} — {format(addDays(nextSpecialDay.eventDate, 1), 'MMM dd')}
+                               Target Date: {format(nextSpecialDay.date, 'PPPP')}
                             </p>
                          </div>
                       </div>
@@ -356,7 +360,7 @@ export default function InternalOccasionsManagement() {
                <History className="w-5 h-5 text-accent" />
                <h2 className="text-xl font-headline font-bold text-primary dark:text-white">Manual Broadcast Registry</h2>
             </div>
-            <div className="relative w-full max-w-md">
+            <div className="relative w-full max-sm:max-w-full max-w-md">
                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                <Input placeholder="Search active greetings..." className="pl-9 h-11 rounded-xl border-slate-200 text-sm shadow-inner" value={search} onChange={e => setSearch(e.target.value)} />
             </div>
