@@ -74,6 +74,11 @@ import { BUILT_IN_HOLIDAYS, BUILT_IN_OBSERVANCES } from '@/lib/activity-hub-data
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 
+/**
+ * Occasions Governance Terminal: Real-time mission control for institutional greetings.
+ * Features: Autonomous Discovery (2026 Cycle), Manual Registry, and Bilingual Narrative Support.
+ * Mutually Exclusive: Enabling Auto-Mode atomically suspends all manual broadcasts.
+ */
 export default function InternalOccasionsManagement() {
   const { user, loading: authLoading } = useUser();
   const router = useRouter();
@@ -137,6 +142,9 @@ export default function InternalOccasionsManagement() {
     return upcomingMatch;
   }, [allSpecialDays]);
 
+  /**
+   * MUTUAL EXCLUSIVITY: Enabling Auto-Mode disables all active manual broadcasts.
+   */
   const handleToggleProtocol = async (val: boolean) => {
     if (!protocolRef || !db) return;
     setIsActionLoading(true);
@@ -149,6 +157,7 @@ export default function InternalOccasionsManagement() {
         updatedBy: user?.email
       }, { merge: true });
 
+      // If switching to AUTO, suspend all active MANUAL greetings
       if (val) {
         const activeManualsSnap = await getDocs(query(collection(db, 'occasions'), where('isActive', '==', true)));
         activeManualsSnap.docs.forEach(d => {
@@ -193,6 +202,7 @@ export default function InternalOccasionsManagement() {
     }
     setIsActionLoading(true);
 
+    // If adding an active manual, turn off Auto-Mode
     const isAutoMode = protocol?.mode === 'auto';
     if (newOccasion.isActive && isAutoMode) {
       await handleToggleProtocol(false);
@@ -211,6 +221,7 @@ export default function InternalOccasionsManagement() {
     if (!db || !editOccasion) return;
     setIsActionLoading(true);
 
+    // If updating to active manual, turn off Auto-Mode
     const isAutoMode = protocol?.mode === 'auto';
     if (editOccasion.isActive && isAutoMode) {
       await handleToggleProtocol(false);
@@ -230,6 +241,7 @@ export default function InternalOccasionsManagement() {
     if (!db) return;
     setIsActionLoading(true);
 
+    // If activating a manual, turn off Auto-Mode
     const isAutoMode = protocol?.mode === 'auto';
     if (val && isAutoMode) {
       await handleToggleProtocol(false);
@@ -281,7 +293,7 @@ export default function InternalOccasionsManagement() {
           <div className="flex gap-3">
              <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button className="bg-accent text-primary hover:bg-secondary hover:text-white font-bold rounded-xl h-11 px-8 flex gap-2 shadow-2xl shadow-accent/20 mx-auto transform hover:scale-105 active:scale-95 transition-all">
+                  <Button className="bg-accent text-primary-foreground hover:bg-secondary hover:text-white font-bold rounded-xl h-11 px-8 flex gap-2 shadow-2xl shadow-accent/20 mx-auto transform hover:scale-105 active:scale-95 transition-all border-none">
                     <Plus className="w-4 h-4" /> New Occasion Greeting
                   </Button>
                 </DialogTrigger>
@@ -315,9 +327,9 @@ export default function InternalOccasionsManagement() {
                           </div>
                        </div>
                        {addTitleLang === 'en' ? (
-                         <Input placeholder="e.g. Happy Independence Day 2026" value={newOccasion.title} onChange={e => setNewOccasion({...newOccasion, title: e.target.value})} className="h-11 rounded-xl font-bold animate-in fade-in duration-300" />
+                         <Input placeholder="e.g. Happy Independence Day 2026" value={newOccasion.title} onChange={e => setNewOccasion({...newOccasion, title: e.target.value})} className="h-12 rounded-xl font-bold animate-in fade-in duration-300" />
                        ) : (
-                         <Input placeholder="উদা: শুভ স্বাধীনতা দিবস ২০২৬" value={newOccasion.titleBn} onChange={e => setNewOccasion({...newOccasion, titleBn: e.target.value})} className="h-11 rounded-xl font-bold animate-in fade-in duration-300" />
+                         <Input placeholder="উদা: শুভ স্বাধীনতা দিবস ২০২৬" value={newOccasion.titleBn} onChange={e => setNewOccasion({...newOccasion, titleBn: e.target.value})} className="h-12 rounded-xl font-medium leading-relaxed animate-in fade-in duration-300" />
                        )}
                     </div>
 
@@ -341,9 +353,9 @@ export default function InternalOccasionsManagement() {
                         </div>
                       </div>
                       {addMsgLang === 'en' ? (
-                        <Textarea placeholder="Wishing every citizen a prosperous year ahead..." value={newOccasion.message} onChange={e => setNewOccasion({...newOccasion, message: e.target.value})} className="rounded-xl min-h-[100px] animate-in fade-in duration-300" />
+                        <Textarea placeholder="Wishing every citizen a prosperous year ahead..." value={newOccasion.message} onChange={e => setNewOccasion({...newOccasion, message: e.target.value})} className="rounded-xl min-h-[120px] animate-in fade-in duration-300" />
                       ) : (
-                        <Textarea placeholder="সকল নাগরিকের উজ্জ্বল ভবিষ্যৎ কামনা করছি..." value={newOccasion.messageBn} onChange={e => setNewOccasion({...newOccasion, messageBn: e.target.value})} className="rounded-xl min-h-[100px] font-medium animate-in fade-in duration-300" />
+                        <Textarea placeholder="সকল নাগরিকের উজ্জ্বল ভবিষ্যৎ কামনা করছি..." value={newOccasion.messageBn} onChange={e => setNewOccasion({...newOccasion, messageBn: e.target.value})} className="rounded-xl min-h-[120px] font-medium leading-relaxed animate-in fade-in duration-300" />
                       )}
                     </div>
 
@@ -371,6 +383,7 @@ export default function InternalOccasionsManagement() {
         <div className="grid lg:grid-cols-12 gap-8 items-start">
            
            <div className="lg:col-span-8 space-y-8">
+              {/* Master Control: Protocol Switcher */}
               <Card className="rounded-[2.5rem] border-none shadow-xl bg-white dark:bg-slate-900 overflow-hidden">
                 <div className="flex flex-col md:flex-row">
                     <div className="md:w-1/3 bg-slate-900 p-8 text-white relative flex flex-col justify-center border-b md:border-b-0 md:border-r border-white/10">
@@ -598,9 +611,9 @@ export default function InternalOccasionsManagement() {
                       </div>
                    </div>
                    {editTitleLang === 'en' ? (
-                     <Input value={editOccasion.title} onChange={e => setEditOccasion({...editOccasion, title: e.target.value})} className="h-11 rounded-xl bg-slate-50 border-none shadow-inner font-bold animate-in fade-in duration-300" />
+                     <Input value={editOccasion.title} onChange={e => setEditOccasion({...editOccasion, title: e.target.value})} className="h-12 rounded-xl bg-slate-50 border-none shadow-inner font-bold animate-in fade-in duration-300" />
                    ) : (
-                     <Input value={editOccasion.titleBn || ''} onChange={e => setEditOccasion({...editOccasion, titleBn: e.target.value})} className="h-11 rounded-xl bg-slate-50 border-none shadow-inner font-bold animate-in fade-in duration-300" />
+                     <Input value={editOccasion.titleBn || ''} onChange={e => setEditOccasion({...editOccasion, titleBn: e.target.value})} className="h-12 rounded-xl bg-slate-50 border-none shadow-inner font-medium leading-relaxed animate-in fade-in duration-300" />
                    )}
                 </div>
 
@@ -620,7 +633,7 @@ export default function InternalOccasionsManagement() {
                   {editMsgLang === 'en' ? (
                     <Textarea value={editOccasion.message} onChange={e => setEditOccasion({...editOccasion, message: e.target.value})} className="rounded-xl min-h-[120px] animate-in fade-in duration-300" />
                   ) : (
-                    <Textarea value={editOccasion.messageBn || ''} onChange={e => setEditOccasion({...editOccasion, messageBn: e.target.value})} className="rounded-xl min-h-[120px] font-medium animate-in fade-in duration-300" />
+                    <Textarea value={editOccasion.messageBn || ''} onChange={e => setEditOccasion({...editOccasion, messageBn: e.target.value})} className="rounded-xl min-h-[120px] font-medium leading-relaxed animate-in fade-in duration-300" />
                   )}
                 </div>
                 

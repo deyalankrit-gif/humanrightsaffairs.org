@@ -226,7 +226,7 @@ export function OccasionBanner() {
                   isDefault ? "bg-[#FF00FF]" : "bg-[#CFFF04]"
                 )}></div>
                 <span className={cn(
-                  "text-[9px] md:text-[13px] font-black uppercase tracking-[0.25em] truncate",
+                  "text-[9px] md:text-[13px] font-black uppercase tracking-[0.25em] truncate leading-relaxed",
                   isDefault ? "text-[#FF00FF]" : "text-[#CFFF04]"
                 )}>
                   {displayTitle}
