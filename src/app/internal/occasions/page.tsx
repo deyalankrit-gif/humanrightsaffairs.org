@@ -53,16 +53,16 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
+} from "@/components/ui/alert-dialog";
 import { useToast } from '@/hooks/use-toast';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
-import { format, addDays, startOfDay } from 'date-fns';
+import { format, addDays, startOfDay, isWithinInterval, endOfDay } from 'date-fns';
 import { BUILT_IN_HOLIDAYS, BUILT_IN_OBSERVANCES } from '@/lib/activity-hub-data';
 
 /**
  * Internal Occasions Governance: Real-time management terminal.
- * Updated: Integrated Autonomous Discovery Protocol for automatic special day greetings.
+ * Updated: Integrated Autonomous Discovery Protocol with expanded Indian Multi-Faith Calendar.
  */
 export default function InternalOccasionsManagement() {
   const { user, loading: authLoading } = useUser();
@@ -112,21 +112,28 @@ export default function InternalOccasionsManagement() {
       ...BUILT_IN_OBSERVANCES.map(o => ({ ...o, isHoliday: false }))
     ];
     
-    const now = new Date();
-    const currentMonth = now.getMonth() + 1;
-    const currentDay = now.getDate();
+    const now = startOfDay(new Date());
+    const currentYear = now.getFullYear();
 
-    // Find days remaining in this year
-    let coming = allDays.filter(d => 
-      d.month > currentMonth || (d.month === currentMonth && d.day >= currentDay)
-    ).sort((a, b) => a.month !== b.month ? a.month - b.month : a.day - b.day);
+    // Map all days to current year and find ones where window (start-3 to end+1) includes today
+    // OR find the very next chronological event.
+    
+    const upcoming = allDays.map(d => {
+      const eventDate = startOfDay(new Date(currentYear, d.month - 1, d.day));
+      return { ...d, eventDate };
+    }).sort((a, b) => a.eventDate.getTime() - b.eventDate.getTime());
 
-    // If none, pick first from next year
-    if (coming.length === 0) {
-      coming = allDays.sort((a, b) => a.month !== b.month ? a.month - b.month : a.day - b.day);
-    }
+    // 1. Check if any is currently active in the window
+    const active = upcoming.find(d => {
+      const windowStart = addDays(d.eventDate, -3);
+      const windowEnd = endOfDay(addDays(d.eventDate, 1));
+      return isWithinInterval(now, { start: windowStart, end: windowEnd });
+    });
 
-    return coming[0];
+    if (active) return { ...active, isActiveInWindow: true };
+
+    // 2. Find next one after today
+    return upcoming.find(d => d.eventDate >= now) || upcoming[0];
   }, []);
 
   const handleToggleProtocol = async (val: boolean) => {
@@ -140,7 +147,7 @@ export default function InternalOccasionsManagement() {
       }, { merge: true });
       toast({ 
         title: val ? "Autonomous Mode Active" : "Manual Curation Mode Active",
-        description: val ? "System will automatically identify and broadcast upcoming special days." : "Homepage greetings will be governed strictly by manual registry."
+        description: val ? "System will automatically identify and broadcast multi-faith festivals and national days." : "Homepage greetings will be governed strictly by manual registry."
       });
     } catch (e) {
       toast({ variant: "destructive", title: "Protocol Sync Failed" });
@@ -221,7 +228,7 @@ export default function InternalOccasionsManagement() {
               <Wifi className="w-2.5 h-2.5 animate-pulse" /> Live Broadcast Control
             </div>
             <h1 className="text-3xl md:text-4xl font-headline font-bold">Institutional <span className="text-accent italic">Occasions</span></h1>
-            <p className="text-slate-400 text-[11px] uppercase font-black">Central Greetings & Festival Registry</p>
+            <p className="text-slate-400 text-[11px] uppercase font-black">Central Greetings & Indian Multi-Faith Calendar</p>
           </div>
           
           <div className="flex gap-3">
@@ -298,7 +305,7 @@ export default function InternalOccasionsManagement() {
                  <div className="absolute top-0 right-0 w-24 h-24 bg-accent/10 rounded-full -mr-12 -mt-12 blur-2xl"></div>
                  <Badge className="bg-accent text-primary font-black uppercase text-[8px] mb-4 tracking-widest w-fit">Registry Node</Badge>
                  <h3 className="text-2xl font-headline font-bold">Governance <span className="text-accent italic">Protocol</span></h3>
-                 <p className="text-slate-400 text-xs mt-2 leading-relaxed">Toggle between manual curator control and autonomous discovery systems.</p>
+                 <p className="text-slate-400 text-xs mt-2 leading-relaxed">Toggle between manual curator control and autonomous multi-faith discovery.</p>
               </div>
               <div className="flex-1 p-10 flex flex-col md:flex-row items-center justify-between gap-8">
                  <div className="space-y-6 flex-1">
@@ -312,7 +319,7 @@ export default function InternalOccasionsManagement() {
                           </div>
                           <div>
                              <h4 className="font-bold text-primary dark:text-white uppercase tracking-tight">Autonomous Discovery Mode</h4>
-                             <p className="text-[10px] font-bold text-slate-400 uppercase">System auto-broadcasts based on regional calendar</p>
+                             <p className="text-[10px] font-bold text-slate-400 uppercase">Auto-trigger: 3 Days Before to 1 Day After</p>
                           </div>
                        </div>
                        <Switch 
@@ -327,11 +334,16 @@ export default function InternalOccasionsManagement() {
                       <div className="flex items-start gap-4 p-5 bg-indigo-50/50 dark:bg-indigo-950/20 rounded-2xl border border-indigo-100 dark:border-indigo-900 animate-in slide-in-from-left-4 duration-700">
                          <div className="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center text-indigo-600 shrink-0"><Clock className="w-4 h-4" /></div>
                          <div className="space-y-1">
-                            <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest leading-none">Next Scheduled Broadcast</p>
-                            <p className="font-bold text-slate-700 dark:text-slate-300">
-                               {nextSpecialDay.title} ({nextSpecialDay.day}/{nextSpecialDay.month})
+                            <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest leading-none">
+                              {nextSpecialDay?.isActiveInWindow ? "Current Special Occasion" : "Next Identified Special Day"}
                             </p>
-                            <p className="text-[8px] font-bold text-slate-400 uppercase italic">Verification: Protocol matches calendar registry.</p>
+                            <p className="font-bold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                               {nextSpecialDay.title} 
+                               <Badge className="bg-primary text-white text-[8px]">{nextSpecialDay.category}</Badge>
+                            </p>
+                            <p className="text-[8px] font-bold text-slate-400 uppercase italic">
+                               Window: {format(addDays(nextSpecialDay.eventDate, -3), 'MMM dd')} — {format(addDays(nextSpecialDay.eventDate, 1), 'MMM dd')}
+                            </p>
                          </div>
                       </div>
                     )}
@@ -343,7 +355,7 @@ export default function InternalOccasionsManagement() {
         <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-8">
             <div className="flex items-center gap-3">
                <History className="w-5 h-5 text-accent" />
-               <h2 className="text-xl font-headline font-bold text-primary dark:text-white">Broadcast Registry</h2>
+               <h2 className="text-xl font-headline font-bold text-primary dark:text-white">Manual Broadcast Registry</h2>
             </div>
             <div className="relative w-full max-w-md">
                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />

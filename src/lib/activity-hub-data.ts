@@ -1,49 +1,68 @@
 
+/**
+ * Institutional Calendar Registry: Comprehensive Multi-Faith and National Importance Days.
+ * This registry powers the Autonomous Greeting Protocol.
+ */
+
 export const BUILT_IN_HOLIDAYS = [
-  { title: "Republic Day", month: 1, day: 26, type: "National Holiday" },
-  { title: "Independence Day", month: 8, day: 15, type: "National Holiday" },
-  { title: "Gandhi Jayanti", month: 10, day: 2, type: "National Holiday" },
-  { title: "Netaji Subhash Chandra Bose Jayanti", month: 1, day: 23, type: "Important Day" },
-  { title: "Dr. B.R. Ambedkar Jayanti", month: 4, day: 14, type: "Important Day" },
+  // National Importance
+  { title: "Republic Day", month: 1, day: 26, type: "National Holiday", category: "National" },
+  { title: "Independence Day", month: 8, day: 15, type: "National Holiday", category: "National" },
+  { title: "Gandhi Jayanti", month: 10, day: 2, type: "National Holiday", category: "National" },
+  { title: "Netaji Subhash Chandra Bose Jayanti", month: 1, day: 23, type: "Important Day", category: "National" },
+  { title: "Dr. B.R. Ambedkar Jayanti", month: 4, day: 14, type: "Important Day", category: "National" },
+  
+  // Hindu Festivals (Approximate dates for 2025/2026 alignment)
+  { title: "Makar Sankranti", month: 1, day: 14, type: "Religious", category: "Hindu" },
+  { title: "Holi", month: 3, day: 14, type: "Religious", category: "Hindu" },
+  { title: "Ganesh Chaturthi", month: 8, day: 27, type: "Religious", category: "Hindu" },
+  { title: "Durga Puja (Saptami)", month: 9, day: 29, type: "Religious", category: "Hindu" },
+  { title: "Vijayadashami (Dussehra)", month: 10, day: 2, type: "Religious", category: "Hindu" },
+  { title: "Diwali (Kali Puja)", month: 10, day: 20, type: "Religious", category: "Hindu" },
+  { title: "Chhath Puja", month: 10, day: 27, type: "Religious", category: "Hindu" },
+  
+  // Muslim Festivals
+  { title: "Eid-ul-Fitr", month: 3, day: 31, type: "Religious", category: "Muslim" },
+  { title: "Eid-ul-Adha", month: 6, day: 7, type: "Religious", category: "Muslim" },
+  { title: "Muharram", month: 7, day: 6, type: "Religious", category: "Muslim" },
+  { title: "Milad-un-Nabi", month: 9, day: 5, type: "Religious", category: "Muslim" },
+
+  // Christian Festivals
+  { title: "Good Friday", month: 4, day: 18, type: "Religious", category: "Christian" },
+  { title: "Easter Sunday", month: 4, day: 20, type: "Religious", category: "Christian" },
+  { title: "Christmas Day", month: 12, day: 25, type: "Religious", category: "Christian" },
+
+  // Sikh, Buddhist, Jain
+  { title: "Guru Nanak Jayanti", month: 11, day: 5, type: "Religious", category: "Sikh" },
+  { title: "Buddha Purnima", month: 5, day: 12, type: "Religious", category: "Buddhist" },
+  { title: "Mahavir Jayanti", month: 4, day: 10, type: "Religious", category: "Jain" },
 ];
 
 export const BUILT_IN_OBSERVANCES = [
-  { title: "Pravasi Bharatiya Divas", month: 1, day: 9, type: "Important Day" },
-  { title: "National Youth Day", month: 1, day: 12, type: "Important Day" },
-  { title: "National Voters' Day", month: 1, day: 25, type: "Legal" },
-  { title: "World Wetlands Day", month: 2, day: 2, type: "Environment" },
-  { title: "World Cancer Day", month: 2, day: 4, type: "Health" },
-  { title: "International Mother Language Day", month: 2, day: 21, type: "Culture" },
-  { title: "International Women's Day", month: 3, day: 8, type: "Women" },
-  { title: "World Consumer Rights Day", month: 3, day: 15, type: "Legal" },
-  { title: "International Day for Elimination of Racial Discrimination", month: 3, day: 21, type: "Human Rights" },
-  { title: "World Health Day", month: 4, day: 7, type: "Health" },
-  { title: "World Heritage Day", month: 4, day: 18, type: "Culture" },
-  { title: "Earth Day", month: 4, day: 22, type: "Environment" },
-  { title: "Panchayati Raj Day", month: 4, day: 24, type: "Democracy" },
-  { title: "World Press Freedom Day", month: 5, day: 3, type: "Democracy" },
-  { title: "Red Cross Day", month: 5, day: 8, type: "Relief" },
-  { title: "Anti-Terrorism Day", month: 5, day: 21, type: "Legal" },
-  { title: "World Environment Day", month: 6, day: 5, type: "Environment" },
-  { title: "International Day Against Drug Abuse", month: 6, day: 26, type: "Legal" },
-  { title: "World Population Day", month: 7, day: 11, type: "Social Justice" },
-  { title: "Nelson Mandela International Day", month: 7, day: 18, type: "Human Rights" },
-  { title: "World Humanitarian Day", month: 8, day: 19, type: "Relief" },
-  { title: "Teachers' Day", month: 9, day: 5, type: "Education" },
-  { title: "International Literacy Day", month: 9, day: 8, type: "Education" },
-  { title: "International Day of Democracy", month: 9, day: 15, type: "Democracy" },
-  { title: "International Day of Peace", month: 9, day: 21, type: "Human Rights" },
-  { title: "International Day of Non-Violence", month: 10, day: 2, type: "Human Rights" },
-  { title: "World Mental Health Day", month: 10, day: 10, type: "Health" },
-  { title: "International Day of the Girl Child", month: 10, day: 11, type: "Women" },
-  { title: "National Legal Services Day", month: 11, day: 9, type: "Legal" },
-  { title: "National Education Day", month: 11, day: 11, type: "Education" },
-  { title: "Children's Day", month: 11, day: 14, type: "Child Welfare" },
-  { title: "Constitution Day (Law Day)", month: 11, day: 26, type: "Legal" },
-  { title: "World AIDS Day", month: 12, day: 1, type: "Health" },
-  { title: "International Day of Persons with Disabilities", month: 12, day: 3, type: "Social Justice" },
-  { title: "International Anti-Corruption Day", month: 12, day: 9, type: "Legal" },
-  { title: "Human Rights Day", month: 12, day: 10, type: "Human Rights" },
-  { title: "National Mathematics Day", month: 12, day: 22, type: "Education" },
-  { title: "National Consumer Day", month: 12, day: 24, type: "Legal" },
+  // International & National Observances
+  { title: "Pravasi Bharatiya Divas", month: 1, day: 9, type: "Observance", category: "International" },
+  { title: "National Youth Day", month: 1, day: 12, type: "Observance", category: "National" },
+  { title: "National Voters' Day", month: 1, day: 25, type: "Legal", category: "National" },
+  { title: "World Wetlands Day", month: 2, day: 2, type: "Environment", category: "International" },
+  { title: "World Cancer Day", month: 2, day: 4, type: "Health", category: "International" },
+  { title: "International Mother Language Day", month: 2, day: 21, type: "Culture", category: "International" },
+  { title: "International Women's Day", month: 3, day: 8, type: "Women", category: "International" },
+  { title: "World Consumer Rights Day", month: 3, day: 15, type: "Legal", category: "International" },
+  { title: "World Health Day", month: 4, day: 7, type: "Health", category: "International" },
+  { title: "World Heritage Day", month: 4, day: 18, type: "Culture", category: "International" },
+  { title: "Earth Day", month: 4, day: 22, type: "Environment", category: "International" },
+  { title: "Panchayati Raj Day", month: 4, day: 24, type: "Democracy", category: "National" },
+  { title: "World Press Freedom Day", month: 5, day: 3, type: "Democracy", category: "International" },
+  { title: "World Environment Day", month: 6, day: 5, type: "Environment", category: "International" },
+  { title: "World Population Day", month: 7, day: 11, type: "Social Justice", category: "International" },
+  { title: "Nelson Mandela Day", month: 7, day: 18, type: "Human Rights", category: "International" },
+  { title: "World Humanitarian Day", month: 8, day: 19, type: "Relief", category: "International" },
+  { title: "Teachers' Day", month: 9, day: 5, type: "Education", category: "National" },
+  { title: "International Day of Peace", month: 9, day: 21, type: "Human Rights", category: "International" },
+  { title: "World Mental Health Day", month: 10, day: 10, type: "Health", category: "International" },
+  { title: "National Education Day", month: 11, day: 11, type: "Education", category: "National" },
+  { title: "Children's Day", month: 11, day: 14, type: "Child Welfare", category: "National" },
+  { title: "Constitution Day", month: 11, day: 26, type: "Legal", category: "National" },
+  { title: "World AIDS Day", month: 12, day: 1, type: "Health", category: "International" },
+  { title: "Human Rights Day", month: 12, day: 10, type: "Human Rights", category: "International" },
 ];
