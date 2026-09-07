@@ -18,7 +18,8 @@ import {
   TrendingUp,
   Globe,
   Sparkles,
-  Loader2
+  Loader2,
+  User
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -113,13 +114,33 @@ export default function DonorsPage() {
                       <p className="text-sm text-slate-500 dark:text-slate-400 italic">"{tier.description}"</p>
                       <div className="space-y-3">
                         <p className="text-[10px] font-black uppercase tracking-widest text-accent">Top Benefactors</p>
-                        <ul className="space-y-3">
-                          {(tier.members || []).map((name: string, i: number) => (
-                            <li key={i} className="flex items-center gap-3 text-sm font-bold text-primary dark:text-slate-200">
-                              <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                              {name}
-                            </li>
-                          ))}
+                        <ul className="space-y-4">
+                          {(tier.members || []).map((member: any, i: number) => {
+                            const name = typeof member === 'string' ? member : member.name;
+                            const imageId = typeof member === 'string' ? null : member.imageId;
+                            
+                            return (
+                              <li key={i} className="flex items-center gap-4 group/item">
+                                <div className="relative w-10 h-10 rounded-xl overflow-hidden bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-800 shrink-0 shadow-sm group-hover/item:scale-110 transition-transform">
+                                   {imageId ? (
+                                     <Image src={imageId} alt={name} fill className="object-cover" />
+                                   ) : (
+                                     <div className="w-full h-full flex items-center justify-center text-slate-300">
+                                       <User className="w-5 h-5" />
+                                     </div>
+                                   )}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                   <div className="flex items-center gap-2">
+                                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                                      <span className="text-sm font-bold text-primary dark:text-slate-200 truncate leading-tight">
+                                        {name}
+                                      </span>
+                                   </div>
+                                </div>
+                              </li>
+                            );
+                          })}
                         </ul>
                       </div>
                     </div>
