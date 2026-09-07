@@ -1,0 +1,88 @@
+{
+  "placeholderImages": [
+    {
+      "id": "chairman-photo",
+      "description": "Central Chairman (INDIA) & Founder - Dhritiman Dey",
+      "imageUrl": "/Dhritiman.jpeg",
+      "imageHint": "dhritiman dey"
+    },
+    {
+      "id": "moumita-photo",
+      "description": "Chairman (West Bengal) & Founder - Moumita Saha",
+      "imageUrl": "/Moumita.jpeg",
+      "imageHint": "moumita saha"
+    },
+    {
+      "id": "id-card-sample",
+      "description": "Sample Member Identity Card for JusticeShield",
+      "imageUrl": "/sample i card.jpeg",
+      "imageHint": "id card"
+    },
+    {
+      "id": "hero-human-rights",
+      "description": "Cinematic black and white image related to human rights",
+      "imageUrl": "/Human R2.jpeg",
+      "imageHint": "human rights"
+    },
+    {
+      "id": "donation-qr",
+      "description": "Official UPI QR Code for Human Rights Affairs Trust",
+      "imageUrl": "/HRAT QR CODE.jpeg",
+      "imageHint": "qr code"
+    },
+    {
+      "id": "niti-logo",
+      "description": "Official Niti Aayog Emblem",
+      "imageUrl": "/niti2.png",
+      "imageHint": "niti aayog"
+    },
+    {
+      "id": "donation-footer-image",
+      "description": "Official Donation call to action image for footer",
+      "imageUrl": "/HRAT%20Donate.jpeg",
+      "imageHint": "donation support"
+    },
+    {
+      "id": "ai-bot-avatar",
+      "description": "AI Advocate Bot Avatar",
+      "imageUrl": "/advocate.jpeg",
+      "imageHint": "advocate avatar"
+    },
+    {
+      "id": "donation-bg-1",
+      "description": "Inspirational portrait for donation section",
+      "imageUrl": "/female.jpeg",
+      "imageHint": "indian female"
+    },
+    {
+      "id": "donation-bg-2",
+      "description": "Portrait of a child for donation section",
+      "imageUrl": "/child.jpeg",
+      "imageHint": "indian child"
+    },
+    {
+      "id": "donor-hero",
+      "description": "A group of people standing together in solidarity",
+      "imageUrl": "https://picsum.photos/seed/donorhero/1200/600",
+      "imageHint": "solidarity community"
+    },
+    {
+      "id": "ganesh-puja",
+      "description": "Lord Ganesha (Ganesh Thakur) idol for Ganesh Puja",
+      "imageUrl": "https://picsum.photos/seed/ganesha/1200/600",
+      "imageHint": "lord ganesha"
+    },
+    {
+      "id": "durga-puja",
+      "description": "Goddess Durga idol for Durga Puja",
+      "imageUrl": "https://picsum.photos/seed/durgapuja/1200/600",
+      "imageHint": "durga idol"
+    },
+    {
+      "id": "kali-puja",
+      "description": "Goddess Kali for Kali Puja",
+      "imageUrl": "https://picsum.photos/seed/kalipuja/1200/600",
+      "imageHint": "kali puja"
+    }
+  ]
+}
