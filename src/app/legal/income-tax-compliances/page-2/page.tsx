@@ -135,22 +135,33 @@ export default function IncomeTaxCompliancesPage2() {
              </div>
 
              {/* Pagination Navigation */}
-             <div className="grid grid-cols-2 gap-4 pt-12 border-t border-slate-100 dark:border-slate-800 print:hidden">
-                <Link href="/legal/income-tax-compliances/page-1">
-                   <Button variant="outline" className="w-full h-20 rounded-2xl flex flex-col items-start gap-1 p-6 hover:border-accent group transition-all text-left">
-                     <span className="text-[10px] font-black uppercase text-slate-400 flex items-center gap-1 group-hover:-translate-x-1 transition-transform">
-                       <ChevronLeft className="w-3 h-3" /> Previous Section
-                     </span>
-                     <span className="text-sm font-bold text-primary dark:text-white truncate">General Rules & Basics</span>
-                   </Button>
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-12 border-t border-slate-100 dark:border-slate-800 print:hidden">
+                <Link href="/legal/income-tax-compliances/page-1" className="group">
+                   <div className="flex items-center gap-4 bg-gradient-to-l from-slate-700 to-indigo-800 p-1 rounded-2xl shadow-xl hover:shadow-indigo-500/20 transition-all hover:scale-105 active:scale-95 h-full">
+                      <div className="pl-6">
+                         <ChevronLeft className="w-6 h-6 text-white group-hover:-translate-x-1 transition-transform" />
+                      </div>
+                      <div className="bg-white/10 backdrop-blur-md px-6 py-4 rounded-xl flex flex-col items-start flex-1 min-w-0">
+                         <span className="text-[10px] font-black uppercase text-white/60 tracking-widest flex items-center gap-2">
+                           <Badge className="bg-white/20 text-white border-none h-4 px-1.5 text-[8px]">Step 1 of 3</Badge> Previous
+                         </span>
+                         <span className="text-base font-headline font-bold text-white mt-1 truncate w-full text-left">General Rules & Basics</span>
+                      </div>
+                   </div>
                 </Link>
-                <Link href="/legal/income-tax-compliances/page-3">
-                   <Button variant="outline" className="w-full h-20 rounded-2xl flex flex-col items-end gap-1 p-6 hover:border-accent group transition-all text-right">
-                     <span className="text-[10px] font-black uppercase text-slate-400 flex items-center gap-1 group-hover:translate-x-1 transition-transform">
-                       Next Section <ChevronRight className="w-3 h-3" />
-                     </span>
-                     <span className="text-sm font-bold text-primary dark:text-white truncate">Master Audit Checklist</span>
-                   </Button>
+
+                <Link href="/legal/income-tax-compliances/page-3" className="group">
+                   <div className="flex items-center gap-4 bg-gradient-to-r from-emerald-500 to-teal-600 p-1 rounded-2xl shadow-xl hover:shadow-emerald-500/20 transition-all hover:scale-105 active:scale-95 h-full">
+                      <div className="bg-white/10 backdrop-blur-md px-6 py-4 rounded-xl flex flex-col items-end flex-1 min-w-0">
+                         <span className="text-[10px] font-black uppercase text-white/60 tracking-widest flex items-center gap-2">
+                           Next <Badge className="bg-white/20 text-white border-none h-4 px-1.5 text-[8px]">Step 3 of 3</Badge>
+                         </span>
+                         <span className="text-base font-headline font-bold text-white mt-1 truncate w-full text-right">Master Audit Checklist</span>
+                      </div>
+                      <div className="pr-6">
+                         <ChevronRight className="w-6 h-6 text-white group-hover:translate-x-1 transition-transform" />
+                      </div>
+                   </div>
                 </Link>
              </div>
         </div>

@@ -156,19 +156,24 @@ export default function IncomeTaxCompliancesPage3() {
 
              {/* Pagination Navigation */}
              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-12 border-t border-slate-100 dark:border-slate-800 print:hidden">
-                <Link href="/legal/income-tax-compliances/page-2">
-                   <Button variant="outline" className="w-full h-20 rounded-2xl flex flex-col items-start gap-1 p-6 hover:border-accent group transition-all text-left">
-                     <span className="text-[10px] font-black uppercase text-slate-400 flex items-center gap-1 group-hover:-translate-x-1 transition-transform">
-                       <ChevronLeft className="w-3 h-3" /> Previous Section
-                     </span>
-                     <span className="text-sm font-bold text-primary dark:text-white truncate">Yearly Compliance Calendar</span>
-                   </Button>
+                <Link href="/legal/income-tax-compliances/page-2" className="group">
+                   <div className="flex items-center gap-4 bg-gradient-to-l from-slate-700 to-indigo-800 p-1 rounded-2xl shadow-xl hover:shadow-indigo-500/20 transition-all hover:scale-105 active:scale-95">
+                      <div className="pl-6">
+                         <ChevronLeft className="w-6 h-6 text-white group-hover:-translate-x-1 transition-transform" />
+                      </div>
+                      <div className="bg-white/10 backdrop-blur-md px-6 py-4 rounded-xl flex flex-col items-start">
+                         <span className="text-[10px] font-black uppercase text-white/60 tracking-widest flex items-center gap-2">
+                           <Badge className="bg-white/20 text-white border-none h-4 px-1.5 text-[8px]">Step 2 of 3</Badge> Previous Section
+                         </span>
+                         <span className="text-sm font-bold text-primary dark:text-white truncate">Yearly Compliance Calendar</span>
+                      </div>
+                   </div>
                 </Link>
                 <div></div>
              </div>
 
-             <div className="text-center pt-8 border-t border-slate-200 dark:border-slate-800 print:hidden">
-               <Button onClick={handlePrint} className="bg-primary text-white h-14 px-10 rounded-xl font-bold">
+             <div className="text-center pt-16 border-t border-slate-200 dark:border-slate-800 print:hidden">
+               <Button onClick={handlePrint} className="bg-primary text-white h-14 px-10 rounded-xl font-bold shadow-xl shadow-primary/10">
                  <Printer className="w-4 h-4 mr-2" /> Download Full Checklist
                </Button>
              </div>

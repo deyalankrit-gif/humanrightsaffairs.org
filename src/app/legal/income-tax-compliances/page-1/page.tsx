@@ -187,15 +187,19 @@ export default function IncomeTaxCompliancesPage1() {
           </div>
 
           {/* Pagination Navigation */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-12 border-t border-slate-100 dark:border-slate-800 print:hidden">
-             <div></div>
-             <Link href="/legal/income-tax-compliances/page-2">
-                <Button variant="outline" className="w-full h-20 rounded-2xl flex flex-col items-end gap-1 p-6 hover:border-accent group transition-all">
-                  <span className="text-[10px] font-black uppercase text-slate-400 flex items-center gap-1 group-hover:translate-x-1 transition-transform">
-                    Next Section <ChevronRight className="w-3 h-3" />
-                  </span>
-                  <span className="text-sm font-bold text-primary dark:text-white truncate">Yearly Compliance Calendar</span>
-                </Button>
+          <div className="flex justify-end pt-12 border-t border-slate-100 dark:border-slate-800 print:hidden">
+             <Link href="/legal/income-tax-compliances/page-2" className="group">
+                <div className="flex items-center gap-4 bg-gradient-to-r from-emerald-500 to-teal-600 p-1 rounded-2xl shadow-xl hover:shadow-emerald-500/20 transition-all hover:scale-105 active:scale-95">
+                   <div className="bg-white/10 backdrop-blur-md px-6 py-4 rounded-xl flex flex-col items-end">
+                      <span className="text-[10px] font-black uppercase text-white/60 tracking-widest flex items-center gap-2">
+                        Next Section <Badge className="bg-white/20 text-white border-none h-4 px-1.5 text-[8px]">Step 2 of 3</Badge>
+                      </span>
+                      <span className="text-base font-headline font-bold text-white mt-1">Yearly Compliance Calendar</span>
+                   </div>
+                   <div className="pr-6">
+                      <ChevronRight className="w-6 h-6 text-white group-hover:translate-x-1 transition-transform" />
+                   </div>
+                </div>
              </Link>
           </div>
         </div>
