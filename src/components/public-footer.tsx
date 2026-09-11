@@ -46,6 +46,7 @@ import { useToast } from '@/hooks/use-toast';
 /**
  * PublicFooter: Fully Responsive High-Fidelity Design.
  * Features grid stacking, localized hyperlinks, and secure OTP gating.
+ * Updated: Included Termination Order in the secure gate registry.
  */
 export function PublicFooter() {
   const donationFooterImg = PlaceHolderImages.find(img => img.id === 'donation-footer-image');
@@ -96,6 +97,8 @@ export function PublicFooter() {
     setTimeout(() => {
       if (otpValue === DEMO_OTP) {
         setIsOtpOpen(false);
+        // Establish authorization flag for the current session
+        sessionStorage.setItem('hrat_gate_authorized', 'true');
         router.push(targetPath);
       } else {
         toast({ variant: "destructive", title: "Verification Failed" });
@@ -174,7 +177,7 @@ export function PublicFooter() {
               <li className="pt-4"><span className="text-[#CEFF00] font-black text-xs md:text-base uppercase tracking-tighter">Office Use Only</span></li>
               <li><Link href="/investigator/login" className="text-[#4666FF] hover:text-accent font-medium flex items-center gap-2">Investigator Portal <Search className="w-3 h-3" /></Link></li>
               <li><Link href="/legal/official-representation" className="text-[#CEFF00] hover:text-white font-bold flex items-center justify-between w-full group/link"><span>Representation</span><ArrowUpRight className="w-3.5 h-3.5 opacity-40 group-hover/link:opacity-100" /></Link></li>
-              <li><Link href="/legal/termination-order" className="text-[#CEFF00] hover:text-white font-bold flex items-center justify-between w-full group/link"><span>Termination Order</span><ArrowUpRight className="w-3.5 h-3.5 opacity-40 group-hover/link:opacity-100" /></Link></li>
+              <li><button onClick={handleOpenGate('/legal/termination-order')} className="text-[#CEFF00] hover:text-white font-bold flex items-center justify-between w-full text-left group/link"><span>Termination Order 🔒</span><Lock className="w-3 h-3 opacity-40 group-hover/link:opacity-100" /></button></li>
               <li><Link href="/trust-responsibilities" className="text-[#CEFF00] hover:text-white font-medium flex items-center justify-between w-full group/link"><span>Duties</span><ArrowUpRight className="w-3.5 h-3.5 opacity-40 group-hover/link:opacity-100" /></Link></li>
               <li><button onClick={handleOpenGate('/legal/required-documents')} className="text-[#CEFF00] hover:text-white font-medium flex items-center justify-between w-full text-left group/link"><span>Docs Vault</span><Lock className="w-3 h-3 opacity-40 group-hover/link:opacity-100" /></button></li>
               <li><button onClick={handleOpenGate('/legal/income-tax-compliances')} className="text-[#CEFF00] hover:text-white font-bold flex items-center justify-between w-full text-left group/link"><span>Income Tax Compliances</span><Lock className="w-3 h-3 opacity-40 group-hover/link:opacity-100" /></button></li>
@@ -274,4 +277,3 @@ export function PublicFooter() {
     </footer>
   );
 }
-
