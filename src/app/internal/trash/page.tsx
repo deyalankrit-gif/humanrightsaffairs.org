@@ -46,6 +46,7 @@ import { Footer } from '@/components/footer';
 /**
  * INSTITUTIONAL RECYCLE BIN: High-fidelity terminal for data recovery and permanent purging.
  * Enforces 60-day retention policy.
+ * Updated: Included mandatory confirmation for RESTORE workflow.
  */
 export default function RecycleBinPage() {
   const { user, loading: authLoading } = useUser();
@@ -222,13 +223,35 @@ export default function RecycleBinPage() {
                              </div>
 
                              <div className="flex items-center gap-3">
-                                <Button 
-                                  onClick={() => handleRestore(item)}
-                                  disabled={isActionLoading === item.id}
-                                  className="h-11 px-8 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase text-[10px] tracking-widest shadow-xl shadow-emerald-900/20"
-                                >
-                                   {isActionLoading === item.id ? <Loader2 className="animate-spin w-4 h-4" /> : <><RotateCcw className="w-4 h-4 mr-2" /> Restore</>}
-                                </Button>
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <Button 
+                                      className="h-11 px-8 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase text-[10px] tracking-widest shadow-xl shadow-emerald-900/20"
+                                    >
+                                       {isActionLoading === item.id ? <Loader2 className="animate-spin w-4 h-4" /> : <><RotateCcw className="w-4 h-4 mr-2" /> Restore</>}
+                                    </Button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent className="rounded-[2.5rem] border-none shadow-2xl bg-white dark:bg-slate-900">
+                                     <AlertDialogHeader className="items-center text-center">
+                                        <div className="w-16 h-16 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 rounded-2xl flex items-center justify-center mb-4">
+                                           <RotateCcw className="w-10 h-10" />
+                                        </div>
+                                        <AlertDialogTitle className="text-2xl font-headline font-bold">Restore Item?</AlertDialogTitle>
+                                        <AlertDialogDescription className="text-sm font-medium leading-relaxed">
+                                          This item will be removed from Trash and returned to its original registry node. Are you sure you want to proceed?
+                                        </AlertDialogDescription>
+                                     </AlertDialogHeader>
+                                     <AlertDialogFooter className="mt-6 flex gap-3">
+                                        <AlertDialogCancel className="rounded-xl h-11 font-bold flex-1">Cancel</AlertDialogCancel>
+                                        <AlertDialogAction 
+                                          onClick={() => handleRestore(item)} 
+                                          className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl h-11 font-bold flex-1 shadow-lg shadow-emerald-600/20"
+                                        >
+                                          Confirm Restore
+                                        </AlertDialogAction>
+                                     </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
 
                                 <AlertDialog>
                                   <AlertDialogTrigger asChild>
@@ -246,11 +269,11 @@ export default function RecycleBinPage() {
                                           This item will be permanently deleted and cannot be recovered. Are you sure?
                                         </AlertDialogDescription>
                                      </AlertDialogHeader>
-                                     <AlertDialogFooter className="mt-6">
-                                        <AlertDialogCancel className="rounded-xl h-11 font-bold">Abort Process</AlertDialogCancel>
+                                     <AlertDialogFooter className="mt-6 flex gap-3">
+                                        <AlertDialogCancel className="rounded-xl h-11 font-bold flex-1">Abort Process</AlertDialogCancel>
                                         <AlertDialogAction 
                                           onClick={() => handlePermanentDelete(item.id)} 
-                                          className="bg-red-600 hover:bg-red-700 text-white rounded-xl h-11 font-bold shadow-xl shadow-red-900/40"
+                                          className="bg-red-600 hover:bg-red-700 text-white rounded-xl h-11 font-bold flex-1 shadow-xl shadow-red-900/40"
                                         >
                                           Delete Permanently
                                         </AlertDialogAction>
@@ -277,8 +300,4 @@ export default function RecycleBinPage() {
       <Footer />
     </main>
   );
-}
-
-function Circle({ className }: { className?: string }) {
-  return <div className={cn("rounded-full", className)} />
 }
