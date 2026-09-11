@@ -32,6 +32,7 @@ import {
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Noto_Serif_Bengali } from 'next/font/google';
 import { useUser } from '@/firebase';
@@ -108,7 +109,7 @@ export default function TerminationOrderPage() {
           <p>তাঁদের এই দায়িত্ব পালনের জন্য সংগঠনের পক্ষ থেকে কোনো প্রকার বেতন, পারিশ্রমিক, সম্মানী বা ভাতা প্রদান করা হয় না। বরং সংগঠনের বিভিন্ন প্রয়োজন এবং জনকল্যাণমূলক কর্মকাণ্ড পরিচালনার ক্ষেত্রে তাঁরা তাঁদের সামর্থ্য অনুযায়ী স্বেচ্ছায় সংগঠনকে আর্থিক ও অন্যান্য প্রয়োজনীয় সহায়তা প্রদান করে থাকেন।</p>
           <p>Human Rights Affairs Trust মূলত সাধারণ মানুষের শুভানুধ্যায়িতা, সদস্যদের সহযোগিতা এবং স্বেচ্ছাসেবী অবদানের উপর নির্ভর করে পরিচালিত হয় এবং এই সহায়তার মাধ্যমে বিভিন্ন সমাজসেবামূলক, জনকল্যাণমূলক ও মানবিক কর্মকাণ্ড পরিচালনা করে থাকে।</p>
           <p>অতএব, সংগঠনের কোনো পদে অধিষ্ঠিত হওয়া কোনো ব্যক্তির জন্য বেতন, ভাতা, আর্থিক সুবিধা অথবা সংগঠনের সম্পদ বা অর্থের উপর ব্যক্তিগত মালিকানা/অধিকার সৃষ্টি করে না। একইভাবে, কোনো পদে নিয়োগ বা কোনো দায়িত্ব অর্পণ করা মানেই সংশ্লিষ্ট ব্যক্তিকে সংগঠনের উপর স্বাধীন, সীমাহীন বা অবাধ কর্তৃত্ব প্রদান করা নয়।</p>
-          <p>প্রত্যেক Office Bearer, Advisor, Representative and অন্যান্য পদাধিকারীকে সংগঠনের গঠনতন্ত্র, সাংগঠনিক কাঠামো, নির্ধারিত দায়িত্বের সীমা এবং ক্ষমতাপ্রাপ্ত উচ্চতর কর্তৃপক্ষের নির্দেশনা অনুযায়ী কাজ করতে হয়।</p>
+          <p>প্রত্যেক Office Bearer, Advisor, Representative এবং অন্যান্য পদাধিকারীকে সংগঠনের গঠনতন্ত্র, সাংগঠনিক কাঠামো, নির্ধারিত দায়িত্বের সীমা এবং ক্ষমতাপ্রাপ্ত উচ্চতর কর্তৃপক্ষের নির্দেশনা অনুযায়ী কাজ করতে হয়।</p>
         </div>
       )
     },
@@ -159,7 +160,7 @@ export default function TerminationOrderPage() {
       title: "সকল ক্ষমতা ও অনুমোদন প্রত্যাহার",
       content: (
         <div className="space-y-4">
-          <p>Legal Advisor হিসেবে আপনার পদমর্যাদার ভিত্তিতে পূর্বে আপনাকে প্রদান করা হয়ে থাকলে এমন সমস্ত ক্ষমতা, অনুমোদন, authorization, representation rights and অন্যান্য কর্তৃত্ব এই আদেশের মাধ্যমে অবিলম্বে প্রত্যাহার করা হলো।</p>
+          <p>Legal Advisor হিসেবে আপনার পদমর্যাদার ভিত্তিতে পূর্বে আপনাকে প্রদান করা হয়ে থাকলে এমন সমস্ত ক্ষমতা, অনুমোদন, authorization, representation rights এবং অন্যান্য কর্তৃত্ব এই আদেশের মাধ্যমে অবিলম্বে প্রত্যাহার করা হলো।</p>
           <p>অতএব, আপনি আর সংগঠনের পক্ষ থেকে—</p>
           <ul className="list-disc pl-8 space-y-1">
             <li>কোনো যোগাযোগ,</li>
@@ -171,7 +172,8 @@ export default function TerminationOrderPage() {
             <li>কার্যক্রম,</li>
             <li>আইনি বা প্রশাসনিক পদক্ষেপ,</li>
           </ul>
-          <p>গ্রহণ করতে পারবেন না এবং কোনো ব্যক্তি, প্রতিষ্ঠান বা কর্তৃপক্ষের কাছে Human Rights Affairs Trust-এর প্রতিনিধি হিসেবে নিজেকে উপস্থাপন করতে পারবেন না। তবে ভবিষ্যতে যদি ক্ষমতাপ্রাপ্ত কর্তৃপক্ষের পক্ষ থেকে পৃথকভাবে লিখিত অনুমোদন প্রদান করা হয়, সেই অনুমোদনের নির্দিষ্ট সীমার মধ্যে কার্যক্রম পরিচালনা করা যেতে পারে।</p>
+          <p>গ্রহণ করতে পারবেন না এবং কোনো ব্যক্তি, প্রতিষ্ঠান বা কর্তৃপক্ষের কাছে Human Rights Affairs Trust-এর প্রতিনিধি হিসেবে নিজেকে উপস্থাপন করতে পারবেন না।</p>
+          <p>তবে ভবিষ্যতে যদি ক্ষমতাপ্রাপ্ত কর্তৃপক্ষের পক্ষ থেকে পৃথকভাবে লিখিত অনুমোদন প্রদান করা হয়, সেই অনুমোদনের নির্দিষ্ট সীমার মধ্যে কার্যক্রম পরিচালনা করা যেতে পারে।</p>
         </div>
       )
     },
@@ -208,7 +210,8 @@ export default function TerminationOrderPage() {
             <li>Spokesperson,</li>
             <li>Authorized Person</li>
           </ul>
-          <p>অথবা Human Rights Affairs Trust-এর অন্য কোনো অনুমোদিত ব্যক্তি হিসেবে প্রত্যক্ষ বা পরোক্ষভাবে উপস্থাপন করতে পারবেন না। আপনার পক্ষ থেকে এমন কোনো বক্তব্য, পরিচয় বা কার্যক্রম গ্রহণ করা যাবে না যার মাধ্যমে বোঝা যায় যে আপনি এখনও Human Rights Affairs Trust-এর সঙ্গে যুক্ত বা সংগঠনের পক্ষে কোনো ক্ষমতা রাখেন।</p>
+          <p>অথবা Human Rights Affairs Trust-এর অন্য কোনো অনুমোদিত ব্যক্তি হিসেবে প্রত্যক্ষ বা পরোক্ষভাবে উপস্থাপন করতে পারবেন না।</p>
+          <p>আপনার পক্ষ থেকে এমন কোনো বক্তব্য, পরিচয় বা কার্যক্রম গ্রহণ করা যাবে না যার মাধ্যমে বোঝা যায় যে আপনি এখনও Human Rights Affairs Trust-এর সঙ্গে যুক্ত বা সংগঠনের পক্ষে কোনো ক্ষমতা রাখেন।</p>
         </div>
       )
     },
@@ -250,7 +253,8 @@ export default function TerminationOrderPage() {
             <li>application,</li>
             <li>representation</li>
           </ul>
-          <p>Human Rights Affairs Trust-এর কোনো কার্যক্রম, সিদ্ধান্ত, প্রতিশ্রুতি বা প্রতিনিধিত্ব হিসেবে স্বীকৃত বা গ্রহণ করা হবে না। এই ধরনের কোনো অনুমোদনবিহীন কার্যক্রম থেকে উদ্ভূত কোনো দায়, দাবি, ক্ষতি, আর্থিক দায়বদ্ধতা বা অন্যান্য পরিণতির জন্য সংগঠন দায়ী থাকবে না।</p>
+          <p>Human Rights Affairs Trust-এর কোনো কার্যক্রম, সিদ্ধান্ত, প্রতিশ্রুতি বা প্রতিনিধিত্ব হিসেবে স্বীকৃত বা গ্রহণ করা হবে না।</p>
+          <p>এই ধরনের কোনো অনুমোদনবিহীন কার্যক্রম থেকে উদ্ভূত কোনো দায়, দাবি, ক্ষতি, আর্থিক দায়বদ্ধতা বা অন্যান্য পরিণতির জন্য সংগঠন দায়ী থাকবে না।</p>
         </div>
       )
     },
@@ -472,14 +476,14 @@ export default function TerminationOrderPage() {
       {/* Floating Bottom Home Button */}
       <div className="mt-12 max-w-[210mm] mx-auto no-print">
          <Button asChild className="w-full h-16 rounded-[1.5rem] bg-slate-900 text-white hover:bg-slate-800 shadow-2xl font-bold flex gap-3">
-            <Link href="/"><Home className="w-6 h-6" /> Close Archive Session</Link>
+            <Link href="/"><HomeIcon className="w-6 h-6" /> Close Archive Session</Link>
          </Button>
       </div>
     </main>
   );
 }
 
-function Home({ className }: { className?: string }) {
+function HomeIcon({ className }: { className?: string }) {
   return (
     <svg className={className} fill="none" height="24" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
       <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
