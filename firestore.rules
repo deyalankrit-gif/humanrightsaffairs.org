@@ -38,9 +38,20 @@ service cloud.firestore {
       );
     }
 
-    // 2. PUBLIC & SETTINGS (TOP PRIORITY)
-    // These must be at the top to ensure unauthenticated public access.
-    
+    // 2. TRASH & RECOVERY PROTOCOL (60-DAY RETENTION)
+    match /trash/{itemId} {
+      // Deny access if document is older than 60 days (5184000 seconds)
+      function isExpired() {
+        return request.time > resource.data.deletedAt + duration.value(60, 'd');
+      }
+      
+      allow read: if isInternalStaff() && !isExpired();
+      allow create: if isInternalStaff();
+      allow update: if isInternalStaff();
+      allow delete: if isInternalStaff();
+    }
+
+    // 3. PUBLIC & SETTINGS (TOP PRIORITY)
     match /settings/{settingId} {
       allow get, list, read: if true;
       allow write: if isRoot() || (settingId == 'audio_announcement' && hasPermission('occasions'));
@@ -116,7 +127,7 @@ service cloud.firestore {
       allow write: if isRoot();
     }
 
-    // 3. SECURE USER REGISTRY
+    // 4. SECURE USER REGISTRY
     match /users/{userEmail} {
       allow read: if isAuthenticated() && (
         (getAuthEmail() == userEmail.lower()) || isRoot()
@@ -124,7 +135,7 @@ service cloud.firestore {
       allow write: if isRoot();
     }
 
-    // 4. PUBLIC SUBMISSIONS
+    // 5. PUBLIC SUBMISSIONS
     match /public_complaints/{complaintId} {
       allow create: if true;
       allow read: if hasPermission('publicComplaints') || 
@@ -152,7 +163,7 @@ service cloud.firestore {
       allow read, write: if hasPermission('grievances');
     }
 
-    // 5. FINANCIAL GOVERNANCE
+    // 6. FINANCIAL GOVERNANCE
     match /finance_transactions/{txId} {
       allow read: if isRoot() || isInternalStaff() || hasPermission('financeLedger') || hasPermission('financeDashboard');
       allow create, update: if isRoot() || isInternalStaff() || hasPermission('financeVouchers');
@@ -190,7 +201,7 @@ service cloud.firestore {
       allow write: if isRoot() || isInternalStaff() || hasPermission('financeCompliance');
     }
 
-    // 6. LOGISTICS & OPERATIONAL ASSETS
+    // 7. LOGISTICS & OPERATIONAL ASSETS
     match /inventory/{itemId} {
       allow read, write: if hasPermission('inventory');
     }
@@ -213,7 +224,7 @@ service cloud.firestore {
       allow create: if isAuthenticated() && request.auth.uid == request.resource.data.uid;
     }
 
-    // 7. DAILY OPERATIONAL DATA
+    // 8. DAILY OPERATIONAL DATA
     match /daily_tasks/{taskId} {
       allow read, write: if isAuthenticated();
     }
@@ -222,7 +233,7 @@ service cloud.firestore {
       allow read, write: if isAuthenticated();
     }
 
-    // 8. GLOBAL OVERRIDE (MOVED TO END)
+    // 9. GLOBAL OVERRIDE (MOVED TO END)
     match /{document=**} {
       allow read, write: if isRoot();
     }

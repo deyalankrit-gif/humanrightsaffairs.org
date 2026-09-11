@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -72,7 +73,8 @@ import {
   Activity,
   ListTodo,
   Globe,
-  Speaker
+  Speaker,
+  Trash2
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -104,6 +106,7 @@ const topAnalyticsLinksConfig = [
 ]
 
 const adminLinksConfig = [
+  { name: 'Recycle Bin', href: '/internal/trash', icon: Trash2, permission: 'publicView' },
   { name: 'Governance Manual', href: '/internal/manual', icon: BookOpen, permission: 'publicView' },
   { name: 'Applications', href: '/internal/applications', icon: FileText, permission: 'applications' },
   { name: 'Public Complaints', href: '/internal/public-complaints', icon: ShieldQuestion, permission: 'publicComplaints' },
@@ -448,14 +451,16 @@ export function AppSidebar() {
                         const isActive = checkIsActive(link.href)
                         const isPinned = pinnedHrefs.includes(link.href)
                         const isAudioAnnouncement = link.name === 'Audio Announcement'
+                        const isTrash = link.name === 'Recycle Bin'
                         return (
                           <SidebarMenuItem key={link.name} ref={isActive ? activeItemRef : null}>
-                            <SidebarMenuButton asChild isActive={isActive} tooltip={link.name} className={cn("h-11 rounded-xl transition-all px-4", isActive ? "bg-accent text-white font-bold" : "hover:bg-secondary/10 hover:text-secondary")}>
+                            <SidebarMenuButton asChild isActive={isActive} tooltip={link.name} className={cn("h-11 rounded-xl transition-all px-4", isActive ? "bg-accent text-white font-bold" : isTrash ? "hover:bg-red-500/10 hover:text-red-500" : "hover:bg-secondary/10 hover:text-secondary")}>
                               <Link href={link.href} className="flex items-center gap-3">
-                                <link.icon className={cn("w-5 h-5", isActive ? "text-white" : isAudioAnnouncement ? "text-[#FF00FF]" : "text-muted-foreground")} />
+                                <link.icon className={cn("w-5 h-5", isActive ? "text-white" : isAudioAnnouncement ? "text-[#FF00FF]" : isTrash ? "text-red-400" : "text-muted-foreground")} />
                                 <span className={cn(
                                   "group-data-[collapsible=icon]:hidden",
-                                  isAudioAnnouncement && !isActive && "text-[#FF00FF] font-black drop-shadow-[0_0_2px_rgba(255,0,255,0.5)]"
+                                  isAudioAnnouncement && !isActive && "text-[#FF00FF] font-black drop-shadow-[0_0_2px_rgba(255,0,255,0.5)]",
+                                  isTrash && !isActive && "text-red-400"
                                 )}>
                                   {link.name}
                                 </span>

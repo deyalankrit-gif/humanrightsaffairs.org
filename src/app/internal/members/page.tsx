@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useEffect, useState } from 'react'
@@ -29,7 +30,8 @@ import {
   Globe,
   Building2,
   ShieldCheck,
-  X
+  X,
+  Archive
 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { 
@@ -59,6 +61,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import { moveToTrash } from '@/lib/trash-utils'
 import Link from 'next/link'
 import { INDIA_DATA } from '@/lib/india-data'
 import { cn } from '@/lib/utils'
@@ -77,9 +80,7 @@ export default function InternalMembersDirectory() {
   const [isDialogOpen, setIsAddingDialogOpen] = useState(false)
 
   // Deletion States
-  const [deleteDialogStep, setDeleteDialogStep] = useState<'confirm' | 'verify' | null>(null)
   const [memberToDelete, setMemberToDelete] = useState<any>(null)
-  const [deleteInputText, setDeleteInputText] = useState('')
   const [isDeleting, setIsDeleting] = useState(false)
   
   const [newMember, setNewMember] = useState({
@@ -132,7 +133,10 @@ export default function InternalMembersDirectory() {
         const years = parseInt(newMember.membershipDuration);
         if (!isNaN(years)) {
           const expiry = addYears(joinDate, years);
-          setNewMember(prev => ({ ...prev, expiryDate: format(expiry, "PPP") }));
+          const formattedExpiry = format(expiry, "PPP");
+          if (newMember.expiryDate !== formattedExpiry) {
+            setNewMember(prev => ({ ...prev, expiryDate: formattedExpiry }));
+          }
         }
       } catch (e) {}
     }
@@ -154,7 +158,6 @@ export default function InternalMembersDirectory() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
-      // PROXY STABILITY: Check size before processing to avoid "Unexpected response" from server action timeouts
       if (file.size > 153600) { // 150KB limit
         toast({
           variant: "destructive",
@@ -235,17 +238,15 @@ export default function InternalMembersDirectory() {
     }
   }
 
-  const handleDeleteMember = async () => {
+  const handleMoveToTrash = async () => {
     if (!db || !memberToDelete) return
     setIsDeleting(true)
     try {
-      await deleteDoc(doc(db, 'memberProfiles', memberToDelete.id))
-      toast({ title: "Record Purged" })
-      setDeleteDialogStep(null)
+      await moveToTrash(db, user, memberToDelete, 'memberProfiles');
+      toast({ title: "Record Moved to Trash", description: "This item remains recoverable for 60 days." })
       setMemberToDelete(null)
-      setDeleteInputText('')
     } catch (error: any) {
-      toast({ variant: "destructive", title: "System Error" })
+      toast({ variant: "destructive", title: "Operation Denied" })
     } finally {
       setIsDeleting(false)
     }
@@ -312,14 +313,37 @@ export default function InternalMembersDirectory() {
                   Profile
                 </Button>
               </Link>
-              <Button 
-                variant="destructive" 
-                size="sm" 
-                className="w-full sm:w-auto h-9 rounded-xl text-[10px] px-4 font-black uppercase tracking-widest flex gap-2"
-                onClick={() => { setMemberToDelete(member); setDeleteDialogStep('confirm'); }}
-              >
-                <Trash2 className="w-3.5 h-3.5" /> Delete
-              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                   <Button 
+                    variant="destructive" 
+                    size="sm" 
+                    className="w-full sm:w-auto h-9 rounded-xl text-[10px] px-4 font-black uppercase tracking-widest flex gap-2"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" /> Delete
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent className="rounded-[2.5rem] border-none shadow-2xl bg-white dark:bg-slate-900">
+                   <AlertDialogHeader className="items-center text-center">
+                      <div className="w-16 h-16 bg-red-50 dark:bg-red-950/30 text-red-500 rounded-2xl flex items-center justify-center mb-4">
+                         <Archive className="w-8 h-8" />
+                      </div>
+                      <AlertDialogTitle className="text-2xl font-headline font-bold">Move to Trash?</AlertDialogTitle>
+                      <AlertDialogDescription className="text-sm font-medium leading-relaxed">
+                        Are you sure you want to delete this record? This item will be moved to **Trash** and will remain there for **60 days** before being permanently deleted.
+                      </AlertDialogDescription>
+                   </AlertDialogHeader>
+                   <AlertDialogFooter className="mt-6 flex gap-3">
+                      <AlertDialogCancel className="rounded-xl h-11 font-bold flex-1">Cancel</AlertDialogCancel>
+                      <AlertDialogAction 
+                        onClick={() => { setMemberToDelete(member); handleMoveToTrash(); }} 
+                        className="bg-red-600 hover:bg-red-700 text-white rounded-xl h-11 font-bold flex-1"
+                      >
+                        Move to Trash
+                      </AlertDialogAction>
+                   </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
           </div>
         </div>
@@ -335,7 +359,7 @@ export default function InternalMembersDirectory() {
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
-      <section className="pt-16 pb-8 bg-slate-900 text-white relative overflow-hidden border-b-8 border-accent/20">
+      <header className="pt-16 pb-8 bg-slate-900 text-white relative overflow-hidden border-b-8 border-accent/20">
         <div className="absolute top-0 right-0 w-1/3 h-full bg-accent/5 -skew-x-12"></div>
         <div className="container mx-auto px-4 relative z-10">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
@@ -516,7 +540,7 @@ export default function InternalMembersDirectory() {
             </Dialog>
           </div>
         </div>
-      </section>
+      </header>
 
       <section className="py-6 border-b bg-white dark:bg-slate-900 sticky top-10 z-30 shadow-sm transition-colors">
         <div className="container mx-auto px-4">
@@ -551,9 +575,9 @@ export default function InternalMembersDirectory() {
                 </div>
               )}
 
-              {Object.keys(groupings.stateGroups).length > 0 && (
+              {Object.keys(stateGroups).length > 0 && (
                 <div className="space-y-12">
-                  {Object.keys(groupings.stateGroups).sort().map(state => (
+                  {Object.keys(stateGroups).sort().map(state => (
                     <div key={state} className="space-y-4">
                       <div className="flex items-center gap-3 px-2">
                         <Globe className="w-6 h-6 text-emerald-600" />
@@ -566,11 +590,11 @@ export default function InternalMembersDirectory() {
                 </div>
               )}
 
-              {Object.keys(groupings.districtGroups).length > 0 && (
+              {Object.keys(districtGroups).length > 0 && (
                 <div className="space-y-16">
-                  {Object.keys(groupings.districtGroups).sort().map(state => (
+                  {Object.keys(districtGroups).sort().map(state => (
                     <div key={state} className="space-y-12">
-                      {Object.keys(groupings.districtGroups[state]).sort().map(district => (
+                      {Object.keys(districtGroups[state]).sort().map(district => (
                         <div key={district} className="space-y-4">
                           <div className="flex items-center gap-3 px-2">
                             <Building2 className="w-6 h-6 text-blue-600" />
@@ -591,44 +615,6 @@ export default function InternalMembersDirectory() {
         </div>
       </section>
 
-      {/* Deletion Dialog */}
-      <Dialog open={!!deleteDialogStep} onOpenChange={(open) => !open && setDeleteDialogStep(null)}>
-        <DialogContent className="max-w-md rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden bg-white dark:bg-slate-900 w-[95vw]">
-          {deleteDialogStep === 'confirm' && (
-            <div className="p-8 space-y-6">
-              <div className="flex flex-col items-center text-center space-y-4">
-                <div className="w-20 h-20 bg-red-50 dark:bg-red-950/30 text-red-500 rounded-full flex items-center justify-center animate-pulse"><ShieldAlert className="w-10 h-10" /></div>
-                <div className="space-y-2">
-                  <DialogTitle className="text-2xl font-headline font-bold text-primary dark:text-white">Confirm Deletion</DialogTitle>
-                  <DialogDescription className="text-sm text-slate-500 leading-relaxed font-medium">You are about to permanently delete this record. This action may permanently remove related data. This action cannot be undone. Please confirm that you want to continue.</DialogDescription>
-                </div>
-              </div>
-              <div className="flex gap-3">
-                <Button variant="outline" onClick={() => setDeleteDialogStep(null)} className="flex-1 h-12 rounded-xl font-bold">Cancel</Button>
-                <Button variant="destructive" onClick={() => setDeleteDialogStep('verify')} className="flex-1 h-12 rounded-xl font-bold">Delete Permanently</Button>
-              </div>
-            </div>
-          )}
-          {deleteDialogStep === 'verify' && (
-            <div className="p-8 space-y-6">
-              <div className="space-y-4 text-center">
-                <div className="inline-flex items-center gap-2 bg-amber-50 dark:bg-amber-950/30 text-amber-600 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border border-amber-100"><AlertTriangle className="w-3 h-3" /> Verification Protocol</div>
-                <div className="space-y-1">
-                  <DialogTitle className="text-xl font-headline font-bold">Authorization Required</DialogTitle>
-                  <p className="text-xs text-slate-500">To prevent accidental deletion, please type <strong className="text-red-600 uppercase">Delete</strong> below to authorize the purge for {memberToDelete?.name}.</p>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Input placeholder="Type 'Delete'..." value={deleteInputText} onChange={(e) => setDeleteInputText(e.target.value)} className="h-12 rounded-xl border-2 focus:ring-red-500 font-bold text-center" />
-              </div>
-              <div className="flex gap-3">
-                <Button variant="ghost" onClick={() => setDeleteDialogStep(null)} className="flex-1 h-12 rounded-xl text-slate-400 font-bold">Abort</Button>
-                <Button variant="destructive" disabled={deleteInputText !== 'Delete' || isDeleting} onClick={handleDeleteMember} className="flex-1 h-12 rounded-xl font-bold bg-red-600 hover:bg-red-700 shadow-xl shadow-red-600/20">{isDeleting ? <Loader2 className="animate-spin" /> : "Verify & Purge Record"}</Button>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
       <Footer />
     </main>
   )
