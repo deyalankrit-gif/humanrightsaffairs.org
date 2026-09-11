@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useEffect, useState } from 'react';
@@ -13,6 +12,7 @@ import {
   Scale, 
   Clock,
   AlertTriangle,
+  AlertCircle,
   ChevronRight,
   Info,
   Lock,
@@ -30,7 +30,6 @@ import {
   Handshake,
   Loader2
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
@@ -109,7 +108,7 @@ export default function TerminationOrderPage() {
           <p>তাঁদের এই দায়িত্ব পালনের জন্য সংগঠনের পক্ষ থেকে কোনো প্রকার বেতন, পারিশ্রমিক, সম্মানী বা ভাতা প্রদান করা হয় না। বরং সংগঠনের বিভিন্ন প্রয়োজন এবং জনকল্যাণমূলক কর্মকাণ্ড পরিচালনার ক্ষেত্রে তাঁরা তাঁদের সামর্থ্য অনুযায়ী স্বেচ্ছায় সংগঠনকে আর্থিক ও অন্যান্য প্রয়োজনীয় সহায়তা প্রদান করে থাকেন।</p>
           <p>Human Rights Affairs Trust মূলত সাধারণ মানুষের শুভানুধ্যায়িতা, সদস্যদের সহযোগিতা এবং স্বেচ্ছাসেবী অবদানের উপর নির্ভর করে পরিচালিত হয় এবং এই সহায়তার মাধ্যমে বিভিন্ন সমাজসেবামূলক, জনকল্যাণমূলক ও মানবিক কর্মকাণ্ড পরিচালনা করে থাকে।</p>
           <p>অতএব, সংগঠনের কোনো পদে অধিষ্ঠিত হওয়া কোনো ব্যক্তির জন্য বেতন, ভাতা, আর্থিক সুবিধা অথবা সংগঠনের সম্পদ বা অর্থের উপর ব্যক্তিগত মালিকানা/অধিকার সৃষ্টি করে না। একইভাবে, কোনো পদে নিয়োগ বা কোনো দায়িত্ব অর্পণ করা মানেই সংশ্লিষ্ট ব্যক্তিকে সংগঠনের উপর স্বাধীন, সীমাহীন বা অবাধ কর্তৃত্ব প্রদান করা নয়।</p>
-          <p>প্রত্যেক Office Bearer, Advisor, Representative এবং অন্যান্য পদাধিকারীকে সংগঠনের গঠনতন্ত্র, সাংগঠনিক কাঠামো, নির্ধারিত দায়িত্বের সীমা এবং ক্ষমতাপ্রাপ্ত উচ্চতর কর্তৃপক্ষের নির্দেশনা অনুযায়ী কাজ করতে হয়।</p>
+          <p>প্রত্যেক Office Bearer, Advisor, Representative and অন্যান্য পদাধিকারীকে সংগঠনের গঠনতন্ত্র, সাংগঠনিক কাঠামো, নির্ধারিত দায়িত্বের সীমা এবং ক্ষমতাপ্রাপ্ত উচ্চতর কর্তৃপক্ষের নির্দেশনা অনুযায়ী কাজ করতে হয়।</p>
         </div>
       )
     },
@@ -147,7 +146,7 @@ export default function TerminationOrderPage() {
     },
     {
       num: "৪",
-      title: "অবিলম্বে নিয়োগের অবসান",
+      title: " অবিলম্বে নিয়োগের অবসান",
       content: (
         <div className="space-y-4">
           <p>উপরোক্ত কারণসমূহের পরিপ্রেক্ষিতে, Human Rights Affairs Trust, West Bengal State Committee-এর Legal Advisor পদে অ্যাডভোকেট শ্রী ভাস্কর মণ্ডলের নিয়োগ <strong className="text-red-600 underline">১২ সেপ্টেম্বর ২০২৬</strong> তারিখ থেকে অবিলম্বে বাতিল/সমাপ্ত করা হলো।</p>
@@ -478,10 +477,6 @@ export default function TerminationOrderPage() {
       </div>
     </main>
   );
-}
-
-function Loader2({ className }: { className?: string }) {
-  return <Clock className={cn("animate-spin", className)} />
 }
 
 function Home({ className }: { className?: string }) {
