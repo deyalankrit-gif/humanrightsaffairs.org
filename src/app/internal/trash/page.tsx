@@ -46,7 +46,7 @@ import { Footer } from '@/components/footer';
 /**
  * INSTITUTIONAL RECYCLE BIN: High-fidelity terminal for data recovery and permanent purging.
  * Enforces 60-day retention policy.
- * Updated: Included mandatory confirmation for RESTORE workflow.
+ * Updated: Removed blocking awaits and integrated contextual error handling pattern.
  */
 export default function RecycleBinPage() {
   const { user, loading: authLoading } = useUser();
@@ -70,30 +70,35 @@ export default function RecycleBinPage() {
 
   const { data: trashItems, loading: dataLoading } = useCollection(trashQuery);
 
-  const handleRestore = async (item: any) => {
+  const handleRestore = (item: any) => {
     if (!db) return;
     setIsActionLoading(item.id);
-    try {
-      await restoreFromTrash(db, item);
-      toast({ title: "Record Restored", description: "Item has been reintegrated into its original registry node." });
-    } catch (e: any) {
-      toast({ variant: "destructive", title: "Restoration Failed", description: e.message });
-    } finally {
-      setIsActionLoading(null);
-    }
+    
+    // Non-blocking dispatch
+    restoreFromTrash(db, item);
+    
+    toast({ 
+      title: "Restoration Initialized", 
+      description: "Establishing record in original registry node." 
+    });
+    
+    // Local cleanup after slight delay for visual consistency
+    setTimeout(() => setIsActionLoading(null), 800);
   };
 
-  const handlePermanentDelete = async (id: string) => {
+  const handlePermanentDelete = (id: string) => {
     if (!db) return;
     setIsActionLoading(id);
-    try {
-      await permanentPurge(db, id);
-      toast({ title: "Irreversible Purge Successful", description: "Record removed from institutional existence." });
-    } catch (e: any) {
-      toast({ variant: "destructive", title: "Purge Denied" });
-    } finally {
-      setIsActionLoading(null);
-    }
+    
+    // Non-blocking dispatch
+    permanentPurge(db, id);
+    
+    toast({ 
+      title: "Purge Initialized", 
+      description: "Removing record from institutional existence." 
+    });
+    
+    setTimeout(() => setIsActionLoading(null), 800);
   };
 
   /**
@@ -102,12 +107,11 @@ export default function RecycleBinPage() {
   useEffect(() => {
     if (trashItems && trashItems.length > 0 && db) {
       const now = new Date();
-      trashItems.forEach(async (item: any) => {
+      trashItems.forEach((item: any) => {
         const deletedAt = item.trashMetadata?.deletedAt?.toDate?.() || new Date();
         const daysInTrash = differenceInDays(now, deletedAt);
         if (daysInTrash >= 60) {
-          console.log(`[TRASH-HOUSEKEEPING] Purging expired record: ${item.id}`);
-          await permanentPurge(db, item.id);
+          permanentPurge(db, item.id);
         }
       });
     }
@@ -171,7 +175,7 @@ export default function RecycleBinPage() {
         </div>
 
         <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
-           <div className="relative w-full max-w-md">
+           <div className="relative w-full max-md:max-w-md">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <Input 
                 placeholder="Filter vault by record name or category..." 

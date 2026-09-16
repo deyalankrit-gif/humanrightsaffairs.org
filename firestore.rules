@@ -42,7 +42,8 @@ service cloud.firestore {
     match /trash/{itemId} {
       // Deny access if document is older than 60 days (5184000 seconds)
       function isExpired() {
-        return request.time > resource.data.trashMetadata.deletedAt + duration.value(60, 'd');
+        // Use get() with default if resource.data is transient during creation
+        return resource != null && request.time > resource.data.trashMetadata.get('deletedAt', request.time) + duration.value(60, 'd');
       }
       
       allow read: if isInternalStaff() && !isExpired();
