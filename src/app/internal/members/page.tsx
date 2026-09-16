@@ -544,7 +544,7 @@ export default function InternalMembersDirectory() {
 
       <section className="py-6 border-b bg-white dark:bg-slate-900 sticky top-10 z-30 shadow-sm transition-colors">
         <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex w-full md:w-auto overflow-x-auto no-scrollbar gap-1.5 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
               {["All", "National", "State", "District"].map((lvl) => (
                 <button key={lvl} onClick={() => setLevelFilter(lvl)} className={cn("whitespace-nowrap h-8 rounded-lg px-4 text-[10px] font-black uppercase transition-all", levelFilter === lvl ? "bg-accent text-primary shadow-sm hover:text-primary" : "text-slate-500 hover:bg-slate-200")}>{lvl}</button>
@@ -556,7 +556,7 @@ export default function InternalMembersDirectory() {
             </div>
           </div>
         </div>
-      </section>
+      </header>
 
       <section className="py-8">
         <div className="container mx-auto px-4 space-y-12 pb-24">
@@ -575,9 +575,9 @@ export default function InternalMembersDirectory() {
                 </div>
               )}
 
-              {Object.keys(stateGroups).length > 0 && (
+              {Object.keys(groupings.stateGroups).length > 0 && (
                 <div className="space-y-12">
-                  {Object.keys(stateGroups).sort().map(state => (
+                  {Object.keys(groupings.stateGroups).sort().map(state => (
                     <div key={state} className="space-y-4">
                       <div className="flex items-center gap-3 px-2">
                         <Globe className="w-6 h-6 text-emerald-600" />
@@ -590,11 +590,11 @@ export default function InternalMembersDirectory() {
                 </div>
               )}
 
-              {Object.keys(districtGroups).length > 0 && (
+              {Object.keys(groupings.districtGroups).length > 0 && (
                 <div className="space-y-16">
-                  {Object.keys(districtGroups).sort().map(state => (
+                  {Object.keys(groupings.districtGroups).sort().map(state => (
                     <div key={state} className="space-y-12">
-                      {Object.keys(districtGroups[state]).sort().map(district => (
+                      {Object.keys(groupings.districtGroups[state]).sort().map(district => (
                         <div key={district} className="space-y-4">
                           <div className="flex items-center gap-3 px-2">
                             <Building2 className="w-6 h-6 text-blue-600" />

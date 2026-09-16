@@ -22,7 +22,7 @@ service cloud.firestore {
     }
 
     function isInternalStaff() {
-      return isAuthenticated() && (getAuthEmail() == 'deyalankrit@gmail.com' || getUserRole() == 'admin' || getUserRole() == 'staff');
+      return isAuthenticated() && (isRoot() || getAuthEmail() == 'deyalankrit@gmail.com' || getUserRole() == 'admin' || getUserRole() == 'staff');
     }
 
     function isInvestigator() {
