@@ -81,7 +81,6 @@ export default function InternalMembersDirectory() {
 
   // Deletion States
   const [memberToDelete, setMemberToDelete] = useState<any>(null)
-  const [isDeleting, setIsDeleting] = useState(false)
   
   const [newMember, setNewMember] = useState({
     honorific: '',
@@ -233,23 +232,15 @@ export default function InternalMembersDirectory() {
         membershipDuration: '1 Year', imageId: ''
       })
     } catch (error: any) {
-      toast({ variant: "destructive", title: "System Error" })
+      toast({ variant: "destructive", title: "System Error", description: error.message })
       setIsAdding(false)
     }
   }
 
-  const handleMoveToTrash = async () => {
-    if (!db || !memberToDelete) return
-    setIsDeleting(true)
-    try {
-      await moveToTrash(db, user, memberToDelete, 'memberProfiles');
-      toast({ title: "Record Moved to Trash", description: "This item remains recoverable for 60 days." })
-      setMemberToDelete(null)
-    } catch (error: any) {
-      toast({ variant: "destructive", title: "Operation Denied" })
-    } finally {
-      setIsDeleting(false)
-    }
+  const handleMoveToTrash = async (member: any) => {
+    if (!db) return
+    moveToTrash(db, user, member, 'memberProfiles');
+    toast({ title: "Moving to Trash", description: "This record will be stored in the Recycle Bin for 60 days." });
   }
 
   const parseMemberDate = (dateStr: string) => {
@@ -289,6 +280,8 @@ export default function InternalMembersDirectory() {
       }, {} as Record<string, Record<string, any[]>>);
     return { central, stateGroups, districtGroups };
   }, [filtered]);
+
+  const { central, stateGroups, districtGroups } = groupings;
 
   const renderMemberCard = (member: any) => (
     <Card key={member.id} className="border-none shadow-sm overflow-hidden bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800">
@@ -336,7 +329,7 @@ export default function InternalMembersDirectory() {
                    <AlertDialogFooter className="mt-6 flex gap-3">
                       <AlertDialogCancel className="rounded-xl h-11 font-bold flex-1">Cancel</AlertDialogCancel>
                       <AlertDialogAction 
-                        onClick={() => { setMemberToDelete(member); handleMoveToTrash(); }} 
+                        onClick={() => handleMoveToTrash(member)} 
                         className="bg-red-600 hover:bg-red-700 text-white rounded-xl h-11 font-bold flex-1"
                       >
                         Move to Trash
@@ -352,10 +345,6 @@ export default function InternalMembersDirectory() {
   )
 
   const statesList = Object.keys(INDIA_DATA).sort()
-
-  if (authLoading || (user && profilesLoading)) {
-    return <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950"><Loader2 className="w-10 h-10 animate-spin text-accent" /></div>
-  }
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
@@ -516,7 +505,7 @@ export default function InternalMembersDirectory() {
 
                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-2">
-                        <Label className="text-[10px] uppercase font-bold text-slate-400">Operational Level *</Label>
+                        <Label className="text-[10px] font-bold uppercase text-slate-400">Operational Level *</Label>
                         <Select value={newMember.level} onValueChange={(val: any) => setNewMember({...newMember, level: val, stateName: '', districtName: ''})}>
                           <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
                           <SelectContent position="popper" className="z-[1000001] bg-white"><SelectItem value="National">National Level</SelectItem><SelectItem value="State">State Level</SelectItem><SelectItem value="District">District Level</SelectItem></SelectContent>
@@ -542,13 +531,15 @@ export default function InternalMembersDirectory() {
         </div>
       </header>
 
-      <section className="py-6 border-b bg-white dark:bg-slate-900 sticky top-10 z-30 shadow-sm transition-colors">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex w-full md:w-auto overflow-x-auto no-scrollbar gap-1.5 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
-              {["All", "National", "State", "District"].map((lvl) => (
-                <button key={lvl} onClick={() => setLevelFilter(lvl)} className={cn("whitespace-nowrap h-8 rounded-lg px-4 text-[10px] font-black uppercase transition-all", levelFilter === lvl ? "bg-accent text-primary shadow-sm hover:text-primary" : "text-slate-500 hover:bg-slate-200")}>{lvl}</button>
-              ))}
+      <section className="py-4 md:py-6 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 sticky top-[56px] z-30 shadow-sm transition-colors w-full overflow-hidden">
+        <div className="container mx-auto px-2 sm:px-4">
+          <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+            <div className="flex flex-wrap items-center gap-2 justify-center w-full md:w-auto">
+              <div className="flex flex-wrap justify-center gap-1">
+                {["All", "National", "State", "District"].map((level) => (
+                  <button key={level} onClick={() => setLevelFilter(level)} className={cn("whitespace-nowrap h-8 rounded-lg px-4 text-[10px] font-black uppercase transition-all", levelFilter === level ? "bg-accent text-primary shadow-sm hover:text-primary" : "text-slate-500 hover:bg-slate-200")}>{level}</button>
+                ))}
+              </div>
             </div>
             <div className="relative w-full max-md:max-w-full max-w-md">
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -564,44 +555,44 @@ export default function InternalMembersDirectory() {
             <div className="text-center py-24"><Loader2 className="w-10 h-10 animate-spin text-accent mx-auto mb-4" /><p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Synchronizing Live Feed...</p></div>
           ) : filtered.length > 0 ? (
             <>
-              {groupings.central.length > 0 && (
-                <div className="space-y-6">
+              {central.length > 0 && (
+                <div className="space-y-4">
                   <div className="flex items-center gap-3 px-2">
                     <ShieldCheck className="w-5 h-5 text-red-600" />
                     <h4 className="text-sm font-black uppercase tracking-[0.25em] text-primary dark:text-white">National Registry</h4>
                     <div className="h-px flex-1 bg-slate-200 dark:bg-slate-800"></div>
                   </div>
-                  <div className="grid gap-4">{groupings.central.map(renderMemberCard)}</div>
+                  <div className="grid gap-4">{central.map(renderMemberCard)}</div>
                 </div>
               )}
 
-              {Object.keys(groupings.stateGroups).length > 0 && (
+              {Object.keys(stateGroups).length > 0 && (
                 <div className="space-y-12">
-                  {Object.keys(groupings.stateGroups).sort().map(state => (
+                  {Object.keys(stateGroups).sort().map(state => (
                     <div key={state} className="space-y-4">
                       <div className="flex items-center gap-3 px-2">
                         <Globe className="w-6 h-6 text-emerald-600" />
                         <h4 className="text-base font-black uppercase tracking-[0.2em] text-primary dark:text-white">{state} <span className="text-emerald-500 font-bold ml-2">Chapter</span></h4>
                         <div className="h-px flex-1 bg-slate-200 dark:bg-slate-800"></div>
                       </div>
-                      <div className="grid gap-4">{groupings.stateGroups[state].map(renderMemberCard)}</div>
+                      <div className="grid gap-4">{stateGroups[state].map(renderMemberCard)}</div>
                     </div>
                   ))}
                 </div>
               )}
 
-              {Object.keys(groupings.districtGroups).length > 0 && (
+              {Object.keys(districtGroups).length > 0 && (
                 <div className="space-y-16">
-                  {Object.keys(groupings.districtGroups).sort().map(state => (
+                  {Object.keys(districtGroups).sort().map(state => (
                     <div key={state} className="space-y-12">
-                      {Object.keys(groupings.districtGroups[state]).sort().map(district => (
+                      {Object.keys(districtGroups[state]).sort().map(district => (
                         <div key={district} className="space-y-4">
                           <div className="flex items-center gap-3 px-2">
                             <Building2 className="w-6 h-6 text-blue-600" />
                             <h4 className="text-base font-black uppercase tracking-[0.2em] text-primary dark:text-white">{district} <span className="text-blue-500 font-bold ml-2">Cell</span> <span className="text-[10px] text-slate-400 font-medium ml-2">({state})</span></h4>
                             <div className="h-px flex-1 bg-slate-200 dark:bg-slate-800"></div>
                           </div>
-                          <div className="grid gap-4">{groupings.districtGroups[state][district].map(renderMemberCard)}</div>
+                          <div className="grid gap-4">{districtGroups[state][district].map(renderMemberCard)}</div>
                         </div>
                       ))}
                     </div>
