@@ -4,7 +4,7 @@
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useUser, useCollection, useFirestore, useMemoFirebase } from '@/firebase'
-import { collection, query, orderBy, addDoc, serverTimestamp, deleteDoc, doc } from 'firebase/firestore'
+import { collection, query, orderBy, addDoc, serverTimestamp, doc } from 'firebase/firestore'
 import { Footer } from '@/components/footer'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -66,7 +66,6 @@ import Link from 'next/link'
 import { INDIA_DATA } from '@/lib/india-data'
 import { cn } from '@/lib/utils'
 import Image from 'next/image'
-import { PlaceHolderImages } from '@/lib/placeholder-images'
 
 export default function InternalMembersDirectory() {
   const { user, loading: authLoading } = useUser()
@@ -79,9 +78,6 @@ export default function InternalMembersDirectory() {
   const [isAdding, setIsAdding] = useState(false)
   const [isDialogOpen, setIsAddingDialogOpen] = useState(false)
 
-  // Deletion States
-  const [memberToDelete, setMemberToDelete] = useState<any>(null)
-  
   const [newMember, setNewMember] = useState({
     honorific: '',
     name: '',
@@ -547,7 +543,7 @@ export default function InternalMembersDirectory() {
             </div>
           </div>
         </div>
-      </header>
+      </section>
 
       <section className="py-8">
         <div className="container mx-auto px-4 space-y-12 pb-24">
