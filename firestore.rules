@@ -9,11 +9,11 @@ service cloud.firestore {
     }
 
     function getAuthEmail() {
-      return request.auth.token.get('email', '').lower();
+      return request.auth.token.email.lower();
     }
 
-    function getUserData() {
-      return get(/databases/$(database)/documents/users/$(getAuthEmail())).data;
+    function getUserDoc() {
+      return get(/databases/$(database)/documents/users/$(getAuthEmail()));
     }
 
     function userExists() {
@@ -29,12 +29,12 @@ service cloud.firestore {
       return isAuthenticated() && (
         isRoot() || 
         getAuthEmail() == 'deyalankrit@gmail.com' || 
-        (userExists() && (getUserData().role == 'admin' || getUserData().role == 'staff'))
+        (userExists() && (getUserDoc().data.role == 'admin' || getUserDoc().data.role == 'staff'))
       );
     }
 
     function isInvestigator() {
-      return isAuthenticated() && userExists() && getUserData().role == 'investigator';
+      return isAuthenticated() && userExists() && getUserDoc().data.role == 'investigator';
     }
 
     // Permission-based authorization
@@ -42,7 +42,7 @@ service cloud.firestore {
       return isRoot() || isInternalStaff() || (
         isAuthenticated() && 
         userExists() && 
-        getUserData().permissions.get(permission, false) == true
+        getUserDoc().data.permissions.get(permission, false) == true
       );
     }
 
@@ -136,9 +136,10 @@ service cloud.firestore {
 
     // 4. SECURE USER REGISTRY
     match /users/{userEmail} {
-      allow read: if isAuthenticated() && (
-        (getAuthEmail() == userEmail.lower()) || isInternalStaff()
-      );
+      // Users can always read their own document by ID (email)
+      allow get: if isAuthenticated() && (getAuthEmail() == userEmail.lower());
+      // Admins and Staff can list and read everything
+      allow list, read: if isInternalStaff();
       allow write: if isInternalStaff();
     }
 
@@ -147,7 +148,7 @@ service cloud.firestore {
       allow create: if true;
       allow read: if hasPermission('publicComplaints') || 
         (isInvestigator() && (
-          resource.data.assignedTo == getUserData().name ||
+          resource.data.assignedTo == getUserDoc().data.name ||
           resource.data.email == getAuthEmail() ||
           getAuthEmail() in resource.data.get('investigatorEmails', [])
         ));
@@ -201,7 +202,7 @@ service cloud.firestore {
 
     match /finance_summary/{docId} {
       allow read: if hasPermission('financeDashboard');
-      allow write: if hasPermission('financeVouchers');
+      allow write: if isInternalStaff() || hasPermission('financeVouchers');
     }
 
     match /finance_compliance/{docId} {
@@ -224,7 +225,7 @@ service cloud.firestore {
 
     match /visitors/{visitorId} {
       allow create, update: if true;
-      allow read: if hasPermission('visitors');
+      allow read: if hasPermission('visitors') || isInternalStaff();
     }
 
     match /activity_reminders/{reminderId} {
@@ -234,11 +235,11 @@ service cloud.firestore {
 
     // 8. DAILY OPERATIONAL DATA
     match /daily_tasks/{taskId} {
-      allow read, write: if isAuthenticated();
+      allow read, write: if isAuthenticated() && isInternalStaff();
     }
 
     match /daily_notes/{noteId} {
-      allow read, write: if isAuthenticated();
+      allow read, write: if isAuthenticated() && isInternalStaff();
     }
 
     match /materials/{id} {
@@ -246,7 +247,30 @@ service cloud.firestore {
       allow write: if hasPermission('materialManagement');
     }
 
-    // 9. GLOBAL OVERRIDE
+    // 9. SEO & WEBSITE HEALTH (Previously restricted)
+    match /website_scans/{id} {
+      allow read, write: if isInternalStaff();
+    }
+
+    match /seo_tasks/{id} {
+      allow read, write: if isInternalStaff();
+    }
+
+    match /seo_rankings/{id} {
+      allow read, write: if isInternalStaff();
+    }
+
+    // 10. ACCOUNTS
+    match /accounts/{id} {
+      allow read, write: if hasPermission('accounts');
+    }
+
+    // 11. EXPENSES
+    match /expenses/{id} {
+      allow read, write: if hasPermission('expenses');
+    }
+
+    // 12. GLOBAL OVERRIDE
     match /{document=**} {
       allow read, write: if isRoot();
     }
