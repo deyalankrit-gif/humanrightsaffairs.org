@@ -160,7 +160,16 @@ Place: ${formData.submissionPlace || '________'}
   })
 
   return (
-    <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
+    <main className="min-h-screen bg-slate-50 dark:bg-slate-950 print:min-h-0 print:bg-white">
+      {/* Print only the application (#fir-document); hide everything else on the site */}
+      <style>{`
+        @media print {
+          body *:not(:has(#fir-document)):not(#fir-document):not(#fir-document *) {
+            display: none !important;
+          }
+        }
+      `}</style>
+
       <section className="pt-32 pb-16 bg-gradient-to-br from-primary via-primary/95 to-accent text-primary-foreground relative overflow-hidden border-b-8 border-accent/20 print:hidden">
         <div className="absolute top-0 right-0 w-1/2 h-full bg-white/5 -skew-x-12"></div>
         <div className="container mx-auto px-4 relative z-10">
@@ -201,7 +210,7 @@ Place: ${formData.submissionPlace || '________'}
         </div>
       </section>
 
-      <section className="py-16 md:py-24 px-4">
+      <section className="py-16 md:py-24 px-4 print:py-0 print:px-0">
         <div className="container mx-auto">
           <div className="max-w-4xl mx-auto">
             
@@ -222,7 +231,7 @@ Place: ${formData.submissionPlace || '________'}
                <div className="absolute top-0 left-0 w-1.5 h-full bg-accent print:hidden"></div>
                
                <CardContent className="p-8 md:p-16 space-y-10" id="fir-document">
-                  <div className="text-center border-b-2 border-slate-100 dark:border-slate-800 pb-8 mb-8">
+                  <div className="text-center border-b-2 border-slate-100 dark:border-slate-800 pb-8 mb-8 print:hidden">
                      <h2 className="text-2xl md:text-3xl font-headline font-bold text-primary dark:text-white uppercase tracking-tight">
                        Legal Application for Filing an FIR
                      </h2>
@@ -376,7 +385,7 @@ Place: ${formData.submissionPlace || '________'}
                       <p>Thanking you.</p>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-12 pt-8">
+                    <div className="grid grid-cols-2 gap-12 pt-8 print:grid-cols-[3fr_2fr] print:gap-6">
                        <div className="space-y-6">
                           <p>Yours faithfully,</p>
                           <div className="space-y-3 pt-4">
@@ -385,7 +394,7 @@ Place: ${formData.submissionPlace || '________'}
                              <div className="space-y-2">
                                 <p className="flex items-center gap-2">Name: <Fillable name="fullName" placeholder="Auto-fills from above" className="w-full" /></p>
                                 <p className="flex items-center gap-2">Phone: <Fillable name="mobileNo" placeholder="Mobile No." className="w-full" /></p>
-                                <p className="flex items-center gap-2">E-mail: <Fillable name="email" placeholder="Email Address" className="w-full" /></p>
+                                <p className="flex items-center gap-2 whitespace-nowrap"><span className="shrink-0">E-mail:</span> <Fillable name="email" placeholder="Email Address" className="w-full min-w-0" /></p>
                              </div>
                           </div>
                        </div>
@@ -402,7 +411,7 @@ Place: ${formData.submissionPlace || '________'}
                     </div>
 
                     {/* Official Footer Section */}
-                    <div className="pt-12 mt-12 bg-slate-50 dark:bg-slate-950 p-8 rounded-[2rem] border-2 border-dashed border-slate-200 dark:border-slate-800">
+                    <div className="pt-12 mt-12 bg-slate-50 dark:bg-slate-950 p-8 rounded-[2rem] border-2 border-dashed border-slate-200 dark:border-slate-800 print:hidden">
                        <p className="font-black text-slate-400 uppercase tracking-[0.3em] text-[10px] text-center mb-8">For Police Department Use Only</p>
                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                           <div className="space-y-1">
