@@ -65,7 +65,7 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
         
         const lowerPath = pathString.toLowerCase();
         
-        // Exemption list for public-facing data streams or member-specific filtered queries
+        // Exemption list for public-facing data streams or common registry nodes
         const silentPaths = [
           'settings',
           'occasions', 
@@ -84,7 +84,11 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
           'feedback',
           'materials',
           'vendors',
-          'current_news_state'
+          'current_news_state',
+          'finance_donors',
+          'finance_summary',
+          'website_scans',
+          'seo_tasks'
         ];
 
         const isSilentPath = silentPaths.some(p => lowerPath.includes(p));

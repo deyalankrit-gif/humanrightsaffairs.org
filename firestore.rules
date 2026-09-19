@@ -8,269 +8,133 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    function getAuthEmail() {
+    function getEmail() {
       return request.auth.token.email.lower();
     }
 
-    function getUserDoc() {
-      return get(/databases/$(database)/documents/users/$(getAuthEmail()));
-    }
-
-    function userExists() {
-      return exists(/databases/$(database)/documents/users/$(getAuthEmail()));
-    }
-
-    // High-Priority Administrative Roles
     function isRoot() {
-      return isAuthenticated() && getAuthEmail() == 'deydhritiman@gmail.com';
+      return isAuthenticated() && getEmail() == 'deydhritiman@gmail.com';
     }
 
-    function isInternalStaff() {
-      return isAuthenticated() && (
-        isRoot() || 
-        getAuthEmail() == 'deyalankrit@gmail.com' || 
-        (userExists() && (getUserDoc().data.role == 'admin' || getUserDoc().data.role == 'staff'))
+    // Robust role checking with document existence verification
+    function hasRole(role) {
+      return exists(/databases/$(database)/documents/users/$(getEmail())) && 
+             get(/databases/$(database)/documents/users/$(getEmail())).data.role == role;
+    }
+
+    function isStaff() {
+      return isRoot() || 
+             getEmail() == 'deyalankrit@gmail.com' || 
+             hasRole('admin') || 
+             hasRole('staff');
+    }
+
+    // Module-specific permission logic
+    function hasPermission(perm) {
+      return isRoot() || isStaff() || (
+        exists(/databases/$(database)/documents/users/$(getEmail())) && 
+        get(/databases/$(database)/documents/users/$(getEmail())).data.permissions.get(perm, false) == true
       );
     }
 
-    function isInvestigator() {
-      return isAuthenticated() && userExists() && getUserDoc().data.role == 'investigator';
-    }
-
-    // Permission-based authorization
-    function hasPermission(permission) {
-      return isRoot() || isInternalStaff() || (
-        isAuthenticated() && 
-        userExists() && 
-        getUserDoc().data.permissions.get(permission, false) == true
-      );
-    }
-
-    // 2. TRASH & RECOVERY PROTOCOL (60-DAY RETENTION)
-    match /trash/{itemId} {
-      function isExpired() {
-        return resource != null && request.time > resource.data.trashMetadata.get('deletedAt', request.time) + duration.value(60, 'd');
-      }
-      
-      allow read: if isInternalStaff() && !isExpired();
-      allow create: if isInternalStaff();
-      allow update: if isInternalStaff();
-      allow delete: if isInternalStaff();
-    }
-
-    // 3. PUBLIC & SETTINGS
-    match /settings/{settingId} {
-      allow get, list, read: if true;
-      allow write: if isInternalStaff() || isRoot();
-    }
-
-    match /occasions/{occasionId} {
+    // 2. PUBLIC & SETTINGS (Read access for all, write for staff)
+    match /settings/{id} {
       allow read: if true;
-      allow write: if hasPermission('occasions');
+      allow write: if isStaff();
     }
 
-    match /current_news/{newsId} {
-      allow read: if true;
-      allow write: if hasPermission('occasions'); 
-    }
+    // 3. PUBLIC DISPLAY COLLECTIONS (Display logic for public portal)
+    match /occasions/{id} { allow read: if true; allow write: if hasPermission('occasions'); }
+    match /current_news/{id} { allow read: if true; allow write: if hasPermission('occasions'); }
+    match /current_news_state/{id} { allow read: if true; allow write: if hasPermission('occasions'); }
+    match /ai_announcements/{id} { allow read: if true; allow write: if hasPermission('occasions'); }
+    match /events/{id} { allow read: if true; allow write: if hasPermission('events'); }
+    match /gallery/{id} { allow read: if true; allow write: if hasPermission('gallery'); }
+    match /leadership/{id} { allow read: if true; allow write: if hasPermission('members'); }
+    match /memberProfiles/{id} { allow read: if true; allow write: if hasPermission('members'); }
+    match /terminatedMembers/{id} { allow read: if true; allow write: if hasPermission('terminated'); }
+    match /donor_tiers/{id} { allow read: if true; allow write: if hasPermission('donorWall'); }
+    match /meetings/{id} { allow read: if true; allow write: if hasPermission('meetings'); }
+    match /activity_events/{id} { allow read: if true; allow write: if hasPermission('activityHub'); }
 
-    match /ai_announcements/{id} {
-      allow read: if true;
-      allow write: if hasPermission('occasions');
-    }
-
-    match /current_news_state/{docId} {
-      allow read: if true;
-      allow write: if hasPermission('occasions');
-    }
-    
-    match /donor_tiers/{tierId} {
-      allow read: if true;
-      allow write: if hasPermission('donorWall');
-    }
-    
-    match /memberProfiles/{profileId} {
-      allow read: if true;
-      allow write: if hasPermission('members');
-    }
-    
-    match /events/{eventId} {
-      allow read: if true;
-      allow write: if hasPermission('events');
-    }
-
-    match /gallery/{itemId} {
-      allow read: if true;
-      allow write: if hasPermission('gallery');
-    }
-
-    match /leadership/{leaderId} {
-      allow read: if true;
-      allow write: if hasPermission('members');
-    }
-
-    match /terminatedMembers/{memberId} {
-      allow read: if true;
-      allow write: if hasPermission('terminated');
-    }
-
-    match /meetings/{meetingId} {
-      allow read: if true;
-      allow write: if hasPermission('meetings');
-    }
-
-    match /activity_events/{eventId} {
-      allow read: if true;
-      allow write: if hasPermission('activityHub');
-    }
-
-    match /feedback/{feedbackId} {
-      allow read, create: if true;
-      allow update, delete: if hasPermission('feedback');
-    }
-
-    match /investigation_officers/{id} {
-      allow read: if true;
-      allow write: if isInternalStaff();
-    }
-
-    // 4. SECURE USER REGISTRY
+    // 4. USER REGISTRY (Self-access + Admin oversight)
     match /users/{userEmail} {
-      // Users can always read their own document by ID (email)
-      allow get: if isAuthenticated() && (getAuthEmail() == userEmail.lower());
-      // Admins and Staff can list and read everything
-      allow list, read: if isInternalStaff();
-      allow write: if isInternalStaff();
+      allow get: if isAuthenticated() && (getEmail() == userEmail.lower());
+      allow list, read, write: if isStaff();
     }
 
-    // 5. PUBLIC SUBMISSIONS
-    match /public_complaints/{complaintId} {
+    // 5. PUBLIC SUBMISSIONS & CASES
+    match /public_complaints/{id} {
       allow create: if true;
       allow read: if hasPermission('publicComplaints') || 
-        (isInvestigator() && (
-          resource.data.assignedTo == getUserDoc().data.name ||
-          resource.data.email == getAuthEmail() ||
-          getAuthEmail() in resource.data.get('investigatorEmails', [])
-        ));
-      allow update: if hasPermission('publicComplaints') || isInvestigator();
+                  (hasRole('investigator') && (
+                    resource.data.assignedTo == get(/databases/$(database)/documents/users/$(getEmail())).data.name ||
+                    resource.data.email == getEmail() ||
+                    getEmail() in resource.data.get('investigatorEmails', [])
+                  ));
+      allow update: if hasPermission('publicComplaints') || hasRole('investigator');
       allow delete: if isRoot();
     }
 
-    match /memberApplications/{appId} {
+    match /donations/{id} {
+      allow create: if true;
+      allow read: if hasPermission('analytics') || hasPermission('financeLedger') || (isAuthenticated() && resource.data.email.lower() == getEmail());
+      allow delete: if isRoot();
+    }
+
+    match /memberApplications/{id} {
       allow create: if true;
       allow read, write: if hasPermission('applications');
     }
-    
-    match /donations/{donationId} {
-      allow create: if true;
-      allow read: if hasPermission('analytics') || hasPermission('financeLedger') || (isAuthenticated() && resource.data.email.lower() == getAuthEmail());
-      allow delete: if isRoot();
-    }
 
-    match /grievances/{grievanceId} {
+    match /grievances/{id} {
       allow create: if true;
       allow read, write: if hasPermission('grievances');
     }
 
-    // 6. FINANCIAL GOVERNANCE
-    match /finance_transactions/{txId} {
-      allow read: if hasPermission('financeLedger') || hasPermission('financeDashboard');
-      allow create, update: if hasPermission('financeVouchers');
-      allow delete: if isRoot();
+    match /feedback/{id} {
+      allow read, create: if true;
+      allow update, delete: if hasPermission('feedback');
     }
 
-    match /finance_vms_vouchers/{vId} {
-      allow read: if hasPermission('financeVouchers') || hasPermission('financeDashboard');
-      allow create, update: if hasPermission('financeVouchers');
-      allow delete: if isRoot();
-    }
-
-    match /finance_projects/{projectId} {
-      allow read: if hasPermission('financeProjects') || hasPermission('financeDashboard');
-      allow write: if hasPermission('financeVouchers');
-    }
-
-    match /finance_assets/{assetId} {
-      allow read: if hasPermission('financeAssets') || hasPermission('financeDashboard');
-      allow write: if hasPermission('financeAssets');
-    }
-
-    match /finance_payroll/{recordId} {
-      allow read: if hasPermission('financePayroll') || hasPermission('financeDashboard');
-      allow write: if hasPermission('financePayroll');
-    }
-
-    match /finance_summary/{docId} {
-      allow read: if hasPermission('financeDashboard');
-      allow write: if isInternalStaff() || hasPermission('financeVouchers');
-    }
-
-    match /finance_compliance/{docId} {
-      allow read: if hasPermission('financeCompliance') || hasPermission('financeDashboard');
-      allow write: if hasPermission('financeCompliance');
-    }
-
-    // 7. LOGISTICS & OPERATIONAL ASSETS
-    match /inventory/{itemId} {
-      allow read, write: if hasPermission('inventory');
-    }
-
-    match /vendors/{vendorId} {
-      allow read, write: if hasPermission('vendors');
-    }
-
-    match /member_kits/{memberId} {
-      allow read, write: if hasPermission('kitManagement');
-    }
-
-    match /visitors/{visitorId} {
-      allow create, update: if true;
-      allow read: if hasPermission('visitors') || isInternalStaff();
-    }
-
-    match /activity_reminders/{reminderId} {
-      allow read, write: if isAuthenticated() && (request.auth.uid == resource.data.uid || isInternalStaff());
+    // 6. FINANCE & OPERATIONS
+    match /finance_transactions/{id} { allow read: if hasPermission('financeLedger') || hasPermission('financeDashboard'); allow write: if hasPermission('financeVouchers'); }
+    match /finance_vms_vouchers/{id} { allow read: if hasPermission('financeVouchers') || hasPermission('financeDashboard'); allow write: if hasPermission('financeVouchers'); }
+    match /finance_donors/{id} { allow read: if hasPermission('financeLedger') || hasPermission('financeDashboard'); allow write: if hasPermission('financeLedger'); }
+    match /finance_projects/{id} { allow read: if hasPermission('financeProjects') || hasPermission('financeDashboard'); allow write: if hasPermission('financeVouchers'); }
+    match /finance_assets/{id} { allow read: if hasPermission('financeAssets') || hasPermission('financeDashboard'); allow write: if hasPermission('financeAssets'); }
+    match /finance_payroll/{id} { allow read: if hasPermission('financePayroll') || hasPermission('financeDashboard'); allow write: if hasPermission('financePayroll'); }
+    match /finance_summary/{id} { allow read: if hasPermission('financeDashboard'); allow write: if isStaff() || hasPermission('financeVouchers'); }
+    match /finance_compliance/{id} { allow read: if hasPermission('financeCompliance') || hasPermission('financeDashboard'); allow write: if hasPermission('financeCompliance'); }
+    
+    // 7. LOGISTICS & ASSETS
+    match /inventory/{id} { allow read, write: if hasPermission('inventory'); }
+    match /vendors/{id} { allow read, write: if hasPermission('vendors'); }
+    match /member_kits/{id} { allow read, write: if hasPermission('kitManagement'); }
+    match /materials/{id} { allow read: if true; allow write: if hasPermission('materialManagement'); }
+    
+    // 8. DAILY OPERATIONAL DATA
+    match /daily_tasks/{id} { allow read, write: if isStaff(); }
+    match /daily_notes/{id} { allow read, write: if isStaff(); }
+    match /activity_reminders/{id} { 
+      allow read, write: if isAuthenticated() && (request.auth.uid == resource.data.uid || isStaff());
       allow create: if isAuthenticated() && request.auth.uid == request.resource.data.uid;
     }
 
-    // 8. DAILY OPERATIONAL DATA
-    match /daily_tasks/{taskId} {
-      allow read, write: if isAuthenticated() && isInternalStaff();
+    // 9. ANALYTICS & SEO
+    match /website_scans/{id} { allow read, write: if isStaff(); }
+    match /seo_tasks/{id} { allow read, write: if isStaff(); }
+    match /seo_rankings/{id} { allow read, write: if isStaff(); }
+    match /visitors/{id} { allow read: if isStaff(); allow create, update: if true; }
+    match /deletion_audit_logs/{id} { allow read, write: if isStaff(); }
+    match /investigation_officers/{id} { allow read: if true; allow write: if isStaff(); }
+    
+    // 10. TRASH & RECOVERY (60-DAY RETENTION)
+    match /trash/{id} {
+      allow read, write: if isStaff();
     }
 
-    match /daily_notes/{noteId} {
-      allow read, write: if isAuthenticated() && isInternalStaff();
-    }
-
-    match /materials/{id} {
-      allow read: if true;
-      allow write: if hasPermission('materialManagement');
-    }
-
-    // 9. SEO & WEBSITE HEALTH (Previously restricted)
-    match /website_scans/{id} {
-      allow read, write: if isInternalStaff();
-    }
-
-    match /seo_tasks/{id} {
-      allow read, write: if isInternalStaff();
-    }
-
-    match /seo_rankings/{id} {
-      allow read, write: if isInternalStaff();
-    }
-
-    // 10. ACCOUNTS
-    match /accounts/{id} {
-      allow read, write: if hasPermission('accounts');
-    }
-
-    // 11. EXPENSES
-    match /expenses/{id} {
-      allow read, write: if hasPermission('expenses');
-    }
-
-    // 12. GLOBAL OVERRIDE
+    // 11. GLOBAL OVERRIDE
     match /{document=**} {
       allow read, write: if isRoot();
     }
