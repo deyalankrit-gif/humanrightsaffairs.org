@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useEffect, useState, useMemo } from 'react';
@@ -54,7 +55,9 @@ import {
   CheckCircle2,
   AlertTriangle,
   LayoutGrid,
-  List
+  List,
+  Check,
+  RotateCcw
 } from 'lucide-react';
 import {
   Dialog,
@@ -77,6 +80,12 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import { Calendar as CalendarComponent } from "@/components/ui/calendar"
 import { useToast } from '@/hooks/use-toast';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
@@ -100,11 +109,10 @@ import {
 } from 'date-fns';
 import { BUILT_IN_HOLIDAYS, BUILT_IN_OBSERVANCES } from '@/lib/activity-hub-data';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 /**
  * Occasions Governance Terminal: Real-time mission control for institutional greetings.
- * Expanded with full-width calendar, detailed registry CRUD, and master Live toggles.
+ * Features: Full CRUD with explicit actions, Live/Off-Live toggle, and expanded tactical calendar.
  */
 export default function InternalOccasionsManagement() {
   const { user, loading: authLoading } = useUser();
@@ -120,7 +128,7 @@ export default function InternalOccasionsManagement() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [currentCalendarMonth, setCurrentCalendarMonth] = useState(new Date());
 
-  // Language Switching States for Forms
+  // Language Switching States
   const [addTitleLang, setAddTitleLang] = useState<'en' | 'bn'>('en');
   const [addMsgLang, setAddMsgLang] = useState<'en' | 'bn'>('en');
   const [editTitleLang, setEditTitleLang] = useState<'en' | 'bn'>('en');
@@ -157,9 +165,10 @@ export default function InternalOccasionsManagement() {
   const isAutoMode = protocol?.mode === 'auto';
 
   const allSpecialDays = useMemo(() => {
+    const currentYear = new Date().getFullYear();
     return [
-      ...BUILT_IN_HOLIDAYS.map(h => ({ ...h, isHoliday: true, date: startOfDay(new Date(2026, h.month - 1, h.day)) })),
-      ...BUILT_IN_OBSERVANCES.map(o => ({ ...o, isHoliday: false, date: startOfDay(new Date(2026, o.month - 1, o.day)) }))
+      ...BUILT_IN_HOLIDAYS.map(h => ({ ...h, isHoliday: true, date: startOfDay(new Date(currentYear, h.month - 1, h.day)) })),
+      ...BUILT_IN_OBSERVANCES.map(o => ({ ...o, isHoliday: false, date: startOfDay(new Date(currentYear, o.month - 1, o.day)) }))
     ].sort((a, b) => a.date.getTime() - b.date.getTime());
   }, []);
 
@@ -255,7 +264,7 @@ export default function InternalOccasionsManagement() {
     if (val && isAutoMode) await handleToggleProtocol(false);
 
     updateDoc(doc(db, 'occasions', occ.id), { isActive: val, updatedAt: serverTimestamp() })
-      .then(() => toast({ title: val ? "ON LIVE" : "OFF LIVE" }))
+      .then(() => toast({ title: val ? "BROADCAST LIVE" : "BROADCAST SUSPENDED" }))
       .finally(() => setIsActionLoading(false));
   };
 
@@ -265,8 +274,8 @@ export default function InternalOccasionsManagement() {
   };
 
   const calendarDays = useMemo(() => {
-    const start = startOfMonth(currentCalendarMonth);
-    const end = endOfMonth(currentCalendarMonth);
+    const start = startOfWeek(startOfMonth(currentCalendarMonth));
+    const end = endOfWeek(endOfMonth(currentCalendarMonth));
     return eachDayOfInterval({ start, end });
   }, [currentCalendarMonth]);
 
@@ -278,20 +287,26 @@ export default function InternalOccasionsManagement() {
     return matchesSearch && matchesStatus;
   });
 
+  const parseFormattedDate = (dateStr: string) => {
+    if (!dateStr) return undefined;
+    try { return parse(dateStr, 'yyyy-MM-dd', new Date()); } catch { return undefined; }
+  };
+
   if (authLoading || !user) {
     return <div className="min-h-screen flex items-center justify-center bg-slate-950"><Loader2 className="animate-spin text-accent" /></div>;
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-20">
-      <header className="pt-16 pb-8 bg-slate-900 text-white border-b-8 border-accent/20 px-4">
+    <main className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-24">
+      {/* 1. Header Section */}
+      <header className="pt-16 pb-8 bg-slate-900 text-white border-b-8 border-accent/20 px-4 sticky top-0 z-50 shadow-2xl">
         <div className="container mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="space-y-1">
+          <div className="space-y-1 text-center md:text-left">
             <div className="inline-flex items-center gap-2 bg-accent/20 text-accent px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border border-accent/30">
               <Wifi className="w-2.5 h-2.5 animate-pulse" /> Live Broadcast Management
             </div>
-            <h1 className="text-3xl md:text-4xl font-headline font-bold">Occasions <span className="text-accent italic">Governance</span></h1>
-            <p className="text-slate-400 text-[11px] uppercase font-black">Official Hub for National Greetings & Broadcasts</p>
+            <h1 className="text-3xl md:text-4xl font-headline font-bold text-white">Occasions <span className="text-accent italic">Governance</span></h1>
+            <p className="text-slate-400 text-[11px] uppercase font-black">Institutional Greeting Registry Terminal</p>
           </div>
           
           <div className="flex gap-3">
@@ -302,21 +317,23 @@ export default function InternalOccasionsManagement() {
         </div>
       </header>
 
-      <section className="py-8 container mx-auto px-4 max-w-7xl space-y-12">
+      {/* 2. Main Terminal Grid */}
+      <section className="py-10 container mx-auto px-4 max-w-7xl space-y-12">
         
-        {/* Registry & Protocol Controls */}
-        <div className="grid lg:grid-cols-12 gap-8">
+        <div className="grid lg:grid-cols-12 gap-8 items-start">
+           
+           {/* LEFT: BROADCAST REGISTRY */}
            <div className="lg:col-span-8 space-y-6">
               <Card className="rounded-[2.5rem] border-none shadow-xl bg-white dark:bg-slate-900 overflow-hidden">
                 <CardHeader className="p-8 border-b bg-slate-50/50 dark:bg-slate-800/50 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
                    <div className="space-y-1">
-                      <CardTitle className="text-xl font-headline font-bold flex items-center gap-2">
+                      <CardTitle className="text-xl font-headline font-bold flex items-center gap-2 text-primary dark:text-white">
                         <History className="w-5 h-5 text-accent" /> Broadcast Registry
                       </CardTitle>
-                      <CardDescription className="text-xs uppercase font-bold text-slate-400">All historical and active broadcasts</CardDescription>
+                      <CardDescription className="text-xs uppercase font-bold text-slate-400">Manage institutional greetings lifecycle</CardDescription>
                    </div>
                    <div className="flex flex-col sm:flex-row gap-3">
-                      <div className="flex items-center gap-1.5 p-1 bg-white dark:bg-slate-950 rounded-xl border">
+                      <div className="flex items-center gap-1.5 p-1 bg-white dark:bg-slate-950 rounded-xl border border-slate-200">
                         {['All', 'Active', 'Draft'].map((f: any) => (
                           <button 
                             key={f} 
@@ -332,57 +349,94 @@ export default function InternalOccasionsManagement() {
                       </div>
                       <div className="relative">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
-                        <Input placeholder="Filter registry..." className="pl-9 h-9 rounded-xl text-xs w-48" value={search} onChange={e => setSearch(e.target.value)} />
+                        <Input placeholder="Filter registry..." className="pl-9 h-10 rounded-xl bg-white dark:bg-slate-900 shadow-sm text-xs w-full sm:w-48" value={search} onChange={e => setSearch(e.target.value)} />
                       </div>
                    </div>
                 </CardHeader>
                 <CardContent className="p-0">
-                   <ScrollArea className="h-[450px]">
+                   <ScrollArea className="h-[550px]">
                       <div className="divide-y divide-slate-100 dark:divide-slate-800">
                          {filtered.map((occ: any) => (
-                           <div key={occ.id} className="p-6 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all flex flex-col md:flex-row items-center justify-between gap-6 group">
-                              <div className="flex items-center gap-5 flex-1 min-w-0">
-                                 <div className="relative w-16 h-16 rounded-2xl overflow-hidden shadow-sm shrink-0 border border-slate-100">
+                           <div key={occ.id} className="p-8 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all flex flex-col md:flex-row items-center justify-between gap-8 group">
+                              <div className="flex items-start gap-6 flex-1 min-w-0">
+                                 <div className="relative w-24 h-24 rounded-3xl overflow-hidden shadow-lg shrink-0 border-2 border-slate-100 group-hover:scale-105 transition-transform duration-500">
                                     <Image src={occ.imageUrl} alt="Banner" fill className="object-cover" />
                                  </div>
-                                 <div className="min-w-0 space-y-1">
+                                 <div className="min-w-0 space-y-2">
                                     <div className="flex items-center gap-2">
-                                       <h4 className="text-base font-bold text-primary dark:text-white truncate">{occ.title}</h4>
-                                       <Badge variant="outline" className="text-[7px] font-black border-slate-200">{occ.category}</Badge>
+                                       <h4 className="text-lg font-headline font-bold text-primary dark:text-white truncate uppercase tracking-tight">{occ.title}</h4>
+                                       <Badge className="bg-slate-100 text-slate-500 border-none font-black text-[7px] uppercase h-4 px-2">{occ.category}</Badge>
                                     </div>
-                                    <p className="text-xs text-slate-400 line-clamp-1 italic">"{occ.message}"</p>
-                                    <p className="text-[9px] font-black text-slate-500 uppercase tracking-tighter">{occ.startDate} — {occ.endDate}</p>
+                                    <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed italic">"{occ.message}"</p>
+                                    <div className="flex items-center gap-4 text-[10px] font-black text-slate-400 uppercase tracking-tighter">
+                                       <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-accent" /> {occ.startDate}</span>
+                                       <ArrowRight className="w-3 h-3" />
+                                       <span className="text-primary dark:text-slate-200">{occ.endDate}</span>
+                                    </div>
                                  </div>
                               </div>
                               
-                              <div className="flex items-center gap-8 shrink-0">
-                                 <div className="flex flex-col items-center gap-1.5">
-                                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none">Live Status</span>
-                                    <div className="flex items-center gap-2">
+                              <div className="flex flex-col sm:flex-row items-center gap-8 shrink-0 w-full md:w-auto pt-4 md:pt-0 border-t md:border-none">
+                                 {/* EXPLICIT LIVE TOGGLE */}
+                                 <div className="flex flex-col items-center gap-2 w-full sm:w-auto">
+                                    <span className="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em] leading-none mb-1">Live Status Control</span>
+                                    <div className="flex items-center gap-3 bg-slate-50 dark:bg-slate-800 px-4 py-2 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-inner w-full justify-between">
                                        <Switch 
                                           checked={occ.isActive} 
                                           onCheckedChange={(val) => handleStatusUpdate(occ, val)} 
                                           className="data-[state=checked]:bg-emerald-500"
                                        />
-                                       <Badge className={cn("text-[8px] font-black uppercase px-2 h-5", occ.isActive ? "bg-emerald-500 text-white" : "bg-slate-200 text-slate-500")}>
+                                       <Badge className={cn(
+                                         "text-[9px] font-black uppercase px-3 h-6 border-none shadow-sm transition-all",
+                                         occ.isActive ? "bg-emerald-500 text-white animate-pulse" : "bg-slate-300 text-slate-500"
+                                       )}>
                                           {occ.isActive ? 'ON LIVE' : 'OFF LIVE'}
                                        </Badge>
                                     </div>
                                  </div>
-                                 <div className="flex gap-1.5">
-                                    <button onClick={() => { setEditOccasion(occ); setIsEditDialogOpen(true); }} className="h-9 w-9 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 hover:text-accent transition-all"><Edit className="w-4 h-4" /></button>
+
+                                 {/* EXPLICIT CRUD ACTIONS */}
+                                 <div className="flex gap-2 shrink-0">
+                                    <Button 
+                                      onClick={() => { setEditOccasion(occ); setIsEditDialogOpen(true); }}
+                                      variant="outline"
+                                      className="h-10 px-5 rounded-xl text-[10px] font-black uppercase tracking-widest border-2 border-slate-100 hover:border-primary hover:bg-primary hover:text-white transition-all shadow-sm"
+                                    >
+                                      <Edit className="w-3.5 h-3.5 mr-2" /> Edit
+                                    </Button>
+                                    
                                     <AlertDialog>
-                                       <AlertDialogTrigger asChild><button className="h-9 w-9 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 hover:text-red-500 transition-all"><Trash2 className="w-4 h-4" /></button></AlertDialogTrigger>
-                                       <AlertDialogContent className="rounded-[2.5rem]"><AlertDialogHeader><AlertDialogTitle>Purge Record?</AlertDialogTitle><AlertDialogDescription>Permanently remove this greeting from the manual registry?</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel><AlertDialogAction onClick={() => handleDeleteOccasion(occ.id)} className="bg-red-600 hover:bg-red-700 rounded-xl">Purge</AlertDialogAction></AlertDialogFooter></AlertDialogContent>
+                                       <AlertDialogTrigger asChild>
+                                          <Button 
+                                            variant="ghost" 
+                                            size="icon" 
+                                            className="h-10 w-10 rounded-xl text-slate-300 hover:text-red-500 hover:bg-red-50 transition-all border border-transparent hover:border-red-100"
+                                          >
+                                            <Trash2 className="w-4.5 h-4.5" />
+                                          </Button>
+                                       </AlertDialogTrigger>
+                                       <AlertDialogContent className="rounded-[2.5rem] border-none shadow-2xl bg-white dark:bg-slate-900 p-10 text-center">
+                                          <AlertDialogHeader className="items-center">
+                                             <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center text-red-500 mb-4 animate-pulse"><Trash2 className="w-8 h-8" /></div>
+                                             <AlertDialogTitle className="text-2xl font-headline font-bold">Purge Record?</AlertDialogTitle>
+                                             <AlertDialogDescription className="text-sm font-medium leading-relaxed">
+                                                This will permanently remove the greeting record from the institutional registry. This action cannot be undone.
+                                             </AlertDialogDescription>
+                                          </AlertDialogHeader>
+                                          <AlertDialogFooter className="mt-8 flex gap-3">
+                                             <AlertDialogCancel className="rounded-xl h-12 font-bold flex-1">Cancel</AlertDialogCancel>
+                                             <AlertDialogAction onClick={() => handleDeleteOccasion(occ.id)} className="bg-red-600 hover:bg-red-700 text-white rounded-xl h-12 font-bold flex-1">Permanently Delete</AlertDialogAction>
+                                          </AlertDialogFooter>
+                                       </AlertDialogContent>
                                     </AlertDialog>
                                  </div>
                               </div>
                            </div>
                          ))}
                          {filtered.length === 0 && (
-                           <div className="py-24 text-center opacity-30">
-                              <Database className="w-12 h-12 mx-auto mb-4" />
-                              <p className="text-sm font-black uppercase tracking-[0.3em]">Registry Query Empty</p>
+                           <div className="py-32 text-center flex flex-col items-center gap-4">
+                              <Database className="w-16 h-16 text-slate-100 mx-auto" />
+                              <p className="text-sm font-black text-slate-400 uppercase tracking-widest">No matching records identified in registry</p>
                            </div>
                          )}
                       </div>
@@ -391,6 +445,7 @@ export default function InternalOccasionsManagement() {
               </Card>
            </div>
 
+           {/* RIGHT: PROTOCOLS & INTELLIGENCE */}
            <div className="lg:col-span-4 space-y-6">
               <Card className="rounded-[2.5rem] bg-slate-900 border-none shadow-xl text-white p-8 relative overflow-hidden">
                  <div className="absolute top-0 right-0 w-32 h-32 bg-accent/5 rounded-full -mr-16 -mt-16 blur-2xl"></div>
@@ -399,60 +454,60 @@ export default function InternalOccasionsManagement() {
                        <Zap className="w-6 h-6 text-accent" />
                        <h3 className="text-sm font-black uppercase tracking-widest">Autonomous Protocol</h3>
                     </div>
-                    <div className="flex items-center justify-between p-5 bg-white/5 rounded-3xl border border-white/5">
+                    <div className="flex items-center justify-between p-5 bg-white/5 rounded-3xl border border-white/5 shadow-inner">
                        <div className="space-y-0.5">
                           <h4 className="font-bold text-xs">Calendar Sync Mode</h4>
-                          <p className="text-[9px] text-slate-500 uppercase font-black">AI Discovery Control</p>
+                          <p className="text-[9px] text-slate-500 uppercase font-black">Auto-Discovery Control</p>
                        </div>
                        <Switch checked={isAutoMode} onCheckedChange={handleToggleProtocol} className="data-[state=checked]:bg-accent" />
                     </div>
-                    <div className="p-5 bg-white/5 rounded-3xl border border-white/5 space-y-4">
+                    <div className="p-5 bg-black/40 rounded-3xl border border-white/5 space-y-4 shadow-inner">
                        <div className="flex items-center gap-3">
                           <Radio className="w-4 h-4 text-emerald-400 animate-pulse" />
-                          <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Protocol Intelligence</span>
+                          <span className="text-[10px] font-black uppercase text-slate-500 tracking-widest">System Intelligence</span>
                        </div>
-                       <p className="text-[11px] leading-relaxed text-slate-400 italic">
-                          "Enabling Auto-Mode suspends manual broadcasts to prevent visual conflicts on the public portal. The system will autonomously scan the institutional calendar for the next relevant occasion."
+                       <p className="text-[11px] leading-relaxed text-slate-400 font-medium italic">
+                          "Autonomous Mode suspends manual broadcasts to prioritize institutional milestones discovered in the national cycle. Ensure manual records do not overlap with national holidays."
                        </p>
                     </div>
                  </div>
               </Card>
 
-              <div className="p-8 rounded-[3rem] bg-indigo-50 dark:bg-indigo-950/20 border-2 border-dashed border-indigo-200 dark:border-indigo-900 text-center space-y-4 shadow-sm">
-                 <ShieldCheck className="w-10 h-10 text-indigo-500 mx-auto" />
-                 <h4 className="text-sm font-black uppercase tracking-widest text-indigo-700">Governance Notice</h4>
+              <div className="p-8 rounded-[3rem] bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-center space-y-4 shadow-xl">
+                 <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 mx-auto shadow-sm"><ShieldCheck className="w-6 h-6" /></div>
+                 <h4 className="text-sm font-headline font-bold text-primary dark:text-white uppercase tracking-tight">Audit Mandate</h4>
                  <p className="text-[10px] text-slate-500 font-bold leading-relaxed uppercase">
-                    Occasions represent the public face of the Trust. Ensure all narratives follow the established institutional etiquette.
+                    All broadcasts are logged with administrative timestamps for future accountability and statutory reporting.
                  </p>
               </div>
            </div>
         </div>
 
-        {/* Full-Width Detailed Calendar Section */}
-        <div className="pt-8 space-y-8">
-           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-slate-200 dark:border-slate-800 pb-6">
-              <div className="flex items-center gap-4">
-                 <div className="w-12 h-12 rounded-2xl bg-white dark:bg-slate-900 border border-slate-100 flex items-center justify-center text-accent shadow-sm">
-                    <CalendarDays className="w-6 h-6" />
+        {/* 3. TACTICAL TIMELINE (Bottom Detailed Calendar) */}
+        <div className="pt-10 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-1000">
+           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b-2 border-slate-100 dark:border-slate-800 pb-8">
+              <div className="flex items-center gap-5">
+                 <div className="w-14 h-14 rounded-3xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 flex items-center justify-center text-accent shadow-lg">
+                    <CalendarDays className="w-7 h-7" />
                  </div>
                  <div>
-                    <h2 className="text-2xl md:text-3xl font-headline font-bold text-primary dark:text-white">Institutional <span className="text-accent italic">Timeline</span></h2>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Tactical oversight of special days & scheduled broadcasts</p>
+                    <h2 className="text-2xl md:text-4xl font-headline font-bold text-primary dark:text-white">Tactical <span className="text-accent italic">Timeline</span></h2>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Full-Spectrum Institutional Calendar oversight</p>
                  </div>
               </div>
-              <div className="flex items-center gap-2 bg-white dark:bg-slate-900 p-1.5 rounded-2xl border shadow-inner">
-                 <Button onClick={() => setCurrentCalendarMonth(subMonths(currentCalendarMonth, 1))} variant="ghost" size="icon" className="h-9 w-9 rounded-xl"><ChevronLeft className="w-4 h-4" /></Button>
-                 <span className="px-6 text-sm font-black uppercase tracking-widest text-primary dark:text-white">{format(currentCalendarMonth, 'MMMM yyyy')}</span>
-                 <Button onClick={() => setCurrentCalendarMonth(addMonths(currentCalendarMonth, 1))} variant="ghost" size="icon" className="h-9 w-9 rounded-xl"><ChevronRight className="w-4 h-4" /></Button>
+              <div className="flex items-center gap-3 bg-white dark:bg-slate-900 p-2 rounded-2xl border shadow-xl">
+                 <Button onClick={() => setCurrentCalendarMonth(subMonths(currentCalendarMonth, 1))} variant="ghost" size="icon" className="h-10 w-10 rounded-xl hover:bg-slate-50"><ChevronLeft className="w-5 h-5" /></Button>
+                 <span className="px-8 text-sm font-black uppercase tracking-widest text-primary dark:text-white min-w-[180px] text-center">{format(currentCalendarMonth, 'MMMM yyyy')}</span>
+                 <Button onClick={() => setCurrentCalendarMonth(addMonths(currentCalendarMonth, 1))} variant="ghost" size="icon" className="h-10 w-10 rounded-xl hover:bg-slate-50"><ChevronRight className="w-5 h-5" /></Button>
               </div>
            </div>
 
            <div className="grid lg:grid-cols-12 gap-8 items-start">
-              {/* Detailed Month Grid */}
+              {/* MONTHLY GRID VIEW */}
               <div className="lg:col-span-8">
                  <div className="grid grid-cols-7 gap-3">
                     {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
-                       <div key={d} className="text-center py-4 bg-slate-900 text-white rounded-xl text-[10px] font-black uppercase tracking-[0.2em] mb-2">{d}</div>
+                       <div key={d} className="text-center py-4 bg-slate-900 text-white rounded-xl text-[11px] font-black uppercase tracking-[0.2em] mb-2">{d}</div>
                     ))}
                     {calendarDays.map((day, idx) => {
                        const dayStr = format(day, 'yyyy-MM-dd');
@@ -461,33 +516,36 @@ export default function InternalOccasionsManagement() {
                        );
                        const holiday = allSpecialDays.find(sd => isSameDay(sd.date, day));
                        const isTodayDay = isToday(day);
+                       const isSameMonthDay = isSameMonth(day, currentCalendarMonth);
 
                        return (
                         <Card key={idx} className={cn(
-                          "min-h-[120px] rounded-2xl border-none shadow-sm transition-all group p-3 relative",
-                          isTodayDay ? "bg-accent/5 ring-2 ring-accent/20" : "bg-white dark:bg-slate-900",
-                          !isSameMonth(day, currentCalendarMonth) && "opacity-20"
+                          "min-h-[140px] rounded-3xl border-none shadow-sm transition-all group p-4 relative overflow-hidden",
+                          isTodayDay ? "bg-accent/10 ring-2 ring-accent/30 scale-[1.02] shadow-xl" : "bg-white dark:bg-slate-900",
+                          !isSameMonthDay && "opacity-20 grayscale",
+                          isSameMonthDay && "hover:shadow-xl hover:ring-1 hover:ring-accent/20"
                         )}>
-                           <div className="flex justify-between items-start mb-3">
+                           {isTodayDay && <div className="absolute top-0 left-0 w-full h-1 bg-accent animate-pulse" />}
+                           <div className="flex justify-between items-start mb-4">
                               <span className={cn(
-                                "text-sm font-black w-7 h-7 rounded-lg flex items-center justify-center transition-all",
-                                isTodayDay ? "bg-accent text-primary" : "text-slate-400 group-hover:text-primary"
+                                "text-base font-black w-8 h-8 rounded-xl flex items-center justify-center transition-all",
+                                isTodayDay ? "bg-accent text-primary shadow-lg" : "text-slate-400 group-hover:text-primary dark:text-slate-600 dark:group-hover:text-white"
                               )}>{format(day, 'd')}</span>
-                              {holiday?.isHoliday && <Badge className="bg-red-500 text-white text-[7px] border-none px-1.5 h-4">OFFICIAL</Badge>}
+                              {holiday?.isHoliday && <Badge className="bg-red-600 text-white text-[7px] font-black border-none px-2 h-4 uppercase shadow-sm">NATIONAL</Badge>}
                            </div>
                            
-                           <div className="space-y-1.5 overflow-hidden">
+                           <div className="space-y-2 overflow-hidden">
                               {holiday && (
-                                <div className="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 text-[8px] font-black uppercase truncate border border-emerald-100">
+                                <div className="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400 text-[9px] font-black uppercase truncate border border-emerald-100 dark:border-emerald-900">
                                    {holiday.title}
                                 </div>
                               )}
                               {dayOccasions.map((occ: any, i: number) => (
                                 <div key={i} className={cn(
-                                  "px-2 py-0.5 rounded-md text-[8px] font-black uppercase truncate border flex items-center gap-1.5",
-                                  occ.isActive ? "bg-accent/10 border-accent/20 text-accent" : "bg-slate-100 text-slate-400 border-slate-200"
+                                  "px-2.5 py-1 rounded-lg text-[9px] font-black uppercase truncate border flex items-center gap-1.5 transition-all",
+                                  occ.isActive ? "bg-accent/10 border-accent/30 text-accent" : "bg-slate-100 text-slate-400 border-slate-200 dark:bg-slate-800 dark:border-slate-700"
                                 )}>
-                                   {occ.isActive && <div className="w-1 h-1 rounded-full bg-accent animate-pulse" />}
+                                   {occ.isActive && <div className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse shadow-[0_0_8px_rgba(249,115,22,0.5)]" />}
                                    {occ.title}
                                 </div>
                               ))}
@@ -498,37 +556,46 @@ export default function InternalOccasionsManagement() {
                  </div>
               </div>
 
-              {/* Sidebar: Strategic Agenda */}
+              {/* SIDEBAR: NEXT 30 DAYS AGENDA */}
               <div className="lg:col-span-4 space-y-6">
-                 <Card className="rounded-[2.5rem] border-none shadow-sm bg-white dark:bg-slate-900 p-8">
-                    <h3 className="text-xs font-black uppercase text-accent tracking-[0.2em] mb-6 flex items-center gap-2">
-                       <Clock className="w-4 h-4" /> Next 30 Days Agenda
-                    </h3>
-                    <ScrollArea className="h-[600px] pr-4">
-                       <div className="space-y-8">
+                 <Card className="rounded-[2.5rem] border-none shadow-xl bg-white dark:bg-slate-900 p-8">
+                    <CardHeader className="p-0 mb-8 border-b pb-6">
+                       <CardTitle className="text-xl font-headline font-bold flex items-center gap-3 text-primary dark:text-white">
+                          <Clock className="w-6 h-6 text-accent" /> Institutional Agenda
+                       </CardTitle>
+                       <CardDescription className="text-[10px] font-black uppercase tracking-widest text-slate-400">Next 30 days projection</CardDescription>
+                    </CardHeader>
+                    <ScrollArea className="h-[650px] pr-4">
+                       <div className="space-y-10">
                           {specialDaysInMonth.map((d, i) => {
                              const daysRemaining = differenceInDays(d.date, startOfDay(new Date()));
                              return (
-                              <div key={i} className="flex gap-4 group">
+                              <div key={i} className="flex gap-6 group relative">
                                  <div className="flex flex-col items-center shrink-0">
-                                    <div className="w-10 h-10 rounded-2xl bg-slate-900 text-white flex items-center justify-center text-xs font-black group-hover:bg-accent group-hover:text-primary transition-all shadow-lg">{format(d.date, 'd')}</div>
-                                    <div className="w-0.5 h-full bg-slate-100 dark:bg-slate-800 mt-2"></div>
+                                    <div className="w-12 h-12 rounded-2xl bg-slate-900 text-white flex flex-col items-center justify-center shadow-xl group-hover:bg-accent group-hover:text-primary transition-all duration-500">
+                                       <span className="text-[8px] font-black uppercase tracking-tighter opacity-60 leading-none">{format(d.date, 'MMM')}</span>
+                                       <span className="text-lg font-black leading-none">{format(d.date, 'd')}</span>
+                                    </div>
+                                    <div className="w-0.5 h-full bg-slate-100 dark:bg-slate-800 mt-4"></div>
                                  </div>
-                                 <div className="space-y-1.5 pb-8 flex-1 min-w-0">
-                                    <div className="flex items-center justify-between">
-                                       <p className="text-[8px] font-black uppercase text-slate-400 leading-none">{format(d.date, 'MMMM yyyy')}</p>
-                                       {daysRemaining > 0 && <span className="text-[7px] font-black text-emerald-500 uppercase tracking-tighter">In {daysRemaining} Days</span>}
-                                       {daysRemaining === 0 && <Badge className="bg-red-600 text-[6px] h-4">TODAY</Badge>}
+                                 <div className="space-y-2 pb-10 flex-1 min-w-0">
+                                    <div className="flex items-center justify-between gap-2">
+                                       {daysRemaining === 0 ? (
+                                         <Badge className="bg-red-600 text-white text-[8px] font-black uppercase animate-pulse">ACTIVE TODAY</Badge>
+                                       ) : (
+                                         <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">IN {daysRemaining} DAYS</span>
+                                       )}
+                                       <span className="text-[8px] font-bold text-slate-400 uppercase">{d.category}</span>
                                     </div>
-                                    <h5 className="text-sm font-black text-primary dark:text-white uppercase truncate">{d.title}</h5>
-                                    <div className="flex items-center gap-3">
-                                       <Badge variant="outline" className="text-[7px] font-bold border-slate-200">{d.category}</Badge>
-                                       <span className="text-[8px] font-black text-slate-300 uppercase">{d.isHoliday ? 'Statutory Holiday' : 'Observance'}</span>
-                                    </div>
+                                    <h5 className="text-base font-bold text-primary dark:text-white leading-tight uppercase truncate">{d.title}</h5>
+                                    <p className="text-[10px] font-medium text-slate-500 italic">Institutional observance mandate</p>
                                  </div>
                               </div>
                              );
                           })}
+                          {specialDaysInMonth.length === 0 && (
+                            <div className="py-20 text-center text-slate-300 font-bold uppercase text-xs">No upcoming milestones</div>
+                          )}
                        </div>
                     </ScrollArea>
                  </Card>
@@ -538,69 +605,150 @@ export default function InternalOccasionsManagement() {
 
       </section>
 
-      {/* Global Edit Dialog */}
+      {/* 4. MODALS & DIALOGS */}
+
+      {/* CREATE MODAL */}
+      <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+        <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="max-w-2xl bg-white dark:bg-slate-900 rounded-[2.5rem] border-none shadow-2xl max-h-[90vh] overflow-y-auto flex flex-col p-0 z-[1000001]">
+            <div className="bg-slate-900 p-10 text-white relative shrink-0 border-b-4 border-accent/20">
+               <div className="absolute right-8 top-8"><DialogClose asChild><Button variant="ghost" size="icon" className="rounded-full text-white hover:bg-white/10 transition-all h-10 w-10"><X className="w-6 h-6" /></Button></DialogClose></div>
+               <DialogTitle className="text-3xl font-headline font-bold">Launch New Broadcast</DialogTitle>
+               <DialogDescription className="text-slate-400 uppercase tracking-widest text-[10px] font-black mt-2 flex items-center gap-2">
+                 <ShieldCheck className="w-4 h-4 text-emerald-400" /> Administrative Deployment Node
+               </DialogDescription>
+            </div>
+            
+            <div className="flex-1 p-10 space-y-10">
+                {/* Visual Banner Area */}
+                <div className="flex flex-col items-center gap-4 p-8 border-2 border-dashed rounded-3xl bg-slate-50 dark:bg-slate-950 border-slate-200 shadow-inner group">
+                   <div className="relative w-full aspect-video rounded-2xl overflow-hidden bg-white shadow-2xl border-4 border-white transition-all group-hover:shadow-accent/10">
+                     {newOccasion.imageUrl ? (
+                       <Image src={newOccasion.imageUrl} alt="Preview" fill className="object-cover" />
+                     ) : (
+                       <div className="flex flex-col items-center justify-center h-full gap-4 text-slate-300">
+                          <ImageIcon className="w-16 h-16 opacity-20" />
+                          <span className="text-[10px] font-black uppercase tracking-widest">Awaiting Visual Payload</span>
+                       </div>
+                     )}
+                     <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer z-10" onChange={(e) => handleFileChange(e, false)} />
+                   </div>
+                   <div className="flex items-center gap-2 text-[10px] font-bold uppercase text-slate-400">
+                      <Upload className="w-4 h-4" /> Click center area to select banner (< 200KB)
+                   </div>
+                </div>
+
+                {/* Form Logic */}
+                <div className="space-y-8">
+                   {/* Bilingual Title Block */}
+                   <div className="grid md:grid-cols-2 gap-8">
+                      <div className="space-y-2">
+                         <div className="flex items-center justify-between mb-1">
+                            <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">English Headline *</Label>
+                            <button type="button" onClick={() => setAddTitleLang('en')} className={cn("px-3 py-0.5 rounded-md text-[8px] font-black uppercase transition-all", addTitleLang === 'en' ? "bg-accent text-primary shadow-sm" : "text-slate-400")}>EN</button>
+                         </div>
+                         <Input value={newOccasion.title} onChange={e => setNewOccasion({...newOccasion, title: e.target.value})} className="h-12 rounded-xl bg-slate-50 border-none shadow-inner font-bold" placeholder="e.g. Independence Day 2026" />
+                      </div>
+                      <div className="space-y-2">
+                         <div className="flex items-center justify-between mb-1">
+                            <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Bengali Headline</Label>
+                            <button type="button" onClick={() => setAddTitleLang('bn')} className={cn("px-3 py-0.5 rounded-md text-[8px] font-black uppercase transition-all", addTitleLang === 'bn' ? "bg-accent text-primary shadow-sm" : "text-slate-400")}>BN</button>
+                         </div>
+                         <Input value={newOccasion.titleBn} onChange={e => setNewOccasion({...newOccasion, titleBn: e.target.value})} className="h-12 rounded-xl bg-slate-50 border-none shadow-inner font-bold" placeholder="যেমন: স্বাধীনতা দিবস ২০২৬" />
+                      </div>
+                   </div>
+
+                   {/* Scheduling Block */}
+                   <div className="grid grid-cols-2 gap-8 p-8 bg-slate-50 dark:bg-slate-950 rounded-[2.5rem] shadow-inner border border-slate-100">
+                      <div className="space-y-2">
+                         <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Deployment (Start Date)</Label>
+                         <Input type="date" value={newOccasion.startDate} onChange={e => setNewOccasion({...newOccasion, startDate: e.target.value})} className="h-11 rounded-xl bg-white border-none shadow-sm font-bold" />
+                      </div>
+                      <div className="space-y-2">
+                         <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Termination (End Date)</Label>
+                         <Input type="date" value={newOccasion.endDate} onChange={e => setNewOccasion({...newOccasion, endDate: e.target.value})} className="h-11 rounded-xl bg-white border-none shadow-sm font-bold" />
+                      </div>
+                   </div>
+
+                   {/* Narrative Content */}
+                   <div className="space-y-6">
+                      <div className="space-y-2">
+                         <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Bilingual Narrative (English & Bengali)</Label>
+                         <Textarea value={newOccasion.message} onChange={e => setNewOccasion({...newOccasion, message: e.target.value})} placeholder="English message content..." className="min-h-[100px] rounded-2xl bg-slate-50 border-none shadow-inner p-5 text-sm" />
+                         <Textarea value={newOccasion.messageBn} onChange={e => setNewOccasion({...newOccasion, messageBn: e.target.value})} placeholder="বাংলায় বার্তা লিখুন..." className="min-h-[100px] rounded-2xl bg-slate-50 border-none shadow-inner p-5 text-sm mt-4" />
+                      </div>
+                   </div>
+
+                   {/* Execution Parameters */}
+                   <div className="grid md:grid-cols-2 gap-8 items-end">
+                      <div className="space-y-2">
+                         <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Broadcast Priority</Label>
+                         <Input type="number" value={newOccasion.priority} onChange={e => setNewOccasion({...newOccasion, priority: Number(e.target.value)})} className="h-12 rounded-xl bg-slate-50 border-none shadow-inner font-black text-xl text-center" />
+                      </div>
+                      <div className="flex items-center justify-between p-6 bg-emerald-50/50 dark:bg-emerald-950/20 rounded-3xl border border-emerald-100 h-12 shadow-sm">
+                         <Label className="text-[10px] font-black text-emerald-700 uppercase tracking-widest">Auto-Enable (Go Live)</Label>
+                         <Switch checked={newOccasion.isActive} onCheckedChange={val => setNewOccasion({...newOccasion, isActive: val})} className="data-[state=checked]:bg-emerald-500" />
+                      </div>
+                   </div>
+                </div>
+
+                <div className="pt-10">
+                   <Button onClick={handleAddOccasion} disabled={isActionLoading} className="w-full h-16 rounded-3xl bg-primary text-white font-black uppercase tracking-widest text-sm md:text-base hover:bg-secondary transition-all shadow-2xl shadow-primary/20 flex gap-3">
+                      {isActionLoading ? <Loader2 className="w-6 h-6 animate-spin" /> : <><CheckCircle2 className="w-6 h-6" /> Verify & Publish Broadcast</>}
+                   </Button>
+                </div>
+            </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* EDIT MODAL */}
       <Dialog open={isEditDialogOpen} onOpenChange={(val) => { if(!val) { setIsEditDialogOpen(false); setEditOccasion(null); } }}>
         <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="max-w-2xl bg-white dark:bg-slate-900 rounded-[2.5rem] border-none shadow-2xl max-h-[90vh] overflow-y-auto flex flex-col p-0 z-[1000001]">
-            <div className="bg-slate-900 pt-14 pb-10 px-8 text-white relative border-b-4 border-accent/20 shrink-0">
-               <div className="absolute right-6 top-6"><DialogClose asChild><Button variant="ghost" size="icon" className="rounded-full text-white hover:bg-white/10 h-10 w-10 transition-all"><X className="w-6 h-6" /></Button></DialogClose></div>
-               <DialogTitle className="text-2xl font-headline font-bold">Refine Greeting Record</DialogTitle>
-               <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">Registry Update Protocol</p>
+            <div className="bg-slate-900 p-10 text-white relative shrink-0 border-b-4 border-accent/20">
+               <div className="absolute right-8 top-8"><DialogClose asChild><Button variant="ghost" size="icon" className="rounded-full text-white hover:bg-white/10 transition-all h-10 w-10"><X className="w-6 h-6" /></Button></DialogClose></div>
+               <DialogTitle className="text-3xl font-headline font-bold">Update Broadcast Metadata</DialogTitle>
+               <DialogDescription className="text-slate-400 uppercase tracking-widest text-[10px] font-black mt-2">Registry Refresh Protocol</DialogDescription>
             </div>
             
             {editOccasion && (
-              <div className="flex-1 overflow-y-auto p-8 space-y-6 custom-scrollbar">
-                <div className="flex flex-col items-center gap-4 p-5 border-2 border-dashed rounded-[2rem] bg-slate-50 dark:bg-slate-900 shadow-inner">
-                  <div className="relative w-full aspect-video rounded-2xl overflow-hidden bg-slate-200 border-4 border-white shadow-xl">
+              <div className="flex-1 p-10 space-y-8">
+                <div className="flex flex-col items-center gap-4 p-5 border-2 border-dashed rounded-3xl bg-slate-50 dark:bg-slate-900 shadow-inner">
+                  <div className="relative w-full aspect-video rounded-2xl overflow-hidden bg-white shadow-xl border-4 border-white">
                     <Image src={editOccasion.imageUrl} alt="Banner" fill className="object-cover" />
                     <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer z-10" onChange={(e) => handleFileChange(e, true)} />
                   </div>
-                  <Badge variant="outline" className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Click Image area to update</Badge>
+                  <Badge variant="outline" className="text-[9px] font-black uppercase tracking-widest text-slate-400">Click Image to Replace Banner</Badge>
                 </div>
 
-                <div className="space-y-2">
-                   <div className="flex items-center justify-between mb-1">
-                      <Label className="text-[10px] font-black uppercase text-slate-500">Occasion Title *</Label>
-                      <div className="flex bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg border">
-                         <button type="button" onClick={() => setEditTitleLang('en')} className={cn("px-3 py-0.5 rounded-md text-[8px] font-black uppercase transition-all", editTitleLang === 'en' ? "bg-white dark:bg-slate-700 text-primary shadow-sm" : "text-slate-400")}>EN</button>
-                         <button type="button" onClick={() => setEditTitleLang('bn')} className={cn("px-3 py-0.5 rounded-md text-[8px] font-black uppercase transition-all", editTitleLang === 'bn' ? "bg-white dark:bg-slate-700 text-primary shadow-sm" : "text-slate-400")}>BN</button>
+                <div className="space-y-6">
+                   <div className="grid md:grid-cols-2 gap-8">
+                      <div className="space-y-1.5"><Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Headline (EN) *</Label><Input value={editOccasion.title} onChange={e => setEditOccasion({...editOccasion, title: e.target.value})} className="h-11 rounded-xl bg-slate-50 border-none shadow-inner font-bold" /></div>
+                      <div className="space-y-1.5"><Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Headline (BN)</Label><Input value={editOccasion.titleBn || ''} onChange={e => setEditOccasion({...editOccasion, titleBn: e.target.value})} className="h-11 rounded-xl bg-slate-50 border-none shadow-inner font-bold" /></div>
+                   </div>
+
+                   <div className="grid grid-cols-2 gap-8 p-6 bg-slate-50 dark:bg-slate-950 rounded-[2rem] border border-slate-100 shadow-inner">
+                      <div className="space-y-1.5"><Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Start Date</Label><Input type="date" value={editOccasion.startDate} onChange={e => setEditOccasion({...editOccasion, startDate: e.target.value})} className="h-11 rounded-xl bg-white border-none shadow-sm" /></div>
+                      <div className="space-y-1.5"><Label className="text-[10px] font-black uppercase text-slate-400 ml-1">End Date</Label><Input type="date" value={editOccasion.endDate} onChange={e => setEditOccasion({...editOccasion, endDate: e.target.value})} className="h-11 rounded-xl bg-white border-none shadow-sm" /></div>
+                   </div>
+
+                   <div className="space-y-4">
+                      <div className="space-y-1.5"><Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Narrative (EN)</Label><Textarea value={editOccasion.message} onChange={e => setEditOccasion({...editOccasion, message: e.target.value})} className="rounded-2xl min-h-[100px] bg-slate-50 border-none shadow-inner p-4 text-sm" /></div>
+                      <div className="space-y-1.5"><Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Narrative (BN)</Label><Textarea value={editOccasion.messageBn || ''} onChange={e => setEditOccasion({...editOccasion, messageBn: e.target.value})} className="rounded-2xl min-h-[100px] bg-slate-50 border-none shadow-inner p-4 text-sm" /></div>
+                   </div>
+                   
+                   <div className="grid grid-cols-2 gap-8 items-center">
+                      <div className="space-y-1.5"><Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Priority</Label><Input type="number" value={editOccasion.priority} onChange={e => setEditOccasion({...editOccasion, priority: Number(e.target.value)})} className="h-11 rounded-xl bg-slate-50 border-none shadow-inner font-bold text-center" /></div>
+                      <div className="flex items-center justify-between p-5 bg-emerald-50/50 dark:bg-emerald-950/20 rounded-3xl border border-emerald-100 h-11 self-end shadow-sm">
+                         <Label className="text-[10px] font-black text-emerald-700 uppercase tracking-widest">Live Status</Label>
+                         <Switch checked={editOccasion.isActive} onCheckedChange={val => setEditOccasion({...editOccasion, isActive: val})} className="data-[state=checked]:bg-emerald-500" />
                       </div>
                    </div>
-                   {editTitleLang === 'en' ? (
-                     <Input value={editOccasion.title} onChange={e => setEditOccasion({...editOccasion, title: e.target.value})} className="h-12 rounded-xl bg-slate-50 border-none shadow-inner font-bold animate-in fade-in duration-300" />
-                   ) : (
-                     <Input value={editOccasion.titleBn || ''} lang="bn" onChange={e => setEditOccasion({...editOccasion, titleBn: e.target.value})} className="h-12 rounded-xl bg-slate-50 border-none shadow-inner font-medium leading-relaxed animate-in fade-in duration-300" />
-                   )}
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1.5"><Label className="text-[10px] uppercase font-bold text-slate-500">Start Date</Label><Input type="date" value={editOccasion.startDate} onChange={e => setEditOccasion({...editOccasion, startDate: e.target.value})} className="h-11 rounded-xl" /></div>
-                  <div className="space-y-1.5"><Label className="text-[10px] uppercase font-bold text-slate-500">End Date</Label><Input type="date" value={editOccasion.endDate} onChange={e => setEditOccasion({...editOccasion, endDate: e.target.value})} className="h-11 rounded-xl" /></div>
+                <div className="pt-6">
+                   <Button onClick={handleUpdateOccasion} disabled={isActionLoading} className="w-full h-16 rounded-3xl bg-primary text-white font-black uppercase tracking-widest text-sm hover:bg-secondary transition-all shadow-xl">
+                      {isActionLoading ? <Loader2 className="w-6 h-6 animate-spin" /> : "Commit Registry Refresh"}
+                   </Button>
                 </div>
-
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between mb-1">
-                    <Label className="text-[10px] font-bold uppercase text-slate-500">Greeting Narrative</Label>
-                    <div className="flex bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg border">
-                      <button type="button" onClick={() => setEditMsgLang('en')} className={cn("px-3 py-0.5 rounded-md text-[8px] font-black uppercase transition-all", editMsgLang === 'en' ? "bg-white dark:bg-slate-700 text-primary shadow-sm" : "text-slate-400")}>EN</button>
-                      <button type="button" onClick={() => setEditMsgLang('bn')} className={cn("px-3 py-0.5 rounded-md text-[8px] font-black uppercase transition-all", editMsgLang === 'bn' ? "bg-white dark:bg-slate-700 text-primary shadow-sm" : "text-slate-400")}>BN</button>
-                    </div>
-                  </div>
-                  {editMsgLang === 'en' ? (
-                    <Textarea value={editOccasion.message} onChange={e => setEditOccasion({...editOccasion, message: e.target.value})} className="rounded-xl min-h-[120px] animate-in fade-in duration-300" />
-                  ) : (
-                    <Textarea value={editOccasion.messageBn || ''} lang="bn" onChange={e => setEditOccasion({...editOccasion, messageBn: e.target.value})} className="rounded-xl min-h-[120px] font-medium leading-relaxed animate-in fade-in duration-300" />
-                  )}
-                </div>
-                
-                <div className="grid grid-cols-2 gap-4 items-center">
-                   <div className="space-y-1.5"><Label className="text-[10px] font-black uppercase text-slate-500">Display Priority</Label><Input type="number" value={editOccasion.priority} onChange={e => setEditOccasion({...editOccasion, priority: Number(e.target.value)})} className="h-11 rounded-xl bg-slate-50 border-none shadow-inner font-bold" /></div>
-                   <div className="flex items-center justify-between p-5 bg-emerald-50/50 dark:bg-emerald-950/20 rounded-2xl border border-emerald-100 dark:border-emerald-900 h-11 self-end">
-                      <Label className="text-[10px] font-bold text-primary dark:text-emerald-400 uppercase">ON LIVE Status</Label>
-                      <Switch checked={editOccasion.isActive} onCheckedChange={val => setEditOccasion({...editOccasion, isActive: val})} className="data-[state=checked]:bg-emerald-500 ml-4" />
-                   </div>
-                </div>
-
-                <Button type="button" onClick={handleUpdateOccasion} disabled={isActionLoading} className="w-full h-16 rounded-2xl bg-primary text-white font-bold shadow-xl hover:bg-secondary transition-all text-base md:text-lg">Save Profile Changes</Button>
               </div>
             )}
         </DialogContent>
@@ -611,7 +759,9 @@ export default function InternalOccasionsManagement() {
   );
 }
 
-// Minimal helpers
+/**
+ * Procedural Helpers
+ */
 function differenceInDays(date1: Date, date2: Date) {
   const diffTime = Math.abs(date1.getTime() - date2.getTime());
   return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
