@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser, useCollection, useFirestore, useMemoFirebase, useDoc } from '@/firebase';
 import { 
@@ -85,9 +85,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { Calendar as CalendarComponent } from "@/components/ui/calendar"
-import { useToast } from '@/hooks/use-toast';
-import Image from 'next/image';
-import { cn } from '@/lib/utils';
 import { 
   format, 
   addDays, 
@@ -104,10 +101,15 @@ import {
   subMonths,
   isSameMonth,
   isToday,
-  parseISO
+  parseISO,
+  startOfWeek,
+  endOfWeek
 } from 'date-fns';
 import { BUILT_IN_HOLIDAYS, BUILT_IN_OBSERVANCES } from '@/lib/activity-hub-data';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useToast } from '@/hooks/use-toast';
+import Image from 'next/image';
+import { cn } from '@/lib/utils';
 
 /**
  * Occasions Governance Terminal: Real-time mission control for institutional greetings.
@@ -142,7 +144,7 @@ export default function InternalOccasionsManagement() {
     category: 'General'
   });
 
-  const isRoot = user?.email?.toLowerCase() === 'deydhritiman@gmail.com';
+  // --- DATA FETCHING & DERIVED STATE ---
 
   const protocolRef = useMemoFirebase(() => {
     if (!db) return null;
@@ -172,6 +174,24 @@ export default function InternalOccasionsManagement() {
     const end = addDays(now, 30);
     return allSpecialDays.filter(d => d.date >= now && d.date <= end);
   }, [allSpecialDays]);
+
+  const calendarDays = useMemo(() => {
+    const start = startOfWeek(startOfMonth(currentCalendarMonth));
+    const end = endOfWeek(endOfMonth(currentCalendarMonth));
+    return eachDayOfInterval({ start, end });
+  }, [currentCalendarMonth]);
+
+  const filtered = useMemo(() => {
+    return (occasions || []).filter((occ: any) => {
+      const matchesSearch = occ.title.toLowerCase().includes(search.toLowerCase()) || 
+                            occ.message.toLowerCase().includes(search.toLowerCase());
+      const matchesStatus = statusFilter === 'All' ? true : 
+                           statusFilter === 'Active' ? occ.isActive === true : occ.isActive === false;
+      return matchesSearch && matchesStatus;
+    });
+  }, [occasions, search, statusFilter]);
+
+  // --- HANDLERS ---
 
   const handleToggleProtocol = async (val: boolean) => {
     if (!protocolRef || !db) return;
@@ -268,24 +288,12 @@ export default function InternalOccasionsManagement() {
     deleteDoc(doc(db, 'occasions', id)).then(() => toast({ title: "Record Purged" }));
   };
 
-  const calendarDays = useMemo(() => {
-    const start = startOfWeek(startOfMonth(currentCalendarMonth));
-    const end = endOfWeek(endOfMonth(currentCalendarMonth));
-    return eachDayOfInterval({ start, end });
-  }, [currentCalendarMonth]);
-
-  const filtered = (occasions || []).filter((occ: any) => {
-    const matchesSearch = occ.title.toLowerCase().includes(search.toLowerCase()) || 
-                          occ.message.toLowerCase().includes(search.toLowerCase());
-    const matchesStatus = statusFilter === 'All' ? true : 
-                         statusFilter === 'Active' ? occ.isActive === true : occ.isActive === false;
-    return matchesSearch && matchesStatus;
-  });
-
   const parseFormattedDate = (dateStr: string) => {
     if (!dateStr) return undefined;
     try { return parse(dateStr, 'yyyy-MM-dd', new Date()); } catch { return undefined; }
   };
+
+  const isRootAdmin = user?.email?.toLowerCase() === 'deydhritiman@gmail.com';
 
   if (authLoading || !user) {
     return <div className="min-h-screen flex items-center justify-center bg-slate-950"><Loader2 className="animate-spin text-accent" /></div>;
@@ -707,7 +715,7 @@ export default function InternalOccasionsManagement() {
 
                    <div className="space-y-4">
                       <div className="space-y-1.5"><Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Narrative (EN)</Label><Textarea value={editOccasion.message} onChange={e => setEditOccasion({...editOccasion, message: e.target.value})} className="rounded-2xl min-h-[100px] bg-slate-50 border-none shadow-inner p-4 text-sm" /></div>
-                      <div className="space-y-1.5"><Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Narrative (BN)</Label><Textarea value={editOccasion.messageBn || ''} onChange={e => setEditOccasion({...editOccasion, messageBn: e.target.value})} className="rounded-2xl min-h-[100px] bg-slate-50 border-none shadow-inner p-4 text-sm" /></div>
+                      <div className="space-y-1.5"><Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Narrative (BN)</Label><Textarea value={editOccasion.messageBn || ''} onChange={e => setEditOccasion({...editOccasion, messageBn: e.target.value})} className="rounded-2xl min-h-[100px] bg-slate-50 border-none shadow-inner p-4 text-sm mt-4" /></div>
                    </div>
                    
                    <div className="grid grid-cols-2 gap-8 items-center">
@@ -734,11 +742,8 @@ export default function InternalOccasionsManagement() {
   );
 }
 
-/**
- * Procedural Helpers
- */
 function formatTime(seconds: number) {
-  const h = Math.floor(seconds / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
-  return `${h > 0 ? h + 'h ' : ''}${m}m`;
+  const m = Math.floor(seconds / 60);
+  const s = Math.floor(seconds % 60);
+  return `${m}:${s.toString().padStart(2, '0')}`;
 }
