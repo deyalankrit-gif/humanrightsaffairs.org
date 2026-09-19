@@ -1,7 +1,6 @@
-
 "use client"
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { 
   ArrowLeft, 
@@ -10,7 +9,9 @@ import {
   FileText, 
   Info,
   CheckCircle2,
-  BadgeCheck
+  BadgeCheck,
+  Upload,
+  X
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -50,6 +51,14 @@ export default function FIRFormatPage() {
     evidenceOther: 'Any other supporting evidence'
   })
 
+  // Always holds the latest form values so the stable Fillable component can read them
+  const formDataRef = useRef(formData)
+  formDataRef.current = formData
+
+  // Evidence upload
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [evidenceFiles, setEvidenceFiles] = useState<File[]>([])
+
   useEffect(() => {
     setMounted(true)
     setFormData(prev => ({ 
@@ -65,6 +74,16 @@ export default function FIRFormatPage() {
 
   const handlePrint = () => {
     window.print()
+  }
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || [])
+    if (files.length) setEvidenceFiles(prev => [...prev, ...files])
+    e.target.value = ''
+  }
+
+  const removeFile = (index: number) => {
+    setEvidenceFiles(prev => prev.filter((_, i) => i !== index))
   }
 
   const handleCopy = () => {
@@ -121,19 +140,24 @@ Place: ${formData.submissionPlace || '________'}
     })
   }
 
-  const Fillable = ({ name, placeholder, className = "" }: { name: string, placeholder: string, className?: string }) => (
-    <input
-      type="text"
-      name={name}
-      value={(formData as any)[name]}
-      onChange={handleChange}
-      placeholder={placeholder}
-      className={cn(
-        "border-b border-dotted border-slate-400 bg-transparent focus:outline-none focus:border-accent focus:border-b-2 px-1 text-primary font-bold placeholder:text-slate-300 print:placeholder:text-transparent print:border-none",
-        className
-      )}
-    />
-  )
+  // Created once (stable identity) so inputs are never remounted while typing.
+  // It reads the latest values from formDataRef on every render.
+  const [Fillable] = useState(() => {
+    const Component = ({ name, placeholder, className = "" }: { name: string, placeholder: string, className?: string }) => (
+      <input
+        type="text"
+        name={name}
+        value={(formDataRef.current as any)[name]}
+        onChange={handleChange}
+        placeholder={placeholder}
+        className={cn(
+          "border-b border-dotted border-slate-400 bg-transparent focus:outline-none focus:border-accent focus:border-b-2 px-1 text-primary font-bold placeholder:text-slate-300 print:placeholder:text-transparent print:border-none",
+          className
+        )}
+      />
+    )
+    return Component
+  })
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
@@ -296,6 +320,47 @@ Place: ${formData.submissionPlace || '________'}
                           <Fillable name="evidenceOther" placeholder="Any other supporting evidence" className="w-full italic" />
                         </li>
                       </ul>
+
+                      {/* Evidence upload */}
+                      <div className="space-y-3">
+                        <div className="print:hidden">
+                          <input
+                            ref={fileInputRef}
+                            type="file"
+                            multiple
+                            accept="image/*,video/*,audio/*,.pdf,.doc,.docx"
+                            onChange={handleFileUpload}
+                            className="hidden"
+                          />
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => fileInputRef.current?.click()}
+                            className="rounded-xl font-bold gap-2"
+                          >
+                            <Upload className="w-4 h-4" /> Upload Evidence
+                          </Button>
+                        </div>
+
+                        {evidenceFiles.length > 0 && (
+                          <ul className="space-y-1 text-sm text-slate-600 dark:text-slate-400">
+                            {evidenceFiles.map((file, index) => (
+                              <li key={`${file.name}-${index}`} className="flex items-center gap-2">
+                                <span className="w-1.5 h-1.5 rounded-full bg-accent shrink-0" />
+                                <span className="truncate">{file.name}</span>
+                                <button
+                                  type="button"
+                                  onClick={() => removeFile(index)}
+                                  className="text-slate-400 hover:text-red-500 print:hidden"
+                                  aria-label={`Remove ${file.name}`}
+                                >
+                                  <X className="w-4 h-4" />
+                                </button>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
                     </div>
 
                     <div className="space-y-4 pt-4 border-t border-slate-50 dark:border-slate-800">
