@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useMemo, useEffect, useState } from 'react';
-import { useCollection, useFirestore, useMemoFirebase, useDoc } from '@/firebase';
+import { useCollection, useFirestore, useMemoFirebase, useDoc, useUser } from '@/firebase';
 import { collection, query, where, doc, writeBatch, serverTimestamp, getDocs, updateDoc } from 'firebase/firestore';
 import { Radio, MapPin, Loader2, TrendingUp, ExternalLink, Clock, Zap, Languages, AlertTriangle, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -48,11 +48,13 @@ function DigitalClock() {
  */
 export function CurrentNews({ className }: { className?: string }) {
   const db = useFirestore();
+  const { user } = useUser();
   const { toast } = useToast();
   const [isSyncing, setIsSyncing] = useState(false);
   const [isTranslating, setIsTranslating] = useState(false);
   const [isBangla, setIsBangla] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [localTranslation, setLocalTranslation] = useState<any>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -65,6 +67,21 @@ export function CurrentNews({ className }: { className?: string }) {
   }, [db]);
 
   const { data: meta } = useDoc(metaRef);
+
+  // User permission check from internal registry
+  const userRegistryRef = useMemoFirebase(() => {
+    if (!db || !user?.email) return null;
+    return doc(db, 'users', user.email.toLowerCase());
+  }, [db, user?.email]);
+
+  const { data: userAccount } = useDoc(userRegistryRef);
+
+  // Determine if the current session has administrative write privileges
+  const isStaff = useMemo(() => {
+    if (!user) return false;
+    if (user.email === 'deydhritiman@gmail.com') return true;
+    return userAccount?.role === 'admin' || userAccount?.role === 'staff';
+  }, [user, userAccount]);
 
   // Real-time news stream
   const newsQuery = useMemoFirebase(() => {
@@ -91,6 +108,7 @@ export function CurrentNews({ className }: { className?: string }) {
   // Reset language view when news content changes
   useEffect(() => {
     setIsBangla(false);
+    setLocalTranslation(null);
   }, [activeNews?.id]);
 
   // Autonomous Sync Logic
@@ -99,7 +117,9 @@ export function CurrentNews({ className }: { className?: string }) {
 
   useEffect(() => {
     const triggerSync = async () => {
-      if (!db || isSyncing || loading || !mounted) return;
+      // SECURITY: Only attempt database writes if the session is an authorized staff member.
+      // This prevents permission errors in the console for general public visitors.
+      if (!db || isSyncing || loading || !mounted || !isStaff) return;
       
       const now = new Date().getTime();
       const hoursSinceSync = (now - lastSyncTime) / (1000 * 60 * 60);
@@ -137,14 +157,14 @@ export function CurrentNews({ className }: { className?: string }) {
     };
 
     triggerSync();
-  }, [db, isSyncing, loading, lastSyncTime, activeCount, mounted]);
+  }, [db, isSyncing, loading, lastSyncTime, activeCount, mounted, isStaff]);
 
   const handleTranslateToggle = async () => {
     if (isTranslating || !activeNews || !db) return;
 
     const hasTranslation = !!(activeNews.bengaliTranslation?.title || activeNews.translatedTitle);
 
-    if (!isBangla && !hasTranslation) {
+    if (!isBangla && !hasTranslation && !localTranslation) {
       setIsTranslating(true);
       try {
         const input = {
@@ -154,19 +174,23 @@ export function CurrentNews({ className }: { className?: string }) {
         };
 
         const result = await translateNews(input);
+        setLocalTranslation(result); // Set local state for immediate viewing
 
-        const newsRef = doc(db, 'current_news', activeNews.id);
-        await updateDoc(newsRef, {
-          bengaliTranslation: result,
-          translationStatus: 'Success',
-          translatedTitle: result.title,
-          translatedContent: result.content,
-          translatedLanguage: "bn",
-          translatedAt: serverTimestamp()
-        });
+        // Only commit the translation to the global registry if the user is authorized.
+        if (isStaff) {
+          const newsRef = doc(db, 'current_news', activeNews.id);
+          await updateDoc(newsRef, {
+            bengaliTranslation: result,
+            translationStatus: 'Success',
+            translatedTitle: result.title,
+            translatedContent: result.content,
+            translatedLanguage: "bn",
+            translatedAt: serverTimestamp()
+          });
+          toast({ title: "Translation Established", description: "Bengali version cached in registry." });
+        }
 
         setIsBangla(true);
-        toast({ title: "Translation Established", description: "Bengali version cached in registry." });
       } catch (e: any) {
         toast({ 
           variant: "destructive", 
@@ -183,16 +207,20 @@ export function CurrentNews({ className }: { className?: string }) {
 
   const displayData = useMemo(() => {
     if (!activeNews) return null;
-    const hasTranslation = !!(activeNews.bengaliTranslation?.title || activeNews.translatedTitle);
     
-    if (isBangla && hasTranslation) {
-      return activeNews.bengaliTranslation || { 
-        title: activeNews.translatedTitle, 
-        content: activeNews.translatedContent 
-      };
+    if (isBangla) {
+      if (localTranslation) return localTranslation;
+      
+      const hasTranslation = !!(activeNews.bengaliTranslation?.title || activeNews.translatedTitle);
+      if (hasTranslation) {
+        return activeNews.bengaliTranslation || { 
+          title: activeNews.translatedTitle, 
+          content: activeNews.translatedContent 
+        };
+      }
     }
     return activeNews.originalEnglish || activeNews;
-  }, [activeNews, isBangla]);
+  }, [activeNews, isBangla, localTranslation]);
 
   if (!mounted) return null;
 
