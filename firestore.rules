@@ -12,14 +12,14 @@ service cloud.firestore {
       return request.auth.token.email.lower();
     }
 
-    function isRoot() {
-      return isAuthenticated() && getEmail() == 'deydhritiman@gmail.com';
-    }
-
-    // Robust role checking with document existence verification
+    // Robust role checking with document existence verification to prevent 403s on first login
     function hasRole(role) {
       return exists(/databases/$(database)/documents/users/$(getEmail())) && 
              get(/databases/$(database)/documents/users/$(getEmail())).data.role == role;
+    }
+
+    function isRoot() {
+      return isAuthenticated() && getEmail() == 'deydhritiman@gmail.com';
     }
 
     function isStaff() {
@@ -29,7 +29,7 @@ service cloud.firestore {
              hasRole('staff');
     }
 
-    // Module-specific permission logic
+    // Module-specific permission logic with existence guard
     function hasPermission(perm) {
       return isRoot() || isStaff() || (
         exists(/databases/$(database)/documents/users/$(getEmail())) && 
@@ -37,25 +37,38 @@ service cloud.firestore {
       );
     }
 
-    // 2. PUBLIC & SETTINGS (Read access for all, write for staff)
-    match /settings/{id} {
-      allow read: if true;
-      allow write: if isStaff();
-    }
+    // 2. GLOBAL PUBLIC READ ACCESS
+    // These collections power the public-facing portal and must be readable by everyone
+    match /occasions/{id} { allow read: if true; }
+    match /current_news/{id} { allow read: if true; }
+    match /current_news_state/{id} { allow read: if true; }
+    match /events/{id} { allow read: if true; }
+    match /gallery/{id} { allow read: if true; }
+    match /leadership/{id} { allow read: if true; }
+    match /memberProfiles/{id} { allow read: if true; }
+    match /terminatedMembers/{id} { allow read: if true; }
+    match /donor_tiers/{id} { allow read: if true; }
+    match /meetings/{id} { allow read: if true; }
+    match /activity_events/{id} { allow read: if true; }
+    match /settings/{id} { allow read: if true; }
+    match /ai_announcements/{id} { allow read: if true; }
+    match /investigation_officers/{id} { allow read: if true; }
 
-    // 3. PUBLIC DISPLAY COLLECTIONS (Display logic for public portal)
-    match /occasions/{id} { allow read: if true; allow write: if hasPermission('occasions'); }
-    match /current_news/{id} { allow read: if true; allow write: if hasPermission('occasions'); }
-    match /current_news_state/{id} { allow read: if true; allow write: if hasPermission('occasions'); }
-    match /ai_announcements/{id} { allow read: if true; allow write: if hasPermission('occasions'); }
-    match /events/{id} { allow read: if true; allow write: if hasPermission('events'); }
-    match /gallery/{id} { allow read: if true; allow write: if hasPermission('gallery'); }
-    match /leadership/{id} { allow read: if true; allow write: if hasPermission('members'); }
-    match /memberProfiles/{id} { allow read: if true; allow write: if hasPermission('members'); }
-    match /terminatedMembers/{id} { allow read: if true; allow write: if hasPermission('terminated'); }
-    match /donor_tiers/{id} { allow read: if true; allow write: if hasPermission('donorWall'); }
-    match /meetings/{id} { allow read: if true; allow write: if hasPermission('meetings'); }
-    match /activity_events/{id} { allow read: if true; allow write: if hasPermission('activityHub'); }
+    // 3. ADMINISTRATIVE WRITE PERMISSIONS
+    // Write access for display content is restricted to authorized staff
+    match /occasions/{id} { allow write: if hasPermission('occasions'); }
+    match /current_news/{id} { allow write: if hasPermission('occasions'); }
+    match /current_news_state/{id} { allow write: if hasPermission('occasions'); }
+    match /ai_announcements/{id} { allow write: if hasPermission('occasions'); }
+    match /events/{id} { allow write: if hasPermission('events'); }
+    match /gallery/{id} { allow write: if hasPermission('gallery'); }
+    match /leadership/{id} { allow write: if hasPermission('members'); }
+    match /memberProfiles/{id} { allow write: if hasPermission('members'); }
+    match /terminatedMembers/{id} { allow write: if hasPermission('terminated'); }
+    match /donor_tiers/{id} { allow write: if hasPermission('donorWall'); }
+    match /meetings/{id} { allow write: if hasPermission('meetings'); }
+    match /activity_events/{id} { allow write: if hasPermission('activityHub'); }
+    match /settings/{id} { allow write: if isStaff(); }
 
     // 4. USER REGISTRY (Self-access + Admin oversight)
     match /users/{userEmail} {
@@ -127,7 +140,7 @@ service cloud.firestore {
     match /seo_rankings/{id} { allow read, write: if isStaff(); }
     match /visitors/{id} { allow read: if isStaff(); allow create, update: if true; }
     match /deletion_audit_logs/{id} { allow read, write: if isStaff(); }
-    match /investigation_officers/{id} { allow read: if true; allow write: if isStaff(); }
+    match /investigation_officers/{id} { allow write: if isStaff(); }
     
     // 10. TRASH & RECOVERY (60-DAY RETENTION)
     match /trash/{id} {
