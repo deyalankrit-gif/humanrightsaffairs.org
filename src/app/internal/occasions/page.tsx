@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useEffect, useState, useMemo } from 'react';
@@ -112,7 +111,6 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 
 /**
  * Occasions Governance Terminal: Real-time mission control for institutional greetings.
- * Features: Full CRUD with explicit actions, Live/Off-Live toggle, and expanded tactical calendar.
  */
 export default function InternalOccasionsManagement() {
   const { user, loading: authLoading } = useUser();
@@ -128,11 +126,8 @@ export default function InternalOccasionsManagement() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [currentCalendarMonth, setCurrentCalendarMonth] = useState(new Date());
 
-  // Language Switching States
   const [addTitleLang, setAddTitleLang] = useState<'en' | 'bn'>('en');
   const [addMsgLang, setAddMsgLang] = useState<'en' | 'bn'>('en');
-  const [editTitleLang, setEditTitleLang] = useState<'en' | 'bn'>('en');
-  const [editMsgLang, setEditMsgLang] = useState<'en' | 'bn'>('en');
 
   const [newOccasion, setNewOccasion] = useState({
     title: '',
@@ -298,7 +293,6 @@ export default function InternalOccasionsManagement() {
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-24">
-      {/* 1. Header Section */}
       <header className="pt-16 pb-8 bg-slate-900 text-white border-b-8 border-accent/20 px-4 sticky top-0 z-50 shadow-2xl">
         <div className="container mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="space-y-1 text-center md:text-left">
@@ -317,12 +311,8 @@ export default function InternalOccasionsManagement() {
         </div>
       </header>
 
-      {/* 2. Main Terminal Grid */}
       <section className="py-10 container mx-auto px-4 max-w-7xl space-y-12">
-        
         <div className="grid lg:grid-cols-12 gap-8 items-start">
-           
-           {/* LEFT: BROADCAST REGISTRY */}
            <div className="lg:col-span-8 space-y-6">
               <Card className="rounded-[2.5rem] border-none shadow-xl bg-white dark:bg-slate-900 overflow-hidden">
                 <CardHeader className="p-8 border-b bg-slate-50/50 dark:bg-slate-800/50 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
@@ -377,7 +367,6 @@ export default function InternalOccasionsManagement() {
                               </div>
                               
                               <div className="flex flex-col sm:flex-row items-center gap-8 shrink-0 w-full md:w-auto pt-4 md:pt-0 border-t md:border-none">
-                                 {/* EXPLICIT LIVE TOGGLE */}
                                  <div className="flex flex-col items-center gap-2 w-full sm:w-auto">
                                     <span className="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em] leading-none mb-1">Live Status Control</span>
                                     <div className="flex items-center gap-3 bg-slate-50 dark:bg-slate-800 px-4 py-2 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-inner w-full justify-between">
@@ -395,7 +384,6 @@ export default function InternalOccasionsManagement() {
                                     </div>
                                  </div>
 
-                                 {/* EXPLICIT CRUD ACTIONS */}
                                  <div className="flex gap-2 shrink-0">
                                     <Button 
                                       onClick={() => { setEditOccasion(occ); setIsEditDialogOpen(true); }}
@@ -445,7 +433,6 @@ export default function InternalOccasionsManagement() {
               </Card>
            </div>
 
-           {/* RIGHT: PROTOCOLS & INTELLIGENCE */}
            <div className="lg:col-span-4 space-y-6">
               <Card className="rounded-[2.5rem] bg-slate-900 border-none shadow-xl text-white p-8 relative overflow-hidden">
                  <div className="absolute top-0 right-0 w-32 h-32 bg-accent/5 rounded-full -mr-16 -mt-16 blur-2xl"></div>
@@ -457,7 +444,7 @@ export default function InternalOccasionsManagement() {
                     <div className="flex items-center justify-between p-5 bg-white/5 rounded-3xl border border-white/5 shadow-inner">
                        <div className="space-y-0.5">
                           <h4 className="font-bold text-xs">Calendar Sync Mode</h4>
-                          <p className="text-[9px] text-slate-500 uppercase font-black">Auto-Discovery Control</p>
+                          <p className="text-[9px] text-slate-500 uppercase font-black">AI Discovery Control</p>
                        </div>
                        <Switch checked={isAutoMode} onCheckedChange={handleToggleProtocol} className="data-[state=checked]:bg-accent" />
                     </div>
@@ -483,7 +470,6 @@ export default function InternalOccasionsManagement() {
            </div>
         </div>
 
-        {/* 3. TACTICAL TIMELINE (Bottom Detailed Calendar) */}
         <div className="pt-10 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-1000">
            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b-2 border-slate-100 dark:border-slate-800 pb-8">
               <div className="flex items-center gap-5">
@@ -503,7 +489,6 @@ export default function InternalOccasionsManagement() {
            </div>
 
            <div className="grid lg:grid-cols-12 gap-8 items-start">
-              {/* MONTHLY GRID VIEW */}
               <div className="lg:col-span-8">
                  <div className="grid grid-cols-7 gap-3">
                     {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
@@ -556,7 +541,6 @@ export default function InternalOccasionsManagement() {
                  </div>
               </div>
 
-              {/* SIDEBAR: NEXT 30 DAYS AGENDA */}
               <div className="lg:col-span-4 space-y-6">
                  <Card className="rounded-[2.5rem] border-none shadow-xl bg-white dark:bg-slate-900 p-8">
                     <CardHeader className="p-0 mb-8 border-b pb-6">
@@ -605,9 +589,7 @@ export default function InternalOccasionsManagement() {
 
       </section>
 
-      {/* 4. MODALS & DIALOGS */}
-
-      {/* CREATE MODAL */}
+      {/* MODALS */}
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
         <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="max-w-2xl bg-white dark:bg-slate-900 rounded-[2.5rem] border-none shadow-2xl max-h-[90vh] overflow-y-auto flex flex-col p-0 z-[1000001]">
             <div className="bg-slate-900 p-10 text-white relative shrink-0 border-b-4 border-accent/20">
@@ -619,7 +601,6 @@ export default function InternalOccasionsManagement() {
             </div>
             
             <div className="flex-1 p-10 space-y-10">
-                {/* Visual Banner Area */}
                 <div className="flex flex-col items-center gap-4 p-8 border-2 border-dashed rounded-3xl bg-slate-50 dark:bg-slate-950 border-slate-200 shadow-inner group">
                    <div className="relative w-full aspect-video rounded-2xl overflow-hidden bg-white shadow-2xl border-4 border-white transition-all group-hover:shadow-accent/10">
                      {newOccasion.imageUrl ? (
@@ -633,13 +614,11 @@ export default function InternalOccasionsManagement() {
                      <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer z-10" onChange={(e) => handleFileChange(e, false)} />
                    </div>
                    <div className="flex items-center gap-2 text-[10px] font-bold uppercase text-slate-400">
-                      <Upload className="w-4 h-4" /> Click center area to select banner (< 200KB)
+                      <Upload className="w-4 h-4" /> Click center area to select banner (&lt; 200KB)
                    </div>
                 </div>
 
-                {/* Form Logic */}
                 <div className="space-y-8">
-                   {/* Bilingual Title Block */}
                    <div className="grid md:grid-cols-2 gap-8">
                       <div className="space-y-2">
                          <div className="flex items-center justify-between mb-1">
@@ -657,7 +636,6 @@ export default function InternalOccasionsManagement() {
                       </div>
                    </div>
 
-                   {/* Scheduling Block */}
                    <div className="grid grid-cols-2 gap-8 p-8 bg-slate-50 dark:bg-slate-950 rounded-[2.5rem] shadow-inner border border-slate-100">
                       <div className="space-y-2">
                          <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Deployment (Start Date)</Label>
@@ -669,16 +647,14 @@ export default function InternalOccasionsManagement() {
                       </div>
                    </div>
 
-                   {/* Narrative Content */}
                    <div className="space-y-6">
                       <div className="space-y-2">
                          <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Bilingual Narrative (English & Bengali)</Label>
-                         <Textarea value={newOccasion.message} onChange={e => setNewOccasion({...newOccasion, message: e.target.value})} placeholder="English message content..." className="min-h-[100px] rounded-2xl bg-slate-50 border-none shadow-inner p-5 text-sm" />
-                         <Textarea value={newOccasion.messageBn} onChange={e => setNewOccasion({...newOccasion, messageBn: e.target.value})} placeholder="বাংলায় বার্তা লিখুন..." className="min-h-[100px] rounded-2xl bg-slate-50 border-none shadow-inner p-5 text-sm mt-4" />
+                         <Textarea value={newOccasion.message} onChange={e => setNewOccasion({...newOccasion, message: e.target.value})} placeholder="English message content..." className="min-h-[100px] rounded-2xl bg-slate-50 border-none shadow-inner p-4 text-sm" />
+                         <Textarea value={newOccasion.messageBn} onChange={e => setNewOccasion({...newOccasion, messageBn: e.target.value})} placeholder="বাংলায় বার্তা লিখুন..." className="min-h-[100px] rounded-2xl bg-slate-50 border-none shadow-inner p-4 text-sm mt-4" />
                       </div>
                    </div>
 
-                   {/* Execution Parameters */}
                    <div className="grid md:grid-cols-2 gap-8 items-end">
                       <div className="space-y-2">
                          <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Broadcast Priority</Label>
@@ -700,11 +676,10 @@ export default function InternalOccasionsManagement() {
         </DialogContent>
       </Dialog>
 
-      {/* EDIT MODAL */}
       <Dialog open={isEditDialogOpen} onOpenChange={(val) => { if(!val) { setIsEditDialogOpen(false); setEditOccasion(null); } }}>
         <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="max-w-2xl bg-white dark:bg-slate-900 rounded-[2.5rem] border-none shadow-2xl max-h-[90vh] overflow-y-auto flex flex-col p-0 z-[1000001]">
             <div className="bg-slate-900 p-10 text-white relative shrink-0 border-b-4 border-accent/20">
-               <div className="absolute right-8 top-8"><DialogClose asChild><Button variant="ghost" size="icon" className="rounded-full text-white hover:bg-white/10 transition-all h-10 w-10"><X className="w-6 h-6" /></Button></DialogClose></div>
+               <div className="absolute right-8 top-8"><DialogClose asChild><Button variant="ghost" size="icon" className="rounded-full text-white hover:bg-white/10 h-10 w-10 transition-all"><X className="w-6 h-6" /></Button></DialogClose></div>
                <DialogTitle className="text-3xl font-headline font-bold">Update Broadcast Metadata</DialogTitle>
                <DialogDescription className="text-slate-400 uppercase tracking-widest text-[10px] font-black mt-2">Registry Refresh Protocol</DialogDescription>
             </div>
@@ -716,7 +691,7 @@ export default function InternalOccasionsManagement() {
                     <Image src={editOccasion.imageUrl} alt="Banner" fill className="object-cover" />
                     <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer z-10" onChange={(e) => handleFileChange(e, true)} />
                   </div>
-                  <Badge variant="outline" className="text-[9px] font-black uppercase tracking-widest text-slate-400">Click Image to Replace Banner</Badge>
+                  <Badge variant="outline" className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Click Image area to update banner (&lt; 200KB)</Badge>
                 </div>
 
                 <div className="space-y-6">
@@ -762,11 +737,6 @@ export default function InternalOccasionsManagement() {
 /**
  * Procedural Helpers
  */
-function differenceInDays(date1: Date, date2: Date) {
-  const diffTime = Math.abs(date1.getTime() - date2.getTime());
-  return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-}
-
 function formatTime(seconds: number) {
   const h = Math.floor(seconds / 3600);
   const m = Math.floor((seconds % 3600) / 60);
