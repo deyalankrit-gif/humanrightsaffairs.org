@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useEffect, useState, useMemo } from 'react';
@@ -96,7 +95,8 @@ import {
   addMonths, 
   subMonths,
   isSameMonth,
-  isToday
+  isToday,
+  parseISO
 } from 'date-fns';
 import { BUILT_IN_HOLIDAYS, BUILT_IN_OBSERVANCES } from '@/lib/activity-hub-data';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -154,12 +154,20 @@ export default function InternalOccasionsManagement() {
 
   const { data: occasions, loading: dataLoading } = useCollection(occasionsQuery);
 
+  const isAutoMode = protocol?.mode === 'auto';
+
   const allSpecialDays = useMemo(() => {
     return [
       ...BUILT_IN_HOLIDAYS.map(h => ({ ...h, isHoliday: true, date: startOfDay(new Date(2026, h.month - 1, h.day)) })),
       ...BUILT_IN_OBSERVANCES.map(o => ({ ...o, isHoliday: false, date: startOfDay(new Date(2026, o.month - 1, o.day)) }))
     ].sort((a, b) => a.date.getTime() - b.date.getTime());
   }, []);
+
+  const specialDaysInMonth = useMemo(() => {
+    const now = startOfDay(new Date());
+    const end = addDays(now, 30);
+    return allSpecialDays.filter(d => d.date >= now && d.date <= end);
+  }, [allSpecialDays]);
 
   const handleToggleProtocol = async (val: boolean) => {
     if (!protocolRef || !db) return;
@@ -215,7 +223,6 @@ export default function InternalOccasionsManagement() {
       return;
     }
     setIsActionLoading(true);
-    const isAutoMode = protocol?.mode === 'auto';
     if (newOccasion.isActive && isAutoMode) await handleToggleProtocol(false);
 
     addDoc(collection(db, 'occasions'), { ...newOccasion, createdAt: serverTimestamp() })
@@ -230,7 +237,6 @@ export default function InternalOccasionsManagement() {
   const handleUpdateOccasion = async () => {
     if (!db || !editOccasion) return;
     setIsActionLoading(true);
-    const isAutoMode = protocol?.mode === 'auto';
     if (editOccasion.isActive && isAutoMode) await handleToggleProtocol(false);
 
     const { id, ...data } = editOccasion;
@@ -246,7 +252,6 @@ export default function InternalOccasionsManagement() {
   const handleStatusUpdate = async (occ: any, val: boolean) => {
     if (!db) return;
     setIsActionLoading(true);
-    const isAutoMode = protocol?.mode === 'auto';
     if (val && isAutoMode) await handleToggleProtocol(false);
 
     updateDoc(doc(db, 'occasions', occ.id), { isActive: val, updatedAt: serverTimestamp() })
@@ -368,7 +373,7 @@ export default function InternalOccasionsManagement() {
                                     <button onClick={() => { setEditOccasion(occ); setIsEditDialogOpen(true); }} className="h-9 w-9 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 hover:text-accent transition-all"><Edit className="w-4 h-4" /></button>
                                     <AlertDialog>
                                        <AlertDialogTrigger asChild><button className="h-9 w-9 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 hover:text-red-500 transition-all"><Trash2 className="w-4 h-4" /></button></AlertDialogTrigger>
-                                       <AlertDialogContent className="rounded-[2rem]"><AlertDialogHeader><AlertDialogTitle>Purge Record?</AlertDialogTitle><AlertDialogDescription>Permanently remove this greeting from the manual registry?</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel><AlertDialogAction onClick={() => handleDeleteOccasion(occ.id)} className="bg-red-600 hover:bg-red-700 rounded-xl">Purge</AlertDialogAction></AlertDialogFooter></AlertDialogContent>
+                                       <AlertDialogContent className="rounded-[2.5rem]"><AlertDialogHeader><AlertDialogTitle>Purge Record?</AlertDialogTitle><AlertDialogDescription>Permanently remove this greeting from the manual registry?</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel><AlertDialogAction onClick={() => handleDeleteOccasion(occ.id)} className="bg-red-600 hover:bg-red-700 rounded-xl">Purge</AlertDialogAction></AlertDialogFooter></AlertDialogContent>
                                     </AlertDialog>
                                  </div>
                               </div>
