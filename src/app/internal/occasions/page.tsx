@@ -103,7 +103,8 @@ import {
   isToday,
   parseISO,
   startOfWeek,
-  endOfWeek
+  endOfWeek,
+  differenceInDays
 } from 'date-fns';
 import { BUILT_IN_HOLIDAYS, BUILT_IN_OBSERVANCES } from '@/lib/activity-hub-data';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -183,8 +184,10 @@ export default function InternalOccasionsManagement() {
 
   const filtered = useMemo(() => {
     return (occasions || []).filter((occ: any) => {
-      const matchesSearch = occ.title.toLowerCase().includes(search.toLowerCase()) || 
-                            occ.message.toLowerCase().includes(search.toLowerCase());
+      const titleText = (occ.title || '').toLowerCase();
+      const messageText = (occ.message || '').toLowerCase();
+      const matchesSearch = titleText.includes(search.toLowerCase()) || 
+                            messageText.includes(search.toLowerCase());
       const matchesStatus = statusFilter === 'All' ? true : 
                            statusFilter === 'Active' ? occ.isActive === true : occ.isActive === false;
       return matchesSearch && matchesStatus;
@@ -303,7 +306,7 @@ export default function InternalOccasionsManagement() {
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-24">
       <header className="pt-16 pb-8 bg-slate-900 text-white border-b-8 border-accent/20 px-4 sticky top-0 z-50 shadow-2xl">
         <div className="container mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="space-y-1 text-center md:text-left">
+          <div className="space-y-1">
             <div className="inline-flex items-center gap-2 bg-accent/20 text-accent px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border border-accent/30">
               <Wifi className="w-2.5 h-2.5 animate-pulse" /> Live Broadcast Management
             </div>
@@ -740,10 +743,4 @@ export default function InternalOccasionsManagement() {
       <Footer />
     </main>
   );
-}
-
-function formatTime(seconds: number) {
-  const m = Math.floor(seconds / 60);
-  const s = Math.floor(seconds % 60);
-  return `${m}:${s.toString().padStart(2, '0')}`;
 }
