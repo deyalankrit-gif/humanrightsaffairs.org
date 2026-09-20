@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useEffect, useState } from 'react'
@@ -254,26 +253,26 @@ export default function MemberDetailsPage() {
 
                      <div className="grid md:grid-cols-2 gap-4">
                        <div className="space-y-1">
-                         <Label className="text-[10px] uppercase font-bold text-slate-400">Full Legal Name <span className="text-red-500">*</span></Label>
-                         <Input value={editForm.name} onChange={e => setEditForm({...editForm, name: e.target.value})} />
+                         <Label className="text-[10px] uppercase font-bold text-slate-500">Full Legal Name <span className="text-red-500">*</span></Label>
+                         <Input value={editForm.name} onChange={e => setEditForm({...editForm, name: e.target.value})} className="border-2 border-black h-11" />
                        </div>
                        <div className="space-y-1">
-                         <Label className="text-[10px] uppercase font-bold text-slate-400">Member ID <span className="text-red-500">*</span></Label>
+                         <Label className="text-[10px] uppercase font-bold text-slate-500">Member ID <span className="text-red-500">*</span></Label>
                          <Input 
                             value={editForm.memberId || ''} 
                             onChange={e => setEditForm({...editForm, memberId: e.target.value.toUpperCase()})} 
                             placeholder="ABCDEF1234"
                             maxLength={10}
-                            className="font-mono"
+                            className="font-mono border-2 border-black h-11"
                          />
                        </div>
                      </div>
 
                      <div className="grid md:grid-cols-2 gap-4">
                        <div className="space-y-1">
-                         <Label className="text-[10px] uppercase font-bold text-slate-400">Operational Level <span className="text-red-500">*</span></Label>
+                         <Label className="text-[10px] uppercase font-bold text-slate-500">Operational Level <span className="text-red-500">*</span></Label>
                          <Select value={editForm.level} onValueChange={(val: any) => setEditForm({...editForm, level: val, stateName: '', districtName: ''})}>
-                           <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
+                           <SelectTrigger className="h-11 rounded-xl border-2 border-black"><SelectValue /></SelectTrigger>
                            <SelectContent>
                              <SelectItem value="National">Central Council</SelectItem>
                              <SelectItem value="State">State Level</SelectItem>
@@ -282,9 +281,9 @@ export default function MemberDetailsPage() {
                          </Select>
                        </div>
                        <div className="space-y-1">
-                         <Label className="text-[10px] uppercase font-bold text-slate-400">Gender <span className="text-red-500">*</span></Label>
+                         <Label className="text-[10px] uppercase font-bold text-slate-500">Gender <span className="text-red-500">*</span></Label>
                          <Select value={editForm.gender} onValueChange={(val: any) => setEditForm({...editForm, gender: val})}>
-                           <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
+                           <SelectTrigger className="h-11 rounded-xl border-2 border-black"><SelectValue /></SelectTrigger>
                            <SelectContent>
                              <SelectItem value="male">Male</SelectItem>
                              <SelectItem value="female">Female</SelectItem>
@@ -298,7 +297,7 @@ export default function MemberDetailsPage() {
                           <div className="space-y-1">
                              <Label className="text-[10px] uppercase font-bold text-accent">Chapter State <span className="text-red-500">*</span></Label>
                              <Select value={editForm.stateName} onValueChange={val => setEditForm({...editForm, stateName: val, districtName: ''})}>
-                                <SelectTrigger className="h-11 rounded-xl border-accent/20"><SelectValue placeholder="Select State" /></SelectTrigger>
+                                <SelectTrigger className="h-11 rounded-xl border-2 border-black"><SelectValue placeholder="Select State" /></SelectTrigger>
                                 <SelectContent className="max-h-60">{states.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
                              </Select>
                           </div>
@@ -306,7 +305,7 @@ export default function MemberDetailsPage() {
                              <div className="space-y-1 animate-in fade-in slide-in-from-top-1 duration-300">
                                 <Label className="text-[10px] uppercase font-bold text-accent">Chapter District <span className="text-red-500">*</span></Label>
                                 <Select value={editForm.districtName} onValueChange={val => setEditForm({...editForm, districtName: val})}>
-                                   <SelectTrigger className="h-11 rounded-xl border-accent/20"><SelectValue placeholder="Select District" /></SelectTrigger>
+                                   <SelectTrigger className="h-11 rounded-xl border-2 border-black"><SelectValue placeholder="Select District" /></SelectTrigger>
                                    <SelectContent className="max-h-60">{(INDIA_DATA[editForm.stateName] || []).map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
                                 </Select>
                              </div>
@@ -316,17 +315,17 @@ export default function MemberDetailsPage() {
 
                      <div className="grid md:grid-cols-2 gap-4">
                        <div className="space-y-1">
-                         <Label className="text-[10px] uppercase font-bold text-slate-400">Blood Group <span className="text-slate-400/50">(Optional)</span></Label>
+                         <Label className="text-[10px] uppercase font-bold text-slate-500">Blood Group <span className="text-slate-400/50">(Optional)</span></Label>
                          <Select value={editForm.bloodGroup} onValueChange={val => setEditForm({...editForm, bloodGroup: val})}>
-                            <SelectTrigger className="h-11 rounded-xl"><SelectValue placeholder="Select" /></SelectTrigger>
+                            <SelectTrigger className="h-11 rounded-xl border-2 border-black"><SelectValue placeholder="Select" /></SelectTrigger>
                             <SelectContent>
                               {["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].map(bg => <SelectItem key={bg} value={bg}>{bg}</SelectItem>)}
                             </SelectContent>
                           </Select>
                        </div>
                        <div className="space-y-1">
-                         <Label className="text-[10px] uppercase font-bold text-slate-400">Current Profession <span className="text-slate-400/50">(Optional)</span></Label>
-                         <Input value={editForm.profession || ''} onChange={e => setEditForm({...editForm, profession: e.target.value})} placeholder="e.g. Advocate" className="h-11 rounded-xl" />
+                         <Label className="text-[10px] uppercase font-bold text-slate-500">Current Profession <span className="text-slate-400/50">(Optional)</span></Label>
+                         <Input value={editForm.profession || ''} onChange={e => setEditForm({...editForm, profession: e.target.value})} placeholder="e.g. Advocate" className="h-11 rounded-xl border-2 border-black" />
                        </div>
                      </div>
 
@@ -335,7 +334,7 @@ export default function MemberDetailsPage() {
                           <div className="space-y-2">
                             <Label className="text-accent font-bold text-[10px] uppercase">Membership Term <span className="text-red-500">*</span></Label>
                             <Select value={editForm.membershipDuration || '1 Year'} onValueChange={(val) => setEditForm({...editForm, membershipDuration: val})}>
-                              <SelectTrigger className="bg-white dark:bg-slate-800 border-accent/20">
+                              <SelectTrigger className="bg-white dark:bg-slate-800 border-2 border-black h-11">
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
@@ -358,7 +357,7 @@ export default function MemberDetailsPage() {
                                 designation: isFixed ? val : ''
                               });
                             }}>
-                              <SelectTrigger className="rounded-xl border-accent/20"><SelectValue /></SelectTrigger>
+                              <SelectTrigger className="rounded-xl border-2 border-black h-11"><SelectValue /></SelectTrigger>
                               <SelectContent>
                                 <SelectItem value="General Member">General Member</SelectItem>
                                 <SelectItem value="Board Member">Board Member</SelectItem>
@@ -370,17 +369,17 @@ export default function MemberDetailsPage() {
                           {editForm.designationCategory === 'Office-bearing Member' && (
                             <div className="space-y-2 animate-in fade-in slide-in-from-left-2">
                               <Label className="text-[10px] uppercase font-bold text-accent">Specific Designation <span className="text-red-500">*</span></Label>
-                              <Input value={editForm.designation} onChange={e => setEditForm({...editForm, designation: e.target.value})} className="rounded-xl border-accent/20" />
+                              <Input value={editForm.designation} onChange={e => setEditForm({...editForm, designation: e.target.value})} className="rounded-xl border-2 border-black h-11" />
                             </div>
                           )}
                         </div>
 
                         <div className="grid md:grid-cols-2 gap-4">
                           <div className="space-y-1">
-                            <Label className="text-[10px] uppercase font-bold text-slate-400">Issue Date <span className="text-red-500">*</span></Label>
+                            <Label className="text-[10px] uppercase font-bold text-slate-500">Issue Date <span className="text-red-500">*</span></Label>
                             <Popover>
                               <PopoverTrigger asChild>
-                                <Button variant="outline" className={cn("w-full justify-start text-left font-normal h-10 rounded-lg", !editForm.joiningDate && "text-muted-foreground")}>
+                                <Button variant="outline" className={cn("w-full justify-start text-left font-normal h-11 rounded-lg border-2 border-black", !editForm.joiningDate && "text-muted-foreground")}>
                                   <CalendarIcon className="mr-2 h-4 w-4" />
                                   {editForm.joiningDate ? editForm.joiningDate : "Pick a date"}
                                 </Button>
@@ -391,62 +390,62 @@ export default function MemberDetailsPage() {
                             </Popover>
                           </div>
                           <div className="space-y-1">
-                            <Label className="text-[10px] uppercase font-bold text-slate-400">Expiry Date</Label>
-                            <Input disabled value={editForm.expiryDate} className="bg-slate-100/50 dark:bg-slate-900/50" />
+                            <Label className="text-[10px] uppercase font-bold text-slate-500">Expiry Date</Label>
+                            <Input disabled value={editForm.expiryDate} className="bg-slate-100/50 dark:bg-slate-900/50 border-2 border-black h-11" />
                           </div>
                         </div>
                      </div>
 
                      <div className="grid md:grid-cols-2 gap-4">
                         <div className="space-y-1">
-                          <Label className="text-[10px] uppercase font-bold text-slate-400">Email <span className="text-slate-400/50">(Optional)</span></Label>
-                          <Input value={editForm.email} onChange={e => setEditForm({...editForm, email: e.target.value})} />
+                          <Label className="text-[10px] uppercase font-bold text-slate-500">Email <span className="text-slate-400/50">(Optional)</span></Label>
+                          <Input value={editForm.email} onChange={e => setEditForm({...editForm, email: e.target.value})} className="border-2 border-black h-11" />
                         </div>
                         <div className="space-y-1">
-                          <Label className="text-[10px] uppercase font-bold text-slate-400">Phone <span className="text-red-500">*</span></Label>
-                          <Input value={editForm.phone} onChange={e => setEditForm({...editForm, phone: e.target.value})} />
+                          <Label className="text-[10px] uppercase font-bold text-slate-500">Phone <span className="text-red-500">*</span></Label>
+                          <Input value={editForm.phone} onChange={e => setEditForm({...editForm, phone: e.target.value})} className="border-2 border-black h-11 font-bold" />
                         </div>
                      </div>
 
                      <div className="grid md:grid-cols-2 gap-4">
                         <div className="space-y-1">
-                           <Label className="text-[10px] uppercase font-bold text-slate-400">Aadhaar Card Number <span className="text-red-500">*</span></Label>
+                           <Label className="text-[10px] uppercase font-bold text-slate-500">Aadhaar Card Number <span className="text-red-500">*</span></Label>
                            <Input 
                               value={editForm.aadhaar || ''} 
                               onChange={e => setEditForm({...editForm, aadhaar: e.target.value})} 
                               placeholder="1234 5678 9012"
                               maxLength={12}
-                              className="font-mono"
+                              className="font-mono border-2 border-black h-11"
                            />
                         </div>
                         <div className="space-y-1">
-                           <Label className="text-[10px] uppercase font-bold text-slate-400">PAN Number <span className="text-slate-400/50">(Optional)</span></Label>
+                           <Label className="text-[10px] uppercase font-bold text-slate-500">PAN Number <span className="text-slate-400/50">(Optional)</span></Label>
                            <Input 
                               value={editForm.pan || ''} 
                               onChange={e => setEditForm({...editForm, pan: e.target.value.toUpperCase()})} 
                               placeholder="ABCDE1234F"
-                              className="font-mono"
+                              className="font-mono border-2 border-black h-11"
                            />
                         </div>
                      </div>
 
                      <div className="space-y-1">
-                       <Label className="text-[10px] uppercase font-bold text-slate-400">Residential Address <span className="text-red-500">*</span></Label>
-                       <Input value={editForm.address} onChange={e => setEditForm({...editForm, address: e.target.value})} />
+                       <Label className="text-[10px] uppercase font-bold text-slate-500">Residential Address <span className="text-red-500">*</span></Label>
+                       <Input value={editForm.address} onChange={e => setEditForm({...editForm, address: e.target.value})} className="border-2 border-black h-11" />
                      </div>
                      
                      <div className="grid md:grid-cols-3 gap-4">
                         <div className="space-y-1">
-                          <Label className="text-[10px] uppercase font-bold text-slate-400">Post Office <span className="text-red-500">*</span></Label>
-                          <Input value={editForm.postOffice} onChange={e => setEditForm({...editForm, postOffice: e.target.value})} />
+                          <Label className="text-[10px] uppercase font-bold text-slate-500">Post Office <span className="text-red-500">*</span></Label>
+                          <Input value={editForm.postOffice} onChange={e => setEditForm({...editForm, postOffice: e.target.value})} className="border-2 border-black h-11" />
                         </div>
                         <div className="space-y-1">
-                          <Label className="text-[10px] uppercase font-bold text-slate-400">Police Station <span className="text-red-500">*</span></Label>
-                          <Input value={editForm.policeStation} onChange={e => setEditForm({...editForm, policeStation: e.target.value})} />
+                          <Label className="text-[10px] uppercase font-bold text-slate-500">Police Station <span className="text-red-500">*</span></Label>
+                          <Input value={editForm.policeStation} onChange={e => setEditForm({...editForm, policeStation: e.target.value})} className="border-2 border-black h-11" />
                         </div>
                         <div className="space-y-1">
-                          <Label className="text-[10px] uppercase font-bold text-slate-400">PIN Code <span className="text-red-500">*</span></Label>
-                          <Input value={editForm.pinCode} onChange={e => setEditForm({...editForm, pinCode: e.target.value})} maxLength={6} className="font-mono" />
+                          <Label className="text-[10px] uppercase font-bold text-slate-500">PIN Code <span className="text-red-500">*</span></Label>
+                          <Input value={editForm.pinCode} onChange={e => setEditForm({...editForm, pinCode: e.target.value})} maxLength={6} className="font-mono border-2 border-black h-11" />
                         </div>
                      </div>
                    </div>

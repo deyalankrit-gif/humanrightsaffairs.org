@@ -343,10 +343,7 @@ export function OccasionBanner() {
                 <ClampOrScroll
                   text={displayTitle}
                   maxLines={2}
-                  className={cn(
-                    "text-[9px] md:text-[13px] font-black uppercase tracking-[0.2em]",
-                    isDefault ? "text-[#FF00FF]" : "text-[#CFFF04]"
-                  )}
+                  className="text-[9px] md:text-[13px] font-black uppercase tracking-[0.2em] text-[#FF00FF]"
                 />
               </div>
             </div>

@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useEffect } from 'react'
@@ -36,12 +35,12 @@ import {
   Clock,
   Info
 } from 'lucide-react'
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { useCollection, useFirestore, useMemoFirebase, useUser, useDoc } from '@/firebase'
-import { collection, query, orderBy, addDoc, serverTimestamp, doc } from 'firebase/firestore'
+import { collection, query, orderBy, addDoc, deleteDoc, doc, updateDoc, serverTimestamp, where } from 'firebase/firestore'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -384,6 +383,7 @@ export default function MembersPage() {
   )
 
   const statesList = Object.keys(INDIA_DATA).sort();
+  const districtsList = selectedState ? (INDIA_DATA[selectedState] || []) : [];
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950 w-full overflow-x-hidden">
@@ -434,20 +434,20 @@ export default function MembersPage() {
                                      <SelectTrigger className="w-24 h-12 rounded-xl bg-slate-50 dark:bg-slate-800 border-none shadow-inner"><SelectValue placeholder="Title" /></SelectTrigger>
                                      <SelectContent position="popper" className="z-[1000001] bg-white">{["Mr.", "Ms.", "Mrs.", "Dr.", "Adv.", "Prof.", "Hon."].map(h => <SelectItem key={h} value={h}>{h}</SelectItem>)}</SelectContent>
                                   </Select>
-                                  <Input placeholder="Legal Identity Name" value={newMember.name} onChange={e => setNewMember({...newMember, name: e.target.value})} className="h-12 rounded-xl flex-1 bg-slate-50 dark:bg-slate-800 border-none shadow-inner font-bold" />
+                                  <Input placeholder="Legal Identity Name" value={newMember.name} onChange={e => setNewMember({...newMember, name: e.target.value})} className="h-12 rounded-xl flex-1 bg-slate-50 dark:bg-slate-800 border-2 border-black font-bold" />
                                </div>
                             </div>
                             <div className="space-y-1.5">
                                <Label className="text-[10px] font-bold uppercase text-slate-500 ml-1">Gender *</Label>
                                <Select value={newMember.gender} onValueChange={(val: any) => setNewMember({...newMember, gender: val})}>
-                                  <SelectTrigger className="h-11 rounded-xl bg-slate-50 dark:bg-slate-800 border-none shadow-inner"><SelectValue placeholder="Select" /></SelectTrigger>
+                                  <SelectTrigger className="h-11 rounded-xl bg-slate-50 dark:bg-slate-800 border-2 border-black"><SelectValue placeholder="Select" /></SelectTrigger>
                                   <SelectContent position="popper" className="z-[1000001] bg-white"><SelectItem value="male">Male</SelectItem><SelectItem value="female">Female</SelectItem></SelectContent>
                                </Select>
                             </div>
                             <div className="space-y-1.5">
                                <Label className="text-[10px] font-bold uppercase text-slate-500 ml-1">Blood Group</Label>
                                <Select value={newMember.bloodGroup} onValueChange={val => setNewMember({...newMember, bloodGroup: val})}>
-                                  <SelectTrigger className="h-11 rounded-xl bg-slate-50 dark:bg-slate-800 border-none shadow-inner"><SelectValue placeholder="Select" /></SelectTrigger>
+                                  <SelectTrigger className="h-11 rounded-xl bg-slate-50 dark:bg-slate-800 border-2 border-black"><SelectValue placeholder="Select" /></SelectTrigger>
                                   <SelectContent position="popper" className="z-[1000001] bg-white">{["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].map(bg => <SelectItem key={bg} value={bg}>{bg}</SelectItem>)}</SelectContent>
                                </Select>
                             </div>
@@ -463,15 +463,15 @@ export default function MembersPage() {
                       <div className="grid md:grid-cols-2 gap-8">
                          <div className="space-y-1.5">
                             <Label className="text-[10px] font-bold uppercase text-slate-400">Education Qualification *</Label>
-                            <Input value={newMember.education} onChange={e => setNewMember({...newMember, education: e.target.value})} placeholder="Highest academic degree..." className="h-12 rounded-xl bg-slate-50 dark:bg-slate-800 border-none shadow-inner" />
+                            <Input value={newMember.education} onChange={e => setNewMember({...newMember, education: e.target.value})} placeholder="Highest academic degree..." className="h-12 rounded-xl bg-slate-50 dark:bg-slate-800 border-2 border-black" />
                          </div>
                          <div className="space-y-1.5">
                             <Label className="text-[10px] font-bold uppercase text-slate-400">Current Profession *</Label>
-                            <Input value={newMember.profession} onChange={e => setNewMember({...newMember, profession: e.target.value})} placeholder="e.g. Advocate / Social Worker" className="h-12 rounded-xl bg-slate-50 dark:bg-slate-800 border-none shadow-inner" />
+                            <Input value={newMember.profession} onChange={e => setNewMember({...newMember, profession: e.target.value})} placeholder="e.g. Advocate / Social Worker" className="h-12 rounded-xl bg-slate-50 dark:bg-slate-800 border-2 border-black" />
                          </div>
                          <div className="space-y-1.5 md:col-span-2">
                             <Label className="text-[10px] font-bold uppercase text-slate-400">Professional Experience Summary</Label>
-                            <Textarea value={newMember.experience} onChange={e => setNewMember({...newMember, experience: e.target.value})} placeholder="Detail previous missions or years of service..." className="min-h-[100px] rounded-2xl bg-slate-50 dark:bg-slate-800 border-none shadow-inner" />
+                            <Textarea value={newMember.experience} onChange={e => setNewMember({...newMember, experience: e.target.value})} placeholder="Detail previous missions or years of service..." className="min-h-[100px] rounded-2xl bg-slate-50 dark:bg-slate-800 border-2 border-black" />
                          </div>
                       </div>
                    </div>
@@ -486,7 +486,7 @@ export default function MembersPage() {
                             <div className="space-y-1.5">
                                <Label className="text-[10px] font-bold uppercase text-slate-400">Operational Level *</Label>
                                <Select value={newMember.level} onValueChange={(val: any) => setNewMember({...newMember, level: val, stateName: '', districtName: ''})}>
-                                  <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
+                                  <SelectTrigger className="h-11 rounded-xl border-2 border-black"><SelectValue /></SelectTrigger>
                                   <SelectContent position="popper" className="z-[1000001] bg-white"><SelectItem value="National">National Level</SelectItem><SelectItem value="State">State Level</SelectItem><SelectItem value="District">District Level</SelectItem></SelectContent>
                                </Select>
                             </div>
@@ -495,7 +495,7 @@ export default function MembersPage() {
                                   <div className="space-y-1.5">
                                      <Label className="text-[10px] font-bold uppercase text-emerald-600">Chapter State *</Label>
                                      <Select value={newMember.stateName} onValueChange={val => setNewMember({...newMember, stateName: val, districtName: ''})}>
-                                        <SelectTrigger className="h-11 rounded-xl border-emerald-100"><SelectValue placeholder="Choose State" /></SelectTrigger>
+                                        <SelectTrigger className="h-11 rounded-xl border-2 border-black"><SelectValue placeholder="Choose State" /></SelectTrigger>
                                         <SelectContent position="popper" className="max-h-60 z-[1000001] bg-white">{statesList.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
                                      </Select>
                                   </div>
@@ -503,7 +503,7 @@ export default function MembersPage() {
                                      <div className="space-y-1.5 animate-in fade-in slide-in-from-top-1">
                                         <Label className="text-[10px] font-bold uppercase text-emerald-600">Chapter District *</Label>
                                         <Select value={newMember.districtName} onValueChange={val => setNewMember({...newMember, districtName: val})}>
-                                           <SelectTrigger className="h-11 rounded-xl border-emerald-100"><SelectValue placeholder="Choose District" /></SelectTrigger>
+                                           <SelectTrigger className="h-11 rounded-xl border-2 border-black"><SelectValue placeholder="Choose District" /></SelectTrigger>
                                            <SelectContent position="popper" className="max-h-60 z-[1000001] bg-white">{(INDIA_DATA[newMember.stateName] || []).map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
                                         </Select>
                                      </div>
@@ -518,7 +518,7 @@ export default function MembersPage() {
                                  const isFixed = val === 'General Member' || val === 'Board Member' || val === 'Volunteer';
                                  setNewMember({ ...newMember, designationCategory: val, designation: isFixed ? val : '' });
                                }}>
-                                  <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
+                                  <SelectTrigger className="h-11 rounded-xl border-2 border-black"><SelectValue /></SelectTrigger>
                                   <SelectContent position="popper" className="z-[1000001] bg-white">
                                     <SelectItem value="General Member">General Member</SelectItem>
                                     <SelectItem value="Board Member">Board Member</SelectItem>
@@ -530,7 +530,7 @@ export default function MembersPage() {
                             {newMember.designationCategory === 'Office-bearing Member' && (
                               <div className="space-y-1.5 animate-in fade-in slide-in-from-left-2">
                                 <Label className="text-[10px] font-bold uppercase text-accent">Manual Designation *</Label>
-                                <Input placeholder="e.g. Secretary, Treasurer" value={newMember.designation} onChange={e => setNewMember({...newMember, designation: e.target.value})} className="rounded-xl border-accent/20 h-11" />
+                                <Input placeholder="e.g. Secretary, Treasurer" value={newMember.designation} onChange={e => setNewMember({...newMember, designation: e.target.value})} className="rounded-xl border-2 border-black h-11" />
                               </div>
                             )}
                          </div>
@@ -546,33 +546,33 @@ export default function MembersPage() {
                         <div className="space-y-2">
                            <Label className="text-[10px] font-bold uppercase text-slate-400">Registry ID *</Label>
                            <div className="flex gap-2">
-                              <Input placeholder="ABCDEF1234" value={newMember.memberId} onChange={e => setNewMember({...newMember, memberId: e.target.value.toUpperCase()})} className="h-11 rounded-xl font-mono bg-slate-50 dark:bg-slate-800" maxLength={10} />
+                              <Input placeholder="ABCDEF1234" value={newMember.memberId} onChange={e => setNewMember({...newMember, memberId: e.target.value.toUpperCase()})} className="h-11 rounded-xl font-mono bg-slate-50 dark:bg-slate-800 border-2 border-black" maxLength={10} />
                               <Button type="button" variant="outline" size="icon" className="h-11 w-11 shrink-0 rounded-xl border-dashed" onClick={() => setNewMember({...newMember, memberId: generateMemberId()})}><Sparkles className="w-4 h-4 text-accent" /></Button>
                            </div>
                         </div>
                         <div className="space-y-2">
                            <Label className="text-[10px] font-bold uppercase text-slate-400">Term Duration *</Label>
                            <Select value={newMember.membershipDuration} onValueChange={val => setNewMember({...newMember, membershipDuration: val})}>
-                              <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
+                              <SelectTrigger className="h-11 rounded-xl border-2 border-black"><SelectValue /></SelectTrigger>
                               <SelectContent position="popper" className="z-[1000001] bg-white"><SelectItem value="1 Year">1 Year</SelectItem><SelectItem value="2 Years">2 Years</SelectItem><SelectItem value="3 Years">3 Years</SelectItem></SelectContent>
                            </Select>
                         </div>
                         <div className="space-y-2">
                            <Label className="text-[10px] font-bold uppercase text-slate-400">Issue Date *</Label>
                            <Popover>
-                              <PopoverTrigger asChild><Button variant="outline" className={cn("w-full justify-start text-left font-normal h-11 rounded-xl bg-white dark:bg-slate-900", !newMember.joiningDate && "text-muted-foreground")}><CalendarIcon className="mr-2 h-4 w-4" />{newMember.joiningDate ? newMember.joiningDate : "Pick date"}</Button></PopoverTrigger>
+                              <PopoverTrigger asChild><Button variant="outline" className={cn("w-full justify-start text-left font-normal h-11 rounded-xl bg-white dark:bg-slate-900 border-2 border-black", !newMember.joiningDate && "text-muted-foreground")}><CalendarIcon className="mr-2 h-4 w-4" />{newMember.joiningDate ? newMember.joiningDate : "Pick date"}</Button></PopoverTrigger>
                               <PopoverContent className="w-auto p-0 z-[1000002]" align="start"><CalendarComponent mode="single" selected={parseMemberDate(newMember.joiningDate)} onSelect={(date) => setNewMember({...newMember, joiningDate: date ? format(date, "PPP") : ''})} initialFocus /></PopoverContent>
                            </Popover>
                         </div>
                         <div className="space-y-2">
                            <Label className="text-[10px] font-bold uppercase text-slate-400">Expiry Date</Label>
-                           <Input disabled value={newMember.expiryDate} className="h-11 rounded-xl bg-slate-100/50 dark:bg-slate-950/50" />
+                           <Input disabled value={newMember.expiryDate} className="h-11 rounded-xl bg-slate-100/50 dark:bg-slate-950/50 border-2 border-black" />
                         </div>
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                         <div className="space-y-1.5"><Label className="text-[10px] font-bold uppercase text-slate-400">Mobile Phone *</Label><Input value={newMember.phone} onChange={e => setNewMember({...newMember, phone: e.target.value})} className="h-12 rounded-xl bg-slate-50 dark:bg-slate-800 border-none shadow-inner" /></div>
-                         <div className="space-y-1.5"><Label className="text-[10px] font-bold uppercase text-slate-400">Email Address</Label><Input type="email" value={newMember.email} onChange={e => setNewMember({...newMember, email: e.target.value})} className="h-12 rounded-xl bg-slate-50 dark:bg-slate-800 border-none shadow-inner" /></div>
+                         <div className="space-y-1.5"><Label className="text-[10px] font-bold uppercase text-slate-400">Mobile Phone *</Label><Input value={newMember.phone} onChange={e => setNewMember({...newMember, phone: e.target.value})} className="h-12 rounded-xl bg-slate-50 dark:bg-slate-800 border-2 border-black font-bold" /></div>
+                         <div className="space-y-1.5"><Label className="text-[10px] font-bold uppercase text-slate-400">Email Address</Label><Input type="email" value={newMember.email} onChange={e => setNewMember({...newMember, email: e.target.value})} className="h-12 rounded-xl bg-slate-50 dark:bg-slate-800 border-2 border-black" /></div>
                       </div>
                    </div>
 
@@ -583,16 +583,16 @@ export default function MembersPage() {
                       </h3>
                       <div className="grid md:grid-cols-2 gap-8">
                          <div className="space-y-6">
-                            <div className="space-y-1.5"><Label className="text-[10px] font-bold uppercase text-slate-400">Aadhaar UID *</Label><Input value={newMember.aadhaar} onChange={e => setNewMember({...newMember, aadhaar: e.target.value})} maxLength={12} className="h-11 rounded-xl font-mono shadow-inner border-none bg-slate-50 dark:bg-slate-800" /></div>
-                            <div className="space-y-1.5"><Label className="text-[10px] font-bold uppercase text-slate-400">PAN Number</Label><Input value={newMember.pan} onChange={e => setNewMember({...newMember, pan: e.target.value.toUpperCase()})} maxLength={10} className="h-11 rounded-xl font-mono shadow-inner border-none bg-slate-50 dark:bg-slate-800" /></div>
+                            <div className="space-y-1.5"><Label className="text-[10px] font-bold uppercase text-slate-400">Aadhaar UID *</Label><Input value={newMember.aadhaar} onChange={e => setNewMember({...newMember, aadhaar: e.target.value})} maxLength={12} className="h-11 rounded-xl font-mono border-2 border-black bg-slate-50 dark:bg-slate-800" /></div>
+                            <div className="space-y-1.5"><Label className="text-[10px] font-bold uppercase text-slate-400">PAN Number</Label><Input value={newMember.pan} onChange={e => setNewMember({...newMember, pan: e.target.value.toUpperCase()})} maxLength={10} className="h-11 rounded-xl font-mono border-2 border-black bg-slate-50 dark:bg-slate-800" /></div>
                          </div>
                          <div className="space-y-4">
                             <Label className="text-[10px] font-bold uppercase text-slate-400">Full Residence Protocol *</Label>
-                            <Textarea value={newMember.address} onChange={e => setNewMember({...newMember, address: e.target.value})} className="min-h-[100px] rounded-2xl bg-slate-50 dark:bg-slate-800 border-none shadow-inner" />
+                            <Textarea value={newMember.address} onChange={e => setNewMember({...newMember, address: e.target.value})} className="min-h-[100px] rounded-2xl bg-slate-50 dark:bg-slate-800 border-2 border-black font-medium" />
                             <div className="grid grid-cols-3 gap-3">
-                               <Input placeholder="P.O." value={newMember.postOffice} onChange={e => setNewMember({...newMember, postOffice: e.target.value})} className="h-10 rounded-xl bg-slate-50 dark:bg-slate-800 border-none" />
-                               <Input placeholder="P.S." value={newMember.policeStation} onChange={e => setNewMember({...newMember, policeStation: e.target.value})} className="h-10 rounded-xl bg-slate-50 dark:bg-slate-800 border-none" />
-                               <Input placeholder="PIN" maxLength={6} value={newMember.pinCode} onChange={e => setNewMember({...newMember, pinCode: e.target.value})} className="h-10 rounded-xl bg-slate-50 dark:bg-slate-800 border-none" />
+                               <Input placeholder="P.O." value={newMember.postOffice} onChange={e => setNewMember({...newMember, postOffice: e.target.value})} className="h-10 rounded-xl bg-slate-50 dark:bg-slate-800 border-2 border-black font-bold" />
+                               <Input placeholder="P.S." value={newMember.policeStation} onChange={e => setNewMember({...newMember, policeStation: e.target.value})} className="h-10 rounded-xl bg-slate-50 dark:bg-slate-800 border-2 border-black font-bold" />
+                               <Input placeholder="PIN" maxLength={6} value={newMember.pinCode} onChange={e => setNewMember({...newMember, pinCode: e.target.value})} className="h-10 rounded-xl bg-slate-50 dark:bg-slate-800 border-2 border-black font-bold" />
                             </div>
                          </div>
                       </div>
@@ -780,7 +780,7 @@ export default function MembersPage() {
               </div>
 
               <div className="p-8 border-t bg-slate-50 dark:bg-slate-900 shrink-0">
-                 <Button onClick={() => setSelectedMemberDetails(null)} className="w-full h-12 rounded-xl bg-primary text-white font-bold">Dismiss Profile View</Button>
+                 <Button onClick={val => !val && setSelectedMemberDetails(null)} className="w-full h-12 rounded-xl bg-primary text-white font-bold">Dismiss Profile View</Button>
               </div>
             </>
           )}
