@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
   ShieldAlert, 
   Loader2, 
@@ -9,21 +9,22 @@ import {
   Lock, 
   Trash2, 
   AlertTriangle,
-  RefreshCw,
+  RotateCcw,
   MessageSquare,
-  CheckCircle2,
-  Phone
+  CheckCircle2
 } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { useFirestore, useUser } from '@/firebase';
-import { doc, setDoc, serverTimestamp, collection, addDoc, getDoc } from 'firebase/firestore';
+import { doc, setDoc, serverTimestamp, collection } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import { moveToTrash, permanentPurge } from '@/lib/trash-utils';
 import { generateSecureOtp, verifySecureOtp } from '@/app/actions/otp-actions';
+import { cn } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge';
 
 type DeleteStep = 'reason' | 'warning' | 'otp' | 'final' | 'success';
 
@@ -56,7 +57,6 @@ export function DeleteMemberWorkflow({ member, isPermanent = false, onSuccess, o
   const handleSendOtp = async () => {
     setIsLoading(true);
     try {
-      // Secure Handshake: Generate OTP on server
       const result = await generateSecureOtp(user?.email || 'root');
       if (result.success && result.challengeId) {
         setOtpChallengeId(result.challengeId);
@@ -81,7 +81,7 @@ export function DeleteMemberWorkflow({ member, isPermanent = false, onSuccess, o
         if (isPermanent) {
           setStep('final');
         } else {
-          executeSoftDelete();
+          await executeSoftDelete();
         }
       } else {
         toast({ variant: "destructive", title: "Verification Failed", description: "Invalid or expired security code." });
@@ -95,7 +95,6 @@ export function DeleteMemberWorkflow({ member, isPermanent = false, onSuccess, o
 
   const executeSoftDelete = async () => {
     if (!db || !user) return;
-    setIsLoading(true);
     try {
       await moveToTrash(db, user, member, 'memberProfiles', reason);
       setStep('success');
@@ -103,8 +102,6 @@ export function DeleteMemberWorkflow({ member, isPermanent = false, onSuccess, o
     } catch (e) {
       toast({ variant: "destructive", title: "Process Error" });
       onCancel();
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -126,7 +123,6 @@ export function DeleteMemberWorkflow({ member, isPermanent = false, onSuccess, o
     <Dialog open={true} onOpenChange={(v) => !v && onCancel()}>
       <DialogContent className="max-w-md rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden bg-white dark:bg-slate-900 [&>button]:hidden">
         
-        {/* HEADER */}
         <div className={cn(
           "p-8 text-white relative border-b-4",
           isPermanent ? "bg-red-600 border-red-900/20" : "bg-slate-900 border-accent/20"
@@ -144,7 +140,6 @@ export function DeleteMemberWorkflow({ member, isPermanent = false, onSuccess, o
           </DialogTitle>
         </div>
 
-        {/* STEP 1: REASON */}
         {step === 'reason' && (
           <div className="p-8 space-y-6 animate-in fade-in duration-300">
              <div className="flex flex-col items-center text-center space-y-4">
@@ -153,7 +148,7 @@ export function DeleteMemberWorkflow({ member, isPermanent = false, onSuccess, o
                 </div>
                 <div className="space-y-1">
                    <h4 className="text-lg font-bold">Justification Required</h4>
-                   <p className="text-xs text-slate-500">Provide official reasoning for this personnel removal.</p>
+                   <p className="text-xs text-slate-500">Provide official reasoning for this removal.</p>
                 </div>
              </div>
              <div className="space-y-2">
@@ -161,7 +156,7 @@ export function DeleteMemberWorkflow({ member, isPermanent = false, onSuccess, o
                 <Textarea 
                   value={reason} 
                   onChange={e => setReason(e.target.value)} 
-                  placeholder="e.g. Voluntary resignation / Policy violation / Term expiry..." 
+                  placeholder="e.g. Voluntary resignation / Policy violation..." 
                   className="min-h-[120px] rounded-2xl border-2 border-black focus:ring-accent"
                 />
              </div>
@@ -172,24 +167,23 @@ export function DeleteMemberWorkflow({ member, isPermanent = false, onSuccess, o
           </div>
         )}
 
-        {/* STEP 2: WARNING */}
         {step === 'warning' && (
           <div className="p-8 space-y-8 animate-in slide-in-from-right-4 duration-500">
              <div className="space-y-4">
                 <div className="p-6 bg-slate-50 dark:bg-slate-950 rounded-2xl border-2 border-black shadow-inner">
-                   <p className="text-[8px] font-black text-slate-400 uppercase mb-2">Subject for removal</p>
+                   <p className="text-[8px] font-black text-slate-400 uppercase mb-2">Member to be deleted</p>
                    <h4 className="text-xl font-headline font-bold text-primary dark:text-white leading-tight">{member.name}</h4>
                    <p className="text-xs font-bold text-accent uppercase mt-1">{member.designation}</p>
                 </div>
                 <div className="p-4 bg-red-50 border border-red-100 rounded-xl">
-                   <p className="text-[9px] font-black text-red-600 uppercase mb-1">Impact Warning</p>
+                   <p className="text-[9px] font-black text-red-600 uppercase mb-1">Retention Policy</p>
                    <p className="text-xs text-red-900 leading-relaxed italic">
-                     "{isPermanent ? "This action CANNOT be undone. Record will be erased from national servers." : "Member will be moved to Recycle Bin for 90 days before automated permanent deletion."}"
+                     "{isPermanent ? "This action CANNOT be undone." : "Member will be moved to Recycle Bin for 90 days."}"
                    </p>
                 </div>
              </div>
              <div className="flex gap-3">
-                <Button variant="outline" onClick={() => setStep('reason')} className="flex-1 h-12 rounded-xl font-bold uppercase text-[10px]">Edit Reason</Button>
+                <Button variant="outline" onClick={() => setStep('reason')} className="flex-1 h-12 rounded-xl font-bold uppercase text-[10px]">Back</Button>
                 <Button onClick={handleSendOtp} disabled={isLoading} className="flex-1 h-12 bg-red-600 text-white font-bold uppercase text-[10px]">
                    {isLoading ? <Loader2 className="animate-spin w-4 h-4" /> : "Authorize Purge"}
                 </Button>
@@ -197,7 +191,6 @@ export function DeleteMemberWorkflow({ member, isPermanent = false, onSuccess, o
           </div>
         )}
 
-        {/* STEP 3: OTP */}
         {step === 'otp' && (
           <div className="p-8 space-y-8 animate-in zoom-in-95 duration-500">
              <div className="text-center space-y-4">
@@ -205,31 +198,28 @@ export function DeleteMemberWorkflow({ member, isPermanent = false, onSuccess, o
                    <Lock className="w-8 h-8" />
                 </div>
                 <div className="space-y-1">
-                   <h4 className="text-xl font-headline font-bold">Security Handshake</h4>
-                   <p className="text-xs text-slate-500">A 6-digit code has been dispatched to your terminal.</p>
+                   <h4 className="text-xl font-headline font-bold">Security Verification</h4>
+                   <p className="text-xs text-slate-500">A code has been dispatched to your mobile.</p>
                 </div>
              </div>
              <div className="space-y-4">
-                <div className="relative">
-                   <Input 
-                    value={otp} 
-                    onChange={e => setOtp(e.target.value.replace(/\D/g, ''))}
-                    maxLength={6}
-                    placeholder="••••••"
-                    className="h-16 text-center text-3xl font-black tracking-[0.5em] rounded-2xl border-2 border-black focus:ring-accent"
-                   />
-                </div>
+                <Input 
+                  value={otp} 
+                  onChange={e => setOtp(e.target.value.replace(/\D/g, ''))}
+                  maxLength={6}
+                  placeholder="••••••"
+                  className="h-16 text-center text-3xl font-black tracking-[0.5em] rounded-2xl border-2 border-black"
+                />
                 <Button onClick={handleVerifyOtp} disabled={isLoading || otp.length < 6} className="w-full h-14 rounded-2xl bg-primary text-white font-bold text-lg">
-                   {isLoading ? <Loader2 className="animate-spin w-5 h-5" /> : "Confirm Identity"}
+                   {isLoading ? <Loader2 className="animate-spin w-5 h-5" /> : "Verify OTP"}
                 </Button>
                 <div className="text-center">
-                   <button onClick={handleSendOtp} className="text-[10px] font-black uppercase text-accent hover:underline">Resend Security Code</button>
+                   <button onClick={handleSendOtp} className="text-[10px] font-black uppercase text-accent hover:underline">Resend OTP</button>
                 </div>
              </div>
           </div>
         )}
 
-        {/* STEP 4: FINAL CONFIRMATION (Permanent Only) */}
         {step === 'final' && (
           <div className="p-10 space-y-8 animate-in slide-in-from-bottom-4 duration-500 text-center">
              <div className="w-20 h-20 bg-red-600 text-white rounded-full flex items-center justify-center mx-auto shadow-2xl animate-pulse">
@@ -238,19 +228,18 @@ export function DeleteMemberWorkflow({ member, isPermanent = false, onSuccess, o
              <div className="space-y-2">
                 <h3 className="text-2xl font-headline font-bold text-red-600 uppercase tracking-tight">Final Authorization</h3>
                 <p className="text-sm font-bold text-slate-500 leading-relaxed">
-                  Purging record for <strong className="text-primary">{member.name}</strong>. This record will be erased permanently from all institutional registries.
+                  Purging record for <strong className="text-primary">{member.name}</strong> permanently.
                 </p>
              </div>
              <div className="flex gap-4">
                 <Button variant="ghost" onClick={onCancel} className="flex-1 h-12 rounded-xl text-slate-400 font-bold uppercase text-[10px]">Abort</Button>
                 <Button onClick={executePermanentDelete} disabled={isLoading} className="flex-1 h-12 rounded-xl bg-red-600 text-white font-bold uppercase text-[10px] shadow-xl">
-                   {isLoading ? <Loader2 className="animate-spin w-4 h-4" /> : "Verify & Purge"}
+                   {isLoading ? <Loader2 className="animate-spin w-4 h-4" /> : "Confirm Purge"}
                 </Button>
              </div>
           </div>
         )}
 
-        {/* STEP 5: SUCCESS */}
         {step === 'success' && (
           <div className="p-10 space-y-8 animate-in zoom-in-95 duration-700 text-center">
              <div className="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -259,20 +248,14 @@ export function DeleteMemberWorkflow({ member, isPermanent = false, onSuccess, o
              <div className="space-y-2">
                 <h3 className="text-2xl font-headline font-bold text-emerald-600">Registry Updated</h3>
                 <p className="text-sm font-medium text-slate-500 leading-relaxed">
-                  Record for <strong>{member.name}</strong> has been displaced to the 90-day recovery vault.
+                  Member has been moved to the 90-day recovery vault.
                 </p>
              </div>
-             <Button onClick={onSuccess} className="w-full h-14 bg-primary text-white font-bold rounded-2xl">Return to Directory</Button>
+             <Button onClick={onSuccess} className="w-full h-14 bg-primary text-white font-bold rounded-2xl">Return to Registry</Button>
           </div>
         )}
 
       </DialogContent>
     </Dialog>
   );
-}
-
-function formatTime(seconds: number) {
-  const m = Math.floor(seconds / 60);
-  const s = Math.floor(seconds % 60);
-  return `${m}:${s.toString().padStart(2, '0')}`;
 }

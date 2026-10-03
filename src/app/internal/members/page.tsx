@@ -23,7 +23,8 @@ import {
   ShieldAlert,
   Edit,
   Trash2,
-  ChevronRight
+  ChevronRight,
+  MapPin
 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import {

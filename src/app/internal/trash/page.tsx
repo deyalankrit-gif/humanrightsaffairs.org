@@ -122,19 +122,21 @@ export default function RecycleBinPage() {
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-20">
       <header className="pt-16 pb-8 bg-slate-900 text-white border-b-8 border-accent/20 px-4 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-1/3 h-full bg-accent/5 -skew-x-12"></div>
-        <div className="container mx-auto flex flex-col md:flex-row items-center justify-between gap-6 relative z-10">
-          <div className="space-y-1">
-             <div className="inline-flex items-center gap-2 bg-accent/20 text-accent px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border border-accent/30">
-               <Archive className="w-2.5 h-2.5" /> Retention Protocol
-             </div>
-             <h1 className="text-3xl md:text-4xl font-headline font-bold">Institutional <span className="text-accent italic">Recycle Bin</span></h1>
-             <p className="text-slate-400 text-[11px] uppercase font-black">90-Day Recovery Vault for Purged Personnel</p>
-          </div>
-          <div className="flex gap-4">
-             <div className="bg-white/5 px-6 py-2 rounded-xl border border-white/10 text-center">
-                <p className="text-[8px] text-slate-500 font-bold uppercase mb-0.5">Records in Vault</p>
-                <p className="text-xl font-bold text-accent">{trashItems?.length || 0}</p>
-             </div>
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6 relative z-10">
+            <div className="space-y-1">
+               <div className="inline-flex items-center gap-2 bg-accent/20 text-accent px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border border-accent/30">
+                 <Archive className="w-2.5 h-2.5" /> Retention Protocol
+               </div>
+               <h1 className="text-3xl md:text-4xl font-headline font-bold">Institutional <span className="text-accent italic">Recycle Bin</span></h1>
+               <p className="text-slate-400 text-[11px] uppercase font-black">90-Day Recovery Vault for Purged Personnel</p>
+            </div>
+            <div className="flex gap-4">
+               <div className="bg-white/5 px-6 py-2 rounded-xl border border-white/10 text-center">
+                  <p className="text-[8px] text-slate-500 font-bold uppercase mb-0.5">Records in Vault</p>
+                  <p className="text-xl font-bold text-accent">{trashItems?.length || 0}</p>
+               </div>
+            </div>
           </div>
         </div>
       </header>
@@ -157,7 +159,7 @@ export default function RecycleBinPage() {
               </div>
            </Card>
            <Card className="rounded-2xl border-none shadow-sm bg-white dark:bg-slate-900 p-6 flex items-center gap-4">
-              <div className="p-3 bg-red-50 dark:bg-red-900/30 rounded-xl text-red-600"><ShieldAlert className="w-6 h-6" /></div>
+              <div className="p-3 bg-red-50 dark:bg-red-950/20 rounded-xl text-red-600"><ShieldAlert className="w-6 h-6" /></div>
               <div>
                 <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Security Policy</p>
                 <p className="text-lg font-bold">OTP Required</p>
@@ -230,7 +232,7 @@ export default function RecycleBinPage() {
                                 <AlertDialog>
                                   <AlertDialogTrigger asChild>
                                     <Button 
-                                      className="h-11 px-8 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase text-[10px] tracking-widest shadow-xl shadow-emerald-900/20"
+                                      className="h-11 px-8 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase text-[10px] tracking-widest shadow-xl shadow-emerald-900/40"
                                     >
                                        {isActionLoading === item.id ? <Loader2 className="animate-spin w-4 h-4" /> : <><RotateCcw className="w-4 h-4 mr-2" /> Restore Member</>}
                                     </Button>
