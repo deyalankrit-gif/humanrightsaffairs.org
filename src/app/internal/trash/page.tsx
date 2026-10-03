@@ -3,7 +3,7 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, query, orderBy, serverTimestamp, deleteDoc, doc } from 'firebase/firestore';
+import { collection, query, orderBy, serverTimestamp, deleteDoc, doc, addDoc } from 'firebase/firestore';
 import { 
   Trash2, 
   RotateCcw, 
@@ -96,13 +96,21 @@ export default function RecycleBinPage() {
   useEffect(() => {
     if (trashItems && trashItems.length > 0 && db) {
       const now = new Date();
-      trashItems.forEach((item: any) => {
+      trashItems.forEach(async (item: any) => {
         const deletedAt = item.trashMetadata?.deletedAt?.toDate?.() || new Date();
         const category = item.trashMetadata?.originalCollection;
         const limit = category === 'memberProfiles' ? 90 : 60;
         const daysInTrash = differenceInDays(now, deletedAt);
+        
         if (daysInTrash >= limit) {
-          permanentPurge(db, user, item);
+          await permanentPurge(db, user, item);
+          await addDoc(collection(db, 'deletion_audit_logs'), {
+            memberId: item.memberId || item.id,
+            memberName: item.trashMetadata?.displayName || 'Unknown',
+            performedBy: 'System Scheduler',
+            timestamp: serverTimestamp(),
+            action: "AUTO_PERMANENT_DELETE"
+          });
         }
       });
     }
@@ -128,7 +136,7 @@ export default function RecycleBinPage() {
                <div className="inline-flex items-center gap-2 bg-accent/20 text-accent px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border border-accent/30">
                  <Archive className="w-2.5 h-2.5" /> Retention Protocol
                </div>
-               <h1 className="text-3xl md:text-4xl font-headline font-bold">Institutional <span className="text-accent italic">Recycle Bin</span></h1>
+               <h1 className="text-3xl md:text-4xl font-headline font-bold">Recycle <span className="text-accent italic">Bin</span></h1>
                <p className="text-slate-400 text-[11px] uppercase font-black">90-Day Recovery Vault for Purged Personnel</p>
             </div>
             <div className="flex gap-4">
@@ -154,8 +162,8 @@ export default function RecycleBinPage() {
            <Card className="rounded-2xl border-none shadow-sm bg-white dark:bg-slate-900 p-6 flex items-center gap-4">
               <div className="p-3 bg-emerald-50 dark:bg-emerald-900/30 rounded-xl text-emerald-600"><RotateCcw className="w-6 h-6" /></div>
               <div>
-                <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Recovery Success</p>
-                <p className="text-lg font-bold">100% Verified</p>
+                <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Recovery Protocol</p>
+                <p className="text-lg font-bold">Verified Restore</p>
               </div>
            </Card>
            <Card className="rounded-2xl border-none shadow-sm bg-white dark:bg-slate-900 p-6 flex items-center gap-4">
@@ -191,7 +199,7 @@ export default function RecycleBinPage() {
              filtered.map((item: any) => {
                const meta = item.trashMetadata;
                const deletedAt = meta?.deletedAt?.toDate?.() || new Date();
-               const limit = meta?.originalCollection === 'memberProfiles' ? 90 : 60;
+               const limit = 90;
                const autoDeleteAt = addDays(deletedAt, limit);
                const daysLeft = limit - differenceInDays(new Date(), deletedAt);
 
@@ -211,7 +219,7 @@ export default function RecycleBinPage() {
                                    <div className="flex items-center gap-3">
                                       <Badge className="bg-primary text-white text-[8px] font-black uppercase tracking-tighter h-5 px-3">{meta.category}</Badge>
                                       <p className="text-[9px] font-bold text-slate-400 uppercase flex items-center gap-1.5">
-                                         <History className="w-3 h-3" /> Purged: {format(deletedAt, 'PPP')}
+                                         <History className="w-3 h-3" /> Deleted: {format(deletedAt, 'PPP')}
                                       </p>
                                    </div>
                                    <h3 className="text-2xl font-headline font-bold text-primary dark:text-white leading-tight truncate">{meta.displayName}</h3>
@@ -219,12 +227,12 @@ export default function RecycleBinPage() {
                                 </div>
 
                                 <div className="p-4 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-100 dark:border-slate-800">
-                                   <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1 flex items-center gap-1.5"><MessageSquare className="w-3 h-3" /> Justification</p>
-                                   <p className="text-xs font-bold text-primary dark:text-slate-200 italic leading-relaxed">"{meta.deletionReason || 'No reason specified.'}"</p>
+                                   <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1 flex items-center gap-1.5"><MessageSquare className="w-3 h-3" /> Deletion Reason</p>
+                                   <p className="text-xs font-bold text-primary dark:text-slate-200 italic leading-relaxed">"{meta.deletionReason || 'No reason provided.'}"</p>
                                 </div>
 
                                 <div className="flex items-center gap-4 text-[10px] font-bold text-slate-500 uppercase tracking-tight">
-                                   <span className="flex items-center gap-1.5"><User className="w-3 h-3 text-accent" /> Action By: {meta.deletedBy}</span>
+                                   <span className="flex items-center gap-1.5"><User className="w-3 h-3 text-accent" /> Deleted By: {meta.deletedBy}</span>
                                 </div>
                              </div>
 
@@ -242,18 +250,15 @@ export default function RecycleBinPage() {
                                         <div className="w-16 h-16 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 rounded-2xl flex items-center justify-center mb-4">
                                            <RotateCcw className="w-10 h-10" />
                                         </div>
-                                        <AlertDialogTitle className="text-2xl font-headline font-bold">Reintegrate Record?</AlertDialogTitle>
-                                        <AlertDialogDescription className="text-sm font-medium leading-relaxed">
-                                          This member will be returned to the active personnel registry. This action will be logged in the governance audit trail.
-                                        </AlertDialogDescription>
+                                        <AlertDialogTitle className="text-2xl font-headline font-bold">Restore this member to the active Members list?</AlertDialogTitle>
                                      </AlertDialogHeader>
                                      <AlertDialogFooter className="mt-6 flex gap-3">
-                                        <AlertDialogCancel className="rounded-xl h-11 font-bold flex-1">Abort</AlertDialogCancel>
+                                        <AlertDialogCancel className="rounded-xl h-11 font-bold flex-1">CANCEL</AlertDialogCancel>
                                         <AlertDialogAction 
                                           onClick={() => handleRestore(item)} 
                                           className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl h-11 font-bold flex-1"
                                         >
-                                          Confirm Restoration
+                                          RESTORE
                                         </AlertDialogAction>
                                      </AlertDialogFooter>
                                   </AlertDialogContent>
@@ -264,7 +269,7 @@ export default function RecycleBinPage() {
                                   onClick={() => setManualPurgeItem(item)}
                                   className="h-11 px-8 rounded-xl text-slate-300 hover:text-red-500 hover:bg-red-50 transition-all font-black uppercase text-[10px] tracking-widest"
                                 >
-                                   <Trash2 className="w-4 h-4 mr-2" /> Permanent Purge
+                                   PERMANENT DELETE
                                 </Button>
                              </div>
                           </div>
@@ -276,14 +281,12 @@ export default function RecycleBinPage() {
            ) : (
              <div className="py-40 text-center opacity-30 flex flex-col items-center gap-4">
                 <Archive className="w-20 h-20 text-slate-200" />
-                <h3 className="text-2xl font-headline font-bold uppercase tracking-[0.4em]">Vault Empty</h3>
-                <p className="text-sm font-bold uppercase tracking-widest">Institutional records are currently stable.</p>
+                <h3 className="text-2xl font-headline font-bold uppercase tracking-[0.4em]">Recycle Bin Empty</h3>
              </div>
            )}
         </div>
       </section>
 
-      {/* Manual Permanent Purge Workflow */}
       {manualPurgeItem && (
         <DeleteMemberWorkflow 
           member={manualPurgeItem}

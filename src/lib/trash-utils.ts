@@ -47,8 +47,19 @@ export async function moveToTrash(
   const trashRef = doc(collection(db, 'trash'));
   const originalRef = doc(db, collectionName, item.id);
 
-  // Calculate permanent deletion date (90 days for members, 60 for others)
-  const retentionDays = collectionName === 'memberProfiles' ? 90 : 60;
+  // LOG: DELETE_REQUESTED
+  const auditRef = doc(collection(db, 'deletion_audit_logs'));
+  batch.set(auditRef, {
+    memberId: item.memberId || item.id,
+    memberName: item[displayNameField] || item.title || 'Unnamed Record',
+    performedBy: user?.email || 'Authorized Admin',
+    timestamp: serverTimestamp(),
+    deletionReason: reason,
+    action: "DELETE_REQUESTED"
+  });
+
+  // Calculate permanent deletion date (90 days for members as per mandate)
+  const retentionDays = 90;
   const now = new Date();
   const permanentDeletionDate = new Date(now.getTime() + (retentionDays * 24 * 60 * 60 * 1000));
 
@@ -60,7 +71,7 @@ export async function moveToTrash(
       deletedBy: user?.email || 'Authorized Admin',
       deletedAt: serverTimestamp(),
       displayName: item[displayNameField] || item.title || item.fullName || 'Unnamed Record',
-      category: collectionName === 'memberProfiles' ? 'Personnel' : collectionName.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
+      category: collectionName === 'memberProfiles' ? 'Personnel' : 'Record',
       deletionReason: reason,
       permanentDeletionDate: permanentDeletionDate,
       deletionStatus: "TRASHED"
@@ -73,9 +84,9 @@ export async function moveToTrash(
   // 2. Erase from active collection
   batch.delete(originalRef);
 
-  // 3. Log Audit Entry
-  const auditRef = doc(collection(db, 'deletion_audit_logs'));
-  batch.set(auditRef, {
+  // 3. Log Audit Entry: MOVED_TO_RECYCLE_BIN
+  const moveAuditRef = doc(collection(db, 'deletion_audit_logs'));
+  batch.set(moveAuditRef, {
     memberId: item.memberId || item.id,
     memberName: trashData.trashMetadata.displayName,
     performedBy: user?.email,

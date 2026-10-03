@@ -1,4 +1,3 @@
-
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -58,7 +57,7 @@ service cloud.firestore {
     match /leadership/{id} { allow write: if hasPermission('members'); }
     match /memberProfiles/{id} { allow write, delete: if hasPermission('members'); }
     match /terminatedMembers/{id} { allow write: if hasPermission('terminated'); }
-    match /donor_tiers/{id} { allow write: if hasPermission('donorWall'); }
+    match /donor_tiers/{id} { allow write: if hasPermission('terminated'); }
     match /meetings/{id} { allow write: if hasPermission('meetings'); }
     match /activity_events/{id} { allow write: if hasPermission('activityHub'); }
     match /settings/{id} { allow write: if isStaff(); }

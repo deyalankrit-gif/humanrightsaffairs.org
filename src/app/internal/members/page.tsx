@@ -184,7 +184,7 @@ export default function InternalMembersPage() {
                                         <Button 
                                           variant="outline" 
                                           size="sm" 
-                                          onClick={() => router.push(`/internal/members/${member.id}`)}
+                                          onClick={() => router.push(`/internal/members/${member.id}?edit=true`)}
                                           className="h-9 px-4 rounded-xl text-[10px] font-black uppercase tracking-widest border-2 border-primary hover:bg-primary hover:text-white"
                                         >
                                            <Edit className="w-3.5 h-3.5 mr-1.5" /> Edit

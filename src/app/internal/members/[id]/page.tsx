@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useEffect, useState } from 'react'
-import { useRouter, useParams } from 'next/navigation'
+import { useRouter, useParams, useSearchParams } from 'next/navigation'
 import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase'
 import { doc, updateDoc, serverTimestamp } from 'firebase/firestore'
 import { Footer } from '@/components/footer'
@@ -53,11 +53,12 @@ export default function MemberDetailsPage() {
   const { user, loading: authLoading } = useUser()
   const router = useRouter()
   const params = useParams()
+  const searchParams = useSearchParams()
   const memberId = params.id as string
   const db = useFirestore()
   const { toast } = useToast()
   
-  const [isEditing, setIsEditing] = useState(false)
+  const [isEditing, setIsEditing] = useState(searchParams.get('edit') === 'true')
   const [isSaving, setIsSaving] = useState(false)
   const [editForm, setEditForm] = useState<any>(null)
   const [isDeleting, setIsDeleting] = useState(false)
@@ -99,7 +100,7 @@ export default function MemberDetailsPage() {
         }
       } catch (e) {}
     }
-  }, [isEditing, editForm?.joiningDate, editForm?.membershipDuration]);
+  }, [isEditing, editForm?.joiningDate, editForm?.membershipDuration, editForm?.expiryDate]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -194,9 +195,18 @@ export default function MemberDetailsPage() {
                   </Button>
                 </>
               ) : (
-                <Button size="sm" onClick={() => setIsEditing(true)} className="bg-white/10 hover:bg-white/20 text-white border border-white/10 h-9 rounded-lg px-4 text-[10px] font-bold transition-all">
-                  <Edit className="w-3 h-3 mr-1.5" /> EDIT MEMBER
-                </Button>
+                <div className="flex gap-2">
+                  <Button size="sm" onClick={() => setIsEditing(true)} className="bg-white/10 hover:bg-white/20 text-white border border-white/10 h-9 rounded-lg px-4 text-[10px] font-bold transition-all">
+                    <Edit className="w-3 h-3 mr-1.5" /> EDIT MEMBER
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    onClick={() => setIsDeleting(true)}
+                    className="bg-red-600/10 hover:bg-red-600 text-red-500 hover:text-white border border-red-600/20 h-9 rounded-lg px-4 text-[10px] font-bold transition-all"
+                  >
+                    <Trash2 className="w-3 h-3 mr-1.5" /> DELETE MEMBER
+                  </Button>
+                </div>
               )}
             </div>
           </div>
@@ -234,16 +244,6 @@ export default function MemberDetailsPage() {
                    <div className="flex items-center gap-2">
                      <ShieldCheck className="w-5 h-5 text-accent" /> Personnel Credentials
                    </div>
-                   {!isEditing && (
-                     <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        onClick={() => setIsDeleting(true)}
-                        className="text-red-500 hover:bg-red-50 h-8 rounded-lg text-[10px] font-bold uppercase tracking-widest gap-2"
-                      >
-                       <Trash2 className="w-4 h-4" /> DELETE MEMBER
-                     </Button>
-                   )}
                  </CardTitle>
                  
                  {isEditing ? (
