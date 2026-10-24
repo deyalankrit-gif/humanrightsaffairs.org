@@ -70,15 +70,19 @@ import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
 import { INDIA_DATA } from '@/lib/india-data'
 
+type LeadershipLevel = "Central" | "State" | "District" | "Sub-Division" | "Block"
+
 type Leader = {
   id: string
   name: string
   title: string
   imageId?: string
   gender: 'male' | 'female'
-  level: "Central" | "State" | "District"
+  level: LeadershipLevel
   parentRegion?: string 
   districtName?: string
+  subDivisionName?: string
+  blockName?: string
 }
 
 function LeaderCard({ leader, variant = "default", isAdmin, onEdit, onDelete }: { leader: Leader, variant?: "xl" | "large" | "default" | "small", isAdmin?: boolean, onEdit?: (l: Leader) => void, onDelete?: (id: string) => void }) {
@@ -168,6 +172,8 @@ function LeaderCard({ leader, variant = "default", isAdmin, onEdit, onDelete }: 
              {leader.level === 'Central' && "National Committee"}
              {leader.level === 'State' && `${leader.parentRegion} State Committee`}
              {leader.level === 'District' && `${leader.districtName} District Committee`}
+             {leader.level === 'Sub-Division' && `${leader.subDivisionName} Sub-Division Committee`}
+             {leader.level === 'Block' && `${leader.blockName} Block Committee`}
           </p>
         </div>
       </div>
@@ -248,16 +254,33 @@ export default function LeadershipPage() {
   const [newLeader, setNewLeader] = useState({
     name: '',
     title: '',
-    gender: 'male' as const,
-    level: 'Central' as 'Central' | 'State' | 'District',
+    gender: 'male' as 'male' | 'female',
+    level: 'Central' as LeadershipLevel,
     parentRegion: '',
     districtName: '',
+    subDivisionName: '',
+    blockName: '',
     imageId: ''
   })
 
   const centralTeam = leaders.filter(l => l.level === 'Central')
   const activeStateLeaders = leaders.filter(l => l.level === 'State' && l.parentRegion === activeState)
   const activeDistrictLeaders = leaders.filter(l => l.level === 'District' && l.parentRegion === activeState && l.districtName === activeDistrict)
+  const activeSubdivisionLeaders = leaders.filter(l => l.level === 'Sub-Division' && l.parentRegion === activeState && l.districtName === activeDistrict)
+  const activeBlockLeaders = leaders.filter(l => l.level === 'Block' && l.parentRegion === activeState && l.districtName === activeDistrict)
+  const subdivisionNames = [...new Set([
+    ...activeSubdivisionLeaders.map(l => l.subDivisionName?.trim()),
+    ...activeBlockLeaders.map(l => l.subDivisionName?.trim())
+  ].filter((name): name is string => Boolean(name)))].sort((a, b) => a.localeCompare(b))
+
+  const getMissingLocationFields = (leader: Pick<Leader, 'level' | 'parentRegion' | 'districtName' | 'subDivisionName' | 'blockName'>) => {
+    const missingFields: string[] = []
+    if (leader.level !== 'Central' && !leader.parentRegion?.trim()) missingFields.push("State / UT")
+    if (["District", "Sub-Division", "Block"].includes(leader.level) && !leader.districtName?.trim()) missingFields.push("District")
+    if (["Sub-Division", "Block"].includes(leader.level) && !leader.subDivisionName?.trim()) missingFields.push("Sub-Division")
+    if (leader.level === 'Block' && !leader.blockName?.trim()) missingFields.push("Block")
+    return missingFields
+  }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, isEdit: boolean) => {
     const file = e.target.files?.[0]
@@ -280,6 +303,8 @@ export default function LeadershipPage() {
       level: member.level || 'Central',
       parentRegion: member.stateName || '',
       districtName: member.districtName || '',
+      subDivisionName: member.subDivisionName || '',
+      blockName: member.blockName || '',
       imageId: member.imageId || ''
     });
     setMemberSearch("");
@@ -290,12 +315,7 @@ export default function LeadershipPage() {
     const missingFields: string[] = [];
     if (!newLeader.name.trim()) missingFields.push("Official Name");
     if (!newLeader.title.trim()) missingFields.push("Official Designation");
-    if (newLeader.level === 'State' || newLeader.level === 'District') {
-      if (!newLeader.parentRegion) missingFields.push("State / UT");
-    }
-    if (newLeader.level === 'District') {
-      if (!newLeader.districtName) missingFields.push("District");
-    }
+    missingFields.push(...getMissingLocationFields(newLeader))
 
     if (missingFields.length > 0) {
       toast({
@@ -320,7 +340,7 @@ export default function LeadershipPage() {
         createdAt: serverTimestamp() 
       })
       toast({ title: "Leader Commissioned" })
-      setNewLeader({ name: '', title: '', gender: 'male', level: 'Central', parentRegion: '', districtName: '', imageId: '' })
+      setNewLeader({ name: '', title: '', gender: 'male', level: 'Central', parentRegion: '', districtName: '', subDivisionName: '', blockName: '', imageId: '' })
       setIsAddDialogOpen(false)
     } catch (e: any) {
       toast({ variant: "destructive", title: "Error", description: e.message })
@@ -340,6 +360,17 @@ export default function LeadershipPage() {
 
   const handleUpdate = async () => {
     if (!editLeader) return
+    const missingFields = getMissingLocationFields(editLeader)
+    if (!editLeader.name?.trim()) missingFields.unshift("Official Name")
+    if (!editLeader.title?.trim()) missingFields.unshift("Official Designation")
+    if (missingFields.length > 0) {
+      toast({
+        variant: "destructive",
+        title: "Mandatory Fields Required",
+        description: `The following credentials must be established: ${missingFields.join(", ")}.`,
+      })
+      return
+    }
     setIsActionLoading(true)
     
     let finalImage = editLeader.imageId;
@@ -467,12 +498,14 @@ export default function LeadershipPage() {
                     <div className="grid grid-cols-2 gap-6">
                       <div className="space-y-1.5">
                         <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Chapter Level *</Label>
-                        <Select value={newLeader.level} onValueChange={(val: any) => setNewLeader({...newLeader, level: val, parentRegion: '', districtName: ''})}>
+                        <Select value={newLeader.level} onValueChange={(val: LeadershipLevel) => setNewLeader({...newLeader, level: val, parentRegion: '', districtName: '', subDivisionName: '', blockName: ''})}>
                           <SelectTrigger className="h-11 rounded-xl bg-slate-50 border-none shadow-inner font-bold"><SelectValue placeholder="Level" /></SelectTrigger>
                           <SelectContent className="bg-white z-[1000000]">
                             <SelectItem value="Central">Central Council</SelectItem>
                             <SelectItem value="State">State Level</SelectItem>
                             <SelectItem value="District">District Level</SelectItem>
+                            <SelectItem value="Sub-Division">Sub-Division Level</SelectItem>
+                            <SelectItem value="Block">Block Level</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -485,22 +518,34 @@ export default function LeadershipPage() {
                       </div>
                     </div>
 
-                    {(newLeader.level === 'State' || newLeader.level === 'District') && (
+                    {newLeader.level !== 'Central' && (
                       <div className="grid md:grid-cols-2 gap-6 p-6 rounded-3xl bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 animate-in fade-in slide-in-from-top-2 duration-300">
                         <div className="space-y-1.5">
                           <Label className="text-[10px] font-black uppercase text-accent flex items-center gap-2"><Globe className="w-3.5 h-3.5" /> State / UT *</Label>
-                          <Select value={newLeader.parentRegion} onValueChange={(val) => setNewLeader({...newLeader, parentRegion: val, districtName: ''})}>
+                          <Select value={newLeader.parentRegion} onValueChange={(val) => setNewLeader({...newLeader, parentRegion: val, districtName: '', subDivisionName: '', blockName: ''})}>
                             <SelectTrigger className="h-11 rounded-xl bg-white dark:bg-slate-800 border-accent/20 font-bold"><SelectValue placeholder="Choose State" /></SelectTrigger>
                             <SelectContent className="bg-white z-[1000000] max-h-60">{allStates.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
                           </Select>
                         </div>
-                        {newLeader.level === 'District' && (
+                        {["District", "Sub-Division", "Block"].includes(newLeader.level) && (
                           <div className="space-y-1.5">
                             <Label className="text-[10px] font-black uppercase text-accent flex items-center gap-2"><MapPin className="w-3.5 h-3.5" /> District *</Label>
-                            <Select value={newLeader.districtName} onValueChange={(val) => setNewLeader({...newLeader, districtName: val})}>
+                            <Select value={newLeader.districtName} onValueChange={(val) => setNewLeader({...newLeader, districtName: val, subDivisionName: '', blockName: ''})}>
                               <SelectTrigger className="h-11 rounded-xl bg-white dark:bg-slate-800 border-accent/20 font-bold"><SelectValue placeholder="Choose District" /></SelectTrigger>
                               <SelectContent className="bg-white z-[1000000] max-h-60">{newLeader.parentRegion && (INDIA_DATA[newLeader.parentRegion] || []).map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
                             </Select>
+                          </div>
+                        )}
+                        {["Sub-Division", "Block"].includes(newLeader.level) && (
+                          <div className="space-y-1.5">
+                            <Label className="text-[10px] font-black uppercase text-accent">Sub-Division *</Label>
+                            <Input value={newLeader.subDivisionName} onChange={e => setNewLeader({...newLeader, subDivisionName: e.target.value, blockName: ''})} placeholder="Enter sub-division" className="h-11 rounded-xl bg-white dark:bg-slate-800 border-accent/20 font-bold" required />
+                          </div>
+                        )}
+                        {newLeader.level === 'Block' && (
+                          <div className="space-y-1.5">
+                            <Label className="text-[10px] font-black uppercase text-accent">Block *</Label>
+                            <Input value={newLeader.blockName} onChange={e => setNewLeader({...newLeader, blockName: e.target.value})} placeholder="Enter block" className="h-11 rounded-xl bg-white dark:bg-slate-800 border-accent/20 font-bold" required />
                           </div>
                         )}
                       </div>
@@ -625,6 +670,7 @@ export default function LeadershipPage() {
                          </div>
 
                          {activeDistrict ? (
+                           <>
                            <div className="bg-slate-50 dark:bg-slate-950/50 p-8 md:p-12 rounded-[3rem] border border-slate-100 dark:border-slate-800 flex flex-col items-center transition-all hover:shadow-2xl hover:bg-white dark:hover:bg-slate-900 group/district animate-in slide-in-from-bottom-4 duration-500">
                               <div className="flex items-center gap-2 mb-10 text-primary dark:text-accent font-bold uppercase text-[11px] tracking-[0.2em] bg-white dark:bg-slate-900 px-6 py-2 rounded-full shadow-md border border-slate-100 dark:border-slate-800 group-hover/district:scale-110 transition-transform">
                                  <MapPin className="w-3.5 h-3.5 text-accent" />
@@ -654,6 +700,47 @@ export default function LeadershipPage() {
                                 <p className="text-slate-400 font-bold uppercase tracking-widest text-[9px] animate-pulse">No commissioned district officials recorded for {activeDistrict}.</p>
                               )}
                            </div>
+                           {subdivisionNames.length > 0 && (
+                             <div className="w-full mt-10 space-y-8">
+                               {subdivisionNames.map(subdivisionName => {
+                                 const subdivisionLeaders = activeSubdivisionLeaders.filter(l => l.subDivisionName?.trim() === subdivisionName)
+                                 const subdivisionBlocks = activeBlockLeaders.filter(l => l.subDivisionName?.trim() === subdivisionName)
+                                 const blockNames = [...new Set(subdivisionBlocks.map(l => l.blockName?.trim()).filter((name): name is string => Boolean(name)))].sort((a, b) => a.localeCompare(b))
+
+                                 return (
+                                   <section key={subdivisionName} className="w-full rounded-3xl border border-violet-100 dark:border-violet-900/50 bg-white/70 dark:bg-slate-900/70 p-6 md:p-8">
+                                     <h3 className="text-center mb-6 text-violet-700 dark:text-violet-300 font-bold uppercase tracking-[0.2em] text-xs">
+                                       {subdivisionName} Sub-Division Committee
+                                     </h3>
+                                     {subdivisionLeaders.length > 0 && (
+                                       <div className="flex flex-wrap justify-center gap-8">
+                                         {subdivisionLeaders.map(leader => (
+                                           <LeaderCard key={leader.id} leader={leader} variant="default" isAdmin={isAdmin} onEdit={handleStartEdit} onDelete={handleDelete} />
+                                         ))}
+                                       </div>
+                                     )}
+                                     {blockNames.length > 0 && (
+                                       <div className={cn("space-y-8", subdivisionLeaders.length > 0 && "mt-8 pt-8 border-t border-slate-100 dark:border-slate-800")}>
+                                         {blockNames.map(blockName => (
+                                           <div key={blockName}>
+                                             <h4 className="text-center mb-5 text-amber-700 dark:text-amber-300 font-bold uppercase tracking-[0.18em] text-[10px]">
+                                               {blockName} Block Committee
+                                             </h4>
+                                             <div className="flex flex-wrap justify-center gap-6">
+                                               {subdivisionBlocks.filter(l => l.blockName?.trim() === blockName).map(leader => (
+                                                 <LeaderCard key={leader.id} leader={leader} variant="small" isAdmin={isAdmin} onEdit={handleStartEdit} onDelete={handleDelete} />
+                                               ))}
+                                             </div>
+                                           </div>
+                                         ))}
+                                       </div>
+                                     )}
+                                   </section>
+                                 )
+                               })}
+                             </div>
+                           )}
+                           </>
                          ) : (
                            <div className="text-center py-10 opacity-50">
                               <p className="text-[10px] font-bold uppercase tracking-[0.2em]">Select a district to view committee officials.</p>
@@ -724,12 +811,14 @@ export default function LeadershipPage() {
                   <div className="grid grid-cols-2 gap-6">
                     <div className="space-y-1.5">
                       <Label className="text-[10px] font-black uppercase text-slate-500">Chapter Level</Label>
-                      <Select value={editLeader.level} onValueChange={(val: any) => setEditLeader({...editLeader, level: val, parentRegion: '', districtName: ''})}>
+                      <Select value={editLeader.level} onValueChange={(val: LeadershipLevel) => setEditLeader({...editLeader, level: val, parentRegion: '', districtName: '', subDivisionName: '', blockName: ''})}>
                         <SelectTrigger className="h-11 rounded-xl bg-slate-50 border-none shadow-inner font-bold"><SelectValue placeholder="Level" /></SelectTrigger>
                         <SelectContent className="bg-white z-[2000000]">
                           <SelectItem value="Central">Central Council</SelectItem>
                           <SelectItem value="State">State Level</SelectItem>
                           <SelectItem value="District">District Level</SelectItem>
+                          <SelectItem value="Sub-Division">Sub-Division Level</SelectItem>
+                          <SelectItem value="Block">Block Level</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -742,22 +831,34 @@ export default function LeadershipPage() {
                     </div>
                   </div>
 
-                  {(editLeader.level === 'State' || editLeader.level === 'District') && (
+                  {editLeader.level !== 'Central' && (
                     <div className="grid md:grid-cols-2 gap-6 p-6 rounded-3xl bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 animate-in fade-in slide-in-from-top-2 duration-300">
                       <div className="space-y-1.5">
                         <Label className="text-[10px] font-black uppercase text-accent flex items-center gap-2"><Globe className="w-3.5 h-3.5" /> State / UT *</Label>
-                        <Select value={editLeader.parentRegion} onValueChange={(val) => setEditLeader({...editLeader, parentRegion: val, districtName: ''})}>
+                        <Select value={editLeader.parentRegion} onValueChange={(val) => setEditLeader({...editLeader, parentRegion: val, districtName: '', subDivisionName: '', blockName: ''})}>
                           <SelectTrigger className="h-11 rounded-xl bg-white dark:bg-slate-800 border-accent/20 font-bold"><SelectValue placeholder="Choose State" /></SelectTrigger>
                           <SelectContent className="bg-white z-[2000000] max-h-60">{allStates.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
                         </Select>
                       </div>
-                      {editLeader.level === 'District' && (
+                      {["District", "Sub-Division", "Block"].includes(editLeader.level) && (
                         <div className="space-y-1.5">
                           <Label className="text-[10px] font-black uppercase text-accent flex items-center gap-2"><MapPin className="w-3.5 h-3.5" /> District *</Label>
-                          <Select value={editLeader.districtName} onValueChange={(val) => setEditLeader({...editLeader, districtName: val})}>
+                          <Select value={editLeader.districtName} onValueChange={(val) => setEditLeader({...editLeader, districtName: val, subDivisionName: '', blockName: ''})}>
                             <SelectTrigger className="h-11 rounded-xl bg-white dark:bg-slate-800 border-accent/20 font-bold"><SelectValue placeholder="Choose District" /></SelectTrigger>
                             <SelectContent className="bg-white z-[2000000] max-h-60">{editLeader.parentRegion && (INDIA_DATA[editLeader.parentRegion] || []).map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
                           </Select>
+                        </div>
+                      )}
+                      {["Sub-Division", "Block"].includes(editLeader.level) && (
+                        <div className="space-y-1.5">
+                          <Label className="text-[10px] font-black uppercase text-accent">Sub-Division *</Label>
+                          <Input value={editLeader.subDivisionName || ''} onChange={e => setEditLeader({...editLeader, subDivisionName: e.target.value, blockName: ''})} placeholder="Enter sub-division" className="h-11 rounded-xl bg-white dark:bg-slate-800 border-accent/20 font-bold" required />
+                        </div>
+                      )}
+                      {editLeader.level === 'Block' && (
+                        <div className="space-y-1.5">
+                          <Label className="text-[10px] font-black uppercase text-accent">Block *</Label>
+                          <Input value={editLeader.blockName || ''} onChange={e => setEditLeader({...editLeader, blockName: e.target.value})} placeholder="Enter block" className="h-11 rounded-xl bg-white dark:bg-slate-800 border-accent/20 font-bold" required />
                         </div>
                       )}
                     </div>

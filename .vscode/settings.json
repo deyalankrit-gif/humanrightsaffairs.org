@@ -1,3 +1,4 @@
 {
-  "workbench.startupEditor": "readme"
+  "workbench.startupEditor": "readme",
+  "liveServer.settings.port": 5501
 }
