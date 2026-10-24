@@ -69,8 +69,12 @@ import { format, parse } from "date-fns"
 import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
 import { INDIA_DATA } from '@/lib/india-data'
+import WEST_BENGAL_LOCATION_DATA from '@/lib/west-bengal-location-data.json'
 
 type LeadershipLevel = "Central" | "State" | "District" | "Sub-Division" | "Block"
+type DistrictLocationData = { subDivisions: string[], blocks: string[] }
+
+const westBengalDistricts: Record<string, DistrictLocationData> = WEST_BENGAL_LOCATION_DATA.districts
 
 type Leader = {
   id: string
@@ -263,21 +267,35 @@ export default function LeadershipPage() {
     imageId: ''
   })
 
+  const newLeaderLocationData = newLeader.parentRegion === 'West Bengal'
+    ? westBengalDistricts[newLeader.districtName]
+    : undefined
+  const editLeaderLocationData = editLeader?.parentRegion === 'West Bengal'
+    ? westBengalDistricts[editLeader.districtName]
+    : undefined
+
   const centralTeam = leaders.filter(l => l.level === 'Central')
   const activeStateLeaders = leaders.filter(l => l.level === 'State' && l.parentRegion === activeState)
   const activeDistrictLeaders = leaders.filter(l => l.level === 'District' && l.parentRegion === activeState && l.districtName === activeDistrict)
   const activeSubdivisionLeaders = leaders.filter(l => l.level === 'Sub-Division' && l.parentRegion === activeState && l.districtName === activeDistrict)
   const activeBlockLeaders = leaders.filter(l => l.level === 'Block' && l.parentRegion === activeState && l.districtName === activeDistrict)
+  const activeDistrictLocationData = activeState === 'West Bengal' && activeDistrict
+    ? westBengalDistricts[activeDistrict]
+    : undefined
   const subdivisionNames = [...new Set([
-    ...activeSubdivisionLeaders.map(l => l.subDivisionName?.trim()),
-    ...activeBlockLeaders.map(l => l.subDivisionName?.trim())
+    ...(activeDistrictLocationData?.subDivisions || []),
+    ...activeSubdivisionLeaders.map(l => l.subDivisionName?.trim())
+  ].filter((name): name is string => Boolean(name)))].sort((a, b) => a.localeCompare(b))
+  const blockNames = [...new Set([
+    ...(activeDistrictLocationData?.blocks || []),
+    ...activeBlockLeaders.map(l => l.blockName?.trim())
   ].filter((name): name is string => Boolean(name)))].sort((a, b) => a.localeCompare(b))
 
   const getMissingLocationFields = (leader: Pick<Leader, 'level' | 'parentRegion' | 'districtName' | 'subDivisionName' | 'blockName'>) => {
     const missingFields: string[] = []
     if (leader.level !== 'Central' && !leader.parentRegion?.trim()) missingFields.push("State / UT")
     if (["District", "Sub-Division", "Block"].includes(leader.level) && !leader.districtName?.trim()) missingFields.push("District")
-    if (["Sub-Division", "Block"].includes(leader.level) && !leader.subDivisionName?.trim()) missingFields.push("Sub-Division")
+    if (leader.level === 'Sub-Division' && !leader.subDivisionName?.trim()) missingFields.push("Sub-Division")
     if (leader.level === 'Block' && !leader.blockName?.trim()) missingFields.push("Block")
     return missingFields
   }
@@ -536,16 +554,30 @@ export default function LeadershipPage() {
                             </Select>
                           </div>
                         )}
-                        {["Sub-Division", "Block"].includes(newLeader.level) && (
+                        {newLeader.level === 'Sub-Division' && (
                           <div className="space-y-1.5">
                             <Label className="text-[10px] font-black uppercase text-accent">Sub-Division *</Label>
-                            <Input value={newLeader.subDivisionName} onChange={e => setNewLeader({...newLeader, subDivisionName: e.target.value, blockName: ''})} placeholder="Enter sub-division" className="h-11 rounded-xl bg-white dark:bg-slate-800 border-accent/20 font-bold" required />
+                            {newLeaderLocationData ? (
+                              <Select value={newLeader.subDivisionName} onValueChange={(val) => setNewLeader({...newLeader, subDivisionName: val, blockName: ''})}>
+                                <SelectTrigger className="h-11 rounded-xl bg-white dark:bg-slate-800 border-accent/20 font-bold"><SelectValue placeholder="Choose sub-division" /></SelectTrigger>
+                                <SelectContent className="bg-white z-[1000000] max-h-60">{newLeaderLocationData.subDivisions.map(name => <SelectItem key={name} value={name}>{name}</SelectItem>)}</SelectContent>
+                              </Select>
+                            ) : (
+                              <Input value={newLeader.subDivisionName} onChange={e => setNewLeader({...newLeader, subDivisionName: e.target.value, blockName: ''})} placeholder="Enter sub-division" className="h-11 rounded-xl bg-white dark:bg-slate-800 border-accent/20 font-bold" required />
+                            )}
                           </div>
                         )}
                         {newLeader.level === 'Block' && (
                           <div className="space-y-1.5">
                             <Label className="text-[10px] font-black uppercase text-accent">Block *</Label>
-                            <Input value={newLeader.blockName} onChange={e => setNewLeader({...newLeader, blockName: e.target.value})} placeholder="Enter block" className="h-11 rounded-xl bg-white dark:bg-slate-800 border-accent/20 font-bold" required />
+                            {newLeaderLocationData ? (
+                              <Select value={newLeader.blockName} onValueChange={(val) => setNewLeader({...newLeader, blockName: val})}>
+                                <SelectTrigger className="h-11 rounded-xl bg-white dark:bg-slate-800 border-accent/20 font-bold"><SelectValue placeholder="Choose block" /></SelectTrigger>
+                                <SelectContent className="bg-white z-[1000000] max-h-60">{newLeaderLocationData.blocks.map(name => <SelectItem key={name} value={name}>{name}</SelectItem>)}</SelectContent>
+                              </Select>
+                            ) : (
+                              <Input value={newLeader.blockName} onChange={e => setNewLeader({...newLeader, blockName: e.target.value})} placeholder="Enter block" className="h-11 rounded-xl bg-white dark:bg-slate-800 border-accent/20 font-bold" required />
+                            )}
                           </div>
                         )}
                       </div>
@@ -594,10 +626,14 @@ export default function LeadershipPage() {
 
               <div className="space-y-32">
                 <div className="flex flex-col items-center gap-8 mb-12">
-                  <div className="flex items-center justify-center gap-4">
+                  <div className="flex flex-wrap items-center justify-center gap-4">
                     <div className="flex items-center gap-2 text-primary dark:text-white font-bold uppercase tracking-[0.2em]">
                       <Shield className="w-6 h-6 text-emerald-500" />
                       <span>Regional Chapters</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-500">
+                      <span className="rounded-full bg-white dark:bg-slate-900 px-4 py-2 shadow-sm border border-slate-100 dark:border-slate-800">India</span>
+                      <ChevronRight className="h-4 w-4 text-slate-300" />
                     </div>
                     <Select value={activeState || ''} onValueChange={(val) => { 
                       setActiveState(val); 
@@ -700,45 +736,78 @@ export default function LeadershipPage() {
                                 <p className="text-slate-400 font-bold uppercase tracking-widest text-[9px] animate-pulse">No commissioned district officials recorded for {activeDistrict}.</p>
                               )}
                            </div>
-                           {subdivisionNames.length > 0 && (
-                             <div className="w-full mt-10 space-y-8">
-                               {subdivisionNames.map(subdivisionName => {
-                                 const subdivisionLeaders = activeSubdivisionLeaders.filter(l => l.subDivisionName?.trim() === subdivisionName)
-                                 const subdivisionBlocks = activeBlockLeaders.filter(l => l.subDivisionName?.trim() === subdivisionName)
-                                 const blockNames = [...new Set(subdivisionBlocks.map(l => l.blockName?.trim()).filter((name): name is string => Boolean(name)))].sort((a, b) => a.localeCompare(b))
-
-                                 return (
-                                   <section key={subdivisionName} className="w-full rounded-3xl border border-violet-100 dark:border-violet-900/50 bg-white/70 dark:bg-slate-900/70 p-6 md:p-8">
-                                     <h3 className="text-center mb-6 text-violet-700 dark:text-violet-300 font-bold uppercase tracking-[0.2em] text-xs">
-                                       {subdivisionName} Sub-Division Committee
-                                     </h3>
-                                     {subdivisionLeaders.length > 0 && (
-                                       <div className="flex flex-wrap justify-center gap-8">
-                                         {subdivisionLeaders.map(leader => (
-                                           <LeaderCard key={leader.id} leader={leader} variant="default" isAdmin={isAdmin} onEdit={handleStartEdit} onDelete={handleDelete} />
-                                         ))}
-                                       </div>
-                                     )}
-                                     {blockNames.length > 0 && (
-                                       <div className={cn("space-y-8", subdivisionLeaders.length > 0 && "mt-8 pt-8 border-t border-slate-100 dark:border-slate-800")}>
-                                         {blockNames.map(blockName => (
-                                           <div key={blockName}>
-                                             <h4 className="text-center mb-5 text-amber-700 dark:text-amber-300 font-bold uppercase tracking-[0.18em] text-[10px]">
-                                               {blockName} Block Committee
-                                             </h4>
+                           {(subdivisionNames.length > 0 || blockNames.length > 0) ? (
+                             <div className="w-full mt-10 space-y-4">
+                               <p className="text-center text-[9px] font-bold uppercase tracking-widest text-slate-400">
+                                 {activeDistrictLocationData
+                                   ? "Sub-divisions and blocks from the Local Government Directory"
+                                   : "Showing sub-divisions and blocks with registered leadership"}
+                               </p>
+                               <div className={cn("grid gap-8", subdivisionNames.length > 0 && blockNames.length > 0 && "lg:grid-cols-2")}>
+                                 {subdivisionNames.length > 0 && (
+                                 <section className="rounded-3xl border border-violet-100 dark:border-violet-900/50 bg-white/70 dark:bg-slate-900/70 p-6 md:p-8">
+                                   <h3 className="text-center mb-6 text-violet-700 dark:text-violet-300 font-bold uppercase tracking-[0.2em] text-xs">
+                                     Sub-Divisions ({subdivisionNames.length})
+                                   </h3>
+                                   <div className="space-y-6">
+                                     {subdivisionNames.map(subdivisionName => {
+                                       const subdivisionLeaders = activeSubdivisionLeaders.filter(l => l.subDivisionName?.trim() === subdivisionName)
+                                       return (
+                                         <div key={subdivisionName} className="rounded-2xl bg-slate-50 dark:bg-slate-950/60 p-4">
+                                           <h4 className="text-center mb-4 text-violet-700 dark:text-violet-300 font-bold uppercase tracking-[0.14em] text-[10px]">
+                                             {subdivisionName}
+                                           </h4>
+                                           {subdivisionLeaders.length > 0 ? (
                                              <div className="flex flex-wrap justify-center gap-6">
-                                               {subdivisionBlocks.filter(l => l.blockName?.trim() === blockName).map(leader => (
+                                               {subdivisionLeaders.map(leader => (
+                                                 <LeaderCard key={leader.id} leader={leader} variant="default" isAdmin={isAdmin} onEdit={handleStartEdit} onDelete={handleDelete} />
+                                               ))}
+                                             </div>
+                                           ) : (
+                                             <p className="text-center text-[9px] font-bold uppercase tracking-wider text-slate-400">No leaders recorded</p>
+                                           )}
+                                         </div>
+                                       )
+                                     })}
+                                   </div>
+                                 </section>
+                                 )}
+                                 {blockNames.length > 0 && (
+                                 <section className="rounded-3xl border border-amber-100 dark:border-amber-900/50 bg-white/70 dark:bg-slate-900/70 p-6 md:p-8">
+                                   <h3 className="text-center mb-6 text-amber-700 dark:text-amber-300 font-bold uppercase tracking-[0.2em] text-xs">
+                                     Blocks ({blockNames.length})
+                                   </h3>
+                                   <div className="space-y-6">
+                                     {blockNames.map(blockName => {
+                                       const blockLeaders = activeBlockLeaders.filter(l => l.blockName?.trim() === blockName)
+                                       return (
+                                         <div key={blockName} className="rounded-2xl bg-slate-50 dark:bg-slate-950/60 p-4">
+                                           <h4 className="text-center mb-4 text-amber-700 dark:text-amber-300 font-bold uppercase tracking-[0.14em] text-[10px]">
+                                             {blockName}
+                                           </h4>
+                                           {blockLeaders.length > 0 ? (
+                                             <div className="flex flex-wrap justify-center gap-6">
+                                               {blockLeaders.map(leader => (
                                                  <LeaderCard key={leader.id} leader={leader} variant="small" isAdmin={isAdmin} onEdit={handleStartEdit} onDelete={handleDelete} />
                                                ))}
                                              </div>
-                                           </div>
-                                         ))}
-                                       </div>
-                                     )}
-                                   </section>
-                                 )
-                               })}
+                                           ) : (
+                                             <p className="text-center text-[9px] font-bold uppercase tracking-wider text-slate-400">No leaders recorded</p>
+                                           )}
+                                         </div>
+                                       )
+                                     })}
+                                   </div>
+                                 </section>
+                                 )}
+                               </div>
                              </div>
+                           ) : (
+                             <p className="mt-8 text-center text-[9px] font-bold uppercase tracking-widest text-slate-400">
+                               {activeDistrictLocationData
+                                 ? "No sub-divisions or development blocks are listed for this district"
+                                 : "No sub-division or block locations are available for this district yet"}
+                             </p>
                            )}
                            </>
                          ) : (
@@ -849,16 +918,30 @@ export default function LeadershipPage() {
                           </Select>
                         </div>
                       )}
-                      {["Sub-Division", "Block"].includes(editLeader.level) && (
+                      {editLeader.level === 'Sub-Division' && (
                         <div className="space-y-1.5">
                           <Label className="text-[10px] font-black uppercase text-accent">Sub-Division *</Label>
-                          <Input value={editLeader.subDivisionName || ''} onChange={e => setEditLeader({...editLeader, subDivisionName: e.target.value, blockName: ''})} placeholder="Enter sub-division" className="h-11 rounded-xl bg-white dark:bg-slate-800 border-accent/20 font-bold" required />
+                          {editLeaderLocationData ? (
+                            <Select value={editLeader.subDivisionName || ''} onValueChange={(val) => setEditLeader({...editLeader, subDivisionName: val, blockName: ''})}>
+                              <SelectTrigger className="h-11 rounded-xl bg-white dark:bg-slate-800 border-accent/20 font-bold"><SelectValue placeholder="Choose sub-division" /></SelectTrigger>
+                              <SelectContent className="bg-white z-[2000000] max-h-60">{editLeaderLocationData.subDivisions.map(name => <SelectItem key={name} value={name}>{name}</SelectItem>)}</SelectContent>
+                            </Select>
+                          ) : (
+                            <Input value={editLeader.subDivisionName || ''} onChange={e => setEditLeader({...editLeader, subDivisionName: e.target.value, blockName: ''})} placeholder="Enter sub-division" className="h-11 rounded-xl bg-white dark:bg-slate-800 border-accent/20 font-bold" required />
+                          )}
                         </div>
                       )}
                       {editLeader.level === 'Block' && (
                         <div className="space-y-1.5">
                           <Label className="text-[10px] font-black uppercase text-accent">Block *</Label>
-                          <Input value={editLeader.blockName || ''} onChange={e => setEditLeader({...editLeader, blockName: e.target.value})} placeholder="Enter block" className="h-11 rounded-xl bg-white dark:bg-slate-800 border-accent/20 font-bold" required />
+                          {editLeaderLocationData ? (
+                            <Select value={editLeader.blockName || ''} onValueChange={(val) => setEditLeader({...editLeader, blockName: val})}>
+                              <SelectTrigger className="h-11 rounded-xl bg-white dark:bg-slate-800 border-accent/20 font-bold"><SelectValue placeholder="Choose block" /></SelectTrigger>
+                              <SelectContent className="bg-white z-[2000000] max-h-60">{editLeaderLocationData.blocks.map(name => <SelectItem key={name} value={name}>{name}</SelectItem>)}</SelectContent>
+                            </Select>
+                          ) : (
+                            <Input value={editLeader.blockName || ''} onChange={e => setEditLeader({...editLeader, blockName: e.target.value})} placeholder="Enter block" className="h-11 rounded-xl bg-white dark:bg-slate-800 border-accent/20 font-bold" required />
+                          )}
                         </div>
                       )}
                     </div>
