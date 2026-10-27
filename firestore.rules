@@ -1,3 +1,4 @@
+```javascript
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -62,6 +63,11 @@ service cloud.firestore {
     match /activity_events/{id} { allow write: if hasPermission('activityHub'); }
     match /settings/{id} { allow write: if isStaff(); }
 
+    match /activity_reminders/{id} {
+      allow read: if isAuthenticated();
+      allow write: if hasPermission('activityHub');
+    }
+
     // 4. USER REGISTRY
     match /users/{userEmail} {
       allow get: if isAuthenticated() && (getEmail() == userEmail.lower());
@@ -99,9 +105,15 @@ service cloud.firestore {
       allow read, create, delete: if isStaff();
     }
 
+    match /current_news_state/{id} {
+      allow read: if true;
+      allow write: if isStaff();
+    }
+
     // 8. GLOBAL OVERRIDE
     match /{document=**} {
       allow read, write: if isRoot();
     }
   }
 }
+```
