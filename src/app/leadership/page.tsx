@@ -739,18 +739,16 @@ export default function LeadershipPage() {
                            {(subdivisionNames.length > 0 || blockNames.length > 0) ? (
                              <div className="w-full mt-10 space-y-4">
                                <p className="text-center text-[9px] font-bold uppercase tracking-widest text-slate-400">
-                                 {activeDistrictLocationData
-                                   ? "Sub-divisions and blocks from the Local Government Directory"
-                                   : "Showing sub-divisions and blocks with registered leadership"}
+                                 "Sub-Divisions and Blocks"
                                </p>
-                               <div className={cn("grid gap-8", subdivisionNames.length > 0 && blockNames.length > 0 && "lg:grid-cols-2")}>
-                                 {subdivisionNames.length > 0 && (
+                               <div className={cn("grid gap-8", subdivisionNames.some(name => activeSubdivisionLeaders.some(l => l.subDivisionName?.trim() === name)) && blockNames.some(name => activeBlockLeaders.some(l => l.blockName?.trim() === name)) && "lg:grid-cols-2")}>
+                                 {subdivisionNames.some(name => activeSubdivisionLeaders.some(l => l.subDivisionName?.trim() === name)) && (
                                  <section className="rounded-3xl border border-violet-100 dark:border-violet-900/50 bg-white/70 dark:bg-slate-900/70 p-6 md:p-8">
                                    <h3 className="text-center mb-6 text-violet-700 dark:text-violet-300 font-bold uppercase tracking-[0.2em] text-xs">
-                                     Sub-Divisions ({subdivisionNames.length})
+                                     Sub-Divisions ({subdivisionNames.filter(name => activeSubdivisionLeaders.some(l => l.subDivisionName?.trim() === name)).length})
                                    </h3>
                                    <div className="space-y-6">
-                                     {subdivisionNames.map(subdivisionName => {
+                                     {subdivisionNames.filter(subdivisionName => activeSubdivisionLeaders.some(l => l.subDivisionName?.trim() === subdivisionName)).map(subdivisionName => {
                                        const subdivisionLeaders = activeSubdivisionLeaders.filter(l => l.subDivisionName?.trim() === subdivisionName)
                                        return (
                                          <div key={subdivisionName} className="rounded-2xl bg-slate-50 dark:bg-slate-950/60 p-4">
@@ -772,13 +770,13 @@ export default function LeadershipPage() {
                                    </div>
                                  </section>
                                  )}
-                                 {blockNames.length > 0 && (
+                                 {blockNames.some(name => activeBlockLeaders.some(l => l.blockName?.trim() === name)) && (
                                  <section className="rounded-3xl border border-amber-100 dark:border-amber-900/50 bg-white/70 dark:bg-slate-900/70 p-6 md:p-8">
                                    <h3 className="text-center mb-6 text-amber-700 dark:text-amber-300 font-bold uppercase tracking-[0.2em] text-xs">
-                                     Blocks ({blockNames.length})
+                                     Blocks ({blockNames.filter(name => activeBlockLeaders.some(l => l.blockName?.trim() === name)).length})
                                    </h3>
                                    <div className="space-y-6">
-                                     {blockNames.map(blockName => {
+                                     {blockNames.filter(blockName => activeBlockLeaders.some(l => l.blockName?.trim() === blockName)).map(blockName => {
                                        const blockLeaders = activeBlockLeaders.filter(l => l.blockName?.trim() === blockName)
                                        return (
                                          <div key={blockName} className="rounded-2xl bg-slate-50 dark:bg-slate-950/60 p-4">
