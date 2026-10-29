@@ -254,6 +254,8 @@ export default function LeadershipPage() {
 
   const [activeState, setActiveState] = useState<string | null>("West Bengal")
   const [activeDistrict, setActiveDistrict] = useState<string | null>("Howrah")
+  const [selectedSubdivision, setSelectedSubdivision] = useState<string>("")
+  const [selectedBlock, setSelectedBlock] = useState<string>("")
   const [editLeader, setEditLeader] = useState<any>(null)
   const [newLeader, setNewLeader] = useState({
     name: '',
@@ -637,6 +639,8 @@ export default function LeadershipPage() {
                     </div>
                     <Select value={activeState || ''} onValueChange={(val) => { 
                       setActiveState(val); 
+                      setSelectedSubdivision('')
+                      setSelectedBlock('')
                       if (val === 'West Bengal') {
                         setActiveDistrict('Howrah')
                       } else {
@@ -694,7 +698,7 @@ export default function LeadershipPage() {
                                  <Users className="w-4 h-4" />
                                  District Level Committee
                               </div>
-                              <Select value={activeDistrict || ''} onValueChange={setActiveDistrict}>
+                              <Select value={activeDistrict || ''} onValueChange={(val) => { setActiveDistrict(val); setSelectedSubdivision(''); setSelectedBlock(''); }}>
                                 <SelectTrigger className="w-[180px] h-8 rounded-full bg-slate-50 dark:bg-slate-950 border-indigo-100 text-[10px] font-bold shadow-inner">
                                   <SelectValue placeholder="Select District" />
                                 </SelectTrigger>
@@ -736,75 +740,109 @@ export default function LeadershipPage() {
                                 <p className="text-slate-400 font-bold uppercase tracking-widest text-[9px] animate-pulse">No commissioned district officials recorded for {activeDistrict}.</p>
                               )}
                            </div>
-                           {(subdivisionNames.length > 0 || blockNames.length > 0) ? (
-                             <div className="w-full mt-10 space-y-4">
-                               <p className="text-center text-[9px] font-bold uppercase tracking-widest text-slate-400">
-                                 "Sub-Divisions and Blocks"
-                               </p>
-                               <div className={cn("grid gap-8", subdivisionNames.some(name => activeSubdivisionLeaders.some(l => l.subDivisionName?.trim() === name)) && blockNames.some(name => activeBlockLeaders.some(l => l.blockName?.trim() === name)) && "lg:grid-cols-2")}>
-                                 {subdivisionNames.some(name => activeSubdivisionLeaders.some(l => l.subDivisionName?.trim() === name)) && (
-                                 <section className="rounded-3xl border border-violet-100 dark:border-violet-900/50 bg-white/70 dark:bg-slate-900/70 p-6 md:p-8">
-                                   <h3 className="text-center mb-6 text-violet-700 dark:text-violet-300 font-bold uppercase tracking-[0.2em] text-xs">
-                                     Sub-Divisions ({subdivisionNames.filter(name => activeSubdivisionLeaders.some(l => l.subDivisionName?.trim() === name)).length})
-                                   </h3>
-                                   <div className="space-y-6">
-                                     {subdivisionNames.filter(subdivisionName => activeSubdivisionLeaders.some(l => l.subDivisionName?.trim() === subdivisionName)).map(subdivisionName => {
-                                       const subdivisionLeaders = activeSubdivisionLeaders.filter(l => l.subDivisionName?.trim() === subdivisionName)
-                                       return (
-                                         <div key={subdivisionName} className="rounded-2xl bg-slate-50 dark:bg-slate-950/60 p-4">
-                                           <h4 className="text-center mb-4 text-violet-700 dark:text-violet-300 font-bold uppercase tracking-[0.14em] text-[10px]">
-                                             {subdivisionName}
-                                           </h4>
-                                           {subdivisionLeaders.length > 0 ? (
+                           {(activeSubdivisionLeaders.length > 0 || activeBlockLeaders.length > 0) ? (
+                             <div className="w-full mt-10 space-y-8">
+                               <h3 className="text-center text-sm font-black uppercase tracking-[0.2em] text-slate-500">
+                                 Sub-Divisions and Blocks
+                               </h3>
+
+                               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+                                 <div className="space-y-2">
+                                   <Label className="text-xs font-bold uppercase tracking-wider text-violet-700 dark:text-violet-300">
+                                     Sub-Division
+                                   </Label>
+                                   <Select
+                                     value={selectedSubdivision || "all"}
+                                     onValueChange={(value) => setSelectedSubdivision(value === "all" ? "" : value)}
+                                   >
+                                     <SelectTrigger className="h-11 rounded-xl bg-white dark:bg-slate-900 border-violet-200 dark:border-violet-900">
+                                       <SelectValue placeholder="Select Sub-Division" />
+                                     </SelectTrigger>
+                                     <SelectContent className="bg-white dark:bg-slate-900">
+                                       <SelectItem value="all">All Sub-Divisions</SelectItem>
+                                       {[...new Set(activeSubdivisionLeaders.map(l => l.subDivisionName?.trim()).filter((name): name is string => Boolean(name)))].sort((a, b) => a.localeCompare(b)).map(name => (
+                                         <SelectItem key={name} value={name}>{name}</SelectItem>
+                                       ))}
+                                     </SelectContent>
+                                   </Select>
+                                 </div>
+
+                                 <div className="space-y-2">
+                                   <Label className="text-xs font-bold uppercase tracking-wider text-amber-700 dark:text-amber-300">
+                                     Block
+                                   </Label>
+                                   <Select
+                                     value={selectedBlock || "all"}
+                                     onValueChange={(value) => setSelectedBlock(value === "all" ? "" : value)}
+                                   >
+                                     <SelectTrigger className="h-11 rounded-xl bg-white dark:bg-slate-900 border-amber-200 dark:border-amber-900">
+                                       <SelectValue placeholder="Select Block" />
+                                     </SelectTrigger>
+                                     <SelectContent className="bg-white dark:bg-slate-900">
+                                       <SelectItem value="all">All Blocks</SelectItem>
+                                       {[...new Set(activeBlockLeaders.map(l => l.blockName?.trim()).filter((name): name is string => Boolean(name)))].sort((a, b) => a.localeCompare(b)).map(name => (
+                                         <SelectItem key={name} value={name}>{name}</SelectItem>
+                                       ))}
+                                     </SelectContent>
+                                   </Select>
+                                 </div>
+                               </div>
+
+                               <div className={cn("grid gap-8", activeSubdivisionLeaders.length > 0 && activeBlockLeaders.length > 0 && "lg:grid-cols-2")}>
+                                 {activeSubdivisionLeaders.length > 0 && (
+                                   <section className="rounded-3xl border border-violet-100 dark:border-violet-900/50 bg-white/70 dark:bg-slate-900/70 p-6 md:p-8">
+                                     <h3 className="text-center mb-6 text-violet-700 dark:text-violet-300 font-bold uppercase tracking-[0.2em] text-xs">
+                                       Sub-Divisions
+                                     </h3>
+                                     <div className="space-y-6">
+                                       {[...new Set(activeSubdivisionLeaders.map(l => l.subDivisionName?.trim()).filter((name): name is string => Boolean(name)))].filter(name => !selectedSubdivision || name === selectedSubdivision).sort((a, b) => a.localeCompare(b)).map(subdivisionName => {
+                                         const subdivisionLeaders = activeSubdivisionLeaders.filter(l => l.subDivisionName?.trim() === subdivisionName)
+                                         return (
+                                           <div key={subdivisionName} className="rounded-2xl bg-slate-50 dark:bg-slate-950/60 p-4">
+                                             <h4 className="text-center mb-4 text-violet-700 dark:text-violet-300 font-bold uppercase tracking-[0.14em] text-[10px]">
+                                               {subdivisionName}
+                                             </h4>
                                              <div className="flex flex-wrap justify-center gap-6">
                                                {subdivisionLeaders.map(leader => (
                                                  <LeaderCard key={leader.id} leader={leader} variant="default" isAdmin={isAdmin} onEdit={handleStartEdit} onDelete={handleDelete} />
                                                ))}
                                              </div>
-                                           ) : (
-                                             <p className="text-center text-[9px] font-bold uppercase tracking-wider text-slate-400">No leaders recorded</p>
-                                           )}
-                                         </div>
-                                       )
-                                     })}
-                                   </div>
-                                 </section>
+                                           </div>
+                                         )
+                                       })}
+                                     </div>
+                                   </section>
                                  )}
-                                 {blockNames.some(name => activeBlockLeaders.some(l => l.blockName?.trim() === name)) && (
-                                 <section className="rounded-3xl border border-amber-100 dark:border-amber-900/50 bg-white/70 dark:bg-slate-900/70 p-6 md:p-8">
-                                   <h3 className="text-center mb-6 text-amber-700 dark:text-amber-300 font-bold uppercase tracking-[0.2em] text-xs">
-                                     Blocks ({blockNames.filter(name => activeBlockLeaders.some(l => l.blockName?.trim() === name)).length})
-                                   </h3>
-                                   <div className="space-y-6">
-                                     {blockNames.filter(blockName => activeBlockLeaders.some(l => l.blockName?.trim() === blockName)).map(blockName => {
-                                       const blockLeaders = activeBlockLeaders.filter(l => l.blockName?.trim() === blockName)
-                                       return (
-                                         <div key={blockName} className="rounded-2xl bg-slate-50 dark:bg-slate-950/60 p-4">
-                                           <h4 className="text-center mb-4 text-amber-700 dark:text-amber-300 font-bold uppercase tracking-[0.14em] text-[10px]">
-                                             {blockName}
-                                           </h4>
-                                           {blockLeaders.length > 0 ? (
+
+                                 {activeBlockLeaders.length > 0 && (
+                                   <section className="rounded-3xl border border-amber-100 dark:border-amber-900/50 bg-white/70 dark:bg-slate-900/70 p-6 md:p-8">
+                                     <h3 className="text-center mb-6 text-amber-700 dark:text-amber-300 font-bold uppercase tracking-[0.2em] text-xs">
+                                       Blocks
+                                     </h3>
+                                     <div className="space-y-6">
+                                       {[...new Set(activeBlockLeaders.map(l => l.blockName?.trim()).filter((name): name is string => Boolean(name)))].filter(name => !selectedBlock || name === selectedBlock).sort((a, b) => a.localeCompare(b)).map(blockName => {
+                                         const blockLeaders = activeBlockLeaders.filter(l => l.blockName?.trim() === blockName)
+                                         return (
+                                           <div key={blockName} className="rounded-2xl bg-slate-50 dark:bg-slate-950/60 p-4">
+                                             <h4 className="text-center mb-4 text-amber-700 dark:text-amber-300 font-bold uppercase tracking-[0.14em] text-[10px]">
+                                               {blockName}
+                                             </h4>
                                              <div className="flex flex-wrap justify-center gap-6">
                                                {blockLeaders.map(leader => (
                                                  <LeaderCard key={leader.id} leader={leader} variant="small" isAdmin={isAdmin} onEdit={handleStartEdit} onDelete={handleDelete} />
                                                ))}
                                              </div>
-                                           ) : (
-                                             <p className="text-center text-[9px] font-bold uppercase tracking-wider text-slate-400">No leaders recorded</p>
-                                           )}
-                                         </div>
-                                       )
-                                     })}
-                                   </div>
-                                 </section>
+                                           </div>
+                                         )
+                                       })}
+                                     </div>
+                                   </section>
                                  )}
                                </div>
                              </div>
                            ) : (
                              <p className="mt-8 text-center text-[9px] font-bold uppercase tracking-widest text-slate-400">
-                               {activeDistrictLocationData
-                                 ? "No sub-divisions or development blocks are listed for this district"
-                                 : "No sub-division or block locations are available for this district yet"}
+                               No Sub-Division or Block leaders are recorded for this district.
                              </p>
                            )}
                            </>
