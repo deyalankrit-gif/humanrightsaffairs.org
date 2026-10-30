@@ -34,14 +34,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { Noto_Serif_Bengali } from 'next/font/google';
 import { useUser } from '@/firebase';
-
-const notoSerifBengali = Noto_Serif_Bengali({
-  subsets: ['bengali'],
-  weight: ['400', '700'],
-  display: 'swap',
-});
 
 type Section = {
   num: string;
@@ -305,7 +298,7 @@ export default function TerminationOrderPage() {
   ];
 
   return (
-    <main className={cn("min-h-screen bg-slate-100 dark:bg-slate-950 py-12 md:py-20 px-4 print:p-0 print:bg-white", notoSerifBengali.className)}>
+    <main className="min-h-screen bg-slate-100 dark:bg-slate-950 py-12 md:py-20 px-4 print:p-0 print:bg-white">
       <style jsx global>{`
         @media print {
           @page {
