@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useEffect } from 'react'
@@ -72,7 +71,7 @@ import { INDIA_DATA } from '@/lib/india-data'
 import WEST_BENGAL_LOCATION_DATA from '@/lib/west-bengal-location-data.json'
 
 type LeadershipLevel = "Central" | "State" | "District" | "Sub-Division" | "Block"
-type DistrictLocationData = { subDivisions: string[], blocks: string[] }
+type DistrictLocationData = { subDivisions: string[], blocks: string[], subDivisionBlocks?: Record<string, string[]> }
 
 const westBengalDistricts: Record<string, DistrictLocationData> = WEST_BENGAL_LOCATION_DATA.districts
 
@@ -292,6 +291,20 @@ export default function LeadershipPage() {
     ...(activeDistrictLocationData?.blocks || []),
     ...activeBlockLeaders.map(l => l.blockName?.trim())
   ].filter((name): name is string => Boolean(name)))].sort((a, b) => a.localeCompare(b))
+
+  // Blocks that belong to the selected sub-division (only when that mapping is known)
+  const mappedBlocks = selectedSubdivision ? activeDistrictLocationData?.subDivisionBlocks?.[selectedSubdivision] : undefined
+  const hasSingleSubdivision = (activeDistrictLocationData?.subDivisions.length ?? 0) <= 1
+  const blocksNeedSubdivision = !selectedSubdivision && !hasSingleSubdivision
+  const visibleBlockNames = blocksNeedSubdivision
+    ? []
+    : !selectedSubdivision
+      ? blockNames
+      : mappedBlocks
+      ? blockNames.filter(name => mappedBlocks.includes(name))
+      : hasSingleSubdivision ? blockNames : []
+  // A block that is not part of the chosen sub-division can never stay selected
+  const effectiveSelectedBlock = selectedBlock && visibleBlockNames.includes(selectedBlock) ? selectedBlock : ''
 
   const getMissingLocationFields = (leader: Pick<Leader, 'level' | 'parentRegion' | 'districtName' | 'subDivisionName' | 'blockName'>) => {
     const missingFields: string[] = []
@@ -740,109 +753,109 @@ export default function LeadershipPage() {
                                 <p className="text-slate-400 font-bold uppercase tracking-widest text-[9px] animate-pulse">No commissioned district officials recorded for {activeDistrict}.</p>
                               )}
                            </div>
-                           {(activeSubdivisionLeaders.length > 0 || activeBlockLeaders.length > 0) ? (
-                             <div className="w-full mt-10 space-y-8">
-                               <h3 className="text-center text-sm font-black uppercase tracking-[0.2em] text-slate-500">
-                                 Sub-Divisions and Blocks
-                               </h3>
-
-                               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
-                                 <div className="space-y-2">
-                                   <Label className="text-xs font-bold uppercase tracking-wider text-violet-700 dark:text-violet-300">
-                                     Sub-Division
-                                   </Label>
-                                   <Select
-                                     value={selectedSubdivision || "all"}
-                                     onValueChange={(value) => setSelectedSubdivision(value === "all" ? "" : value)}
-                                   >
-                                     <SelectTrigger className="h-11 rounded-xl bg-white dark:bg-slate-900 border-violet-200 dark:border-violet-900">
-                                       <SelectValue placeholder="Select Sub-Division" />
-                                     </SelectTrigger>
-                                     <SelectContent className="bg-white dark:bg-slate-900">
-                                       <SelectItem value="all">All Sub-Divisions</SelectItem>
-                                       {[...new Set(activeSubdivisionLeaders.map(l => l.subDivisionName?.trim()).filter((name): name is string => Boolean(name)))].sort((a, b) => a.localeCompare(b)).map(name => (
-                                         <SelectItem key={name} value={name}>{name}</SelectItem>
-                                       ))}
-                                     </SelectContent>
-                                   </Select>
+                           {subdivisionNames.length > 0 && (
+                             <div className="w-full mt-14 space-y-8">
+                               <div className="flex flex-wrap items-center justify-center gap-4">
+                                 <div className="inline-flex items-center gap-2 text-violet-600 dark:text-violet-400 font-bold uppercase text-[10px] tracking-[0.3em]">
+                                   <Users className="w-4 h-4" />
+                                   Sub-Division Level Committee
                                  </div>
-
-                                 <div className="space-y-2">
-                                   <Label className="text-xs font-bold uppercase tracking-wider text-amber-700 dark:text-amber-300">
-                                     Block
-                                   </Label>
-                                   <Select
-                                     value={selectedBlock || "all"}
-                                     onValueChange={(value) => setSelectedBlock(value === "all" ? "" : value)}
-                                   >
-                                     <SelectTrigger className="h-11 rounded-xl bg-white dark:bg-slate-900 border-amber-200 dark:border-amber-900">
-                                       <SelectValue placeholder="Select Block" />
-                                     </SelectTrigger>
-                                     <SelectContent className="bg-white dark:bg-slate-900">
-                                       <SelectItem value="all">All Blocks</SelectItem>
-                                       {[...new Set(activeBlockLeaders.map(l => l.blockName?.trim()).filter((name): name is string => Boolean(name)))].sort((a, b) => a.localeCompare(b)).map(name => (
-                                         <SelectItem key={name} value={name}>{name}</SelectItem>
-                                       ))}
-                                     </SelectContent>
-                                   </Select>
-                                 </div>
+                                 <Select value={selectedSubdivision || 'all'} onValueChange={(val) => { setSelectedSubdivision(val === 'all' ? '' : val); setSelectedBlock('') }}>
+                                   <SelectTrigger className="w-[220px] h-8 rounded-full bg-slate-50 dark:bg-slate-950 border-violet-100 text-[10px] font-bold shadow-inner">
+                                     <SelectValue placeholder="Select Sub-Division" />
+                                   </SelectTrigger>
+                                   <SelectContent className="max-h-80 bg-white">
+                                     <SelectItem value="all" className="text-[10px] font-bold">All Sub-Divisions</SelectItem>
+                                     {subdivisionNames.map(name => <SelectItem key={name} value={name} className="text-[10px] font-bold">{name}</SelectItem>)}
+                                   </SelectContent>
+                                 </Select>
                                </div>
 
-                               <div className={cn("grid gap-8", activeSubdivisionLeaders.length > 0 && activeBlockLeaders.length > 0 && "lg:grid-cols-2")}>
-                                 {activeSubdivisionLeaders.length > 0 && (
-                                   <section className="rounded-3xl border border-violet-100 dark:border-violet-900/50 bg-white/70 dark:bg-slate-900/70 p-6 md:p-8">
-                                     <h3 className="text-center mb-6 text-violet-700 dark:text-violet-300 font-bold uppercase tracking-[0.2em] text-xs">
-                                       Sub-Divisions
-                                     </h3>
-                                     <div className="space-y-6">
-                                       {[...new Set(activeSubdivisionLeaders.map(l => l.subDivisionName?.trim()).filter((name): name is string => Boolean(name)))].filter(name => !selectedSubdivision || name === selectedSubdivision).sort((a, b) => a.localeCompare(b)).map(subdivisionName => {
-                                         const subdivisionLeaders = activeSubdivisionLeaders.filter(l => l.subDivisionName?.trim() === subdivisionName)
-                                         return (
-                                           <div key={subdivisionName} className="rounded-2xl bg-slate-50 dark:bg-slate-950/60 p-4">
-                                             <h4 className="text-center mb-4 text-violet-700 dark:text-violet-300 font-bold uppercase tracking-[0.14em] text-[10px]">
-                                               {subdivisionName}
-                                             </h4>
-                                             <div className="flex flex-wrap justify-center gap-6">
-                                               {subdivisionLeaders.map(leader => (
-                                                 <LeaderCard key={leader.id} leader={leader} variant="default" isAdmin={isAdmin} onEdit={handleStartEdit} onDelete={handleDelete} />
-                                               ))}
-                                             </div>
-                                           </div>
-                                         )
-                                       })}
+                               {(() => {
+                                 const withLeaders = subdivisionNames.filter(name => activeSubdivisionLeaders.some(l => l.subDivisionName?.trim() === name))
+                                 const shown = selectedSubdivision ? [selectedSubdivision] : withLeaders
+                                 if (shown.length === 0) {
+                                   return <p className="text-center text-[9px] font-bold uppercase tracking-widest text-slate-400">No sub-division officials recorded yet. Pick a sub-division from the list to see its cell.</p>
+                                 }
+                                 return shown.map(name => {
+                                   const cellLeaders = activeSubdivisionLeaders.filter(l => l.subDivisionName?.trim() === name)
+                                   return (
+                                     <div key={name} className="bg-slate-50 dark:bg-slate-950/50 p-8 md:p-12 rounded-[3rem] border border-slate-100 dark:border-slate-800 flex flex-col items-center animate-in slide-in-from-bottom-4 duration-500">
+                                       <div className="flex items-center gap-2 mb-10 text-primary dark:text-accent font-bold uppercase text-[11px] tracking-[0.2em] bg-white dark:bg-slate-900 px-6 py-2 rounded-full shadow-md border border-slate-100 dark:border-slate-800">
+                                         <MapPin className="w-3.5 h-3.5 text-accent" />
+                                         {name} Cell
+                                       </div>
+                                       {cellLeaders.length > 0 ? (
+                                         <div className="flex flex-wrap justify-center gap-8">
+                                           {cellLeaders.map(leader => (
+                                             <LeaderCard key={leader.id} leader={leader} variant="default" isAdmin={isAdmin} onEdit={handleStartEdit} onDelete={handleDelete} />
+                                           ))}
+                                         </div>
+                                       ) : (
+                                         <p className="text-slate-400 font-bold uppercase tracking-widest text-[9px] animate-pulse">No commissioned sub-division officials recorded for {name}.</p>
+                                       )}
                                      </div>
-                                   </section>
-                                 )}
-
-                                 {activeBlockLeaders.length > 0 && (
-                                   <section className="rounded-3xl border border-amber-100 dark:border-amber-900/50 bg-white/70 dark:bg-slate-900/70 p-6 md:p-8">
-                                     <h3 className="text-center mb-6 text-amber-700 dark:text-amber-300 font-bold uppercase tracking-[0.2em] text-xs">
-                                       Blocks
-                                     </h3>
-                                     <div className="space-y-6">
-                                       {[...new Set(activeBlockLeaders.map(l => l.blockName?.trim()).filter((name): name is string => Boolean(name)))].filter(name => !selectedBlock || name === selectedBlock).sort((a, b) => a.localeCompare(b)).map(blockName => {
-                                         const blockLeaders = activeBlockLeaders.filter(l => l.blockName?.trim() === blockName)
-                                         return (
-                                           <div key={blockName} className="rounded-2xl bg-slate-50 dark:bg-slate-950/60 p-4">
-                                             <h4 className="text-center mb-4 text-amber-700 dark:text-amber-300 font-bold uppercase tracking-[0.14em] text-[10px]">
-                                               {blockName}
-                                             </h4>
-                                             <div className="flex flex-wrap justify-center gap-6">
-                                               {blockLeaders.map(leader => (
-                                                 <LeaderCard key={leader.id} leader={leader} variant="small" isAdmin={isAdmin} onEdit={handleStartEdit} onDelete={handleDelete} />
-                                               ))}
-                                             </div>
-                                           </div>
-                                         )
-                                       })}
-                                     </div>
-                                   </section>
-                                 )}
-                               </div>
+                                   )
+                                 })
+                               })()}
                              </div>
-                           ) : (
+                           )}
+                           {blockNames.length > 0 && (
+                             <div className="w-full mt-14 space-y-8">
+                               <div className="flex flex-wrap items-center justify-center gap-4">
+                                 <div className="inline-flex items-center gap-2 text-amber-600 dark:text-amber-400 font-bold uppercase text-[10px] tracking-[0.3em]">
+                                   <Users className="w-4 h-4" />
+                                   Block Level Committee
+                                 </div>
+                                 <Select disabled={blocksNeedSubdivision} value={effectiveSelectedBlock || 'all'} onValueChange={(val) => setSelectedBlock(val === 'all' ? '' : val)}>
+                                   <SelectTrigger className="w-[220px] h-8 rounded-full bg-slate-50 dark:bg-slate-950 border-amber-100 text-[10px] font-bold shadow-inner">
+                                     <SelectValue placeholder="Select Block" />
+                                   </SelectTrigger>
+                                   <SelectContent className="max-h-80 bg-white">
+                                     <SelectItem value="all" className="text-[10px] font-bold">All Blocks</SelectItem>
+                                     {visibleBlockNames.map(name => <SelectItem key={name} value={name} className="text-[10px] font-bold">{name}</SelectItem>)}
+                                   </SelectContent>
+                                 </Select>
+                               </div>
+
+                               {(() => {
+                                 const withLeaders = visibleBlockNames.filter(name => activeBlockLeaders.some(l => l.blockName?.trim() === name))
+                                 const shown = effectiveSelectedBlock ? [effectiveSelectedBlock] : withLeaders
+                                 if (blocksNeedSubdivision) {
+                                   return <p className="text-center text-[9px] font-bold uppercase tracking-widest text-slate-400">Select a sub-division above to see its blocks.</p>
+                                 }
+                                 if (selectedSubdivision && visibleBlockNames.length === 0) {
+                                   return <p className="text-center text-[9px] font-bold uppercase tracking-widest text-slate-400">Blocks of {selectedSubdivision} sub-division are not added yet.</p>
+                                 }
+                                 if (shown.length === 0) {
+                                   return <p className="text-center text-[9px] font-bold uppercase tracking-widest text-slate-400">No block officials recorded yet. Pick a block from the list to see its cell.</p>
+                                 }
+                                 return shown.map(name => {
+                                   const cellLeaders = activeBlockLeaders.filter(l => l.blockName?.trim() === name)
+                                   return (
+                                     <div key={name} className="bg-slate-50 dark:bg-slate-950/50 p-8 md:p-12 rounded-[3rem] border border-slate-100 dark:border-slate-800 flex flex-col items-center animate-in slide-in-from-bottom-4 duration-500">
+                                       <div className="flex items-center gap-2 mb-10 text-primary dark:text-accent font-bold uppercase text-[11px] tracking-[0.2em] bg-white dark:bg-slate-900 px-6 py-2 rounded-full shadow-md border border-slate-100 dark:border-slate-800">
+                                         <MapPin className="w-3.5 h-3.5 text-accent" />
+                                         {name} Cell
+                                       </div>
+                                       {cellLeaders.length > 0 ? (
+                                         <div className="flex flex-wrap justify-center gap-8">
+                                           {cellLeaders.map(leader => (
+                                             <LeaderCard key={leader.id} leader={leader} variant="small" isAdmin={isAdmin} onEdit={handleStartEdit} onDelete={handleDelete} />
+                                           ))}
+                                         </div>
+                                       ) : (
+                                         <p className="text-slate-400 font-bold uppercase tracking-widest text-[9px] animate-pulse">No commissioned block officials recorded for {name}.</p>
+                                       )}
+                                     </div>
+                                   )
+                                 })
+                               })()}
+                             </div>
+                           )}
+                           {subdivisionNames.length === 0 && blockNames.length === 0 && (
                              <p className="mt-8 text-center text-[9px] font-bold uppercase tracking-widest text-slate-400">
-                               No Sub-Division or Block leaders are recorded for this district.
+                               No Sub-Division or Block data is available for this district.
                              </p>
                            )}
                            </>

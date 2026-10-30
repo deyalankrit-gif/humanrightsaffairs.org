@@ -1,839 +1,1085 @@
 ﻿{
-    "source":  "Local Government Directory, Government of India",
-    "downloadedAt":  "2026-10-24",
-    "state":  "West Bengal",
-    "stateCode":  19,
-    "districts":  {
-                      "Alipurduar":  {
-                                         "subDivisions":  [
-                                                              "Alipurduar - I",
-                                                              "Alipurduar - II",
-                                                              "Falakata",
-                                                              "Kalchini",
-                                                              "Kumargram",
-                                                              "Madarihat"
-                                                          ],
-                                         "blocks":  [
-                                                        "Alipurduar-I",
-                                                        "Alipurduar-Ii",
-                                                        "Falakata",
-                                                        "Kalchini",
-                                                        "Kumargram",
-                                                        "Madarihat"
-                                                    ]
-                                     },
-                      "Bankura":  {
-                                      "subDivisions":  [
-                                                           "Bankura - I",
-                                                           "Bankura - II",
-                                                           "Barjora",
-                                                           "Chhatna",
-                                                           "Gangajalghati",
-                                                           "Hirbandh",
-                                                           "Indpur",
-                                                           "Indus",
-                                                           "Jaypur",
-                                                           "Khatra",
-                                                           "Kotulpur",
-                                                           "Mejhia",
-                                                           "Onda",
-                                                           "Patrasayer",
-                                                           "Raipur",
-                                                           "Ranibandh",
-                                                           "Saltora",
-                                                           "Sarenga",
-                                                           "Simlapal",
-                                                           "Sonamukhi",
-                                                           "Taldangra",
-                                                           "Vishnupur"
-                                                       ],
-                                      "blocks":  [
-                                                     "Bankura-I",
-                                                     "Bankura-Ii",
-                                                     "Barjora",
-                                                     "Chhatna",
-                                                     "Gangajal Ghati",
-                                                     "Hirbandh",
-                                                     "Indpur",
-                                                     "Indus",
-                                                     "Jaypur",
-                                                     "Khatra-I",
-                                                     "Kotulpur",
-                                                     "Mejhia",
-                                                     "Onda",
-                                                     "Patrasayer",
-                                                     "Raipur-I",
-                                                     "Ranibundh",
-                                                     "Saltora",
-                                                     "Sarenga",
-                                                     "Simlapal",
-                                                     "Sonamukhi",
-                                                     "Taldangra",
-                                                     "Vishnupur"
-                                                 ]
-                                  },
-                      "Birbhum":  {
-                                      "subDivisions":  [
-                                                           "Bolpur Sriniketan",
-                                                           "Dubrajpur",
-                                                           "Illambazar",
-                                                           "Khoyrasol",
-                                                           "Labpur",
-                                                           "Mayureswar - I",
-                                                           "Mayureswar - II",
-                                                           "Mohammad Bazar",
-                                                           "Murarai - I",
-                                                           "Murarai - II",
-                                                           "Nalhati - I",
-                                                           "Nalhati - II",
-                                                           "Nanoor",
-                                                           "Rajnagar",
-                                                           "Rampurhat - I",
-                                                           "Rampurhat - II",
-                                                           "Sainthia",
-                                                           "Suri - I",
-                                                           "Suri - II"
-                                                       ],
-                                      "blocks":  [
-                                                     "Bolpur-Sriniketan",
-                                                     "Dubrajpur",
-                                                     "Illambazar",
-                                                     "Khoyrasol",
-                                                     "Labpur",
-                                                     "Mayureswar-I",
-                                                     "Mayureswar-Ii",
-                                                     "Mohammad Bazar",
-                                                     "Murarai-I",
-                                                     "Murarai-Ii",
-                                                     "Nalhati-I",
-                                                     "Nalhati-Ii",
-                                                     "Nanoor",
-                                                     "Rajnagar",
-                                                     "Rampurhat-I",
-                                                     "Rampurhat-Ii",
-                                                     "Sainthia",
-                                                     "Suri-I",
-                                                     "Suri-Ii"
-                                                 ]
-                                  },
-                      "Cooch Behar":  {
-                                          "subDivisions":  [
-                                                               "Cooch Behar - I",
-                                                               "Cooch Behar - II",
-                                                               "Dinhata - I",
-                                                               "Dinhata - II",
-                                                               "Haldibari",
-                                                               "Mathabhanga - I",
-                                                               "Mathabhanga-II",
-                                                               "Mekliganj",
-                                                               "Sitai",
-                                                               "Sitalkuchi",
-                                                               "Tufanganj - I",
-                                                               "Tufanganj - II"
-                                                           ],
-                                          "blocks":  [
-                                                         "Cooch Behar II",
-                                                         "Coochbehar I",
-                                                         "Dinhata-I",
-                                                         "Dinhata-Ii",
-                                                         "Haldibari",
-                                                         "Mathabhanga II",
-                                                         "Mathabhanga-I",
-                                                         "Mekliganj",
-                                                         "Sitai",
-                                                         "Sitalkuchi",
-                                                         "Tufanganj-I",
-                                                         "Tufanganj-Ii"
-                                                     ]
-                                      },
-                      "Dakshin Dinajpur":  {
-                                               "subDivisions":  [
-                                                                    "Balurghat",
-                                                                    "Bansihari",
-                                                                    "Gangarampur",
-                                                                    "Harirampur",
-                                                                    "Hilli",
-                                                                    "Kumarganj",
-                                                                    "Kushmundi",
-                                                                    "Tapan"
-                                                                ],
-                                               "blocks":  [
-                                                              "Balurghat",
-                                                              "Bansihari",
-                                                              "Gangarampur",
-                                                              "Harirampur",
-                                                              "Hili",
-                                                              "Kumarganj",
-                                                              "Kushmandi",
-                                                              "Tapan"
-                                                          ]
-                                           },
-                      "Darjeeling":  {
-                                         "subDivisions":  [
-                                                              "Darjeeling Pulbazar",
-                                                              "Jorebunglow Sukiapokhri",
-                                                              "Kharibari",
-                                                              "Kurseong",
-                                                              "Matigara",
-                                                              "Mirik",
-                                                              "Naxalbari",
-                                                              "Phansidewa",
-                                                              "Rangli Rangliot"
-                                                          ],
-                                         "blocks":  [
-                                                        "Darjeeling-Pulbazar",
-                                                        "Jore Bunglow-Sukiapokhri",
-                                                        "Kharibari",
-                                                        "Kurseong",
-                                                        "Matigara",
-                                                        "Mirik",
-                                                        "Naxal Bari",
-                                                        "Phansidewa",
-                                                        "Rangli Rangliot"
-                                                    ]
-                                     },
-                      "Hooghly":  {
-                                      "subDivisions":  [
-                                                           "Arambag",
-                                                           "Balagarh",
-                                                           "Chanditala - I",
-                                                           "Chanditala - II",
-                                                           "Chinsurah - Magra",
-                                                           "Dhaniakhali",
-                                                           "Goghat - I",
-                                                           "Goghat - II",
-                                                           "Haripal",
-                                                           "Jangipara",
-                                                           "Khanakul - I",
-                                                           "Khanakul - II",
-                                                           "Pandua",
-                                                           "Polba - Dadpur",
-                                                           "Pursura",
-                                                           "Serampur Uttarpara",
-                                                           "Singur",
-                                                           "Tarakeswar"
-                                                       ],
-                                      "blocks":  [
-                                                     "Arambagh",
-                                                     "Balagarh",
-                                                     "Chanditala-I",
-                                                     "Chanditala-Ii",
-                                                     "Chinsurah-Magrah",
-                                                     "Dhaniakhali",
-                                                     "Goghat-I",
-                                                     "Goghat-Ii",
-                                                     "Haripal",
-                                                     "Jangipara",
-                                                     "Khanakul-I",
-                                                     "Khanakul-Ii",
-                                                     "Pandua",
-                                                     "Polba-Dadpur",
-                                                     "Pursurah",
-                                                     "Singur",
-                                                     "Sirampur-Uttarpara",
-                                                     "Tarakeswar"
-                                                 ]
-                                  },
-                      "Howrah":  {
-                                     "subDivisions":  [
-                                                          "Amta - I",
-                                                          "Amta - II",
-                                                          "Bagnan - I",
-                                                          "Bagnan - II",
-                                                          "Bally Jagachha",
-                                                          "Domjur",
-                                                          "Jagatballavpur",
-                                                          "Panchla",
-                                                          "Sankrail",
-                                                          "Shyampur - I",
-                                                          "Shyampur - II",
-                                                          "Udaynarayanpur",
-                                                          "Uluberia - I",
-                                                          "Uluberia - II"
-                                                      ],
-                                     "blocks":  [
-                                                    "Amta-I",
-                                                    "Amta-Ii",
-                                                    "Bagnan-I",
-                                                    "Bagnan-Ii",
-                                                    "Bally-Jagacha",
-                                                    "Domjur",
-                                                    "Jagatballavpur",
-                                                    "Panchla",
-                                                    "Sankrail",
-                                                    "Shyampur-I",
-                                                    "Shyampur-Ii",
-                                                    "Udaynarayanpur",
-                                                    "Uluberia-I",
-                                                    "Uluberia-Ii"
-                                                ]
-                                 },
-                      "Jalpaiguri":  {
-                                         "subDivisions":  [
-                                                              "Banarhat",
-                                                              "Dhupguri",
-                                                              "Jalpaiguri",
-                                                              "Kranti",
-                                                              "Mal",
-                                                              "Matiali",
-                                                              "Maynaguri",
-                                                              "Nagrakata",
-                                                              "Rajganj"
-                                                          ],
-                                         "blocks":  [
-                                                        "Banarhat",
-                                                        "Dhupguri",
-                                                        "Jalpaiguri",
-                                                        "Kranti",
-                                                        "Mal",
-                                                        "Matiali",
-                                                        "Maynaguri",
-                                                        "Nagrakata",
-                                                        "Rajganj"
-                                                    ]
-                                     },
-                      "Jhargram":  {
-                                       "subDivisions":  [
-                                                            "Binpur - I",
-                                                            "Binpur - II",
-                                                            "Gopiballavpur - I",
-                                                            "Gopiballavpur - II",
-                                                            "Jamboni",
-                                                            "Jhargram",
-                                                            "Nayagram",
-                                                            "Sankrail"
-                                                        ],
-                                       "blocks":  [
-                                                      "Binpur-I",
-                                                      "Binpur-Ii",
-                                                      "Gopiballav Pur -Ii",
-                                                      "Gopiballavpur-I",
-                                                      "Jambani",
-                                                      "Jhargram",
-                                                      "Nayagram",
-                                                      "Sankrail"
-                                                  ]
-                                   },
-                      "Kalimpong":  {
-                                        "subDivisions":  [
-                                                             "Gorubathan",
-                                                             "Kalimpong -I",
-                                                             "Lava",
-                                                             "Lavaold",
-                                                             "Pedong"
-                                                         ],
-                                        "blocks":  [
-                                                       "Gorubathan",
-                                                       "Kalimpong-I",
-                                                       "Lava",
-                                                       "Pedong"
-                                                   ]
-                                    },
-                      "Kolkata":  {
-                                      "subDivisions":  [
-
-                                                       ],
-                                      "blocks":  [
-
-                                                 ]
-                                  },
-                      "Malda":  {
-                                    "subDivisions":  [
-                                                         "Bamangola",
-                                                         "Chanchal - I",
-                                                         "Chanchal - II",
-                                                         "English Bazar",
-                                                         "Gazole",
-                                                         "Habibpur",
-                                                         "Harischandrapur - I",
-                                                         "Harischandrapur - II",
-                                                         "Kaliachak - I",
-                                                         "Kaliachak - II",
-                                                         "Kaliachak - III",
-                                                         "Maldah (Old)",
-                                                         "Manikchak",
-                                                         "Ratua - I",
-                                                         "Ratua - II"
-                                                     ],
-                                    "blocks":  [
-                                                   "Bamongola",
-                                                   "Chanchal-I",
-                                                   "Chanchal-Ii",
-                                                   "English Bazar",
-                                                   "Gazole",
-                                                   "Habibpur",
-                                                   "Harishchandrapur-I",
-                                                   "Harishchandrapur-Ii",
-                                                   "Kaliachak-I",
-                                                   "Kaliachak-Ii",
-                                                   "Kaliachak-Iii",
-                                                   "Manikchak",
-                                                   "Old Malda",
-                                                   "Ratua-I",
-                                                   "Ratua-Ii"
-                                               ]
-                                },
-                      "Murshidabad":  {
-                                          "subDivisions":  [
-                                                               "Beldanga - I",
-                                                               "Beldanga - II",
-                                                               "Berhampore",
-                                                               "Bhagawangola - I",
-                                                               "Bhagawangola - II",
-                                                               "Bharatpur - I",
-                                                               "Bharatpur - II",
-                                                               "Burwan",
-                                                               "Domkal",
-                                                               "Farakka",
-                                                               "Hariharpara",
-                                                               "Jalangi",
-                                                               "Kandi",
-                                                               "Khargram",
-                                                               "Lalgola",
-                                                               "Murshidabad Jiaganj",
-                                                               "Nabagram",
-                                                               "Nawda",
-                                                               "Raghunathganj - I",
-                                                               "Raghunathganj - II",
-                                                               "Raninagar - I",
-                                                               "Raninagar - II",
-                                                               "Sagardighi",
-                                                               "Samserganj",
-                                                               "Suti - I",
-                                                               "Suti - II"
-                                                           ],
-                                          "blocks":  [
-                                                         "Beldanga-I",
-                                                         "Beldanga-Ii",
-                                                         "Berhampore",
-                                                         "Bhagabangola-Ii",
-                                                         "Bhagawangola-I",
-                                                         "Bharatpur-I",
-                                                         "Bharatpur-Ii",
-                                                         "Burwan",
-                                                         "Domkal",
-                                                         "Farakka",
-                                                         "Hariharpara",
-                                                         "Jalangi",
-                                                         "Kandi",
-                                                         "Khargram",
-                                                         "Lalgola",
-                                                         "Murshidabad-Jiagunj",
-                                                         "Nabagram",
-                                                         "Nawda",
-                                                         "Raghunathganj-I",
-                                                         "Raghunathganj-Ii",
-                                                         "Raninagar-I",
-                                                         "Raninagar-Ii",
-                                                         "Sagardighi",
-                                                         "Shamsherganj",
-                                                         "Suti-I",
-                                                         "Suti-Ii"
-                                                     ]
-                                      },
-                      "Nadia":  {
-                                    "subDivisions":  [
-                                                         "Chakdah",
-                                                         "Chapra",
-                                                         "Hanskhali",
-                                                         "Haringhata",
-                                                         "Kaliganj",
-                                                         "Kalyani",
-                                                         "Karimpur - I",
-                                                         "Karimpur - II",
-                                                         "Krishnaganj",
-                                                         "Krishnagar - I",
-                                                         "Krishnagar - II",
-                                                         "Nabadwip",
-                                                         "Nakashipara",
-                                                         "Ranaghat - I",
-                                                         "Ranaghat - II",
-                                                         "Santipur",
-                                                         "Tehatta - I",
-                                                         "Tehatta - II"
-                                                     ],
-                                    "blocks":  [
-                                                   "Chakdah",
-                                                   "Chapra",
-                                                   "Hanskhali",
-                                                   "Haringhata",
-                                                   "Kaliganj",
-                                                   "Kalyani",
-                                                   "Karimpur-1",
-                                                   "Karimpur-Ii",
-                                                   "Krishnaganj",
-                                                   "Krishnagar-I",
-                                                   "Krishnagar-Ii",
-                                                   "Nabadwip",
-                                                   "Nakashipara",
-                                                   "Ranaghat-I",
-                                                   "Ranaghat-Ii",
-                                                   "Santipur",
-                                                   "Tehatta-I",
-                                                   "Tehatta-Ii"
-                                               ]
-                                },
-                      "North 24 Parganas":  {
-                                                "subDivisions":  [
-                                                                     "Amdanga",
-                                                                     "Baduria",
-                                                                     "Bagda",
-                                                                     "Barasat - I",
-                                                                     "Barasat - II",
-                                                                     "Barrackpur - I",
-                                                                     "Barrackpur - II",
-                                                                     "Basirhat - I",
-                                                                     "Basirhat - II",
-                                                                     "Bongaon",
-                                                                     "Deganga",
-                                                                     "Gaighata",
-                                                                     "Habra - I",
-                                                                     "Habra - II",
-                                                                     "Haroa",
-                                                                     "Hasnabad",
-                                                                     "Hingalganj",
-                                                                     "Minakhan",
-                                                                     "Rajarhat",
-                                                                     "Sandeshkhali - I",
-                                                                     "Sandeshkhali - II",
-                                                                     "Swarupnagar"
-                                                                 ],
-                                                "blocks":  [
-                                                               "Amdanga",
-                                                               "Baduria",
-                                                               "Bagda",
-                                                               "Barasat-I",
-                                                               "Barasat-Ii",
-                                                               "Barrackpur-I",
-                                                               "Barrackpur-Ii",
-                                                               "Basirhat-I",
-                                                               "Basirhat-Ii",
-                                                               "Bongaon",
-                                                               "Deganga",
-                                                               "Gaighata",
-                                                               "Habra-I",
-                                                               "Habra-Ii",
-                                                               "Haroa",
-                                                               "Hasnabad",
-                                                               "Hingalganj",
-                                                               "Minakhan",
-                                                               "Rajarhat",
-                                                               "Sandeshkhali-I",
-                                                               "Sandeshkhali-Ii",
-                                                               "Swarupnagar"
-                                                           ]
-                                            },
-                      "Paschim Bardhaman":  {
-                                                "subDivisions":  [
-                                                                     "Andal",
-                                                                     "Barabani",
-                                                                     "Durgapur Faridpur",
-                                                                     "Jamuria",
-                                                                     "Kanksa",
-                                                                     "Pandabeswar",
-                                                                     "Raniganj",
-                                                                     "Salanpur"
-                                                                 ],
-                                                "blocks":  [
-                                                               "Barabani",
-                                                               "Faridpur - Durgapur",
-                                                               "Jamuria",
-                                                               "Kanksa",
-                                                               "Ondal",
-                                                               "Pandabeswar",
-                                                               "Raniganj",
-                                                               "Salanpur"
-                                                           ]
-                                            },
-                      "Paschim Medinipur":  {
-                                                "subDivisions":  [
-                                                                     "Chandrakona - I",
-                                                                     "Chandrakona - II",
-                                                                     "Dantan - I",
-                                                                     "Dantan - II",
-                                                                     "Daspur - I",
-                                                                     "Daspur - II",
-                                                                     "Debra",
-                                                                     "Garbeta - I",
-                                                                     "Garbeta - II",
-                                                                     "Garbeta - III",
-                                                                     "Ghatal",
-                                                                     "Keshiary",
-                                                                     "Keshpur",
-                                                                     "Kharagpur - I",
-                                                                     "Kharagpur - II",
-                                                                     "Midnapore",
-                                                                     "Mohanpur",
-                                                                     "Narayangarh",
-                                                                     "Pingla",
-                                                                     "Sabang",
-                                                                     "Salbani"
-                                                                 ],
-                                                "blocks":  [
-                                                               "Chandrakona-I",
-                                                               "Chandrakona-Ii",
-                                                               "Dantan-I",
-                                                               "Dantan-Ii",
-                                                               "Daspur-I",
-                                                               "Daspur-Ii",
-                                                               "Debra",
-                                                               "Garbeta-I",
-                                                               "Garbeta-Ii",
-                                                               "Garbeta-Iii",
-                                                               "Ghatal",
-                                                               "Keshiary",
-                                                               "Keshpur",
-                                                               "Kharagpur-I",
-                                                               "Kharagpur-Ii",
-                                                               "Midnapore",
-                                                               "Mohanpur",
-                                                               "Narayangarh",
-                                                               "Pingla",
-                                                               "Sabang",
-                                                               "Salbani"
-                                                           ]
-                                            },
-                      "Purba Bardhaman":  {
-                                              "subDivisions":  [
-                                                                   "Ausgram - I",
-                                                                   "Ausgram - II",
-                                                                   "Bhatar",
-                                                                   "Burdwan - I",
-                                                                   "Burdwan - II",
-                                                                   "Galsi - I",
-                                                                   "Galsi - II",
-                                                                   "Jamalpur",
-                                                                   "Kalna - I",
-                                                                   "Kalna - II",
-                                                                   "Katwa - I",
-                                                                   "Katwa - II",
-                                                                   "Ketugram - I",
-                                                                   "Ketugram - II",
-                                                                   "Khandaghosh",
-                                                                   "Mangolkote",
-                                                                   "Manteswar",
-                                                                   "Memari - I",
-                                                                   "Memari - II",
-                                                                   "Purbasthali - I",
-                                                                   "Purbasthali - II",
-                                                                   "Raina - I",
-                                                                   "Raina - II"
-                                                               ],
-                                              "blocks":  [
-                                                             "Ausgram-I",
-                                                             "Ausgram-Ii",
-                                                             "Bhatar",
-                                                             "Burdwan-I",
-                                                             "Burdwan-Ii",
-                                                             "Galsi -I",
-                                                             "Galsi-Ii",
-                                                             "Jamal Pur",
-                                                             "Kalna II",
-                                                             "Kalna-I",
-                                                             "Katwa-I",
-                                                             "Katwa-Ii",
-                                                             "Ketugram_I",
-                                                             "Ketugram-Ii",
-                                                             "Khandaghosh",
-                                                             "Mangolkote",
-                                                             "Manteswar",
-                                                             "Memari-1",
-                                                             "Memari-Ii",
-                                                             "Purbasthali-I",
-                                                             "Purbasthali-Ii",
-                                                             "Raina-I",
-                                                             "Raina-Ii"
-                                                         ]
-                                          },
-                      "Purba Medinipur":  {
-                                              "subDivisions":  [
-                                                                   "Bhagawanpur - I",
-                                                                   "Bhagawanpur - II",
-                                                                   "Chandipur",
-                                                                   "Contai - I",
-                                                                   "Contai - III",
-                                                                   "Deshopran",
-                                                                   "Egra - I",
-                                                                   "Egra - II",
-                                                                   "Haldia",
-                                                                   "Khejuri - I",
-                                                                   "Khejuri - II",
-                                                                   "Kolaghat",
-                                                                   "Mahisadal",
-                                                                   "Moyna",
-                                                                   "Nanda Kumar",
-                                                                   "Nandigram - I",
-                                                                   "Nandigram - II",
-                                                                   "Panskura",
-                                                                   "Potashpur - I",
-                                                                   "Potashpur - II",
-                                                                   "Ramnagar - I",
-                                                                   "Ramnagar - II",
-                                                                   "Sahid Matangini",
-                                                                   "Sutahata",
-                                                                   "Tamluk"
-                                                               ],
-                                              "blocks":  [
-                                                             "Bhagawanpur-I",
-                                                             "Bhagawanpur-Ii",
-                                                             "Chandipur",
-                                                             "Contai-I",
-                                                             "Contai-Iii",
-                                                             "Deshapran",
-                                                             "Egra-I",
-                                                             "Egra-Ii",
-                                                             "Haldia",
-                                                             "Khejuri-I",
-                                                             "Khejuri-Ii",
-                                                             "Kolaghat",
-                                                             "Mahishadal",
-                                                             "Moyna",
-                                                             "Nandakumar",
-                                                             "Nandigram-I",
-                                                             "Nandigram-Ii",
-                                                             "Panskura-I",
-                                                             "Patashpur-I",
-                                                             "Patashpur-Ii",
-                                                             "Ramnagar-I",
-                                                             "Ramnagar-Ii",
-                                                             "Shahid Matangini",
-                                                             "Sutahata",
-                                                             "Tamluk"
-                                                         ]
-                                          },
-                      "Purulia":  {
-                                      "subDivisions":  [
-                                                           "Arsha",
-                                                           "Bagmundi",
-                                                           "Balarampur",
-                                                           "Barabazar",
-                                                           "Bundwan",
-                                                           "Hura",
-                                                           "Jaipur",
-                                                           "Jhalda - I",
-                                                           "Jhalda - II",
-                                                           "Kashipur",
-                                                           "Manbazar - I",
-                                                           "Manbazar - II",
-                                                           "Neturia",
-                                                           "Para",
-                                                           "Puncha",
-                                                           "Purulia - I",
-                                                           "Purulia - II",
-                                                           "Raghunathpur - I",
-                                                           "Raghunathpur - II",
-                                                           "Santuri"
-                                                       ],
-                                      "blocks":  [
-                                                     "Arsha",
-                                                     "Bagmundi",
-                                                     "Balarampur",
-                                                     "Barabazar",
-                                                     "Bundwan",
-                                                     "Hura",
-                                                     "Jaipur",
-                                                     "Jhalda-I",
-                                                     "Jhalda-Ii",
-                                                     "Kashipur",
-                                                     "Manbazar-I",
-                                                     "Manbazar-Ii",
-                                                     "Neturia",
-                                                     "Para",
-                                                     "Puncha",
-                                                     "Purulia-I",
-                                                     "Purulia-Ii",
-                                                     "Raghunath Pur-I",
-                                                     "Raghunathpur-Ii",
-                                                     "Santuri"
-                                                 ]
-                                  },
-                      "South 24 Parganas":  {
-                                                "subDivisions":  [
-                                                                     "Baruipur",
-                                                                     "Basanti",
-                                                                     "Bhangar - I",
-                                                                     "Bhangar - II",
-                                                                     "Bishnupur - I",
-                                                                     "Bishnupur - II",
-                                                                     "Budge Budge - I",
-                                                                     "Budge Budge - II",
-                                                                     "Canning - I",
-                                                                     "Canning - II",
-                                                                     "Diamond Harbour - I",
-                                                                     "Diamond Harbour - II",
-                                                                     "Falta",
-                                                                     "Gosaba",
-                                                                     "Jaynagar - I",
-                                                                     "Jaynagar - II",
-                                                                     "Kakdwip",
-                                                                     "Kulpi",
-                                                                     "Kultali",
-                                                                     "Magrahat - I",
-                                                                     "Magrahat - II",
-                                                                     "Mandirbazar",
-                                                                     "Mathurapur - I",
-                                                                     "Mathurapur - II",
-                                                                     "Namkhana",
-                                                                     "Patharpratima",
-                                                                     "Sagar",
-                                                                     "Sonarpur",
-                                                                     "Thakurpukur Mahestola"
-                                                                 ],
-                                                "blocks":  [
-                                                               "Baruipur",
-                                                               "Basanti",
-                                                               "Bhangar-I",
-                                                               "Bhangar-Ii",
-                                                               "Bishnupur-I",
-                                                               "Bishnupur-Ii",
-                                                               "Budge Budge-I",
-                                                               "Budge Budge-Ii",
-                                                               "Canning-I",
-                                                               "Canning-Ii",
-                                                               "Diamond Harbour-I",
-                                                               "Diamond Harbour-Ii",
-                                                               "Falta",
-                                                               "Gosaba",
-                                                               "Jaynagar-I",
-                                                               "Jaynagar-Ii",
-                                                               "Kak Dwip",
-                                                               "Kulpi",
-                                                               "Kultali",
-                                                               "Magra Hat-I",
-                                                               "Magra Hat-Ii",
-                                                               "Mandirbazar",
-                                                               "Mathurapur I",
-                                                               "Mathurapur-Ii",
-                                                               "Namkhana",
-                                                               "Pathar Pratima",
-                                                               "Sagar",
-                                                               "Sonarpur",
-                                                               "Thakurpukur Mahestola"
-                                                           ]
-                                            },
-                      "Uttar Dinajpur":  {
-                                             "subDivisions":  [
-                                                                  "Chopra",
-                                                                  "Goalpokher - I",
-                                                                  "Goalpokher - II",
-                                                                  "Hemtabad",
-                                                                  "Islampur",
-                                                                  "Itahar",
-                                                                  "Kaliaganj",
-                                                                  "Karandighi",
-                                                                  "Raiganj"
-                                                              ],
-                                             "blocks":  [
-                                                            "Chopra",
-                                                            "Goalpokhar II",
-                                                            "Goalpokhar-I",
-                                                            "Hemtabad",
-                                                            "Islampur",
-                                                            "Itahar",
-                                                            "Kaliaganj",
-                                                            "Karandighi",
-                                                            "Raiganj"
-                                                        ]
-                                         }
-                  }
+  "source": "Blocks: Local Government Directory, Government of India (spellings normalized). Sub-divisions: List of subdivisions of West Bengal (69 sub-divisions).",
+  "downloadedAt": "2026-10-24",
+  "state": "West Bengal",
+  "stateCode": 19,
+  "districts": {
+    "Alipurduar": {
+      "subDivisions": [
+        "Alipurduar"
+      ],
+      "blocks": [
+        "Alipurduar-I",
+        "Alipurduar-II",
+        "Falakata",
+        "Kalchini",
+        "Kumargram",
+        "Madarihat-Birpara"
+      ],
+      "subDivisionBlocks": {
+        "Alipurduar": [
+          "Alipurduar-I",
+          "Alipurduar-II",
+          "Falakata",
+          "Kalchini",
+          "Kumargram",
+          "Madarihat-Birpara"
+        ]
+      }
+    },
+    "Bankura": {
+      "subDivisions": [
+        "Bankura Sadar",
+        "Bishnupur",
+        "Khatra"
+      ],
+      "blocks": [
+        "Bankura-I",
+        "Bankura-II",
+        "Barjora",
+        "Bishnupur",
+        "Chhatna",
+        "Gangajalghati",
+        "Hirbandh",
+        "Indpur",
+        "Indus",
+        "Jaypur",
+        "Khatra",
+        "Kotulpur",
+        "Mejhia",
+        "Onda",
+        "Patrasayer",
+        "Raipur",
+        "Ranibandh",
+        "Saltora",
+        "Sarenga",
+        "Simlapal",
+        "Sonamukhi",
+        "Taldangra"
+      ],
+      "subDivisionBlocks": {
+        "Bankura Sadar": [
+          "Bankura-I",
+          "Bankura-II",
+          "Barjora",
+          "Chhatna",
+          "Gangajalghati",
+          "Mejhia",
+          "Onda",
+          "Saltora"
+        ],
+        "Khatra": [
+          "Hirbandh",
+          "Indpur",
+          "Khatra",
+          "Raipur",
+          "Ranibandh",
+          "Sarenga",
+          "Simlapal",
+          "Taldangra"
+        ],
+        "Bishnupur": [
+          "Bishnupur",
+          "Indus",
+          "Jaypur",
+          "Kotulpur",
+          "Patrasayer",
+          "Sonamukhi"
+        ]
+      }
+    },
+    "Birbhum": {
+      "subDivisions": [
+        "Bolpur",
+        "Rampurhat",
+        "Suri Sadar"
+      ],
+      "blocks": [
+        "Bolpur-Sriniketan",
+        "Dubrajpur",
+        "Ilambazar",
+        "Khoyrasol",
+        "Labpur",
+        "Mayureswar-I",
+        "Mayureswar-II",
+        "Mohammad Bazar",
+        "Murarai-I",
+        "Murarai-II",
+        "Nalhati-I",
+        "Nalhati-II",
+        "Nanoor",
+        "Rajnagar",
+        "Rampurhat-I",
+        "Rampurhat-II",
+        "Sainthia",
+        "Suri-I",
+        "Suri-II"
+      ],
+      "subDivisionBlocks": {
+        "Bolpur": [
+          "Bolpur-Sriniketan",
+          "Ilambazar",
+          "Labpur",
+          "Nanoor"
+        ],
+        "Rampurhat": [
+          "Mayureswar-I",
+          "Mayureswar-II",
+          "Murarai-I",
+          "Murarai-II",
+          "Nalhati-I",
+          "Nalhati-II",
+          "Rampurhat-I",
+          "Rampurhat-II"
+        ],
+        "Suri Sadar": [
+          "Dubrajpur",
+          "Khoyrasol",
+          "Mohammad Bazar",
+          "Rajnagar",
+          "Sainthia",
+          "Suri-I",
+          "Suri-II"
+        ]
+      }
+    },
+    "Cooch Behar": {
+      "subDivisions": [
+        "Cooch Behar Sadar",
+        "Dinhata",
+        "Mathabhanga",
+        "Mekhliganj",
+        "Tufanganj"
+      ],
+      "blocks": [
+        "Cooch Behar-I",
+        "Cooch Behar-II",
+        "Dinhata-I",
+        "Dinhata-II",
+        "Haldibari",
+        "Mathabhanga-I",
+        "Mathabhanga-II",
+        "Mekhliganj",
+        "Sitai",
+        "Sitalkuchi",
+        "Tufanganj-I",
+        "Tufanganj-II"
+      ],
+      "subDivisionBlocks": {
+        "Cooch Behar Sadar": [
+          "Cooch Behar-I",
+          "Cooch Behar-II"
+        ],
+        "Dinhata": [
+          "Dinhata-I",
+          "Dinhata-II",
+          "Sitai"
+        ],
+        "Mathabhanga": [
+          "Mathabhanga-I",
+          "Mathabhanga-II",
+          "Sitalkuchi"
+        ],
+        "Mekhliganj": [
+          "Haldibari",
+          "Mekhliganj"
+        ],
+        "Tufanganj": [
+          "Tufanganj-I",
+          "Tufanganj-II"
+        ]
+      }
+    },
+    "Dakshin Dinajpur": {
+      "subDivisions": [
+        "Balurghat",
+        "Gangarampur"
+      ],
+      "blocks": [
+        "Balurghat",
+        "Bansihari",
+        "Gangarampur",
+        "Harirampur",
+        "Hili",
+        "Kumarganj",
+        "Kushmandi",
+        "Tapan"
+      ],
+      "subDivisionBlocks": {
+        "Balurghat": [
+          "Balurghat",
+          "Hili",
+          "Kumarganj",
+          "Tapan"
+        ],
+        "Gangarampur": [
+          "Bansihari",
+          "Gangarampur",
+          "Harirampur",
+          "Kushmandi"
+        ]
+      }
+    },
+    "Darjeeling": {
+      "subDivisions": [
+        "Darjeeling Sadar",
+        "Kurseong",
+        "Mirik",
+        "Siliguri"
+      ],
+      "blocks": [
+        "Darjeeling-Pulbazar",
+        "Jorebunglow-Sukhiapokhri",
+        "Kharibari",
+        "Kurseong",
+        "Matigara",
+        "Mirik",
+        "Naxalbari",
+        "Phansidewa",
+        "Rangli Rangliot"
+      ],
+      "subDivisionBlocks": {
+        "Darjeeling Sadar": [
+          "Darjeeling-Pulbazar",
+          "Jorebunglow-Sukhiapokhri",
+          "Rangli Rangliot"
+        ],
+        "Kurseong": [
+          "Kurseong"
+        ],
+        "Mirik": [
+          "Mirik"
+        ],
+        "Siliguri": [
+          "Kharibari",
+          "Matigara",
+          "Naxalbari",
+          "Phansidewa"
+        ]
+      }
+    },
+    "Hooghly": {
+      "subDivisions": [
+        "Arambag",
+        "Chandannagore",
+        "Chinsurah Sadar",
+        "Srirampore"
+      ],
+      "blocks": [
+        "Arambagh",
+        "Balagarh",
+        "Chanditala-I",
+        "Chanditala-II",
+        "Chinsurah-Mogra",
+        "Dhaniakhali",
+        "Goghat-I",
+        "Goghat-II",
+        "Haripal",
+        "Jangipara",
+        "Khanakul-I",
+        "Khanakul-II",
+        "Pandua",
+        "Polba-Dadpur",
+        "Pursurah",
+        "Serampore-Uttarpara",
+        "Singur",
+        "Tarakeswar"
+      ],
+      "subDivisionBlocks": {
+        "Arambag": [
+          "Arambagh",
+          "Goghat-I",
+          "Goghat-II",
+          "Khanakul-I",
+          "Khanakul-II",
+          "Pursurah"
+        ],
+        "Chandannagore": [
+          "Chanditala-I",
+          "Chanditala-II",
+          "Singur"
+        ],
+        "Chinsurah Sadar": [
+          "Balagarh",
+          "Chinsurah-Mogra",
+          "Dhaniakhali",
+          "Pandua",
+          "Polba-Dadpur"
+        ],
+        "Srirampore": [
+          "Haripal",
+          "Jangipara",
+          "Serampore-Uttarpara",
+          "Tarakeswar"
+        ]
+      }
+    },
+    "Howrah": {
+      "subDivisions": [
+        "Howrah Sadar",
+        "Uluberia"
+      ],
+      "blocks": [
+        "Amta-I",
+        "Amta-II",
+        "Bagnan-I",
+        "Bagnan-II",
+        "Bally-Jagachha",
+        "Domjur",
+        "Jagatballavpur",
+        "Panchla",
+        "Sankrail",
+        "Shyampur-I",
+        "Shyampur-II",
+        "Udaynarayanpur",
+        "Uluberia-I",
+        "Uluberia-II"
+      ],
+      "subDivisionBlocks": {
+        "Howrah Sadar": [
+          "Bally-Jagachha",
+          "Domjur",
+          "Jagatballavpur",
+          "Panchla",
+          "Sankrail"
+        ],
+        "Uluberia": [
+          "Amta-I",
+          "Amta-II",
+          "Bagnan-I",
+          "Bagnan-II",
+          "Shyampur-I",
+          "Shyampur-II",
+          "Udaynarayanpur",
+          "Uluberia-I",
+          "Uluberia-II"
+        ]
+      }
+    },
+    "Jalpaiguri": {
+      "subDivisions": [
+        "Dhupguri",
+        "Jalpaiguri Sadar",
+        "Malbazar"
+      ],
+      "blocks": [
+        "Banarhat",
+        "Dhupguri",
+        "Jalpaiguri",
+        "Kranti",
+        "Mal",
+        "Matiali",
+        "Maynaguri",
+        "Nagrakata",
+        "Rajganj"
+      ],
+      "subDivisionBlocks": {
+        "Dhupguri": [
+          "Dhupguri"
+        ],
+        "Jalpaiguri Sadar": [
+          "Jalpaiguri",
+          "Maynaguri",
+          "Rajganj"
+        ],
+        "Malbazar": [
+          "Banarhat",
+          "Kranti",
+          "Mal",
+          "Matiali",
+          "Nagrakata"
+        ]
+      }
+    },
+    "Jhargram": {
+      "subDivisions": [
+        "Jhargram"
+      ],
+      "blocks": [
+        "Binpur-I",
+        "Binpur-II",
+        "Gopiballavpur-I",
+        "Gopiballavpur-II",
+        "Jamboni",
+        "Jhargram",
+        "Nayagram",
+        "Sankrail"
+      ],
+      "subDivisionBlocks": {
+        "Jhargram": [
+          "Binpur-I",
+          "Binpur-II",
+          "Gopiballavpur-I",
+          "Gopiballavpur-II",
+          "Jamboni",
+          "Jhargram",
+          "Nayagram",
+          "Sankrail"
+        ]
+      }
+    },
+    "Kalimpong": {
+      "subDivisions": [
+        "Kalimpong"
+      ],
+      "blocks": [
+        "Gorubathan",
+        "Kalimpong-I",
+        "Lava",
+        "Pedong"
+      ],
+      "subDivisionBlocks": {
+        "Kalimpong": [
+          "Gorubathan",
+          "Kalimpong-I",
+          "Lava",
+          "Pedong"
+        ]
+      }
+    },
+    "Kolkata": {
+      "subDivisions": [],
+      "blocks": [],
+      "subDivisionBlocks": {}
+    },
+    "Malda": {
+      "subDivisions": [
+        "Chanchal",
+        "Malda Sadar"
+      ],
+      "blocks": [
+        "Bamangola",
+        "Chanchal-I",
+        "Chanchal-II",
+        "English Bazar",
+        "Gazole",
+        "Habibpur",
+        "Harishchandrapur-I",
+        "Harishchandrapur-II",
+        "Kaliachak-I",
+        "Kaliachak-II",
+        "Kaliachak-III",
+        "Manikchak",
+        "Old Malda",
+        "Ratua-I",
+        "Ratua-II"
+      ],
+      "subDivisionBlocks": {
+        "Chanchal": [
+          "Chanchal-I",
+          "Chanchal-II",
+          "Harishchandrapur-I",
+          "Harishchandrapur-II",
+          "Ratua-I",
+          "Ratua-II"
+        ],
+        "Malda Sadar": [
+          "Bamangola",
+          "English Bazar",
+          "Gazole",
+          "Habibpur",
+          "Kaliachak-I",
+          "Kaliachak-II",
+          "Kaliachak-III",
+          "Manikchak",
+          "Old Malda"
+        ]
+      }
+    },
+    "Murshidabad": {
+      "subDivisions": [
+        "Berhampore",
+        "Domkal",
+        "Jangipur",
+        "Kandi",
+        "Lalbag"
+      ],
+      "blocks": [
+        "Beldanga-I",
+        "Beldanga-II",
+        "Berhampore",
+        "Bhagawangola-I",
+        "Bhagawangola-II",
+        "Bharatpur-I",
+        "Bharatpur-II",
+        "Burwan",
+        "Domkal",
+        "Farakka",
+        "Hariharpara",
+        "Jalangi",
+        "Kandi",
+        "Khargram",
+        "Lalgola",
+        "Murshidabad-Jiaganj",
+        "Nabagram",
+        "Nawda",
+        "Raghunathganj-I",
+        "Raghunathganj-II",
+        "Raninagar-I",
+        "Raninagar-II",
+        "Sagardighi",
+        "Shamsherganj",
+        "Suti-I",
+        "Suti-II"
+      ],
+      "subDivisionBlocks": {
+        "Berhampore": [
+          "Beldanga-I",
+          "Beldanga-II",
+          "Berhampore",
+          "Hariharpara",
+          "Nawda"
+        ],
+        "Domkal": [
+          "Domkal",
+          "Jalangi",
+          "Raninagar-I",
+          "Raninagar-II"
+        ],
+        "Jangipur": [
+          "Farakka",
+          "Raghunathganj-I",
+          "Raghunathganj-II",
+          "Sagardighi",
+          "Shamsherganj",
+          "Suti-I",
+          "Suti-II"
+        ],
+        "Kandi": [
+          "Bharatpur-I",
+          "Bharatpur-II",
+          "Burwan",
+          "Kandi",
+          "Khargram"
+        ],
+        "Lalbag": [
+          "Bhagawangola-I",
+          "Bhagawangola-II",
+          "Lalgola",
+          "Murshidabad-Jiaganj",
+          "Nabagram"
+        ]
+      }
+    },
+    "Nadia": {
+      "subDivisions": [
+        "Kalyani",
+        "Krishnanagar Sadar",
+        "Ranaghat",
+        "Tehatta"
+      ],
+      "blocks": [
+        "Chakdah",
+        "Chapra",
+        "Hanskhali",
+        "Haringhata",
+        "Kaliganj",
+        "Kalyani",
+        "Karimpur-I",
+        "Karimpur-II",
+        "Krishnaganj",
+        "Krishnagar-I",
+        "Krishnagar-II",
+        "Nabadwip",
+        "Nakashipara",
+        "Ranaghat-I",
+        "Ranaghat-II",
+        "Santipur",
+        "Tehatta-I",
+        "Tehatta-II"
+      ],
+      "subDivisionBlocks": {
+        "Kalyani": [
+          "Chakdah",
+          "Haringhata",
+          "Kalyani"
+        ],
+        "Krishnanagar Sadar": [
+          "Chapra",
+          "Kaliganj",
+          "Krishnaganj",
+          "Krishnagar-I",
+          "Krishnagar-II",
+          "Nabadwip",
+          "Nakashipara"
+        ],
+        "Ranaghat": [
+          "Hanskhali",
+          "Ranaghat-I",
+          "Ranaghat-II",
+          "Santipur"
+        ],
+        "Tehatta": [
+          "Karimpur-I",
+          "Karimpur-II",
+          "Tehatta-I",
+          "Tehatta-II"
+        ]
+      }
+    },
+    "North 24 Parganas": {
+      "subDivisions": [
+        "Bangaon",
+        "Barasat Sadar",
+        "Barrackpore",
+        "Basirhat",
+        "Bidhannagar"
+      ],
+      "blocks": [
+        "Amdanga",
+        "Baduria",
+        "Bagda",
+        "Bangaon",
+        "Barasat-I",
+        "Barasat-II",
+        "Barrackpore-I",
+        "Barrackpore-II",
+        "Basirhat-I",
+        "Basirhat-II",
+        "Deganga",
+        "Gaighata",
+        "Habra-I",
+        "Habra-II",
+        "Haroa",
+        "Hasnabad",
+        "Hingalganj",
+        "Minakhan",
+        "Rajarhat",
+        "Sandeshkhali-I",
+        "Sandeshkhali-II",
+        "Swarupnagar"
+      ],
+      "subDivisionBlocks": {
+        "Bangaon": [
+          "Bagda",
+          "Bangaon",
+          "Gaighata"
+        ],
+        "Barasat Sadar": [
+          "Amdanga",
+          "Barasat-I",
+          "Barasat-II",
+          "Deganga",
+          "Habra-I",
+          "Habra-II",
+          "Rajarhat"
+        ],
+        "Barrackpore": [
+          "Barrackpore-I",
+          "Barrackpore-II"
+        ],
+        "Basirhat": [
+          "Baduria",
+          "Basirhat-I",
+          "Basirhat-II",
+          "Haroa",
+          "Hasnabad",
+          "Hingalganj",
+          "Minakhan",
+          "Sandeshkhali-I",
+          "Sandeshkhali-II",
+          "Swarupnagar"
+        ],
+        "Bidhannagar": []
+      }
+    },
+    "Paschim Bardhaman": {
+      "subDivisions": [
+        "Asansol Sadar",
+        "Durgapur"
+      ],
+      "blocks": [
+        "Andal",
+        "Barabani",
+        "Faridpur-Durgapur",
+        "Jamuria",
+        "Kanksa",
+        "Pandabeswar",
+        "Raniganj",
+        "Salanpur"
+      ],
+      "subDivisionBlocks": {
+        "Asansol Sadar": [
+          "Barabani",
+          "Jamuria",
+          "Raniganj",
+          "Salanpur"
+        ],
+        "Durgapur": [
+          "Andal",
+          "Faridpur-Durgapur",
+          "Kanksa",
+          "Pandabeswar"
+        ]
+      }
+    },
+    "Paschim Medinipur": {
+      "subDivisions": [
+        "Ghatal",
+        "Kharagpur",
+        "Medinipur Sadar"
+      ],
+      "blocks": [
+        "Chandrakona-I",
+        "Chandrakona-II",
+        "Dantan-I",
+        "Dantan-II",
+        "Daspur-I",
+        "Daspur-II",
+        "Debra",
+        "Garbeta-I",
+        "Garbeta-II",
+        "Garbeta-III",
+        "Ghatal",
+        "Keshiary",
+        "Keshpur",
+        "Kharagpur-I",
+        "Kharagpur-II",
+        "Midnapore",
+        "Mohanpur",
+        "Narayangarh",
+        "Pingla",
+        "Sabang",
+        "Salbani"
+      ],
+      "subDivisionBlocks": {
+        "Ghatal": [
+          "Chandrakona-I",
+          "Chandrakona-II",
+          "Daspur-I",
+          "Daspur-II",
+          "Ghatal"
+        ],
+        "Kharagpur": [
+          "Dantan-I",
+          "Dantan-II",
+          "Kharagpur-I",
+          "Kharagpur-II",
+          "Keshiary",
+          "Mohanpur",
+          "Narayangarh",
+          "Pingla",
+          "Sabang",
+          "Debra"
+        ],
+        "Medinipur Sadar": [
+          "Garbeta-I",
+          "Garbeta-II",
+          "Garbeta-III",
+          "Keshpur",
+          "Midnapore",
+          "Salbani"
+        ]
+      }
+    },
+    "Purba Bardhaman": {
+      "subDivisions": [
+        "Bardhaman Sadar North",
+        "Bardhaman Sadar South",
+        "Kalna",
+        "Katwa"
+      ],
+      "blocks": [
+        "Ausgram-I",
+        "Ausgram-II",
+        "Bhatar",
+        "Burdwan-I",
+        "Burdwan-II",
+        "Galsi-I",
+        "Galsi-II",
+        "Jamalpur",
+        "Kalna-I",
+        "Kalna-II",
+        "Katwa-I",
+        "Katwa-II",
+        "Ketugram-I",
+        "Ketugram-II",
+        "Khandaghosh",
+        "Mangolkote",
+        "Manteswar",
+        "Memari-I",
+        "Memari-II",
+        "Purbasthali-I",
+        "Purbasthali-II",
+        "Raina-I",
+        "Raina-II"
+      ],
+      "subDivisionBlocks": {
+        "Bardhaman Sadar North": [
+          "Ausgram-I",
+          "Ausgram-II",
+          "Bhatar",
+          "Galsi-I",
+          "Galsi-II",
+          "Manteswar"
+        ],
+        "Bardhaman Sadar South": [
+          "Burdwan-I",
+          "Burdwan-II",
+          "Jamalpur",
+          "Khandaghosh",
+          "Memari-I",
+          "Memari-II",
+          "Raina-I",
+          "Raina-II"
+        ],
+        "Kalna": [
+          "Kalna-I",
+          "Kalna-II",
+          "Purbasthali-I",
+          "Purbasthali-II"
+        ],
+        "Katwa": [
+          "Katwa-I",
+          "Katwa-II",
+          "Ketugram-I",
+          "Ketugram-II",
+          "Mangolkote"
+        ]
+      }
+    },
+    "Purba Medinipur": {
+      "subDivisions": [
+        "Contai",
+        "Egra",
+        "Haldia",
+        "Tamluk"
+      ],
+      "blocks": [
+        "Bhagawanpur-I",
+        "Bhagawanpur-II",
+        "Chandipur",
+        "Contai-I",
+        "Contai-III",
+        "Deshapran",
+        "Egra-I",
+        "Egra-II",
+        "Haldia",
+        "Khejuri-I",
+        "Khejuri-II",
+        "Kolaghat",
+        "Mahishadal",
+        "Moyna",
+        "Nandakumar",
+        "Nandigram-I",
+        "Nandigram-II",
+        "Panskura-I",
+        "Patashpur-I",
+        "Patashpur-II",
+        "Ramnagar-I",
+        "Ramnagar-II",
+        "Shahid Matangini",
+        "Sutahata",
+        "Tamluk"
+      ],
+      "subDivisionBlocks": {
+        "Contai": [
+          "Contai-I",
+          "Contai-III",
+          "Deshapran",
+          "Khejuri-I",
+          "Khejuri-II",
+          "Ramnagar-I",
+          "Ramnagar-II"
+        ],
+        "Egra": [
+          "Egra-I",
+          "Egra-II",
+          "Patashpur-I",
+          "Patashpur-II"
+        ],
+        "Haldia": [
+          "Bhagawanpur-I",
+          "Bhagawanpur-II",
+          "Haldia",
+          "Mahishadal",
+          "Nandigram-I",
+          "Nandigram-II",
+          "Sutahata"
+        ],
+        "Tamluk": [
+          "Chandipur",
+          "Kolaghat",
+          "Moyna",
+          "Nandakumar",
+          "Panskura-I",
+          "Shahid Matangini",
+          "Tamluk"
+        ]
+      }
+    },
+    "Purulia": {
+      "subDivisions": [
+        "Jhalda",
+        "Manbazar",
+        "Purulia Sadar",
+        "Raghunathpur"
+      ],
+      "blocks": [
+        "Arsha",
+        "Bagmundi",
+        "Balarampur",
+        "Barabazar",
+        "Bundwan",
+        "Hura",
+        "Jaipur",
+        "Jhalda-I",
+        "Jhalda-II",
+        "Kashipur",
+        "Manbazar-I",
+        "Manbazar-II",
+        "Neturia",
+        "Para",
+        "Puncha",
+        "Purulia-I",
+        "Purulia-II",
+        "Raghunathpur-I",
+        "Raghunathpur-II",
+        "Santuri"
+      ],
+      "subDivisionBlocks": {
+        "Jhalda": [
+          "Arsha",
+          "Bagmundi",
+          "Jaipur",
+          "Jhalda-I",
+          "Jhalda-II"
+        ],
+        "Manbazar": [
+          "Barabazar",
+          "Bundwan",
+          "Manbazar-I",
+          "Manbazar-II",
+          "Puncha"
+        ],
+        "Purulia Sadar": [
+          "Balarampur",
+          "Hura",
+          "Purulia-I",
+          "Purulia-II"
+        ],
+        "Raghunathpur": [
+          "Kashipur",
+          "Neturia",
+          "Para",
+          "Raghunathpur-I",
+          "Raghunathpur-II",
+          "Santuri"
+        ]
+      }
+    },
+    "South 24 Parganas": {
+      "subDivisions": [
+        "Alipore Sadar",
+        "Baruipur",
+        "Canning",
+        "Diamond Harbour",
+        "Kakdwip"
+      ],
+      "blocks": [
+        "Baruipur",
+        "Basanti",
+        "Bhangar-I",
+        "Bhangar-II",
+        "Bishnupur-I",
+        "Bishnupur-II",
+        "Budge Budge-I",
+        "Budge Budge-II",
+        "Canning-I",
+        "Canning-II",
+        "Diamond Harbour-I",
+        "Diamond Harbour-II",
+        "Falta",
+        "Gosaba",
+        "Jaynagar-I",
+        "Jaynagar-II",
+        "Kakdwip",
+        "Kulpi",
+        "Kultali",
+        "Magrahat-I",
+        "Magrahat-II",
+        "Mandirbazar",
+        "Mathurapur-I",
+        "Mathurapur-II",
+        "Namkhana",
+        "Patharpratima",
+        "Sagar",
+        "Sonarpur",
+        "Thakurpukur Mahestola"
+      ],
+      "subDivisionBlocks": {
+        "Alipore Sadar": [
+          "Bishnupur-I",
+          "Bishnupur-II",
+          "Budge Budge-I",
+          "Budge Budge-II",
+          "Thakurpukur Mahestola",
+          "Bhangar-I",
+          "Bhangar-II"
+        ],
+        "Baruipur": [
+          "Baruipur",
+          "Jaynagar-I",
+          "Jaynagar-II",
+          "Sonarpur"
+        ],
+        "Canning": [
+          "Basanti",
+          "Canning-I",
+          "Canning-II",
+          "Gosaba",
+          "Kultali"
+        ],
+        "Diamond Harbour": [
+          "Diamond Harbour-I",
+          "Diamond Harbour-II",
+          "Falta",
+          "Magrahat-I",
+          "Magrahat-II",
+          "Mandirbazar"
+        ],
+        "Kakdwip": [
+          "Kakdwip",
+          "Kulpi",
+          "Mathurapur-I",
+          "Mathurapur-II",
+          "Namkhana",
+          "Patharpratima",
+          "Sagar"
+        ]
+      }
+    },
+    "Uttar Dinajpur": {
+      "subDivisions": [
+        "Islampur",
+        "Raiganj"
+      ],
+      "blocks": [
+        "Chopra",
+        "Goalpokhar-I",
+        "Goalpokhar-II",
+        "Hemtabad",
+        "Islampur",
+        "Itahar",
+        "Kaliaganj",
+        "Karandighi",
+        "Raiganj"
+      ],
+      "subDivisionBlocks": {
+        "Islampur": [
+          "Chopra",
+          "Goalpokhar-I",
+          "Goalpokhar-II",
+          "Islampur",
+          "Karandighi"
+        ],
+        "Raiganj": [
+          "Hemtabad",
+          "Itahar",
+          "Kaliaganj",
+          "Raiganj"
+        ]
+      }
+    }
+  }
 }
