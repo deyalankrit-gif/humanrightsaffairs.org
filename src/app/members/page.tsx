@@ -69,6 +69,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea'
 import { useToast } from '@/hooks/use-toast'
 import { INDIA_DATA } from '@/lib/india-data'
+import WEST_BENGAL_LOCATION_DATA from '@/lib/west-bengal-location-data.json'
+
+type DistrictLocationData = {
+  subDivisions: string[]
+  blocks: string[]
+  subDivisionBlocks: Record<string, string[]>
+}
+const WEST_BENGAL_DISTRICTS = WEST_BENGAL_LOCATION_DATA.districts as Record<string, DistrictLocationData>
+const getDistrictLocation = (stateName?: string, districtName?: string) =>
+  stateName === WEST_BENGAL_LOCATION_DATA.state && districtName
+    ? WEST_BENGAL_DISTRICTS[districtName]
+    : undefined
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
 
@@ -78,9 +90,11 @@ type Member = {
   name: string
   designationCategory?: string
   designation: string
-  level: "National" | "State" | "District"
+  level: "National" | "State" | "District" | "Sub-Division" | "Block"
   stateName?: string
   districtName?: string
+  subdivisionName?: string
+  blockName?: string
   imageId?: string
   gender?: string
   email?: string
@@ -138,6 +152,8 @@ export default function MembersPage() {
     memberId: '',
     stateName: '',
     districtName: '',
+    subdivisionName: '',
+    blockName: '',
     imageId: '',
     joiningDate: '',
     expiryDate: '',
@@ -243,6 +259,18 @@ export default function MembersPage() {
     ];
 
     const missing = mandatoryFields.find(f => !f.val);
+    if (!missing && newMember.level !== 'National' && !newMember.stateName) {
+      toast({ variant: "destructive", title: "Missing Information", description: "Chapter State is required." }); return;
+    }
+    if (!missing && ['District', 'Sub-Division', 'Block'].includes(newMember.level) && !newMember.districtName) {
+      toast({ variant: "destructive", title: "Missing Information", description: "Chapter District is required." }); return;
+    }
+    if (!missing && ['Sub-Division', 'Block'].includes(newMember.level) && !newMember.subdivisionName.trim()) {
+      toast({ variant: "destructive", title: "Missing Information", description: "Sub-Division is required." }); return;
+    }
+    if (!missing && newMember.level === 'Block' && !newMember.blockName.trim()) {
+      toast({ variant: "destructive", title: "Missing Information", description: "Block is required." }); return;
+    }
     if (missing) {
       toast({ variant: "destructive", title: "Missing Information", description: `${missing.label} is required.` });
       return;
@@ -271,7 +299,7 @@ export default function MembersPage() {
       setNewMember({ 
         honorific: '', name: '', designationCategory: 'General Member', designation: 'General Member', 
         profession: '', education: '', experience: '', email: '', phone: '', level: 'National', 
-        status: 'Active', memberId: '', stateName: '', districtName: '', gender: 'male', 
+        status: 'Active', memberId: '', stateName: '', districtName: '', subdivisionName: '', blockName: '', gender: 'male', 
         imageId: '', joiningDate: '', expiryDate: '', membershipDuration: '1 Year',
         aadhaar: '', pan: ''
       })
@@ -485,28 +513,67 @@ export default function MembersPage() {
                          <div className="space-y-6">
                             <div className="space-y-1.5">
                                <Label className="text-[10px] font-bold uppercase text-slate-400">Operational Level *</Label>
-                               <Select value={newMember.level} onValueChange={(val: any) => setNewMember({...newMember, level: val, stateName: '', districtName: ''})}>
+                               <Select value={newMember.level} onValueChange={(val: any) => setNewMember({...newMember, level: val, stateName: '', districtName: '', subdivisionName: '', blockName: ''})}>
                                   <SelectTrigger className="h-11 rounded-xl border-2 border-black"><SelectValue /></SelectTrigger>
-                                  <SelectContent position="popper" className="z-[1000001] bg-white"><SelectItem value="National">National Level</SelectItem><SelectItem value="State">State Level</SelectItem><SelectItem value="District">District Level</SelectItem></SelectContent>
+                                  <SelectContent position="popper" className="z-[1000001] bg-white"><SelectItem value="National">National Level</SelectItem><SelectItem value="State">State Level</SelectItem><SelectItem value="District">District Level</SelectItem><SelectItem value="Sub-Division">Sub-Division Level</SelectItem><SelectItem value="Block">Block Level</SelectItem></SelectContent>
                                </Select>
                             </div>
-                            {(newMember.level === 'State' || newMember.level === 'District') && (
+                            {(newMember.level !== 'National') && (
                                <div className="grid grid-cols-1 gap-4 animate-in fade-in slide-in-from-top-1">
                                   <div className="space-y-1.5">
                                      <Label className="text-[10px] font-bold uppercase text-emerald-600">Chapter State *</Label>
-                                     <Select value={newMember.stateName} onValueChange={val => setNewMember({...newMember, stateName: val, districtName: ''})}>
+                                     <Select value={newMember.stateName} onValueChange={val => setNewMember({...newMember, stateName: val, districtName: '', subdivisionName: '', blockName: ''})}>
                                         <SelectTrigger className="h-11 rounded-xl border-2 border-black"><SelectValue placeholder="Choose State" /></SelectTrigger>
                                         <SelectContent position="popper" className="max-h-60 z-[1000001] bg-white">{statesList.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
                                      </Select>
                                   </div>
-                                  {newMember.level === 'District' && newMember.stateName && (
+                                  {['District', 'Sub-Division', 'Block'].includes(newMember.level) && newMember.stateName && (
                                      <div className="space-y-1.5 animate-in fade-in slide-in-from-top-1">
                                         <Label className="text-[10px] font-bold uppercase text-emerald-600">Chapter District *</Label>
-                                        <Select value={newMember.districtName} onValueChange={val => setNewMember({...newMember, districtName: val})}>
+                                        <Select value={newMember.districtName} onValueChange={val => setNewMember({...newMember, districtName: val, subdivisionName: '', blockName: ''})}>
                                            <SelectTrigger className="h-11 rounded-xl border-2 border-black"><SelectValue placeholder="Choose District" /></SelectTrigger>
                                            <SelectContent position="popper" className="max-h-60 z-[1000001] bg-white">{(INDIA_DATA[newMember.stateName] || []).map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
                                         </Select>
                                      </div>
+                                  )}
+                                  {['Sub-Division', 'Block'].includes(newMember.level) && newMember.districtName && (
+                                    <div className="space-y-1.5 animate-in fade-in slide-in-from-top-1">
+                                      <Label className="text-[10px] font-bold uppercase text-emerald-600">Sub-Division *</Label>
+                                      <Select
+                                        value={newMember.subdivisionName}
+                                        onValueChange={val => setNewMember({...newMember, subdivisionName: val, blockName: ''})}
+                                      >
+                                        <SelectTrigger className="h-11 rounded-xl border-2 border-black">
+                                          <SelectValue placeholder="Choose Sub-Division" />
+                                        </SelectTrigger>
+                                        <SelectContent position="popper" className="max-h-60 z-[1000001] bg-white">
+                                          {(getDistrictLocation(newMember.stateName, newMember.districtName)?.subDivisions || []).map(sd => (
+                                            <SelectItem key={sd} value={sd}>{sd}</SelectItem>
+                                          ))}
+                                        </SelectContent>
+                                      </Select>
+                                      {!getDistrictLocation(newMember.stateName, newMember.districtName) && (
+                                        <p className="text-xs text-amber-600">Subdivision data is currently available for West Bengal only.</p>
+                                      )}
+                                    </div>
+                                  )}
+                                  {newMember.level === 'Block' && newMember.subdivisionName && (
+                                    <div className="space-y-1.5 animate-in fade-in slide-in-from-top-1">
+                                      <Label className="text-[10px] font-bold uppercase text-emerald-600">Block *</Label>
+                                      <Select
+                                        value={newMember.blockName}
+                                        onValueChange={val => setNewMember({...newMember, blockName: val})}
+                                      >
+                                        <SelectTrigger className="h-11 rounded-xl border-2 border-black">
+                                          <SelectValue placeholder="Choose Block" />
+                                        </SelectTrigger>
+                                        <SelectContent position="popper" className="max-h-60 z-[1000001] bg-white">
+                                          {(getDistrictLocation(newMember.stateName, newMember.districtName)?.subDivisionBlocks?.[newMember.subdivisionName] || []).map(block => (
+                                            <SelectItem key={block} value={block}>{block}</SelectItem>
+                                          ))}
+                                        </SelectContent>
+                                      </Select>
+                                    </div>
                                   )}
                                </div>
                             )}
@@ -615,7 +682,7 @@ export default function MembersPage() {
           <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
             <div className="flex flex-wrap items-center gap-2 justify-center w-full md:w-auto">
               <div className="flex flex-wrap justify-center gap-1">
-                {["All", "National", "State", "District"].map((level) => (
+                {["All", "National", "State", "District", "Sub-Division", "Block"].map((level) => (
                   <Button 
                     key={level} 
                     variant={levelFilter === level && !selectedState ? "default" : "outline"} 
@@ -691,6 +758,30 @@ export default function MembersPage() {
                    ))}
                 </div>
               ))}
+              {filteredMembers.filter(m => m.level === 'Sub-Division').length > 0 && (
+                <div>
+                  <SectionHeading title="Sub-Division Chapters" icon={Building2} color="text-violet-600 border-violet-100" />
+                  <div className="space-y-10">
+                    {Array.from(new Set(filteredMembers.filter(m => m.level === 'Sub-Division').map(m => `${m.stateName || 'State'}|${m.districtName || 'District'}|${m.subdivisionName || 'Sub-Division'}`))).map(key => {
+                      const [state, district, subdivision] = key.split('|')
+                      const items = filteredMembers.filter(m => m.level === 'Sub-Division' && (m.stateName || 'State') === state && (m.districtName || 'District') === district && (m.subdivisionName || 'Sub-Division') === subdivision)
+                      return <div key={key}><SectionHeading title={`${subdivision} Sub-Division · ${district}, ${state}`} icon={Building2} color="text-violet-600 border-violet-100" /><MemberGrid items={items} /></div>
+                    })}
+                  </div>
+                </div>
+              )}
+              {filteredMembers.filter(m => m.level === 'Block').length > 0 && (
+                <div>
+                  <SectionHeading title="Block Chapters" icon={Building2} color="text-amber-600 border-amber-100" />
+                  <div className="space-y-10">
+                    {Array.from(new Set(filteredMembers.filter(m => m.level === 'Block').map(m => `${m.stateName || 'State'}|${m.districtName || 'District'}|${m.subdivisionName || 'Sub-Division'}|${m.blockName || 'Block'}`))).map(key => {
+                      const [state, district, subdivision, block] = key.split('|')
+                      const items = filteredMembers.filter(m => m.level === 'Block' && (m.stateName || 'State') === state && (m.districtName || 'District') === district && (m.subdivisionName || 'Sub-Division') === subdivision && (m.blockName || 'Block') === block)
+                      return <div key={key}><SectionHeading title={`${block} Block · ${subdivision}, ${district}, ${state}`} icon={Building2} color="text-amber-600 border-amber-100" /><MemberGrid items={items} /></div>
+                    })}
+                  </div>
+                </div>
+              )}
             </>
           )}
         </div>
@@ -766,7 +857,7 @@ export default function MembersPage() {
                       </div>
                       <div className="p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100">
                          <p className="text-[8px] font-black text-slate-400 uppercase mb-1">Jurisdiction</p>
-                         <p className="text-sm font-bold uppercase">{selectedMemberDetails.districtName ? `${selectedMemberDetails.districtName}, ` : ''}{selectedMemberDetails.stateName || 'National Council'}</p>
+                         <p className="text-sm font-bold uppercase">{[selectedMemberDetails.blockName, selectedMemberDetails.subdivisionName, selectedMemberDetails.districtName, selectedMemberDetails.stateName].filter(Boolean).join(', ') || 'National Council'}</p>
                       </div>
                    </div>
                 </div>

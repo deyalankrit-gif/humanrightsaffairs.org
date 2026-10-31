@@ -20,7 +20,9 @@ import {
   Video,
   Link as LinkIcon,
   AlertTriangle,
-  Info
+  Info,
+  Trash2,
+  Pencil
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -30,7 +32,7 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Progress } from '@/components/ui/progress'
 import { useCollection, useFirestore, useMemoFirebase, useUser } from '@/firebase'
-import { collection, query, orderBy, addDoc, serverTimestamp } from 'firebase/firestore'
+import { collection, query, orderBy, addDoc, serverTimestamp, deleteDoc, updateDoc, doc } from 'firebase/firestore'
 import { cn } from '@/lib/utils'
 import {
   Dialog,
@@ -41,6 +43,17 @@ import {
   DialogTrigger,
   DialogFooter,
 } from "@/components/ui/dialog"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import {
   Popover,
   PopoverContent,
@@ -60,14 +73,20 @@ type GalleryItem = {
   eventName: string
   type: 'still' | 'video'
   videoUrl?: string
+  source: 'gallery' | 'event'
 }
 
 export default function GalleryPage() {
   const [selectedImage, setSelectedImage] = useState<GalleryItem | null>(null)
   const [filterType, setFilterType] = useState<'All' | 'still' | 'video'>('All')
   const [isMirror, setIsMirror] = useState(false)
+  const [isInternal, setIsInternal] = useState(false)
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [isActionLoading, setIsActionLoading] = useState(false)
+  const [editItem, setEditItem] = useState<GalleryItem | null>(null)
+  const [deleteTarget, setDeleteTarget] = useState<GalleryItem | null>(null)
+  const [deleteStep, setDeleteStep] = useState<1 | 2>(1)
+  const [deleteConfirmText, setDeleteConfirmText] = useState('')
   const [videoProgress, setVideoProgress] = useState<number>(0)
   const [isVideoProcessing, setIsVideoProcessing] = useState(false)
   
@@ -79,11 +98,13 @@ export default function GalleryPage() {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       setIsMirror(window.self !== window.top)
+      setIsInternal(window.location.pathname.startsWith('/internal'))
     }
   }, [])
 
   // Administrative check for Live Editor
-  const isAdmin = user?.email === 'deydhritiman@gmail.com' && isMirror
+  // Admin tools show only inside Public Site View (mirror) or the internal Gallery Archive, never on the public website
+  const isAdmin = user?.email?.trim().toLowerCase() === 'deydhritiman@gmail.com' && (isMirror || isInternal)
 
   const [newItem, setNewItem] = useState({
     url: '',
@@ -122,6 +143,7 @@ export default function GalleryPage() {
           date: item.date,
           location: item.location,
           eventName: "Mission Highlight",
+          source: 'gallery',
           type: item.type || 'still',
           videoUrl: item.videoUrl
         });
@@ -141,6 +163,7 @@ export default function GalleryPage() {
             date: event.date,
             location: event.location,
             eventName: event.title,
+            source: 'event',
             type: 'still'
           });
         }
@@ -157,6 +180,7 @@ export default function GalleryPage() {
                 date: event.date,
                 location: event.location,
                 eventName: event.title,
+            source: 'event',
                 type: 'still'
               });
             }
@@ -173,6 +197,7 @@ export default function GalleryPage() {
             date: event.date,
             location: event.location,
             eventName: event.title,
+            source: 'event',
             type: 'video',
             videoUrl: event.videoUrl
           });
@@ -188,7 +213,7 @@ export default function GalleryPage() {
     return galleryItems.filter(item => item.type === filterType);
   }, [galleryItems, filterType]);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, field: 'url' | 'videoUrl') => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, field: 'url' | 'videoUrl', target: 'new' | 'edit' = 'new') => {
     const file = e.target.files?.[0]
     if (file) {
       // Conservative caps to avoid Firestore 1MB rejection
@@ -218,7 +243,8 @@ export default function GalleryPage() {
 
       reader.onloadend = () => {
         const dataUri = reader.result as string
-        setNewItem(prev => ({ ...prev, [field]: dataUri }))
+        if (target === 'edit') setEditItem(prev => prev ? { ...prev, [field]: dataUri } : prev)
+        else setNewItem(prev => ({ ...prev, [field]: dataUri }))
 
         if (field === 'videoUrl') {
           setIsVideoProcessing(false)
@@ -247,6 +273,54 @@ export default function GalleryPage() {
       setIsAddDialogOpen(false)
     } catch (error: any) {
       toast({ variant: "destructive", title: "Archive Failed" })
+    } finally {
+      setIsActionLoading(false)
+    }
+  }
+
+  const closeDeleteFlow = () => {
+    setDeleteTarget(null)
+    setDeleteStep(1)
+    setDeleteConfirmText('')
+  }
+
+  const isDeleteWordTyped = deleteConfirmText.trim().toLowerCase() === 'delete'
+
+  const handleDeleteItem = async (item: GalleryItem) => {
+    // Only entries stored in the gallery collection can be removed here
+    if (!db || item.source !== 'gallery') return;
+    try {
+      await deleteDoc(doc(db, 'gallery', item.id));
+      toast({ title: "Record Purged", description: "Moment removed from the visual registry." });
+    } catch (e) {
+      toast({ variant: "destructive", title: "Delete Failed", description: "Check your Firestore permissions." });
+    } finally {
+      closeDeleteFlow()
+    }
+  }
+
+  const handleUpdateItem = async () => {
+    if (!db || !editItem || editItem.source !== 'gallery') return;
+    if (!editItem.url || !editItem.caption.trim()) {
+      toast({ variant: "destructive", title: "Incomplete Data", description: "Media and Caption are mandatory." });
+      return;
+    }
+    setIsActionLoading(true)
+    try {
+      await updateDoc(doc(db, 'gallery', editItem.id), {
+        url: editItem.url,
+        caption: editItem.caption.trim(),
+        category: editItem.category,
+        date: editItem.date,
+        location: editItem.location,
+        type: editItem.type,
+        videoUrl: editItem.type === 'video' ? (editItem.videoUrl || '') : '',
+        updatedAt: serverTimestamp()
+      })
+      toast({ title: "Entry Updated", description: "Changes saved to the visual registry." })
+      setEditItem(null)
+    } catch (e) {
+      toast({ variant: "destructive", title: "Update Failed", description: "Check your Firestore permissions." })
     } finally {
       setIsActionLoading(false)
     }
@@ -475,9 +549,37 @@ export default function GalleryPage() {
           ) : filteredItems.length > 0 ? (
             <div className="columns-1 sm:grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {filteredItems.map((item) => (
+                <div key={item.id} className="mb-6 break-inside-avoid">
+                {isAdmin && item.source === 'gallery' && (
+                  <div className="flex items-center justify-end gap-2 mb-3">
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setEditItem({ ...item })}
+                      className="h-9 rounded-full px-4 text-[10px] font-bold uppercase tracking-widest border-slate-300 bg-white hover:bg-slate-100 text-slate-800"
+                    >
+                      <Pencil className="w-3.5 h-3.5 mr-1.5" /> Edit
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={() => { setDeleteStep(1); setDeleteConfirmText(''); setDeleteTarget(item) }}
+                      className="h-9 rounded-full px-4 text-[10px] font-bold uppercase tracking-widest bg-red-600 hover:bg-red-700 text-white"
+                    >
+                      <Trash2 className="w-3.5 h-3.5 mr-1.5" /> Delete
+                    </Button>
+                  </div>
+                )}
+                {isAdmin && item.source === 'event' && (
+                  <div className="flex justify-end mb-3">
+                    <span className="rounded-full bg-slate-200 text-slate-600 text-[9px] font-bold uppercase tracking-widest px-3 py-2">
+                      Managed in Events
+                    </span>
+                  </div>
+                )}
                 <Card 
-                  key={item.id} 
-                  className="mb-6 break-inside-avoid group border-none shadow-sm hover:shadow-2xl transition-all duration-500 rounded-[2rem] overflow-hidden bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 cursor-zoom-in relative"
+                  className="group border-none shadow-sm hover:shadow-2xl transition-all duration-500 rounded-[2rem] overflow-hidden bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 cursor-zoom-in relative"
                   onClick={() => setSelectedImage(item)}
                 >
                   <div className="relative aspect-[4/3] overflow-hidden">
@@ -509,9 +611,12 @@ export default function GalleryPage() {
                         <span className="flex items-center gap-1"><CalendarIcon className="w-2.5 h-2.5" /> {item.date}</span>
                         <span className="flex items-center gap-1"><MapPin className="w-2.5 h-2.5" /> {item.location}</span>
                       </div>
+
+                      
                     </div>
                   </div>
                 </Card>
+                </div>
               ))}
             </div>
           ) : (
@@ -616,6 +721,129 @@ export default function GalleryPage() {
           )}
         </DialogContent>
       </Dialog>
+
+      {isAdmin && (
+        <>
+          <Dialog open={!!editItem} onOpenChange={(open) => !open && setEditItem(null)}>
+            <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="max-w-xl rounded-[2.5rem] max-h-[90vh] overflow-y-auto border-none shadow-2xl">
+              <DialogHeader>
+                <DialogTitle>Edit Archive Entry</DialogTitle>
+                <DialogDescription>Update the details of this moment. Changes go live immediately.</DialogDescription>
+              </DialogHeader>
+              {editItem && (
+                <div className="space-y-6 py-4">
+                  <div className="flex flex-col items-center gap-4 p-4 border-2 border-dashed rounded-2xl">
+                    <div className="relative w-full aspect-video bg-slate-100 dark:bg-slate-800 rounded-2xl overflow-hidden border">
+                      <Image src={editItem.url} alt="Preview" fill className="object-cover" />
+                      <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => handleFileChange(e, 'url', 'edit')} />
+                    </div>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Click the picture to replace it (max 200KB)</p>
+                  </div>
+
+                  {editItem.type === 'video' && (
+                    <div className="space-y-1">
+                      <Label className="text-[10px] uppercase font-bold text-slate-400">Video URL</Label>
+                      <Input
+                        value={editItem.videoUrl?.startsWith('data:') ? '' : (editItem.videoUrl || '')}
+                        onChange={e => setEditItem({ ...editItem, videoUrl: e.target.value })}
+                        className="h-11 rounded-xl"
+                        placeholder={editItem.videoUrl?.startsWith('data:') ? 'Uploaded clip (paste a URL to replace)' : 'YouTube/Drive URL'}
+                      />
+                    </div>
+                  )}
+
+                  <div className="space-y-1">
+                    <Label className="text-[10px] uppercase font-bold text-slate-400">Caption *</Label>
+                    <Input value={editItem.caption} onChange={e => setEditItem({ ...editItem, caption: e.target.value })} className="h-11 rounded-xl" />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <Label className="text-[10px] uppercase font-bold text-slate-400">Category</Label>
+                      <Select value={editItem.category} onValueChange={(v: any) => setEditItem({ ...editItem, category: v })}>
+                        <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
+                        <SelectContent position="popper" className="z-[1000001] bg-white">
+                          {(categories.includes(editItem.category) ? categories : [editItem.category, ...categories]).map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-[10px] uppercase font-bold text-slate-400">Date</Label>
+                      <Popover>
+                        <PopoverTrigger asChild><Button variant="outline" className="w-full h-11 rounded-xl text-left font-normal">{editItem.date}</Button></PopoverTrigger>
+                        <PopoverContent className="w-auto p-0 z-[1000001]">
+                          <CalendarComponent mode="single" selected={parseItemDate(editItem.date)} onSelect={d => setEditItem({ ...editItem, date: d ? format(d, "PPP") : editItem.date })} initialFocus />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <Label className="text-[10px] uppercase font-bold text-slate-400">Location</Label>
+                    <Input value={editItem.location} onChange={e => setEditItem({ ...editItem, location: e.target.value })} className="h-11 rounded-xl" placeholder="Venue or Chapter Name" />
+                  </div>
+                </div>
+              )}
+              <DialogFooter>
+                <Button onClick={handleUpdateItem} disabled={isActionLoading} className="w-full h-12 bg-primary text-white font-bold rounded-xl hover:bg-secondary">
+                  {isActionLoading ? <Loader2 className="animate-spin" /> : "Save Changes"}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
+          <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) closeDeleteFlow() }}>
+            <AlertDialogContent className="rounded-[2.5rem]">
+              {deleteStep === 1 ? (
+                <>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle className="flex items-center gap-2 text-red-600">
+                      <AlertTriangle className="w-5 h-5" /> Warning
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                      You are about to delete &ldquo;{deleteTarget?.caption}&rdquo; from the gallery. It will be removed
+                      permanently and cannot be recovered. Do you want to continue?
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+                    <Button onClick={() => setDeleteStep(2)} className="bg-red-600 hover:bg-red-700 text-white rounded-xl">
+                      Continue
+                    </Button>
+                  </AlertDialogFooter>
+                </>
+              ) : (
+                <>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle className="text-red-600">Final confirmation</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      To delete this photo, type the word <span className="font-bold text-slate-900">delete</span> below.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <Input
+                    autoFocus
+                    value={deleteConfirmText}
+                    onChange={(e) => setDeleteConfirmText(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === 'Enter' && isDeleteWordTyped && deleteTarget) handleDeleteItem(deleteTarget) }}
+                    placeholder="Type delete"
+                    className="h-11 rounded-xl"
+                  />
+                  <AlertDialogFooter>
+                    <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+                    <Button
+                      onClick={() => deleteTarget && handleDeleteItem(deleteTarget)}
+                      disabled={!isDeleteWordTyped}
+                      className="bg-red-600 hover:bg-red-700 text-white rounded-xl disabled:opacity-40"
+                    >
+                      Delete permanently
+                    </Button>
+                  </AlertDialogFooter>
+                </>
+              )}
+            </AlertDialogContent>
+          </AlertDialog>
+        </>
+      )}
 
       <Footer />
     </main>
