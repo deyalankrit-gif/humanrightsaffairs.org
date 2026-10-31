@@ -74,7 +74,7 @@ import WEST_BENGAL_LOCATION_DATA from '@/lib/west-bengal-location-data.json'
 type DistrictLocationData = {
   subDivisions: string[]
   blocks: string[]
-  subDivisionBlocks: Record<string, string[]>
+  subDivisionBlocks?: Record<string, string[]>
 }
 const WEST_BENGAL_DISTRICTS = WEST_BENGAL_LOCATION_DATA.districts as Record<string, DistrictLocationData>
 const getDistrictLocation = (stateName?: string, districtName?: string) =>
@@ -116,11 +116,23 @@ type Member = {
   pan?: string
 }
 
+const getSubDivisions = (stateName?: string, districtName?: string): string[] =>
+  stateName === WEST_BENGAL_LOCATION_DATA.state && districtName
+    ? (WEST_BENGAL_DISTRICTS[districtName]?.subDivisions ?? [])
+    : []
+const getBlocks = (stateName?: string, districtName?: string, subdivisionName?: string): string[] => {
+  if (stateName !== WEST_BENGAL_LOCATION_DATA.state || !districtName || !subdivisionName) return []
+  const district = WEST_BENGAL_DISTRICTS[districtName]
+  return district?.subDivisionBlocks?.[subdivisionName] ?? district?.blocks ?? []
+}
+
 export default function MembersPage() {
   const [search, setSearch] = useState("")
   const [levelFilter, setLevelFilter] = useState<string>("All")
   const [selectedState, setSelectedState] = useState<string | null>(null)
   const [selectedDistrict, setSelectedDistrict] = useState<string | null>(null)
+  const [selectedSubdivision, setSelectedSubdivision] = useState<string | null>(null)
+  const [selectedBlock, setSelectedBlock] = useState<string | null>(null)
   const [mounted, setMounted] = useState(false)
   const [isAdding, setIsAdding] = useState(false)
   const [isMirror, setIsMirror] = useState(false)
@@ -229,16 +241,31 @@ export default function MembersPage() {
     setLevelFilter(level)
     setSelectedState(null)
     setSelectedDistrict(null)
+    setSelectedSubdivision(null)
+    setSelectedBlock(null)
   }
 
   const handleStateSelect = (state: string) => {
-    setLevelFilter("State")
+    setLevelFilter("All")
     setSelectedState(state)
     setSelectedDistrict(null)
+    setSelectedSubdivision(null)
+    setSelectedBlock(null)
   }
 
   const handleDistrictSelect = (district: string) => {
     setSelectedDistrict(district)
+    setSelectedSubdivision(null)
+    setSelectedBlock(null)
+  }
+
+  const handleSubdivisionSelect = (subdivision: string) => {
+    setSelectedSubdivision(subdivision)
+    setSelectedBlock(null)
+  }
+
+  const handleBlockSelect = (block: string) => {
+    setSelectedBlock(block)
   }
 
   const handleAddMember = async () => {
@@ -324,12 +351,10 @@ export default function MembersPage() {
       (m.memberId || '').toLowerCase().includes(search.toLowerCase());
     
     let matchesLevel = levelFilter === "All" || m.level === levelFilter;
-    if (selectedState) {
-      matchesLevel = m.stateName === selectedState;
-      if (selectedDistrict) {
-        matchesLevel = matchesLevel && m.districtName === selectedDistrict;
-      }
-    }
+    if (selectedState) matchesLevel = matchesLevel && m.stateName === selectedState;
+    if (selectedDistrict) matchesLevel = matchesLevel && m.districtName === selectedDistrict;
+    if (selectedSubdivision) matchesLevel = matchesLevel && m.subdivisionName === selectedSubdivision;
+    if (selectedBlock) matchesLevel = matchesLevel && m.blockName === selectedBlock;
     return matchesSearch && matchesLevel;
   })
 
@@ -412,6 +437,12 @@ export default function MembersPage() {
 
   const statesList = Object.keys(INDIA_DATA).sort();
   const districtsList = selectedState ? (INDIA_DATA[selectedState] || []) : [];
+  const subdivisionsList = selectedState === WEST_BENGAL_LOCATION_DATA.state && selectedDistrict
+    ? getSubDivisions(selectedState, selectedDistrict)
+    : [];
+  const blocksList = selectedState === WEST_BENGAL_LOCATION_DATA.state && selectedDistrict && selectedSubdivision
+    ? getBlocks(selectedState, selectedDistrict, selectedSubdivision)
+    : [];
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950 w-full overflow-x-hidden">
@@ -717,6 +748,30 @@ export default function MembersPage() {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent className="max-h-80 overflow-y-auto w-48 bg-white z-[1000]">
                       {districtsList.map(d => <DropdownMenuItem key={d} onClick={() => handleDistrictSelect(d)}>{d}</DropdownMenuItem>)}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
+                {selectedState === WEST_BENGAL_LOCATION_DATA.state && selectedDistrict && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant={selectedSubdivision ? "default" : "outline"} className="rounded-full px-4 h-8 text-[10px] font-bold animate-in fade-in slide-in-from-left-2">
+                        {selectedSubdivision || "Sub-Division"} <ChevronDown className="w-3 h-3 ml-1" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="max-h-80 overflow-y-auto w-56 bg-white z-[1000]">
+                      {subdivisionsList.length ? subdivisionsList.map(sd => <DropdownMenuItem key={sd} onClick={() => handleSubdivisionSelect(sd)}>{sd}</DropdownMenuItem>) : <DropdownMenuItem disabled>No Sub-Divisions available</DropdownMenuItem>}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
+                {selectedState === WEST_BENGAL_LOCATION_DATA.state && selectedDistrict && selectedSubdivision && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant={selectedBlock ? "default" : "outline"} className="rounded-full px-4 h-8 text-[10px] font-bold animate-in fade-in slide-in-from-left-2">
+                        {selectedBlock || "Block"} <ChevronDown className="w-3 h-3 ml-1" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="max-h-80 overflow-y-auto w-56 bg-white z-[1000]">
+                      {blocksList.length ? blocksList.map(block => <DropdownMenuItem key={block} onClick={() => handleBlockSelect(block)}>{block}</DropdownMenuItem>) : <DropdownMenuItem disabled>No Blocks available</DropdownMenuItem>}
                     </DropdownMenuContent>
                   </DropdownMenu>
                 )}
