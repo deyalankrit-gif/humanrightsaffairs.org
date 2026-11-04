@@ -122,7 +122,7 @@ export default function LogisticTrackingPage() {
               <p className="text-slate-400 text-[11px] font-bold uppercase tracking-widest">Master Deployment & Distribution Terminal</p>
             </div>
             
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                {[
                  { label: 'Deployed', val: stats.deployed, color: 'text-emerald-500' },
                  { label: 'Transit', val: stats.inTransit, color: 'text-blue-500' },

@@ -827,7 +827,7 @@ export default function MembersPage() {
                          <div className="space-y-4">
                             <Label className="text-[10px] font-bold uppercase text-slate-400">Full Residence Protocol *</Label>
                             <Textarea value={newMember.address ?? ''} onChange={e => setNewMember({...newMember, address: e.target.value})} className="min-h-[100px] rounded-2xl bg-slate-50 dark:bg-slate-800 border-2 border-black font-medium" />
-                            <div className="grid grid-cols-3 gap-3">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                                <Input placeholder="P.O." value={newMember.postOffice ?? ''} onChange={e => setNewMember({...newMember, postOffice: e.target.value})} className="h-10 rounded-xl bg-slate-50 dark:bg-slate-800 border-2 border-black font-bold" />
                                <Input placeholder="P.S." value={newMember.policeStation ?? ''} onChange={e => setNewMember({...newMember, policeStation: e.target.value})} className="h-10 rounded-xl bg-slate-50 dark:bg-slate-800 border-2 border-black font-bold" />
                                <Input placeholder="PIN" maxLength={6} value={newMember.pinCode ?? ''} onChange={e => setNewMember({...newMember, pinCode: e.target.value})} className="h-10 rounded-xl bg-slate-50 dark:bg-slate-800 border-2 border-black font-bold" />
@@ -1281,7 +1281,7 @@ export default function MembersPage() {
                       <div className="space-y-1.5"><Label className={editLabelCls}>Aadhaar UID</Label><Input maxLength={12} value={editMember.aadhaar || ''} onChange={e => setEdit({ aadhaar: e.target.value })} className={editInputCls} /></div>
                       <div className="space-y-1.5"><Label className={editLabelCls}>PAN Number</Label><Input maxLength={10} value={editMember.pan || ''} onChange={e => setEdit({ pan: e.target.value.toUpperCase() })} className={editInputCls} /></div>
                       <div className="space-y-1.5 md:col-span-2"><Label className={editLabelCls}>Residential Address</Label><Textarea value={editMember.address || ''} onChange={e => setEdit({ address: e.target.value })} className="min-h-[80px] rounded-2xl border-2 border-black bg-slate-50 dark:bg-slate-800" /></div>
-                      <div className="grid grid-cols-3 gap-3 md:col-span-2">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:col-span-2">
                         <Input placeholder="P.O." value={editMember.postOffice || ''} onChange={e => setEdit({ postOffice: e.target.value })} className={editInputCls} />
                         <Input placeholder="P.S." value={editMember.policeStation || ''} onChange={e => setEdit({ policeStation: e.target.value })} className={editInputCls} />
                         <Input placeholder="PIN" maxLength={6} value={editMember.pinCode || ''} onChange={e => setEdit({ pinCode: e.target.value })} className={editInputCls} />

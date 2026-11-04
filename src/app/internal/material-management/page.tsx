@@ -494,7 +494,7 @@ export default function MaterialManagementPage() {
                   <div className="space-y-1.5"><Label className="text-[10px] font-bold uppercase text-slate-400">Category</Label>
                     <Select value={editItem.category} onValueChange={v => setEditItem({...editItem, category: v})}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent className="bg-white">{categories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent></Select></div>
                 </div>
-                <div className="grid grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   <div className="space-y-1.5"><Label className="text-[10px] font-bold uppercase text-slate-400">SKU</Label><Input value={editItem.sku} onChange={e => setEditItem({...editItem, sku: e.target.value})} className="h-11 rounded-xl font-mono" /></div>
                   <div className="space-y-1.5"><Label className="text-[10px] font-bold uppercase text-slate-400">Stock Balance</Label><Input type="number" value={editItem.currentStock} onChange={e => setEditItem({...editItem, currentStock: Number(e.target.value)})} className="h-11 rounded-xl" /></div>
                   <div className="flex items-center space-x-3 p-4 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-100 self-end h-11">

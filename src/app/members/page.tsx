@@ -687,7 +687,7 @@ export default function MembersPage() {
                          <div className="space-y-4">
                             <Label className="text-[10px] font-bold uppercase text-slate-400">Full Residence Protocol *</Label>
                             <Textarea value={newMember.address} onChange={e => setNewMember({...newMember, address: e.target.value})} className="min-h-[100px] rounded-2xl bg-slate-50 dark:bg-slate-800 border-2 border-black font-medium" />
-                            <div className="grid grid-cols-3 gap-3">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                                <Input placeholder="P.O." value={newMember.postOffice} onChange={e => setNewMember({...newMember, postOffice: e.target.value})} className="h-10 rounded-xl bg-slate-50 dark:bg-slate-800 border-2 border-black font-bold" />
                                <Input placeholder="P.S." value={newMember.policeStation} onChange={e => setNewMember({...newMember, policeStation: e.target.value})} className="h-10 rounded-xl bg-slate-50 dark:bg-slate-800 border-2 border-black font-bold" />
                                <Input placeholder="PIN" maxLength={6} value={newMember.pinCode} onChange={e => setNewMember({...newMember, pinCode: e.target.value})} className="h-10 rounded-xl bg-slate-50 dark:bg-slate-800 border-2 border-black font-bold" />

@@ -77,7 +77,7 @@ export function AIChat() {
   if (!mounted) return null;
 
   return (
-    <div className="fixed bottom-6 right-6 z-[100] print:hidden">
+    <div className="fixed bottom-[calc(env(safe-area-inset-bottom)+0.75rem)] right-3 sm:bottom-6 sm:right-6 z-[100] print:hidden">
       {!isOpen && (
         <Button 
           onClick={() => setIsOpen(true)}
@@ -101,7 +101,7 @@ export function AIChat() {
       )}
 
       {isOpen && (
-        <Card className="w-[350px] md:w-[400px] h-[550px] flex flex-col shadow-2xl border-2 border-primary/10 overflow-hidden animate-in slide-in-from-bottom-4 duration-300">
+        <Card className="w-[min(350px,calc(100vw-1.5rem))] md:w-[400px] h-[min(550px,calc(100dvh-2rem))] flex flex-col shadow-2xl border-2 border-primary/10 overflow-hidden animate-in slide-in-from-bottom-4 duration-300">
           <CardHeader className="bg-primary text-white p-4 space-y-1">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">

@@ -468,7 +468,7 @@ export function InvestigationTutorial() {
                       </div>
 
                       {/* Mockup Windows */}
-                      <div className="mt-12 w-full max-w-3xl grid grid-cols-3 gap-4 opacity-40">
+                      <div className="mt-12 w-full max-w-3xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 opacity-40">
                          {[1, 2, 3].map(i => (
                            <div key={i} className="h-24 rounded-2xl bg-white/5 border border-white/10 animate-pulse" />
                          ))}
@@ -583,7 +583,7 @@ export function InvestigationTutorial() {
                                </div>
                                <div className="space-y-3">
                                   <Label className="text-[10px] font-black uppercase text-slate-500">Font Size</Label>
-                                  <div className="grid grid-cols-3 gap-2">
+                                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                                      {['sm', 'md', 'lg'].map(size => (
                                        <Button key={size} variant={subtitleFontSize === size ? 'default' : 'outline'} onClick={() => setSubtitleFontSize(size as any)} className="h-9 rounded-xl text-[10px] font-bold uppercase">{size === 'sm' ? 'Small' : size === 'md' ? 'Medium' : 'Large'}</Button>
                                      ))}

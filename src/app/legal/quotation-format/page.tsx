@@ -391,7 +391,7 @@ Conditions:
                              </div>
                           </div>
                        </div>
-                       <div className="grid grid-cols-3 gap-8 pt-2 border-t border-white/10 print:border-black print:gap-4">
+                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 pt-2 border-t border-white/10 print:grid-cols-3 print:border-black print:gap-4">
                           <div className="space-y-1">
                              <div className="border-b border-white/30 h-8 print:border-black"></div>
                              <p className="text-[8px] font-bold uppercase text-slate-500 print:text-black">Approved By</p>
