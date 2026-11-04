@@ -314,7 +314,7 @@ export function OccasionBanner() {
   const displayMessage = (isBangla && activeOccasion.messageBn) ? activeOccasion.messageBn : activeOccasion.message;
 
   return (
-    <div className="absolute top-full md:-right-[200px] mt-24 md:mt-48 z-[110] animate-in fade-in slide-in-from-top-4 duration-700 pointer-events-auto w-full md:w-[500px] left-0 md:left-auto px-4 md:px-0">
+    <div className="fixed top-[152px] left-1/2 -translate-x-1/2 z-[110] animate-in fade-in slide-in-from-top-4 duration-700 pointer-events-auto w-[min(500px,calc(100vw-1rem))] px-2 md:absolute md:top-full md:mt-48 md:left-auto md:right-[-200px] md:translate-x-0 md:w-[500px] md:px-0">
       <div className={cn(
         "bg-black/20 md:bg-transparent p-4 md:p-6 rounded-3xl md:rounded-none flex items-center gap-4 md:gap-7 group transition-all duration-700 backdrop-blur-md md:backdrop-blur-none",
         loading && "opacity-80"
