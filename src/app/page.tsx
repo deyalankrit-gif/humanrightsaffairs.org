@@ -118,7 +118,7 @@ export default function Home() {
 
             <div className="flex flex-col items-center gap-2 w-full mt-2 md:mt-4">
               <div className="font-headline font-bold text-lg sm:text-3xl md:text-5xl lg:text-6xl tracking-tight leading-tight min-h-[1.5em] flex justify-center items-center w-full">
-                <h1 className="bg-gradient-to-r from-[#FF9933] via-white to-[#138808] bg-clip-text text-transparent italic block drop-shadow-sm px-2 pb-2 text-center">
+                <h1 className="w-full max-w-full whitespace-normal break-normal bg-gradient-to-r from-[#FF9933] via-white to-[#138808] bg-clip-text text-transparent italic block drop-shadow-sm px-2 pb-2 text-center">
                   <Typewriter 
                     text="Human Rights Affairs Trust" 
                     speed={80} 

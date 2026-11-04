@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useEffect } from 'react'
@@ -10,13 +9,19 @@ interface TypewriterProps {
   className?: string
 }
 
-export function Typewriter({ text, speed = 100, delay = 0, className = "" }: TypewriterProps) {
+export function Typewriter({
+  text,
+  speed = 100,
+  delay = 0,
+  className = ""
+}: TypewriterProps) {
   const [displayedText, setDisplayedText] = useState('')
   const [started, setStarted] = useState(false)
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
     setMounted(true)
+
     const timer = setTimeout(() => {
       setStarted(true)
     }, delay)
@@ -29,19 +34,41 @@ export function Typewriter({ text, speed = 100, delay = 0, className = "" }: Typ
 
     if (displayedText.length < text.length) {
       const timer = setTimeout(() => {
-        setDisplayedText(text.substring(0, displayedText.length + 1))
+        setDisplayedText(
+          text.substring(0, displayedText.length + 1)
+        )
       }, speed)
+
       return () => clearTimeout(timer)
     }
   }, [displayedText, text, started, mounted, speed])
 
+  const textStyle: React.CSSProperties = {
+    writingMode: 'horizontal-tb',
+    textOrientation: 'mixed',
+    wordBreak: 'normal',
+    overflowWrap: 'normal',
+    maxWidth: '100%'
+  }
+
   if (!mounted) {
-    return <span className={className}>&nbsp;</span>
+    return (
+      <span
+        className={`inline-block max-w-full ${className}`}
+        style={textStyle}
+      >
+        &nbsp;
+      </span>
+    )
   }
 
   return (
-    <span className={className}>
+    <span
+      className={`inline-block max-w-full ${className}`}
+      style={textStyle}
+    >
       {displayedText}
+
       {started && displayedText.length < text.length && (
         <span className="inline-block w-[2px] h-[0.9em] bg-accent ml-1 animate-blink align-middle"></span>
       )}
