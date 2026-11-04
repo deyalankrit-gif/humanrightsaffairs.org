@@ -143,9 +143,10 @@ export function Navbar() {
           })}
         </nav>
         
-        {/* Occasion Banner */}
-        <OccasionBanner />
       </div>
+
+      {/* Keep the overlay outside the flexible nav track so it has a stable containing width. */}
+      <OccasionBanner />
 
       {/* Header Actions (Right) */}
       <div className="ml-2 md:ml-8 flex items-center gap-1 md:gap-2 shrink-0 h-full pl-2 md:pl-6 border-l border-slate-100 dark:border-slate-800">
